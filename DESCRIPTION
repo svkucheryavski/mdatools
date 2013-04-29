@@ -1,0 +1,10 @@
+Package: mdatools
+Title: Multivariate Data Analysis 
+Version: 0.2.0
+Date: 2013-04-29
+Author: Sergey Kucheryavskiy 
+Maintainer:  Sergey Kucheryavskiy <svkucheryavski@gmail.com>
+Description: The package contains useful functions for preprocessing, exploring and analysis of multivariate data.
+Suggests: 
+Depends:
+License: GPL-2
