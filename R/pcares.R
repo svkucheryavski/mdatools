@@ -1,12 +1,11 @@
-# class and methods for PCA results #
-pcares = function(scores, loadings, residuals, fullvar, ...) UseMethod("pcares")
+## class and methods for PCA results ##
 
-pcares.default = function(scores, loadings, residuals, fullvar, tnorm = NULL, ncomp.selected = NULL, ...)
+pcares = function(scores, loadings, residuals, totvar, tnorm = NULL, ncomp.selected = NULL, ...)
 {
    # Creates an object of pcares class. In fact the class is a wrapper for ldecomp and
    # uses its methods and attributes.
    
-   pcares = ldecomp(scores, loadings, residuals, fullvar, tnorm = tnorm, ncomp.selected = ncomp.selected, ...)
+   pcares = ldecomp(scores, loadings, residuals, totvar, tnorm = tnorm, ncomp.selected = ncomp.selected, ...)
    class(pcares) = c('pcares', 'ldecomp')   
    
    return (pcares)

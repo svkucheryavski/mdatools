@@ -2,11 +2,11 @@
 \alias{selectCompNum.pca}
 
 \title{
-Set number of optimal components
+Set number of optimal components for PCA model
 }
 
 \description{
-\code{selectCompNum} is used to select number of optimal components in a model.
+\code{selectCompNum.pca} is used to select number of optimal components in a PCA model.
 }
 
 \usage{
@@ -21,11 +21,6 @@ selectCompNum(obj, ncomp)
 \value{
 Returns the same model as provided as an argument, but where the parameter \code{ncomp.selected} is set to \code{ncomp} and all distances and limits are recalculated. If number is not set, number of all computed components will be considered as optimal.
 }
-
-\author{
-Sergey Kucheryavski (svkucheryavski@gmail.com)
-}
-
 
 \examples{
 ## make PCA model and show residuals for different number of selected components

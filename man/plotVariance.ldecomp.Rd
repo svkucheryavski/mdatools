@@ -2,18 +2,19 @@
 \alias{plotVariance.ldecomp}
 
 \title{
-Explained variance plot
+Explained variance plot for data decomposition
 }
 
 \description{
-\code{plotVariance.ldecomp} is used to make a plot with data variance, explained by each component.
+\code{plotVariance} is used to make a plot with data variance, explained by each component.
 }
 \usage{
-plotVariance(obj, show.labels = F)
+plotVariance(obj, type = 'b', ...)
 }
 \arguments{
   \item{obj}{an object of \code{ldecomp} class (e.g. PCA results).}
-  \item{show.labels}{logical, show or not labels with variance values for plot points.}
+  \item{type}{type of the plot.}  
+  \item{...}{most of the \code{\link{mdaplot}} parameters can be used.}
 }
 
 \details{
@@ -22,9 +23,6 @@ The variance values are in percent of total variance.
 
 \seealso{
 \code{\link{plotCumVariance.ldecomp}} makes cumulative explained variance plot.
-}
-\author{
-Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }
 
 \examples{
@@ -35,7 +33,7 @@ data(People)
 
 model = pca(people, scale = T)
 
-par(mfrow = c(1, 2))
+par(mfrow = c(2, 1))
 plotVariance(model$calres)
 plotVariance(model$calres, show.labels = T)
 par(mfrow = c(1, 1))

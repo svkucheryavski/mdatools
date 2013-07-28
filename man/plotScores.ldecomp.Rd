@@ -2,32 +2,21 @@
 \alias{plotScores.ldecomp}
 
 \title{
-Scores plot
+Scores plot for data decomposition
 }
 \description{
-\code{plotScores.pca} is used to make a scores plot for \code{ldecomp} objects (PCA or PLS results, etc) 
+\code{plotScores} is used to make a scores plot for \code{ldecomp} objects (PCA or PLS results, etc) 
 }
 
 \usage{
-plotScores(obj, comp = c(1, 2), cgroup = NULL, show.labels = F, 
-show.colorbar = T, show.axes = T)
+plotScores(obj, comp = c(1, 2), show.axes = T, ...)
 }
 \arguments{
   \item{obj}{an object of \code{ldecomp} class (e.g. PCA results).}
   \item{comp}{either one value or vector with two values - number of components 
   to make the plot for. If one value is provided, the plot will be made for scores vs. objects.}
-  \item{cgroup}{vector with values used for color grouping of plot points (number of values should 
-  be the same as number of objects).}
-  \item{show.labels}{logical, show or not labels for plot points.}
-  \item{show.colorbar}{logical, show or not a colorbar legend if \code{cgroup} is provided.}
-  \item{show.axes}{logical, show or not coordinate axes, that cross the origin (0, 0)ю}
-}
-
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\author{
-Sergey Kucheryavskiy (svkucheryavski@gmail.com)
+  \item{show.axes}{logical, show or not coordinate axes, that cross the origin (0, 0).}
+  \item{...}{most of the \code{\link{mdaplot}} parameters can be used.}
 }
 
 \examples{

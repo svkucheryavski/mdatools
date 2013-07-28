@@ -8,21 +8,17 @@ Residuals plot for PCA model
 \code{plotResiduals.pca} is used to show plot for Hotelling T2 values vs. Q2 residuals for PCA model
 }
 \usage{
-plotResiduals(obj, ncomp = NULL, show.labels = F, show.legend = T, show.limits = T)
+plotResiduals(obj, ncomp = NULL, show.limits = T, ...)
 }
+
 \arguments{
   \item{obj}{an object of \code{pca} class (PCA model).}
-  \item{comp}{a number of component to show the residuals for.} 
-  \item{show.labels}{logical, show or not labels for the plot points.}
-  \item{show.legend}{logical, show or not a legend if test or cross-validated results are also presented in the plot.}
+  \item{ncomp}{a number of component to show the residuals for.} 
   \item{show.limits}{logical, show or not significance limits for T2 and Q2 values.}
+  \item{...}{most of the \code{\link{mdaplotg}} parameters can be used.}
 }
 \details{
 If number of components is not provided, the selected value (\code{ncomp.selected}) is used. If number of components is not equal to the selected value, limits are not shown even if \code{show.limits} is set to \code{TRUE}.
-}
-
-\author{
-Sergey Kucheryvskiy (svkucheryavski@gmail.com)
 }
 
 \examples{

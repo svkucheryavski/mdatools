@@ -10,15 +10,20 @@ Results of PCA decomposition
 }
 
 \usage{
-pcares(scores, loadings, residuals, fullvar, ncomp.selected = NULL)
+pcares(scores, loadings, residuals, totvar, tnorm = NULL, ncomp.selected = NULL, 
+   T2 = NULL, Q2 = NULL)
 }
 \arguments{
   \item{scores}{matrix with score values (nobj x ncomp).}
   \item{loadings}{matrix with loading values (nvar x ncomp).}
   \item{residuals }{matrix with data residuals.}
-  \item{fullvar }{full variance for data matrix.}
-  \item{ncomp.selected}{selected number of components.}
+  \item{totvar }{total variance for data matrix.}
+  \item{tnorm }{vector with singular values for scores normalization.}
+  \item{ncomp.selected }{selected number of components for decomposition.}
+  \item{T2 }{matrix with Hotelling T2 values for the data objects.}
+  \item{Q2 }{matrix with Q2 residuals for the data objects.}
 }
+
 \details{
 In fact \code{pcares} is a wrapper for \code{\link{ldecomp}} - general class for storing
 results for linear decomposition X = TP' + E. So, most of the methods, arguments and 
@@ -28,12 +33,14 @@ There is no need to create a pcacvres object manually, it is created automatical
 }
 \value{
 Returns an object (list) of class \code{pcares} and \code{ldecomp} with following fields:
-\item{scores }{matrix with score values (nobj x ncomp)}
-\item{T2 }{matrix with T2 distances (nobj x ncomp)}
-\item{Q2 }{matrix with Q2 distances (nobj x ncomp)}
-\item{ncomp.selected }{selected number of components}
-\item{expvar }{explained variance for each component}
-\item{cumexpvar }{cumulative explained variance}
+\item{scores }{matrix with score values (nobj x ncomp).}
+\item{residuals }{matrix with data residuals (nobj x nvar).}
+\item{T2 }{matrix with T2 distances (nobj x ncomp).}
+\item{Q2 }{matrix with Q2 distances (nobj x ncomp).}
+\item{tnorm }{vector with singular values used for scores normalization.}
+\item{ncomp.selected }{selected number of components.}
+\item{expvar }{explained variance for each component.}
+\item{cumexpvar }{cumulative explained variance.}
 }
 
 \author{
@@ -45,7 +52,7 @@ Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 Methods for \code{pcares} objects:
   \tabular{ll}{
       \code{print.pcacvres} \tab shows information about the object.\cr
-      \code{summary.pcacvres} \tab shows some statistics for the object.\cr
+      \code{summary.pcacvres} \tab shows statistics for the PCA results.\cr
    }
 
 Methods, inherited from \code{\link{ldecomp}} class:   
@@ -64,7 +71,7 @@ library(mdatools)
 data(People)
 
 model = pca(people, scale = T)
-model = pca.selectCompNum(model, 5)
+model = selectCompNum(model, 5)
 
 print(model$calres)
 summary(model$calres)

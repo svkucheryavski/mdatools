@@ -1,0 +1,33 @@
+\name{mdatools}
+\alias{mdatools}
+
+\title{
+Package for Multivariate Data Analysis (Chemometrics)
+}
+\description{
+This package contains classes and functions for most common methods used in Chemometrics. For a complete list of functions, use \code{library(help = 'mdatools')}. 
+}
+
+\details{
+Every model is represented by two classes: a class for keeping and visualising results of applying the model to particular data values and a model class for keeping all parameters and information about the model, including calibration and validation results.
+
+Every model class, e.g. \code{\link{pls}}, has all needed functionality implemented as class methods, including model calibration with several algorithms, validation (test set and cross-validation), visualisation of the calibration and validation results with various plots and summary statistics. 
+
+So far the following modelling methods are implemented:
+\tabular{ll}{
+      \code{\link{pca}}, \code{\link{pcares}} \tab Principal Component Analysis (PCA).\cr
+      \code{\link{pls}}, \code{\link{plsres}} \tab Partial Least Squares regression (PLS).\cr
+}
+
+Methods for data preprocessing:
+\tabular{ll}{
+      \code{\link{prep.autoscale}} \tab data mean centering and/or standardization.\cr
+      \code{\link{prep.savgol}} \tab Savitzky-Golay transformation.\cr
+      \code{\link{prep.snv}} \tab Standard normal variate.\cr
+}
+
+All plotting methods are based on two functions, \code{\link{mdaplot}} and \code{\link{mdaplotg}}. The functions extend the basic functionality of R plots and allow to make automatic legend and color grouping of data points or lines with colorbar legend, automatically adjust axes limits when several data groups are plotted and so on. 
+}
+
+\author{
+}

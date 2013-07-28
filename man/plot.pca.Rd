@@ -15,7 +15,7 @@ plot(model, comp = c(1, 2), show.labels = F, show.legend = T)
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{model}{\code{pca} object (PCA model)}
+  \item{model}{a PCA model (object of class \code{pca})}
   \item{comp}{x and y components for scores and loadings plots}
   \item{show.labels}{logical, show labels for objects on scores and residuals plots or not}
   \item{show.legend}{logical, show legend or not (legend is available if test or cross-validation used)}
@@ -23,10 +23,6 @@ plot(model, comp = c(1, 2), show.labels = F, show.legend = T)
 
 \details{
 If model was validated with test set or cross-validation the results of calibration and validation are shown on scores, residuals and explained variance plots as several groups of points (or lines) separated with colors. 
-}
-
-\author{
-Sergey Kucheryavskiy (svkucheryavskiy@gmail.com)
 }
 
 \seealso{

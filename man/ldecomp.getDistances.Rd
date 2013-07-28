@@ -2,12 +2,11 @@
 \alias{ldecomp.getDistances}
 
 \title{
-Calculate T2 and Q2 distances
+Calculate T2 and Q2 distances for data decomposition
 }
 
 \description{
-\code{ldecomp.getDistances} is used to calculate T2 and Q2 distances for every object in the
-\code{ldecomp} decomposition.
+\code{ldecomp.getDistances} is used to calculate Hotelling T2 values and Q2 residuals for every object in the \code{ldecomp} decomposition.
 }
 
 \usage{
@@ -27,6 +26,8 @@ The T2 values (Hotelling T2 values) are calculated for normalized scores, so in 
 The Q2 values are squared distances from an original object to its projection. They show individual object variance, which is not explained by latent variable space.
 
 The distances are calculated automatically when a \code{ldecomp} based model (e.g. PCA) is calibrated and/or applied.
+
+If \code{tnorm} values are not provided they calculated from \code{scores}. 
 }
 
 \value{
@@ -36,12 +37,23 @@ Returns a list with following fields:
 \item{tnorm}{a vector with singular values for scores normalization}
 }
 
-\author{
-Sergey Kucheryavskiy (svkucheryavski@gmail.com)
-}
+\examples{
+## In the example we use an R function princomp to get scores and loadings and 
+## then calculate Q2 and T2 distances using ldecomp.getDistances() function
 
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+library(mdatools)
+data(People)
+people = prep.autoscale(people, center = T, scale = T)
+pcares = princomp(people)
+
+residuals = people - pcares$scores \%*\% t(pcares$loadings)
+dist = ldecomp.getDistances(pcares$scores, pcares$loadings, residuals)
+
+# show residuals plot for 5 components
+nlv = 5
+plot(dist$T2[, nlv], dist$Q2[, nlv], type = "p", col = 'blue', 
+   pch = 16, xlab = 'T2', ylab = 'Q2')
+text(dist$T2[, nlv], dist$Q2[, nlv], rownames(people), pos = 3)
 }
 
 \keyword{ ~kwd1 }

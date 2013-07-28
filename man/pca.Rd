@@ -6,12 +6,12 @@ Principal Component Analysis
 }
 
 \description{
-pca is used to build and explore a principal component analysis (PCA) model.
+\code{pca} is used to build and explore a principal component analysis (PCA) model.
 }
 
 \usage{
-pca(data, ncomp = 20, center = T, scale = F, cv = NULL, info = '',
-   test.data = NULL, alpha = 0.05)
+pca(data, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL, 
+   alpha = 0.05, method = 'svd', info = '')
 }
 
 \arguments{
@@ -20,13 +20,16 @@ pca(data, ncomp = 20, center = T, scale = F, cv = NULL, info = '',
   \item{center}{logical, do mean centering of data or not.}
   \item{scale}{logical, do sdandardization of data or not.}
   \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
-  \item{info}{a short text line with model description.}
   \item{test.data}{a numerical matrix with test data.}
   \item{alpha}{significance level for calculating limit for Q2 residuals.}
+  \item{method}{method to compute principal components.}
+  \item{info}{a short text line with model description.}
 }
 
 \details{
-Principal components are calculated using SVD (Singular Value Decompisition) method. By default \code{pca} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of variables and default value (20). Besides this, there is also a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal number of components is used to build a residuals plot (with Q2 residuals vs. T2 values), calculate confidence limits for Q2 residuals, as well as for SIMCA classification. 
+So far only SVD (Singular Value Decompisition) method is available, more coming soon. 
+
+By default \code{pca} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of variables and default or provided value. Besides this, there is also a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal number of components is used to build a residuals plot (with Q2 residuals vs. Hotelling T2 values), calculate confidence limits for Q2 residuals, as well as for SIMCA classification. 
 
 If data contains missing values (NA) the \code{pca} will use an iterative algorithm to fit the values with most probable ones. The algorithm is implemented in a function \code{\link{pca.mvreplace}}. The same center and scale options will be used. You can also do this step manually before calling \code{pca} and play with extra options.
 
@@ -35,29 +38,27 @@ If data contains missing values (NA) the \code{pca} will use an iterative algori
 \value{
 Returns an object of \code{pca} class with following fields:
 \item{ncomp }{number of components included to the model.} 
+\item{ncomp.selected }{selected (optimal) number of components.} 
 \item{loadings }{matrix with loading values (nvar x ncomp).} 
 \item{eigenvals }{vector with eigenvalues for all existent components.} 
 \item{expvar }{vector with explained variance for each component (in percent).} 
 \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).} 
-\item{ncomp.selected }{selected (optimal) number of components.} 
 \item{T2lim }{statistical limit for T2 distance.} 
 \item{Q2lim }{statistical limit for Q2 distance.} 
 \item{info }{information about the model, provided by user when build the model.} 
 \item{calres }{an object of class \code{\link{pcares}} with PCA results for a calibration data.} 
-\item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if the last were provided.} 
-\item{cvres }{an object of class \code{\link{pcacvres}} with PCA results for cross-validation, if this option was chosen.} 
+\item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it was provided.} 
+\item{cvres }{an object of class \code{\link{pcares}} with PCA results for cross-validation, if this option was chosen.} 
 }
+
 \references{
 %% ~put references to the literature/web site here ~
 }
+
 \author{
 Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }
-\note{
-%%  ~~further notes~~
-}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 Methods for \code{pca} objects:
@@ -69,7 +70,7 @@ Methods for \code{pca} objects:
       \code{\link{plotScores.pca}} \tab shows scores plot.\cr
       \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
       \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
-      \code{\link{plotCumVariance.pca}} \tab shows commulative explained variance plot.\cr
+      \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
       \code{\link{plotResiduals.pca}} \tab shows Q2 vs. T2 residuals plot.\cr
        }
    Most of the methods for plotting data are also available for PCA results 

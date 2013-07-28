@@ -1,62 +1,77 @@
-# class and methods for linear decomposition X = TP' + E #
-ldecomp = function(scores, loadings, residuals, fullvar, ...) UseMethod("ldecomp")
+## class and methods for linear decomposition X = TP' + E ##
 
-ldecomp.default = function(scores, loadings, residuals, fullvar, tnorm = NULL, ncomp.selected = NULL)
+ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL, 
+                   totvar, tnorm = NULL, ncomp.selected = NULL,
+                   T2 = NULL, Q2 = NULL)
 {
-   # Creates an object of ldecomp class. 
+   # Creates an object of ldecomp class.
+   #
+   # The object is needed to store and visualise results for decomposition X = TP' + E 
+   # In case of cross-validated results, only distances and variances are stored
    #
    # Arguments:
    #   scores: matrix with score values (nobj x ncomp).
    #   loadings: matrix with loading values (nvar x ncomp).
    #   residuals: matrix with data residuals 
-   #   fullvar: full variance of original data, preprocessed and centered
+   #   totvar: full variance of original data, preprocessed and centered
    #   tnorm: singular values for score normalization
    #   ncomp.selected: number of selected components
    #
    # Returns:
    #  object (list) of class ldecomp with following fields:   
-   #   obj$scores: matrix with score values (nobj x ncomp).
-   #   obj$residuals: matrix with residuals (nobj x nvar).
-   #   obj$fullvar: full variance of original data
-   #   obj$Q2: matrix with Q2 residuals (nobj x ncomp).
-   #   obj$T2: matrix with T2 distances (nobj x ncomp)   
    #   obj$ncomp.selected: selected number of components
-   #   obj$expvar: explained variance for each component
-   #   obj$cumexpvar: cumulative explained variance
+   #   obj$scores: matrix with score values (nobj x ncomp).
+   #   obj$Q2: matrix with Q2 residuals (nobj x ncomp).
+   #   obj$T2: matrix with T2 distances (nobj x ncomp)  
+   #   obj$totvar: total variance of the data
    
-   scores = as.matrix(scores)
-   loadings = as.matrix(loadings)
-   residuals = as.matrix(residuals)
+   if (!is.null(scores))
+   {   
+      scores = as.matrix(scores)
+      rownames(scores) = rownames(residuals)
+      colnames(scores) = paste('Comp', 1:ncol(scores))
+   }
    
-   # check dimension   
-   if (ncol(scores) != ncol(loadings) || 
-          nrow(scores) != nrow(residuals) || nrow(loadings) != ncol(residuals))
-      stop('Dimensions of scores, loadings and data do not correspond to each other!')
-   
-   # set names for scores and loadings
-   rownames(scores) = rownames(residuals)
-   colnames(scores) = paste('Comp', 1:ncol(scores))
-   rownames(loadings) = colnames(residuals)
-   colnames(loadings) = paste('Comp', 1:ncol(loadings))
+   obj = list(
+      scores = scores,
+      totvar = totvar
+   )
    
    if (is.null(ncomp.selected))
-      ncomp.selected = ncol(scores)
+      obj$ncomp.selected = ncol(scores)
+   else
+      obj$ncomp.selected = ncomp.selected
    
    # calculate residual distances and explained variance
-   obj = ldecomp.getDistances(scores, loadings, residuals, tnorm)
-   var = ldecomp.getVariances(obj$Q2, fullvar)
+   if (is.null(Q2) && is.null(T2) && !is.null(scores) && !is.null(loadings) && !is.null(residuals))
+   {   
+      res = ldecomp.getDistances(scores, loadings, residuals, tnorm)
+      
+      if (is.null(Q2))
+         obj$Q2 = res$Q2
+      
+      if (is.null(T2))
+         obj$T2 = res$T2
+      
+      if (is.null(tnorm))
+         obj$tnorm = res$tnorm
+   }
+   else
+   {
+      obj$Q2 = Q2
+      obj$T2 = T2
+      obj$tnorm = tnorm
+   }   
    
+   var = ldecomp.getVariances(obj$Q2, totvar)   
    obj$expvar = var$expvar
    obj$cumexpvar = var$cumexpvar
-   obj$scores = scores
-   obj$residuals = residuals
-   obj$fullvar = fullvar
-   obj$ncomp.selected = ncomp.selected
+   
    obj$call = match.call()
    
    class(obj) = "ldecomp"
-   
-   return (obj)
+
+   obj
 }
 
 ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
@@ -69,24 +84,27 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
    #   scores: matrix with scores (nobj x ncomp).
    #   loadings: matrix with loadings (nvar x ncomp)
    #   residuals: matrix with data residuals 
+   #   tnorm: singular values for normalizing scores
    #
    # Returns:
    #   res$Q2: matrix with Q2 residuals (nobj x ncomp).
    #   res$T2: matrix with T2 distances (nobj x ncomp)   
-
+   
    ncomp = ncol(scores)
    nobj = nrow(scores)
    T2 = matrix(0, nrow = nobj, ncol = ncomp)
    Q2 = matrix(0, nrow = nobj, ncol = ncomp)
-
+   
    # calculate normalized scores
    if (is.null(tnorm))
       tnorm = sqrt(colSums(scores ^ 2)/(nrow(scores) - 1));
+   
    scoresn = sweep(scores, 2L, tnorm, '/', check.margin = F);  
-
+   
    # calculate distances for each set of components
    for (i in 1:ncomp)
    {
+      
       if (i < ncomp)
          res = residuals + scores[, (i + 1):ncomp, drop = F] %*% t(loadings[, (i + 1):ncomp, drop = F])
       else
@@ -107,21 +125,20 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
    )
 }
 
-ldecomp.getVariances = function(Q2, fullvar)
+ldecomp.getVariances = function(Q2, totvar)
 {   
    # Computes explained variance and cumulative explained variance 
    # for every component of a decomposition.
    #
    # Arguments:
-   #   scores: matrix with scores.
-   #   loadings: matrix with loadings.
-   #   residuals: matrix with residuals.
    #   Q2: matrix with Q2 values
+   #   totvar: total variance of the data
+   #
    # Returns:
    #   res$expvar: vector with explained variance for every component
    #   res$cumexpvar: vector with cumulative explained variance
-
-   cumresvar = colSums(Q2) / fullvar * 100
+   
+   cumresvar = colSums(Q2) / totvar * 100
    cumexpvar = 100 - cumresvar
    expvar = c(cumexpvar[1], diff(cumexpvar))
    
@@ -144,7 +161,7 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
    # Returns:
    #   res$Q2lim: limit for Q2 residuals
    #   res$T2lim: limit for T2 distances
-
+   
    # calculate T2 limit using Hotelling statistics
    if (nobj == ncomp)
       T2lim = 0
@@ -183,39 +200,58 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
    )   
 }   
 
-plotCumVariance.ldecomp = function(obj, show.labels = F)
+plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance',
+                                   xlab = 'Components', ylab = 'Explained variance, %',
+                                   show.labels = F, ...)
 {
    # Shows cumulative explained variance plot.
    #
    # Arguments:
    #   obj: object of ldecomp class.
+   #   type: type of the plot
+   #   main: main title for the plot
+   #   xlab: text for x axis label
+   #   ylab: text for y axis label
    #   show.labels: show or not labels for plot points
    
    data = cbind(1:length(obj$cumexpvar), obj$cumexpvar)
-   data = rbind(c(0, 0), data)
-   colnames(data) = c('Components', 'Explained variance, %')
-   rownames(data) = round(c(0, obj$cumexpvar), 1)
-   mdaplots.linescatter(data, main = 'Cumulative variance', show.labels = show.labels)
+   if (type != 'h')
+   {   
+      data = rbind(c(0, 0), data)
+      rownames(data) = round(c(0, obj$cumexpvar), 2)
+   }
+   else
+   {
+      rownames(data) = round(obj$cumexpvar, 2)      
+   }  
+   
+   colnames(data) = c(xlab, ylab)
+   mdaplot(data, main = main, xlab = xlab, ylab = ylab, type = type, show.labels = show.labels, ...)
 }
 
-plotVariance.ldecomp = function(obj, show.labels = F)
+plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
+                                xlab = 'Components', ylab = 'Explained variance, %',
+                                show.labels = F, ...)
 {
    # Shows explained variance plot.
    #
    # Arguments:
-   #   obj: object of ldecomp class.
-   #   show.labels: show or not labels for plot points
-   #
+   #   obj: object of ldecomp class
+   #   type: type of the plot
+   #   main: main title for the plot
+   #   xlab: text for x axis label
+   #   ylab: text for y axis label
+   #   show.labels: logical, show or not labels for plot points
+   
    
    data = cbind(1:length(obj$expvar), obj$expvar)
-   colnames(data) = c('Components', 'Explained variance, %')
-   rownames(data) = round(obj$expvar, 1)
-   mdaplots.linescatter(data, main = 'Variance', show.labels = show.labels)
+   colnames(data) = c(xlab, ylab)
+   rownames(data) = round(obj$expvar, 2)
+   mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, type = type, ...)
 }
 
-plotScores.ldecomp = function(obj, comp = c(1, 2), cgroup = NULL, 
-                              show.labels = F, show.colorbar = T,
-                              show.axes = T)
+plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores', 
+                              show.labels = F, show.axes = F, ...)
 {
    # Shows scores plot.
    #
@@ -223,65 +259,70 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), cgroup = NULL,
    #   obj: object of ldecomp class.
    #   comp: which components to show on x and y axis. 
    #   cgroup: variable for color grouping of plot points.
+   #   main: main title for the plot
    #   show.labels: show or not labels for plot points.
    #   show.colorbar: show or not a colorbar legend if cgroup is provided.
    #   show.axes: show or not axes crossing (0, 0) point.
    
-   if (length(comp) == 1)
-   {   
-      # scores vs objects
-      data = cbind(1:nrow(obj$scores), obj$scores[, comp])
-      colnames(data) = c('Objects', colnames(obj$scores)[comp])
-      rownames(data) = rownames(obj$scores)
-      mdaplots.scatter(data, main = 'Scores', cgroup = cgroup, 
-                       show.labels = show.labels, 
-                       show.colorbar = show.colorbar
-                       )
-   }
-   else if (length(comp) == 2)
+   if (is.null(obj$scores))
    {
-      # scores vs scores
-      data = obj$scores[, c(comp[1], comp[2])]   
-
-      if (show.axes == T)
-         show.lines = c(0, 0)      
-      else
-         show.lines = F
-      
-      mdaplots.scatter(data, main = 'Scores', cgroup = cgroup, 
-                       show.labels = show.labels, 
-                       show.colorbar = show.colorbar,
-                       show.lines = show.lines)
-   }
-   else
-   {
-      stop('Wrong number of components!')
+      warning('Scores values are not specified!')
    }   
+   else
+   {   
+      if (length(comp) == 1)
+      {   
+         # scores vs objects
+         data = cbind(1:nrow(obj$scores), obj$scores[, comp])      
+         colnames(data) = c('Objects', colnames(obj$scores)[comp])
+         rownames(data) = rownames(obj$scores)
+         
+         mdaplot(data, main = main, show.labels = show.labels, ...)
+      }
+      else if (length(comp) == 2)
+      {
+         # scores vs scores
+         data = obj$scores[, c(comp[1], comp[2])]   
+         
+         if (show.axes == T)
+            show.lines = c(0, 0)      
+         else
+            show.lines = F
+         
+         mdaplot(data, main = main, show.labels = show.labels, show.lines = show.lines, ...)
+      }
+      else
+      {
+         stop('Wrong number of components!')
+      }   
+   }
 }  
 
-plotResiduals.ldecomp = function(obj, ncomp = NULL, cgroup = NULL, 
-                                 show.labels = F, show.colorbar = T)
+plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', ylab = 'Q2', 
+                                 show.labels = F, ...)
 {
    # Shows T2 vs Q2 residuals plot.
    #
    # Arguments:
    #   obj: object of ldecomp class.
    #   ncomp: number of components for the residuals 
-   #   cgroup: variable for color grouping of plot points.
+   #   main: main title for the plot
+   #   xlab: text for x axis label
+   #   ylab: text for y axis label
    #   show.labels: show or not labels for plot points.
-   #   show.colorbar: show or not a colorbar legend if cgroup is provided.
    
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
    
+   if (is.null(main))
+      main = sprintf('Residuals (ncomp = %d)', ncomp)
+   
    data = cbind(obj$T2[, ncomp], obj$Q2[, ncomp])
-   colnames(data) = c('T2', 'Q2')
-   mdaplots.scatter(data, main = sprintf('Residuals (ncomp = %d)', ncomp), 
-                    cgroup = cgroup, show.labels = show.labels,
-                    show.colorbar = show.colorbar)
+   colnames(data) = c(xlab, ylab)
+   mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, ...)
 }  
 
-print.ldecomp = function(obj, str = NULL)
+print.ldecomp = function(obj, str = NULL, ...)
 {   
    if (is.null(str))
       str ='Results of data decomposition (class ldecomp)'
@@ -301,7 +342,7 @@ summary.ldecomp = function(obj, str = NULL)
 {
    if (is.null(str))
       str ='Summary for data decomposition (class ldecomp)'
-
+   
    cat('\n')
    cat(str, '\n')
    cat(sprintf('\nSelected components: %d\n\n', obj$ncomp.selected))      
@@ -309,7 +350,7 @@ summary.ldecomp = function(obj, str = NULL)
    data = cbind(round(obj$expvar, 2),
                 round(obj$cumexpvar, 2))
    
-   colnames(data) = c('Exp. var', 'Cum. exp. var')
+   colnames(data) = c('Expvar', 'Cumexpvar')
    show(data)   
 }
 

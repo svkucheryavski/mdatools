@@ -1,0 +1,25 @@
+v. 0.3.1
+========
+
+* PLS and all related methods were rewritten from the scratch to make them faster, more efficient
+and also to follow the same code conventions as previously rewritten PCA. Here are main changes
+you need to do in your code if you used mdatools PLS before: `selectNumComp(model, ncomp)` instead
+of `pls.selectncomp(model, ncomp)`, `test.x` ad `test.y` instead of `Xt` and `yt`, finally separate logical
+arguments `center` and `scale` are used instead of previously used `autoscale`. By default `scale = F` and `center = T`.
+
+Before:
+model = pls(xc, yc, ncomp = 5, autoscale = 2, Xt = xt, yt = yt)
+model = pls.selectncomp(model, 3)
+
+Now:
+model = pls(xc, yc, ncomp = 5, scale = T, test.x = xt, test.y = yt)
+model = selectNumComp(model, 3)
+
+
+* PLS and all related methods are now well documented (see `?pls`)
+
+* plotting tools for all classes and methods were rewritten completely. Now all plotting methods 
+use either `mdaplot` or `mdaplotg` functions, which extend basic functionality of R plots. For example, 
+they allow to make color groups and colorbar legend, calculate limits automatically depending on 
+elements on a plot, make automatic legend and many other things.
+

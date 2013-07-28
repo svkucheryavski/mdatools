@@ -13,56 +13,86 @@ prep =
 
 prep.autoscale = function(data, center = T, scale = F)
 {   
+   # Autoscale (mean center and standardize) data matrix.
+   #
+   # Arguments:
+   #   data: a matrix with data values    
+   #   center: a logical value or vector with numbers for centering
+   #   scale: a logical value or vector with numbers for weighting
+   #
+   # Returns:
+   #   data: preprocessed data values
+   
+   # define values for centering
    if (is.logical(center) && center == T )
       center = apply(data, 2, mean)
    else if (is.numeric(center))
       center = center   
    
+   # define values for weigting
    if (is.logical(scale) && scale == T)
       scale = apply(data, 2, sd)
    else if(is.numeric(scale))
       scale = scale         
    
+   # make autoscaling and attach preprocessing attributes
    data = scale(data, center = center, scale = scale)
    attr(data, 'scaled:center') = NULL
    attr(data, 'scaled:scale') = NULL
    attr(data, 'prep:center') = center
    attr(data, 'prep:scale') = scale
    
-   return (data)
+   data
 }
 
-prep.snv = function(X)
+prep.snv = function(data)
 {
-   X = t(X)
-   X = scale(X, center = T, scale = T)
-   X = t(X)
+   # Makes standard normal variate (SNV) preprocessing.
+   #
+   # Arguments:
+   #   data: a matrix with data values    
+   #
+   # Returns:
+   #   data: preprocessed data values
+   
+   data = t(scale(t(data), center = T, scale = T))
 } 
 
-prep.savgol <- function(TT, fl, forder = 1, idorder = 0)
+prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
 {
-   nobj = nrow(TT)
-   TT2 = matrix(0, ncol = ncol(TT), nrow = nrow(TT))
+   # Apply Savytzky-Golay filter to the data values.
+   #
+   # Arguments:
+   #   data: a matrix with data values    
+   #   width: a width of the filter
+   #   porder: a polinomial order
+   #   dorder: a derivative order
+   #
+   # Returns:
+   #   data: preprocessed data values
+   
+   nobj = nrow(data)
+   nvar = ncol(data)
+   
+   pdata = matrix(0, ncol = nvar, nrow = nobj)
    
    for (i in 1:nobj)
    {
-      T = TT[i,]
-      m <- length(T)
-      dorder = idorder + 1
+      d = data[i, ]
       
-      fc <- (fl - 1)/2                        
-      X  <- outer(-fc:fc, 0:forder, FUN="^")  
+      w = (width - 1)/2                        
+      f  = pinv(outer(-w:w, 0:porder, FUN = "^"))  
       
-      Y  <- pinv(X);                                
-      T2 <- convolve(T, rev(Y[dorder, ]), type="o")
-      T2 <- T2[(fc+1):(length(T2)-fc)]
-      TT2[i,] = T2
+      d = convolve(d, rev(f[dorder + 1, ]), type = "o")      
+      pdata[i, ] = d[(w + 1) : (length(d) - w)] 
    }  
-   TT2
+   
+   pdata
 }
 
-pinv <- function(A)
+pinv = function(data)
 {
-   s <- svd(A)
+   # Calculates pseudo-inverso of data matrix
+   s = svd(data)
    s$v %*% diag(1/s$d) %*% t(s$u)
 }

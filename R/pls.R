@@ -1,302 +1,639 @@
 # class and methods for Partial Least Squares regression #
-pls = function(X, y, ...) UseMethod("pls")
 
-pls.default = function(X, y, ncomp = 12, cv = 0, autoscale = 1, Xt = NULL, yt = NULL, ...)
+pls = function(x, y, ncomp = 20, center = T, scale = F, cv = NULL, 
+               x.test = NULL, y.test = NULL, method = 'simpls', alpha = 0.05, info = '')
 {
-   X = as.matrix(X)
+   # Calibrate and validate a PLS model.
+   #
+   # Arguments:
+   #   x: a matrix with predictor values    
+   #   y: a vector with response values
+   #   ncomp: maximum number of components to calculate
+   #   center: logical, center or not x and y data
+   #   scale: logical, standardize or not x data
+   #   cv: number of segments for cross-validation (1 - full CV)
+   #   x.test: a matrix with predictor values for test set validation
+   #   y.test: a vector with response values for test set validation
+   #   method: a method to calculate PLS model
+   #   alpha: a sigificance limit for Q2 values
+   #   info: a short string with information about the model
+   #
+   # Returns:
+   #   model: a PLS model (object of class pls) 
+   
+   x = as.matrix(x)
    y = as.matrix(y)
    
-   ncomp = min(ncol(X), nrow(X) - 1, ncomp)
+   if (is.null(colnames(y)))
+      colnames(y) = paste('y', 1:ncol(y), sep = '')
+   
+   # correct maximum number of components
+   ncomp = min(ncol(x), nrow(x) - 1, ncomp)
    
    # build a model and apply to calibration set
-   model = pls.cal(X, y, ncomp, autoscale)
-   model$calres = predict.pls(model, X, y)
+   model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method)
+   model$ncomp.selected = ncomp
+   model$alpha = alpha   
+   model$calres = predict.pls(model, x, y)
    
    # do cross-validation if needed
-   if (cv > 0)
-      model$cvres = pls.crossval(model, X, y, cv)    
+   if (!is.null(cv))
+      model$cvres = pls.crossval(model, x, y, cv, center = center, scale = scale)    
    
    # do test set validation if provided
-   if (!is.null(Xt) && !is.null(yt))
+   if (!is.null(x.test) && !is.null(y.test))
    {
-      Xt = as.matrix(Xt)
-      yt = as.matrix(yt)
-      model$testres = predict.pls(model, Xt, yt)
+      x.test = as.matrix(x.test)
+      y.test = as.matrix(y.test)
+      
+      if (is.null(colnames(y.test)))
+         colnames(y.test) = paste('y', 1:ncol(y), sep = '')
+      
+      if (ncol(x.test) != ncol(x) || ncol(y.test) != ncol(y))
+         stop('Calibration and data set should have the same number of variables!')
+      
+      if (nrow(x.test) != nrow(y.test))
+         stop('Number of rows in x.test and y.test should be the same!')
+      
+      model$testres = predict.pls(model, x.test, y.test)
    }
    
-   model$ncomp.selected = ncomp
    model$call = match.call()
+   model$info = info
    
    class(model) = "pls"
    
    model
 }
 
-pls.cal = function(X, y, ncomp, autoscale)
+pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = F)
 {   
-   X = as.matrix(X)
-   y = as.matrix(y)
+   # Calibrates a PLS model.
+   #
+   # Arguments:
+   #   x: a matrix with predictor values
+   #   y: a vector with response values
+   #   ncomp: number of components to calculate
+   #   center: logical, center or not x and y data
+   #   scale: logical, standardize or not y data
+   #   method: a method to calculate PLS model
+   #   cv: logical, calibrate model for cross-validation or not
+   #
+   # Returns:
+   #   model: calibrated PLS model (list) 
    
-   if (autoscale > 0)
-   {
-      # find mean values for X and y
-      mX = apply(X, 2, mean)
-      my = apply(y, 2, mean)
-      
-      if (autoscale == 2)
-      {
-         # calculate stadnard deviations for X variables
-         sdX = apply(X, 2, sd)
-         sdy = apply(y, 2, sd)
-      }
-      else
-      {
-         # use vector with ones if no standardization is needed 
-         sdX = rep(1, ncol(X))         
-         sdy = rep(1, ncol(y))
-      }   
-      
-      # autoscale X and y
-      X = scale(X, center = mX, scale = sdX)
-      #y = scale(y, center = my, scale = sdy)
-      y = y - my
-   }
+   # center and scale data according to arguments
+   x = prep.autoscale(as.matrix(x), center = center, scale = scale)
+   y = prep.autoscale(as.matrix(y), center = center, scale = scale)
    
+   # do PLS
+   if (method == 'simpls')
+      res = pls.simpls(x, y, ncomp)
+   else
+      stop('Method with this name is not supported!')
+
+   # return a list with model parameters
+   model = list(
+      xloadings = res$xloadings,
+      yloadings = res$yloadings,
+      weights = res$weights,
+      coeffs = regcoeffs(res$coeffs),
+      method = method,
+      xtnorm = sqrt(colSums(res$xscores ^ 2)/(nrow(res$xscores) - 1)),   
+      ytnorm = sqrt(colSums(res$yscores ^ 2)/(nrow(res$yscores) - 1)),   
+      xcenter = attr(x, 'prep:center'),
+      xscale = attr(x, 'prep:scale'),
+      ycenter = attr(y, 'prep:center'),
+      yscale = attr(y, 'prep:scale'),
+      ncomp = ncomp
+   )
    
-   # do SIMPLS
-   model = pls.simpls(X, y, ncomp)
-   
-   model$autoscale = autoscale
-   
-   if (autoscale > 0)
-   {   
-      model$mX = mX
-      model$sdX = sdX
-      model$my = my
-      model$sdy = sdy
-   }
-   
-   model$ncomp = ncomp
-   
-   return (model)
+   model
 }
 
-## SIMPLS algorithm ###
-pls.simpls = function(X, y, ncomp, stripped = FALSE)
+pls.simpls = function(x, y, ncomp)
 {
-   X = as.matrix(X)
+   # SIMPLS algorithm for calibrating PLS model.
+   #
+   # Arguments:
+   #   x: a matrix with predictor values
+   #   y: a matrix with response values
+   #   ncomp: number of components to calculate
+   #
+   # Returns:
+   #   res: a list with PLS calibration results 
+   
+   x = as.matrix(x)
    y = as.matrix(y)
    
-   objnames = rownames(X);
-   prednames = colnames(X);
+   # get names for objects, variables and components
+   objnames = rownames(x);
+   prednames = colnames(x);
    respnames = colnames(y);
+   compnames = paste('Comp', 1:ncomp)
    
-   nobj = dim(X)[1]
-   npred = dim(X)[2]
-   nresp = 1
+   nobj = nrow(x)
+   npred = ncol(x)
+   nresp = ncol(y)
    
-   V = R = matrix(0, nrow = npred, ncol = ncomp)
-   tQ = matrix(0, nrow = ncomp, ncol = nresp)
-   B = array(0, dim = c(npred, nresp, ncomp))
+   # initial estimation
+   A = t(x) %*% y
+   M = t(x) %*% x
+   C = diag(npred)
    
-   if (!stripped) {
-      P = R
-      U = TT = matrix(0, nrow = nobj, ncol = ncomp)
-   }
+   # prepare space for results
+   B = array(0, dim = c(npred, ncomp, nresp))
+   W = matrix(0, nrow = npred, ncol = ncomp)
+   P = matrix(0, nrow = npred, ncol = ncomp)
+   Q = matrix(0, nrow = nresp, ncol = ncomp)
    
-   S = crossprod(X, y)
-   for (a in 1:ncomp) {
-      q.a = 1
-      r.a = S %*% q.a
-      t.a = X %*% r.a
-      t.a = t.a - mean(t.a)
-      tnorm = sqrt(c(crossprod(t.a)))
+   # loop for each components
+   for (n in 1:ncomp)
+   {
+      # get the dominate eigenvector of A'A
+      e = eigen(t(A) %*% A)
+      q = e$vectors[1:nresp]
       
-      t.a = t.a/tnorm
-      r.a = r.a/tnorm
-      p.a = crossprod(X, t.a)
-      q.a = crossprod(y, t.a)
-      v.a = p.a
-      if (a > 1) {
-         v.a = v.a - V %*% crossprod(V, p.a)
-      }
-      v.a = v.a/sqrt(c(crossprod(v.a)))
-      S = S - v.a %*% crossprod(v.a, S)
-      R[, a] = r.a
-      tQ[a, ] = q.a
-      V[, a] = v.a
-      B[, , a] = R[, 1:a, drop = FALSE] %*% tQ[1:a, , drop = FALSE]
-      if (!stripped) {
-         u.a = y %*% q.a
-         if (a > 1) 
-            u.a = u.a - TT %*% crossprod(TT, u.a)
-         P[, a] = p.a
-         TT[, a] = t.a
-         U[, a] = u.a
-      }
-   }
-   
-   B = B[, 1, ]
-   
-   if (stripped) {
-      list(coeffs = B)
-   }
-   else {
+      # calculate and store weights
+      w = A %*% q
+      c = t(w) %*% M %*% w
+      w = w/sqrt(as.numeric(c))
+      W[, n] = w
       
-      lvnames = paste("Comp", 1:ncomp)
-      ncompnames = paste(1:ncomp, " components")
-      rownames(B) = prednames
-      colnames(B) = ncompnames
-      rownames(TT) = rownames(U) = objnames
-      colnames(TT) = colnames(U) = lvnames
-      list(
-         coeffs = B, 
-         xloadings = P, 
-         yloadings = t(tQ), 
-         weights = R
-      )
+      # calculate and store x loadings
+      p = M %*% w
+      P[, n] = p
+      
+      # calculate and store y loadings
+      q = t(A) %*% w
+      Q[, n] = q
+      
+      v = C %*% p
+      v = v/sqrt(as.numeric(t(v) %*% v))
+      
+      # calculate and store regression coefficients
+      B[, n, ] = W[, 1:n, drop = FALSE] %*% t(Q[, 1:n, drop = FALSE])
+      
+      # recalculate matrices for the next compnonent
+      C = C - v %*% t(v)
+      M = M - p %*% t(p)
+      A = C %*% A      
    }
-}   
+   
+   # calculate x and y scores
+   U = y %*% Q 
+   TT = x %*% (W %*% solve(t(P) %*% W))  
+   
+   # set names for all results
+   colnames(Q) = colnames(B) = colnames(P) = colnames(W) = compnames      
+   colnames(TT) = colnames(U) = compnames      
+   rownames(P) = rownames(B) = rownames(W) = prednames
+   rownames(TT) = rownames(U) = objnames
+   rownames(Q) = dimnames(B)[[3]] = respnames
+   
+   res = list(
+      coeffs = B,
+      weights = W,
+      xloadings = P,
+      xscores = TT,
+      yloadings = Q,
+      yscores = U
+   )   
+}  
 
-pls.crossval = function(model, X, y, cv)
+pls.crossval = function(model, x, y, cv, center = T, scale = F)
 {
-   X = as.matrix(X)
+   # Cross-validation of a PLS model.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class pls) 
+   #   x: a matrix with predictor values
+   #   y: a vector with response values
+   #   cv: number of segments for cross-validation (1 - full CV)
+   #   center: logical, to center x and y data or not
+   #   scale: logical, to standardize x data or not
+   
+   # Returns:
+   #   res: a list with cross-validation results 
+   
+   x = as.matrix(x)
    y = as.matrix(y)
    
-   autoscale = model$autoscale
    ncomp = model$ncomp
-   nobj = nrow(X)
-   nvar = ncol(X)
+   nobj = nrow(x)
+   nvar = ncol(x)
+   nresp = ncol(y)
    
    # get matrix with indices for cv segments
    idx = crossval(nobj, cv)
    
    seglen = ncol(idx);
    
-   yp = matrix(0, nrow = nobj, ncol = ncomp)
+   yp = array(0, dim = c(nobj, ncomp, nresp))
+   Q2x = matrix(0, ncol = ncomp, nrow = nobj)   
+   T2x = matrix(0, ncol = ncomp, nrow = nobj)   
+   Q2y = matrix(0, ncol = ncomp, nrow = nobj)   
+   T2y = matrix(0, ncol = ncomp, nrow = nobj)   
    
    # loop over segments
    for (i in 1:nrow(idx))
    {
-      ind = na.exclude(idx[i,])
       
+      ind = na.exclude(idx[i,])
       if (length(ind) > 0)
       {   
-         Xc = X[-ind, , drop = F]
+         xc = x[-ind, , drop = F]
          yc = y[-ind, , drop = F]
-         Xt = X[ind, , drop = F]
+         xt = x[ind, , drop = F]
          yt = y[ind, , drop = F]
          
-         m = pls.cal(Xc, yc, ncomp, autoscale)               
-         res = predict.pls(m, Xt, stripped = T)
-         yp[ind, ] = res$yp         
+         m = pls.cal(xc, yc, ncomp, center = center, scale = scale)               
+         res = predict.pls(m, xt, yt, cv = T)
+         
+         xdist = ldecomp.getDistances(res$xscores, m$xloadings, res$xresiduals, 
+                                      model$calres$xdecomp$tnorm)
+         ydist = ldecomp.getDistances(res$xscores, m$yloadings, res$yresiduals, 
+                                      model$calres$xdecomp$tnorm)
+         
+         yp[ind, , ] = res$yp
+         Q2x[ind, ] = xdist$Q2        
+         T2x[ind, ] = xdist$T2        
+         Q2y[ind, ] = ydist$Q2        
+         T2y[ind, ] = ydist$T2        
       }
+      
    }  
    
-   res = plsresult(yp, y)
+   dimnames(yp) = list(rownames(x), colnames(model$coeffs$values), colnames(model$calres$y.ref))         
+   
+   res = plsres(yp, y.ref = y, ncomp.selected = model$ncomp.selected,
+                xdecomp = ldecomp(totvar = model$calres$xdecomp$totvar,
+                                  tnorm = model$calres$xdecomp$tnorm,
+                                  ncomp.selected = model$ncomp.selected,
+                                  Q2 = Q2x, T2 = T2x),
+                ydecomp = ldecomp(totvar = model$calres$ydecomp$totvar,
+                                  tnorm = model$calres$ydecomp$tnorm,
+                                  ncomp.selected = model$ncomp.selected,
+                                  Q2 = Q2y, T2 = T2y)   
+   )
 }
 
-## select optimal ncomp for the model ##
-pls.selectncomp = function(model, ncomp)
+selectCompNum.pls = function(model, ncomp)
 {
-   if (ncomp <= model$ncomp && ncomp > 0)
-   {   
-      model$ncomp.selected = ncomp;
-      model$calres$ncomp.selected = ncomp
-      
-      if (!is.null(model$cvres)) 
-         model$cvres$ncomp.selected = ncomp
-      
-      if (!is.null(model$testres)) 
-         model$testres$ncomp.selected = ncomp
-   }
+   # Set user defined value for optimal number of components.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class pls) 
+   #   ncomp: number of components to use as optimal
+   #
+   # Returns:
+   #   model: the same model but with selected components 
    
-   return (model)
+   if (ncomp > model$ncomp || ncomp < 0)
+      stop('Wrong number of selected components!')
+   
+   model$ncomp.selected = ncomp      
+   model$calres$ncomp.selected = ncomp
+   
+   if (!is.null(model$cvres)) 
+      model$cvres$ncomp.selected = ncomp
+   
+   if (!is.null(model$testres)) 
+      model$testres$ncomp.selected = ncomp
+   
+   model
 }   
 
-predict.pls = function(model, X, y = NULL, stripped = FALSE)
+predict.pls = function(model, x, y = NULL, cv = F)
 {   
+   # Applies a PLS model to a new data.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class PLS)
+   #   x: a matrix with predictor values
+   #   y: a vector with response values (optional)
+   #   cv: logical, is it prediction for cross-validation or not
+   #
+   # Returns:
+   #   res: PLS results (object of class plsres)
    
-   if (model$autoscale > 0)
-      X = scale(X, center = model$mX, scale = model$sdX) 
+   nresp = dim(model$coeffs$values)[3]
+   nobj = nrow(x)
    
-   yp = X %*% as.matrix(model$coeffs)
+   # preprocess x and calculate scores, total and full variance
+   x = as.matrix(x)
+   x  = prep.autoscale(x, center = model$xcenter, scale = model$xscale)
+   xscores = x %*% (model$weights %*% solve(t(model$xloadings) %*% model$weights))  
+   xresiduals = x - xscores %*% t(model$xloadings)
    
-   if (model$autoscale > 0) 
-      yp = yp + model$my   
+   # make predictions
+   yp = array(0, dim = c(nrow(x), model$ncomp, nresp))
+   for (i in 1:nresp)
+      yp[, , i] = x %*% model$coeffs$values[, , i]
    
-   if (stripped == FALSE)
+   # if y is provided, calculate y residuals
+   if (!is.null(y))
    {   
-      xscores = X %*% (model$weights %*% solve(t(model$xloadings) %*% model$weights))  
+      yy = prep.autoscale(y, center = model$ycenter, scale = model$yscale)
+      yscores = as.matrix(yy) %*% model$yloadings   
+
+      ypp = yp[, ncol(yp), , drop = F]
+      dim(ypp) = dim(yp)[c(1, 3)]
+      yresiduals = ypp - yy
       
+      dimnames(yp) = list(rownames(x), colnames(model$coeffs$values), colnames(y))   
+   }
+   else
+   {
+      dimnames(yp) = list(rownames(x), colnames(model$coeffs$values), colnames(model$calres$y.ref))         
+   }   
+   
+   # unscale predicted y values
+   if (model$yscale != F)
+      for (i in 1:nresp)
+         yp[, , i] = sweep(yp[, , i, drop = F], 2L, model$yscale[i], '*', check.margin = F)
+   
+   # uncenter predicted y values
+   if (length(model$ycenter) > 1 || model$ycenter != F)
+      for (i in 1:nresp)
+         yp[, , i] = sweep(yp[, , i, drop = F], 2L, model$ycenter[i], '+', check.margin = F)
+   
+   if (cv == F)
+   {   
+      # normal predictions      
+      # calculate PLS decomposition for x and y data
+      # and return all results
+      rownames(xscores) = rownames(x)
+      colnames(xscores) = paste("Comp", 1:model$ncomp)
+      xdecomp = ldecomp(xscores, model$xloadings, xresiduals, 
+                        totvar = sum(x^2),
+                        ncomp.selected = model$ncomp.selected)
       if (!is.null(y))
       {   
-         yy = y - model$my
-         yscores = as.matrix(yy) %*% model$yloadings   
+         dimnames(yscores) = dimnames(xscores)
+         ydist = ldecomp.getDistances(xscores, model$yloadings, yresiduals)
+         ydecomp = ldecomp(yscores, model$yloadings, yresiduals, sum(yy^2),
+                           model$ytnorm, model$ncomp.selected,
+                           ydist$T2, ydist$Q2)
       }
+      else
+      {
+         ydecomp = NULL
+      }      
       
-      rownames(xscores) = rownames(yscores) = rownames(X)
-      colnames(xscores) = colnames(yscores) = paste("LV", 1:model$ncomp)
-      
-      res = plsresult(yp, y, X = X,
-                      xscores = xscores, 
-                      yscores = yscores,
-                      xloadings = model$xloadings,
-                      yloadings = model$yloadings
-      )
+      res = plsres(yp, y.ref = y, ncomp.selected = model$ncomp.selected, 
+                   xdecomp = xdecomp, ydecomp = ydecomp)    
    }      
    else
    {
-      res = list(yp = yp)
-   }   
+      # predictions for cross-validation      
+      # just return predictions, scores and residuals
+      # decomposition will be calculated in crossval() function
+      res = list(
+         yp = yp,
+         xscores = xscores,
+         yscores = yscores,
+         xresiduals = xresiduals,
+         yresiduals = yresiduals
+      )
+   }         
 }  
 
-
-plotRMSE.pls = function(model, 
-                        main = 'RMSE', xlab = 'ncomps', ylab = 'RMSE', 
-                        type = 'b',
-                        show.legend = T)
+plotRMSE.pls = function(model, ny = 1, type = 'b',
+                        main = 'RMSE', xlab = 'Components', ylab = NULL, 
+                        show.legend = T, show.labels = F, ...)
 {
+   # Makes RMSE plot.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class PLS)  
+   #   ny: number of response variable to make the plot for
+   #   type: type of the plot('b', 'l' or 'h')
+   #   main: main plot title
+   #   xlab: label for x axis
+   #   ylab: label for y axis
+   #   show.legend: logical, show or not legend for the plot
+   
    ncomp = model$ncomp
    
+   if (is.null(ylab))
+   {   
+      if (nrow(model$calres$rmse) == 1)
+         ylab = 'RMSE'
+      else if (is.null(rownames(model$calres$rmse)))
+         ylab = sprintf('RMSE (#%d)', ny)
+      else         
+         ylab = sprintf('RMSE (%s)', rownames(model$calres$rmse)[ny])
+   }
+   
    legend = c('cal')
-   cdata = cbind(1:ncomp, model$calres$rmse)   
-   data = list(cdata = cdata)
+   data = cbind(1:ncomp, model$calres$rmse[ny, ])   
+   labels = mdaplot.formatValues(model$calres$rmse[ny, ])
    
    if (!is.null(model$cvres)) 
    { 
-      cvdata = cbind(1:ncomp, model$cvres$rmse)
-      data$cvdata = cvdata
+      data = cbind(data, model$cvres$rmse[ny, ])
+      labels = cbind(labels, mdaplot.formatValues(model$cvres$rmse[ny, ]))
       legend = c(legend, 'cv')
    }   
    
    if (!is.null(model$testres)) 
    { 
-      testdata = cbind(1:ncomp, model$testres$rmse)
-      data$testdata = testdata
+      data = cbind(data, model$testres$rmse[ny, ])
+      labels = cbind(labels, mdaplot.formatValues(model$testres$rmse[ny, ]))
       legend = c(legend, 'test')
    }     
    
    if (show.legend == F)
       legend = NULL
    
-   mdaplots.lineg(data, legend = legend, type = type, 
-                  main = main, xlab = xlab, ylab = ylab)
+   if (show.labels == F)
+      labels = NULL
+   
+   mdaplotg(data, type = type, legend = legend, labels = labels, 
+            main = main, xlab = xlab, ylab = ylab, ...)
 }
 
-plotXYScores.pls = function(model, ncomp = 1, main = 'XY Scores',
-                            show.labels = F, show.legend = T)
+plotXVariance.pls = function(model, type = 'b',
+                             main = 'X variance', xlab = 'Components', 
+                             ylab = 'Explained variance, %', 
+                             show.legend = T, ...)
 {
-   main = sprintf('XY scores (ncomp = %d)', ncomp)
+   # Description.
+   #
+   # Arguments:
+   #   :  
+   #
+   # Returns:
+   #   : 
    
-   cdata = cbind(model$calres$xscores[, ncomp], model$calres$yscores[, ncomp])
-   colnames(cdata) = c('X scores', 'Y scores')
-   data = list(cdata = cdata)
+   plotVariance(model, decomp = 'xdecomp', type = type, main = main,
+                xlab = xlab, ylab = ylab, show.legend = show.legend, ...)
+}
+
+plotYVariance.pls = function(model, type = 'b',
+                             main = 'Y variance', xlab = 'Components', 
+                             ylab = 'Explained variance, %', 
+                             show.legend = T, ...)
+{
+   # Description.
+   #
+   # Arguments:
+   #   :  
+   #
+   # Returns:
+   #   : 
+   
+   plotVariance(model, decomp = 'ydecomp', type = type, main = main,
+                xlab = xlab, ylab = ylab, show.legend = show.legend, ...)
+}
+
+
+plotXCumVariance.pls = function(model, type = 'b',
+                                main = 'X cumulative variance', 
+                                xlab = 'Components', ylab = 'Explained variance, %', 
+                                show.legend = T, ...)
+{
+   # Description.
+   #
+   # Arguments:
+   #   :  
+   #
+   # Returns:
+   #   : 
+   
+   plotVariance(model, decomp = 'xdecomp', variance = 'cumexpvar', 
+                type = type, main = main, xlab = xlab, ylab = ylab, 
+                show.legend = show.legend, ...)   
+}
+
+plotYCumVariance.pls = function(model, type = 'b',
+                                main = 'Y cumulative variance', 
+                                xlab = 'Components', ylab = 'Explained variance, %', 
+                                show.legend = T, ...)
+{
+   # Description.
+   #
+   # Arguments:
+   #   :  
+   #
+   # Returns:
+   #   : 
+   
+   plotVariance(model, decomp = 'ydecomp', variance = 'cumexpvar', 
+                type = type, main = main, xlab = xlab, ylab = ylab, 
+                show.legend = show.legend, ...)   
+}
+
+plotVariance.pls = function(model, decomp = 'xdecomp', variance = 'expvar',
+                            type = 'b',
+                            main = 'X variance', xlab = 'Components', 
+                            ylab = 'Explained variance, %', 
+                            show.labels = F,
+                            show.legend = T, ...)
+{
+   # Description.
+   #
+   # Arguments:
+   #   :  
+   #
+   # Returns:
+   #   : 
+   
+   ncomp = model$ncomp
+   
    legend = c('cal')
-      
+   data = cbind(1:ncomp, model$calres[[decomp]][[variance]])   
+   labels = mdaplot.formatValues(model$calres[[decomp]][[variance]])
+   
+   if (!is.null(model$cvres)) 
+   { 
+      data = cbind(data, model$cvres[[decomp]][[variance]])
+      labels = cbind(labels, mdaplot.formatValues(model$cvres[[decomp]][[variance]]))
+      legend = c(legend, 'cv')
+   }   
+   
    if (!is.null(model$testres)) 
    { 
-      tdata = cbind(model$testres$xscores[, ncomp], model$testres$yscores[, ncomp])
+      data = cbind(data, model$testres[[decomp]][[variance]])
+      labels = cbind(labels, mdaplot.formatValues(model$testres[[decomp]][[variance]]))
+      legend = c(legend, 'test')
+   }     
+   
+   if (show.legend == F)
+      legend = NULL
+   
+   if (show.labels == F)
+      labels = NULL
+   
+   mdaplotg(data, legend = legend, type = type, main = main, 
+            xlab = xlab, ylab = ylab, labels = labels, ...)
+}
+
+plotXScores.pls = function(model, comp = c(1, 2), main = 'X scores',
+                           xlab = NULL, ylab = NULL,
+                           show.axes = F, 
+                           show.labels = F, show.legend = T, ...)
+{
+   # Description.
+   #
+   # Arguments:
+   #   :  
+   #
+   # Returns:
+   #   : 
+   
+   ncomp = length(comp)
+   
+   if (ncomp < 1 || ncomp > 2)
+      stop('The plot can be made for one or two components only!')
+      
+   if (is.null(main))
+      main = sprintf('XY scores (ncomp = %d)', ncomp)
+   
+   if (is.null(ylab))
+   {   
+      if (ncomp == 2)
+         ylab = colnames(model$calres$xdecomp$scores)[comp[2]]
+      else
+         ylab = colnames(model$calres$xdecomp$scores)[comp]
+   }      
+   
+   if (is.null(xlab))
+   {   
+      if (ncomp == 2)
+         xlab = colnames(model$calres$xdecomp$scores)[comp[1]]
+      else
+         xlab = 'Objects'
+   }
+   
+   if (ncomp == 2)
+   {   
+      cdata = cbind(model$calres$xdecomp$scores[, comp[1], drop = F], 
+                    model$calres$xdecomp$scores[, comp[2], drop = F])
+   }
+   else
+   {
+      ncrows = nrow(model$calres$xdecomp$scores);
+      cdata = cbind(1:ncrows, 
+                    model$calres$xdecomp$scores[, comp, drop = F])
+   }   
+   
+   data = list(cdata = cdata)
+   legend = c('cal')
+   
+   if (!is.null(model$testres)) 
+   { 
+      if (ncomp == 2)
+      {   
+         tdata = cbind(model$testres$xdecomp$scores[, comp[1], drop = F], 
+                    model$testres$xdecomp$scores[, comp[2], drop = F])
+      }
+      else
+      {
+         tdata = cbind(ncrows + (1:nrow(model$testres$xdecomp$scores)), 
+                       model$testres$xdecomp$scores[, comp, drop = F])         
+      }   
       data$tdata = tdata
       legend = c(legend, 'test')      
    }   
@@ -304,45 +641,133 @@ plotXYScores.pls = function(model, ncomp = 1, main = 'XY Scores',
    if (show.legend == F)
       legend = NULL
    
-   mdaplots.scatterg(data, legend = legend, show.labels = show.labels, main = main)   
+   if (show.axes == T)
+      show.lines = c(0, 0)
+   else
+      show.lines = F
+   
+   mdaplotg(data, legend = legend, show.labels = show.labels, show.lines = show.lines,
+            main = main, xlab = xlab, ylab = ylab, ...)   
 }  
 
-## plot with measured vs predicted y values ##
-plotPredictions.pls = function(model, ncomp = 0, main = 'Predictions', 
-                                xlab = 'y, measured',
-                                ylab = 'y, predicted', 
-                                show.labels = F,
-                                show.legend = T)
+plotXYScores.pls = function(model, comp = 1, main = NULL,
+                            xlab = 'X scores', ylab = 'Y scores',
+                            show.lines = T,
+                            show.labels = F, show.legend = T, ...)
 {
-   if (ncomp == 0) 
-      ncomp = model$ncomp.selected
+   # Description.
+   #
+   # Arguments:
+   #   :  
+   #
+   # Returns:
+   #   : 
    
-   if (ncomp > model$ncomp) 
+   if (is.null(comp)) 
+      comp = model$ncomp.selected   
+   else if (comp <= 0 || comp > model$ncomp) 
+      stop('Wrong component number!')
+   
+   if (is.null(main))
+      main = sprintf('XY scores (comp %d)', comp)
+   
+   cdata = cbind(model$calres$xdecomp$scores[, comp, drop = F], 
+                 model$calres$ydecomp$scores[, comp, drop = F])
+   colnames(cdata) = c('X scores', 'Y scores')
+   data = list(cdata = cdata)
+   legend = c('cal')
+   
+   if (!is.null(model$testres)) 
    { 
-      warning(sprintf('\nChosen ncomp is larger than model has. Use %d instead.', model$ncomp))
-      ncomp = model$ncomp
+      tdata = cbind(model$testres$xdecomp$scores[, comp, drop = F], 
+                    model$testres$ydecomp$scores[, comp, drop = F])
+      data$tdata = tdata
+      legend = c(legend, 'test')      
+   }   
+   
+   if (show.legend == F)
+      legend = NULL
+   
+   if (show.lines == T)
+      show.lines = c(0, 0)
+   
+   mdaplotg(data, legend = legend, show.labels = show.labels, main = main,
+            xlab = xlab, ylab = ylab, show.lines = show.lines, ...)   
+}  
+
+plotPredictions.pls = function(model, ncomp = NULL, ny = 1, main = NULL, xlab = NULL,
+                               ylab = NULL, colmap = 'default', col = NULL,
+                               legend.position = 'topleft', show.lines = T, show.labels = F,
+                               show.legend = T, ...)
+{
+   # Makes predictions (predicted vs measured values) plot.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class pls)  
+   #   ncomp: number of components to make the plot for (default: ncomp.selected)
+   #   ny: which y variables to make the plot for
+   #   main: main title for the plot
+   #   xlab: label for x axis
+   #   ylab: label for y axis
+   #   colmap: color map for marker colors
+   #   col: color for markers
+   #   legend.position: position of the plot legend
+   #   show.lines: logical, show target lines for points or not
+   #   show.labels: logical, show labels for data objects or not
+   #   show.legend: logical, show plot legend or not
+   
+   # set default values for main title, x and y axis labels
+   if (is.null(main))
+   {   
+      if (is.null(ncomp))
+         main = 'Predictions'
+      else
+         main = sprintf('Predictions (ncomp = %d)', ncomp)
    }
    
-   cdata = cbind(model$calres$y, model$calres$yp[, ncomp])
+   if (is.null(xlab))
+   {
+      if (!is.null(colnames(model$calres$y.ref)))
+         xlab = sprintf('%s, measured', colnames(model$calres$y.ref)[ny])
+      else
+         xlab = 'y, measured'
+   }  
+   
+   if (is.null(ylab))
+   {
+      if (!is.null(colnames(model$calres$y.ref)))
+         ylab = sprintf('%s, predicted', colnames(model$calres$y.ref)[ny])
+      else
+         ylab = 'y, predicted'
+   }  
+   
+   # check number of components
+   if (is.null(ncomp)) 
+      ncomp = model$ncomp.selected
+   else if (ncomp <= 0 || ncomp > model$ncomp) 
+      stop('Wrong value for number of components!')
+   
+   # make list with groups of measured and predicted values for each type of result
+   cdata = cbind(model$calres$y.ref[, ny], model$calres$y.pred[, ncomp, ny])
    colnames(cdata) = c('y, measured', 'y, predicted')
-   rownames(cdata) = rownames(model$calres$yp)
+   rownames(cdata) = rownames(model$calres$y.ref)
    legend = c('cal')
    data = list(cdata = cdata)
    
    if (!is.null(model$cvres)) 
    { 
-      cvdata = cbind(model$cvres$y, model$cvres$yp[, ncomp])
+      cvdata = cbind(model$cvres$y.ref[, ny], model$cvres$y.pred[, ncomp, ny])
       colnames(cvdata) = c('y, measured', 'y, predicted')
-      rownames(cvdata) = rownames(model$cvres$yp)
+      rownames(cvdata) = rownames(model$cvres$y.ref)
       legend = c(legend, 'cv')
       data$cvdata = cvdata
    }   
    
    if (!is.null(model$testres)) 
    { 
-      testdata = cbind(model$testres$y, model$testres$yp[, ncomp])
+      testdata = cbind(model$testres$y.ref[, ny], model$testres$y.pred[, ncomp, ny])
       colnames(testdata) = c('y, measured', 'y, predicted')
-      rownames(testdata) = rownames(model$testres$yp)
+      rownames(testdata) = rownames(model$testres$y.ref)
       legend = c(legend, 'test')
       data$testdata = testdata
    }   
@@ -350,155 +775,406 @@ plotPredictions.pls = function(model, ncomp = 0, main = 'Predictions',
    if (show.legend == F)
       legend = NULL
    
-   mdaplots.scatterg(data, legend = legend, show.labels = show.labels, 
-                     main = main)      
+   mdaplotg(data, legend = legend, show.labels = show.labels, main = main, 
+            colmap = colmap, xlab = xlab, ylab = ylab, col = col, 
+            legend.position = legend.position, ...)  
+   
+   if (show.lines == T)
+      mdaplot.showRegressionLine(data, colmap = colmap, col = col)
 }
 
-plotYResiduals.pls = function(model, ncomp = 0, main = 'Y residuals', 
-                               xlab = 'y residuals',
-                               ylab = 'y values', 
-                               show.labels = F,
-                               show.legend = T)
+plotYResiduals.pls = function(model, ncomp = NULL, ny = 1, type = 'p', 
+                              main = NULL, 
+                              ylab = NULL,
+                              xlab = NULL,
+                              show.lines = T,
+                              show.labels = F,
+                              show.legend = T,
+                              ...)
 {
-   if (ncomp == 0) 
-      ncomp = model$ncomp.selected
+   # Makes Y residuals plot.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class pls) 
+   #   ncomp: number of components to make the plot for
+   #   ny: number of response variable to make the plot for
+   #   type: type of the plot
+   #   main: main title for the plot
+   #   xlab: label for x axis
+   #   ylab: label for y axis
+   #   show.lines: logical, show confidence limits as lines or not 
+   #   show.labels: logical, show labels for data objects or not
+   #   show.legend: logical, show plot legend or not
    
-   if (ncomp > model$ncomp) 
-   { 
-      warning(sprintf('\nChosen ncomp is larger than model has. Use %d instead.', model$ncomp))
-      ncomp = model$ncomp
+   if (is.null(main))
+   {   
+      if (is.null(ncomp))
+         main = 'Y residuals'
+      else
+         main = sprintf('Y residuals (ncomp = %d)', ncomp)
    }
    
-   cdata = cbind(model$calres$y, model$calres$yp[, ncomp] - model$calres$y)
-   colnames(cdata) = c('y values', 'y residuals')
-   rownames(cdata) = rownames(model$calres$yp)
+   if (is.null(xlab))
+   {
+      if (type == 'p')
+      {   
+         if (ncol(model$calres$y.ref) == 1)
+            xlab = 'y, measured'
+         else
+            xlab = sprintf('%s, measured', colnames(model$calres$y.ref)[ny])
+      }
+      else
+      {
+         xlab = 'Objects'
+      }   
+   }  
+
+   if (is.null(ylab))
+   {
+      if (ncol(model$calres$y.ref) == 1)
+         ylab = 'y residuals'
+      else
+         ylab = sprintf('y residuals (%s)', colnames(model$calres$y.ref)[ny])
+   }  
+   
+   if (is.null(ncomp)) 
+      ncomp = model$ncomp.selected
+   else if (ncomp <= 0 || ncomp > model$ncomp) 
+      stop('Wrong value for number of components!')
+   
+   if (type == 'p')
+   {   
+      cdata = cbind(model$calres$y.ref[, ny], model$calres$y.pred[, ncomp, ny] - model$calres$y.ref[, ny])
+      colnames(cdata) = c('y values', 'y residuals')
+   }
+   else
+   {   
+      nobj = nrow(model$calres$y.ref)
+      cdata = cbind(1:nrow(model$calres$y.ref), model$calres$y.pred[, ncomp, ny] - model$calres$y.ref[, ny])
+      colnames(cdata) = c('Objects', 'y residuals')
+   }
+   rownames(cdata) = rownames(model$calres$y.pred)
    legend = c('cal')
    data = list(cdata = cdata)
    
    if (!is.null(model$cvres)) 
    { 
-      cvdata = cbind(model$cvres$y, model$cvres$yp[, ncomp] - model$cvres$y)
-      colnames(cvdata) = c('y values', 'y residuals')
-      rownames(cvdata) = rownames(model$cvres$yp)
+      if (type == 'p')
+      {   
+         cvdata = cbind(model$cvres$y.ref[, ny], 
+                        model$cvres$y.pred[, ncomp, ny] - model$cvres$y.ref[, ny])
+         colnames(cvdata) = c('y values', 'y residuals')
+      }
+      else
+      {   
+         cvdata = cbind(nobj + (1:nrow(model$cvres$y.ref)), 
+                        model$cvres$y.pred[, ncomp, ny] - model$cvres$y.ref[, ny])
+         colnames(cvdata) = c('Objects', 'y residuals')
+         nobj = nobj + nrow(model$cvres$y.ref)
+      }      
+      rownames(cvdata) = rownames(model$cvres$y.pred)
       legend = c(legend, 'cv')
       data$cvdata = cvdata
    }   
    
    if (!is.null(model$testres)) 
    { 
-      testdata = cbind(model$testres$y, model$testres$yp[, ncomp] - model$testres$y)
-      colnames(testdata) = c('y values', 'y residuals')
-      rownames(testdata) = rownames(model$testres$yp)
+      if (type == 'p')
+      {   
+         tdata = cbind(model$testres$y.ref[, ny], 
+                       model$testres$y.pred[, ncomp, ny] - model$testres$y.ref[, ny])
+         colnames(tdata) = c('y values', 'y residuals')
+      }
+      else
+      {   
+         tdata = cbind(nobj + (1:nrow(model$testres$y.ref)), 
+                       model$testres$y.pred[, ncomp, ny] - model$testres$y.ref[, ny])
+         colnames(tdata) = c('Objects', 'y residuals')
+      }
+      rownames(tdata) = rownames(model$testres$y.pred)
       legend = c(legend, 'test')
-      data$testdata = testdata
+      data$tdata = tdata
    }   
    
    if (show.legend == F)
       legend = NULL
    
-   mdaplots.scatterg(data, legend = legend, show.labels = show.labels, 
-                     main = sprintf('Y residuals (ncomp = %d)', ncomp))      
+   if (show.lines == T)
+      show.lines = c(NA, 0)
+   
+   mdaplotg(data, legend = legend, type = type, show.labels = show.labels, xlab = xlab, ylab = ylab, 
+            main = main, show.lines = show.lines, ...)      
 }
 
-plotRegcoeffs.pls = function(model, main = 'Regression coefficients', 
-                             show.labels = F, ncomp = 0)
+plotRegcoeffs.pls = function(model, ncomp = NULL, ny = 1, main = NULL, ylab = NULL, ...)
 {
-   if (ncomp == 0)
-      ncomp = model$ncomp.selected
+   # Makes regression coefficients plot.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class pls)  
+   #   ncomp: number of components to make the plot for
+   #   ny: number of response variable to make the plot for
+   #   main: main title for the plot
    
-   if (ncomp > model$ncomp) 
-   { 
-      warning(sprintf('\nChosen ncomp is larger than model has. Use %d instead.', model$ncomp))
-      ncomp = model$ncomp
+   if (is.null(main))
+   {   
+      if (is.null(ncomp))
+         main = 'Regression coefficients'
+      else
+         main = sprintf('Regression coefficients (ncomp = %d)', ncomp)
    }
    
-   data = cbind(1:nrow(model$coeffs), model$coeffs[, ncomp])
-   colnames(data) = c('Variables', 'Coefficients')
-   rownames(data) = rownames(model$xloadings)
-   mdaplots.line(data, type = 'l', main = main, show.labels = show.labels)
+   if (is.null(ylab))
+   {   
+      if (ncol(model$calres$y.ref) == 1)
+         ylab = 'Coefficients'
+      else
+         ylab = sprintf('Coefficients (%s)', colnames(model$calres$y.ref)[ny])
+   }
+   
+   if (is.null(ncomp)) 
+      ncomp = model$ncomp.selected
+   else if (ncomp <= 0 || ncomp > model$ncomp) 
+      stop('Wrong value for number of components!')
+   
+   plot(model$coeffs, ncomp = ncomp, ny = ny, main = main, ylab = ylab, ...)
 }
 
-
-plotXResiduals.pls = function(model, ncomp = NULL, show.labels = F, show.legend = T)
+plotXLoadings.pls = function(model, comp = c(1, 2), type = 'p', main = 'X loadings', 
+                             ylab = NULL, xlab = NULL, show.axes = F, ...)
 {
-   if (is.null(ncomp))
-      ncomp = model$ncomp.selected
-   cdata = cbind(model$calres$T2[, ncomp], model$calres$Q2[, ncomp])
+   # Makes X loadings plot.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class pls)  
+   #   comp: which components to make the plot for
+   #   type: type of the plot
+   #   main: main title for the plot
+   
+   ncomp = length(comp)
+   
+   if (min(comp) < 1 || max(comp) > model$ncomp)
+      stop('Wrong components number!')
+   
+   if (type == 'p' && ncomp != 2)
+      stop('Scatter plot can be made only for two components!')
 
+   if (type == 'p')
+   {
+      data = cbind(model$xloadings[, comp[1], drop = F],
+                   model$xloadings[, comp[2], drop = F])      
+      legend = NULL
+   }   
+   else
+   {
+      data = cbind(1:nrow(model$xloadings),
+                   model$xloadings[, comp, drop = F])  
+      legend = colnames(model$xloadings[, comp, drop = F])
+   }   
+   
+   if (is.null(ylab))
+   {   
+      if (type == 'p')
+         ylab = colnames(model$xloadings)[comp[2]]
+      else   
+         ylab = 'Loadings'
+   }
+
+   if (is.null(xlab))
+   {   
+      if (type == 'p')
+         xlab = colnames(model$xloadings)[comp[1]]
+      else   
+         xlab = 'Variables'
+   }
+
+   if (show.axes == T)
+      show.lines = c(0, 0)
+   else
+      show.lines = F
+   
+   mdaplotg(data, main = main, type = type, ylab = ylab, xlab = xlab, legend = legend, 
+            show.lines = show.lines, ...)
+}
+
+plotXYLoadings.pls = function(model, comp = c(1, 2), main = 'XY loadings', 
+                             ylab = NULL, xlab = NULL, show.axes = F, ...)
+{
+   # Makes XY loadings plot.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class pls)  
+   #   comp: which components to make the plot for
+   #   main: main title for the plot
+   
+   if (length(comp) != 2)
+      stop('This plot can be made for only two components!')
+   
+   xdata = cbind(model$xloadings[, comp[1], drop = F],
+                 model$xloadings[, comp[2], drop = F])      
+   ydata = cbind(model$yloadings[, comp[1], drop = F],
+                 model$yloadings[, comp[2], drop = F])      
+   data = list(xdata = xdata, ydata = ydata)
+   
+   legend = c('X', 'Y')
+   
+   if (is.null(ylab))
+      ylab = colnames(model$xloadings)[comp[2]]
+   
+   if (is.null(xlab))
+      xlab = colnames(model$xloadings)[comp[1]]
+   
+   if (show.axes == T)
+      show.lines = c(0, 0)
+   else
+      show.lines = F
+   
+   mdaplotg(data, main = main, type = 'p', ylab = ylab, xlab = xlab, legend = legend, 
+            show.lines = show.lines, ...)
+}
+
+plotXResiduals.pls = function(model, ncomp = NULL, 
+                              main = NULL, xlab = 'T2', ylab = 'Q2',
+                              show.labels = F, show.legend = T, ...)
+{
+   # Makes X residuals plot (T2 vs Q2).
+   #
+   # Arguments:
+   #   model: a PLS model (object of class PLS)  
+   #   ncomp: number of components to make the plot for
+   #   main: main title for the plot
+   #   xlab: label for x axis
+   #   ylab: label for y axis
+   #   show.labels: logical, show labels for data objects or not 
+   #   show.legend: logical, show legend for the plot or not
+   
+   if (is.null(main))
+   {   
+      if (is.null(ncomp))
+         main = 'X residuals'
+      else
+         main = sprintf('X residuals (ncomp = %d)', ncomp)
+   }
+   
+   if (is.null(ncomp)) 
+      ncomp = model$ncomp.selected
+   else if (ncomp <= 0 || ncomp > model$ncomp) 
+      stop('Wrong value for number of components!')
+   
+   cdata = cbind(model$calres$xdecomp$T2[, ncomp], model$calres$xdecomp$Q2[, ncomp])
+   
    colnames(cdata) = c('T2', 'Q2')
-   rownames(cdata) = rownames(model$calres$scores)
+   rownames(cdata) = rownames(model$calres$xdecomp$scores)
    
    data = list(cdata = cdata)
    legend = NULL
    
    if (!is.null(model$testres))
    {
-      tdata = cbind(model$testres$T2[, ncomp], model$testres$Q2[, ncomp])      
+      tdata = cbind(model$testres$xdecomp$T2[, ncomp], model$testres$xdecomp$Q2[, ncomp])      
       colnames(tdata) = c('T2', 'Q2')
-      rownames(tdata) = rownames(model$testres$scores)
+      rownames(tdata) = rownames(model$testres$xdecomp$scores)
       
       data$tdata = tdata
-      if (show.legend == T)
-         legend = c('cal', 'test')
+      legend = c('cal', 'test')
    }      
    
-   mdaplots.scatterg(data, main = sprintf('X residuals (ncomp = %d)', ncomp),
-                     show.labels = show.labels,
-                     legend = legend)
+   mdaplotg(data, main = main, xlab = xlab, ylab = ylab,
+            show.labels = show.labels, legend = legend, ...)
 } 
 
 ## makes a plot with regression results ##
-plot.pls = function(model, show.legend = T, show.labels = F)
+plot.pls = function(model, ncomp = NULL, ny = 1, show.legend = T, show.labels = F)
 {
+   # Makes a plot for PLS model overview.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class pls)  
+   #   ncomp: number of components to show the summary for (default: ncomp.selected)
+   #   ny: number of response variable to show the summary for
+   #   show.legend: logical, show the plot legend or not
+   #   show.labels: logical, show data object labels or not
+   
+   if (!is.null(ncomp) && (ncomp <= 0 || ncomp > model$ncomp)) 
+      stop('Wrong value for number of components!')
+   
    par(mfrow = c(2, 2))      
-   plotXYScores(model, show.labels = show.labels, show.legend = show.legend)   
-   plotRegcoeffs(model, show.labels = show.labels)   
-   plotRMSE(model, show.legend = show.legend)   
-   plotPredictions(model, show.labels = show.labels, show.legend = show.legend)   
+   plotXResiduals(model, ncomp = ncomp, show.labels = show.labels, show.legend = show.legend)   
+   plotRegcoeffs(model, ncomp = ncomp, ny = ny, show.labels = F)   
+   plotRMSE(model, ny = ny, show.legend = show.legend)   
+   plotPredictions(model, ncomp = ncomp, ny = ny, show.labels = show.labels, show.legend = show.legend)   
    par(mfrow = c(1, 1))
 }
 
-
-## show summary for a model ##
-summary.pls = function(model)
+summary.pls = function(model, ncomp = NULL, ny = NULL)
 {
-   ncomp = model$ncomp.selected
+   # Shows summary information for PLS model.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class pls)  
+   #   ncomp: number of components to show the summary for (default: ncomp.selected)
+   #   ny: number of response variable to show the summary for
+   
+   if (is.null(ncomp))
+      ncomp = model$ncomp.selected
+   else if (ncomp <= 0 || ncomp > model$ncomp)
+      stop('Wrong value for number of components!')
+   
+   if (is.null(ny))
+      ny = 1:ncol(model$calres$y.ref)
+   
    cat('\nPLS model (class pls) summary\n')
    cat('\nPerformance and validation:\n')
-   cat(sprintf('Selected LVs: %d\n\n', ncomp))
-   cat('     ')
-   cat(sprintf('%6s\t', colnames(as.matrix(model$calres))))
-   cat('\n')
-   cat('Cal:  ')
-   cat(sprintf('%.4f\t', as.matrix(model$calres)[ncomp, , drop = F]))
-   cat('\n')
+   cat(sprintf('Number of selected components: %d\n', ncomp))
    
-   if (!is.null(model$cvres))
-   {
-      cat('CV:   ')
-      cat(sprintf('%.4f\t', as.matrix(model$cvres)[ncomp, , drop = F]))      
-      cat('\n')
-   }
-   
-   if (!is.null(model$testres))
-   {
-      cat('Test: ')
-      cat(sprintf('%.4f\t', as.matrix(model$testres)[ncomp, , drop = F]))      
-      cat('\n')
+   for (y in ny)
+   {   
+      if (ncol(model$calres$y.ref) > 1)
+         cat(sprintf('\nResponse variable #%d (%s)\n', y, colnames(model$calres$y.ref)[y]))
+      
+      data = as.matrix(model$calres, ncomp = ncomp, ny = y)
+      rownames(data) = 'Cal'
+      
+      if (!is.null(model$cvres))
+      {
+         data = rbind(data, as.matrix(model$cvres, ncomp = ncomp, ny = y))      
+         rownames(data)[2] = 'CV'
+      }
+      
+      if (!is.null(model$testres))
+      {
+         data = rbind(data, as.matrix(model$testres, ncomp = ncomp, ny = y))
+         rownames(data)[nrow(data)] = 'Test'
+      }   
+      
+      data = data[, -c(1, 3), drop = F]
+      
+      data[, 1:2] = round(data[, 1:2], 2)      
+      data[, 4:5] = round(data[, 4:5], 2)  
+      data[, 3] = mdaplot.formatValues(data[, 3], round.only = T)
+      data[, 6] = round(data[, 6], 4)      
+      data[, 7] = round(data[, 7], 2)      
+      
+      print(data)
    }   
-   
+   cat('\n')
 }
 
-## print information about a model ##
 print.pls = function(model, ...)
 {
+   # Prints information about the PLS model.
+   #
+   # Arguments:
+   #   model: a PLS model (object of class pls)  
+   
    cat('\nPLS model (class pls)\n')
    cat('\nCall:\n')
    print(model$call)
    cat('\nMajor fields:\n')
    cat('$coeffs - vector with regression coefficients\n')
-   cat('$xloadings - vector with X loadings\n')
+   cat('$xloadings - vector with x loadings\n')
    cat('$yloadings - vector with Y loadings\n')
+   cat('$weights - vector with weights\n')
    cat('$calres - results for calibration set\n')
    if (!is.null(model$cvres))
    {
@@ -508,6 +1184,5 @@ print.pls = function(model, ...)
    {
       cat('$testres - results for test set\n')      
    }   
-   cat('\nTry summary(model) and plot(model) to see the results of validation\n')
-   
+   cat('\nTry summary(model) and plot(model) to see the model performance.\n')   
 }
