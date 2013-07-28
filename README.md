@@ -1,14 +1,14 @@
 Multivariate Data Analysis Tools (mdatools)
 ===========================================
 
-mdatools is an R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. It was created for of an introductory PhD course on Chemometrics being tought at Section of Chemical Engineering, Aalborg University. 
+mdatools is an R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for [Chemometrics](http://en.wikipedia.org/wiki/Chemometrics). It was created for an introductory PhD course on Chemometrics given at Section of Chemical Engineering, Aalborg University. 
 
-The general idea is to collect most of the common chemometric methods and give a similar "user interface" to operate with them. So if user knows how to make a model and visualise results for one method, he or she can easily do this for the others.
+The general idea of the package is to collect most of the common chemometric methods and give a similar "user interface" to use them. So if user knows how to make a model and visualise results for one method, he or she can easily do this for the others.
 
 How to install
 --------------
 
-The package is in beta testing and therefore is not yet available from CRAN. The easiest way to use the package is to download a source package archive and install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.3.0.tar.gz` and it is located in a current working directory, just run the following:
+The package is in beta testing and therefore is not yet available from CRAN. The easiest way to use the package is to [download](https://github.com/svkucheryavski/mdatools/releases) a source package archive from GitHub and install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.3.0.tar.gz` and it is located in a current working directory, just run the following:
 
 ```
 install.packages('mdatools_0.3.0.tar.gz')
