@@ -16,8 +16,8 @@ The package is in beta testing and therefore is not yet available from CRAN. The
 install.packages('mdatools_0.3.0.tar.gz')
 ```
 
-If you have `devtools` package installed, the following command will install the latest release from the GitHub:
+If you have `devtools` package installed, the following command will install the latest release from the GitHub (do not forget to load the `devtools` package first):
 
 ```
-install.github('svkucheryavski/mdatools')
+install_github('mdatools', username = 'svkucheryavski')
 ```
