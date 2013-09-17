@@ -675,7 +675,7 @@ print.pca = function(model, ...)
    
    cat('\nPCA model (class pca)\n')
    
-   if (length(model$info) > 0)
+   if (length(model$info) > 1)
    {
       cat('\nInfo:\n')
       cat(model$info)      
@@ -684,7 +684,7 @@ print.pca = function(model, ...)
    cat('\n\nCall:\n')
    print(model$call)
    
-   cat('\nMajor fields and methods:\n')   
+   cat('\nMajor fields:\n')   
    cat('$loadings - matrix with loadings\n')
    cat('$eigenvals - eigenvalues for components\n')
    cat('$ncomp - number of calculated components\n')
@@ -703,7 +703,6 @@ print.pca = function(model, ...)
    {
       cat('$testres - results for test set\n')      
    }   
-   cat('\nTry also: show(model$calres), summary(model) and plot(model)\n\n')
    
 }
 

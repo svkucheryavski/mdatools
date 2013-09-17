@@ -104,7 +104,7 @@ regres.rmse = function(y.ref, y.pred)
    rmse = matrix(0, nrow = nresp, ncol = ncomp)
    
    for (i in 1:nresp)
-      rmse[i, ] = sqrt(colSums((y.ref[, i] - y.pred[, , i])^2)/length(y.ref[, i]))      
+      rmse[i, ] = sqrt(colSums((y.ref[, i, drop = F] - y.pred[, , i])^2)/length(y.ref[, i]))      
    
    rownames(rmse) = colnames(y.ref)
    colnames(rmse) = dimnames(y.pred)[[2]]
@@ -197,7 +197,7 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, main = 'Predictions
    
    if (is.null(ylab))
    {   
-      if (dim(obj$y.pred)[3] > 1)
+      if (~is.null(dim(obj$y.pred)) && dim(obj$y.pred)[3] > 1)
          ylab = sprintf('%s, predicted', dimnames(obj$y.pred)[[3]][ny])
       else
          ylab = 'y, predicted'
@@ -330,7 +330,7 @@ print.regres = function(obj, ...)
    cat('$y.pred - matrix or vector with predicted y values\n')
    if (!is.null(obj$y.ref))
    {   
-      cat('$y - vector with reference y values\n')
+      cat('$y.ref - vector with reference y values\n')
       cat('$rmse - root mean squared error\n')
       cat('$r2 - coefficient of determination\n')
       cat('$slope - slope for predicted vs. measured values\n')
