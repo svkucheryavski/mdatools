@@ -3,5 +3,4 @@
 .RData
 .Rapp.history
 .Rbuildignore
-Gettingstarted.Rmd
-Gettingstarted.md
+mdatools.Rproj
