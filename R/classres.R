@@ -1,17 +1,19 @@
 #  methods for classification results #
-classres = function(c.pred, c.ref = NULL, ncomp.selected = NULL)
+classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL)
 {
    # Class for storing and visualising of classification results 
    #
    # Arguments:
    #   c.pred: vector or matrix with predicted class
    #   c.ref: vector with reference (true) class
+   #   p.pred: vector with predicted probabilities for the classification decision
    #   ncomp.selected: if c.pred calculated for different components, which to use as default
    #
    # Returns:
    # a list (object of "classres" class) with following fields
    #   c.pred: a matrix with predicted class
    #   c.ref: a vector with reference (true) class
+   #   p.pred: a vector with predicted probabilities
    #   rmse: root mean squared error for predicted vs measured values
    #   slope: slope for predicted vs measured values
    #   r2: coefficient of determination for predicted vs measured values
@@ -31,7 +33,13 @@ classres = function(c.pred, c.ref = NULL, ncomp.selected = NULL)
    }   
    
    obj$c.pred = c.pred
-   obj$ncomp.selected = ncomp.selected
+   obj$p.pred = p.pred
+   
+   obj$ncomp = dim(c.pred)[2]
+   if (is.null(ncomp.selected) && obj$ncomp > 1)
+      obj$ncomp.selected = obj$ncomp
+   else
+      obj$ncomp.selected == NULL
    
    obj$call = match.call()   
    class(obj) = "classres"
@@ -40,44 +48,7 @@ classres = function(c.pred, c.ref = NULL, ncomp.selected = NULL)
 }
 
 
-plotPredictions.classres = function(obj, nc = 1, ncomp = NULL, main = 'Predictions', 
-                                  xlab = NULL, ylab = NULL, 
-                                  show.line = T, ...)
-{
-   # Makes plot with predicted class values vs object number 
-   # for selected class 
-   #
-   # Arguments:
-   #   obj: object of "classres" class
-   #   nc: number of class c to make the plot for
-   #   ncomp: which column of c.pred to use
-   #   main: main title of the plot
-   #   xlab: text for x axis label
-   #   ylab: text for y axis label
-   #   show.line: logical, show or not separation line for classes
-   #   col: color for plot and target line
-   
-   if (is.null(ncomp))
-      ncomp = obj$ncomp.selected
-   
-   if (is.null(ylab))
-   {   
-      if (~is.null(dim(obj$c.pred)) && dim(obj$c.pred)[3] > 1)
-         ylab = sprintf('%s, predicted', dimnames(obj$c.pred)[[3]][nc])
-      else
-         ylab = 'class, predicted'
-   }
-   
-   if (is.null(xlab))
-      xlab = 'Objects'
-      
-   data = cbind(1:nrow(obj$c.pred[, , nc]), 
-                obj$c.meas[, ncomp, nc, drop = F],
-                obj$c.pred[, ncomp, nc, drop = F])     
-   mdaplotg(data, type = 'p', main = main, xlab = xlab, ylab = ylab, ...)
-}
-
-classres.getClassificationPerformance = function(c.ref, c.pref)
+classres.getClassificationPerformance = function(c.ref, c.pred)
 {
    # Calculates and returns a list with classification performance parameters
    #
@@ -95,10 +66,10 @@ classres.getClassificationPerformance = function(c.ref, c.pref)
    specificity = matrix(0, nrow = nclasses, ncol = ncomp)
    sensitivity = matrix(0, nrow = nclasses, ncol = ncomp)
    f1 = matrix(0, nrow = nclasses, ncol = ncomp)
-   
+   show(dim(c.pred))
    for (i in 1:nclasses)         
-      fn[i, ] = colSums((c.ref[, i, drop = F] == 1) & (c.pred[, , i] == 0))
-      fp[i, ] = colSums((c.ref[, i, drop = F] == 0) & (c.pred[, , i] == 1))
+      fn[i, ] = colSums((c.ref[, i, drop = F] == 1) & (c.pred[, , i] == -1))
+      fp[i, ] = colSums((c.ref[, i, drop = F] == -1) & (c.pred[, , i] == 1))
       tp[i, ] = colSums((c.ref[, i, drop = F] == 1) & (c.pred[, , i] == 1))
       sensitivity[i, ] = tp[i, ] / (tp[i, ] + fn[i, ])
       specificity[i, ] = tp[i, ] / (tp[i, ] + fp[i, ])
@@ -116,24 +87,79 @@ classres.getClassificationPerformance = function(c.ref, c.pref)
    obj
 }   
 
-plot.classres = function(obj, ny = 1, ...)
+
+plotPredictions.classres = function(obj, nc = 1, ncomp = NULL, main = 'Predictions', 
+                                    xlab = NULL, ylab = NULL, legend = NULL, 
+                                    show.line = T, ...)
+{
+   # Makes plot with predicted class values vs object number 
+   # for selected class 
+   #
+   # Arguments:
+   #   obj: object of "classres" class
+   #   nc: number of class c to make the plot for
+   #   ncomp: which column of c.pred to use
+   #   main: main title of the plot
+   #   xlab: text for x axis label
+   #   ylab: text for y axis label
+   #   show.line: logical, show or not separation line for classes
+   #   col: color for plot and target line
+   
+   if (is.null(ncomp))
+   {   
+      if (is.null(obj$ncomp.selected))
+         ncomp = 1
+      else
+         ncomp = obj$ncomp.selected
+   }
+
+   if (is.null(ylab))
+   {   
+      if (!is.null(dim(obj$c.pred)) && dim(obj$c.pred)[3] > 1)
+         ylab = sprintf('%s, predicted', dimnames(obj$c.pred)[[3]][nc])
+      else
+         ylab = 'class, predicted'
+   }
+   
+   if (is.null(xlab))
+      xlab = 'Objects'
+   
+   if (is.null(obj$p.pred))
+      y = obj$c.pred[ , ncomp, nc, drop = F]
+   else
+      y = obj$p.pred[ , ncomp, nc, drop = F]
+   
+   if (is.null(legend))
+      legend = c(colnames(c.ref)[nc], 'Others')
+   
+   members_idx = obj$c.ref[, nc] == 1;
+   members_num = sum(members_idx == T);
+   
+   data = list(
+      cbind(1:members_num, y[members_idx]), 
+      cbind(members_num + 1:nrow(obj$c.ref), y[!members_idx]))
+   
+   mdaplotg(data, single.x = F, type = 'h', main = main, xlab = xlab, ylab = ylab, legend = legend, ...)
+}
+
+plot.classres = function(obj, nc = 1, ...)
 {
    # Plot method for "regres" objects
    #
    # Arguments:
    #   obj: object of "regres" class
-   #   ny: number of response variable y to make the plot for   
+   #   nc: number of response variable y to make the plot for   
    
-   plotPredictions.classres(obj, ny = ny, ...)
+   plotPredictions.classres(obj, nc = nc, ...)
 }   
 
-as.matrix.classres = function(obj, ncomp = NULL, ny = 1)
+as.matrix.classres = function(obj, ncomp = NULL, nc = 1)
 {
    # as.matrix method for "classres" objects
    #
    # Arguments:
    #   obj: object of "regres" class
-   #   ny: number of response variable y to make the plot for   
+   #   nc: number of response variable y to make the plot for   
    
    if (!is.null(obj$c.ref))
    {  
@@ -141,7 +167,7 @@ as.matrix.classres = function(obj, ncomp = NULL, ny = 1)
          res = cbind(obj$tp[nc, ], obj$fp[nc, ], obj$fn[nc, ], obj$specificity[nc, ], obj$sensitivity[nc, ])
       else
          res = cbind(obj$tp[nc, ncomp], obj$fp[nc, ncomp], obj$fn[nc, ncomp], 
-                     obj$specificity[nc, ncomp], obj$sensitivity[nc, ncomp])
+                     round(obj$specificity[nc, ncomp], 3), round(obj$sensitivity[nc, ncomp], 3))
       
       colnames(res) = c('TP', 'FN', 'FP', 'Specificity', 'Sensitivity')
    }
@@ -180,7 +206,7 @@ print.classres = function(obj, ...)
       cat('$ncomp.selected - number of selected components for each class\n')
 }   
 
-summary.calres = function(obj, ncomp = NULL, nc = NULL, ...)
+summary.classres = function(obj, ncomp = NULL, nc = NULL, ...)
 {
    # Summary method for "calres" object
    #
@@ -191,23 +217,37 @@ summary.calres = function(obj, ncomp = NULL, nc = NULL, ...)
    cat('\nClassiciation results (class classres) summary\n')
    if (!is.null(obj$c.ref))
    {         
-      if (is.null(ncomp))
-         ncomp = obj$ncomp.selected
       
       if (is.null(nc))
          nc = 1:ncol(obj$c.ref)
       
       if (!is.null(ncomp))
-         cat(sprintf('\nNumber of selected components: %d\n\n', ncomp))
+         cat(sprintf('\nNumber of selected components: %d', ncomp))
+      else
+      {   
+         if (is.null(ncomp))
+         {   
+            if (is.null(obj$ncomp.selected))
+            {   
+               ncomp = 1
+            }   
+            else
+            {   
+               ncomp = obj$ncomp.selected
+               cat(sprintf('\nNumber of selected components: %d', ncomp))
+            }   
+         }
+      }
+   
+      cat(sprintf('\nNumber of classes: %d\n', ncol(obj$c.ref)))
       
       for (i in nc)
       {   
          cat(sprintf('\nClass "%s":\n', colnames(obj$c.ref)[i]))
-         res = as.matrix.regres(obj, nc = i, ncomp = ncomp)
+         res = as.matrix.classres(obj, nc = i, ncomp = ncomp)
          rownames(res) = ncomp
          print(res)
-      }
-      
+      }      
    }      
    else
    {
