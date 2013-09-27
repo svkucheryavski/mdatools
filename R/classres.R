@@ -66,7 +66,7 @@ classres.getClassificationPerformance = function(c.ref, c.pred)
    specificity = matrix(0, nrow = nclasses, ncol = ncomp)
    sensitivity = matrix(0, nrow = nclasses, ncol = ncomp)
    f1 = matrix(0, nrow = nclasses, ncol = ncomp)
-   show(dim(c.pred))
+
    for (i in 1:nclasses)         
       fn[i, ] = colSums((c.ref[, i, drop = F] == 1) & (c.pred[, , i] == -1))
       fp[i, ] = colSums((c.ref[, i, drop = F] == -1) & (c.pred[, , i] == 1))
@@ -87,6 +87,10 @@ classres.getClassificationPerformance = function(c.ref, c.pred)
    obj
 }   
 
+showPredictions.classres = function(obj, ncomp = NULL, nc = NULL)
+{
+   
+}  
 
 plotPredictions.classres = function(obj, nc = 1, ncomp = NULL, main = 'Predictions', 
                                     xlab = NULL, ylab = NULL, legend = NULL, 
@@ -128,18 +132,29 @@ plotPredictions.classres = function(obj, nc = 1, ncomp = NULL, main = 'Predictio
       y = obj$c.pred[ , ncomp, nc, drop = F]
    else
       y = obj$p.pred[ , ncomp, nc, drop = F]
+
+   if (!is.null(obj$c.ref))
+   {   
+      if (is.null(legend))
+         legend = c(colnames(c.ref)[nc], 'Others')
    
-   if (is.null(legend))
-      legend = c(colnames(c.ref)[nc], 'Others')
-   
-   members_idx = obj$c.ref[, nc] == 1;
-   members_num = sum(members_idx == T);
-   
-   data = list(
-      cbind(1:members_num, y[members_idx]), 
-      cbind(members_num + 1:nrow(obj$c.ref), y[!members_idx]))
-   
-   mdaplotg(data, single.x = F, type = 'h', main = main, xlab = xlab, ylab = ylab, legend = legend, ...)
+      members_idx = obj$c.ref[, nc] == 1;
+      members_num = sum(members_idx == T);
+      
+      members = cbind(1:members_num, y[members_idx])
+      rownames(members) = rownames(y)[members_idx]
+      
+      nonmembers = cbind((members_num + 1):length(y), y[!members_idx])
+      rownames(nonmembers) = rownames(y)[!members_idx]
+      data = list(members, nonmembers)
+      mdaplotg(data, type = 'h', main = main, xlab = xlab, ylab = ylab, legend = legend, ...)
+   }
+   else
+   {
+      data = cbind(1:length(y), y)
+      rownames(data) = rownames(y)
+      mdaplot(data, type = 'h', main = main, xlab = xlab, ylab = ylab, ...)      
+   }   
 }
 
 plot.classres = function(obj, nc = 1, ...)
@@ -169,7 +184,7 @@ as.matrix.classres = function(obj, ncomp = NULL, nc = 1)
          res = cbind(obj$tp[nc, ncomp], obj$fp[nc, ncomp], obj$fn[nc, ncomp], 
                      round(obj$specificity[nc, ncomp], 3), round(obj$sensitivity[nc, ncomp], 3))
       
-      colnames(res) = c('TP', 'FN', 'FP', 'Specificity', 'Sensitivity')
+      colnames(res) = c('TP', 'FP', 'FN', 'Specificity', 'Sensitivity')
    }
    else
    {
