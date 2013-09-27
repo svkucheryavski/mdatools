@@ -3,7 +3,7 @@ data(Simdata)
 
 spectra = spectra.c
 conc = conc.c
-wavelength = 200:350
+wavelength = 201:350
 
 spectra1 = spectra[conc[, 1] < 0.3, ]
 spectra2 = spectra[conc[, 1] >= 0.3 & conc[, 1] < 0.65, ]
@@ -140,7 +140,7 @@ par(mfrow = c(2, 2))
 mdaplotg(datagl1, type = 'l', legend = legendgl, legend.position = 'top')
 mdaplotg(datagl2, type = 'l', legend = legendgl, single.x = F)
 mdaplotg(datagl3, type = 'l', legend = legendgl)
-mdaplotg(datagl1, type = 'l', legend = legendgl, show.legend = F)
+mdaplotg(datagl1, type = 'l', legend = NULL)
 readline('Press Enter to continue...')
 
 cat('\n7. Test different markers and line types for groups\n')
