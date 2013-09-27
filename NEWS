@@ -1,4 +1,13 @@
+v. 0.3.2
+========
+* Enhancements in group bar plot
+* Fixed bugs with wrong labels of bar plot with negative values
+
 v. 0.3.1
+========
+* Corrected errors and typos in README.md and small bg fixes
+
+v. 0.3.0
 ========
 
 * PLS and all related methods were rewritten from the scratch to make them faster, more efficient

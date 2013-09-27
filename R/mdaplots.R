@@ -32,7 +32,7 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
 }
 
 mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines = F, 
-                              legend = NULL, show.legend = F, legend.position = 'topright')
+                              legend = NULL, show.legend = F, legend.position = 'topright', show.labels = F)
 {
    # Calculates axes limits depending on data values that have to be plotted, 
    # extra plot elements that have to be shown and margins. 
@@ -49,6 +49,7 @@ mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines 
    #   legend: vector with legend items
    #   show.legend: logical, will legend be shown on the plot or not
    #   legend.position: position of the legend
+   #   show.labels: logica, show or not labels for the data items
    #
    # Returns:
    #   a list with limit values
@@ -177,8 +178,15 @@ mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines 
          xlim[2] = xlim[2] + dx * 0.2
          ylim[1] = ylim[1] - dy * 0.2
       }   
-   }   
+   }  
    
+   # add extra margins if labels must be shown
+   if (show.labels == T)
+   {
+      ylim[1] = ylim[1] - dy 
+      ylim[2] = ylim[2] + dy
+   }   
+      
    # return the limits
    lim = list(
       xlim = xlim,
@@ -368,7 +376,7 @@ mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, bty = 'o',
           ncol = ncol)   
 }
 
-mdaplot.showLabels = function(data, pos = 3, cex = 0.65, col = 'darkgray')
+mdaplot.showLabels = function(data, pos = 3, cex = 0.65, col = 'darkgray', type = NULL)
 {
    # Shows labels for data points on a plot. 
    #
@@ -377,6 +385,7 @@ mdaplot.showLabels = function(data, pos = 3, cex = 0.65, col = 'darkgray')
    #   pos: position of the labels relative to the points
    #   cex: size of the labels text
    #   col: color of the labels text
+   #   type: type of the plot
    
    # rownames of matrix data are used as labels
    # if no rownames provided, row names are used instead
@@ -384,7 +393,18 @@ mdaplot.showLabels = function(data, pos = 3, cex = 0.65, col = 'darkgray')
       rownames(data) = 1:nrow(data)
    
    # show labels
-   text(data[, 1], data[, 2], rownames(data), cex = cex, pos = pos, col = col)   
+   if (!is.null(type) && type == 'h')
+   {   
+      # show labels properly for bars with positive and negative values
+      neg = data[, 2] < 0
+      if (sum(neg) > 0)
+         text(data[neg, 1], data[neg, 2], rownames(data)[neg], cex = cex, pos = 1, col = col)   
+      if (sum(!neg) > 0)
+         text(data[!neg, 1], data[!neg, 2], rownames(data)[!neg], cex = cex, pos = 3, col = col)   
+   }
+   else 
+      text(data[, 1], data[, 2], rownames(data), cex = cex, pos = pos, col = col)   
+   
 }  
 
 mdaplot.showLines = function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2))
@@ -497,14 +517,14 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
       if (!is.null(cgroup))
       {   
          # show color groups according to cdata values
-         lim = mdaplot.getAxesLim(data, show.colorbar = show.colorbar, 
+         lim = mdaplot.getAxesLim(data, show.colorbar = show.colorbar, show.labels = show.labels,
                                   show.lines = show.lines, single.x = single.x)
          col = mdaplot.getColors(cgroup = cgroup, colmap = colmap)
       }
       else   
       {
          # show all points with the same color
-         lim = mdaplot.getAxesLim(data, show.lines = show.lines,
+         lim = mdaplot.getAxesLim(data, show.lines = show.lines, show.labels = show.labels,
                                   single.x = single.x)
          if (is.null(col))
             col = mdaplot.getColors(1, colmap = colmap)
@@ -573,7 +593,7 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
    
    # show labels if needed
    if (show.labels == T || !is.null(labels))
-      mdaplot.showLabels(data)   
+      mdaplot.showLabels(data, type = type)   
    
    # show lines if needed
    if (is.numeric(show.lines) && length(show.lines) == 2 )
@@ -623,11 +643,13 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
          ngroups = round(ncol(data)/2)
    }
    else
+   {   
       ngroups = length(data)
+   }
    
    # calculate limits and get colors
    lim = mdaplot.getAxesLim(data, show.lines = show.lines, single.x = single.x, 
-                            show.legend = show.legend, legend = legend, 
+                            show.legend = show.legend, legend = legend, show.labels = show.labels,
                             legend.position = legend.position)
 
    if (!is.null(ylim))
@@ -638,7 +660,6 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    
    col = mdaplot.getColors(ngroups, colmap = colmap)
    
-   
    # if plot type is not specified for each group multply default value
    if (length(type) == 1)
       type = rep(type, ngroups)
@@ -646,11 +667,7 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
       stop('Parameter "type" should be specified for each group or be common for all!')
    else if (!(sum(type == 'h') == 0 | sum(type == 'h') == length(pch)))
       stop('Barplot (type = "h") for groups can not be combined with other plots!');
-   
-   # check if bar plot data is organized properly
-#   if (type[1] == 'h' && (is.list(data) || single.x == F))
-#      stop('For bar plot data should be organized in a matrix with single x column')
-   
+      
    # Correct x axis limits if it is a bar plot
    if (type[1] == 'h')
    {
@@ -703,8 +720,20 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    {   
       for (i in 1:ngroups)
       {
+         if (!is.null(labels))
+         {
+            if (is.list(labels))
+               slabels = labels[[i]]
+            else
+               slabels = labels[, i]
+         }
+         else
+         {
+            slabels = NULL
+         }   
+         
          mdaplot(data[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
-                 labels = labels[, i], show.grid = F, show.axes = F, show.labels = show.labels)
+                 labels = slabels, show.grid = F, show.axes = F, show.labels = show.labels)
       }
    }
    else
