@@ -607,7 +607,7 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
                     legend = NULL, xlab = NA, ylab = NA, labels = NULL, ylim = NULL, xlim = NULL,
                     colmap = 'default', legend.position = 'topright', single.x = T, 
-                    show.labels = F, show.lines = F, show.grid = T, ...)
+                    show.legend = T, show.labels = F, show.lines = F, show.grid = T, ...)
 {   
    # Makes a group of plots for several data sets
    #
@@ -625,15 +625,14 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    #   colmap: colormap ('default', 'gray' or user defined) used for color groupng
    #   legend.position: position of box with legend (top, topright, topleft, bottom, etc)
    #   single.x: logical, is there a single vector with x values for all line series or not
+   #   show.legend: logical, show or not legend for the data groups
    #   show.labels: logical, show or not labels for the data objects
    #   show.lines: logical or numeric, in latter case a vector with coordinates for lines
    #   show.grid: logical, show or not a grid on the plot
    
    #   If data for bar plot is organized as a list, the X values should be contioneous,
    #   e.g. 1:20 for first item, 21:35, for second, 36:42 for third, etc.
-   
-   show.legend = !is.null(legend)
-   
+      
    # get number of groups
    if (!is.list(data))
    {   
@@ -776,7 +775,7 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
       mdaplot.showLines(show.lines)
    
    # show legend if needed
-   if (!is.null(legend) && length(legend) > 0)
+   if (!is.null(legend) && length(legend) > 0 && show.legend == T)
    {
       lty[type == 'p' | type == 'h'] = 0
       pch[type == 'l'] = NA_integer_

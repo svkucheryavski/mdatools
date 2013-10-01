@@ -12,18 +12,17 @@ classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL)
    # Returns:
    # a list (object of "classres" class) with following fields
    #   c.pred: a matrix with predicted class
-   #   c.ref: a vector with reference (true) class
-   #   p.pred: a vector with predicted probabilities
-   #   rmse: root mean squared error for predicted vs measured values
-   #   slope: slope for predicted vs measured values
-   #   r2: coefficient of determination for predicted vs measured values
-   #   bias: bias for predicted vs measured values
-   #   rpd: RPD values
-   
+   #   c.ref: a matrix with reference (true) class
+   #   p.pred: a matrix with predicted probabilities
+   #   tp: a matrix with true positives for each class and component
+   #   fp: a matrix with false positives for each class and component
+   #   fn: a matrix with false negatives for each class and component
+   #   specificity: a matrix with specificity values
+   #   sensitivity: a matrix with sensitivity values
    
    if (!is.null(c.ref))
    {
-      c.ref = as.matrix(c.ref)      
+      c.ref = as.matrix(c.ref)
       obj = classres.getClassificationPerformance(c.ref, c.pred)
       obj$c.ref = c.ref
    }
@@ -31,7 +30,7 @@ classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL)
    {
       obj = list()
    }   
-   
+
    obj$c.pred = c.pred
    obj$p.pred = p.pred
    
@@ -66,15 +65,22 @@ classres.getClassificationPerformance = function(c.ref, c.pred)
    specificity = matrix(0, nrow = nclasses, ncol = ncomp)
    sensitivity = matrix(0, nrow = nclasses, ncol = ncomp)
    f1 = matrix(0, nrow = nclasses, ncol = ncomp)
-
+   
    for (i in 1:nclasses)         
-      fn[i, ] = colSums((c.ref[, i, drop = F] == 1) & (c.pred[, , i] == -1))
-      fp[i, ] = colSums((c.ref[, i, drop = F] == -1) & (c.pred[, , i] == 1))
-      tp[i, ] = colSums((c.ref[, i, drop = F] == 1) & (c.pred[, , i] == 1))
+   {   
+      fn[i, ] = colSums((c.ref[, i] == 1) & (c.pred[, , i, drop = F] == -1))
+      fp[i, ] = colSums((c.ref[, i] == -1) & (c.pred[, , i, drop = F] == 1))
+      tp[i, ] = colSums((c.ref[, i] == 1) & (c.pred[, , i, drop = F] == 1))
+      
       sensitivity[i, ] = tp[i, ] / (tp[i, ] + fn[i, ])
       specificity[i, ] = tp[i, ] / (tp[i, ] + fp[i, ])
       f1[i, ] = 2 * sensitivity[i, ] * specificity[i, ] / (sensitivity[i, ] + specificity[i, ])
-   end
+   }
+
+   rownames(fn) = rownames(fp) = rownames(tp) = rownames(f1) = 
+      rownames(sensitivity) = rownames(specificity) = colnames(c.ref)
+   colnames(fn) = colnames(fp) = colnames(tp) = colnames(f1) = 
+      colnames(sensitivity) = colnames(specificity) = dimnames(c.pred)[[2]]
    
    obj = list()
    obj$fn = fn
@@ -87,12 +93,75 @@ classres.getClassificationPerformance = function(c.ref, c.pred)
    obj
 }   
 
-showPredictions.classres = function(obj, ncomp = NULL, nc = NULL)
+getSelectedComponents.classres = function(obj, ncomp = NULL)
 {
+   if (is.null(ncomp))
+   {   
+      if (is.null(obj$ncomp.selected))
+         ncomp = 1
+      else
+         ncomp = obj$ncomp.selected
+   }   
    
+   ncomp
 }  
 
-plotPredictions.classres = function(obj, nc = 1, ncomp = NULL, main = 'Predictions', 
+showPredictions.classres = function(obj, ncomp = NULL)
+{
+   #  Shows table with predictions for selected or user specified number of components
+   #
+   # Arguments:
+   #   obj: object of "classres" class
+   #   ncomp: for which components to show the results for
+
+   ncomp = getSelectedComponents(obj, ncomp)
+   
+   pred = obj$c.pred[ , ncomp, , drop = F]
+   dim(pred) = c(dim(obj$c.pred)[1], dim(obj$c.pred)[3]);
+   dimnames(pred) = list(dimnames(obj$c.pred)[[1]], dimnames(obj$c.pred)[[3]])
+   
+   print(pred)
+}  
+
+plotPerformance.classres = function(obj, nc = 1, main = NULL, xlab = 'Complexity', 
+                                    legend = NULL, ylim = NULL, ...)
+{
+   # Makes plot with snesitivity and specificity vs number of components
+   #
+   # Arguments:
+   #   obj: object of "classres" class
+   #   nc: number of class to make the plot for
+   #   main: main title of the plot
+   #   xlab: text for x axis label
+   #   ylab: text for y axis label
+   #   legend: legend for the plot items
+   #   ylim: limits for y axis
+   
+   if (is.null(obj$sensitivity) || is.null(obj$specificity))
+      stop('The sensitivity and specificity values are not available!')
+   
+   if (length(obj$sensitivity) < 2)
+      warning('There are values only for one component!')
+   else
+   {   
+      if (is.null(main))
+         main = sprintf('Prediction performance for class "%s"', rownames(obj$specificity)[nc])
+      
+      if (is.null(xlab))
+         xlab = 'nLVs'
+      
+      if (is.null(legend))
+         legend = c('sensitivity', 'specificity')
+      
+      if (is.null(ylim))
+         ylim = c(0, 1.1)
+      
+      data = cbind(1:length(obj$sensitivity[nc, ]), obj$sensitivity[nc, ], obj$specificity[nc, ])
+      mdaplotg(data, type = 'h', legend = legend, main = main, xlab = xlab, ylim = ylim, ...)
+   }
+}
+
+plotPredictions.classres = function(obj, nc = 1, ncomp = NULL, main = NULL, 
                                     xlab = NULL, ylab = NULL, legend = NULL, 
                                     show.line = T, ...)
 {
@@ -106,8 +175,8 @@ plotPredictions.classres = function(obj, nc = 1, ncomp = NULL, main = 'Predictio
    #   main: main title of the plot
    #   xlab: text for x axis label
    #   ylab: text for y axis label
+   #   legend: legend for the plot groups
    #   show.line: logical, show or not separation line for classes
-   #   col: color for plot and target line
    
    if (is.null(ncomp))
    {   
@@ -118,21 +187,26 @@ plotPredictions.classres = function(obj, nc = 1, ncomp = NULL, main = 'Predictio
    }
 
    if (is.null(ylab))
-   {   
-      if (!is.null(dim(obj$c.pred)) && dim(obj$c.pred)[3] > 1)
-         ylab = sprintf('%s, predicted', dimnames(obj$c.pred)[[3]][nc])
-      else
-         ylab = 'class, predicted'
-   }
+      ylab = 'Predicted values'
    
    if (is.null(xlab))
       xlab = 'Objects'
+   
+   if (is.null(main))
+   {   
+      if (!is.null(dim(obj$c.pred)) && dim(obj$c.pred)[3] > 1)
+         main = sprintf('Predictions for class "%s"', dimnames(obj$c.pred)[[3]][nc])
+      else
+         main = 'Predictions'
+   }
    
    if (is.null(obj$p.pred))
       y = obj$c.pred[ , ncomp, nc, drop = F]
    else
       y = obj$p.pred[ , ncomp, nc, drop = F]
 
+   obj_idx = 1:length(y)
+   
    if (!is.null(obj$c.ref))
    {   
       if (is.null(legend))
@@ -141,13 +215,16 @@ plotPredictions.classres = function(obj, nc = 1, ncomp = NULL, main = 'Predictio
       members_idx = obj$c.ref[, nc] == 1;
       members_num = sum(members_idx == T);
       
-      members = cbind(1:members_num, y[members_idx])
+      members = cbind(obj_idx[members_idx], y[members_idx])
       rownames(members) = rownames(y)[members_idx]
       
-      nonmembers = cbind((members_num + 1):length(y), y[!members_idx])
+      nonmembers = cbind(obj_idx[!members_idx], y[!members_idx])
       rownames(nonmembers) = rownames(y)[!members_idx]
+
       data = list(members, nonmembers)
-      mdaplotg(data, type = 'h', main = main, xlab = xlab, ylab = ylab, legend = legend, ...)
+      c1 = mdaplot.getColors(n = 1)
+      c2 = mdaplot.getColors(n = 2, colmap = 'gray')[1]
+      mdaplotg(data, col = c(c1, c2), type = 'h', main = main, xlab = xlab, ylab = ylab, legend = legend, ...)
    }
    else
    {
@@ -184,6 +261,7 @@ as.matrix.classres = function(obj, ncomp = NULL, nc = 1)
          res = cbind(obj$tp[nc, ncomp], obj$fp[nc, ncomp], obj$fn[nc, ncomp], 
                      round(obj$specificity[nc, ncomp], 3), round(obj$sensitivity[nc, ncomp], 3))
       
+      res[, 4:5] = round(res[, 4:5], 3)
       colnames(res) = c('TP', 'FP', 'FN', 'Specificity', 'Sensitivity')
    }
    else
@@ -206,10 +284,10 @@ print.classres = function(obj, ...)
    print(obj$call)
    
    cat('\nMajor fields:\n')   
-   cat('$c.pred - matrix or vector with predicted class\n')
+   cat('$c.pred - matrix or vector with predicted class values\n')
    if (!is.null(obj$c.ref))
    {   
-      cat('$c.ref - vector with reference (true) class\n')
+      cat('$c.ref - matrix with reference (true) values\n')
       cat('$tp - number of true positives\n')
       cat('$fp - number of false positives\n')
       cat('$fn - number of false negatives\n')
@@ -235,23 +313,22 @@ summary.classres = function(obj, ncomp = NULL, nc = NULL, ...)
       
       if (is.null(nc))
          nc = 1:ncol(obj$c.ref)
-      
+
       if (!is.null(ncomp))
+      {   
          cat(sprintf('\nNumber of selected components: %d', ncomp))
+      }   
       else
       {   
-         if (is.null(ncomp))
+         if (is.null(obj$ncomp.selected))
          {   
-            if (is.null(obj$ncomp.selected))
-            {   
-               ncomp = 1
-            }   
-            else
-            {   
-               ncomp = obj$ncomp.selected
-               cat(sprintf('\nNumber of selected components: %d', ncomp))
-            }   
-         }
+            ncomp = 1
+         }   
+         else
+         {   
+            ncomp = obj$ncomp.selected
+            cat(sprintf('\nNumber of selected components: %d', ncomp))
+         }   
       }
    
       cat(sprintf('\nNumber of classes: %d\n', ncol(obj$c.ref)))
@@ -259,8 +336,7 @@ summary.classres = function(obj, ncomp = NULL, nc = NULL, ...)
       for (i in nc)
       {   
          cat(sprintf('\nClass "%s":\n', colnames(obj$c.ref)[i]))
-         res = as.matrix.classres(obj, nc = i, ncomp = ncomp)
-         rownames(res) = ncomp
+         res = as.matrix.classres(obj, nc = i)    
          print(res)
       }      
    }      

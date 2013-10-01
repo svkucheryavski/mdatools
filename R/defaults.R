@@ -1,5 +1,30 @@
 # default function for interclass methods #
 
+plotSpecificity = function(object, ...)
+{
+   UseMethod("plotSpecificity")   
+}  
+
+plotSensitivity = function(object, ...)
+{
+   UseMethod("plotSensitivity")   
+}
+
+plotPerformance = function(object, ...)
+{
+   UseMethod("plotPerformance")   
+}  
+
+getSelectedComponents = function(object, ...)
+{
+   UseMethod("getSelectedComponents")   
+}  
+
+showPredictions = function(object, ...)
+{
+   UseMethod("showPredictions")   
+}  
+
 selectCompNum = function(object, ...)
 {   
    UseMethod("selectCompNum")
