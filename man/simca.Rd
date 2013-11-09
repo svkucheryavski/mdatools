@@ -1,0 +1,109 @@
+\name{simca}
+\alias{simca}
+
+\title{
+SIMCA one-class classification
+}
+\description{
+\code{simca} is used to make and use SIMCA (Soft Independent Modelling of Class Analogies) model for one-class classification.
+}
+\usage{
+simca(data, classname, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL, 
+   test.c = NULL, alpha = 0.05, method = "svd", info = "")
+}
+
+\arguments{
+  \item{data}{a numerical matrix with data values.}
+  \item{classname}{short text (up to 20 symbols) with class name.}
+  \item{ncomp}{maximum number of components to calculate.}
+  \item{center}{logical, do mean centering of data or not.}
+  \item{scale}{logical, do sdandardization of data or not.}
+  \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
+  \item{test.data}{a numerical matrix with test data.}
+  \item{test.c}{a vector with logical values for classes of test data objects.}
+  \item{alpha}{significance level for calculating limit for T2 and Q2 residuals.}
+  \item{method}{method to compute principal components.}
+  \item{info}{text with information about the model}
+}
+
+\details{
+SIMCA is in fact PCA model with additional functionality, so \code{simca} class inherits most of the functionality of \code{\link{pca}} class. 
+}
+
+\value{
+Returns an object of \code{simca} class with following fields:
+\item{classname }{a short text with class name.} 
+\item{modpower }{a matrix with modelling power of variables.} 
+\item{calres }{an object of class \code{\link{classres}} with classification results for a calibration data.} 
+\item{testres }{an object of class \code{\link{classres}} with classification results for a test data, if it was provided.} 
+\item{cvres }{an object of class \code{\link{classres}} with classification results for cross-validation, if this option was chosen.} 
+
+Fields, inherited from \code{\link{pca}} class:
+\item{ncomp }{number of components included to the model.} 
+\item{ncomp.selected }{selected (optimal) number of components.} 
+\item{loadings }{matrix with loading values (nvar x ncomp).} 
+\item{eigenvals }{vector with eigenvalues for all existent components.} 
+\item{expvar }{vector with explained variance for each component (in percent).} 
+\item{cumexpvar }{vector with cumulative explained variance for each component (in percent).} 
+\item{T2lim }{statistical limit for T2 distance.} 
+\item{Q2lim }{statistical limit for Q2 distance.} 
+\item{info }{information about the model, provided by user when build the model.} 
+}
+
+\references{
+1. S. Wold, M. Sjostrom. "SIMCA: A method for analyzing chemical data in terms of similarity and analogy" in B.R. Kowalski (ed.), Chemometrics Theory and Application, American Chemical Society Symposium Series 52, Wash., D.C., American Chemical Society, p. 243-282.
+}
+
+\author{
+Sergey Kucheryavskiy (svkucheryavski@gmail.com)
+}
+
+\seealso{
+Methods for \code{simca} objects:
+  \tabular{ll}{
+      \code{print.simca} \tab shows information about the object.\cr
+      \code{summary.simca} \tab shows summary statistics for the model.\cr
+      \code{plot.simca} \tab makes an overview of SIMCA model with four plots.\cr
+      \code{\link{predict.simca}} \tab applies SIMCA model to a new data.\cr
+      \code{\link{plotPredictions.simca}} \tab shows plot with predicted values.\cr
+      \code{\link{plotModellingPower.simca}} \tab shows plot with modelling power of variables.\cr
+      \code{\link{plotSensitivity.simca}} \tab shows sensitivity plot.\cr
+   }
+
+Methods, inherited from \code{\link{pca}} class:
+  \tabular{ll}{
+      \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
+      \code{\link{plotScores.pca}} \tab shows scores plot.\cr
+      \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
+      \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
+      \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
+      \code{\link{plotResiduals.pca}} \tab shows Q2 vs. T2 residuals plot.\cr
+   }
+}
+
+\examples{
+## make a SIMCA model for Iris setosa class with full cross-validation
+library(mdatools)
+
+data = iris[, 1:4]
+class = iris[, 5]
+
+# take first 20 objects of setosa as calibration set 
+se = data[1:20, ]
+
+# make SIMCA model and apply to test set
+model = simca(se, 'Se', cv = 1)
+model = selectCompNum(model, 1)
+
+# show infromation, summary and plot overview
+print(model)
+summary(model)
+plot(model)
+
+# show plots for 2 components
+layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
+plotPredictions(model, ncomp = 2, show.labels = T)
+plotModellingPower(model, ncomp = 2, show.labels = T)
+plotResiduals(model, ncomp = 2)
+layout(1, 1, 1)
+}

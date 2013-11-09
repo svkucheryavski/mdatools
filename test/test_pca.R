@@ -5,7 +5,7 @@ do_people = T
 if (do_people == T) {
    data(People)
    data = people
-   data[4, 4] = NA
+#   data[4, 4] = NA
    pcamodel = pca(data, ncomp = 8, scale = T, cv = 1, info = 'My first model')
    pcamodel = selectCompNum(pcamodel, 5)
    gpch = c(16, 17)

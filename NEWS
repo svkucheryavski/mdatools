@@ -1,6 +1,10 @@
 v. 0.4.0
 ========
-* New classres class for representation and visualisation of classification results
+* New `classres` class for representation and visualisation of classification results
+* in PCA model, limits for T2 and Q2 now are calculated for all available components
+* in PCA results, limits for T2 and Q2 calculates for a model are kept and shown on residuals plot 
+* New `simca` and `simcares` classes for one-class SIMCA model and results
+
 
 v. 0.3.2
 ========

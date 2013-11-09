@@ -63,7 +63,7 @@ Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 \seealso{
 Methods for \code{pca} objects:
   \tabular{ll}{
-      \code{plot.pca} \tab makes an overview of PCA model with four main plot.\cr
+      \code{plot.pca} \tab makes an overview of PCA model with four plots.\cr
       \code{summary.pca} \tab shows some statistics for the model.\cr
       \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
       \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr

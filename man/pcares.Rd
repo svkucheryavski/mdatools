@@ -29,7 +29,7 @@ In fact \code{pcares} is a wrapper for \code{\link{ldecomp}} - general class for
 results for linear decomposition X = TP' + E. So, most of the methods, arguments and 
 returned values are inherited from \code{ldecomp}.
 
-There is no need to create a pcacvres object manually, it is created automatically when build a pca model (see \code{\link{pca}}) or apply the model to a new data (see \code{\link{predict.pca}}). The object can be used to show summary and plots for the results.
+There is no need to create a \code{pcares} object manually, it is created automatically when build a PCA model (see \code{\link{pca}}) or apply the model to a new data (see \code{\link{predict.pca}}). The object can be used to show summary and plots for the results.
 }
 \value{
 Returns an object (list) of class \code{pcares} and \code{ldecomp} with following fields:
@@ -51,8 +51,8 @@ Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 \seealso{
 Methods for \code{pcares} objects:
   \tabular{ll}{
-      \code{print.pcacvres} \tab shows information about the object.\cr
-      \code{summary.pcacvres} \tab shows statistics for the PCA results.\cr
+      \code{print.pcares} \tab shows information about the object.\cr
+      \code{summary.pcares} \tab shows statistics for the PCA results.\cr
    }
 
 Methods, inherited from \code{\link{ldecomp}} class:   

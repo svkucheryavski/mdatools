@@ -55,6 +55,8 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
       
       if (is.null(tnorm))
          obj$tnorm = res$tnorm
+            
+      obj$modpower = res$modpower
    }
    else
    {
@@ -70,7 +72,7 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
    obj$call = match.call()
    
    class(obj) = "ldecomp"
-
+   
    obj
 }
 
@@ -89,38 +91,47 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
    # Returns:
    #   res$Q2: matrix with Q2 residuals (nobj x ncomp).
    #   res$T2: matrix with T2 distances (nobj x ncomp)   
+   #   res$mpower: modelling power (nvar x ncomp)
    
    ncomp = ncol(scores)
    nobj = nrow(scores)
+   nvar = nrow(loadings)
+   
    T2 = matrix(0, nrow = nobj, ncol = ncomp)
    Q2 = matrix(0, nrow = nobj, ncol = ncomp)
-   
+   modpower = matrix(0, nrow = nvar, ncol = ncomp)
+      
    # calculate normalized scores
    if (is.null(tnorm))
       tnorm = sqrt(colSums(scores ^ 2)/(nrow(scores) - 1));
    
    scoresn = sweep(scores, 2L, tnorm, '/', check.margin = F);  
+
+   # calculate variance for data columns
+   data = scores %*% t(loadings) + residuals;
+   datasd = apply(data, 2, sd)
    
    # calculate distances for each set of components
    for (i in 1:ncomp)
    {
       
-      if (i < ncomp)
-         res = residuals + scores[, (i + 1):ncomp, drop = F] %*% t(loadings[, (i + 1):ncomp, drop = F])
-      else
-         res = residuals
+      exp = scores[, 1:i, drop = F] %*% t(loadings[, 1:i, drop = F]);
+      res = data - exp;
       
       Q2[, i] = rowSums(res^2)
       T2[, i] = rowSums(scoresn[, 1:i, drop = F]^2)
+      modpower[, i] = 1 - apply(res, 2, sd)/datasd
    }   
    
    # set dimnames and return results
-   colnames(Q2) = colnames(T2) = colnames(scores)
+   colnames(Q2) = colnames(T2) = colnames(modpower) = colnames(scores)
    rownames(Q2) = rownames(T2) = rownames(scores)
-   
+   rownames(modpower) = rownames(loadings)
+      
    res = list(
       Q2 = Q2,
       T2 = T2,
+      modpower = modpower,
       tnorm = tnorm
    )
 }
@@ -163,37 +174,45 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
    #   res$T2lim: limit for T2 distances
    
    # calculate T2 limit using Hotelling statistics
-   if (nobj == ncomp)
-      T2lim = 0
-   else
-      T2lim = (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(1 - alpha, ncomp, nobj - ncomp);  
+   T2lim = matrix(0, nrow = 1, ncol = ncomp)
+   for (i in 1:ncomp)
+   {
+      if (nobj == ncomp)
+         T2lim[1, i] = 0
+      else
+         T2lim[1, i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - alpha, i, nobj - i);  
+   }
    
    # calculate Q2 limit using F statistics
-   conflim = 100 - alpha * 100;
-   
+   Q2lim = matrix(0, nrow = 1, ncol = ncomp)
+   conflim = 100 - alpha * 100;   
    nvar = length(eigenvals)
    
-   if (ncomp < nvar)
-   {         
-      eigenvals = eigenvals[(ncomp + 1):nvar]         
-      
-      cl = 2 * conflim - 100
-      t1 = sum(eigenvals)
-      t2 = sum(eigenvals^2)
-      t3 = sum(eigenvals^3)
-      h0 = 1 - 2 * t1 * t3/3/(t2^2);
-      
-      if (h0 < 0.001)
-         h0 = 0.001
-      
-      ca = sqrt(2) * erfinv(cl/100)
-      h1 = ca * sqrt(2 * t2 * h0^2)/t1
-      h2 = t2 * h0 * (h0 - 1)/(t1^2)
-      Q2lim = t1 * (1 + h1 + h2)^(1/h0)
+   for (i in 1:ncomp)
+   {   
+      if (i < nvar)
+      {         
+         evals = eigenvals[(i + 1):nvar]         
+         
+         cl = 2 * conflim - 100
+         t1 = sum(evals)
+         t2 = sum(evals^2)
+         t3 = sum(evals^3)
+         h0 = 1 - 2 * t1 * t3/3/(t2^2);
+         
+         if (h0 < 0.001)
+            h0 = 0.001
+         
+         ca = sqrt(2) * erfinv(cl/100)
+         h1 = ca * sqrt(2 * t2 * h0^2)/t1
+         h2 = t2 * h0 * (h0 - 1)/(t1^2)
+         Q2lim[1, i] = t1 * (1 + h1 + h2)^(1/h0)
+      }
+      else
+         Q2lim[1, i] = 0
    }
-   else
-      Q2lim = 0
    
+   colnames(T2lim) = colnames(Q2lim) = paste('Comp', 1:ncomp)
    res = list(
       T2lim = T2lim,
       Q2lim = Q2lim
@@ -299,7 +318,7 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
 }  
 
 plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', ylab = 'Q2', 
-                                 show.labels = F, ...)
+                                 show.labels = F, show.limits = T, ...)
 {
    # Shows T2 vs Q2 residuals plot.
    #
@@ -311,15 +330,26 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
    #   ylab: text for y axis label
    #   show.labels: show or not labels for plot points.
    
+   if (is.null(main))
+   {
+      if (is.null(ncomp))
+         main = 'Residuals'
+      else
+         main = sprintf('Residuals (ncomp = %d)', ncomp)
+   }
+   
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
-   
-   if (is.null(main))
-      main = sprintf('Residuals (ncomp = %d)', ncomp)
-   
+      
+   if (show.limits == T)
+      show.lines = c(obj$T2lim[1, ncomp], obj$Q2lim[1, ncomp])
+   else
+      show.lines = F
+
    data = cbind(obj$T2[, ncomp], obj$Q2[, ncomp])
    colnames(data) = c(xlab, ylab)
-   mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, ...)
+   mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, 
+           show.lines = show.lines, ...)
 }  
 
 print.ldecomp = function(obj, str = NULL, ...)
@@ -327,16 +357,24 @@ print.ldecomp = function(obj, str = NULL, ...)
    if (is.null(str))
       str ='Results of data decomposition (class ldecomp)'
    
-   cat('\n')
-   cat(str, '\n')
+   if (nchar(str) > 0)   
+      cat(sprintf('\n%s\n', str))
+   
    cat('\nMajor fields:\n')   
    cat('$scores - matrix with score values\n')
    cat('$T2 - matrix with T2 distances\n')
    cat('$Q2 - matrix with Q2 residuals\n')
    cat('$ncomp.selected - selected number of components\n')
    cat('$expvar - explained variance for each component\n')
-   cat('$cumexpvar - cumulative explained variance\n\n')
+   cat('$cumexpvar - cumulative explained variance\n')
 }
+
+as.matrix.ldecomp = function(obj)
+{
+   data = cbind(obj$expvar, obj$cumexpvar)   
+   colnames(data) = c('Expvar', 'Cumexpvar')   
+   data
+}  
 
 summary.ldecomp = function(obj, str = NULL)
 {
@@ -347,11 +385,7 @@ summary.ldecomp = function(obj, str = NULL)
    cat(str, '\n')
    cat(sprintf('\nSelected components: %d\n\n', obj$ncomp.selected))      
    
-   data = cbind(round(obj$expvar, 2),
-                round(obj$cumexpvar, 2))
-   
-   colnames(data) = c('Expvar', 'Cumexpvar')
-   show(data)   
+   print(round(data, 2))   
 }
 
 erfinv = function (x) qnorm((1 + x)/2)/sqrt(2)

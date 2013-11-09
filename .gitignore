@@ -3,4 +3,5 @@
 .RData
 .Rapp.history
 .Rbuildignore
+.DS_Store
 mdatools.Rproj

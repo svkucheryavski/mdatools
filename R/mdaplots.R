@@ -389,6 +389,7 @@ mdaplot.showLabels = function(data, pos = 3, cex = 0.65, col = 'darkgray', type 
    
    # rownames of matrix data are used as labels
    # if no rownames provided, row names are used instead
+
    if (is.null(rownames(data)))
       rownames(data) = 1:nrow(data)
    
@@ -510,6 +511,12 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
    #   show.axes: logical, make a normal plot or show only points or lines
    
    data = as.matrix(data)
+   
+   if (is.null(dim(data)) || nrow(data) < 1)
+   {   
+      warning('Data matrix is empty!')
+      return
+   }
    
    if (show.axes == T)
    {  

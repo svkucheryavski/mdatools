@@ -50,7 +50,7 @@ pca = function(data, ncomp = 20, center = T, scale = F, cv = NULL, test.data = N
       model$testres = predict.pca(model, test.data)
    
    # calculate and assign limit values for T2 and Q2 residuals
-   lim = ldecomp.getResLimits(model$eigenvals, nrow(data), model$ncomp.selected, model$alpha)
+   lim = ldecomp.getResLimits(model$eigenvals, nrow(data), model$ncomp, model$alpha)
    model$T2lim = lim$T2lim
    model$Q2lim = lim$Q2lim
    
@@ -75,10 +75,6 @@ selectCompNum.pca = function(model, ncomp)
       stop('Wrong number of selected components!')
    
    model$ncomp.selected = ncomp   
-   lim = ldecomp.getResLimits(model$eigenvals, nrow(model$calres$scores), 
-                              model$ncomp.selected, model$alpha)
-   model$T2lim = lim$T2lim
-   model$Q2lim = lim$Q2lim         
    
    model$calres$ncomp.selected = ncomp
    
@@ -186,7 +182,7 @@ pca.mvreplace = function(data, center = T, scale = F, maxncomp = 7,
    cdata
 }
 
-pca.cal = function(data, ncomp, center = T, scale = F, method = 'svd')
+pca.cal = function(data, ncomp, center = T, scale = F, method = 'svd', simca = F)
 {
    # Calibrates a PCA model.
    #
@@ -196,6 +192,7 @@ pca.cal = function(data, ncomp, center = T, scale = F, method = 'svd')
    #   center: logical, mean center the data values or not
    #   scale: logical, standardize the data values or not
    #   method: which method to use for computing principal component space
+   #   simca: logical, is model build for SIMCA or not
    #
    # Returns:
    #   model: a calibrated PCA model 
@@ -210,7 +207,10 @@ pca.cal = function(data, ncomp, center = T, scale = F, method = 'svd')
    colnames(model$loadings) = paste('Comp', 1:ncol(model$loadings))
    model$center = attr(data, 'prep:center')
    model$scale = attr(data, 'prep:scale')
-
+   
+   if (simca)
+      model$modpower = pca.getModellingPower(model, data)
+   
    model
 }  
 
@@ -348,6 +348,10 @@ pca.crossval = function(model, data, cv, center = T, scale = F)
    # in CV results there are no scores only residuals and variances
    res = pcares(NULL, NULL, NULL, model$calres$totvar, model$tnorm, model$ncomp.selected,
                 T2, Q2)
+   res$Q2lim = model$Q2lim
+   res$T2lim = model$T2lim
+   
+   res
 }  
 
 predict.pca = function(model, data, cv = F)
@@ -370,6 +374,8 @@ predict.pca = function(model, data, cv = F)
    {   
       totvar = sum(data^2)
       res = pcares(scores, model$loadings, residuals, totvar, model$tnorm, model$ncomp.selected)
+      res$Q2lim = model$Q2lim
+      res$T2lim = model$T2lim
    }   
    else
    {
@@ -442,8 +448,8 @@ plotCumVariance.pca = function(model, xlab = 'Components', ylab = 'Explained var
    plotVariance.pca(model, variance = 'cumexpvar', xlab = xlab, ylab = ylab, main = main, ...)   
 }
 
-plotScores.pca = function(model, comp = c(1, 2), main = 'Scores', xlab = NULL, ylab = NULL,
-                          show.labels = F, show.legend = T,
+plotScores.pca = function(model, comp = c(1, 2), type = 'p', main = 'Scores', xlab = NULL, 
+                          ylab = NULL, show.labels = F, show.legend = T,
                           show.axes = T, ...)
 {
    # Makes a scores plot.
@@ -451,6 +457,7 @@ plotScores.pca = function(model, comp = c(1, 2), main = 'Scores', xlab = NULL, y
    # Arguments:
    #   model: a PCA model (object of class pca)  
    #   comp: one or two numbers - which components to make the plot for
+   #   type: type of the plot
    #   main: main title for the plot
    #   xlab: label for x axis
    #   ylab: label for y axis
@@ -491,7 +498,7 @@ plotScores.pca = function(model, comp = c(1, 2), main = 'Scores', xlab = NULL, y
             legend = c('cal', 'test')
       }   
       
-      mdaplotg(data, type = 'p', main = main, show.labels = show.labels, legend = legend, 
+      mdaplotg(data, type = type, main = main, show.labels = show.labels, legend = legend, 
                xlab = xlab, ylab = ylab, ...)
    }
    else if (ncomp == 2)
@@ -527,7 +534,7 @@ plotScores.pca = function(model, comp = c(1, 2), main = 'Scores', xlab = NULL, y
       else
          show.lines = F
 
-      mdaplotg(data, type = 'p', main = main, show.labels = show.labels, legend = legend, 
+      mdaplotg(data, type = type, main = main, show.labels = show.labels, legend = legend, 
                show.lines = show.lines, xlab = xlab, ylab = ylab, ...)
       }
    else
@@ -551,15 +558,22 @@ plotResiduals.pca = function(model, ncomp = NULL, main = NULL, xlab = 'T2',
    #   show.legend: logical, show or not legend on the plot
    #   show.limits: logical, show or not statistical limits on the plot   
    
+   if (is.null(main))
+   {
+      if (is.null(ncomp))
+         main = 'Residuals'
+      else
+         main = sprintf('Residuals (ncomp = %d)', ncomp)      
+   }   
    
-   if (show.limits == T && (is.null(ncomp) || ncomp == model$ncomp.selected))
-      show.lines = c(model$T2lim, model$Q2lim)
-   else
-      show.lines = F
-
    if (is.null(ncomp))
       ncomp = model$ncomp.selected
-
+   
+   if (show.limits == T)
+      show.lines = c(model$T2lim[1, ncomp], model$Q2lim[1, ncomp])
+   else
+      show.lines = F
+   
    if (ncomp > model$ncomp || ncomp < 1)
       stop('Wrong number of components!')
 
@@ -586,9 +600,6 @@ plotResiduals.pca = function(model, ncomp = NULL, main = NULL, xlab = 'T2',
 
    if (show.legend == F)
       legend = NULL
-   
-   if (is.null(main))
-      main = sprintf('Residuals (ncomp = %d)', ncomp)
    
    mdaplotg(data, main = main, xlab = xlab, ylab = ylab,
             show.labels = show.labels, legend = legend, show.lines = show.lines, ...)
@@ -638,11 +649,12 @@ plotLoadings.pca = function(model, comp = c(1, 2), type = NULL, main = 'Loadings
          ylab = 'Loadings'
       
       data = cbind(1:nrow(model$loadings), model$loadings[, comp, drop = F])            
+      rownames(data) = rownames(model$loadings)
       
       if (show.legend == T)
          legend = colnames(data)[-1];
 
-      mdaplotg(data, legend = legend, type = type, 
+      mdaplotg(data, legend = legend, type = type, show.labels = show.labels, 
                main = main, ylab = ylab, xlab = xlab, ...)
    }   
 }
@@ -688,7 +700,7 @@ print.pca = function(model, ...)
    cat('$loadings - matrix with loadings\n')
    cat('$eigenvals - eigenvalues for components\n')
    cat('$ncomp - number of calculated components\n')
-   cat('$ncomp.selected - selected number of components\n')
+   cat('$ncomp.selected - number of selected components\n')
    cat('$center - values for centering data\n')
    cat('$scale - values for scaling data\n')
    cat('$cv - number of segments for cross-validation\n')
@@ -702,8 +714,7 @@ print.pca = function(model, ...)
    if (!is.null(model$testres))
    {
       cat('$testres - results for test set\n')      
-   }   
-   
+   }    
 }
 
 summary.pca = function(model)

@@ -1,5 +1,23 @@
 # default function for interclass methods #
 
+getSelectedComponents = function(obj, ncomp = NULL)
+{
+   if (is.null(ncomp))
+   {   
+      if (is.null(obj$ncomp.selected))
+         ncomp = 1
+      else
+         ncomp = obj$ncomp.selected
+   }   
+   
+   ncomp
+}  
+
+plotModellingPower = function(object, ...)
+{
+   UseMethod("plotModellingPower")   
+}  
+
 plotSpecificity = function(object, ...)
 {
    UseMethod("plotSpecificity")   
@@ -13,11 +31,6 @@ plotSensitivity = function(object, ...)
 plotPerformance = function(object, ...)
 {
    UseMethod("plotPerformance")   
-}  
-
-getSelectedComponents = function(object, ...)
-{
-   UseMethod("getSelectedComponents")   
 }  
 
 showPredictions = function(object, ...)
