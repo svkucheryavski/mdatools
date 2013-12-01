@@ -2,7 +2,8 @@ library(mdatools)
 
 do_people = T
 
-if (do_people == T) {
+if (do_people == T) 
+{
    data(People)
    data = people
 #   data[4, 4] = NA
@@ -10,7 +11,7 @@ if (do_people == T) {
    pcamodel = selectCompNum(pcamodel, 5)
    gpch = c(16, 17)
    glty = c(1, 2)
-}  else
+} else
 {  
    ncobj = 60
    ntobj = 30

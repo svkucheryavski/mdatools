@@ -10,11 +10,14 @@ Results of classification
 }
 
 \usage{
-classres()
+classres(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL)
 }
+
 \arguments{
-  \item{pres}{results of PCA decomposition of data (class \code{pcares}).}
-  \item{cres}{results of classification (class \code{classres}).}
+  \item{c.pred}{matrix with predicted values (+1 or -1) for each class.}
+  \item{c.ref}{matrix with reference values for each class.}
+  \item{p.pred}{matrix with probability values for each class.}
+  \item{ncomp.selected}{vector with selected number of components for each class.}
 }
 
 \details{

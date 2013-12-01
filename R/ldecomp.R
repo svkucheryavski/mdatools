@@ -34,6 +34,7 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
    
    obj = list(
       scores = scores,
+      residuals = residuals, 
       totvar = totvar
    )
    
@@ -109,7 +110,9 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
 
    # calculate variance for data columns
    data = scores %*% t(loadings) + residuals;
-   datasd = apply(data, 2, sd)
+   
+   if (nobj > 1)
+      datasd = sqrt(colSums(data^2)/(nobj - 1))
    
    # calculate distances for each set of components
    for (i in 1:ncomp)
@@ -120,7 +123,8 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
       
       Q2[, i] = rowSums(res^2)
       T2[, i] = rowSums(scoresn[, 1:i, drop = F]^2)
-      modpower[, i] = 1 - apply(res, 2, sd)/datasd
+      if (nobj > 1)
+         modpower[, i] = 1 - sqrt(colSums(res^2)/(nobj - i - 1))/datasd
    }   
    
    # set dimnames and return results
@@ -385,6 +389,7 @@ summary.ldecomp = function(obj, str = NULL)
    cat(str, '\n')
    cat(sprintf('\nSelected components: %d\n\n', obj$ncomp.selected))      
    
+   data = as.matrix(obj)
    print(round(data, 2))   
 }
 

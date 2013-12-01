@@ -2,15 +2,27 @@
 
 getSelectedComponents = function(obj, ncomp = NULL)
 {
-   if (is.null(ncomp))
-   {   
-      if (is.null(obj$ncomp.selected))
-         ncomp = 1
-      else
-         ncomp = obj$ncomp.selected
-   }   
-   
-   ncomp
+   UseMethod("getSelectedComponents")
+}  
+
+plotCooman = function(object, ...)
+{
+   UseMethod("plotCooman")
+}
+
+plotModelDistance = function(object, ...)
+{
+   UseMethod("plotModelDistance")
+}
+
+plotDiscriminationPower = function(object, ...)
+{
+   UseMethod("plotDiscriminationPower")      
+}  
+
+getCalibrationData = function(object, ...)
+{
+   UseMethod("getCalibrationData")   
 }  
 
 plotModellingPower = function(object, ...)

@@ -85,7 +85,6 @@ par(mfrow = c(1, 1))
 plotPredictions(res, show.labels = T)
 readline('Press enter to continue...')
 
-
 # with predictions and probability no reference
 res = classres(lc.pred, p.pred = lp.pred)
 print(res)
@@ -148,7 +147,7 @@ plotPredictions(res, nc = 2, show.labels = T)
 plotPredictions(res, nc = 3, show.labels = T)
 readline('Press enter to continue...')
 
-## 3. one class many components
+## 2. one class many components
 lc.ref = c.ref[ , 1, drop = F]
 lc.pred = c.pred[ , , 1, drop = F]
 lp.pred = p.pred[ , , 1, drop = F]

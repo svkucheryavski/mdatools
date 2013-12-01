@@ -60,6 +60,18 @@ pca = function(data, ncomp = 20, center = T, scale = F, cv = NULL, test.data = N
    model
 }
 
+getCalibrationData.pca = function(model)
+{
+   data = model$calres$scores %*% t(model$loadings) + model$calres$residuals
+   
+   if (is.numeric(attr(data, 'prep:scale')))
+      data = sweep(data, 2L, attr(data, 'prep:scale'), '*', check.margin = F)
+   
+   if (is.numeric(attr(data, 'prep:center')))
+      data = sweep(data, 2L, attr(data, 'prep:center'), '+', check.margin = F)
+   
+}
+
 selectCompNum.pca = function(model, ncomp)
 {
    # Sets user defined number of optimal components.

@@ -10,10 +10,13 @@ For more details read a [short wiki tutorial](https://github.com/svkucheryavski/
 How to install
 --------------
 
-The package is in beta testing and therefore is not yet available from CRAN. The easiest way to use the package is to [download](https://github.com/svkucheryavski/mdatools/releases) a source package archive from GitHub and install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.3.0.tar.gz` and it is located in a current working directory, just run the following:
+The package is in beta testing and therefore is not yet available from CRAN. The easiest way to use the package is to 
+[download](https://github.com/svkucheryavski/mdatools/releases) a source package archive from GitHub and install it using 
+the `install.packages` command, e.g. if the downloaded file is `mdatools_0.4.0.tar.gz` and it is located in a current 
+working directory, just run the following:
 
 ```
-install.packages('mdatools_0.3.0.tar.gz')
+install.packages('mdatools_0.4.0.tar.gz')
 ```
 
 If you have `devtools` package installed, the following command will install the latest release from the GitHub (do not forget to load the `devtools` package first):

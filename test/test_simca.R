@@ -46,7 +46,7 @@ readline('Press enter to continue...')
 
 cat('3. Show predictions plot for results')
 par(mfrow = c(2, 1))
-plotPredictions(model$calres);
+plotPredictions(model$calres)
 plotPredictions(pred, ncomp = 1, type = 'p', show.labels = T)
 readline('Press enter to continue...')
 

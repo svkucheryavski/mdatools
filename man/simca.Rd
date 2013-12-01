@@ -5,7 +5,7 @@
 SIMCA one-class classification
 }
 \description{
-\code{simca} is used to make and use SIMCA (Soft Independent Modelling of Class Analogies) model for one-class classification.
+\code{simca} is used to make SIMCA (Soft Independent Modelling of Class Analogies) model for one-class classification.
 }
 \usage{
 simca(data, classname, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL, 
@@ -34,9 +34,9 @@ SIMCA is in fact PCA model with additional functionality, so \code{simca} class 
 Returns an object of \code{simca} class with following fields:
 \item{classname }{a short text with class name.} 
 \item{modpower }{a matrix with modelling power of variables.} 
-\item{calres }{an object of class \code{\link{classres}} with classification results for a calibration data.} 
-\item{testres }{an object of class \code{\link{classres}} with classification results for a test data, if it was provided.} 
-\item{cvres }{an object of class \code{\link{classres}} with classification results for cross-validation, if this option was chosen.} 
+\item{calres }{an object of class \code{\link{simcares}} with classification results for a calibration data.} 
+\item{testres }{an object of class \code{\link{simcares}} with classification results for a test data, if it was provided.} 
+\item{cvres }{an object of class \code{\link{simcares}} with classification results for cross-validation, if this option was chosen.} 
 
 Fields, inherited from \code{\link{pca}} class:
 \item{ncomp }{number of components included to the model.} 

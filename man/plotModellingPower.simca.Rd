@@ -2,14 +2,14 @@
 \alias{plotModellingPower.simca}
 
 \title{
-Modelling power of variables
+Modelling power plot for SIMCA one-class model 
 }
 
 \description{
 \code{plotModellingPower.simca} is used to show plot with modelling power of variables for a SIMCA model.
 }
 \usage{
-plotModellingPower(model, ncomp = NULL)
+plotModellingPower(model, ncomp = NULL, ...)
 }
 
 \arguments{

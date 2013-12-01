@@ -10,7 +10,7 @@ Plot with predicted class values
 }
 
 \usage{
-plotPredictions(obj, nc = 1, ncomp = NULL, ...)
+plotPredictions(obj, nc = NULL, ncomp = NULL, ...)
 }
 \arguments{
   \item{obj}{classification results (object of \code{classress} class or similar).}
@@ -20,7 +20,8 @@ plotPredictions(obj, nc = 1, ncomp = NULL, ...)
 }
 
 \details{
-If a classification method returns continuous values used to make decision about class membership (e.g. probability or PLS predictions) the values are shown instead of +1 or -1 for classification.
+If class number is not provided, the results will be shown for all available classes. If number of
+components is not provided, the results will be shown for selected (optimal) number.
 
 See examples for \code{\link{simcares}}, \code{\link{simcamres}} and \code{\link{plsdares}}.
 }

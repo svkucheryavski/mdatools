@@ -2,8 +2,12 @@ v. 0.4.0
 ========
 * New `classres` class for representation and visualisation of classification results
 * in PCA model, limits for T2 and Q2 now are calculated for all available components
-* in PCA results, limits for T2 and Q2 calculates for a model are kept and shown on residuals plot 
+* in PCA results, limits for T2 and Q2 calculated for a model are kept and shown on residuals plot 
 * New `simca` and `simcares` classes for one-class SIMCA model and results
+* added parameters `xticklabels` and `yticklabels` to `mdaplot` and `mdaplotg` functions
+* New `simcam` and `simcamres` classes for multiclass SIMCA model and results
+
+* New `plsda`and `plsdares`classes for PLS-DA model and results
 
 
 v. 0.3.2

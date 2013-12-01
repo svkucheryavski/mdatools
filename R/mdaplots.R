@@ -481,10 +481,69 @@ bars = function(x, y, col = NULL, bwd = 0.8)
    }
 }  
 
+mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
+{
+   # Create an empty axes plane for given parameters
+   #
+   # Arguments:
+   #   xticks: tick values for x axis
+   #   xticklabels: labels for x axis corresponding to x tick values
+   #   yticks: tick values for y axis
+   #   yticklabels: labels for y axis corresponding to y tick values
+   #   lim: vector with limits for x and y axes
+   #   main: main title for the plot
+   #   xlab: label for x axis
+   #   ylab: label for y axis
+   #
+   
+   if (!is.null(xticklabels) && !is.null(yticklabels))
+   {
+      # tick labels for both x and y axes are provided
+      
+      if (is.null(xticks))
+         xticks = 1:length(xticklabels)
+      
+      if (is.null(yticks))
+         yticks = 1:length(yticklabels)
+      
+      plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
+           xaxt = 'n', yaxt = 'n')
+      axis(1, at = xticks, labels = xticklabels)
+      axis(2, at = yticks, labels = yticklabels)
+   }
+   else if (!is.null(xticklabels))
+   {
+      # tick labels for x only provided
+      
+      if (is.null(xticks))
+         xticks = 1:length(xticklabels)
+      
+      plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, xaxt = 'n')
+      axis(1, at = xticks, labels = xticklabels)
+   }  
+   else if (!is.null(yticklabels))
+   {
+      # tick labels for y only provided
+      
+      if (is.null(yticks))
+         yticks = 1:length(yticklabels)
+      
+      plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, yaxt = 'n')
+      axis(2, at = yticks, labels = yticklabels)
+   }   
+   else
+   {   
+      # no tick labels provided
+      plot(0, 0, type = 'n', main = main, xlim = lim$xlim, ylim = lim$ylim, xlab = xlab, ylab = ylab)
+   }   
+}
+
+
 mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8,
                    cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
-                   xlab = NULL, ylab = NULL, single.x = T, show.labels = F, show.colorbar = T, 
-                   show.lines = F, show.grid = T, show.axes = T, ...)
+                   main = NULL, xlab = NULL, ylab = NULL, single.x = T, show.labels = F, show.colorbar = T, 
+                   show.lines = F, show.grid = T, show.axes = T, 
+                   xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, ...)
 {   
    # Makes a plot for one series of data (scatter, line, scatterline, or bar).
    #
@@ -509,6 +568,10 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
    #   show.lines: logical or numeric, in latter case a vector with coordinates for lines
    #   show.grid: logical, show or not a grid on the plot
    #   show.axes: logical, make a normal plot or show only points or lines
+   #   xticks: tick values for x axis
+   #   xticklabels: labels for x axis corresponding to x tick values
+   #   yticks: tick values for y axis
+   #   yticklabels: labels for y axis corresponding to y tick values
    
    data = as.matrix(data)
    
@@ -556,18 +619,22 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
       # if user did not specified y axis label use 2nd column name for it
       if (is.null(ylab))
          ylab = colnames(data)[2]
+      # make an empty plot with proper limits and axis labels
+      if (!is.list(data) && nrow(data) < 10 && type != 'p' && single.x == T && is.null(xticklabels))
+      {   
+         xticks = data[, 1]
+         xticklabels = data[, 1]
+      }
+      
+      # if number of variables is small set up proper tick labels for x      
+      if (nrow(data) < 10 && single.x == T && type != 'p' && is.null(xticklabels))
+      {
+         xticks =  data[, 1];
+         xticklabels = data[, 1]
+      }
       
       # make an empty plot with proper limits and axis labels
-      if (nrow(data) < 10 && single.x == T && type != 'p')
-      {
-         plot(0, 0, type = 'n', xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
-              xaxt = 'n', ...)
-         axis(1, at = data[, 1], labels = data[, 1])
-      }
-      else   
-      {   
-         plot(0, 0, type = 'n', xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, ...)
-      }
+      mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
    }
    
    # get x and y values from data
@@ -613,8 +680,9 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 
 mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
                     legend = NULL, xlab = NA, ylab = NA, labels = NULL, ylim = NULL, xlim = NULL,
-                    colmap = 'default', legend.position = 'topright', single.x = T, 
-                    show.legend = T, show.labels = F, show.lines = F, show.grid = T, ...)
+                    main = NULL, colmap = 'default', legend.position = 'topright', single.x = T, 
+                    show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
+                    xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, ...)
 {   
    # Makes a group of plots for several data sets
    #
@@ -636,6 +704,10 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    #   show.labels: logical, show or not labels for the data objects
    #   show.lines: logical or numeric, in latter case a vector with coordinates for lines
    #   show.grid: logical, show or not a grid on the plot
+   #   xticks: tick values for x axis
+   #   xticklabels: labels for x axis corresponding to x tick values
+   #   yticks: tick values for y axis
+   #   yticklabels: labels for y axis corresponding to y tick values
    
    #   If data for bar plot is organized as a list, the X values should be contioneous,
    #   e.g. 1:20 for first item, 21:35, for second, 36:42 for third, etc.
@@ -705,18 +777,16 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    
    if (is.na(ylab) && !is.null(colnames(data[[1]])))
       ylab = colnames(data[[1]])[2]
+
+   # if data is small set up proper x tick labels
+   if (!is.list(data) && nrow(data) < 10 && type != 'p' && single.x == T && is.null(xticklabels))
+   {   
+      xticks = data[, 1]
+      xticklabels = data[, 1]
+   }
    
    # make an empty plot with proper limits and axis labels
-   if (!is.list(data) && nrow(data) < 10 && type != 'p' && single.x == T)
-   {
-      # in case if we have up to 10 data objects and make a bar or line plot - show precise x axis
-      plot(0, 0, type = 'n', xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, xaxt = 'n', ...)
-      axis(1, at = data[, 1], labels = data[, 1])
-   }
-   else   
-   {   
-      plot(0, 0, type = 'n', xlim = lim$xlim, ylim = lim$ylim, xlab = xlab, ylab = ylab, ...)
-   }
+   mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
    
    if (show.grid == T)
       mdaplot.showGrid()

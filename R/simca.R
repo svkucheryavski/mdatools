@@ -89,6 +89,13 @@ predict.simca = function(model, data, c.ref = NULL, cv = F)
    #   res: results of SIMCA classification (object of simcares class)
    
    data = as.matrix(data)
+   
+   if (is.null(rownames(data)))
+      rownames(data) = 1:nrow(data)
+   
+   if (is.null(colnames(data)))
+      colnames(data) = paste('v', 1:ncol(data), sep = '')
+   
    pres = predict.pca(model, data, cv)     
    pres$Q2lim = model$Q2lim
    pres$T2lim = model$T2lim
@@ -98,14 +105,18 @@ predict.simca = function(model, data, c.ref = NULL, cv = F)
    # check c.ref values and add dimnames
    if (!is.null(c.ref))
    {   
+      if (is.character(c.ref))
+         c.ref = c.ref == model$classname
+      
       if (is.logical(c.ref))
          c.ref = c.ref * 2 - 1
+      
       c.ref = as.matrix(c.ref)
       rownames(c.ref) = rownames(data)
       colnames(c.ref) = model$classname
    } 
    
-   cres = classres(c.pred, c.ref = c.ref)
+   cres = classres(c.pred, c.ref = c.ref, ncomp.selected = model$ncomp.selected)
    res = simcares(pres, cres)
    
    res
@@ -199,9 +210,22 @@ simca.crossval = function(model, data, cv, center = T, scale = F)
    res
 }  
 
+getSelectedComponents.simca = function(obj, ncomp = NULL)
+{
+   if (is.null(ncomp))
+   {   
+      if (is.null(obj$ncomp.selected))
+         ncomp = 1
+      else
+         ncomp = obj$ncomp.selected
+   }   
+
+   ncomp
+}
+
 plotPredictions.simca = function(model, which = 'crossval', ncomp = NULL, type = 'h',
-                                 main = NULL, xlab = NULL, 
-                                 ylab = NULL, legend = NULL, ...)
+                                 main = NULL, xlab = 'Objects', yticks = NULL, yticklabels = NULL, 
+                                 ylab = '', legend = NULL, ...)
 {
    # makes a plot with predictions
    #
@@ -230,12 +254,6 @@ plotPredictions.simca = function(model, which = 'crossval', ncomp = NULL, type =
    
    if (ncomp > model$ncomp)
       stop('Wrong value for argument "ncomp"!')
-   
-   if (is.null(ylab))
-      ylab = 'Predicted values'
-   
-   if (is.null(xlab))
-      xlab = 'Objects'   
    
    if (is.null(model$p.pred))
    {   
@@ -270,10 +288,17 @@ plotPredictions.simca = function(model, which = 'crossval', ncomp = NULL, type =
       else             
          y = model$calres$p.pred[ , ncomp, nc, drop = F]
    }
-   
+  
+   if (is.null(yticklabels))
+   {
+      yticks = c(-1, 1)
+      yticklabels = c('None', model$classname)
+   }
+
    data = cbind(1:nrow(y), y)
    rownames(data) = rownames(y)
-   mdaplotg(data, type = type, main = main, xlab = xlab, ylab = ylab, legend = legend, ...)            
+   mdaplotg(data, type = type, main = main, xlab = xlab, ylab = ylab, legend = legend, 
+            yticks = yticks, yticklabels = yticklabels, ...)            
 }
 
 # plotSpecificity.simca = function(model, type = 'h', legend = NULL, main = 'Specificity', 
@@ -447,7 +472,8 @@ summary.simca = function(model, ...)
 {
    ncomp = model$ncomp   
    cat(sprintf('\nSIMCA model for class "%s" summary\n\n', model$classname))
-   cat(sprintf('Significance level (alpha): %.2f\n\n', model$alpha))
+   cat(sprintf('Significance level (alpha): %.2f\n', model$alpha))
+   cat(sprintf('Selected number of components: %d\n\n', model$ncomp.selected))
    data = cbind(round(model$calres$expvar, 2),
                 round(model$calres$cumexpvar, 2),
                 round(model$calres$sensitivity[1, ], 2)
