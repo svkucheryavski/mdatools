@@ -10,13 +10,13 @@ predict.pls is used to apply a PLS model to a new data set.
 }
 
 \usage{
-predict.pls(model, x, y = NULL)
+predict(model, x, y.ref = NULL)
 }
 
 \arguments{
   \item{model}{a PLS model (object of class \code{pls})}
   \item{x}{a matrix with predictor values.}
-  \item{y}{a matrix with response values (optional).}
+  \item{y.ref}{a matrix with reference values for response (optional).}
 }
 
 \details{

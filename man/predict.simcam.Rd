@@ -10,12 +10,12 @@ Predict method for SIMCA multiclass model
 }
 
 \usage{
-predict(model, data, c.ref = NULL)
+predict(model, x, c.ref = NULL)
 }
 
 \arguments{
   \item{model}{an object of class \code{simcam} (a SIMCA multiclass model).}
-  \item{data}{a numerical matrix with data.}
+  \item{x}{a numerical matrix with data.}
   \item{c.ref}{a vector with class membership for the data objects.}
 }
 

@@ -24,7 +24,7 @@ vemodel = selectCompNum(vemodel, 1)
 #  2 - 3 classes in model and 3 same classes in prediction data but without reference values provided
 #  3 - 2 classes in model and 3 classes in prediction data with reference values
 #  4 - 3 classes in model and 2 classes in prediction data with reference values
-case = 4 
+case = 3
 
 if (case == 1)
 {

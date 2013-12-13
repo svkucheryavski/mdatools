@@ -10,12 +10,12 @@ Projects data to principal component space defined by a \code{pca} object.
 }
 
 \usage{
-predict(obj, data)
+predict(obj, x)
 }
 
 \arguments{
   \item{obj}{an object of class \code{pca} (a PCA model).}
-  \item{data}{a numerical matrix with data.}
+  \item{x}{a numerical matrix with data.}
 }
 
 \details{

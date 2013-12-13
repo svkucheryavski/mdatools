@@ -17,6 +17,9 @@ So far the following modelling methods are implemented:
 \tabular{ll}{
       \code{\link{pca}}, \code{\link{pcares}} \tab Principal Component Analysis (PCA).\cr
       \code{\link{pls}}, \code{\link{plsres}} \tab Partial Least Squares regression (PLS).\cr
+      \code{\link{simca}}, \code{\link{simcares}} \tab Soft Independent Modelling of Class Analogues (SIMCA)\cr
+      \code{\link{simcam}}, \code{\link{simcamres}} \tab SIMCA for multiple classes case (SIMCA)\cr
+      \code{\link{plsda}}, \code{\link{plsdares}} \tab Partial Least Squares Dscriminant Analysis (PLS-DA).\cr
 }
 
 Methods for data preprocessing:

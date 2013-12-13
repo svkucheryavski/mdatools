@@ -43,7 +43,8 @@ Methods \code{classres} class:
       \code{\link{plotPredictions.classres}} \tab makes plot with predicted values.\cr
       \code{\link{plotSensitivity.classres}} \tab makes plot with sensitivity vs. components values.\cr
       \code{\link{plotSpecificity.classres}} \tab makes plot with specificity vs. components values.\cr
-      \code{\link{plotPerformance.classres}} \tab makes plot with both specificity and sensitivity values.\cr
+      \code{\link{plotMisclassified.classres}} \tab makes plot with misclassified ratio values.\cr
+      \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity and sensitivity values.\cr
    }
 }
 

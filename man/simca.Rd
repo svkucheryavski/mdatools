@@ -65,9 +65,15 @@ Methods for \code{simca} objects:
       \code{summary.simca} \tab shows summary statistics for the model.\cr
       \code{plot.simca} \tab makes an overview of SIMCA model with four plots.\cr
       \code{\link{predict.simca}} \tab applies SIMCA model to a new data.\cr
-      \code{\link{plotPredictions.simca}} \tab shows plot with predicted values.\cr
       \code{\link{plotModellingPower.simca}} \tab shows plot with modelling power of variables.\cr
-      \code{\link{plotSensitivity.simca}} \tab shows sensitivity plot.\cr
+   }
+
+Methods, inherited from \code{classmodel} class:
+  \tabular{ll}{
+      \code{\link{plotPredictions.classmodel}} \tab shows plot with predicted values.\cr
+      \code{\link{plotSensitivity.classmodel}} \tab shows sensitivity plot.\cr
+      \code{\link{plotSpecificity.classmodel}} \tab shows specificity plot.\cr
+      \code{\link{plotMisclassified.classmodel}} \tab shows misclassified ratio plot.\cr
    }
 
 Methods, inherited from \code{\link{pca}} class:
@@ -100,10 +106,17 @@ print(model)
 summary(model)
 plot(model)
 
-# show plots for 2 components
-layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
-plotPredictions(model, ncomp = 2, show.labels = T)
+# show predictions 
+par(mfrow = c(2, 1))
+plotPredictions(model, show.labels = T)
+plotPredictions(model, res = 'calres', ncomp = 2, show.labels = T)
+par(mfrow = c(1, 1))
+
+# show performance, modelling power and residuals for ncomp = 2
+par(mfrow = c(2, 2))
+plotSensitivity(model)
+plotMisclassified(model)
 plotModellingPower(model, ncomp = 2, show.labels = T)
 plotResiduals(model, ncomp = 2)
-layout(1, 1, 1)
+par(mfrow = c(1, 1))
 }

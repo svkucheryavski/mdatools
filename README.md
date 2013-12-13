@@ -3,7 +3,8 @@ Multivariate Data Analysis Tools
 
 mdatools is an R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for [Chemometrics](http://en.wikipedia.org/wiki/Chemometrics). It was created for an introductory PhD course on Chemometrics given at Section of Chemical Engineering, Aalborg University. 
 
-The general idea of the package is to collect most of the common chemometric methods and give a similar "user interface" to use them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.
+The general idea of the package is to collect most of the common chemometric methods and give a similar "user interface" for using them. 
+So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.
 
 For more details read a [short wiki tutorial](https://github.com/svkucheryavski/mdatools/wiki). 
 

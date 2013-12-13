@@ -12,7 +12,7 @@ test.c = c(matrix(1, 1, 25), matrix(2, 1, 25), matrix(3, 1, 25))
 
 
 # Select which model to calculate
-option = 3
+option = 2
 
 if (option == 1)
 {
@@ -22,12 +22,12 @@ if (option == 1)
    pred = predict(model, test.data, test.c == 1)   
 } else if (option == 2) {  
    # Virginica model with test set validation (no CV)
-   model = simca(vi, 'Vi', test.data = test.data[test.c == 3, ])
+   model = simca(vi, 'Vi', x.test = test.data[test.c == 3, ])
    model = selectCompNum(model, 3)
    pred = predict(model, test.data, test.c == 3)   
 } else {
    # Versicolor model with 5 segments CV and test set
-   model = simca(ve, 'Ve', ncomp = 4, cv = 5, test.data = test.data, test.c = test.c == 2)
+   model = simca(ve, 'Ve', ncomp = 4, cv = 5, x.test = test.data, c.test = test.c == 2)
    model = selectCompNum(model, 3)
    pred = predict(model, test.data, test.c == 2)   
 }
@@ -40,8 +40,8 @@ readline('Press enter to continue...')
 
 cat('2. Show predictions plot for model')
 par(mfrow = c(2, 1))
-plotPredictions(model);
-plotPredictions(model, ncomp = 1, type = 'p', show.labels = T)
+plotPredictions(model)
+plotPredictions(model, res = 'testres', ncomp = 1, type = 'p', show.labels = T)
 readline('Press enter to continue...')
 
 cat('3. Show predictions plot for results')

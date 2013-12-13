@@ -32,7 +32,8 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
 }
 
 mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines = F, 
-                              legend = NULL, show.legend = F, legend.position = 'topright', show.labels = F)
+                              legend = NULL, show.legend = F, legend.position = 'topright', show.labels = F,
+                              xticks = NULL, yticks = NULL)
 {
    # Calculates axes limits depending on data values that have to be plotted, 
    # extra plot elements that have to be shown and margins. 
@@ -50,6 +51,8 @@ mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines 
    #   show.legend: logical, will legend be shown on the plot or not
    #   legend.position: position of the legend
    #   show.labels: logica, show or not labels for the data items
+   #   xticks: values for x ticks
+   #   yticks: values for y ticks
    #
    # Returns:
    #   a list with limit values
@@ -130,7 +133,20 @@ mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines 
          ymax = max(ymax, show.lines[2])
       }   
    }
-   
+  
+   # correct limits for manual tick values
+   if (!is.null(xticks))
+   {
+      xmax = max(xmax, xticks)
+      xmin = min(xmin, xticks)
+   }   
+
+   if (!is.null(yticks))
+   {
+      ymax = max(ymax, yticks)
+      ymin = min(ymin, yticks)
+   }   
+
    # calculate margins: dx and dy
    dx = (xmax - xmin) * scale
    dy = (ymax - ymin) * scale
@@ -495,16 +511,16 @@ mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main,
    #   xlab: label for x axis
    #   ylab: label for y axis
    #
-   
-   if (!is.null(xticklabels) && !is.null(yticklabels))
+  
+   if ((!is.null(xticklabels) || !is.null(xticks)) && (!is.null(yticklabels) || !is.null(yticks)))
    {
       # tick labels for both x and y axes are provided
       
-      if (is.null(xticks))
-         xticks = 1:length(xticklabels)
+      if (is.null(yticklabels))
+         yticklabels = yticks
       
-      if (is.null(yticks))
-         yticks = 1:length(yticklabels)
+      if (is.null(xticklabels))
+         xticklabels = xticks
       
       plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
            xaxt = 'n', yaxt = 'n')
@@ -515,19 +531,19 @@ mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main,
    {
       # tick labels for x only provided
       
-      if (is.null(xticks))
-         xticks = 1:length(xticklabels)
+      if (is.null(xticklabels))
+         xticklabels = xticks
       
       plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, xaxt = 'n')
       axis(1, at = xticks, labels = xticklabels)
    }  
-   else if (!is.null(yticklabels))
+   else if (!is.null(yticklabels) || !is.null(yticks))
    {
       # tick labels for y only provided
-      
-      if (is.null(yticks))
-         yticks = 1:length(yticklabels)
-      
+     
+      if (is.null(yticklabels))
+         yticklabels = yticks
+
       plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, yaxt = 'n')
       axis(2, at = yticks, labels = yticklabels)
    }   
@@ -583,6 +599,13 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
    
    if (show.axes == T)
    {  
+
+      if (is.null(xticks) && !is.null(xticklabels))
+         xticks = 1:length(xticklabels)
+      
+      if (is.null(yticks) && !is.null(yticklabels))
+         yticks = 1:length(yticklabels)
+      
       # calculate limits and get proper colors      
       if (!is.null(cgroup))
       {   
@@ -595,7 +618,7 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
       {
          # show all points with the same color
          lim = mdaplot.getAxesLim(data, show.lines = show.lines, show.labels = show.labels,
-                                  single.x = single.x)
+                                  single.x = single.x, xticks = xticks, yticks = yticks)
          if (is.null(col))
             col = mdaplot.getColors(1, colmap = colmap)
       }
@@ -725,10 +748,16 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
       ngroups = length(data)
    }
    
+   if (is.null(xticks) && !is.null(xticklabels))
+      xticks = 1:length(xticklabels)
+   
+   if (is.null(yticks) && !is.null(yticklabels))
+      yticks = 1:length(yticklabels)
+   
    # calculate limits and get colors
    lim = mdaplot.getAxesLim(data, show.lines = show.lines, single.x = single.x, 
                             show.legend = show.legend, legend = legend, show.labels = show.labels,
-                            legend.position = legend.position)
+                            legend.position = legend.position, xticks = xticks, yticks = yticks)
 
    if (!is.null(ylim))
       lim$ylim = ylim

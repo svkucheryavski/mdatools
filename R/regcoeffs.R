@@ -9,7 +9,8 @@ regcoeffs = function(coeffs)
    # Returns:
    # a list, object of the class "regcoeffs", with following fields
    #   values: matrix with regression coefficient values    
-   
+  
+
    regcoeffs = list(values = coeffs)
    regcoeffs$call = match.call()
    
@@ -71,7 +72,10 @@ plot.regcoeffs = function(obj, ncomp = 1, ny = 1, main = 'Regression coefficient
       else
          type = 'l'
    }
-   
-   mdaplot(cbind(1:ncoeff, coeffs), type = type, main = main, xlab = xlab, ylab = ylab, 
+  
+   data = cbind(1:ncoeff, coeffs)
+   rownames(data) = rownames(obj$values)
+
+   mdaplot(data, type = type, main = main, xlab = xlab, ylab = ylab, 
            show.grid = T, show.line = c(NA, 0), ...)
 }   

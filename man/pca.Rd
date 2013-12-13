@@ -10,12 +10,12 @@ Principal Component Analysis
 }
 
 \usage{
-pca(data, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL, 
+pca(x, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL, 
    alpha = 0.05, method = 'svd', info = '')
 }
 
 \arguments{
-  \item{data}{a numerical matrix with calibration data.}
+  \item{x}{a numerical matrix with calibration data.}
   \item{ncomp}{maximum number of components to calculate.}
   \item{center}{logical, do mean centering of data or not.}
   \item{scale}{logical, do sdandardization of data or not.}

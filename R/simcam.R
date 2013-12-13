@@ -31,29 +31,29 @@ simcam = function(models, info = '')
    model$moddist = stat$moddist
 
    model$call = match.call()   
-   class(model) = c("simcam")
+   class(model) = c("simcam", "classmodel")
    
    # make predictions for calibration set
    caldata = getCalibrationData(model)
-   model$calres = predict(model, caldata$data, caldata$c.ref)
+   model$calres = predict(model, caldata$x, caldata$c.ref)
    
    model
 }
 
-predict.simcam = function(model, data, c.ref = NULL, cv = F)
+predict.simcam = function(model, x, c.ref = NULL, cv = F)
 {
    # Apply the SIMCAM model to a new data set
    #
    # Arguments:
    #   model: a SIMCAM model (object of class simcam)
-   #   data: a matrix with new data values
+   #   x: a matrix with new data values
    #   c.ref: reference class values for the data set (optional)
    #
    # Returns:
    #   res: results of SIMCAM classification (object of simcamres class)
    
-   data = as.matrix(data)
-   nobj = nrow(data)
+   x = as.matrix(x)
+   nobj = nrow(x)
 
    c.pred = array(0, dim = c(nobj, 1, model$nclasses))
    Q2 = array(0, dim = c(nobj, model$nclasses))
@@ -68,12 +68,12 @@ predict.simcam = function(model, data, c.ref = NULL, cv = F)
       if (!is.null(c.ref))
       {   
          if (is.numeric(c.ref))
-            res = predict(model$models[[i]], data, c.ref == i)
+            res = predict(model$models[[i]], x, c.ref == i)
          else
-            res = predict(model$models[[i]], data, c.ref == model$models[[i]]$classname)
+            res = predict(model$models[[i]], x, c.ref == model$models[[i]]$classname)
       }
       else
-         res = predict(model$models[[i]], data)
+         res = predict(model$models[[i]], x)
 
       ncomp.selected[i] = model$models[[i]]$ncomp.selected
       c.pred[, , i] = res$c.pred[, ncomp.selected[i], ]
@@ -83,7 +83,7 @@ predict.simcam = function(model, data, c.ref = NULL, cv = F)
       T2lim[i] = res$T2lim[ncomp.selected[i]]
    }
    
-   dimnames(c.pred) = list(rownames(data), paste('Comp', ncomp.selected[[i]]), model$classnames)
+   dimnames(c.pred) = list(rownames(x), paste('Comp', ncomp.selected[[i]]), model$classnames)
    cres = classres(c.pred, c.ref, ncomp.selected = ncomp.selected)
    res = simcamres(cres, T2, Q2, T2lim, Q2lim)
    res
@@ -91,18 +91,16 @@ predict.simcam = function(model, data, c.ref = NULL, cv = F)
 
 getCalibrationData.simcam = function(model)
 {
-   data = NULL
+   x = NULL
    c.ref = NULL
    for (i in 1:model$nclasses)
    {
       classdata = getCalibrationData(model$models[[i]])
-      data = rbind(data, classdata)
+      x = rbind(x, classdata)
       c.ref = rbind(c.ref, matrix(model$models[[i]]$classname, nrow = nrow(classdata), ncol = 1))            
    }
 
-   res = list(data = data,
-              c.ref = c.ref
-              )
+   res = list(x = x, c.ref = c.ref)
 
    res
 }
@@ -263,11 +261,6 @@ plotModellingPower.simcam = function(model, nc = 1, main = NULL, ...)
    plotModellingPower(model$models[[nc]], main = main, ...)
 }
 
-plotPredictions.simcam = function(model, ...)
-{
-   plotPredictions(model$calres, ...)
-}
-
 plot.simcam = function(model, nc = c(1, 2), ...)
 {
    # makes a plot overview of  a SIMCAM model
@@ -280,6 +273,18 @@ plot.simcam = function(model, nc = c(1, 2), ...)
    plotDiscriminationPower(model, nc)
    plotModelDistance(model, nc[1])
    par(mfrow = c(1, 1))
+}  
+
+summary.simcam = function(model, ...)
+{
+   cat('\nSIMCA multiple classes classification (class simcam)\n')
+   cat(sprintf('Nmber of classes: %d\n', length(model$models)))
+   
+   if (!is.null(model$info))
+      cat(sprintf('Info: %s\n', model$info))
+   
+   for (i in 1:length(model$models))
+      summary(model$models[[i]])
 }  
 
 print.simcam = function(model, ...)
@@ -297,11 +302,3 @@ print.simcam = function(model, ...)
    cat('$info - information about the object\n')
 }  
 
-summary.simcam = function(model, ...)
-{
-   cat('\nSIMCA multiple classes classification (class simcam)\n')
-   cat(sprintf('Nmber of classes: %d\n', length(model$models)))
-   
-   for (i in 1:length(model$models))
-      summary(model$models[[i]])
-}  

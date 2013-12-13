@@ -10,13 +10,13 @@ Predict method for SIMCA model
 }
 
 \usage{
-predict(model, data, c.ref = NULL)
+predict(model, x, c.ref = NULL)
 }
 
 \arguments{
   \item{model}{an object of class \code{simca} (a SIMCA model).}
-  \item{data}{a numerical matrix with data.}
-  \item{c.ref}{a logical vector with class membership for the data objects.}
+  \item{x}{a numerical matrix with data.}
+  \item{c.ref}{a vector with class membership for the data objects (either text with class names or logical).}
 }
 
 \value{
@@ -38,13 +38,13 @@ class = iris[, 5]
 se = data[1:30, ]
 
 # use the next 40 as test set and make logical reference values
-test = data[31:70, ]
-testclass = class[31:70] == 'setosa'
+x.test = data[31:80, ]
+c.test = class[31:80]
 
 # make SIMCA model and apply to test set
-model = simca(se, 'Se')
+model = simca(se, 'setosa')
 model = selectCompNum(model, 1)
-pred = predict(model, test, c.ref = testclass)
+pred = predict(model, x.test, c.ref = c.test)
 
 # show infromation and summary
 print(pred)

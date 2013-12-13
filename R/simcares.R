@@ -38,7 +38,7 @@ plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p'
    # get selected components and ncomp is NULL
    ncomp = getSelectedComponents(obj, ncomp)
 
-   if (is.null(obj$c.ref) || sum(obj$c.ref == 1) == length(obj$c.ref))
+   if (is.null(obj$c.ref)) 
    {
       # if no reference values or all objects are from the same class 
       # show standard plot for PCA
@@ -48,30 +48,50 @@ plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p'
    {   
       # if objects include members and non-members show plot with
       # color differentiation and legend
-            
-      members = obj$c.ref == 1
-      membersdata = cbind(obj$T2[members, ncomp, drop = F], obj$Q2[members, ncomp, drop = F])
-      colnames(membersdata) = c('T2', 'Q2')
-      nonmembersdata = cbind(obj$T2[!members, ncomp, drop = F], obj$Q2[!members, ncomp, drop = F])
-      colnames(nonmembersdata) = c('T2', 'Q2')
-
-      data = list(membersdata, nonmembersdata);
       
-      if (is.null(legend) && sum(!members) > 0)
-         legend = c(dimnames(obj$c.pred)[[3]][1], 'Others')
+      c.ref = obj$c.ref     
+      if (!is.character(c.ref))
+      {   
+         c.ref[obj$c.ref == 1] = obj$classname
+         c.ref[obj$c.ref != 1] = 'Others'
+      }
       
-      # colors for members and non-members
-      c1 = mdaplot.getColors(n = 1)
-      c2 = mdaplot.getColors(n = 2, colmap = 'gray')[1]
-         
-      if (show.limits == T)
-         show.lines = c(obj$T2lim[1, ncomp], obj$Q2lim[1, ncomp])
+      if (sum(c.ref == obj$classname) == length(c.ref))
+      {
+         plotResiduals.ldecomp(obj, ncomp, main = main, ...)
+      }
       else
-         show.lines = F
-      
-      mdaplotg(data, type = type, col = c(c1, c2), xlab = xlab, ylab = ylab, main = main,
-               legend = legend, show.lines = show.lines, ...)
-   }
+      {
+         classes = unique(c.ref)
+         nclasses = length(classes)
+
+         pdata = list()
+         legend.str = NULL
+
+         for (i in 1:nclasses)
+         {   
+            idx = c.ref == classes[i]
+            data = cbind(obj$T2[idx, ncomp, drop = F], obj$Q2[idx, ncomp, drop = F])
+            colnames(data) = c('T2', 'Q2')
+            rownames(data) = rownames(obj$c.ref[idx])
+           
+            legend.str = c(legend.str, classes[i])
+            pdata[[i]] = data
+         }
+
+         if (is.null(legend))
+            legend = legend.str
+         
+            
+         if (show.limits == T)
+            show.lines = c(obj$T2lim[1, ncomp], obj$Q2lim[1, ncomp])
+         else
+            show.lines = F
+         
+         mdaplotg(pdata, type = type, xlab = xlab, ylab = ylab, main = main,
+                  legend = legend, show.lines = show.lines, ...)
+      }
+   }   
 }
 
 plotPerformance.simcares = function(obj, ...)

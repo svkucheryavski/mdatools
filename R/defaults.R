@@ -30,6 +30,11 @@ plotModellingPower = function(object, ...)
    UseMethod("plotModellingPower")   
 }  
 
+plotMisclassified = function(object, ...)
+{
+   UseMethod('plotMisclassified')
+}
+
 plotSpecificity = function(object, ...)
 {
    UseMethod("plotSpecificity")   

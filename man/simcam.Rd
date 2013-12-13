@@ -5,7 +5,7 @@
 SIMCA multiclass classification
 }
 \description{
-\code{simcam} is used to combine several one-class SIMCA models for multiclasses classification. 
+\code{simcam} is used to combine several one-class SIMCA models for multiclass classification. 
 }
 
 \usage{
@@ -22,8 +22,8 @@ Besides the possibility for multiclass classification, SIMCAM also provides tool
 among individual models (classes), such as discrimination power of variables, Cooman's plot, model distance, etc.
 
 When create \code{simcam} object, the calibration data from all individual SIMCA models is 
-extracted and combined for making predictions with calculate performance of the multi-class model. The
-results are stored in \code{$calres} field of the object.
+extracted and combined for making predictions and calculate performance of the multi-class model. The
+results are stored in \code{$calres} field of the model object.
 }
 
 \value{
@@ -53,8 +53,19 @@ Methods for \code{simca} objects:
       \code{\link{plotModellingPower.simcam}} \tab shows plot with modelling power for individual model.\cr
       \code{\link{plotCooman.simcam}} \tab shows Cooman's plot for calibration data.\cr
       \code{\link{plotResiduals.simcam}} \tab shows plot with Q2 vs. T2 residuals for calibration data.\cr
-      \code{\link{plotPredictions.simcam}} \tab shows plot with predicted values for calibration data.\cr
    }
+
+Methods, inherited from \code{classmodel} class:
+  \tabular{ll}{
+      \code{\link{plotPredictions.classmodel}} \tab shows plot with predicted values.\cr
+      \code{\link{plotSensitivity.classmodel}} \tab shows sensitivity plot.\cr
+      \code{\link{plotSpecificity.classmodel}} \tab shows specificity plot.\cr
+      \code{\link{plotMisclassified.classmodel}} \tab shows misclassified ratio plot.\cr
+   }
+
+Since SIMCAM objects and results are calculated only for optimal number of components, there is no
+sense to show such plots like sensitivity or specificity vs. number of components. However they
+are available as for any other classification model.
 }
 
 \examples{

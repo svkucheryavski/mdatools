@@ -10,12 +10,12 @@ Replace missing values in data
 }
 
 \usage{
-data = pca.mvreplace(mvdata, center = T, scale = F, maxncomp = 7, expvarlim = 0.95, 
+x.rep = pca.mvreplace(x, center = T, scale = F, maxncomp = 7, expvarlim = 0.95, 
                covlim = 10^-6, maxiter = 100)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{mvdata}{a matrix with data, containing missing values.}
+  \item{x}{a matrix with data, containing missing values.}
   \item{center}{logical, do centering of data values or not.}
   \item{scale}{logical, do standardization of data values or not.}
   \item{maxncomp}{maximum number of components in PCA model.}
@@ -29,7 +29,7 @@ The function uses iterative PCA modeling of the data to approximate and impute m
 }
 
 \value{
-Returns the same matrix \code{data} where missing values are replaced with approximated.
+Returns the same matrix \code{x} where missing values are replaced with approximated.
 }
 
 \references{
