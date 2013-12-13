@@ -10,12 +10,12 @@ Principal Component Analysis
 }
 
 \usage{
-pca(data, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL, 
+pca(x, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL, 
    alpha = 0.05, method = 'svd', info = '')
 }
 
 \arguments{
-  \item{data}{a numerical matrix with calibration data.}
+  \item{x}{a numerical matrix with calibration data.}
   \item{ncomp}{maximum number of components to calculate.}
   \item{center}{logical, do mean centering of data or not.}
   \item{scale}{logical, do sdandardization of data or not.}
@@ -63,7 +63,7 @@ Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 \seealso{
 Methods for \code{pca} objects:
   \tabular{ll}{
-      \code{plot.pca} \tab makes an overview of PCA model with four main plot.\cr
+      \code{plot.pca} \tab makes an overview of PCA model with four plots.\cr
       \code{summary.pca} \tab shows some statistics for the model.\cr
       \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
       \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr

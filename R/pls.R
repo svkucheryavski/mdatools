@@ -146,7 +146,7 @@ pls.simpls = function(x, y, ncomp)
    W = matrix(0, nrow = npred, ncol = ncomp)
    P = matrix(0, nrow = npred, ncol = ncomp)
    Q = matrix(0, nrow = nresp, ncol = ncomp)
-   
+  
    # loop for each components
    for (n in 1:ncomp)
    {
@@ -304,14 +304,14 @@ selectCompNum.pls = function(model, ncomp)
    model
 }   
 
-predict.pls = function(model, x, y = NULL, cv = F)
+predict.pls = function(model, x, y.ref = NULL, cv = F)
 {   
    # Applies a PLS model to a new data.
    #
    # Arguments:
    #   model: a PLS model (object of class PLS)
    #   x: a matrix with predictor values
-   #   y: a vector with response values (optional)
+   #   y.ref: a vector with response values (optional)
    #   cv: logical, is it prediction for cross-validation or not
    #
    # Returns:
@@ -332,16 +332,16 @@ predict.pls = function(model, x, y = NULL, cv = F)
       yp[, , i] = x %*% model$coeffs$values[, , i]
    
    # if y is provided, calculate y residuals
-   if (!is.null(y))
+   if (!is.null(y.ref))
    {   
-      yy = prep.autoscale(y, center = model$ycenter, scale = model$yscale)
+      yy = prep.autoscale(y.ref, center = model$ycenter, scale = model$yscale)
       yscores = as.matrix(yy) %*% model$yloadings   
 
       ypp = yp[, ncol(yp), , drop = F]
       dim(ypp) = dim(yp)[c(1, 3)]
       yresiduals = ypp - yy
       
-      dimnames(yp) = list(rownames(x), colnames(model$coeffs$values), colnames(y))   
+      dimnames(yp) = list(rownames(x), colnames(model$coeffs$values), colnames(y.ref))   
    }
    else
    {
@@ -368,7 +368,7 @@ predict.pls = function(model, x, y = NULL, cv = F)
       xdecomp = ldecomp(xscores, model$xloadings, xresiduals, 
                         totvar = sum(x^2),
                         ncomp.selected = model$ncomp.selected)
-      if (!is.null(y))
+      if (!is.null(y.ref))
       {   
          dimnames(yscores) = dimnames(xscores)
          ydist = ldecomp.getDistances(xscores, model$yloadings, yresiduals)
@@ -381,7 +381,7 @@ predict.pls = function(model, x, y = NULL, cv = F)
          ydecomp = NULL
       }      
       
-      res = plsres(yp, y.ref = y, ncomp.selected = model$ncomp.selected, 
+      res = plsres(yp, y.ref = y.ref, ncomp.selected = model$ncomp.selected, 
                    xdecomp = xdecomp, ydecomp = ydecomp)    
    }      
    else
@@ -572,7 +572,7 @@ plotVariance.pls = function(model, decomp = 'xdecomp', variance = 'expvar',
 
 plotXScores.pls = function(model, comp = c(1, 2), main = 'X scores',
                            xlab = NULL, ylab = NULL,
-                           show.axes = F, 
+                           show.axes = T, 
                            show.labels = F, show.legend = T, ...)
 {
    # Description.
@@ -941,7 +941,7 @@ plotRegcoeffs.pls = function(model, ncomp = NULL, ny = 1, main = NULL, ylab = NU
 }
 
 plotXLoadings.pls = function(model, comp = c(1, 2), type = 'p', main = 'X loadings', 
-                             ylab = NULL, xlab = NULL, show.axes = F, ...)
+                             ylab = NULL, xlab = NULL, show.axes = T, ...)
 {
    # Makes X loadings plot.
    #
@@ -1171,6 +1171,8 @@ print.pls = function(model, ...)
    cat('\nCall:\n')
    print(model$call)
    cat('\nMajor fields:\n')
+   cat('$ncomp - number of calculated components\n')
+   cat('$ncomp.selected - number of selected components\n')
    cat('$coeffs - vector with regression coefficients\n')
    cat('$xloadings - vector with x loadings\n')
    cat('$yloadings - vector with Y loadings\n')

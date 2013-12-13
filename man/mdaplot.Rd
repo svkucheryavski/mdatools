@@ -13,7 +13,7 @@ Plotting function for a single set of objects
 mdaplot(data, type = 'p', single.x = T, cgroup = NULL, colmap = 'default'
    pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8, 
    xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, main = NULL,
-   labels = NULL, 
+   labels = NULL, xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
    show.labels = F, show.colorbar = T, show.lines = NULL, 
    show.grid = T, show.axes = T, ...)
 }
@@ -35,6 +35,10 @@ mdaplot(data, type = 'p', single.x = T, cgroup = NULL, colmap = 'default'
   \item{ylab}{a title for the y axis (same as \code{plot} parameter).}
   \item{main}{an overall title for the plot (same as \code{plot} parameter).}
   \item{labels}{a vector with text labels for data points (if NULL, row names will be used).}
+  \item{xticks}{tick values for x axis.}
+  \item{xticklabels}{labels for x ticks.}
+  \item{yticks}{tick values for y axis.}
+  \item{yticklabels}{labels for y ticks.}
   \item{show.labels}{logical, show or not labels for the data objects.}
   \item{show.colorbar}{logical, show or not colorbar legend if color grouping is on.}
   \item{show.lines}{vector with two coordinates (x, y) to show horizontal and vertical line cross the point.}
@@ -81,6 +85,9 @@ y3 = x3^2 * 1.4
 
 mdaplot(cbind(x1, y1, x2, y2, x3, y3), type = 'l', single.x = F)
 
+# change tick values and labels for x axis
+mdaplot(cbind(x1, y1, x2, y2, x3, y3), type = 'l', single.x = F,
+        xticks = c(-8, 0, 8), xticklabels = c('Negative', 'Zero', 'Positive'))
 
 # make line plot of the spectra with coloring by concentration of first component
 # using different color maps

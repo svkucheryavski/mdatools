@@ -1,17 +1,17 @@
 ## class and methods for Principal Component Analysis based methods ##
 
-pca = function(data, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL, 
+pca = function(x, ncomp = 20, center = T, scale = F, cv = NULL, x.test = NULL, 
                alpha = 0.05, method = 'svd', info = '', ...)
 {
    # Calibrate and validate a PCA model.
    #
    # Arguments:
-   #   data: a matrix with data values
+   #   x: a matrix with data values
    #   ncomp: maximum number of components to calculate
    #   center: logical, mean center or not data values
    #   scale: logical, standardize or not data values
    #   cv: number of segments for random cross-validation (1 - for full CV)
-   #   test.data: a matrix with data values for test set validation
+   #   x.test: a matrix with data values for test set validation
    #   alpha: a significance level for Q2 residuals
    #   method: method to estimate principal component space (only SVD is supported so far)
    #   info: a short text with information about the model
@@ -19,38 +19,38 @@ pca = function(data, ncomp = 20, center = T, scale = F, cv = NULL, test.data = N
    # Returns:
    #   model: a PCA model (object of pca class)
       
-   data = as.matrix(data)
+   x = as.matrix(x)
 
    # check if data has missing values
-   if (sum(is.na(data)) > 0)
+   if (sum(is.na(x)) > 0)
    {
       warning('Data has missing values, will try to fix using pca.mvreplace.')
-      data = pca.mvreplace(data, center = center, scale = scale)
+      x = pca.mvreplace(x, center = center, scale = scale)
    }   
    
    # correct maximum number of components
-   ncomp = min(ncomp, ncol(data), nrow(data) - 1)
+   ncomp = min(ncomp, ncol(x), nrow(x) - 1)
 
    # calibrate model  
-   model = pca.cal(data, ncomp, center = center, scale = scale, method = method)
+   model = pca.cal(x, ncomp, center = center, scale = scale, method = method)
    model$ncomp = ncomp
    model$ncomp.selected = model$ncomp
    model$info = info
    model$alpha = alpha
    
    # apply model to calibration set
-   model$calres = predict.pca(model, data)
+   model$calres = predict.pca(model, x)
    
    # do cross-validation if needed
    if (!is.null(cv))
-      model$cvres = pca.crossval(model, data, cv, center = center, scale = scale)
+      model$cvres = pca.crossval(model, x, cv, center = center, scale = scale)
    
    # apply model to test set if provided
-   if (!is.null(test.data))
-      model$testres = predict.pca(model, test.data)
+   if (!is.null(x.test))
+      model$testres = predict.pca(model, x.test)
    
    # calculate and assign limit values for T2 and Q2 residuals
-   lim = ldecomp.getResLimits(model$eigenvals, nrow(data), model$ncomp.selected, model$alpha)
+   lim = ldecomp.getResLimits(model$eigenvals, nrow(x), model$ncomp, model$alpha)
    model$T2lim = lim$T2lim
    model$Q2lim = lim$Q2lim
    
@@ -58,6 +58,18 @@ pca = function(data, ncomp = 20, center = T, scale = F, cv = NULL, test.data = N
    class(model) = "pca"
    
    model
+}
+
+getCalibrationData.pca = function(model)
+{
+   x = model$calres$scores %*% t(model$loadings) + model$calres$residuals
+   
+   if (is.numeric(attr(x, 'prep:scale')))
+      x = sweep(x, 2L, attr(x, 'prep:scale'), '*', check.margin = F)
+   
+   if (is.numeric(attr(x, 'prep:center')))
+      x = sweep(x, 2L, attr(x, 'prep:center'), '+', check.margin = F)
+   
 }
 
 selectCompNum.pca = function(model, ncomp)
@@ -75,10 +87,6 @@ selectCompNum.pca = function(model, ncomp)
       stop('Wrong number of selected components!')
    
    model$ncomp.selected = ncomp   
-   lim = ldecomp.getResLimits(model$eigenvals, nrow(model$calres$scores), 
-                              model$ncomp.selected, model$alpha)
-   model$T2lim = lim$T2lim
-   model$Q2lim = lim$Q2lim         
    
    model$calres$ncomp.selected = ncomp
    
@@ -91,13 +99,13 @@ selectCompNum.pca = function(model, ncomp)
    model
 }
 
-pca.mvreplace = function(data, center = T, scale = F, maxncomp = 7,
+pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
                          expvarlim = 0.95, covlim = 10^-6, maxiter = 100)
 {
    # Makes missing values replacement with PCA based estimations.
    #
    # Arguments:
-   #   data: a matrix with data values
+   #   x: a matrix with data values
    #   center: logical, mean center data or not
    #   scale: logical, standardize data or not
    #   maxncomp: maximum number of components to calculate for PCA estimation
@@ -106,33 +114,33 @@ pca.mvreplace = function(data, center = T, scale = F, maxncomp = 7,
    #   maxiter: maximum number of iterations if covergence is not reached
    #
    # Returns:
-   #   cdata: data matrix with replaced missing values 
+   #   x.rep: data matrix with replaced missing values 
    
-   cdata = data
-   mvidx = is.na(cdata)
+   x.rep = x
+   mvidx = is.na(x.rep)
 
    # calculate number of missing values for every variable
    # and make initial estimates with mean values
-   for (i in 1:ncol(data))
+   for (i in 1:ncol(x))
    {
-      mv = is.na(data[, i])
+      mv = is.na(x[, i])
       
-      if (sum(mv)/length(data[, i]) > 0.2)
+      if (sum(mv)/length(x[, i]) > 0.2)
          stop(sprintf('To many missing values in column #%d', i))
       
-      cdata[mv, i] = mean(data[, i], na.rm = T)        
+      x.rep[mv, i] = mean(x[, i], na.rm = T)        
    }  
    
    # autoscale 
-   cdata = scale(cdata, center = center, scale = scale)
+   x.rep = scale(x.rep, center = center, scale = scale)
    
    if (scale == T)
-      gsd = attr(cdata, 'scaled:scale')
+      gsd = attr(x.rep, 'scaled:scale')
    
    if (center == T)
-      gmean = attr(cdata, 'scaled:center');         
+      gmean = attr(x.rep, 'scaled:center');         
    
-   data = cdata
+   x = x.rep
    
    n = 1
    scoresp = 0
@@ -143,10 +151,10 @@ pca.mvreplace = function(data, center = T, scale = F, maxncomp = 7,
       n = n + 1
       
       # rescale data on every iteration
-      cdata = scale(cdata, center = T, scale = F)
-      lmean = attr(cdata, 'scaled:center')
+      x.rep = scale(x.rep, center = T, scale = F)
+      lmean = attr(x.rep, 'scaled:center')
       
-      res = pca.svd(cdata, maxncomp)
+      res = pca.svd(x.rep, maxncomp)
       
       expvar = cumsum(res$eigenvals/sum(res$eigenvals))
       ncomp = min(which(expvar >= expvarlim), maxncomp)
@@ -159,14 +167,14 @@ pca.mvreplace = function(data, center = T, scale = F, maxncomp = 7,
       # get and trancate scores and loadings and reestimate the values
       scoresp = scores
       loadings = res$loadings[, 1:ncomp]      
-      scores = cdata %*% loadings
-      newdata = scores %*% t(loadings)   
+      scores = x.rep %*% loadings
+      x.new = scores %*% t(loadings)   
       
       # remove centering
-      newdata = sweep(newdata, 2L, lmean, '+', check.margin = F)
+      x.new = sweep(x.new, 2L, lmean, '+', check.margin = F)
 
-      cdata = data
-      cdata[mvidx] = newdata[mvidx]
+      x.rep = x
+      x.rep[mvidx] = x.new[mvidx]
       
       if (n > 2)
       {
@@ -178,89 +186,93 @@ pca.mvreplace = function(data, center = T, scale = F, maxncomp = 7,
    
    # rescale the data back and return
    if (scale == T)
-      cdata = sweep(cdata, 2L, gsd, '*', check.margin = F)
+      x.rep = sweep(x.rep, 2L, gsd, '*', check.margin = F)
    
    if (center == T)
-      cdata = sweep(cdata, 2L, gmean, '+', check.margin = F)
+      x.rep = sweep(x.rep, 2L, gmean, '+', check.margin = F)
 
-   cdata
+   x.rep
 }
 
-pca.cal = function(data, ncomp, center = T, scale = F, method = 'svd')
+pca.cal = function(x, ncomp, center = T, scale = F, method = 'svd', simca = F)
 {
    # Calibrates a PCA model.
    #
    # Arguments:
-   #   data: a matrix with data values  
+   #   x: a matrix with data values  
    #   ncomp: number of principal components to calculate
    #   center: logical, mean center the data values or not
    #   scale: logical, standardize the data values or not
    #   method: which method to use for computing principal component space
+   #   simca: logical, is model build for SIMCA or not
    #
    # Returns:
    #   model: a calibrated PCA model 
    
    
-   data = prep.autoscale(data, center = center, scale = scale)
-   model = pca.svd(data, ncomp)
+   x = prep.autoscale(x, center = center, scale = scale)
+   model = pca.svd(x, ncomp)
    
    model$tnorm = sqrt(colSums(model$scores ^ 2)/(nrow(model$scores) - 1));   
    
-   rownames(model$loadings) = colnames(data)
+   rownames(model$loadings) = colnames(x)
    colnames(model$loadings) = paste('Comp', 1:ncol(model$loadings))
-   model$center = attr(data, 'prep:center')
-   model$scale = attr(data, 'prep:scale')
-
+   model$center = attr(x, 'prep:center')
+   model$scale = attr(x, 'prep:scale')
+   
+   if (simca)
+      model$modpower = pca.getModellingPower(model, x)
+   
    model
 }  
 
-pca.svd = function(data, ncomp = NULL)
+pca.svd = function(x, ncomp = NULL)
 {
    # Singulare Value Decomposition based PCA algorithm.
    #
    # Arguments:
-   #   data: a matrix with data values (preprocessed)  
+   #   x: a matrix with data values (preprocessed)  
    #   ncomp: number of components to calculate
    #
    # Returns:
    #   res: a list with scores, loadings and eigenvalues of the components 
    
    if (is.null(ncomp)) 
-      ncomp = min(ncol(data), nrow(data) - 1)
+      ncomp = min(ncol(x), nrow(x) - 1)
    else
-      ncomp = min(ncomp, ncol(data), nrow(data) - 1)
+      ncomp = min(ncomp, ncol(x), nrow(x) - 1)
    
-   s = svd(data)
+   s = svd(x)
    loadings = s$v[, 1:ncomp]
       
    res = list(
       loadings = loadings,
-      scores = data %*% loadings,
-      eigenvals = (s$d^2)/(nrow(data) - 1)
+      scores = x %*% loadings,
+      eigenvals = (s$d^2)/(nrow(x) - 1)
    )
 }
 
-pca.nipals = function(data, ncomp)
+pca.nipals = function(x, ncomp)
 {
    # NIPALS based PCA algorithm.
    #
    # Arguments:
-   #   data: a matrix with data values (preprocessed)  
+   #   x: a matrix with data values (preprocessed)  
    #   ncomp: number of components to calculate
    #
    # Returns:
    #   res: a list with scores, loadings and eigenvalues of the components 
    
    
-   nobj = nrow(data)
-   nvar = ncol(data)   
+   nobj = nrow(x)
+   nvar = ncol(x)   
    ncomp = min(ncomp, nobj - 1, nvar)
    
    scores = matrix(0, nrow = nobj, ncol = ncomp)
    loadings = matrix(0, nrow = nvar, ncol = ncomp)
    eigenvals = rep(0, ncomp);
    
-   E = data
+   E = x
    for (i in 1:ncomp)
    {      
       ind = which.max(apply(E, 2, sd))
@@ -290,22 +302,22 @@ pca.nipals = function(data, ncomp)
    )   
 }
 
-pca.pp = function(data, ncomp)
+pca.pp = function(x, ncomp)
 {
    # Projection Pursuite based PCA algorithm.
    #
    # Arguments:
-   #   data: a matrix with data values (preprocessed)  
+   #   x: a matrix with data values (preprocessed)  
    #   ncomp: number of components to calculate
 }
 
-pca.crossval = function(model, data, cv, center = T, scale = F)
+pca.crossval = function(model, x, cv, center = T, scale = F)
 {
    # Cross-validates a PCA model
    #
    # Arguments:
    #   model: a PCA model (object of class pca)  
-   #   data: a matrix with data values
+   #   x: a matrix with data values
    #   cv: number of segments for cross-validation (1 for full CV)
    #   center: logical, mean center data values or not
    #   scale: logical, standardize data values or not
@@ -314,8 +326,8 @@ pca.crossval = function(model, data, cv, center = T, scale = F)
    #   res: results of cross-validation (object of class pcares) 
       
    ncomp = model$ncomp   
-   nobj = nrow(data)
-   nvar = ncol(data)
+   nobj = nrow(x)
+   nvar = ncol(x)
    
    # get matrix with indices for cv segments
    idx = crossval(nobj, cv)
@@ -332,44 +344,50 @@ pca.crossval = function(model, data, cv, center = T, scale = F)
       
       if (length(ind) > 0)
       {   
-         datac = data[-ind, , drop = F]
-         datat = data[ind, , drop = F]
+         x.cal = x[-ind, , drop = F]
+         x.val = x[ind, , drop = F]
          
-         m = pca.cal(datac, ncomp, center, scale)               
-         res = predict.pca(m, datat, cv = T)
+         m = pca.cal(x.cal, ncomp, center, scale)               
+         res = predict.pca(m, x.val, cv = T)
          Q2[ind, ] = res$Q2
          T2[ind, ] = res$T2
       }
    }  
    
-   rownames(Q2) = rownames(T2) = rownames(data)
+   rownames(Q2) = rownames(T2) = rownames(x)
    colnames(Q2) = colnames(T2) = colnames(model$scores)
 
    # in CV results there are no scores only residuals and variances
    res = pcares(NULL, NULL, NULL, model$calres$totvar, model$tnorm, model$ncomp.selected,
                 T2, Q2)
+   res$Q2lim = model$Q2lim
+   res$T2lim = model$T2lim
+   
+   res
 }  
 
-predict.pca = function(model, data, cv = F)
+predict.pca = function(model, x, cv = F)
 {
    # Applies PCA model to a data.
    #
    # Arguments:
    #   model: a PCA model (object of class pca)  
-   #   data: a matrix with data values
+   #   x: a matrix with data values
    #   cv: logical, will prediction be used for cross-validation or not
    #
    # Returns:
    #   res: list with PCA results or (for CV) residual distances for each object 
       
-   data = prep.autoscale(data, model$center, model$scale)
-   scores = data %*% model$loadings
-   residuals = data - scores %*% t(model$loadings)
+   x = prep.autoscale(x, model$center, model$scale)
+   scores = x %*% model$loadings
+   residuals = x - scores %*% t(model$loadings)
    
    if (cv == F)
    {   
-      totvar = sum(data^2)
+      totvar = sum(x^2)
       res = pcares(scores, model$loadings, residuals, totvar, model$tnorm, model$ncomp.selected)
+      res$Q2lim = model$Q2lim
+      res$T2lim = model$T2lim
    }   
    else
    {
@@ -442,8 +460,8 @@ plotCumVariance.pca = function(model, xlab = 'Components', ylab = 'Explained var
    plotVariance.pca(model, variance = 'cumexpvar', xlab = xlab, ylab = ylab, main = main, ...)   
 }
 
-plotScores.pca = function(model, comp = c(1, 2), main = 'Scores', xlab = NULL, ylab = NULL,
-                          show.labels = F, show.legend = T,
+plotScores.pca = function(model, comp = c(1, 2), type = 'p', main = 'Scores', xlab = NULL, 
+                          ylab = NULL, show.labels = F, show.legend = T,
                           show.axes = T, ...)
 {
    # Makes a scores plot.
@@ -451,6 +469,7 @@ plotScores.pca = function(model, comp = c(1, 2), main = 'Scores', xlab = NULL, y
    # Arguments:
    #   model: a PCA model (object of class pca)  
    #   comp: one or two numbers - which components to make the plot for
+   #   type: type of the plot
    #   main: main title for the plot
    #   xlab: label for x axis
    #   ylab: label for y axis
@@ -491,7 +510,7 @@ plotScores.pca = function(model, comp = c(1, 2), main = 'Scores', xlab = NULL, y
             legend = c('cal', 'test')
       }   
       
-      mdaplotg(data, type = 'p', main = main, show.labels = show.labels, legend = legend, 
+      mdaplotg(data, type = type, main = main, show.labels = show.labels, legend = legend, 
                xlab = xlab, ylab = ylab, ...)
    }
    else if (ncomp == 2)
@@ -527,7 +546,7 @@ plotScores.pca = function(model, comp = c(1, 2), main = 'Scores', xlab = NULL, y
       else
          show.lines = F
 
-      mdaplotg(data, type = 'p', main = main, show.labels = show.labels, legend = legend, 
+      mdaplotg(data, type = type, main = main, show.labels = show.labels, legend = legend, 
                show.lines = show.lines, xlab = xlab, ylab = ylab, ...)
       }
    else
@@ -551,15 +570,22 @@ plotResiduals.pca = function(model, ncomp = NULL, main = NULL, xlab = 'T2',
    #   show.legend: logical, show or not legend on the plot
    #   show.limits: logical, show or not statistical limits on the plot   
    
+   if (is.null(main))
+   {
+      if (is.null(ncomp))
+         main = 'Residuals'
+      else
+         main = sprintf('Residuals (ncomp = %d)', ncomp)      
+   }   
    
-   if (show.limits == T && (is.null(ncomp) || ncomp == model$ncomp.selected))
-      show.lines = c(model$T2lim, model$Q2lim)
-   else
-      show.lines = F
-
    if (is.null(ncomp))
       ncomp = model$ncomp.selected
-
+   
+   if (show.limits == T)
+      show.lines = c(model$T2lim[1, ncomp], model$Q2lim[1, ncomp])
+   else
+      show.lines = F
+   
    if (ncomp > model$ncomp || ncomp < 1)
       stop('Wrong number of components!')
 
@@ -586,9 +612,6 @@ plotResiduals.pca = function(model, ncomp = NULL, main = NULL, xlab = 'T2',
 
    if (show.legend == F)
       legend = NULL
-   
-   if (is.null(main))
-      main = sprintf('Residuals (ncomp = %d)', ncomp)
    
    mdaplotg(data, main = main, xlab = xlab, ylab = ylab,
             show.labels = show.labels, legend = legend, show.lines = show.lines, ...)
@@ -638,11 +661,12 @@ plotLoadings.pca = function(model, comp = c(1, 2), type = NULL, main = 'Loadings
          ylab = 'Loadings'
       
       data = cbind(1:nrow(model$loadings), model$loadings[, comp, drop = F])            
+      rownames(data) = rownames(model$loadings)
       
       if (show.legend == T)
          legend = colnames(data)[-1];
 
-      mdaplotg(data, legend = legend, type = type, 
+      mdaplotg(data, legend = legend, type = type, show.labels = show.labels, 
                main = main, ylab = ylab, xlab = xlab, ...)
    }   
 }
@@ -688,7 +712,7 @@ print.pca = function(model, ...)
    cat('$loadings - matrix with loadings\n')
    cat('$eigenvals - eigenvalues for components\n')
    cat('$ncomp - number of calculated components\n')
-   cat('$ncomp.selected - selected number of components\n')
+   cat('$ncomp.selected - number of selected components\n')
    cat('$center - values for centering data\n')
    cat('$scale - values for scaling data\n')
    cat('$cv - number of segments for cross-validation\n')
@@ -702,8 +726,7 @@ print.pca = function(model, ...)
    if (!is.null(model$testres))
    {
       cat('$testres - results for test set\n')      
-   }   
-   
+   }    
 }
 
 summary.pca = function(model)

@@ -1,0 +1,113 @@
+\name{plsda}
+\alias{plsda}
+\title{Partial Least Squares Discriminant Analysis}
+
+\usage{
+  plsda(x, c, ncomp = 20, center = T, scale = F, cv = NULL,
+    x.test = NULL, c.test = NULL, method = 'simpls', info = '')
+}
+
+\description{
+\code{plsda} is used to calibrate, validate and use of partial least squares discrimination analysis (PLS-DA) model.
+}
+
+\arguments{
+  \item{x}{matrix with predictors.}
+  \item{c}{vector with class values (either class number or class name as text for each object).}
+  \item{ncomp }{maximum number of components to calculate.}
+  \item{center }{logical, center or not predictors and response values.}
+  \item{scale }{logical, scale (standardize) or not predictors and response values.}
+  \item{cv}{number of segments for cross-validation (if cv = 1, full cross-validation will be used).}
+  \item{x.test }{matrix with predictors for test set.}
+  \item{c.test }{vector with reference class values for test set (same format as calibration values).}
+  \item{method }{method for calculating PLS model.}
+  \item{info }{short text with information about the model.}
+}
+
+\value{
+Returns an object of \code{plsda} class with following fields (most inherited from class \code{pls}):
+   \item{ncomp }{number of components included to the model.} 
+   \item{ncomp.selected }{selected (optimal) number of components.} 
+   \item{xloadings }{matrix with loading values for x decomposition.} 
+   \item{yloadings }{matrix with loading values for y (c)  decomposition.} 
+   \item{weights }{matrix with PLS weights.} 
+   \item{coeffs }{matrix with regression coefficients calculated for each component.}   
+   \item{info }{information about the model, provided by user when build the model.} 
+   \item{calres }{an object of class \code{\link{plsdares}} with PLS-DA results for a calibration data.} 
+   \item{testres }{an object of class \code{\link{plsdares}} with PLS-DA results for a test data, if it was provided.} 
+   \item{cvres }{an object of class \code{\link{plsdares}} with PLS-DA results for cross-validation, if this option was chosen.} 
+}
+
+\details{
+The \code{plsda} class is based on \code{pls} with extra functions and plots covering classification functionality. All plots for \code{pls}
+can be used. E.g. of you want to see the real predicted values (y in PLS) instead of classes use \code{plotPredictions.pls(model)} instead
+of \code{plotPredictions(model)}.
+}
+
+\seealso{
+Specific methods for \code{plsda} class:
+  \tabular{ll}{
+      \code{print.plsda} \tab prints information about a \code{pls} object.\cr
+      \code{summary.plsda} \tab shows performance statistics for the model.\cr
+      \code{plot.plsda} \tab shows plot overview of the model.\cr
+      \code{\link{predict.plsda}} \tab applies PLS-DA model to a new data.\cr
+   }
+
+Methods, inherited from \code{classmodel} class:
+  \tabular{ll}{
+      \code{\link{plotPredictions.classmodel}} \tab shows plot with predicted values.\cr
+      \code{\link{plotSensitivity.classmodel}} \tab shows sensitivity plot.\cr
+      \code{\link{plotSpecificity.classmodel}} \tab shows specificity plot.\cr
+      \code{\link{plotMisclassified.classmodel}} \tab shows misclassified ratio plot.\cr
+   }
+   
+   See also methods for class \code{\link{pls}}.
+}
+
+\author{
+Sergey Kucheryavskiy (svkucheryavski@gmail.com)
+}
+
+\examples{
+## Make a PLS-DA model with full cross-validation and show model overview
+
+library(mdatools)
+
+# make a calibration set from iris data (3 classes)
+# use names of classes as class vector
+x.cal = iris[seq(1, nrow(iris), 2), 1:4] 
+c.cal = iris[seq(1, nrow(iris), 2), 5]
+
+model = plsda(x.cal, c.cal, ncomp = 3, cv = 1, info = 'IRIS data example')
+model = slectCompNum(model, 1)
+
+# show summary and basic model plots
+print(model)
+summary(model)
+plot(model)
+
+# summary and model plots for another class
+summary(model, nc = 2)
+plot(model, nc = 2)
+
+# summary and model plot for specific class and number of components
+summary(model, nc = 3, ncomp = 3)
+plot(model, nc = 3, ncomp = 3)
+
+# show performance plots
+par(mfrow = c(2, 2))
+plotSpecificity(model)
+plotSensitivity(model)
+plotMisclassified(model)
+plotMisclassified(model, nc = 2)
+par(mfrow = c(1, 1))
+
+# show both class and y values predictions
+par(mfrow = c(2, 2))
+plotPredictions(model)
+plotPredictions(model, res = 'calres', ncomp = 2, nc = 2)
+plotPredictions.pls(model)
+plotPredictions.pls(model, ncomp = 2, ny = 2)
+par(mfrow = c(1, 1))
+}
+

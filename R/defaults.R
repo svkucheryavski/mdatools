@@ -1,5 +1,60 @@
 # default function for interclass methods #
 
+getSelectedComponents = function(obj, ncomp = NULL)
+{
+   UseMethod("getSelectedComponents")
+}  
+
+plotCooman = function(object, ...)
+{
+   UseMethod("plotCooman")
+}
+
+plotModelDistance = function(object, ...)
+{
+   UseMethod("plotModelDistance")
+}
+
+plotDiscriminationPower = function(object, ...)
+{
+   UseMethod("plotDiscriminationPower")      
+}  
+
+getCalibrationData = function(object, ...)
+{
+   UseMethod("getCalibrationData")   
+}  
+
+plotModellingPower = function(object, ...)
+{
+   UseMethod("plotModellingPower")   
+}  
+
+plotMisclassified = function(object, ...)
+{
+   UseMethod('plotMisclassified')
+}
+
+plotSpecificity = function(object, ...)
+{
+   UseMethod("plotSpecificity")   
+}  
+
+plotSensitivity = function(object, ...)
+{
+   UseMethod("plotSensitivity")   
+}
+
+plotPerformance = function(object, ...)
+{
+   UseMethod("plotPerformance")   
+}  
+
+showPredictions = function(object, ...)
+{
+   UseMethod("showPredictions")   
+}  
+
 selectCompNum = function(object, ...)
 {   
    UseMethod("selectCompNum")

@@ -4,7 +4,7 @@
 
 \usage{
   pls(x, y, ncomp = 20, center = T, scale = F, cv = NULL,
-    test.x = NULL, test.y = NULL, method = 'simpls', info = '')
+    x.test = NULL, y.test = NULL, method = 'simpls', info = '')
 }
 
 \description{
@@ -18,8 +18,8 @@
   \item{center }{logical, center or not predictors and response values.}
   \item{scale }{logical, scale (standardize) or not predictors and response values.}
   \item{cv}{number of segments for cross-validation (if cv = 1, full cross-validation will be used).}
-  \item{test.x }{matrix with predictors for test set.}
-  \item{test.y }{matrix with responses for test set.}
+  \item{x.test }{matrix with predictors for test set.}
+  \item{y.test}{matrix with responses for test set.}
   \item{method }{method for calculating PLS model.}
   \item{info }{short text with information about the model.}
 }

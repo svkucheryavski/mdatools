@@ -14,7 +14,8 @@ mdaplotg(data, type = 'p', single.x = T, colmap = 'default',
    pch = 16, lty = 1, lwd = 1, bwd = 0.8, ylim = NULL, xlim = NULL, 
    xlab = NA, ylab = NA, main = NULL, 
    legend = NULL, legend.position = "topright", 
-   labels = NULL, show.labels = F, show.lines = F, show.grid = T, ...)
+   labels = NULL, xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
+   show.labels = F, show.lines = F, show.grid = T, ...)
 }
 
 \arguments{
@@ -34,6 +35,10 @@ mdaplotg(data, type = 'p', single.x = T, colmap = 'default',
   \item{legend}{a vector with legend elements (if NULL, no legend will be shown).}
   \item{legend.position}{position of the legend ('topleft', 'topright', 'top', 'bottomleft', 'bottomright', 'bottom').}
   \item{labels}{a matrix with text labels for data points (if NULL, row names for each group will be used).}
+  \item{xticks}{tick values for x axis.}
+  \item{xticklabels}{labels for x ticks.}
+  \item{yticks}{tick values for y axis.}
+  \item{yticklabels}{labels for y ticks.}
   \item{show.labels}{logical, show or not labels for the data objects.}
   \item{show.lines}{vector with two coordinates (x, y) to show horizontal and vertical line cross the point.}
   \item{show.grid}{logical, show or not a grid for the plot.}
@@ -77,6 +82,10 @@ mdaplotg(pdata, legend = c('female', 'male'), pch = c(17, 19), colmap = c('green
 mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', colmap = 'gray')
 mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', show.labels = T)
 par(mfrow = c(1, 1))
+
+# change tick values for x axis
+mdaplotg(pdata, legend = c('female', 'male'), xticks = c(160, 175, 190), 
+         xticklabels = c('Short', 'Medium', 'Tall'))
 
 # show line plots with spectra from calibration and test set of the Simdata
 

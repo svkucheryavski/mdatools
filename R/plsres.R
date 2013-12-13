@@ -193,21 +193,17 @@ plot.plsres = function(obj, ncomp = NULL, ny = 1, show.labels = F, ...)
    if (is.null(obj$y.ref))
    {
       par(mfrow = c(1, 2))
-      plotXScores(obj, ...)
-      plotPredictions(obj, ncomp = ncomp, ny = ny, ...)
+      plotXResiduals(obj, ...)
+      plotPredictions.plsres(obj, ncomp = ncomp, ny = ny, ...)
       par(mfrow = c(1, 1))      
    }  
    else
    {   
       par(mfrow = c(2, 2))
-      if (!is.null(obj$xdecomp$scores))
-         plotXScores(obj, ...)      
-      else
-         plotXVariance(obj, ...)   
-      
+      plotXResiduals(obj, ncomp = ncomp, ...) 
       plotYVariance(obj, ...)   
       plotRMSE(obj, ny = ny, ...)
-      plotPredictions(obj, ncomp = ncomp, ny = ny, ...)
+      plotPredictions.plsres(obj, ncomp = ncomp, ny = ny, ...)
       par(mfrow = c(1, 1))
    }
 }   
