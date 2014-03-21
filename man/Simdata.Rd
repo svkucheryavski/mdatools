@@ -1,5 +1,5 @@
-\name{Simdata}
-\alias{Simdata}
+\name{simdata}
+\alias{simdata}
 \docType{data}
 \title{
 Spectral data of polyaromatic hydrocarbons mixing
@@ -8,14 +8,15 @@ Spectral data of polyaromatic hydrocarbons mixing
 Simdata contains training and test set with spectra and concentration values of polyaromatic hydrocarbons mixings.
 }
 
-\usage{data(Simdata)}
+\usage{data(simdata)}
 \format{
-   The data includes four matrices:
+   The data is a list with following fields:
    \tabular{rlll}{
-    \code{spectra.c} \tab a matrix (100x150) with spectral values for the training set. \cr
-    \code{spectra.t} \tab a matrix (100x150) with spectral values for the test set. \cr
-    \code{conc.c} \tab a matrix (100x3) with concentration of components for the training set. \cr
-    \code{conc.t} \tab a matrix (100x3) with concentration of components for the test set. \cr
+    \code{$spectra.c} \tab a matrix (100x150) with spectral values for the training set. \cr
+    \code{$spectra.t} \tab a matrix (100x150) with spectral values for the test set. \cr
+    \code{$conc.c} \tab a matrix (100x3) with concentration of components for the training set. \cr
+    \code{$conc.t} \tab a matrix (100x3) with concentration of components for the test set. \cr
+    \code{$wavelength} \tab a vector with spectra wavelength in nm. \cr
   }
 }
 

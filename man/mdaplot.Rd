@@ -1,6 +1,5 @@
 \name{mdaplot}
 \alias{mdaplot}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Plotting function for a single set of objects
 }
@@ -10,18 +9,16 @@ Plotting function for a single set of objects
 }
 
 \usage{
-mdaplot(data, type = 'p', single.x = T, cgroup = NULL, colmap = 'default'
-   pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8, 
-   xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, main = NULL,
-   labels = NULL, xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
-   show.labels = F, show.colorbar = T, show.lines = NULL, 
-   show.grid = T, show.axes = T, ...)
+mdaplot(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8, 
+   cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
+   main = NULL, xlab = NULL, ylab = NULL, single.x = T, 
+   show.labels = F, show.colorbar = T, show.lines = F, show.grid = T, show.axes = T, 
+   xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, ...)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{data}{a matrix with data values.}
   \item{type}{type of the plot ('p', 'l', 'b', 'h')}
-  \item{single.x}{logical, is first column of data matrix used for x values (or every odd)?}
   \item{cgroup}{a vector with values to use for make color groups.}
   \item{colmap}{a colormap to use for coloring the plot items.}
   \item{pch}{a character for markers (same as \code{plot} parameter).}
@@ -35,29 +32,31 @@ mdaplot(data, type = 'p', single.x = T, cgroup = NULL, colmap = 'default'
   \item{ylab}{a title for the y axis (same as \code{plot} parameter).}
   \item{main}{an overall title for the plot (same as \code{plot} parameter).}
   \item{labels}{a vector with text labels for data points (if NULL, row names will be used).}
-  \item{xticks}{tick values for x axis.}
-  \item{xticklabels}{labels for x ticks.}
-  \item{yticks}{tick values for y axis.}
-  \item{yticklabels}{labels for y ticks.}
+  \item{single.x}{logical, is first column of data matrix used for x values (or every odd)?}
   \item{show.labels}{logical, show or not labels for the data objects.}
   \item{show.colorbar}{logical, show or not colorbar legend if color grouping is on.}
   \item{show.lines}{vector with two coordinates (x, y) to show horizontal and vertical line cross the point.}
   \item{show.grid}{logical, show or not a grid for the plot.}
   \item{show.axes}{logical, make a normal plot or show only elements (markers, lines, bars) without axes.}
-  \item{\dots}{}
+  \item{xticks}{tick values for x axis.}
+  \item{xticklabels}{labels for x ticks.}
+  \item{yticks}{tick values for y axis.}
+  \item{yticklabels}{labels for y ticks.}
+  \item{...}{other plotting arguments}
 }
 
 \details{
-Most of the parameters are similar to what are used with \code{plot} function. The differences are described below.
+Most of the parameters are similar to what are used with standard \code{plot} function. The differences are described below.
 
-The function makes a plot of one set of values. It can be a set of points (scatter plot), bars, lines or scatter-lines. The data is organized as a matrix, in fact for scatter and bar plot only two columns are needed, but to plot of set of lines there are two ways to organise the data matrix.
+The function makes a plot of one set of objects. It can be a set of points (scatter plot), bars, lines or scatter-lines. The data is organized as a matrix. For scatter and bar plot only two columns are needed, but to plot set of lines there are two ways to organise the data matrix.
 
-If \code{single.x = T} it means first column of the matrix contains x values, as the rest columns contain y values (one column - one line, e.g. [x y1 y2 y3]). If \code{single.x = F} it means every odd column of matrix contains x values and every even column - y values of a line (e.g. [x1 y1 x2 y2 x3 y3]). This option is needed if lines have different x values.
+If parameter \code{single.x = T} it means first column of the matrix contains x values, as the other columns contain y values (one column - one line, e.g. [x y1 y2 y3]). If \code{single.x = F} it means every odd column of matrix contains x values and every even column - y values of a line (e.g. [x1 y1 x2 y2 x3 y3]). This option is needed if lines have different x values.
 
 The function allows to colorize lines and points according to values of a parameter \code{cgroup}. The parameter must be a vector with the same elements as number of objects (rows) in the data. The values are divided into up to eight intervals and for each interval a particular color from a selected color scheme is assigned. Parameter \code{show.colorbar} allows to turn off and on a color bar legend for this option.
 
 The used color scheme is defined by the \code{colmap} parameter. The default scheme is based on color brewer (colorbrewer2.org) diverging scheme with eight colors. There is also a gray scheme (\code{colmap = 'gray'}) and user can define its own just by specifing the needed sequence of colors (e.g. \code{colmap = c('red', 'yellow', 'green')}, two colors is minimum). The scheme will then be generated automatically as a gradient among the colors.  
 
+Besides that the function allows to change tick values and corresponding tick labels for x and y axis, see examples for more details.
 }
 
 \author{
@@ -65,16 +64,15 @@ Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }
 
 \seealso{
-\code{\link{mdaplotg}} - to make plot with several sets of data (groups).
+\code{\link{mdaplotg}} - to make for several sets of data objects (groups of objects).
 }
 
 \examples{
-## Examples of using mdaplot function
+### Examples of using mdaplot function
 
 library(mdatools)
-data(Simdata)
 
-# make a line plot for y = x^2 with different x values for each line
+## 1. Make a line plot for y = x^2 with different x values for each line
 
 x1 = seq(-10, 10, length = 100) 
 y1 = x1^2
@@ -83,39 +81,48 @@ y2 = x2^2 * 1.2
 x3 = seq(-8, 8, length = 100) + 2
 y3 = x3^2 * 1.4
 
-mdaplot(cbind(x1, y1, x2, y2, x3, y3), type = 'l', single.x = F)
+mdaplot(cbind(x1, y1, x2, y2, x3, y3), type = 'l', single.x = FALSE)
 
-# change tick values and labels for x axis
-mdaplot(cbind(x1, y1, x2, y2, x3, y3), type = 'l', single.x = F,
+## 2. Change tick values and labels for x axis
+mdaplot(cbind(x1, y1, x2, y2, x3, y3), type = 'l', single.x = FALSE,
         xticks = c(-8, 0, 8), xticklabels = c('Negative', 'Zero', 'Positive'))
 
-# make line plot of the spectra with coloring by concentration of first component
-# using different color maps
+
+## 3. Make a line plot of the spectra with coloring by concentration of first component
+## using different color maps
+
+data(simdata)
+
+# first column of matrix val will contain the wavelength
+# and the last columns - spectra from calibration set
+val = cbind(simdata$wavelength, t(simdata$spectra.c))
+
+# concentration will be used for color groups
+c1 = simdata$conc.c[, 1] 
 
 par(mfrow = c(2, 2))
-mdaplot(cbind(wavelength, t(spectra.c)), type = 'l', cgroup = conc.c[, 1])
-mdaplot(cbind(wavelength, t(spectra.c)), type = 'l', cgroup = conc.c[, 1], 
-   colmap = 'gray', show.colorbar = F)
-mdaplot(cbind(wavelength, t(spectra.c)), type = 'l', cgroup = conc.c[, 1], 
-   colmap = c('red', 'green'))
-mdaplot(cbind(wavelength, t(spectra.c)), type = 'l', cgroup = conc.c[, 1], 
-   colmap = c('#ffff00', '#ff00ff', '#00ffff'))
+mdaplot(val, type = 'l', cgroup = c1)
+mdaplot(val, type = 'l', cgroup = c1, colmap = 'gray', show.colorbar = FALSE)
+mdaplot(val, type = 'l', cgroup = c1, colmap = c('red', 'green'))
+mdaplot(val, type = 'l', cgroup = c1, colmap = c('#ffff00', '#00ffff'))
 par(mfrow = c(1, 1))
 
-# show scatter plots from spectral data with coloring and other parameters
-# see how limits are adjusted if show.lines option is used
+## 3. Show scatter plots from spectral data with color groups and other parameters
+## see how limits are adjusted if show.lines option is used
 
 nobj = 30
-pdata = cbind(spectra.c[1:nobj, 100, drop = F], spectra.c[1:nobj, 110, drop = F])
-coldata = conc.c[1:nobj, 1]
+# concentration is used for color groups
+c1 = simdata$conc.c[1:nobj, 1]
+# x values are absorbance of waveband 100, y values - absorbance for waveband 110
+pdata = cbind(
+   simdata$spectra.c[1:nobj, 100, drop = FALSE], 
+   simdata$spectra.c[1:nobj, 110, drop = FALSE])
 
 par(mfrow = c(2, 2))
-mdaplot(pdata, cgroup = coldata, main = 'Spectra', show.lines = c(0.1, 0.06))
-mdaplot(pdata, cgroup = coldata, main = 'Spectra', show.lines = c(0.06, 0.01))
-mdaplot(pdata, cgroup = coldata, xlab = '309 nm', ylab = '319 nm', 
-   main = 'Spectra', show.labels = T, show.grid = F)
-mdaplot(pdata, col = 'red', pch = 17, xlab = '309 nm', ylab = '319 nm',
-   main = 'Spectra', show.labels = T, labels = paste('Obj', 1:nobj))
+mdaplot(pdata, cgroup = c1, main = 'Spectra', show.lines = c(0.1, 0.06))
+mdaplot(pdata, cgroup = c1, main = 'Spectra', show.lines = c(0.06, 0.01))
+mdaplot(pdata, cgroup = c1, xlab = '309 nm', ylab = '319 nm', main = 'Spectra', show.labels = TRUE)
+mdaplot(pdata, col = 'red', pch = 17, show.labels = TRUE, labels = paste('Obj', 1:nobj))
 par(mfrow = c(1, 1))
 
 }

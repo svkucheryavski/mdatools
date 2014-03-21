@@ -1,0 +1,16 @@
+\name{getSelectivityRatio}
+\alias{getSelectivityRatio}
+\title{Selectivity ratio}
+\usage{
+getSelectivityRatio(obj, ...)
+}
+\arguments{
+  \item{obj}{a regression model}
+
+  \item{...}{other parameters}
+}
+\description{
+Generic function for returning selectivity ratio values for
+regression model (PCR, PLS, etc)
+}
+

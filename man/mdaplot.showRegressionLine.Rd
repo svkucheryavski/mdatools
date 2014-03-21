@@ -1,0 +1,22 @@
+\name{mdaplot.showRegressionLine}
+\alias{mdaplot.showRegressionLine}
+\title{Regression line for data points}
+\usage{
+mdaplot.showRegressionLine(data, lty = 1, lwd = 1, colmap = "default",
+  col = NULL)
+}
+\arguments{
+  \item{data}{data values}
+
+  \item{lty}{line type}
+
+  \item{lwd}{line width}
+
+  \item{colmap}{color map}
+
+  \item{col}{color of lines}
+}
+\description{
+Shows linear fit line for data points.
+}
+

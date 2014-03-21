@@ -1,6 +1,6 @@
 ## class and methods for SIMCA multi class classification results ##
 
-simcamres = function(cres, T2, Q2, T2lim, Q2lim, ...)
+simcamres = function(cres, T2, Q2, T2lim, Q2lim)
 {
    # Creates an object of simcamres class. 
    #
@@ -22,17 +22,36 @@ simcamres = function(cres, T2, Q2, T2lim, Q2lim, ...)
    res
 }   
 
+#' Residuals plot for SIMCAM results
+#' 
+#' @description
+#' Shows a plot with Q2 vs. T2 residuals for SIMCAM results
+#' 
+#' @param obj
+#' SIMCAM results (object of class \code{simcamres})
+#' @param nc
+#' which class (SIMCA model) to show the plot for
+#' @param show.limits
+#' logical, show or not lines with statistical limits for the residuals
+#' @param type
+#' type of the plot
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param legend
+#' vector with legend items
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{simcamres}} function.
+#' 
 plotResiduals.simcamres = function(obj, nc = 1, show.limits = T, type = 'p', main = NULL, 
                                   xlab = 'T2', ylab = 'Q2', legend = NULL, ...)
 {
-   # Shows residuals plot (T2 vs Q) for a selected model 
-   #
-   # Arguments:
-   #  obj: SIMCA results (an object of class simcares)
-   #  nc: which model to make the plot for
-   #  show.limits: logical, show or not statistical limits for the residual values
-   #  ...: standard arguments for plots
-
    # set main title
    if (is.null(main))
       main = sprintf('Residuals (%s)', obj$classnames[nc])
@@ -68,18 +87,36 @@ plotResiduals.simcamres = function(obj, nc = 1, show.limits = T, type = 'p', mai
    }
 }
 
+#' Cooman's plot for SIMCAM results
+#' 
+#' @description
+#' Shows a Cooman's plot for a pair of SIMCA models
+#' 
+#' @param obj
+#' SIMCAM results (object of class \code{simcamres})
+#' @param nc
+#' vector with two values - classes (SIMCA models) to show the plot for
+#' @param type
+#' type of the plot
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.limits
+#' logical, show or not lines with statistical limits for the residuals
+#' @param legend
+#' vector with legend items 
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{simcamres}} function.
+#' 
 plotCooman.simcamres = function(obj, nc = c(1, 2), type = 'p', main = "Cooman's plot", xlab = NULL, 
                                 ylab = NULL, show.limits = T, legend = NULL, ...)
 {
-
-   # Shows Cooman's plot (distance to model 1 vs to model 2)
-   #
-   # Arguments:
-   #  obj: SIMCA results (an object of class simcares)
-   #  nc:  vector with two values - models to show the plot for
-   #  show.limits: logical, show or not statistical limits for the residual values
-   #  ...: standard arguments for plots
-
    # set labels for axes
    if (is.null(xlab))
       xlab = sprintf('Distance to class %s', obj$classnames[nc[1]])
@@ -120,23 +157,36 @@ plotCooman.simcamres = function(obj, nc = c(1, 2), type = 'p', main = "Cooman's 
    }
 }
 
-plot.simcamres = function(obj, ...)
+#' Model overview plot for SIMCAM results
+#' 
+#' @description
+#' Just shows a prediction plot for SIMCAM results.
+#' 
+#' @param x
+#' SIMCAM results (object of class \code{simcamres})
+#' @param ...
+#' other arguments
+#' 
+#' @details
+#' See examples in help for \code{\link{simcamres}} function.
+#' 
+plot.simcamres = function(x, ...)
 {
-   plotPredictions(obj)
+   plotPredictions(x)
 }
 
-print.simcamres = function(obj)
-{   
-   # Print information on simcares object
-   
-   cat('Result for SIMCA multiple classes classification (class simcamres)\n')
-   print.classres(obj, '')
-   cat('\n')
-}
-
-summary.simcamres = function(obj)
+#' Summary method for SIMCAM results object
+#' 
+#' @description
+#' Shows performance statistics for the results.
+#' 
+#' @param object
+#' SIMCAM results (object of class \code{simcamres})
+#' @param ...
+#' other arguments
+summary.simcamres = function(object, ...)
 {
-   # Show summary for simcamres object
+   obj = object
    
    cat('\nSummary for SIMCA multiple classes classification result\n')
    if (!is.null(obj$c.ref))
@@ -152,3 +202,22 @@ summary.simcamres = function(obj)
       cat('\nReference values are not provided.\n')
    }
 }  
+
+#' Print method for SIMCAM results object
+#' 
+#' @description
+#' Prints information about the object structure
+#' 
+#' @param x
+#' SIMCAM results (object of class \code{simcamres})
+#' @param ...
+#' other arguments
+#' 
+print.simcamres = function(x, ...)
+{   
+   obj = x
+   
+   cat('Result for SIMCA multiple classes classification (class simcamres)\n')
+   print.classres(obj, '')
+   cat('\n')
+}

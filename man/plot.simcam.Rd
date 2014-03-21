@@ -1,0 +1,21 @@
+\name{plot.simcam}
+\alias{plot.simcam}
+\title{Model overview plot for SIMCAM}
+\usage{
+\method{plot}{simcam}(x, nc = c(1, 2), ...)
+}
+\arguments{
+  \item{x}{a SIMCAM model (object of class \code{simcam})}
+
+  \item{nc}{vector with two values - classes (SIMCA models)
+  to show the plot for}
+
+  \item{...}{other arguments}
+}
+\description{
+Shows a set of plots for SIMCAM model.
+}
+\details{
+See examples in help for \code{\link{simcam}} function.
+}
+

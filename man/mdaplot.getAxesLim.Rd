@@ -1,0 +1,52 @@
+\name{mdaplot.getAxesLim}
+\alias{mdaplot.getAxesLim}
+\title{Calculate axes limits}
+\usage{
+mdaplot.getAxesLim(data, single.x = T, show.colorbar = F, show.lines = F,
+  legend = NULL, show.legend = F, legend.position = "topright",
+  show.labels = F, xticks = NULL, yticks = NULL)
+}
+\arguments{
+  \item{data}{a matrix or list with data values (values to
+  be plotted).}
+
+  \item{single.x}{logical, has data matrix (matrices) one
+  column for X and many for Y or not.}
+
+  \item{show.colorbar}{logical, show or not the colorbar on
+  the plot.}
+
+  \item{show.lines}{logical or numeric with line
+  coordinates to be shown on the plot.}
+
+  \item{legend}{vector with legend items.}
+
+  \item{show.legend}{logical, show or not legend on the
+  plot.}
+
+  \item{legend.position}{position of the legend (see
+  \code{\link{mdaplotg}} for details).}
+
+  \item{show.labels}{logical, show or not labels for the
+  data objects}
+
+  \item{xticks}{values for x ticks to show}
+
+  \item{yticks}{values for yticks to show}
+}
+\value{
+Returns a list with four limits for the x and y axes.
+}
+\description{
+Calculates axes limits depending on data values that have
+to be plotted, extra plot elements that have to be shown
+and margins.
+}
+\details{
+Data can be a list with several matrices or just one
+matrix. The matrices can have single.x configuration, where
+first column is x values and the others are y values or
+normal configuration, where every odd column is x values
+and every even is corresponding y values.
+}
+

@@ -1,44 +1,22 @@
 \name{selectCompNum.pls}
 \alias{selectCompNum.pls}
-
-\title{
-Set number of optimal components for PLS model
-}
-
-\description{
-\code{selectCompNum.pls} is used to select number of optimal components in a PLS model.
-}
-
+\title{Select optimal number of components for PLS model}
 \usage{
-selectCompNum(model, ncomp)
+\method{selectCompNum}{pls}(model, ncomp)
 }
-
 \arguments{
-  \item{model}{a PLS model (object of class \code{pls}).}
-  \item{ncomp}{number of components to select.}
-}
+  \item{model}{PLS model (object of class \code{pls})}
 
-\details{
+  \item{ncomp}{number of components to select}
 }
-
 \value{
-Returns the same model as provided as an argument, but where the parameter \code{ncomp.selected} is set to \code{ncomp} and all distances and limits are recalculated.
+the same model with selected number of components
 }
-
-\examples{
-
-library(mdatools)
-data(Simdata)
-model = pls(spectra.c, conc.c[, 1], ncomp = 8, cv = 1)
-model1 = selectCompNum(model, 3)
-model2 = selectCompNum(model, 5)
-
-par(mfrow = c(2, 2))
-plotPredictions(model1)
-plotRegcoeffs(model1)
-plotPredictions(model2)
-plotRegcoeffs(model2)
-par(mfrow = c(1, 1))
-
+\description{
+Allows user to select optimal number of components for PLS
+model
+}
+\details{
+See examples in help for \code{\link{pls}} function.
 }
 

@@ -1,3 +1,9 @@
+v. 0.5.0
+========
+* all documentation has been rewritten using `roxygen2` package
+* the first release available in ?CRAN
+* bug fixes and improvements
+
 v. 0.4.0
 ========
 * New `classres` class for representation and visualisation of classification results

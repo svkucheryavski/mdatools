@@ -10,8 +10,7 @@ Results of PCA decomposition
 }
 
 \usage{
-pcares(scores, loadings, residuals, totvar, tnorm = NULL, ncomp.selected = NULL, 
-   T2 = NULL, Q2 = NULL)
+pcares(scores, loadings, residuals, totvar, tnorm = NULL, ncomp.selected = NULL, ...)
 }
 \arguments{
   \item{scores}{matrix with score values (nobj x ncomp).}
@@ -20,8 +19,7 @@ pcares(scores, loadings, residuals, totvar, tnorm = NULL, ncomp.selected = NULL,
   \item{totvar }{total variance for data matrix.}
   \item{tnorm }{vector with singular values for scores normalization.}
   \item{ncomp.selected }{selected number of components for decomposition.}
-  \item{T2 }{matrix with Hotelling T2 values for the data objects.}
-  \item{Q2 }{matrix with Q2 residuals for the data objects.}
+  \item{\dots }{other arguments supported by \code{ldecomp}.}
 }
 
 \details{
@@ -66,20 +64,52 @@ Methods, inherited from \code{\link{ldecomp}} class:
 }
 
 \examples{
-## make PCA model and show results for calibration set
+### Examples for PCA results class
+
 library(mdatools)
-data(People)
 
-model = pca(people, scale = T)
-model = selectCompNum(model, 5)
+## 1. Make a model for every odd row of People data
+## and apply it to the objects from every even row
 
-print(model$calres)
-summary(model$calres)
+data(people)
+x = people[seq(1, 32, 2), ]
+x.new = people[seq(1, 32, 2), ]
 
-par(mfrow = c(1, 2))
-plotScores(model$calres, show.labels = T)
-plotResiduals(model$calres, show.labels = T)
+model = pca(people, scale = TRUE, cv = 1, info = 'Simple PCA model')
+model = selectCompNum(model, 4)
+
+res = predict(model, x.new)
+summary(res)
+plot(res)
+
+## 1. Make PCA model for People data with autoscaling
+## and full cross-validation and get calibration results
+
+
+data(people)
+model = pca(people, scale = TRUE, cv = 1, info = 'Simple PCA model')
+model = selectCompNum(model, 4)
+
+res = model$calres
+summary(res)
+plot(res)
+
+## 2. Show scores plots for the results
+par(mfrow = c(2, 2))
+plotScores(res)
+plotScores(res, cgroup = people[, 'Beer'], show.labels = TRUE)
+plotScores(res, comp = c(1, 3), show.labels = TRUE)
+plotScores(res, comp = 2, type = 'h', show.labels = TRUE)
 par(mfrow = c(1, 1))
+
+## 3. Show residuals and variance plots for the results
+par(mfrow = c(2, 2))
+plotVariance(res, type = 'h')
+plotCumVariance(res, show.labels = TRUE, legend.position = 'bottomright')
+plotResiduals(res, show.labels = TRUE, cgroup = people[, 'Sex'])
+plotResiduals(res, ncomp = 2, show.labels = TRUE)
+par(mfrow = c(1, 1))
+
 }
 
 \keyword{ ~pca }

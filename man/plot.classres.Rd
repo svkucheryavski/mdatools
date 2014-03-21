@@ -1,0 +1,20 @@
+\name{plot.classres}
+\alias{plot.classres}
+\title{Plot function for classification results}
+\usage{
+\method{plot}{classres}(x, nc = NULL, ...)
+}
+\arguments{
+  \item{x}{classification results (object of class
+  \code{plsdares}, \code{simcamres}, etc.).}
+
+  \item{nc}{if there are several classes, which class to
+  make the plot for (NULL - summary for all classes).}
+
+  \item{...}{other arguments}
+}
+\description{
+Generic plot function for classification results. Shows
+predicted class values.
+}
+

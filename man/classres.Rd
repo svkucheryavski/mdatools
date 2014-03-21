@@ -46,8 +46,6 @@ Methods \code{classres} class:
       \code{\link{plotMisclassified.classres}} \tab makes plot with misclassified ratio values.\cr
       \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity and sensitivity values.\cr
    }
-}
 
-\examples{
 see examples for \code{\link{simcares}}, \code{\link{simcamres}} and \code{\link{plsdares}}.
 }

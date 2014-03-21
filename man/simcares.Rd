@@ -88,12 +88,13 @@ summary(model$calres)
 
 # show plots
 layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
-plotPredictions(model$calres, show.labels = T)
-plotResiduals(model$calres, show.labels = T)
-plotPerformance(model$calres, show.labels = T, legend.position = 'bottomright')
+plotPredictions(model$calres, show.labels = TRUE)
+plotResiduals(model$calres, show.labels = TRUE)
+plotPerformance(model$calres, show.labels = TRUE, legend.position = 'bottomright')
 layout(1, 1, 1)
 
 # show predictions table
 showPredictions(model$calres)
+
 }
 

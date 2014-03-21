@@ -1,40 +1,32 @@
 \name{plot.pls}
 \alias{plot.pls}
-
-\title{
-Plot overview of PLS model
-}
-
-\description{
-\code{plot.pls} is used to show a set of plots (X residuals, regression coefficients, RMSE and predictions) for inspecting of a PLS model.
-}
-
+\title{Model overview plot for PLS}
 \usage{
-plot(model, ncomp = NULL, ny = 1, show.labels = F)
+\method{plot}{pls}(x, ncomp = NULL, ny = 1, show.legend = T,
+  show.labels = F, ...)
 }
-
 \arguments{
-  \item{model }{a PLS model (object of class \code{pls}).}
-  \item{ncomp }{number of components to show the plot for (default: \code{ncomp.selected}).}
-  \item{ny }{if response is multivariate, which variable to show the plot for.}
-  \item{show.labels}{logical, show or not object labels for the data points.}
+  \item{x}{a PLS model (object of class \code{pls})}
+
+  \item{ncomp}{how many components to use (if NULL - user
+  selected optimal value will be used)}
+
+  \item{ny}{which y variable to show the summary for (if
+  NULL, will be shown for all)}
+
+  \item{show.labels}{logical, show or not labels for the
+  plot objects}
+
+  \item{show.legend}{logical, show or not a legend on the
+  plot}
+
+  \item{...}{other arguments}
+}
+\description{
+Shows a set of plots (x residuals, regression coefficients,
+RMSE and predictions) for PLS model.
+}
+\details{
+See examples in help for \code{\link{pls}} function.
 }
 
-\examples{
-## Examples of using plot function for PLS model
-
-library(mdatools)
-data(Simdata)
-model = pls(spectra.c, conc.c, ncomp = 5, cv = 4, x.test = spectra.t, y.test = conc.t)
-model = selectCompNum(model, 3)
-
-# default
-plot(model)
-
-# for 2 components
-plot(model, ncomp = 2, show.labels = T)
-
-# for 5 components and second response variable
-plot(model, ny = 2, ncomp = 5)
-
-}

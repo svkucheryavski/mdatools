@@ -77,23 +77,29 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
    obj
 }
 
+#' Residuals distances for linear decomposition
+#'
+#' @description
+#' Computes residual distances (Q2 and T2) and modelling power for a data decomposition X = TP' + E.
+#' 
+#' @param scores
+#' matrix with scores (T).
+#' @param loadings
+#' matrix with loadings (P).
+#' @param residuals
+#' matrix with residuals (E).
+#' @param tnorm
+#' vector with singular values for scores normalisation (if NULL will be calculated from \code{scores}).
+#' 
+#' @details
+#' The distances are calculated for every 1:n components, where n goes from 1 to ncomp 
+#' (number of columns in scores and loadings).
+#' 
+#' @return
+#' Returns a list with Q2, T2 and modelling power values for each component.
+#'  
 ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
 {
-   # Computes residual distances (Q2 and T2) for a decomposition.
-   # The distances are calculated for every 1:n components, where n
-   # goes from 1 to ncomp (number of columns in scores and loadings)
-   #
-   # Arguments:
-   #   scores: matrix with scores (nobj x ncomp).
-   #   loadings: matrix with loadings (nvar x ncomp)
-   #   residuals: matrix with data residuals 
-   #   tnorm: singular values for normalizing scores
-   #
-   # Returns:
-   #   res$Q2: matrix with Q2 residuals (nobj x ncomp).
-   #   res$T2: matrix with T2 distances (nobj x ncomp)   
-   #   res$mpower: modelling power (nvar x ncomp)
-   
    ncomp = ncol(scores)
    nobj = nrow(scores)
    nvar = nrow(loadings)
@@ -140,19 +146,22 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
    )
 }
 
+
+#' Explained variance for linear decomposition
+#' 
+#' @description
+#' Computes explained variance and cumulative explained variance for a data decomposition X = TP' + E.
+#'
+#' @param Q2
+#' Q2 values (squared residuals distance from object to component space).
+#' @param totvar
+#' Total variance of the original data (after preprocessing).
+#' 
+#' @return
+#' Returns a list with two vectors.
+#' 
 ldecomp.getVariances = function(Q2, totvar)
 {   
-   # Computes explained variance and cumulative explained variance 
-   # for every component of a decomposition.
-   #
-   # Arguments:
-   #   Q2: matrix with Q2 values
-   #   totvar: total variance of the data
-   #
-   # Returns:
-   #   res$expvar: vector with explained variance for every component
-   #   res$cumexpvar: vector with cumulative explained variance
-   
    cumresvar = colSums(Q2) / totvar * 100
    cumexpvar = 100 - cumresvar
    expvar = c(cumexpvar[1], diff(cumexpvar))
@@ -163,21 +172,28 @@ ldecomp.getVariances = function(Q2, totvar)
    )
 }
 
+#' Statistical limits for Q2 and T2 residuals
+#' 
+#' @description
+#' Computes statisticsl limits for Q2 and T2 residuals
+#' 
+#' @param eigenvals
+#' vector with eigenvalues 
+#' @param nobj
+#' number of objects in data
+#' @param ncomp
+#' number of calculated components
+#' @param alpha
+#' significance level
+#'
+#' @details
+#' T2 limits are calculated using Hotelling statistics. 
+#' 
+#' @return
+#' Returns a list with two vectors:  \code{T2lim} and \code{Q2lim}.
+#' 
 ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
 {   
-   # Computes statistical limits for Q2 residuals and T2 distances.
-   #
-   # Arguments:
-   #   eigenvals: vector with eigenvalues for a model.
-   #   nobj: number of objects in calibration data
-   #   ncomp: number of selected components 
-   #   alpha: significance level for Q2 limits
-   #
-   # Returns:
-   #   res$Q2lim: limit for Q2 residuals
-   #   res$T2lim: limit for T2 distances
-   
-   # calculate T2 limit using Hotelling statistics
    T2lim = matrix(0, nrow = 1, ncol = ncomp)
    for (i in 1:ncomp)
    {
@@ -223,20 +239,30 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
    )   
 }   
 
+#' Cumulative explained variance plot for linear decomposition
+#' 
+#' @description
+#' Shows a plot with cumulative explained variance values vs. number of components.
+#' 
+#' @param obj
+#' object of \code{ldecomp} class.
+#' @param type
+#' type of the plot
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param ...
+#' most of graphical parameters from \code{\link{mdaplot}} function can be used.
+#' 
 plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance',
                                    xlab = 'Components', ylab = 'Explained variance, %',
                                    show.labels = F, ...)
 {
-   # Shows cumulative explained variance plot.
-   #
-   # Arguments:
-   #   obj: object of ldecomp class.
-   #   type: type of the plot
-   #   main: main title for the plot
-   #   xlab: text for x axis label
-   #   ylab: text for y axis label
-   #   show.labels: show or not labels for plot points
-   
    data = cbind(1:length(obj$cumexpvar), obj$cumexpvar)
    if (type != 'h')
    {   
@@ -252,41 +278,58 @@ plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance'
    mdaplot(data, main = main, xlab = xlab, ylab = ylab, type = type, show.labels = show.labels, ...)
 }
 
+#' Explained variance plot for linear decomposition
+#' 
+#' @description
+#' Shows a plot with explained variance values vs. number of components.
+#' 
+#' @param obj
+#' object of \code{ldecomp} class.
+#' @param type
+#' type of the plot
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param ...
+#' most of graphical parameters from \code{\link{mdaplot}} function can be used.
+#' 
 plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
                                 xlab = 'Components', ylab = 'Explained variance, %',
                                 show.labels = F, ...)
 {
-   # Shows explained variance plot.
-   #
-   # Arguments:
-   #   obj: object of ldecomp class
-   #   type: type of the plot
-   #   main: main title for the plot
-   #   xlab: text for x axis label
-   #   ylab: text for y axis label
-   #   show.labels: logical, show or not labels for plot points
-   
-   
    data = cbind(1:length(obj$expvar), obj$expvar)
    colnames(data) = c(xlab, ylab)
    rownames(data) = round(obj$expvar, 2)
    mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, type = type, ...)
 }
 
+
+#' Scores plot for linear decomposition
+#' 
+#' @description
+#' Shows a plot with scores values for data objects.
+#' 
+#' @param obj
+#' object of \code{ldecomp} class.
+#' @param comp
+#' which components to show the plot for (can be one value or vector with two values).
+#' @param main
+#' main title for the plot
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param show.axes
+#' logical, show or not a axes lines crossing origin (0,0)
+#' @param ...
+#' most of graphical parameters from \code{\link{mdaplot}} function can be used.
+#' 
 plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores', 
                               show.labels = F, show.axes = F, ...)
 {
-   # Shows scores plot.
-   #
-   # Arguments:
-   #   obj: object of ldecomp class.
-   #   comp: which components to show on x and y axis. 
-   #   cgroup: variable for color grouping of plot points.
-   #   main: main title for the plot
-   #   show.labels: show or not labels for plot points.
-   #   show.colorbar: show or not a colorbar legend if cgroup is provided.
-   #   show.axes: show or not axes crossing (0, 0) point.
-   
    if (is.null(obj$scores))
    {
       warning('Scores values are not specified!')
@@ -321,19 +364,31 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
    }
 }  
 
+#' Residuals plot for linear decomposition
+#' 
+#' @description
+#' Shows a plot with T2 vs Q2 values for data objects.
+#' 
+#' @param obj
+#' object of \code{ldecomp} class.
+#' @param ncomp
+#' what number of components to show the plot for (if NULL, model selected value will be used).
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param show.limits
+#' logical, show or not lines for statistical limits of the residuals
+#' @param ...
+#' most of graphical parameters from \code{\link{mdaplot}} function can be used.
+#' 
 plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', ylab = 'Q2', 
                                  show.labels = F, show.limits = T, ...)
 {
-   # Shows T2 vs Q2 residuals plot.
-   #
-   # Arguments:
-   #   obj: object of ldecomp class.
-   #   ncomp: number of components for the residuals 
-   #   main: main title for the plot
-   #   xlab: text for x axis label
-   #   ylab: text for y axis label
-   #   show.labels: show or not labels for plot points.
-   
    if (is.null(main))
    {
       if (is.null(ncomp))
@@ -356,7 +411,20 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
            show.lines = show.lines, ...)
 }  
 
-print.ldecomp = function(obj, str = NULL, ...)
+#' Print function for linear decomposition
+#' 
+#' @description
+#' Generic \code{print} function for linear decomposition. Prints information about the \code{ldecomp}
+#' object.
+#' 
+#' @param x
+#' object of class \code{ldecomp}
+#' @param str
+#' user specified text to show as a description of the object
+#' @param ...
+#' other arguments
+#' 
+print.ldecomp = function(x, str = NULL, ...)
 {   
    if (is.null(str))
       str ='Results of data decomposition (class ldecomp)'
@@ -373,26 +441,53 @@ print.ldecomp = function(obj, str = NULL, ...)
    cat('$cumexpvar - cumulative explained variance\n')
 }
 
-as.matrix.ldecomp = function(obj)
+#' Converts ldecomp object to a matrix
+#' 
+#' @description
+#' Generic \code{as.matrix} function for linear decomposition. Returns a matrix with information 
+#' about the decomposition.
+#' 
+#' @param x
+#' object of class \code{ldecomp}
+#' @param ...
+#' other arguments
+#' 
+as.matrix.ldecomp = function(x, ...)
 {
-   data = cbind(obj$expvar, obj$cumexpvar)   
+   data = cbind(x$expvar, x$cumexpvar)   
    colnames(data) = c('Expvar', 'Cumexpvar')   
    data
 }  
 
-summary.ldecomp = function(obj, str = NULL)
+#' Summary statistics for linear decomposition
+#' 
+#' @description
+#' Generic \code{summary} function for linear decomposition. Prints statistic about the decomposition.
+#' 
+#' @param object
+#' object of class \code{ldecomp}
+#' @param str
+#' user specified text to show as a description of the object
+#' @param ...
+#' other arguments
+#' 
+summary.ldecomp = function(object, str = NULL, ...)
 {
    if (is.null(str))
       str ='Summary for data decomposition (class ldecomp)'
    
    cat('\n')
    cat(str, '\n')
-   cat(sprintf('\nSelected components: %d\n\n', obj$ncomp.selected))      
+   cat(sprintf('\nSelected components: %d\n\n', object$ncomp.selected))      
    
-   data = as.matrix(obj)
+   data = as.matrix(object)
    print(round(data, 2))   
 }
 
+#' Inverse error function 
+#' 
+#' @param x
+#' a matrix or vector with data values
 erfinv = function (x) qnorm((1 + x)/2)/sqrt(2)
 
 

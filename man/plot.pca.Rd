@@ -1,43 +1,29 @@
 \name{plot.pca}
 \alias{plot.pca}
-
-\title{
-Plot overview of PCA model
-}
-
-\description{
-Shows four plots for a \code{pca} object: scores, loadings, residuals (Q2 vs. T2) and cumulative explained variance. 
-}
-
+\title{Model overview plot for PCA}
 \usage{
-plot(model, comp = c(1, 2), show.labels = F, show.legend = T)
+\method{plot}{pca}(x, comp = c(1, 2), show.labels = F, show.legend = T,
+  ...)
 }
-
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{model}{a PCA model (object of class \code{pca})}
-  \item{comp}{x and y components for scores and loadings plots}
-  \item{show.labels}{logical, show labels for objects on scores and residuals plots or not}
-  \item{show.legend}{logical, show legend or not (legend is available if test or cross-validation used)}
-}
+  \item{x}{a PCA model (object of class \code{pca})}
 
+  \item{comp}{vector with two values - number of components
+  to show the scores and loadings plots for}
+
+  \item{show.labels}{logical, show or not labels for the
+  plot objects}
+
+  \item{show.legend}{logical, show or not a legend on the
+  plot}
+
+  \item{...}{other arguments}
+}
+\description{
+Shows a set of plots (scores, loadings, residuals and
+explained variance) for PCA model.
+}
 \details{
-If model was validated with test set or cross-validation the results of calibration and validation are shown on scores, residuals and explained variance plots as several groups of points (or lines) separated with colors. 
+See examples in help for \code{\link{pca}} function.
 }
 
-\seealso{
-Main plots for pca model and results: \code{\link{plotScores.pca}}, \code{\link{plotLoadings.pca}}, \code{\link{plotResiduals.pca}}, \code{\link{plotVariance.pca}}, \code{\link{plotCumVariance.pca}}, \code{\link{plotEigenvalues.pca}}.
-}
-
-\examples{
-## make a PCA model for people data and show main plots
-library(mdatools)
-
-data(People)
-model = pca(people, scale = T, cv = 1)
-model = pca.selectCompNum(model, 5)
-plot(model, c(1, 3), show.labels = T)
-
-}
-
-\keyword{ ~pca }

@@ -1,37 +1,27 @@
 \name{plotCumVariance.pca}
 \alias{plotCumVariance.pca}
-
-\title{
-Cumulative explained variance plot for PCA model
-}
-
-\description{
-\code{plotCumVariance.pca} is used to make a plot with cumulative variance, explained by each component in PCA model.
-}
-
+\title{Cumulative explained variance plot for PCA}
 \usage{
-plotCumVariance(model, type = 'b')
+\method{plotCumVariance}{pca}(obj, xlab = "Components",
+  ylab = "Explained variance, \%", main = "Cumulative variance", ...)
 }
 \arguments{
-  \item{obj}{a PCA model (object of class \code{pca}).}
-  \item{type}{type of the plot.}
-  \item{...}{most of the \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{a PCA model (object of class \code{pca})}
 
+  \item{main}{main title for the plot}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows a plot with cumulative explained variance for
+components.
+}
 \details{
-If test set or cross-validation was used, the plot shows cumulative explained variance for the validation results as well. 
+See examples in help for \code{\link{pca}} function.
 }
 
-\examples{
-library(mdatools)
-data(People)
-
-model = pca(people, scale = T, cv = 1)
-
-par(mfrow = c(2, 1))
-plotCumVariance(model, legend.position = 'topleft')
-plotCumVariance(model, show.labels = T, type = 'h')
-par(mfrow = c(1, 1))
-}
-
-\keyword{ ~pca }

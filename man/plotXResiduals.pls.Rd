@@ -1,35 +1,36 @@
 \name{plotXResiduals.pls}
 \alias{plotXResiduals.pls}
-
-\title{
-X residuals plot for PLS model
-}
-
-\description{
-\code{plotXResiduals.pls} is used to show plot for Hotelling T2 values vs. Q2 residuals for X decomposition in PLS model.
-}
+\title{X residuals plot for PLS}
 \usage{
-plotXResiduals.pls(model, ncomp = NULL, ...)
+\method{plotXResiduals}{pls}(obj, ncomp = NULL, main = NULL, xlab = "T2",
+  ylab = "Q2", show.labels = F, show.legend = T, ...)
 }
-
 \arguments{
-  \item{model}{a PLS model (object of class \code{pls})}
-  \item{ncomp}{a number of components to show the residuals for (default: \code{ncomp.selected}).} 
-  \item{...}{most of the \code{\link{mdaplotg}} parameters can be used.}
+  \item{obj}{a PLS model (object of class \code{pls})}
+
+  \item{ncomp}{how many components to use (if NULL - user
+  selected optimal value will be used)}
+
+  \item{main}{main title for the plot}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{show.labels}{logical, show or not labels for the
+  plot objects}
+
+  \item{show.legend}{logical, show or not a legend on the
+  plot}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows a plot with Q2 residuals vs. Hotelling T2 values for
+PLS decomposition of x data.
+}
+\details{
+See examples in help for \code{\link{pls}} function.
 }
 
-\examples{
-## Examples of using X residuals plot
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c, ncomp = 5, x.test = spectra.t, y.test = conc.t)
-model = selectCompNum(model, 3)
-
-par(mfrow = c(2, 1))
-plotXResiduals(model)
-plotXResiduals(model, ncomp = 2, show.labels = T)
-par(mfrow = c(1, 1))
-
-}

@@ -1,0 +1,22 @@
+\name{plot.pcares}
+\alias{plot.pcares}
+\title{Pplot method for PCA results object}
+\usage{
+\method{plot}{pcares}(x, comp = c(1, 2), show.labels = T, ...)
+}
+\arguments{
+  \item{x}{PCA results (object of class \code{pcares})}
+
+  \item{comp}{which components to show the scores plot for
+  (can be one value or vector with two values).}
+
+  \item{show.labels}{logical, show or not labels for the
+  plot objects}
+
+  \item{...}{other arguments}
+}
+\description{
+Show several plots to give an overview about the PCA
+results
+}
+

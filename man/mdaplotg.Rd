@@ -10,39 +10,40 @@ Plotting function for several sets of objects
 }
 
 \usage{
-mdaplotg(data, type = 'p', single.x = T, colmap = 'default', 
-   pch = 16, lty = 1, lwd = 1, bwd = 0.8, ylim = NULL, xlim = NULL, 
-   xlab = NA, ylab = NA, main = NULL, 
-   legend = NULL, legend.position = "topright", 
-   labels = NULL, xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
-   show.labels = F, show.lines = F, show.grid = T, ...)
+mdaplotg(data, type = 'p', pch = 16, lty = 1, lwd = 1, bwd = 0.8, legend = NULL, 
+   xlab = NA, ylab = NA, main = NULL, labels = NULL, 
+   ylim = NULL, xlim = NULL, colmap = 'default', 
+   legend.position = "topright", single.x = T, 
+   show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
+   xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, ...)
 }
 
 \arguments{
   \item{data}{a list with data values (see details below).}
   \item{type}{type of the plot ('p', 'l', 'b', 'h')}
-  \item{single.x}{logical, is first column of data matrix used for x values (or every odd)?}
-  \item{colmap}{a colormap to use for coloring the plot items.}
   \item{pch}{a character for markers (same as \code{plot} parameter).}
   \item{lty}{the line type (same as \code{plot} parameter).}
   \item{lwd}{the line width (thickness) (same as \code{plot} parameter).}
   \item{bwd}{a width of a bar as a percent of a maximum space available for each bar.}
-  \item{xlim}{limits for the x axis (if NULL, will be calculated automatically).}
-  \item{ylim}{limits for the y axis (if NULL, will be calculated automatically).}
+  \item{legend}{a vector with legend elements (if NULL, no legend will be shown).}
   \item{xlab}{a title for the x axis (same as \code{plot} parameter).}
   \item{ylab}{a title for the y axis (same as \code{plot} parameter).}
   \item{main}{an overall title for the plot (same as \code{plot} parameter).}
-  \item{legend}{a vector with legend elements (if NULL, no legend will be shown).}
-  \item{legend.position}{position of the legend ('topleft', 'topright', 'top', 'bottomleft', 'bottomright', 'bottom').}
   \item{labels}{a matrix with text labels for data points (if NULL, row names for each group will be used).}
+  \item{ylim}{limits for the y axis (if NULL, will be calculated automatically).}
+  \item{xlim}{limits for the x axis (if NULL, will be calculated automatically).}
+  \item{colmap}{a colormap to use for coloring the plot items.}
+  \item{legend.position}{position of the legend ('topleft', 'topright', 'top', 'bottomleft', 'bottomright', 'bottom').}
+  \item{single.x}{logical, is first column of data matrix used for x values (or every odd)?}
+  \item{show.legend}{logical, show or not legend for the data objects.}
+  \item{show.labels}{logical, show or not labels for the data objects.}
+  \item{show.lines}{vector with two coordinates (x, y) to show horizontal and vertical line cross the point.}
+  \item{show.grid}{logical, show or not a grid for the plot.}
   \item{xticks}{tick values for x axis.}
   \item{xticklabels}{labels for x ticks.}
   \item{yticks}{tick values for y axis.}
   \item{yticklabels}{labels for y ticks.}
-  \item{show.labels}{logical, show or not labels for the data objects.}
-  \item{show.lines}{vector with two coordinates (x, y) to show horizontal and vertical line cross the point.}
-  \item{show.grid}{logical, show or not a grid for the plot.}
-  \item{\dots}{}
+  \item{...}{other plotting arguments}
 }
 \details{
 The \code{mdaplotg} function is used to make a plot with several sets of objects. Simply speaking, use it when you need a plot with legend. For example to show line plot with spectra from calibration and test set, scatter plot for height and weight values for women and men, and so on.
@@ -59,16 +60,12 @@ Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }
 
 \examples{
-## Examples of using mdaplotg
+### Examples of using mdaplotg
 
-# show scatter plot for wine and beer consumption for 
-# each group of people data
+## 1. Show scatter plot for with height and weight values 
+## for males and females
 
-library(mdatools)
-
-# show scatter plot with height and weight values for males and females
-
-data(People)
+data(people)
 
 sex = people[, 'Sex']
 fdata = cbind(people[sex == 1, 'Height'], people[sex == 1, 'Weight'])
@@ -80,19 +77,19 @@ par(mfrow = c(2, 2))
 mdaplotg(pdata, legend = c('female', 'male'))
 mdaplotg(pdata, legend = c('female', 'male'), pch = c(17, 19), colmap = c('green', 'orange'))
 mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', colmap = 'gray')
-mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', show.labels = T)
+mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', show.labels = TRUE)
 par(mfrow = c(1, 1))
 
-# change tick values for x axis
+## 2. Change tick values for x axis
 mdaplotg(pdata, legend = c('female', 'male'), xticks = c(160, 175, 190), 
          xticklabels = c('Short', 'Medium', 'Tall'))
 
-# show line plots with spectra from calibration and test set of the Simdata
+## 3. Show line plots with spectra from calibration and test set of the Simdata
 
-data(Simdata)
+data(simdata)
 
-cdata = cbind(wavelength, t(spectra.c))
-tdata = cbind(wavelength, t(spectra.t))
+cdata = cbind(simdata$wavelength, t(simdata$spectra.c))
+tdata = cbind(simdata$wavelength, t(simdata$spectra.t))
 pdata = list(cdata, tdata)
 
 par(mfrow = c(2, 2))

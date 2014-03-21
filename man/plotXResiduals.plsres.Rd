@@ -1,35 +1,25 @@
 \name{plotXResiduals.plsres}
 \alias{plotXResiduals.plsres}
-
-\title{
-X residuals plot for PLS results
-}
-
-\description{
-\code{plotXResiduals.plsres} is used to show plot for Hotelling T2 values vs. Q2 residuals for X decomposition in PLS model.
-}
+\title{X residuals plot for PLS results}
 \usage{
-plotXResiduals.plsres(obj, ncomp = NULL, ...)
+\method{plotXResiduals}{plsres}(obj, ncomp = NULL, main = NULL, ...)
 }
-
 \arguments{
   \item{obj}{PLS results (object of class \code{plsres})}
-  \item{ncomp}{a number of components to show the residuals for (default: \code{ncomp.selected}).} 
-  \item{...}{most of the \code{\link{mdaplot}} parameters can be used.}
+
+  \item{ncomp}{how many components to use (if NULL - user
+  selected optimal value will be used)}
+
+  \item{main}{main title for the plot}
+
+  \item{...}{other plot parameters (see \code{mdaplot} for
+  details)}
+}
+\description{
+Shows a plot with Q2 residuals vs. Hotelling T2 values for
+PLS decomposition of x data.
+}
+\details{
+See examples in help for \code{\link{plsres}} function.
 }
 
-\examples{
-## Examples of using X residuals plot
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c, ncomp = 5, x.test = spectra.t, y.test = conc.t)
-model = selectCompNum(model, 3)
-
-par(mfrow = c(2, 1))
-plotXResiduals(model$calres)
-plotXResiduals(model$calres, ncomp = 1, show.labels = T)
-par(mfrow = c(1, 1))
-
-}

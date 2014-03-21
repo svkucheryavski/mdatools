@@ -1,43 +1,33 @@
 \name{plotXYLoadings.pls}
 \alias{plotXYLoadings.pls}
-
-\title{
-XY loadings plot for PLS model
-}
-
-\description{
-\code{plotXYLoadings.pls} is used to make a plot with loading values for PLS decomposition of predictors and responses.
-}
-
+\title{XY loadings plot for PLS}
 \usage{
-plotXYLoadings(model, comp = c(1, 2), show.axes = F, ...)
+\method{plotXYLoadings}{pls}(obj, comp = c(1, 2), main = "XY loadings",
+  ylab = NULL, xlab = NULL, show.axes = F, ...)
 }
-
 \arguments{
-  \item{model }{a PLS model (object of \code{pls} class.)}
-  \item{comp }{vector with two values - number of components to make the plot for. }  
-  \item{show.axes }{logical, show or not coordinate axes, that cross the origin (0, 0).}
-  \item{...}{most of \code{\link{mdaplotg}} parameters can be used.}
+  \item{obj}{a PLS model (object of class \code{pls})}
+
+  \item{comp}{which components to show the plot for (one or
+  vector with several values)}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{show.axes}{logical, show or not a axes lines
+  crossing origin (0,0)}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows plot with X and Y loading values for selected
+components.
+}
+\details{
+See examples in help for \code{\link{pls}} function.
 }
 
-\examples{
-## Examples of using XY loadings plot
-
-library(mdatools)
-data(People)
-
-# will predict Shoesize using the other variables
-xdata = people[, -4]
-ydata = people[, 4]
-
-model = pls(xdata, ydata, ncomp = 8, scale = T)
-
-# show cumulative variance plot to see importance of components
-# as well as several XY loading plots
-par(mfrow = c(2, 2))
-plotYCumVariance(model)
-plotXYLoadings(model, show.labels = T, show.axes = T)
-plotXYLoadings(model, c(2, 3), show.labels = T)
-plotXYLoadings(model, show.labels = T, colmap = c('green', 'orange'))
-par(mfrow = c(1, 1))
-}

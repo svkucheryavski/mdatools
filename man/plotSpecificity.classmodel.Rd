@@ -1,28 +1,25 @@
 \name{plotSpecificity.classmodel}
 \alias{plotSpecificity.classmodel}
-
-\title{
-Specificity plot for classification model
-}
-
-\description{
-\code{plotSpecificity.classmodel} is used to show plot with specificity values for calibration and validation predictions for any classification model.
-}
-
+\title{Specificity plot for classification model}
 \usage{
-plotSpecificity(model, nc = NULL, ...)
+\method{plotSpecificity}{classmodel}(obj, nc = NULL, ...)
 }
-
 \arguments{
-  \item{model}{a classification model (object of class \code{simca}, \code{simcam}, \code{plsda}, etc).}
-  \item{nc}{which class to make the plot for (if NULL summary values for all classes from the model will be used).} 
-  \item{\dots}{most of \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{classification model (object of class
+  \code{plsda}, \code{simca}, etc.).}
 
+  \item{nc}{if there are several classes, which class to
+  make the plot for (NULL - summary for all classes).}
+
+  \item{...}{most of the graphical parameters from
+  \code{\link{mdaplotg}} function can be used.}
+}
+\description{
+Makes a plot with specificity values vs. model complexity
+(e.g. number of components)
+}
 \details{
-See examples for \code{\link{simca}}, \code{\link{simcam}} or \code{\link{plsda}} class.
+See examples in description of \code{\link{plsda}},
+\code{\link{simca}} or \code{\link{simcam}}.
 }
 
-\seealso{
-\code{\link{plotSensitivity.classmodel}},  \code{\link{plotMisclassified.classmodel}}.
-}

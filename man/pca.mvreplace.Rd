@@ -10,7 +10,7 @@ Replace missing values in data
 }
 
 \usage{
-x.rep = pca.mvreplace(x, center = T, scale = F, maxncomp = 7, expvarlim = 0.95, 
+pca.mvreplace(x, center = T, scale = F, maxncomp = 7, expvarlim = 0.95, 
                covlim = 10^-6, maxiter = 100)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -52,7 +52,7 @@ mdata = odata
 mdata[5, 2] = mdata[2, 3] = NA
 
 # replace missing values with approximated
-rdata = pca.mvreplace(mdata, scale = T)
+rdata = pca.mvreplace(mdata, scale = TRUE)
 
 # show all matrices together
 show(cbind(odata, mdata, round(rdata, 2)))

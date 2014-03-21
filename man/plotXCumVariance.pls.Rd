@@ -1,43 +1,33 @@
 \name{plotXCumVariance.pls}
 \alias{plotXCumVariance.pls}
-
-\title{
-Cumulative X variance plot for PLS model
-}
-
-\description{
-\code{plotXCumVariance.pls} is used to show cumulative variance of predictor variables, explained by components in PLS model.
-}
-
+\title{Cumulative explained X variance plot for PLS}
 \usage{
-plotXCumVariance(model, type = 'b', ...)
+\method{plotXCumVariance}{pls}(obj, type = "b",
+  main = "X cumulative variance", xlab = "Components",
+  ylab = "Explained variance, \%", show.legend = T, ...)
 }
-
 \arguments{
-  \item{model}{a PLS model (object of class \code{pls}).}
-  \item{type}{type of the plot.}
-  \item{...}{most of the \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{a PLS model (object of class \code{pls})}
 
+  \item{type}{type of the plot('b', 'l' or 'h')}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{show.legend}{logical, show or not legend for the
+  plot}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows plot with cumulative explained X variance vs. number
+of components.
+}
 \details{
-Shows variance both for calibration and validation (cross-validation, test) results, if validation was used.
+See examples in help for \code{\link{pls}} function.
 }
 
-\seealso{
-\code{\link{plotXVariance.pls}} - makes variance plot for X.
-}
-
-\examples{
-## Examples of using cumulative X variance plot
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c, ncomp = 5, x.test = spectra.t, y.test = conc.t)
-
-par(mfrow = c(2, 1))
-plotXCumVariance(model, legend.position = 'topleft')
-plotXCumVariance(model, type = 'h', show.labels = T)
-par(mfrow = c(1, 1))
-
-}

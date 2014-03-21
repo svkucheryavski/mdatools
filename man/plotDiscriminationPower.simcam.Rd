@@ -1,28 +1,33 @@
 \name{plotDiscriminationPower.simcam}
 \alias{plotDiscriminationPower.simcam}
-
-\title{
-Discrimination power plot for SIMCA multiclass model   
-}
-
-\description{
-\code{plotDiscriminationPower.simcam} is used to show plot with discrimination power of variables for two SIMCA models. 
-}
+\title{Discrimination power plot for SIMCAM model}
 \usage{
-plotDiscriminationPower(model, nc = c(1, 2), ...)
+\method{plotDiscriminationPower}{simcam}(obj, nc = c(1, 2), type = "h",
+  main = NULL, xlab = "Variables", ylab = "", ...)
 }
-
 \arguments{
-  \item{model}{an object of class \code{simcam} (a SIMCA multiclass model).}
-  \item{nc}{vector with two values - number of models to make the plot for.}  
-  \item{\dots}{most of \code{\link{mdaplot}} parameters can be used.}
-}
+  \item{obj}{a SIMCAM model (object of class
+  \code{simcam})}
 
+  \item{nc}{vector with two values - classes (SIMCA models)
+  to show the plot for}
+
+  \item{type}{type of the plot}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows a plot with discrimination power of predictors for a
+pair of SIMCA models
+}
 \details{
-See examples for \code{\link{simcam}} class.
-}
-
-\seealso{
-\code{\link{simcam}} to make SIMCAM model, \code{\link{simcamres}} to store and explore SIMCA multiclass classification results.
+See examples in help for \code{\link{simcam}} function.
 }
 

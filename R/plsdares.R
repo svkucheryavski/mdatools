@@ -14,8 +14,24 @@ plsdares = function(plsres, cres)
    obj
 }   
 
-as.matrix.plsdares = function(obj, ncomp = NULL, nc = NULL)
+#' as.matrix method for PLS-DA results
+#' 
+#' @description
+#' Returns a matrix with model performance statistics for PLS-DA results
+#' 
+#' @param x
+#' PLS-DA results (object of class \code{plsdares})
+#' @param ncomp
+#' number of components to calculate the statistics for
+#' @param nc
+#' for which class to calculate the statistics for
+#' @param ...
+#' other arguments
+#' 
+as.matrix.plsdares = function(x, ncomp = NULL, nc = NULL, ...)
 {
+   obj = x
+   
    plsmat = as.matrix.plsres(obj, ncomp = ncomp, ny = nc)
    classmat = as.matrix.classres(obj, ncomp = ncomp, nc = nc)
    mat = cbind(plsmat[, 1:4, drop = F], classmat)
@@ -23,21 +39,58 @@ as.matrix.plsdares = function(obj, ncomp = NULL, nc = NULL)
    mat
 }
 
-plot.plsdares = function(obj, nc = NULL, ncomp = NULL, ...)
+#' Overview plot for PLS-DA results
+#' 
+#' @description
+#' Shows a set of plots (x residuals, y variance, classification performance and predictions) 
+#' for PLS-DA results.
+#' 
+#' @param x
+#' PLS-DA results (object of class \code{plsdares})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param nc
+#' which class to show the summary for (if NULL, will be shown for all)
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param ...
+#' other arguments
+#' 
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#' 
+plot.plsdares = function(x, nc = NULL, ncomp = NULL, show.labels = F, ...)
 {
+   obj = x
+   
    par(mfrow = c(2, 2))
-   plotXResiduals.plsres(obj, ncomp = ncomp, ...)
-   plotYVariance.plsres(obj, ncomp = ncomp, ...)
-   plotPerformance(obj, nc = nc, ncomp = ncomp, ...)
-   plotPredictions(obj, nc = nc, ncomp = ncomp, ...)
+   plotXResiduals.plsres(obj, ncomp = ncomp, show.labels = show.labels)
+   plotYVariance.plsres(obj, ncomp = ncomp, show.labels = show.labels)
+   plotPerformance(obj, nc = nc, ncomp = ncomp, show.labels = show.labels)
+   plotPredictions(obj, nc = nc, ncomp = ncomp, show.labels = show.labels)
    par(mfrow = c(1, 1))
 }
 
-summary.plsdares = function(obj, nc = NULL)
+
+#' Summary method for PLS-DA results object
+#' 
+#' @description
+#' Shows performance statistics for the results.
+#' 
+#' @param object
+#' PLS-DA results (object of class \code{plsdares})
+#' @param nc
+#' which class to show the summary for (if NULL, will be shown for all)
+#' @param ...
+#' other arguments
+#' 
+summary.plsdares = function(object, nc = NULL, ...)
 {
+   obj = object
+   
    if (is.null(nc))
       nc = 1:obj$nclasses
-   cat('\nPLSDA results (class plsdares) summary:\n');
+   cat('\nPLS-DA results (class plsdares) summary:\n');
    cat(sprintf('Number of selected components: %d\n', obj$ncomp.selected))
    for (n in nc)
    {
@@ -50,10 +103,21 @@ summary.plsdares = function(obj, nc = NULL)
    }
 }
 
-print.plsdares = function(obj)
+#' Print method for PLS-DA results object
+#' 
+#' @description
+#' Prints information about the object structure
+#' 
+#' @param x
+#' PLS-DA results (object of class \code{plsdares})
+#' @param ...
+#' other arguments
+#' 
+print.plsdares = function(x, ...)
 {
-
-   cat('\nPLSDA results (class plsdares)\n')
+   obj = x
+   
+   cat('\nPLS-DA results (class plsdares)\n')
    cat('\nCall:\n')
    print(obj$call)
    

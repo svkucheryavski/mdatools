@@ -1,0 +1,19 @@
+\name{plotPredictions}
+\alias{plotPredictions}
+\title{Predictions plot}
+\usage{
+plotPredictions(obj, ...)
+}
+\arguments{
+  \item{obj}{a model or result object}
+
+  \item{...}{other arguments}
+}
+\description{
+Predictions plot
+}
+\details{
+Generic function for plotting predicted values for
+classification or regression model or results
+}
+

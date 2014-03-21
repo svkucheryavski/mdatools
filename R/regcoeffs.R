@@ -1,3 +1,11 @@
+#' Regression coefficients
+#' 
+#' @description
+#' A class for storing and visualising of regression coefficients for any regression model.
+#' 
+#' @param coeffs
+#' vector or matrix with regression coefficients
+#' 
 regcoeffs = function(coeffs)
 { 
    # A class for storing and visualising of regression coefficients 
@@ -19,51 +27,83 @@ regcoeffs = function(coeffs)
    regcoeffs
 }
 
-as.matrix.regcoeffs = function(obj, ncomp = 1, ny = 1)
+#' as.matrix method for regression coefficients class
+#' 
+#' @description
+#' returns matrix with regression coeffocoents for given response number and amount of components
+#' 
+#' @param x
+#' regression coefficients object (class \code{regcoeffs})
+#' @param ncomp
+#' number of components to return the coefficients for
+#' @param ny
+#' number of response variable to return the coefficients for
+#' @param ...
+#' other arguments
+#' 
+as.matrix.regcoeffs = function(x, ncomp = 1, ny = 1, ...)
 {
-   # Returns values of regression coefficients as a matrix 
-   #
-   # Arguments:
-   #   obj: object of class "regcoeffs" 
-   #   ncomp.selected: which column of the matrix to show (number of components for PLS/PCR) 
-   #
-   # Returns:
-   #   res: matrix with regression coefficients
-   
-   return (obj$values[, ncomp, ny, drop = F])
+   return (x$values[, ncomp, ny, drop = F])
 }
 
-print.regcoeffs = function(obj, ncomp.selected = 1, ny = 1, digits = 3)
+#' print method for regression coefficients class
+#' 
+#' @description
+#' prints regression coeffocoent values for given response number and amount of components
+#' 
+#' @param x
+#' regression coefficients object (class \code{regcoeffs})
+#' @param ncomp
+#' number of components to return the coefficients for
+#' @param ny
+#' number of response variable to return the coefficients for
+#' @param digits
+#' decimal digits round the coefficients to
+#' @param ...
+#' other arguments
+#' 
+print.regcoeffs = function(x, ncomp = 1, ny = 1, digits = 3, ...)
 {
-   # Shows regression coefficient values
-   #
-   # Arguments:
-   #   obj: object of class "regcoeffs" 
-   #   ncomp.selected: which column of the matrix to show (number of components for PLS/PCR) 
-   #   digits: how many decimal numbers to show
+   obj = x
    
    cat('\nRegression coefficients (class plsregcoeffs)\n')
-   print(round(obj$values[, ncomp.selected, ny, drop = F], digits))
+   print(round(obj$values[, ncomp, ny, drop = F], digits))
 }   
 
-plot.regcoeffs = function(obj, ncomp = 1, ny = 1, main = 'Regression coefficients', type = NULL,
-                          xlab = 'Variables', ylab = 'Coefficients', show.lines = T, ...)
+#' Regression coefficients plot
+#' 
+#' @description
+#' Shows plot with regression coefficient values for every predictor variable (x)
+#' 
+#' @param x
+#' regression coefficients object (class \code{regcoeffs})
+#' @param ncomp
+#' number of components to return the coefficients for
+#' @param ny
+#' number of response variable to return the coefficients for
+#' @param type
+#' type of the plot
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.line
+#' logical, show or not line for 0 value
+#' @param ...
+#' other arguments
+#' 
+plot.regcoeffs = function(x, ncomp = 1, ny = 1, type = NULL, main = 'Regression coefficients',
+                          xlab = 'Variables', ylab = 'Coefficients', show.line = T, ...)
 {
-   # Makes regression coefficients plot
-   #
-   # Arguments:
-   #   obj: object of class "regcoeffs" 
-   #   ncomp.selected: which column of the matrix to show (number of components for PLS/PCR) 
-   #   main: main title for the plot
-   #   xlab: label for X axis
-   #   ylab: label for Y axus
-   #   show.line: logical, show or not zero line
+   obj = x
    
    coeffs = obj$values[, ncomp, ny, drop = F]
    ncoeff = length(coeffs)
    
-   if (show.lines == T)
-      show.lines = c(NA, 0)
+   if (show.line == T)
+      show.line = c(NA, 0)
    
    if (is.null(type))
    {   
@@ -77,5 +117,5 @@ plot.regcoeffs = function(obj, ncomp = 1, ny = 1, main = 'Regression coefficient
    rownames(data) = rownames(obj$values)
 
    mdaplot(data, type = type, main = main, xlab = xlab, ylab = ylab, 
-           show.grid = T, show.line = c(NA, 0), ...)
+           show.grid = T, show.lines = show.line, ...)
 }   

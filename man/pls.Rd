@@ -4,7 +4,7 @@
 
 \usage{
   pls(x, y, ncomp = 20, center = T, scale = F, cv = NULL,
-    x.test = NULL, y.test = NULL, method = 'simpls', info = '')
+    x.test = NULL, y.test = NULL, method = 'simpls', alpha = 0.05, info = '')
 }
 
 \description{
@@ -21,6 +21,7 @@
   \item{x.test }{matrix with predictors for test set.}
   \item{y.test}{matrix with responses for test set.}
   \item{method }{method for calculating PLS model.}
+  \item{alpha }{significance level for calculating statistical limits for residuals.}
   \item{info }{short text with information about the model.}
 }
 
@@ -41,12 +42,12 @@ Returns an object of \code{pls} class with following fields:
 \details{
 So far only SIMPLS method [1] is available, more coming soon. Implementation works both with one and multiple response variables.
 
-Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of x variables and the default or provided value. Regression coefficients, predictions and other results are calculated for each set of components from 1 to \code{ncomp}: 1, 1:2, 1:3, etc. Besides that, there is also a  function (\code{\link{selectCompNum.pls}}) for selecting an optimal number of components in a model (\code{ncomp.selected}). The selected optimal number of components is used for all default operations — predictions, plots, etc. 
+Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of x variables and the default or provided value. Regression coefficients, predictions and other results are calculated for each set of components from 1 to \code{ncomp}: 1, 1:2, 1:3, etc. Besides that, there is also a  function (\code{\link{selectCompNum.pls}}) for selecting an optimal number of components in a model (\code{ncomp.selected}). The selected optimal number of components is used for all default operations - predictions, plots, etc. 
 
 }
 
 \references{
-1. S. de Jong, SIMPLS: an alternative approach to partial least squares regression, Chemometrics and Intelligent Laboratory Systems 18 (1993) 251–263.
+1. S. de Jong, SIMPLS: an alternative approach to partial least squares regression, Chemometrics and Intelligent Laboratory Systems 18 (1993) 251-263.
 }
 
 \seealso{
@@ -71,6 +72,8 @@ Methods for \code{pls} objects:
       \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y decomposition.\cr
       \code{\link{plotXResiduals.pls}} \tab shows T2 vs. Q2 plot for x decomposition.\cr
       \code{\link{plotYResiduals.pls}} \tab shows residuals plot for y values.\cr
+      \code{\link{getSelectivityRatio.pls}} \tab returns vector with selectivity ratio values.\cr
+      \code{\link{plotSelectivityRatio.pls}} \tab shows plot with selectivity ratio values.\cr
    }
    
    Most of the methods for plotting data (except loadings and regression coefficients) are also available for PLS results 
@@ -82,13 +85,107 @@ Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }
 
 \examples{
-## Make a PLS model with full cross-validation and show model overview
+### Examples of using PLS model class
 
-data(Simdata)
-model = pls(spectra.c, conc.c[, 1], ncomp = 8, cv = 1)
-model = selectCompNum(model, 3)
+## 1. Make a PLS model for concentration of first component 
+## using full-cross validation and show overview
+
+data(simdata)
+x = simdata$spectra.c
+y = simdata$conc.c[, 1]
+
+model = pls(x, y, ncomp = 8, cv = 1)
+model = selectCompNum(model, 2)
 summary(model)
 plot(model)
 
+## 2. Make a PLS model for concentration of first component 
+## using test set and 10 segment cross-validation and show overview
+
+data(simdata)
+x = simdata$spectra.c
+y = simdata$conc.c[, 1]
+x.t = simdata$spectra.t
+y.t = simdata$conc.t[, 1]
+
+model = pls(x, y, ncomp = 8, cv = 10, x.test = x.t, y.test = y.t)
+model = selectCompNum(model, 2)
+summary(model)
+plot(model)
+
+## 3. Make a PLS model for concentration of first component 
+## using only test set validation and show overview
+
+data(simdata)
+x = simdata$spectra.c
+y = simdata$conc.c[, 1]
+x.t = simdata$spectra.t
+y.t = simdata$conc.t[, 1]
+
+model = pls(x, y, ncomp = 6, x.test = x.t, y.test = y.t)
+model = selectCompNum(model, 2)
+summary(model)
+plot(model)
+
+## 4. Show variance and error plots for a PLS model
+par(mfrow = c(2, 2))
+plotXCumVariance(model, type = 'h')
+plotYCumVariance(model, type = 'b', show.labels = TRUE, legend.position = 'bottomright')
+plotRMSE(model)
+plotRMSE(model, type = 'h', show.labels = TRUE)
+par(mfrow = c(1, 1))
+
+## 5. Show scores plots for a PLS model
+par(mfrow = c(2, 2))
+plotXScores(model)
+plotXScores(model, comp = c(1, 3), show.labels = TRUE)
+plotXYScores(model)
+plotXYScores(model, comp = 2, show.labels = TRUE)
+par(mfrow = c(1, 1))
+
+## 6. Show loadings and coefficients plots for a PLS model
+par(mfrow = c(2, 2))
+plotXLoadings(model)
+plotXLoadings(model, comp = c(1, 2), type = 'l')
+plotXYLoadings(model, comp = c(1, 2), legend.position = 'topleft')
+plotRegcoeffs(model)
+par(mfrow = c(1, 1))
+
+## 7. Show predictions and residuals plots for a PLS model
+par(mfrow = c(2, 2))
+plotXResiduals(model, show.label = TRUE)
+plotYResiduals(model, show.label = TRUE)
+plotPredictions(model)
+plotPredictions(model, ncomp = 4, xlab = 'C, reference', ylab = 'C, predictions')
+par(mfrow = c(1, 1))
+
+## 8. Selectivity ratio and VIP scores plots
+par(mfrow = c(2, 2))
+plotSelectivityRatio(model)
+plotSelectivityRatio(model, ncomp = 1)
+par(mfrow = c(1, 1))
+
+## 9. Variable selection with selectivity ratio and VIP scores
+selratio = getSelectivityRatio(model)
+selvar = !(selratio < 8)
+
+xsel = x[, selvar]
+modelsel = pls(xsel, y, ncomp = 6, cv = 1)
+modelsel = selectCompNum(modelsel, 3)
+
+summary(model)
+summary(modelsel)
+
+i = 1:ncol(x)
+ms = apply(x, 2, mean)
+
+par(mfrow = c(2, 2))
+mdaplot(cbind(i, ms), col = 'red', main = 'Original variables')
+plotPredictions(model)
+
+mdaplot(cbind(i, ms), type = 'l', main = 'Selected variables')
+mdaplot(cbind(i[selvar], ms[selvar]), col = 'red', show.axes = F)
+plotPredictions(modelsel)
+par(mfrow = c(2, 2))
 }
 

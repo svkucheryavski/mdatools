@@ -1,0 +1,21 @@
+\name{plot.simca}
+\alias{plot.simca}
+\title{Model overview plot for SIMCA}
+\usage{
+\method{plot}{simca}(x, ncomp = NULL, ...)
+}
+\arguments{
+  \item{x}{a SIMCA model (object of class \code{simca})}
+
+  \item{ncomp}{how many components to use (if NULL - user
+  selected optimal value will be used)}
+
+  \item{...}{other arguments}
+}
+\description{
+Shows a set of plots for SIMCA model.
+}
+\details{
+See examples in help for \code{\link{simcam}} function.
+}
+

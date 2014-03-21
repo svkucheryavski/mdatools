@@ -27,7 +27,7 @@ classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL)
    if (!is.null(c.ref))
    {
       c.ref = as.matrix(c.ref)
-      obj = classres.getClassificationPerformance(c.ref, c.pred)
+      obj = getClassificationPerformance(c.ref, c.pred)
       obj$c.ref = c.ref
    }
    else
@@ -48,16 +48,34 @@ classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL)
    obj
 }
 
-
-classres.getClassificationPerformance = function(c.ref, c.pred)
+#' Calculation of  classification performance parameters
+#'
+#' @description
+#' Calculates and returns performance parameters for classification result (e.g. number of false
+#' negatives, false positives, sensitivity, specificity, etc.).
+#' 
+#' @param c.ref
+#' reference class values for objects (vector with numeric or text values)
+#' @param c.pred
+#' predicted class values for objects (array nobj x ncomponents x nclasses) 
+#'
+#' @return
+#' Returns a list with following fields:
+#' \tabular{ll}{
+#'    \code{$fn} \tab number of false negatives (nclasses x ncomponents) \cr
+#'    \code{$fp} \tab number of false positives (nclasses x ncomponents) \cr
+#'    \code{$tp} \tab number of true positives (nclasses x ncomponents) \cr
+#'    \code{$sensitivity} \tab sensitivity values (nclasses x ncomponents) \cr
+#'    \code{$specificity} \tab specificity values (nclasses x ncomponents) \cr
+#'    \code{$sensitivity} \tab misclassified ratio values (nclasses x ncomponents) \cr
+#' }
+#'
+#' @details
+#' The function is called automatically when a classification result with reference values is 
+#' created, for example when applying a \code{plsda} or \code{simca} models.
+#' 
+getClassificationPerformance = function(c.ref, c.pred)
 {
-   # Calculates and returns a list with classification performance parameters
-   #
-   # Arguments:
-   #  c.ref - matrix with reference values (nobj x nclasses)
-   #  c.pred - array with predicted values (nobj x ncomp x nclasses) 
-   #
-
    ncomp = dim(c.pred)[2]
    nobj = dim(c.pred)[1]
    nclasses = dim(c.pred)[3]
@@ -109,11 +127,22 @@ classres.getClassificationPerformance = function(c.ref, c.pred)
    obj
 }   
 
+#' Get selected components
+#' 
+#' @description
+#' Returns number of components depending on user selection and object properites
+#' 
+#' @param obj
+#' object with classification results (e.g. \code{plsdares} or \code{simcamres}).
+#' @param ncomp
+#' number of components specified by user.
+#' 
+#' @details
+#' This is a technical function used for selection proper value for number of components in 
+#' plotting functions.
+#' 
 getSelectedComponents.classres = function(obj, ncomp = NULL)
 {
-   # returns proper value for number of components depending on 
-   # user specified argument and classification results values
-
    if (is.null(ncomp))
    {   
       if (is.null(obj$ncomp.selected) || dim(obj$c.pred)[2] == 1)
@@ -128,14 +157,24 @@ getSelectedComponents.classres = function(obj, ncomp = NULL)
    ncomp
 }
 
-showPredictions.classres = function(obj, ncomp = NULL)
+#' Show predicted class values
+#' 
+#' @description
+#' Shows a table with predicted class values for classification result.
+#' 
+#' @param obj
+#' object with classification results (e.g. \code{plsdares} or \code{simcamres}).
+#' @param ncomp
+#' number of components to show the predictions for (NULL - use selected for a model).
+#' @param ...
+#' other parameters
+#' 
+#' @details
+#' The function prints a matrix where every column is a class and every row is an data object.
+#' The matrix has either -1 (does not belong to the class) or +1 (belongs to the class) values.
+#' 
+showPredictions.classres = function(obj, ncomp = NULL, ...)
 {
-   #  Shows table with predictions for selected or user specified number of components
-   #
-   # Arguments:
-   #   obj: object of "classres" class
-   #   ncomp: for which components to show the results for
-
    ncomp = getSelectedComponents.classres(obj, ncomp)
 
    if (obj$nclasses == 1)
@@ -156,37 +195,106 @@ showPredictions.classres = function(obj, ncomp = NULL)
    print(pred)
 }  
 
-plotSensitivity.classres = function(obj, ...)
+
+#' Sensitivity plot for classification results
+#' 
+#' @description
+#' Makes a plot with sensitivity values vs. model complexity (e.g. number of components) for 
+#' classification results.
+#' 
+#' @param obj
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param nc
+#' if there are several classes, which class to make the plot for (NULL - summary for all classes).
+#' @param ...
+#' most of the graphical parameters from \code{\link{mdaplot}} function can be used.
+#' 
+#' @details
+#' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
+#' 
+plotSensitivity.classres = function(obj, nc = NULL, ...)
 {
-   plotPerformance(obj, param = 'sensitivity', ...)
+   plotPerformance(obj, nc = nc, param = 'sensitivity', ...)
 }   
 
-plotSpecificity.classres = function(obj, ...)
+#' Specificity plot for classification results
+#' 
+#' @description
+#' Makes a plot with specificity values vs. model complexity (e.g. number of components) for
+#' classification results.
+#' 
+#' @param obj
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param nc
+#' if there are several classes, which class to make the plot for (NULL - summary for all classes).
+#' @param ...
+#' most of the graphical parameters from \code{\link{mdaplot}} function can be used.
+#' 
+#' @details
+#' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
+#' 
+plotSpecificity.classres = function(obj, nc = NULL, ...)
 {
-   plotPerformance(obj, param = 'specificity', ...)
+   plotPerformance(obj, nc = nc, param = 'specificity', ...)
 }   
 
-plotMisclassified.classres = function(obj, ...)
+#' Misclassified ratio plot for classification results
+#' 
+#' @description
+#' Makes a plot with misclassified ratio values vs. model complexity (e.g. number of components) for
+#' classification results.
+#' 
+#' @param obj
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param nc
+#' if there are several classes, which class to make the plot for (NULL - summary for all classes).
+#' @param ...
+#' most of the graphical parameters from \code{\link{mdaplot}} function can be used.
+#' 
+#' @details
+#' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
+#' 
+plotMisclassified.classres = function(obj, nc = NULL, ...)
 {
-   plotPerformance(obj, param = 'misclassified', ...)
+   plotPerformance(obj, nc = nc, param = 'misclassified', ...)
 }   
 
 
-plotPerformance.classres = function(obj, nc = NULL, param = 'all', main = NULL, xlab = 'Components', 
-                                    type = 'h', ylab = '', legend = NULL, ylim = c(0, 1.1), ...)
+#' Performance plot for classification results
+#' 
+#' @description
+#' Makes a plot with classification performance parameters vs. model complexity (e.g. number of 
+#' components) for classification results.
+#' 
+#' @param obj
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param nc
+#' if there are several classes, which class to make the plot for (NULL - summary for all classes).
+#' @param param
+#' which performance parameter to make the plot for (\code{'sensitivity'}, \code{'specificity'}, 
+#' \code{'misclassified'}, \code{'all'}).
+#' @param type
+#' type of the plot
+#' @param legend
+#' vector with legend items
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ylim
+#' vector with two values - limits for y axis
+#' @param ...
+#' most of the graphical parameters from \code{\link{mdaplot}} function can be used.
+#' 
+#' @details
+#' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
+#' 
+plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', legend = NULL, 
+                                    main = NULL, xlab = 'Components', 
+                                    ylab = '', ylim = c(0, 1.1), ...)
 {
-   # Makes plot with snesitivity and specificity vs number of components
-   #
-   # Arguments:
-   #   obj: object of "classres" class
-   #   nc: number of class to make the plot for
-   #   param: which of the three performance parameters to show
-   #   main: main title of the plot
-   #   xlab: text for x axis label
-   #   ylab: text for y axis label
-   #   legend: legend for the plot items
-   #   ylim: limits for y axis
-
    if (is.null(nc))
    {
       nc =  obj$nclasses + 1
@@ -232,23 +340,41 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', main = NULL, 
    }
 }
 
-plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', main = NULL, 
-                                    xlab = 'Objects', ylab = NULL, legend = NULL, ylim = c(-1.2, 1.2),
-                                    show.line = T, ...)
+#' Prediction plot for classification results
+#' 
+#' @description
+#' Makes a plot with predicted class values for classification results.
+#' 
+#' @param obj
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param nc
+#' if there are several classes, which class to make the plot for (NULL - summary for all classes).
+#' @param ncomp
+#' which number of components to make the plot for (can be one value for all classes or vector with
+#' separate values for each, if NULL - model selected number will be used).
+#' @param type
+#' type of the plot
+#' @param legend
+#' vector with legend items
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ylim
+#' vector with two values - limits for y axis
+#' @param ...
+#' most of the graphical parameters from \code{\link{mdaplotg}} or \code{\link{mdaplot}} function 
+#' can be used.
+#'
+#' @details
+#' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
+#' 
+plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', legend = NULL, 
+                                    main = NULL, xlab = 'Objects', ylab = NULL, ylim = c(-1.2, 1.2),
+                                    ...)
 {
-   # Makes plot with predicted class values vs object number 
-   # for selected class 
-   #
-   # Arguments:
-   #   obj: object of "classres" class
-   #   nc: number of class c to make the plot for
-   #   ncomp: which column of c.pred to use
-   #   main: main title of the plot
-   #   xlab: text for x axis label
-   #   ylab: text for y axis label
-   #   legend: legend for the plot groups
-   #   show.line: logical, show or not separation line for classes
-
    if (is.null(nc))
       nc = 1:obj$nclasses
 
@@ -345,25 +471,42 @@ plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', ma
    }   
 }
 
-plot.classres = function(obj, nc = NULL, ...)
+#' Plot function for classification results
+#' 
+#' @description
+#' Generic plot function for classification results. Shows predicted class values.
+#'
+#' @param x
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param nc
+#' if there are several classes, which class to make the plot for (NULL - summary for all classes).
+#' @param ...
+#' other arguments
+#' 
+plot.classres = function(x, nc = NULL, ...)
 {
-   # Plot method for "regres" objects
-   #
-   # Arguments:
-   #   obj: object of "regres" class
-   #   nc: number of response variable y to make the plot for   
-
-   plotPredictions.classres(obj, nc = nc, ...)
+   plotPredictions.classres(x, nc = nc, ...)
 }   
 
-as.matrix.classres = function(obj, ncomp = NULL, nc = 1)
+#' Converts classification results object to a matrix
+#' 
+#' @description
+#' Generic \code{as.matrix} function for classification results. Returns matrix with performance 
+#' values for specific class.
+#'
+#' @param x
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param ncomp
+#' model complexity (number of components) to show the parameters for.
+#' @param nc
+#' if there are several classes, which class to show the parameters for.
+#' @param ...
+#' other arguments
+#' 
+as.matrix.classres = function(x, ncomp = NULL, nc = 1, ...)
 {
-   # as.matrix method for "classres" objects
-   #
-   # Arguments:
-   #   obj: object of "regres" class
-   #   nc: number of response variable y to make the plot for   
-
+   obj = x
+   
    if (!is.null(obj$c.ref))
    {  
       if (is.null(ncomp))
@@ -383,13 +526,21 @@ as.matrix.classres = function(obj, ncomp = NULL, nc = 1)
    res
 }
 
-print.classres = function(obj, str = NULL, ...)
+#' Print information about classification result object
+#' 
+#' @description
+#' Generic \code{print} function for classification results. Prints information about major fields
+#' of the object.
+#'
+#' @param x
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param str
+#' User specified text (e.g. to be used for particular method, like PLS-DA, etc).
+#' @param ...
+#' other arguments
+#' 
+print.classres = function(x, str = NULL, ...)
 {
-   # Print method for "classres" object
-   #
-   # Arguments:
-   #   obj: object of "classres" class
-
    if (is.null(str))
       str = 'Classification results (class classres)\nMajor fields:'
 
@@ -397,7 +548,7 @@ print.classres = function(obj, str = NULL, ...)
       cat(sprintf('\n%s\n', str))   
 
    cat('$c.pred - predicted class values\n')
-   if (!is.null(obj$c.ref))
+   if (!is.null(x$c.ref))
    {   
       cat('$c.ref - reference (true) class values\n')
       cat('$tp - number of true positives\n')
@@ -407,23 +558,32 @@ print.classres = function(obj, str = NULL, ...)
       cat('$sensitivity - sensitivity of predictions\n')
       cat('$misclassified - misclassification ratio for predictions\n')
    }
-
 }   
 
-summary.classres = function(obj, ncomp = NULL, nc = NULL, ...)
+#' Summary statistics about classification result object
+#' 
+#' @description
+#' Generic \code{summary} function for classification results. Prints performance values for the 
+#' results.
+#'
+#' @param object
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param ncomp
+#' which number of components to make the plot for (can be one value for all classes or vector with
+#' separate values for each, if NULL - model selected number will be used).
+#' @param nc
+#' if there are several classes, which class to make the plot for (NULL - summary for all classes).
+#' @param ...
+#' other arguments
+#' 
+summary.classres = function(object, ncomp = NULL, nc = NULL, ...)
 {
-   # Summary method for "calres" object
-   #
-   # Arguments:
-   #   obj: object of "calres" class
-   #   ncomp: which column of c.pred to use
-
    cat('\nClassiciation results (class classres) summary\n')
-   if (!is.null(obj$c.ref))
+   if (!is.null(object$c.ref))
    {         
 
       if (is.null(nc))
-         nc = 1:dim(obj$c.pred)[3]
+         nc = 1:dim(object$c.pred)[3]
       show(nc)
       if (!is.null(ncomp))
       {   
@@ -431,23 +591,23 @@ summary.classres = function(obj, ncomp = NULL, nc = NULL, ...)
       }   
       else
       {   
-         if (is.null(obj$ncomp.selected))
+         if (is.null(object$ncomp.selected))
          {   
             ncomp = 1
          }   
          else
          {   
-            ncomp = obj$ncomp.selected
+            ncomp = object$ncomp.selected
             cat(sprintf('\nNumber of selected components: %d', ncomp))
          }   
       }
 
-      cat(sprintf('\nNumber of classes: %d\n', ncol(obj$c.ref)))
+      cat(sprintf('\nNumber of classes: %d\n', ncol(object$c.ref)))
 
       for (i in nc)
       {   
-         cat(sprintf('\nClass "%s":\n', colnames(obj$c.ref)[i]))
-         res = as.matrix.classres(obj, nc = i)    
+         cat(sprintf('\nClass "%s":\n', colnames(object$c.ref)[i]))
+         res = as.matrix.classres(object, nc = i)    
          print(res)
       }      
    }      
@@ -456,4 +616,3 @@ summary.classres = function(obj, ncomp = NULL, nc = NULL, ...)
       cat('No reference data provided to calculate prediction performance.')
    }   
 }   
-

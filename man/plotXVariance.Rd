@@ -1,0 +1,19 @@
+\name{plotXVariance}
+\alias{plotXVariance}
+\title{X variance plot}
+\usage{
+plotXVariance(obj, ...)
+}
+\arguments{
+  \item{obj}{a model or result object}
+
+  \item{...}{other arguments}
+}
+\description{
+X variance plot
+}
+\details{
+Generic function for plotting explained variance for
+decomposition of x data
+}
+
