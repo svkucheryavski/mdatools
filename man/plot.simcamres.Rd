@@ -1,0 +1,19 @@
+\name{plot.simcamres}
+\alias{plot.simcamres}
+\title{Model overview plot for SIMCAM results}
+\usage{
+\method{plot}{simcamres}(x, ...)
+}
+\arguments{
+  \item{x}{SIMCAM results (object of class
+  \code{simcamres})}
+
+  \item{...}{other arguments}
+}
+\description{
+Just shows a prediction plot for SIMCAM results.
+}
+\details{
+See examples in help for \code{\link{simcamres}} function.
+}
+

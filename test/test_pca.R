@@ -4,7 +4,7 @@ do_people = T
 
 if (do_people == T) 
 {
-   data(People)
+   data(people)
    data = people
    data[4, 4] = NA
    pcamodel = pca(data, ncomp = 8, scale = T, cv = 1, info = 'My first model')
@@ -127,7 +127,7 @@ plot(pcamodel, show.labels = T)
 readline('Press Enter to continue...')
 
 cat('\n13. Check summary plot printing\n')
-png(filename = './test/PCA summary.png', width = 2400, height = 1800, pointsize = 9, res = 300)
+png(filename = '../../PCA summary.png', width = 2400, height = 1800, pointsize = 9, res = 300)
 plot.new()
 plot(pcamodel, show.labels = T)
 dev.off()

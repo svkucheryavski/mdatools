@@ -1,5 +1,5 @@
-\name{People}
-\alias{People}
+\name{people}
+\alias{people}
 \docType{data}
 
 \title{
@@ -10,7 +10,7 @@ People data
 Dataset for exploratory analysis with 32 objects (male and female persons) and 12 variables.
 }
 
-\usage{data(People)}
+\usage{data(people)}
 \format{
   a matrix with 32 observations (persons) and 12 variables.
    \tabular{rlll}{

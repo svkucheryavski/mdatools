@@ -1,0 +1,30 @@
+\name{mdaplot.showLegend}
+\alias{mdaplot.showLegend}
+\title{Plot legend}
+\usage{
+mdaplot.showLegend(legend, col, pch = NULL, lty = NULL, bty = "o",
+  position = "topright", plot = T)
+}
+\arguments{
+  \item{legend}{vector with text elements for the legend
+  items}
+
+  \item{col}{vector with color values for the legend items}
+
+  \item{pch}{vector with marker symbols for the legend
+  items}
+
+  \item{lty}{vector with line types for the legend items}
+
+  \item{bty}{border type for the legend}
+
+  \item{position}{legend position ('topright', 'topleft',
+  'bottomright', 'bottomleft', 'top', 'bottom')}
+
+  \item{plot}{logical, show legend or just calculate and
+  return its size}
+}
+\description{
+Shows a legend for plot elements or their groups.
+}
+

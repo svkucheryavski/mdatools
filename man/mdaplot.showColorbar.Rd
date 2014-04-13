@@ -1,0 +1,17 @@
+\name{mdaplot.showColorbar}
+\alias{mdaplot.showColorbar}
+\title{Plot colorbar}
+\usage{
+mdaplot.showColorbar(cgroup, colmap = "default")
+}
+\arguments{
+  \item{cgroup}{a vector with values used to make color
+  grouping of the elements}
+
+  \item{colmap}{a colormap to be used for color generation}
+}
+\description{
+Shows a colorbar if plot has color grouping of elements
+(points or lines).
+}
+

@@ -1,0 +1,24 @@
+\name{as.matrix.classres}
+\alias{as.matrix.classres}
+\title{as.matrix method for classification results}
+\usage{
+\method{as.matrix}{classres}(x, ncomp = NULL, nc = 1, ...)
+}
+\arguments{
+  \item{x}{classification results (object of class
+  \code{plsdares}, \code{simcamres}, etc.).}
+
+  \item{ncomp}{model complexity (number of components) to
+  show the parameters for.}
+
+  \item{nc}{if there are several classes, which class to
+  show the parameters for.}
+
+  \item{...}{other arguments}
+}
+\description{
+Generic \code{as.matrix} function for classification
+results. Returns matrix with performance values for
+specific class.
+}
+

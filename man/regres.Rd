@@ -1,0 +1,33 @@
+\name{regres}
+\alias{regres}
+\title{Regression results}
+\usage{
+regres(y.pred, y.ref = NULL, ncomp.selected = 1)
+}
+\arguments{
+  \item{y.pred}{vector or matrix with y predicted values}
+
+  \item{y.ref}{vector with reference (measured) y values}
+
+  \item{ncomp.selected}{if y.pred calculated for different
+  components, which to use as default}
+}
+\value{
+a list (object of \code{regres} class) with fields,
+including: \tabular{ll}{ \code{y.pred} \tab a matrix with
+predicted values \cr \code{y.pred} \tab a matrix with
+predicted values \cr \code{y.ref} \tab a vector with
+reference (measured) values \cr \code{ncomp.selected} \tab
+selected column/number of components for predictions \cr
+\code{rmse} \tab root mean squared error for predicted vs
+measured values \cr \code{slope} \tab slope for predicted
+vs measured values \cr \code{r2} \tab coefficient of
+determination for predicted vs measured values \cr
+\code{bias} \tab bias for predicted vs measured values \cr
+\code{rpd} \tab RPD values \cr }
+}
+\description{
+Class for storing and visualisation of regression
+predictions
+}
+

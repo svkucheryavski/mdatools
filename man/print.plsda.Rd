@@ -1,0 +1,15 @@
+\name{print.plsda}
+\alias{print.plsda}
+\title{Print method for PLS-DA model object}
+\usage{
+\method{print}{plsda}(x, ...)
+}
+\arguments{
+  \item{x}{a PLS-DA model (object of class \code{plsda})}
+
+  \item{...}{other arguments}
+}
+\description{
+Prints information about the object structure
+}
+

@@ -3,8 +3,8 @@
 \title{Partial Least Squares Discriminant Analysis}
 
 \usage{
-  plsda(x, c, ncomp = 20, center = T, scale = F, cv = NULL,
-    x.test = NULL, c.test = NULL, method = 'simpls', info = '')
+  plsda(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
+    x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, info = '')
 }
 
 \description{
@@ -21,6 +21,7 @@
   \item{x.test }{matrix with predictors for test set.}
   \item{c.test }{vector with reference class values for test set (same format as calibration values).}
   \item{method }{method for calculating PLS model.}
+  \item{alpha }{significance level for calculating statistical limits for residuals.}  
   \item{info }{short text with information about the model.}
 }
 
@@ -69,9 +70,11 @@ Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }
 
 \examples{
-## Make a PLS-DA model with full cross-validation and show model overview
+### Examples for PLS-DA model class
 
 library(mdatools)
+
+## 1. Make a PLS-DA model with full cross-validation and show model overview
 
 # make a calibration set from iris data (3 classes)
 # use names of classes as class vector
@@ -79,14 +82,14 @@ x.cal = iris[seq(1, nrow(iris), 2), 1:4]
 c.cal = iris[seq(1, nrow(iris), 2), 5]
 
 model = plsda(x.cal, c.cal, ncomp = 3, cv = 1, info = 'IRIS data example')
-model = slectCompNum(model, 1)
+model = selectCompNum(model, 1)
 
 # show summary and basic model plots
-print(model)
+# misclassification will be shown only for first class
 summary(model)
 plot(model)
 
-# summary and model plots for another class
+# summary and model plots for second class
 summary(model, nc = 2)
 plot(model, nc = 2)
 
@@ -94,7 +97,7 @@ plot(model, nc = 2)
 summary(model, nc = 3, ncomp = 3)
 plot(model, nc = 3, ncomp = 3)
 
-# show performance plots
+## 2. Show performance plots for a model
 par(mfrow = c(2, 2))
 plotSpecificity(model)
 plotSensitivity(model)
@@ -102,12 +105,22 @@ plotMisclassified(model)
 plotMisclassified(model, nc = 2)
 par(mfrow = c(1, 1))
 
-# show both class and y values predictions
+## 3. Show both class and y values predictions
 par(mfrow = c(2, 2))
 plotPredictions(model)
 plotPredictions(model, res = 'calres', ncomp = 2, nc = 2)
 plotPredictions.pls(model)
 plotPredictions.pls(model, ncomp = 2, ny = 2)
 par(mfrow = c(1, 1))
+
+## 4. All plots from ordinary PLS can be used, e.g.:
+par(mfrow = c(2, 2))
+plotXYScores(model)
+plotYVariance(model)
+plotXResiduals(model)
+plotRegcoeffs(model, ny = 2)
+par(mfrow = c(1, 1))
+
+
 }
 

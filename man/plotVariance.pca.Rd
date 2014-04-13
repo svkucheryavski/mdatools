@@ -1,40 +1,39 @@
 \name{plotVariance.pca}
 \alias{plotVariance.pca}
-
-\title{
-Explained variance plot for PCA model
-}
-
-\description{
-\code{plotVariance.pca} is used to make a plot with variance, explained by each component in PCA model.
-}
-
+\title{Explained variance plot for PCA}
 \usage{
-plotVariance(obj, type = 'b', ...)
+\method{plotVariance}{pca}(obj, type = "b", variance = "expvar",
+  main = "Variance", xlab = "Components", ylab = "Explained variance, \%",
+  show.legend = T, show.labels = F, ...)
 }
-
 \arguments{
-  \item{obj}{an object of \code{pca} class (PCA model).}
-  \item{type}{type of the plot.}
-  \item{...}{most of the \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{a PCA model (object of class \code{pca})}
 
+  \item{type}{type of the plot ('b', 'l', 'h')}
+
+  \item{variance}{which variance to use ('expvar',
+  'cumexpvar')}
+
+  \item{main}{main title for the plot}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{show.legend}{logical, show or not a legend on the
+  plot}
+
+  \item{show.labels}{logical, show or not labels for the
+  plot objects}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows a plot with explained variance or cumulative
+explained variance for components.
+}
 \details{
-If test set or cross-validation was used, the plot shows explained variance for the validation results as well. 
+See examples in help for \code{\link{pca}} function.
 }
 
-\examples{
-## make a PCA model for People data with full cross-validation and show variance plots
-
-library(mdatools)
-data(People)
-
-model = pca(people, scale = T, cv = 1)
-
-par(mfrow = c(2, 1))
-plotVariance(model)
-plotVariance(model, show.labels = T, type = 'h')
-par(mfrow = c(1, 1))
-}
-
-\keyword{ ~pca }

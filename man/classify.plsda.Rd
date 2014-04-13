@@ -1,0 +1,26 @@
+\name{classify.plsda}
+\alias{classify.plsda}
+\title{PLS-DA classification}
+\usage{
+classify.plsda(model, y, c.ref = NULL)
+}
+\arguments{
+  \item{model}{a PLS-DA model (object of class
+  \code{plsda})}
+
+  \item{y}{a matrix with predicted y values}
+
+  \item{c.ref}{a vector with reference class values}
+}
+\value{
+Classification results (an object of class \code{classres})
+}
+\description{
+Converts PLS predictions of y values to predictions of
+classes
+}
+\details{
+This is a service function for PLS-DA class, do not use it
+manually.
+}
+

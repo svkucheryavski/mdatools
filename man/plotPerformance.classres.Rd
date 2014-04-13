@@ -1,28 +1,44 @@
 \name{plotPerformance.classres}
 \alias{plotPerformance.classres}
-
-\title{
-Classification performance plot
-}
-
-\description{
-\code{plotPerformance.classres} is used to show a plot with specificity and sensitivity values vs. model complexity for classification results.
-}
-
+\title{Performance plot for classification results}
 \usage{
-plotPerformance(obj, nc = 1, ...)
+\method{plotPerformance}{classres}(obj, nc = NULL, param = "all",
+  type = "h", legend = NULL, main = NULL, xlab = "Components",
+  ylab = "", ylim = c(0, 1.1), ...)
 }
-
 \arguments{
-  \item{obj}{classification results (object of \code{classress} class or similar).}
-  \item{nc}{if results include several classes, which class to show the plot for.}
-  \item{\dots}{most of \code{\link{mdaplot}} parameters can be used.}
-}
+  \item{obj}{classification results (object of class
+  \code{plsdares}, \code{simcamres}, etc.).}
 
+  \item{nc}{if there are several classes, which class to
+  make the plot for (NULL - summary for all classes).}
+
+  \item{param}{which performance parameter to make the plot
+  for (\code{'sensitivity'}, \code{'specificity'},
+  \code{'misclassified'}, \code{'all'}).}
+
+  \item{type}{type of the plot}
+
+  \item{legend}{vector with legend items}
+
+  \item{main}{main title for the plot}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{ylim}{vector with two values - limits for y axis}
+
+  \item{...}{most of the graphical parameters from
+  \code{\link{mdaplot}} function can be used.}
+}
+\description{
+Makes a plot with classification performance parameters vs.
+model complexity (e.g. number of components) for
+classification results.
+}
 \details{
-See examples for \code{\link{simcares}}, \code{\link{simcamres}} and \code{\link{plsdares}}.
+See examples in description of \code{\link{plsdares}},
+\code{\link{simcamres}}, etc.
 }
 
-\seealso{
-\code{\link{plotSensitivity.classres}} to show sensitivity plot, \code{\link{plotSpecificity.classres}} to show specificity plot.
-}

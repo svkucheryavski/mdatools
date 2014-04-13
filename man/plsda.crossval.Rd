@@ -1,0 +1,31 @@
+\name{plsda.crossval}
+\alias{plsda.crossval}
+\title{Cross-validation of a PLS-DA model}
+\usage{
+plsda.crossval(model, x, c, cv, center = T, scale = F)
+}
+\arguments{
+  \item{model}{a PLS-DA model (object of class
+  \code{plsda})}
+
+  \item{x}{a matrix with x values (predictors from
+  calibration set)}
+
+  \item{c}{a vetor with c values (classes from calibration
+  set)}
+
+  \item{cv}{number of segments (if cv = 1, full
+  cross-validation will be used)}
+
+  \item{center}{logical, do mean centering or not}
+
+  \item{scale}{logical, do standardization or not}
+}
+\value{
+object of class \code{plsdares} with results of
+cross-validation
+}
+\description{
+Does the cross-validation of a PLS-DA model
+}
+

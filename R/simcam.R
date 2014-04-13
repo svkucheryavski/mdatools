@@ -2,7 +2,7 @@
 
 simcam = function(models, info = '')
 {
-   # Create a SIMCA multiple classes classification model
+   # Create a SIMCA multiple classes classification obj
    #
    # Arguments:
    #   models: a list with SIMCA one-class models (simca)
@@ -40,42 +40,54 @@ simcam = function(models, info = '')
    model
 }
 
-predict.simcam = function(model, x, c.ref = NULL, cv = F)
+#' SIMCA multiple classes predictions
+#' 
+#' @description
+#' Applies SIMCAM model (SIMCA for multiple classes) to a new data set
+#' 
+#' @param object
+#' a SIMCAM model (object of class \code{simcam})
+#' @param x
+#' a matrix with x values (predictors)
+#' @param c.ref
+#' a vector with reference class values
+#' @param cv
+#' logical, are predictions for cross-validation or not
+#' @param ...
+#' other arguments
+#' 
+#' @return
+#' SIMCAM results (an object of class \code{simcamres})
+#'
+#' @details
+#' See examples in help for \code{\link{simcam}} function.
+#'  
+predict.simcam = function(object, x, c.ref = NULL, cv = F, ...)
 {
-   # Apply the SIMCAM model to a new data set
-   #
-   # Arguments:
-   #   model: a SIMCAM model (object of class simcam)
-   #   x: a matrix with new data values
-   #   c.ref: reference class values for the data set (optional)
-   #
-   # Returns:
-   #   res: results of SIMCAM classification (object of simcamres class)
-   
    x = as.matrix(x)
    nobj = nrow(x)
 
-   c.pred = array(0, dim = c(nobj, 1, model$nclasses))
-   Q2 = array(0, dim = c(nobj, model$nclasses))
-   T2 = array(0, dim = c(nobj, model$nclasses))
-   Q2lim = array(0, dim = c(1, model$nclasses))
-   T2lim = array(0, dim = c(1, model$nclasses))
+   c.pred = array(0, dim = c(nobj, 1, object$nclasses))
+   Q2 = array(0, dim = c(nobj, object$nclasses))
+   T2 = array(0, dim = c(nobj, object$nclasses))
+   Q2lim = array(0, dim = c(1, object$nclasses))
+   T2lim = array(0, dim = c(1, object$nclasses))
 
-   ncomp.selected = matrix(0, nrow = 1, ncol = model$nclasses)
+   ncomp.selected = matrix(0, nrow = 1, ncol = object$nclasses)
    
-   for (i in 1:model$nclasses)
+   for (i in 1:object$nclasses)
    {  
       if (!is.null(c.ref))
       {   
          if (is.numeric(c.ref))
-            res = predict(model$models[[i]], x, c.ref == i)
+            res = predict(object$models[[i]], x, c.ref == i)
          else
-            res = predict(model$models[[i]], x, c.ref == model$models[[i]]$classname)
+            res = predict(object$models[[i]], x, c.ref == object$models[[i]]$classname)
       }
       else
-         res = predict(model$models[[i]], x)
+         res = predict(object$models[[i]], x)
 
-      ncomp.selected[i] = model$models[[i]]$ncomp.selected
+      ncomp.selected[i] = object$models[[i]]$ncomp.selected
       c.pred[, , i] = res$c.pred[, ncomp.selected[i], ]
       Q2[, i] = res$Q2[, ncomp.selected[i], drop = F]
       T2[, i] = res$T2[, ncomp.selected[i], drop = F]
@@ -83,21 +95,34 @@ predict.simcam = function(model, x, c.ref = NULL, cv = F)
       T2lim[i] = res$T2lim[ncomp.selected[i]]
    }
    
-   dimnames(c.pred) = list(rownames(x), paste('Comp', ncomp.selected[[i]]), model$classnames)
+   dimnames(c.pred) = list(rownames(x), paste('Comp', ncomp.selected[[i]]), object$classnames)
    cres = classres(c.pred, c.ref, ncomp.selected = ncomp.selected)
    res = simcamres(cres, T2, Q2, T2lim, Q2lim)
    res
 }
 
-getCalibrationData.simcam = function(model)
+#' Get calibration data
+#' 
+#' @description
+#' Get data, used for calibration of the SIMCAM model.
+#' 
+#' @param obj
+#' SIMCAM model (object of class \code{simcam})
+#' @param ...
+#' other arguments
+#' 
+#' @details
+#' See examples in help for \code{\link{simcam}} function.
+#' 
+getCalibrationData.simcam = function(obj, ...)
 {
    x = NULL
    c.ref = NULL
-   for (i in 1:model$nclasses)
+   for (i in 1:obj$nclasses)
    {
-      classdata = getCalibrationData(model$models[[i]])
+      classdata = getCalibrationData(obj$models[[i]])
       x = rbind(x, classdata)
-      c.ref = rbind(c.ref, matrix(model$models[[i]]$classname, nrow = nrow(classdata), ncol = 1))            
+      c.ref = rbind(c.ref, matrix(obj$models[[i]]$classname, nrow = nrow(classdata), ncol = 1))            
    }
 
    res = list(x = x, c.ref = c.ref)
@@ -105,13 +130,16 @@ getCalibrationData.simcam = function(model)
    res
 }
 
+#' Performance statistics for SIMCAM model
+#' 
+#' @description
+#' Calculates discrimination power and distance between models for SIMCAM model.
+#' 
+#' @param model
+#' SIMCAM model (object of class \code{simcam})
+#' 
 simcam.getPerformanceStatistics = function(model)
 {
-   # calculates discrimination power and distance between models
-   #
-   # Arguments:
-   #  model: SIMCAM model (object of class simcam)
-   
    nvar = nrow(model$models[[1]]$loadings)
    nc = length(model$models)
    
@@ -191,41 +219,74 @@ simcam.getPerformanceStatistics = function(model)
       )
 }
 
-plotModelDistance.simcam = function(model, nc = 1, type = 'h', main = NULL, xlab = 'Models', ylab = '', 
+#' Modelling distance plot for SIMCAM model
+#' 
+#' @description
+#' Shows a plot with distance from data objects to a SIMCA model
+#' 
+#' @param obj
+#' a SIMCAM model (object of class \code{simcam})
+#' @param nc
+#' for which class (SIMCA model) to show the plot for
+#' @param type
+#' type of the plot
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param xticklabels
+#' labels for x axis ticks
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{simcam}} function.
+#' 
+plotModelDistance.simcam = function(obj, nc = 1, type = 'h', main = NULL, xlab = 'Models', ylab = '', 
                                     xticklabels = NULL, ...)
 {
-   # makes a plot with distance from one model to the others
-   #
-   # Argumens:
-   #  model: a SIMCAM model (object of class simcam)
-   #  nc: number of class to show the distance from
-   #  ...: standard plot parameters
-
-
    if (is.null(main))
-      main = sprintf('Model distance (%s)', model$classnames[nc])
+      main = sprintf('Model distance (%s)', obj$classnames[nc])
 
-   if (is.null(xticklabels) && length(model$moddist[, nc]) < 8)
-      xticklabels = model$classnames
+   if (is.null(xticklabels) && length(obj$moddist[, nc]) < 8)
+      xticklabels = obj$classnames
 
-   data = cbind(1:length(model$models), model$moddist[, nc, drop = F])
+   data = cbind(1:length(obj$models), obj$moddist[, nc, drop = F])
    mdaplot(data, type = type, main = main, xlab = xlab, ylab = ylab, xticklabels = xticklabels, ...)
 }
 
-plotDiscriminationPower.simcam = function(model, nc = c(1, 2), type = 'h', xlab = 'Variables', 
-                                          ylab = '', main = NULL, ...)
+#' Discrimination power plot for SIMCAM model
+#' 
+#' @description
+#' Shows a plot with discrimination power of predictors for a pair of SIMCA models
+#' 
+#' @param obj
+#' a SIMCAM model (object of class \code{simcam})
+#' @param nc
+#' vector with two values - classes (SIMCA models) to show the plot for
+#' @param type
+#' type of the plot
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{simcam}} function.
+#' 
+plotDiscriminationPower.simcam = function(obj, nc = c(1, 2), type = 'h', main = NULL, 
+                                          xlab = 'Variables', ylab = '', ...)
 {
-   # makes a plot with discrimination power of variables
-   #
-   # Arguments:
-   #   model: a SIMCA model (object of class simca)
-   #   nc: vector with two valies - models to show discrimination power for
-   #   ...: stadard plot parameters
-   
    if (is.null(main))
-      main = sprintf('Discrimination power (%s vs %s)', model$classnames[nc[1]], model$classnames[nc[2]])
+      main = sprintf('Discrimination power (%s vs %s)', obj$classnames[nc[1]], obj$classnames[nc[2]])
 
-   nvar = dim(model$dispower)[[3]]
+   nvar = dim(obj$dispower)[[3]]
    
    if (is.null(type))
    {   
@@ -235,64 +296,150 @@ plotDiscriminationPower.simcam = function(model, nc = c(1, 2), type = 'h', xlab 
          type = 'l'
    }   
    
-   data = model$dispower[nc[1], nc[2], , drop = F]
-   varnames = dimnames(model$dispower)[[3]]
+   data = obj$dispower[nc[1], nc[2], , drop = F]
+   varnames = dimnames(obj$dispower)[[3]]
    dim(data) = c(dim(data)[3], 1)
    data = cbind(1:nvar, data)
    rownames(data) = varnames
    mdaplot(data, type = type, main = main, xlab = xlab, ylab = ylab, ...)
 }   
 
-plotCooman.simcam = function(model, ...)
+#' Cooman's plot for SIMCAM model
+#' 
+#' @description
+#' Shows a Cooman's plot for a pair of SIMCA models
+#' 
+#' @param obj
+#' a SIMCAM model (object of class \code{simcam})
+#' @param nc
+#' vector with two values - classes (SIMCA models) to show the plot for
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{simcam}} function.
+#' 
+plotCooman.simcam = function(obj, nc = c(1, 2), ...)
 {
-   plotCooman(model$calres, ...)
+   plotCooman(obj$calres, nc = nc, ...)
 }
 
-plotResiduals.simcam = function(model, ...)
+#' Residuals plot for SIMCAM model
+#' 
+#' @description
+#' Shows a plot with residuals for SIMCAM model
+#' 
+#' @param obj
+#' a SIMCAM model (object of class \code{simcam})
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{simcam}} function.
+#' 
+plotResiduals.simcam = function(obj, ...)
 {
-   plotResiduals(model$calres, ...)
+   plotResiduals(obj$calres, ...)
 }
 
-plotModellingPower.simcam = function(model, nc = 1, main = NULL, ...)
+#' Modelling power plot for SIMCAM model
+#' 
+#' @description
+#' Shows a plot with modelling power values for each predictor of selected SIMCA model
+#' 
+#' @param obj
+#' a SIMCAM model (object of class \code{simcam})
+#' @param nc
+#' which classe (SIMCA model) to show the plot for
+#' @param main
+#' main plot title
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{simcam}} function.
+#' 
+plotModellingPower.simcam = function(obj, nc = 1, main = NULL, ...)
 {
    if (is.null(main))
-      main = sprintf('Modelling power (%s)', model$classnames[nc])
+      main = sprintf('Modelling power (%s)', obj$classnames[nc])
    
-   plotModellingPower(model$models[[nc]], main = main, ...)
+   plotModellingPower.simca(obj$models[[nc]], main = main, ...)
 }
 
-plot.simcam = function(model, nc = c(1, 2), ...)
+#' Model overview plot for SIMCAM
+#' 
+#' @description
+#' Shows a set of plots for SIMCAM model.
+#' 
+#' @param x
+#' a SIMCAM model (object of class \code{simcam})
+#' @param nc
+#' vector with two values - classes (SIMCA models) to show the plot for
+#' @param ...
+#' other arguments
+#' 
+#' @details
+#' See examples in help for \code{\link{simcam}} function.
+#' 
+plot.simcam = function(x, nc = c(1, 2), ...)
 {
-   # makes a plot overview of  a SIMCAM model
-   #
-   # Arguments:
-   #  model: a SIMCAM model (object of class simcam)
-   #  nc: a vector with two values - number of models to show the plot for
-
+   obj = x
+   
    par(mfrow = c(2, 1))
-   plotDiscriminationPower(model, nc)
-   plotModelDistance(model, nc[1])
+   plotDiscriminationPower(obj, nc)
+   plotModelDistance(obj, nc[1])
    par(mfrow = c(1, 1))
 }  
 
-summary.simcam = function(model, ...)
+#' Summary method for SIMCAM model object
+#' 
+#' @method summary simcam
+#' @S3method summary simcam
+#'
+#' @description
+#' Shows performance statistics for the model.
+#' 
+#' @param object
+#' a SIMCAM model (object of class \code{simcam})
+#' @param ...
+#' other arguments
+#' 
+summary.simcam = function(object, ...)
 {
+   obj = object
+   
    cat('\nSIMCA multiple classes classification (class simcam)\n')
-   cat(sprintf('Nmber of classes: %d\n', length(model$models)))
+   cat(sprintf('Nmber of classes: %d\n', length(obj$models)))
    
-   if (!is.null(model$info))
-      cat(sprintf('Info: %s\n', model$info))
+   if (!is.null(obj$info))
+      cat(sprintf('Info: %s\n', obj$info))
    
-   for (i in 1:length(model$models))
-      summary(model$models[[i]])
+   for (i in 1:length(obj$models))
+      summary(obj$models[[i]])
 }  
 
-print.simcam = function(model, ...)
+#' Print method for SIMCAM model object
+#' 
+#' @method print simcam
+#' @S3method print simcam
+#'
+#' @description
+#' Prints information about the object structure
+#' 
+#' @param x
+#' a SIMCAM model (object of class \code{simcam})
+#' @param ...
+#' other arguments
+#' 
+print.simcam = function(x, ...)
 {
+   obj = x
+   
    cat('\nSIMCA multiple classes classification (class simcam)\n')
    
    cat('\nCall:\n')
-   print(model$call)
+   print(obj$call)
    
    cat('\nMajor fields:\n')   
    cat('$models - list wth individual SIMCA models for each class\n')

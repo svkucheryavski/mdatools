@@ -1,13 +1,13 @@
 library('mdatools')
-data(Simdata)
+data(simdata)
 ny = 1:3
-y = conc.c[, ny]
-yt = conc.t[, ny]
+y = simdata$conc.c[, ny]
+yt = simdata$conc.t[, ny]
 
-plsmodel = pls(spectra.c, conc.c[, ny], cv = 2, x.test = spectra.t, y.test = conc.t[, ny], ncomp = 7)
+plsmodel = pls(simdata$spectra.c, y, cv = 2, x.test = simdata$spectra.t, y.test = yt, ncomp = 7)
 plsmodel = selectCompNum(plsmodel, 3)
 
-plspred = predict(plsmodel, spectra.t)
+plspred = predict(plsmodel, simdata$spectra.t)
 
 cat('\n\n### A. Checking calibration results ###\n')
 readline('Press Enter to continue...')
@@ -35,8 +35,8 @@ cat('\n3. Y residuals plots\n')
 par(mfrow = c(2, 2))
 plotYResiduals(plsmodel$calres, cgroup = y)
 plotYResiduals(plsmodel$calres, ny = 2, colmap = 'gray')
-plotYResiduals(plsmodel$calres, ny = 3, show.lines = T, show.labels = T)
-plotYResiduals(plsmodel$calres, ncomp = 1, col = 'red', show.lines = F, show.labels = T)
+plotYResiduals(plsmodel$calres, ny = 3, show.line = T, show.labels = T)
+plotYResiduals(plsmodel$calres, ncomp = 1, col = 'red', show.line = F, show.labels = T)
 readline('Press Enter to continue...')
 
 cat('\n4. RMSE plots\n')
@@ -117,8 +117,8 @@ cat('\n3. Y residuals plots\n')
 par(mfrow = c(2, 2))
 plotYResiduals(plsmodel$cvres, cgroup = y)
 plotYResiduals(plsmodel$cvres, colmap = 'gray')
-plotYResiduals(plsmodel$cvres, show.lines = T, show.labels = T)
-plotYResiduals(plsmodel$cvres, ncomp = 1, col = 'red', show.lines = F, show.labels = T)
+plotYResiduals(plsmodel$cvres, show.line = T, show.labels = T)
+plotYResiduals(plsmodel$cvres, ncomp = 1, col = 'red', show.line = F, show.labels = T)
 readline('Press Enter to continue...')
 
 cat('\n4. RMSE plots\n')
@@ -209,24 +209,24 @@ plotPredictions(plsmodel, ny = 2, colmap = c('blue', 'red', 'orange'),
                 legend.position = 'bottomright')
 plotPredictions(plsmodel, ny = 3, colmap = c('red', 'green', 'brown'), 
             show.labels = T,
-            show.lines = F)
+            show.line = F)
 readline('Press Enter to continue...')
 
 cat('\n3. Y residuals plots\n')
 par(mfrow = c(2, 2))
 plotYResiduals(plsmodel)
 plotYResiduals(plsmodel, ncomp = 1, colmap = 'gray')
-plotYResiduals(plsmodel, show.lines = T, show.labels = T, ncomp = 2, 
+plotYResiduals(plsmodel, show.line = T, show.labels = T, ncomp = 2, 
                xlab = 'Values', ylab = 'Residuals', main = 'Plot residuals')
 plotYResiduals(plsmodel, ncomp = 1, colmap = c('red', 'blue'), 
-               show.lines = F, show.labels = T)
+               show.line = F, show.labels = T)
 readline('Press Enter to continue...')
 
 cat('\n4. Regression coefficients plots\n')
 par(mfrow = c(2, 2))
 plotRegcoeffs(plsmodel)
 plotRegcoeffs(plsmodel, ncomp = 1, colmap = 'gray')
-plotRegcoeffs(plsmodel, col = 'red', show.labels = T, show.lines = F)
+plotRegcoeffs(plsmodel, col = 'red', show.labels = T, show.line = F)
 plotRegcoeffs(plsmodel, col = 'red', type = 'h')
 readline('Press Enter to continue...')
 
@@ -249,7 +249,7 @@ readline('Press Enter to continue...')
 cat('\n6. XY scores plots\n')
 par(mfrow = c(2, 2))
 plotXYScores(plsmodel)
-plotXYScores(plsmodel, 2, colmap = 'gray', show.legend = F, show.lines = F)
+plotXYScores(plsmodel, 2, colmap = 'gray', show.legend = F, show.line = F)
 plotXYScores(plsmodel, 3, colmap = c('red', 'blue'), pch = c(16, 15))
 plotXYScores(plsmodel, 3,  show.labels = T)
 readline('Press Enter to continue...')
@@ -284,3 +284,28 @@ par(mfrow = c(1, 2))
 plot(plsmodel, ny = 2)
 readline('Press Enter to continue...')
 
+cat('\n11. Selectivity ratio plots\n')
+par(mfrow = c(2, 2))
+plotSelectivityRatio(plsmodel)
+plotSelectivityRatio(plsmodel, ncomp = 2)
+plotSelectivityRatio(plsmodel, ncomp = 4, ny = 3, type = 'h')
+plotSelectivityRatio(plsmodel, ncomp = 1, ny = 3, color = 'red', lty = 2)
+readline('Press Enter to continue...')
+
+cat('\n12. VIP scores plots\n')
+par(mfrow = c(2, 2))
+plotVIPScores(plsmodel)
+plotVIPScores(plsmodel, ncomp = 2)
+plotVIPScores(plsmodel, ncomp = 4, ny = 3, type = 'h')
+plotVIPScores(plsmodel, ncomp = 1, ny = 3, col = 'red', lty = 2)
+readline('Press Enter to continue...')
+
+cat('\n13. Jack-knifing regcoeffs plots\n')
+plsmodel = pls(x, y, coeffs.ci='jk')
+plsmodel = selectCompNum(plsmodel, 3)
+par(mfrow = c(2, 2))
+plotRegcoeffs(plsmodel, show.ci = T)
+plotRegcoeffs(plsmodel, show.ci = T, ncomp = 2)
+plotRegcoeffs(plsmodel, show.ci = T, ny = 3, ncomp = 2, type = 'h')
+plotRegcoeffs(plsmodel, show.ci = T, ny = 3, ncomp = 3, col = c('red', 'green', 'green'), lwd = 2)
+readline('Press Enter to continue...')

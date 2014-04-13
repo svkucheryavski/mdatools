@@ -1,48 +1,41 @@
 \name{plotScores.pca}
 \alias{plotScores.pca}
-
-\title{
-Scores plot for PCA model
-}
-
-\description{
-\code{scoresPlot.pca} is used to make scores plot for a PCA model.
-}
-
+\title{Scores plot for PCA}
 \usage{
-plotScores(obj, comp = c(1, 2), show.axes = F, ...)
+\method{plotScores}{pca}(obj, comp = c(1, 2), type = "p", main = "Scores",
+  xlab = NULL, ylab = NULL, show.labels = F, show.legend = T,
+  show.axes = T, ...)
 }
-
 \arguments{
-  \item{obj}{an object of \code{pca} class (PCA model).}
-  \item{comp}{either one value or vector with two values - number of components 
-  to make the plot for. If one value is provided, the plot will be made for scores vs. objects number.}
-  \item{show.axes}{logical, show or not coordinate axes, that cross the origin (0, 0).}
-  \item{...}{most of the \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{a PCA model (object of class \code{pca})}
 
+  \item{comp}{a value or vector with several values -
+  number of components to show the plot for}
+
+  \item{type}{type of the plot ('b', 'l', 'h')}
+
+  \item{main}{main title for the plot}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{show.labels}{logical, show or not labels for the
+  plot objects}
+
+  \item{show.legend}{logical, show or not a legend on the
+  plot}
+
+  \item{show.axes}{logical, show or not a axes lines
+  crossing origin (0,0)}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows a scores plot for selected components.
+}
 \details{
-The plot shows scores for objects from calibration set and test set, if the last was provided. 
-If one value is provided for \code{comp} parameters, the plot will be made for scores vs. objects number.
+See examples in help for \code{\link{pca}} function.
 }
 
-\examples{
-## make a PCA model with test set validation and show score plots
-
-library(mdatools)
-data(People)
-
-tdata = people[seq(1, nrow(people), 4), ]
-cdata = people[-seq(1, nrow(people), 4), ]
-
-model = pca(cdata, scale = T, test.data = tdata)
-
-par(mfrow = c(2, 2))
-plotScores(model)
-plotScores(model, c(1, 3), show.labels = T)
-plotScores(model, c(1, 3), show.labels = T, show.legend = F)
-plotScores(model, 2, show.labels = T)
-par(mfrow = c(1, 1))
-}
-
-\keyword{ ~pca }

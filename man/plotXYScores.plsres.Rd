@@ -1,41 +1,30 @@
 \name{plotXYScores.plsres}
 \alias{plotXYScores.plsres}
-
-\title{
-XY scores plot for PLS results
-}
-
-\description{
-\code{plotXYScores.plsres} is used to make a plot with scores values for PLS decomposition of predictors and responses.
-}
-
+\title{XY scores plot for PLS results}
 \usage{
-plotXYScores(obj, ncomp = 1, show.axes = T, ...)
+\method{plotXYScores}{plsres}(obj, comp = 1, type = "p",
+  main = "XY scores", xlab = "X scores", ylab = "Y scores", ...)
 }
-
 \arguments{
-  \item{obj }{PLS results (object of class \code{plsres}.)}
-  \item{comp}{for which component to make the plot for. }
-  \item{show.axes}{logical, show or not coordinate axes, that cross the origin (0, 0).}
-  \item{...}{most of \code{\link{mdaplot}} parameters can be used.}
-}
+  \item{obj}{PLS results (object of class \code{plsres})}
 
+  \item{comp}{which component to show the plot for}
+
+  \item{type}{type of the plot}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{...}{other plot parameters (see \code{mdaplot} for
+  details)}
+}
+\description{
+Shows plot with X vs. Y scores values for PLS results.
+}
 \details{
-Also know as T-U plot. Useful to see importance of components and to detect outliers. The plot is not available for cross-validation results, since to scores are calculated.
+See examples in help for \code{\link{plsres}} function.
 }
 
-\examples{
-## Examples of using XY scores plot
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c, ncomp = 8, x.test = spectra.t, y.test = conc.t)
-
-par(mfrow = c(2, 2))
-plotXYScores(model$calres)
-plotXYScores(model$calres, 2, cgroup = conc.c[, 2])
-plotXYScores(model$testres, show.axes = T)
-plotXYScores(model$testres, 2, cgroup = conc.t[, 2])
-par(mfrow = c(1, 1))
-}

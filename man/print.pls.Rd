@@ -1,0 +1,15 @@
+\name{print.pls}
+\alias{print.pls}
+\title{Print method for PLS model object}
+\usage{
+\method{print}{pls}(x, ...)
+}
+\arguments{
+  \item{x}{a PLS model (object of class \code{pls})}
+
+  \item{...}{other arguments}
+}
+\description{
+Prints information about the object structure
+}
+

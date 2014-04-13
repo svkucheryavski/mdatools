@@ -1,0 +1,23 @@
+\name{errorbars}
+\alias{errorbars}
+\title{Show error bars on a plot}
+\usage{
+errorbars(x, lower, upper, y = NULL, col = NULL, pch = 16)
+}
+\arguments{
+  \item{x}{vector with x values}
+
+  \item{lower}{vector with lower limits for the bars}
+
+  \item{upper}{vector with upper limits for the bars}
+
+  \item{y}{vector with y values (bid points)}
+
+  \item{col}{color for the error bars}
+
+  \item{pch}{marker symbol for the plot}
+}
+\description{
+Shows error bars (errorbar plot) on predefined axes
+}
+

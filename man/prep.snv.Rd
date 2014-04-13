@@ -1,50 +1,37 @@
 \name{prep.snv}
 \alias{prep.snv}
-
-\title{
-Standard Normal Variate preprocessing
-}
-
-\description{
-}
-
+\title{Standard Normal Variate transformation}
 \usage{
 prep.snv(data)
 }
-
 \arguments{
-  \item{data}{matrix with data values.}
+  \item{data}{a matrix with data values}
 }
-
-\details{
-Standard Normal Variate (SNV) is a simple preprocessing for removing baseline offset and, partly, slope of spectra data. For each spectrum (row of \code{data} matrix) an average value is subtracted and then it is divided to standard deviation. 
-}
-
 \value{
-\item{pdata }{preprocessed data values.}
+data matrix with processed values
 }
-
-\references{
-1. R. J. Barnes, M. S. Dhanoa, S. J. Lister. Standard Normal Variate Transformation and De-trending of NearInfrared Diffuse Reflectance Spectra. Applied Spectroscopy, 43 (5), pp. 772-777 (1989)
+\description{
+Applies Standard Normal Variate (SNV) transformation to the
+rows of data matrix
 }
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\details{
+SNV is a simple preprocessing to remove scatter effects
+(baseline offset and slope) from spectral data, e.g. NIR
+spectra.
 }
-
 \examples{
-## Examples of using SNV preprocessing
+### Apply SNV to spectra from simdata
 
-library(mdatools)
-data(Simdata)
+ library(mdatools)
+ data(simdata)
 
-ospectra = spectra.c
-pspectra = prep.snv(ospectra)
+ spectra = simdata$spectra.c
+ wavelength = simdata$wavelength
 
-par(mfrow = c(2, 1))
-mdaplot(cbind(wavelength, t(ospectra)), type = 'l', main = 'Original spectra')
-mdaplot(cbind(wavelength, t(pspectra)), type = 'l', main = 'SNV preprocessed spectra')
-par(mfrow = c(2, 2))
+ cspectra = prep.snv(spectra)
 
-
+ par(mfrow = c(2, 1))
+ mdaplot(cbind(wavelength, t(spectra)), type = 'l', main = 'Before SNV')
+ mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After SNV')
 }
+

@@ -1,39 +1,31 @@
 \name{plotRegcoeffs.pls}
 \alias{plotRegcoeffs.pls}
-
-\title{
-Regression coefficients plot for PLS model
-}
-
-\description{
-\code{plotRegcoeffs.pls} is used to make a plot with regression coefficients for each predictor variable.
-}
-
+\title{Regression coefficient plot for PLS}
 \usage{
-plotRegcoeffs(model, ncomp = NULL, ny = 1, ...)
+\method{plotRegcoeffs}{pls}(obj, ncomp = NULL, ny = 1, main = NULL,
+  ylab = NULL, ...)
 }
-
 \arguments{
-  \item{model }{a PLS model (object of \code{pls} class.)}
-  \item{ncomp }{number of components to make the plot for (default: \code{ncomp.selected}).}
-  \item{ny }{if response is multivariate, which variable to make the plot for.}
-  \item{\dots}{most of the \code{\link{mdaplot}} parameters can be used.}
+  \item{obj}{a PLS model (object of class \code{pls})}
+
+  \item{ncomp}{how many components to use (if NULL - user
+  selected optimal value will be used)}
+
+  \item{ny}{number of response variable to make the plot
+  for (if y is multivariate)}
+
+  \item{main}{main plot title}
+
+  \item{ylab}{label for y axis}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows plot with regression coefficient values for selected
+components.
+}
+\details{
+See examples in help for \code{\link{pls}} function.
 }
 
-\examples{
-## Examples of using regressions plot
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c, ncomp = 8, cv = 1)
-model = selectCompNum(model, 3)
-
-par(mfrow = c(2, 2))
-plotRegcoeffs(model)
-plotRegcoeffs(model, ncomp = 4)
-plotRegcoeffs(model, ny = 2)
-plotRegcoeffs(model, ny = 2, ncomp = 4)
-par(mfrow = c(1, 1))
-
-}

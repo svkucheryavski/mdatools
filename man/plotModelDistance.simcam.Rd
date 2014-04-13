@@ -1,30 +1,35 @@
 \name{plotModelDistance.simcam}
 \alias{plotModelDistance.simcam}
-
-\title{
-Model distance plot for SIMCA multiclass model
-}
-
-\description{
-\code{plotModelDistance.simcam} is used to show plot for distance between individual SIMCA models. 
-}
+\title{Modelling distance plot for SIMCAM model}
 \usage{
-plotModelDistance(model, nc = 1, ...)
+\method{plotModelDistance}{simcam}(obj, nc = 1, type = "h", main = NULL,
+  xlab = "Models", ylab = "", xticklabels = NULL, ...)
 }
-
 \arguments{
-  \item{model}{an object of class \code{simcam} (a SIMCA multiclass model).}
-  \item{nc}{number of class (individual model) to plot the distance values for.}
-  \item{\dots}{most of \code{\link{mdaplot}} parameters can be used.}
-}
+  \item{obj}{a SIMCAM model (object of class
+  \code{simcam})}
 
+  \item{nc}{for which class (SIMCA model) to show the plot
+  for}
+
+  \item{type}{type of the plot}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{xticklabels}{labels for x axis ticks}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows a plot with distance from data objects to a SIMCA
+model
+}
 \details{
-See examples for \code{\link{simcam}} class.
+See examples in help for \code{\link{simcam}} function.
 }
 
-\seealso{
-\code{\link{simcam}} to make SIMCAM model, \code{\link{simcamres}} to store and explore SIMCA multiclass classification results.
-}
-
-\examples{
-}

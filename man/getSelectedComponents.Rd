@@ -1,0 +1,23 @@
+\name{getSelectedComponents}
+\alias{getSelectedComponents}
+\title{Get selected components}
+\usage{
+getSelectedComponents(obj, ncomp = NULL)
+}
+\arguments{
+  \item{obj}{an MDA model or result object (e.g.
+  \code{pca}, \code{pls}, \code{simca}, etc)}
+
+  \item{ncomp}{number of components to select, provided by
+  user}
+}
+\description{
+returns number of components depending on a user choice
+}
+\details{
+Depedning on a user choice it returns optimal number of
+component for the model (if use did not provide any value)
+or check the user choice for correctness and returns it
+back
+}
+

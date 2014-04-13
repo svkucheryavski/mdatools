@@ -1,26 +1,26 @@
 \name{showPredictions.classres}
 \alias{showPredictions.classres}
-
-\title{
-Predicted class values
-}
-
-\description{
-\code{showPredictions.classres} is used to show predicted class values for classification results.
-}
-
+\title{Show predicted class values}
 \usage{
-showPredictions(obj, ncomp = NULL)
+\method{showPredictions}{classres}(obj, ncomp = NULL, ...)
 }
-
 \arguments{
-  \item{obj}{classification results (object of class \code{classres} or similar).}
-  \item{ncomp}{number of components to show the predictions for.}
+  \item{obj}{object with classification results (e.g.
+  \code{plsdares} or \code{simcamres}).}
+
+  \item{ncomp}{number of components to show the predictions
+  for (NULL - use selected for a model).}
+
+  \item{...}{other parameters}
 }
-
+\description{
+Shows a table with predicted class values for
+classification result.
+}
 \details{
-If \code{ncomp} is not provided, the results are shown for selected (optimal) number of components. For classification methods, which do not use latent variables, \code{ncomp} is equal to one or corresponds to another model complexity parameter if any.  
-
-See examples for \code{\link{simcares}}, \code{\link{simcamres}} and \code{\link{plsdares}}.
+The function prints a matrix where every column is a class
+and every row is an data object. The matrix has either -1
+(does not belong to the class) or +1 (belongs to the class)
+values.
 }
 

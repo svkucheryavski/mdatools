@@ -1,42 +1,43 @@
 \name{plotYResiduals.pls}
 \alias{plotYResiduals.pls}
-
-\title{
-Y residuals plot for PLS model
-}
-
-\description{
-\code{plotYResiduals.pls} is used to show plot for Y residuals in PLS model.
-}
+\title{Y residuals plot for PLS}
 \usage{
-plotYResiduals.pls(model, ncomp = NULL, ny = 1, ...)
+\method{plotYResiduals}{pls}(obj, ncomp = NULL, ny = 1, type = "p",
+  main = NULL, ylab = NULL, xlab = NULL, show.line = T,
+  show.labels = F, show.legend = T, ...)
 }
-
-\details{
-By default scatter plot is used and residuals are shown versus reference response values. If line or bar plots are used, the residuals shown versus object number.
-}
-
 \arguments{
-  \item{model}{a PLS model (object of class \code{pls})}
-  \item{ncomp}{a number of components to show the residuals for.} 
-  \item{ny }{if response is multivariate, which variable to make the plot for.}
-  \item{...}{most of the \code{\link{mdaplotg}} parameters can be used.}
+  \item{obj}{a PLS model (object of class \code{pls})}
+
+  \item{ncomp}{how many components to use (if NULL - user
+  selected optimal value will be used)}
+
+  \item{ny}{number of response variable to make the plot
+  for (if y is multivariate)}
+
+  \item{type}{type of the plot}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{show.line}{logical, show or not line for 0 value}
+
+  \item{show.labels}{logical, show or not labels for the
+  plot elements}
+
+  \item{show.legend}{logical, show or not legend for the
+  plot}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows plot with y residuals for selected components.
+}
+\details{
+See examples in help for \code{\link{pls}} function.
 }
 
-\examples{
-## Examples of using Y residuals plot
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c, ncomp = 5, x.test = spectra.t, y.test = conc.t)
-model = selectCompNum(model, 3)
-
-par(mfrow = c(2, 2))
-plotYResiduals(model)
-plotYResiduals(model, ny = 2, ncomp = 2, show.labels = T)
-plotYResiduals(model, ny = 2, ncomp = 2, type = 'l')
-plotYResiduals(model, type = 'h', show.labels = T)
-par(mfrow = c(1, 1))
-
-}

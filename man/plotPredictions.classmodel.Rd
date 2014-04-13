@@ -1,27 +1,37 @@
 \name{plotPredictions.classmodel}
 \alias{plotPredictions.classmodel}
-
-\title{
-Plot with predicted class values for a classification model
-}
-
-\description{
-\code{plotPredictions.classmodel} is used to show plot with predicted class values for calibration validation predictions.
-}
-
+\title{Predictions plot for classification model}
 \usage{
-plotPredictions(model, result = 'calres', ncomp = NULL, nc = NULL, ...)
+\method{plotPredictions}{classmodel}(obj, res = NULL, nc = NULL,
+  ncomp = NULL, main = NULL, ...)
 }
-
 \arguments{
-  \item{model}{a classification model (object of class \code{simca}, \code{simcam}, \code{plsda}, etc).}
-  \item{result}{which result to show predictions for (possible values: \code{"calres"}, \code{"cvres"}, \code{"testres"}.}
-  \item{ncomp}{number of components to show the predictions for (if NULL, selected (optimal) number will be used).}
-  \item{nc}{which class to make the plot for (if NULL predictions for all classes in the model will be shown).}
-  \item{\dots}{most of \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{a classification model (object of class
+  \code{simca}, \code{plsda}, etc.). if \code{NULL} value
+  is specified, the result will be selected automatically
+  by checking the nearest available from test, cv and
+  calibration results.}
 
+  \item{res}{which result to make the plot for
+  (\code{'calres'}, \code{'cvres'} or \code{'testres'}).}
+
+  \item{nc}{if there are several classes, which class to
+  make the plot for (NULL - for all).}
+
+  \item{ncomp}{what number of components to make the plot
+  for (NULL - for selected in the model).}
+
+  \item{main}{main title for the plot}
+
+  \item{...}{most of the graphical parameters from
+  \code{\link{mdaplotg}} function can be used.}
+}
+\description{
+Makes a plot with class predictions for a classification
+model.
+}
 \details{
-See examples for \code{\link{simca}}, \code{\link{simcam}} or \code{\link{plsda}} class.
+See examples in description of \code{\link{plsda}},
+\code{\link{simca}} or \code{\link{simcam}}.
 }
 

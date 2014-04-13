@@ -1,29 +1,37 @@
 \name{plotResiduals.simcamres}
 \alias{plotResiduals.simcamres}
-
-\title{
-Residuals plot for SIMCA multiclass classification results
-}
-
-\description{
-\code{plotResiduals.simcamres} is used to show plot with T2 vs Q2 residuals for SIMCA multiclass classification results. 
-}
-
+\title{Residuals plot for SIMCAM results}
 \usage{
-plotResiduals(obj, nc = 1, ...)
+\method{plotResiduals}{simcamres}(obj, nc = 1, show.limits = T,
+  type = "p", main = NULL, xlab = "T2", ylab = "Q2", legend = NULL,
+  ...)
 }
-
 \arguments{
-  \item{obj}{an object of class \code{simcamres} (SIMCA multiclass classification results).}
-  \item{nc}{number of model (class) to make the plot for.}
-  \item{\dots}{most of \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{SIMCAM results (object of class
+  \code{simcamres})}
 
+  \item{nc}{which class (SIMCA model) to show the plot for}
+
+  \item{show.limits}{logical, show or not lines with
+  statistical limits for the residuals}
+
+  \item{type}{type of the plot}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{legend}{vector with legend items}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows a plot with Q2 vs. T2 residuals for SIMCAM results
+}
 \details{
-See examples for \code{\link{simcamres}} class.
-}
-
-\seealso{
-\code{\link{simcam}} to make SIMCAM model, \code{\link{simcamres}} to store and explore SIMCA multiclass classification results.
+See examples in help for \code{\link{simcamres}} function.
 }
 

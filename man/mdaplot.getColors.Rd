@@ -1,0 +1,24 @@
+\name{mdaplot.getColors}
+\alias{mdaplot.getColors}
+\title{Color values for plot elements}
+\usage{
+mdaplot.getColors(ngroups = 1, cgroup = NULL, colmap = "default")
+}
+\arguments{
+  \item{ngroups}{number of groups.}
+
+  \item{cgroup}{vector of values, used for color grouping
+  of plot points or lines.}
+
+  \item{colmap}{which colormap to use ('default', 'gray',
+  or user defined in form c('color1', 'color2', ...)).}
+}
+\value{
+Returns vector with generated color values
+}
+\description{
+Generate vector with color values for plot objects (lines,
+points, bars), depending on number of groups for the
+objects.
+}
+

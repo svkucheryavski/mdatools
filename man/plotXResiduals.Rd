@@ -1,0 +1,19 @@
+\name{plotXResiduals}
+\alias{plotXResiduals}
+\title{X residuals plot}
+\usage{
+plotXResiduals(obj, ...)
+}
+\arguments{
+  \item{obj}{a model or result object}
+
+  \item{...}{other arguments}
+}
+\description{
+X residuals plot
+}
+\details{
+Generic function for plotting x residuals for
+classification or regression model or results
+}
+

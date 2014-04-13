@@ -1,44 +1,33 @@
 \name{plotPredictions.plsres}
 \alias{plotPredictions.plsres}
-
-\title{
-Predictions plot for PLS results
-}
-
-\description{
-\code{plotPredictions.plsres} is used to make a plot with predicted vs. reference (measured) response values.
-}
-
+\title{Predictions plot for PLS results}
 \usage{
-plotPredictions(obj, ncomp = NULL, ny = 1, show.line = T, ...)
+\method{plotPredictions}{plsres}(obj, ny = 1, ncomp = NULL, main = NULL,
+  ...)
 }
-
 \arguments{
-  \item{obj }{PLS results (object of \code{plsres} class.)}
-  \item{ncomp }{number of components to make the plot for (default: \code{ncomp.selected}).}
-  \item{ny }{if response is multivariate, which variable to make the plot for.}
-  \item{show.line }{logical, show or not a target line for predicted vs. measured points}
-  \item{\dots}{most of the \code{\link{mdaplot}} parameters can be used.}
+  \item{obj}{PLS results (object of class \code{plsres})}
+
+  \item{ncomp}{how many components to use (if NULL - user
+  selected optimal value will be used)}
+
+  \item{ny}{number of response variable to make the plot
+  for (if y is multivariate)}
+
+  \item{main}{main plot title}
+
+  \item{...}{other plot parameters (see \code{mdaplot} for
+  details)}
+}
+\description{
+Shows plot with predicted vs. reference (measured) y values
+for selected components.
+}
+\details{
+See examples in help for \code{\link{plsres}} function.
+}
+\seealso{
+\code{\link{plotPredictions.regres}} - prediction plot for
+regression results.
 }
 
-
-\examples{
-## Examples of using predictions plot
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c, ncomp = 8, cv = 4)
-model = selectCompNum(model, 3)
-
-par(mfrow = c(1, 2))
-plotPredictions(model$cvres, ny = 2)
-plotPredictions(model$cvres, ny = 2, ncomp = 5, col = 'red', pch = 18)
-par(mfrow = c(1, 1))
-
-}
-
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

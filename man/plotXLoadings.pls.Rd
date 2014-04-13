@@ -1,40 +1,34 @@
 \name{plotXLoadings.pls}
 \alias{plotXLoadings.pls}
-
-\title{
-X loadings plot for PLS model
-}
-
-\description{
-\code{plotXLoadings.pls} is used to make a plot with loadings for predictor values decomposition.
-}
+\title{X loadings plot for PLS}
 \usage{
-plotXLoadings(model, comp = c(1, 2), type = 'p', ...)
+\method{plotXLoadings}{pls}(obj, comp = c(1, 2), type = "p",
+  main = "X loadings", ylab = NULL, xlab = NULL, show.axes = T, ...)
 }
-
 \arguments{
-  \item{model }{a PLS model (object of \code{pls} class.)}
-  \item{comp }{either one value or vector with two values - number of components to make the plot for. }  
-  \item{show.axes }{logical, show or not coordinate axes, that cross the origin (0, 0).}
-  \item{type }{type of the plot.}
-  \item{...}{most of \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{a PLS model (object of class \code{pls})}
 
+  \item{comp}{which components to show the plot for (one or
+  vector with several values)}
+
+  \item{type}{type of the plot}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{show.axes}{logical, show or not a axes lines
+  crossing origin (0,0)}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows plot with X loading values for selected components.
+}
 \details{
+See examples in help for \code{\link{pls}} function.
 }
 
-\examples{
-## Examples of using X loadings plot
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c[, 2], ncomp = 8)
-
-par(mfrow = c(2, 2))
-plotXLoadings(model)
-plotXLoadings(model, c(1, 3), show.axes = T, show.labels = T)
-plotXLoadings(model, c(1, 3), type = 'l')
-plotXLoadings(model, 1:4, type = 'l')
-par(mfrow = c(1, 1))
-}

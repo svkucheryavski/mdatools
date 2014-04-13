@@ -10,7 +10,7 @@ Results of SIMCA multiclass classification
 }
 
 \usage{
-simcares(cres, T2, Q2, T2lim, Q2lim)
+simcamres(cres, T2, Q2, T2lim, Q2lim)
 }
 
 \arguments{
@@ -111,7 +111,7 @@ par(mfrow = c(2, 2))
 plotPredictions(res)
 plotPredictions(res, nc = 1)
 plotPredictions(res, nc = c(1, 2))
-plotPredictions(res, show.labels = T)
+plotPredictions(res, show.labels = TRUE)
 par(mfrow = c(1, 1))
 
 # show residuals and Cooman's plot

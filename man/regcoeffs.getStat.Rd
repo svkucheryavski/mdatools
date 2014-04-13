@@ -1,0 +1,25 @@
+\name{regcoeffs.getStat}
+\alias{regcoeffs.getStat}
+\title{Confidence intervals and p-values for regression coeffificents}
+\usage{
+regcoeffs.getStat(obj, ci.coeffs, ci.alpha = 0.1)
+}
+\arguments{
+  \item{obj}{regression coefficients array for a model}
+
+  \item{ci.coeffs}{array with regression coefficients for
+  calculation of condifence intervals}
+
+  \item{ci.alpha}{significance level to calculate the
+  confidence intervals}
+}
+\value{
+a list with statistics (\code{$ci} - array with confidence
+intervals, \code{$p.values} - array with p-values,
+\code{$t.values} - array with t-values)
+}
+\description{
+calculates confidence intervals and t-test based p-values
+for regression coefficients based on jack-knifing procedure
+}
+

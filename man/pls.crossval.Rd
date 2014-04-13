@@ -1,0 +1,32 @@
+\name{pls.crossval}
+\alias{pls.crossval}
+\title{Cross-validation of a PLS model}
+\usage{
+pls.crossval(model, x, y, cv, center = T, scale = F, jack.knife = T)
+}
+\arguments{
+  \item{model}{a PLS model (object of class \code{pls})}
+
+  \item{x}{a matrix with x values (predictors from
+  calibration set)}
+
+  \item{y}{a matrix with y values (responses from
+  calibration set)}
+
+  \item{cv}{number of segments (if cv = 1, full
+  cross-validation will be used)}
+
+  \item{center}{logical, do mean centering or not}
+
+  \item{scale}{logical, do standardization or not}
+
+  \item{jack.knife}{logical, do jack-knifing or not}
+}
+\value{
+object of class \code{plsres} with results of
+cross-validation
+}
+\description{
+Does the cross-validation of a PLS model
+}
+

@@ -1,46 +1,29 @@
 \name{predict.pls}
 \alias{predict.pls}
-
-\title{
-Predict method for PLS model
-}
-
-\description{
-predict.pls is used to apply a PLS model to a new data set.
-}
-
+\title{PLS predictions}
 \usage{
-predict(model, x, y.ref = NULL)
+\method{predict}{pls}(object, x, y.ref = NULL, cv = F, ...)
 }
-
 \arguments{
-  \item{model}{a PLS model (object of class \code{pls})}
-  \item{x}{a matrix with predictor values.}
-  \item{y.ref}{a matrix with reference values for response (optional).}
-}
+  \item{object}{a PLS model (object of class \code{pls})}
 
+  \item{x}{a matrix with x values (predictors)}
+
+  \item{y.ref}{a matrix with reference y values
+  (responses)}
+
+  \item{cv}{logical, are predictions for cross-validation
+  or not}
+
+  \item{...}{other arguments}
+}
+\value{
+PLS results (an object of class \code{plsres})
+}
+\description{
+Applies PLS model to a new data set
+}
 \details{
-The method applies a PLS model to a new data. If response values are not provided, no prediction statistics will be available.
-}
-
-\value{Returns an object of \code{\link{plsres}} class.}
-
-
-\seealso{
-}
-
-\examples{
-## make a PLS model a apply it to a new data
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c[, 1], ncomp = 8)
-model = selectCompNum(model, 3)
-
-res = predict(model, spectra.t, conc.t[, 1])
-summary(res)
-plot(res)
-
+See examples in help for \code{\link{pls}} function.
 }
 

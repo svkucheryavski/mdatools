@@ -1,42 +1,39 @@
 \name{plotXYScores.pls}
 \alias{plotXYScores.pls}
-
-\title{
-XY scores plot for PLS model
-}
-
-\description{
-\code{plotXYScores.pls} is used to make a plot with scores values for PLS decomposition of predictors and responses.
-}
-
+\title{XY scores plot for PLS}
 \usage{
-plotXYScores(model, ncomp = 1, show.axes = T, ...)
+\method{plotXYScores}{pls}(obj, comp = 1, main = NULL, xlab = "X scores",
+  ylab = "Y scores", show.axes = T, show.labels = F, show.legend = T,
+  ...)
 }
-
 \arguments{
-  \item{model }{a PLS model (object of class \code{pls}.)}
-  \item{comp}{for which component to make the plot for. }
-  \item{show.axes}{logical, show or not coordinate axes, that cross the origin (0, 0).}
-  \item{...}{most of \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{a PLS model (object of class \code{pls})}
 
+  \item{comp}{which component to show the plot for}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{show.axes}{logical, show or not a axes lines
+  crossing origin (0,0)}
+
+  \item{show.labels}{logical, show or not labels for the
+  plot elements}
+
+  \item{show.legend}{logical, show or not legend for the
+  plot}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows plot with X vs. Y scores values for selected
+component.
+}
 \details{
-Also know as T-U plot. Useful to see importance of components and to detect outliers.
-}
-
-\examples{
-## Examples of using XY scores plot
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c, ncomp = 8, x.test = spectra.t, y.test = conc.t)
-
-par(mfrow = c(2, 2))
-plotXYScores(model)
-plotXYScores(model, 2, legend.position = 'topleft')
-plotXYScores(model, 3)
-plotXYScores(model, colmap = c('orange', 'green'), pch = c(18, 17), main = 'T-U plot')
-par(mfrow = c(1, 1))
+See examples in help for \code{\link{pls}} function.
 }
 

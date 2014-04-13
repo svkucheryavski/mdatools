@@ -1,0 +1,16 @@
+\name{print.plsdares}
+\alias{print.plsdares}
+\title{Print method for PLS-DA results object}
+\usage{
+\method{print}{plsdares}(x, ...)
+}
+\arguments{
+  \item{x}{PLS-DA results (object of class
+  \code{plsdares})}
+
+  \item{...}{other arguments}
+}
+\description{
+Prints information about the object structure
+}
+

@@ -1,0 +1,24 @@
+\name{mdaplot.showLines}
+\alias{mdaplot.showLines}
+\title{Plot lines}
+\usage{
+mdaplot.showLines(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2))
+}
+\arguments{
+  \item{point}{vector with two values: x coordinate for
+  vertical point y for horizontal}
+
+  \item{lty}{line type}
+
+  \item{lwd}{line width}
+
+  \item{col}{color of lines}
+}
+\description{
+Shows horisontal and vertical lines on a plot.
+}
+\details{
+If it is needed to show only one line, the other coordinate
+shall be set to NA.
+}
+

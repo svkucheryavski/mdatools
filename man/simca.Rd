@@ -8,19 +8,19 @@ SIMCA one-class classification
 \code{simca} is used to make SIMCA (Soft Independent Modelling of Class Analogies) model for one-class classification.
 }
 \usage{
-simca(data, classname, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL, 
-   test.c = NULL, alpha = 0.05, method = "svd", info = "")
+simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
+   c.test = NULL, alpha = 0.05, method = "svd", info = "")
 }
 
 \arguments{
-  \item{data}{a numerical matrix with data values.}
+  \item{x}{a numerical matrix with data values.}
   \item{classname}{short text (up to 20 symbols) with class name.}
   \item{ncomp}{maximum number of components to calculate.}
   \item{center}{logical, do mean centering of data or not.}
   \item{scale}{logical, do sdandardization of data or not.}
   \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
-  \item{test.data}{a numerical matrix with test data.}
-  \item{test.c}{a vector with logical values for classes of test data objects.}
+  \item{x.test}{a numerical matrix with test data.}
+  \item{c.test}{a vector with logical values for classes of test data objects.}
   \item{alpha}{significance level for calculating limit for T2 and Q2 residuals.}
   \item{method}{method to compute principal components.}
   \item{info}{text with information about the model}
@@ -108,15 +108,15 @@ plot(model)
 
 # show predictions 
 par(mfrow = c(2, 1))
-plotPredictions(model, show.labels = T)
-plotPredictions(model, res = 'calres', ncomp = 2, show.labels = T)
+plotPredictions(model, show.labels = TRUE)
+plotPredictions(model, res = 'calres', ncomp = 2, show.labels = TRUE)
 par(mfrow = c(1, 1))
 
 # show performance, modelling power and residuals for ncomp = 2
 par(mfrow = c(2, 2))
 plotSensitivity(model)
 plotMisclassified(model)
-plotModellingPower(model, ncomp = 2, show.labels = T)
+plotModellingPower(model, ncomp = 2, show.labels = TRUE)
 plotResiduals(model, ncomp = 2)
 par(mfrow = c(1, 1))
 }

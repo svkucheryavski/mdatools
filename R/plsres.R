@@ -27,25 +27,45 @@ plsres = function(y.pred, y.ref = NULL, ncomp.selected = NULL, xdecomp = NULL, y
    obj
 }
 
+#' RMSE plot for PLS results
+#' 
+#' @description
+#' Shows plot with root mean squared error values vs. number of components for PLS results.
+#' 
+#' @param obj
+#' PLS results (object of class \code{plsres})
+#' @param xlab
+#' label for x axis
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{plsres}} function.
+#' 
 plotRMSE.plsres = function(obj, xlab = 'Components', ...)
 {
-   # Makes a plot for RMSE vs number of components
-   #
-   # Arguments:
-   #   obj: object of class "plsres"
-   #   xlab: label for X axis
-   
    plotRMSE.regres(obj, xlab = xlab, ...)
 }
 
+#' X scores plot for PLS results
+#' 
+#' @description
+#' Shows plot with scores values for PLS decomposition of x data.
+#' 
+#' @param obj
+#' PLS results (object of class \code{plsres})
+#' @param comp
+#' which components to show the plot for (one or vector with several values)
+#' @param main
+#' main plot title
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{plsres}} function.
+#' 
 plotXScores.plsres = function(obj, comp = c(1, 2), main = NULL, ...)
 {
-   # Makes a scores plot for X decomposition
-   #
-   # Arguments:
-   #   obj: object of class "plsres"
-   #   ...: possible arguments for plotScores.ldecomp
-   
    if (is.null(main))
       main = 'X scores'
    
@@ -55,49 +75,67 @@ plotXScores.plsres = function(obj, comp = c(1, 2), main = NULL, ...)
       warning('Scores values are not available.')
 }
 
-plotXYScores.plsres = function(obj, ncomp = 1, type = 'p', main = 'XY scores', 
+#' XY scores plot for PLS results
+#' 
+#' @description
+#' Shows plot with X vs. Y scores values for PLS results.
+#' 
+#' @param obj
+#' PLS results (object of class \code{plsres})
+#' @param comp
+#' which component to show the plot for
+#' @param type
+#' type of the plot
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{plsres}} function.
+#' 
+plotXYScores.plsres = function(obj, comp = 1, type = 'p', main = 'XY scores', 
                                xlab = 'X scores', ylab = 'Y scores', ...)
 {
-   # Makes a scores plot for X and Y decompositions
-   #
-   # Arguments:
-   #   obj: object of class "plsres"
-   #   ncomp: for which component makes the plot
-   #   type: type of the plot
-   #   main: text for main title of the plot
-   #   xlab: text for x axis label
-   #   ylab: text for y axis label
-   
    if (is.null(obj$xdecomp$scores) || is.null(obj$ydecomp$scores))
    {   
       warning('X or Y scores are not available.')
    }
    else
    {   
-      if (ncomp < 0 || ncomp > obj$ncomp)
+      if (comp < 0 || comp > obj$ncomp)
          stop('Wrong value for ncomp argument!')
       
-      data = cbind(obj$xdecomp$scores[, ncomp, drop = F],
-                   obj$ydecomp$scores[, ncomp, drop = F])
+      data = cbind(obj$xdecomp$scores[, comp, drop = F],
+                   obj$ydecomp$scores[, comp, drop = F])
       colnames(data) = c(xlab, ylab)
-      mdaplot(data, type = type, main = sprintf('%s (ncomp = %d)', main, ncomp), ...)
+      mdaplot(data, type = type, main = sprintf('%s (ncomp = %d)', main, comp), ...)
    }   
 }
 
-plotYResiduals.plsres = function(obj, ncomp = NULL, ny = 1, ...)
-{
-   plotYResiduals.regres(obj, ncomp = ncomp, ny = ny, ...)   
-}  
-
+#' X residuals plot for PLS results
+#' 
+#' @description
+#' Shows a plot with Q2 residuals vs. Hotelling T2 values for PLS decomposition of x data.
+#' 
+#' @param obj
+#' PLS results (object of class \code{plsres})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param main
+#' main title for the plot
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{plsres}} function.
+#' 
 plotXResiduals.plsres = function(obj, ncomp = NULL, main = NULL, ...)
 {   
-   # Makes a residuals plot for X decomposition
-   #
-   # Arguments:
-   #   obj: object of class "plsres"
-   #   ncomp: number of components to show the plot for
-   #   main: main title for the plot
-      
    if (is.null(main))
    {   
       if (is.null(ncomp))
@@ -115,60 +153,110 @@ plotXResiduals.plsres = function(obj, ncomp = NULL, main = NULL, ...)
    plotResiduals.ldecomp(obj$xdecomp, ncomp = ncomp, main = main, ...)
 }
 
+#' Explained X variance plot for PLS results
+#' 
+#' @description
+#' Shows plot with explained X variance vs. number of components.
+#' 
+#' @param obj
+#' PLS results (object of class \code{plsres})
+#' @param main
+#' main plot title
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{plsres}} function.
+#' 
 plotXVariance.plsres = function(obj, main = 'X variance', ...)
 {   
-   # Makes a plot for X explained variance for each component
-   #
-   # Arguments:
-   #   obj: object of class "plsres"
-   #   main: main title for the plot
-   
    plotVariance.ldecomp(obj$xdecomp, main = main, ...)
 }
 
+#' Explained Y variance plot for PLS results
+#' 
+#' @description
+#' Shows plot with explained Y variance vs. number of components.
+#' 
+#' @param obj
+#' PLS results (object of class \code{plsres})
+#' @param main
+#' main plot title
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{plsres}} function.
+#' 
 plotYVariance.plsres = function(obj, main = 'Y variance', ...)
 {   
-   # Makes a plot for Y explained variance for each components
-   #
-   # Arguments:
-   #   obj: object of class "plsres"
-   #   main: main title for the plot
-   
    plotVariance.ldecomp(obj$ydecomp, main = main, ...)
 }
 
+#' Explained cumulative X variance plot for PLS results
+#' 
+#' @description
+#' Shows plot with cumulative explained X variance vs. number of components.
+#' 
+#' @param obj
+#' PLS results (object of class \code{plsres})
+#' @param main
+#' main plot title
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{plsres}} function.
+#' 
 plotXCumVariance.plsres = function(obj, main = 'X cumulative variance', ...)
 {   
-   # Makes a plot for X cumulative explained variance vs number of components
-   #
-   # Arguments:
-   #   obj: object of class "plsres"
-   #   main: main title for the plot
-   
    plotCumVariance.ldecomp(obj$xdecomp, main = main, ...)
 }
 
+#' Explained cumulative Y variance plot for PLS results
+#' 
+#' @description
+#' Shows plot with cumulative explained Y variance vs. number of components.
+#' 
+#' @param obj
+#' PLS results (object of class \code{plsres})
+#' @param main
+#' main plot title
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{plsres}} function.
+#' 
 plotYCumVariance.plsres = function(obj, main = 'Y cumulative variance', ...)
 {   
-   # Makes a plot for Y cumulative explained variance vs number of components
-   #
-   # Arguments:
-   #   obj: object of class "plsres"
-   #   main: main title for the plot
-   
    plotCumVariance.ldecomp(obj$ydecomp, main = main, ...)
 }
 
+#' Predictions plot for PLS results
+#' 
+#' @description
+#' Shows plot with predicted vs. reference (measured) y values for selected components.
+#' 
+#' @param obj
+#' PLS results (object of class \code{plsres})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param ny
+#' number of response variable to make the plot for (if y is multivariate)
+#' @param main
+#' main plot title
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{plsres}} function.
+#' 
+#' @seealso
+#' \code{\link{plotPredictions.regres}} - prediction plot for regression results.
+#' 
 plotPredictions.plsres = function(obj, ny = 1, ncomp = NULL, main = NULL, ...)
 {
-   # Makes a plot for predicted y values (vs measured or object number)
-   #
-   # Arguments:
-   #   obj: object of class "plsres"
-   #   ny: number of response variable to make the plot for
-   #   ncomp: number of components to make the plot for
-   #   main: main title for the plot
-   
    if (is.null(main))
    {
       if (is.null(ncomp))
@@ -185,8 +273,29 @@ plotPredictions.plsres = function(obj, ny = 1, ncomp = NULL, main = NULL, ...)
    plotPredictions.regres(obj, ny = ny, ncomp = ncomp, main = main, ...)
 }
 
-plot.plsres = function(obj, ncomp = NULL, ny = 1, show.labels = F, ...)
+#' Overview plot for PLS results
+#' 
+#' @description
+#' Shows a set of plots for PLS results.
+#' 
+#' @param x
+#' PLS results (object of class \code{plsres})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param ny
+#' which y variable to show the summary for (if NULL, will be shown for all)
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param ...
+#' other arguments
+#' 
+#' @details
+#' See examples in help for \code{\link{plsres}} function.
+#' 
+plot.plsres = function(x, ncomp = NULL, ny = 1, show.labels = F, ...)
 {
+   obj = x
+   
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected 
    
@@ -208,8 +317,27 @@ plot.plsres = function(obj, ncomp = NULL, ny = 1, show.labels = F, ...)
    }
 }   
 
-as.matrix.plsres = function(obj, ncomp = NULL, ny = 1)
+#' as.matrix method for PLS results
+#' 
+#' @method as.matrix plsres
+#' @S3method as.matrix plsres
+#'
+#' @description
+#' Returns a matrix with model performance statistics for PLS results
+#' 
+#' @param x
+#' PLS results (object of class \code{plsres})
+#' @param ncomp
+#' number of components to calculate the statistics for
+#' @param ny
+#' for which response variable calculate the statistics for
+#' @param ...
+#' other arguments
+#' 
+as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...)
 {
+   obj = x
+   
    if (is.null(ncomp))
    {   
       res = cbind(
@@ -235,35 +363,27 @@ as.matrix.plsres = function(obj, ncomp = NULL, ny = 1)
    res
 }
 
-print.plsres = function(obj, ...)
-{
-   cat('\nPLS results (class plsres)\n')
-   cat('\nCall:\n')
-   print(obj$call)
-   
-   cat('\nMajor fields:\n')   
-   cat('$ncomp.selected - number of selected components\n')
-   cat('$yp - array with predicted y values\n')
-   if (!is.null(obj$y.ref))
-   {   
-      cat('$y - matrix with reference y values\n')
-      cat('$rmse - root mean squared error\n')
-      cat('$r2 - coefficient of determination\n')
-      cat('$slope - slope for predicted vs. measured values\n')
-      cat('$bias - bias for prediction vs. measured values\n')
-      cat('$ydecomp - decomposition of y values (ldecomp object)\n')
-   }
-   cat('$xdecomp - decomposition of x values (ldecomp object)\n')
-   
-}   
 
-summary.plsres = function(obj, ny = NULL, ncomp = NULL, ...)
+#' summary method for PLS results object
+#' 
+#' @method summary plsres
+#' @S3method summary plsres
+#'
+#' @description
+#' Shows performance statistics for the results.
+#' 
+#' @param object
+#' PLS results (object of class \code{plsres})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param ny
+#' for which response variable show the summary for
+#' @param ...
+#' other arguments
+#' 
+summary.plsres = function(object, ny = NULL, ncomp = NULL, ...)
 {
-   # Summary method for "plsres" object
-   #
-   # Arguments:
-   #   obj: object of "plsres" class
-   #   ncomp: which column of yp to use
+   obj = object
    
    cat('\nPLS regression results (class plsres) summary\n')
    if (!is.null(obj$y.ref))
@@ -296,3 +416,41 @@ summary.plsres = function(obj, ny = NULL, ncomp = NULL, ...)
       cat('No reference data provided to calculate prediction performance.')
    }   
 }   
+
+#' print method for PLS results object
+#' 
+#' @method print plsres
+#' @S3method print plsres
+#'
+#' @description
+#' Prints information about the object structure
+#' 
+#' @param x
+#' PLS results (object of class \code{plsres})
+#' @param ...
+#' other arguments
+#' 
+print.plsres = function(x, ...)
+{
+   obj = x
+   
+   cat('\nPLS results (class plsres)\n')
+   cat('\nCall:\n')
+   print(obj$call)
+   
+   cat('\nMajor fields:\n')   
+   cat('$ncomp.selected - number of selected components\n')
+   cat('$yp - array with predicted y values\n')
+   if (!is.null(obj$y.ref))
+   {   
+      cat('$y - matrix with reference y values\n')
+      cat('$rmse - root mean squared error\n')
+      cat('$r2 - coefficient of determination\n')
+      cat('$slope - slope for predicted vs. measured values\n')
+      cat('$bias - bias for prediction vs. measured values\n')
+      cat('$ydecomp - decomposition of y values (ldecomp object)\n')
+   }
+   cat('$xdecomp - decomposition of x values (ldecomp object)\n')
+   
+}   
+

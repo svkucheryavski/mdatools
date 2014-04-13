@@ -1,33 +1,23 @@
 \name{plotCooman.simcam}
 \alias{plotCooman.simcam}
-
-\title{
-Cooman's plot for SIMCA multiclass models
-}
-
-\description{
-\code{plotCooman.simcam} is used to show Cooman's plot for two SIMCA models. 
-}
-
+\title{Cooman's plot for SIMCAM model}
 \usage{
-plotCooman(model, nc = c(1, 2), ...)
+\method{plotCooman}{simcam}(obj, nc = c(1, 2), ...)
 }
-
 \arguments{
-  \item{model}{an object of class \code{simcam} (a SIMCA mutliclass model).}
-  \item{nc}{number of individual models (classes) to make the plot for.}
-  \item{\dots}{most of \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{a SIMCAM model (object of class
+  \code{simcam})}
 
+  \item{nc}{vector with two values - classes (SIMCA models)
+  to show the plot for}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows a Cooman's plot for a pair of SIMCA models
+}
 \details{
-The plot is made for calibration data used to build individual SIMCA models.
-
-See examples for \code{\link{simcam}} class.
+See examples in help for \code{\link{simcam}} function.
 }
 
-\seealso{
-\code{\link{simcam}} to make SIMCAM model, \code{\link{simcamres}} to store and explore SIMCA multiclass classification results.
-}
-
-\examples{
-}

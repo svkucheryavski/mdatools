@@ -1,0 +1,19 @@
+\name{summary.ldecomp}
+\alias{summary.ldecomp}
+\title{Summary statistics for linear decomposition}
+\usage{
+\method{summary}{ldecomp}(object, str = NULL, ...)
+}
+\arguments{
+  \item{object}{object of class \code{ldecomp}}
+
+  \item{str}{user specified text to show as a description
+  of the object}
+
+  \item{...}{other arguments}
+}
+\description{
+Generic \code{summary} function for linear decomposition.
+Prints statistic about the decomposition.
+}
+

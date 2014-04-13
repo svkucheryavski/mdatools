@@ -1,7 +1,7 @@
 ## class and methods for Principal Component Analysis based methods ##
 
-pca = function(x, ncomp = 20, center = T, scale = F, cv = NULL, x.test = NULL, 
-               alpha = 0.05, method = 'svd', info = '', ...)
+pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
+               alpha = 0.05, method = 'svd', info = '')
 {
    # Calibrate and validate a PCA model.
    #
@@ -60,9 +60,19 @@ pca = function(x, ncomp = 20, center = T, scale = F, cv = NULL, x.test = NULL,
    model
 }
 
-getCalibrationData.pca = function(model)
+#' Get calibration data
+#' 
+#' @description
+#' Get data, used for calibration of the PCA model
+#' 
+#' @param obj
+#' PCA model (object of class \code{pca})
+#' @param ...
+#' other parameters
+#' 
+getCalibrationData.pca = function(obj, ...)
 {
-   x = model$calres$scores %*% t(model$loadings) + model$calres$residuals
+   x = obj$calres$scores %*% t(obj$loadings) + obj$calres$residuals
    
    if (is.numeric(attr(x, 'prep:scale')))
       x = sweep(x, 2L, attr(x, 'prep:scale'), '*', check.margin = F)
@@ -70,19 +80,24 @@ getCalibrationData.pca = function(model)
    if (is.numeric(attr(x, 'prep:center')))
       x = sweep(x, 2L, attr(x, 'prep:center'), '+', check.margin = F)
    
+   x
 }
 
+#' Select optimal number of components for PCA model
+#' 
+#' @description
+#' Allows user to select optimal number of components for PCA model
+#' 
+#' @param model
+#' PCA model (object of class \code{pca})
+#' @param ncomp
+#' number of components to select
+#' 
+#' @return
+#' the same model with selected number of components
+#' 
 selectCompNum.pca = function(model, ncomp)
 {
-   # Sets user defined number of optimal components.
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)  
-   #   ncomp: number of components to set as optimal
-   #
-   # Returns:
-   #   model: the same model with selected number of optimal components 
-   
    if (ncomp < 1 || ncomp > model$ncomp)
       stop('Wrong number of selected components!')
    
@@ -194,22 +209,27 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
    x.rep
 }
 
-pca.cal = function(x, ncomp, center = T, scale = F, method = 'svd', simca = F)
+#' PCA model calibration
+#' 
+#' @description
+#' Calibrates (builds) a PCA model for given data and parameters
+#' 
+#' @param x
+#' matrix with data values
+#' @param ncomp
+#' number of principal components to calculate
+#' @param center
+#' logical, do mean centering or not
+#' @param scale
+#' logical, do standardization or not
+#' @param method
+#' algorithm for compiting PC space (only 'svd' is supported so far)
+#' 
+#' @return
+#' an object with calibrated PCA model
+#' 
+pca.cal = function(x, ncomp, center = T, scale = F, method = 'svd')
 {
-   # Calibrates a PCA model.
-   #
-   # Arguments:
-   #   x: a matrix with data values  
-   #   ncomp: number of principal components to calculate
-   #   center: logical, mean center the data values or not
-   #   scale: logical, standardize the data values or not
-   #   method: which method to use for computing principal component space
-   #   simca: logical, is model build for SIMCA or not
-   #
-   # Returns:
-   #   model: a calibrated PCA model 
-   
-   
    x = prep.autoscale(x, center = center, scale = scale)
    model = pca.svd(x, ncomp)
    
@@ -219,24 +239,25 @@ pca.cal = function(x, ncomp, center = T, scale = F, method = 'svd', simca = F)
    colnames(model$loadings) = paste('Comp', 1:ncol(model$loadings))
    model$center = attr(x, 'prep:center')
    model$scale = attr(x, 'prep:scale')
-   
-   if (simca)
-      model$modpower = pca.getModellingPower(model, x)
-   
+      
    model
 }  
 
+#' Singular Values Decomposition based PCA algorithm
+#' 
+#' @description
+#' Computes principal component space using Singular Values Decomposition
+#' 
+#' @param x
+#' a matrix with data values (preprocessed)
+#' @param ncomp
+#' number of components to calculate
+#' 
+#' @return
+#' a list with scores, loadings and eigencalues for the components
+#' 
 pca.svd = function(x, ncomp = NULL)
 {
-   # Singulare Value Decomposition based PCA algorithm.
-   #
-   # Arguments:
-   #   x: a matrix with data values (preprocessed)  
-   #   ncomp: number of components to calculate
-   #
-   # Returns:
-   #   res: a list with scores, loadings and eigenvalues of the components 
-   
    if (is.null(ncomp)) 
       ncomp = min(ncol(x), nrow(x) - 1)
    else
@@ -252,18 +273,25 @@ pca.svd = function(x, ncomp = NULL)
    )
 }
 
+#' NIPALS based PCA algorithm
+#' 
+#' @description
+#' Calculates principal component space using non-linear iterative partial least squares algorithm (NIPALS)
+#' 
+#' @param x
+#' a matrix with data values (preprocessed)
+#' @param ncomp
+#' number of components to calculate
+#' 
+#' @return
+#' a list with scores, loadings and eigencalues for the components
+#' 
+#' @references
+#' [1] Geladi, Paul; Kowalski, Bruce (1986), "Partial Least Squares 
+#' Regression:A Tutorial", Analytica Chimica Acta 185: 1-17 
+#'    
 pca.nipals = function(x, ncomp)
 {
-   # NIPALS based PCA algorithm.
-   #
-   # Arguments:
-   #   x: a matrix with data values (preprocessed)  
-   #   ncomp: number of components to calculate
-   #
-   # Returns:
-   #   res: a list with scores, loadings and eigenvalues of the components 
-   
-   
    nobj = nrow(x)
    nvar = ncol(x)   
    ncomp = min(ncomp, nobj - 1, nvar)
@@ -302,29 +330,27 @@ pca.nipals = function(x, ncomp)
    )   
 }
 
-pca.pp = function(x, ncomp)
-{
-   # Projection Pursuite based PCA algorithm.
-   #
-   # Arguments:
-   #   x: a matrix with data values (preprocessed)  
-   #   ncomp: number of components to calculate
-}
-
+#' Cross-validation of a PCA model
+#' 
+#' @description
+#' Does the cross-validation of a PCA model
+#' 
+#' @param model
+#' a PCA model (object of class \code{pca})
+#' @param x
+#' a matrix with data values (calibration set)
+#' @param cv
+#' number of segments (if cv = 1, full cross-validation will be used)
+#' @param center
+#' logical, do mean centering or not
+#' @param scale
+#' logical, do standardization or not
+#'
+#' @return
+#' object of class \code{pcares} with results of cross-validation
+#'  
 pca.crossval = function(model, x, cv, center = T, scale = F)
-{
-   # Cross-validates a PCA model
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)  
-   #   x: a matrix with data values
-   #   cv: number of segments for cross-validation (1 for full CV)
-   #   center: logical, mean center data values or not
-   #   scale: logical, standardize data values or not
-   #
-   # Returns:
-   #   res: results of cross-validation (object of class pcares) 
-      
+{      
    ncomp = model$ncomp   
    nobj = nrow(x)
    nvar = ncol(x)
@@ -366,72 +392,91 @@ pca.crossval = function(model, x, cv, center = T, scale = F)
    res
 }  
 
-predict.pca = function(model, x, cv = F)
+#' PCA predictions
+#' 
+#' @description
+#' Applies PCA model to a new data
+#' 
+#' @param object
+#' a PCA model (object of class \code{pca})
+#' @param x
+#' a matrix with data values
+#' @param cv
+#' logical, are predictions for cross-validation or not
+#' @param ...
+#' other arguments
+#' 
+#' @return
+#' PCA results (an object of class \code{pcares})
+#'  
+predict.pca = function(object, x, cv = F, ...)
 {
-   # Applies PCA model to a data.
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)  
-   #   x: a matrix with data values
-   #   cv: logical, will prediction be used for cross-validation or not
-   #
-   # Returns:
-   #   res: list with PCA results or (for CV) residual distances for each object 
-      
-   x = prep.autoscale(x, model$center, model$scale)
-   scores = x %*% model$loadings
-   residuals = x - scores %*% t(model$loadings)
+   x = prep.autoscale(x, object$center, object$scale)
+   scores = x %*% object$loadings
+   residuals = x - scores %*% t(object$loadings)
    
    if (cv == F)
    {   
       totvar = sum(x^2)
-      res = pcares(scores, model$loadings, residuals, totvar, model$tnorm, model$ncomp.selected)
-      res$Q2lim = model$Q2lim
-      res$T2lim = model$T2lim
+      res = pcares(scores, object$loadings, residuals, totvar, object$tnorm, object$ncomp.selected)
+      res$Q2lim = object$Q2lim
+      res$T2lim = object$T2lim
    }   
    else
    {
-      res = ldecomp.getDistances(scores, model$loadings, residuals, model$tnorm)   
+      res = ldecomp.getDistances(scores, object$loadings, residuals, object$tnorm)   
    }
 
    res
 }  
 
-
-plotVariance.pca = function(model, type = 'b', variance = 'expvar', 
+#' Explained variance plot for PCA
+#' 
+#' @description
+#' Shows a plot with explained variance or cumulative explained variance for components.
+#' 
+#' @param obj
+#' a PCA model (object of class \code{pca})
+#' @param type
+#' type of the plot ('b', 'l', 'h')
+#' @param variance
+#' which variance to use ('expvar', 'cumexpvar')
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.legend
+#' logical, show or not a legend on the plot
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{pca}} function.
+#' 
+plotVariance.pca = function(obj, type = 'b', variance = 'expvar', 
                             main = 'Variance', xlab = 'Components', 
                             ylab = 'Explained variance, %',
                             show.legend = T, show.labels = F, ...)
 {
-   # Makes explained variance plot.
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)  
-   #   type: type of the plot ('l', 'b', 'h')
-   #   variance: which variance to show the plot for ('expvar', 'cumexpvar')
-   #   xlab: label for x axis
-   #   ylab: label for y axis
-   #   main: main title for the plot
-   #   show.legend: logical, show or not legend on the plot
-   #   show.labels: logical, show or not labels for the data objects
-   #   legend.position: position of legend on the plot   
-   #   ...: other possible graphical parameters (see also mdaplotg for details)
-   
-   data = cbind(1:length(model$calres[[variance]]), model$calres[[variance]])
-   labels = mdaplot.formatValues(model$calres[[variance]])
+   data = cbind(1:length(obj$calres[[variance]]), obj$calres[[variance]])
+   labels = mdaplot.formatValues(obj$calres[[variance]])
    legend  = 'cal'
    
-   if (!is.null(model$cvres))
+   if (!is.null(obj$cvres))
    {
-      data = cbind(data, model$cvres[[variance]])
-      labels = cbind(labels, mdaplot.formatValues(model$cvres[[variance]]))
+      data = cbind(data, obj$cvres[[variance]])
+      labels = cbind(labels, mdaplot.formatValues(obj$cvres[[variance]]))
       legend = c(legend, 'cv')
    }      
 
-   if (!is.null(model$testres))
+   if (!is.null(obj$testres))
    {
-      data = cbind(data, model$testres[[variance]])
-      labels = cbind(labels, mdaplot.formatValues(model$testres[[variance]]))
+      data = cbind(data, obj$testres[[variance]])
+      labels = cbind(labels, mdaplot.formatValues(obj$testres[[variance]]))
       legend = c(legend, 'test')
    }      
       
@@ -441,42 +486,68 @@ plotVariance.pca = function(model, type = 'b', variance = 'expvar',
    if (show.labels == F)
       labels = NULL
    
-   mdaplotg(data, main = main, xlab = xlab, ylab = ylab, 
-            labels = labels, legend = legend, type = type, ...)   
+   mdaplotg(data, main = main, xlab = xlab, ylab = ylab, labels = labels, legend = legend, 
+            type = type, show.labels = show.labels, ...)   
 }
 
-plotCumVariance.pca = function(model, xlab = 'Components', ylab = 'Explained variance, %', 
+#' Cumulative explained variance plot for PCA
+#' 
+#' @description
+#' Shows a plot with cumulative explained variance for components.
+#' 
+#' @param obj
+#' a PCA model (object of class \code{pca})
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{pca}} function.
+#' 
+plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained variance, %', 
                                main = 'Cumulative variance', ...)
 {
-   # Makes a cumulative explained variance plot
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)
-   #   xlab: label for x axis
-   #   ylab: label for y axis
-   #   main: main title for the plot
-   #   ...: other graphical parameters (see also mdaplotg for details)
-   
-   plotVariance.pca(model, variance = 'cumexpvar', xlab = xlab, ylab = ylab, main = main, ...)   
+   plotVariance.pca(obj, variance = 'cumexpvar', xlab = xlab, ylab = ylab, main = main, ...)   
 }
 
-plotScores.pca = function(model, comp = c(1, 2), type = 'p', main = 'Scores', xlab = NULL, 
+#' Scores plot for PCA
+#' 
+#' @description
+#' Shows a scores plot for selected components.
+#' 
+#' @param obj
+#' a PCA model (object of class \code{pca})
+#' @param comp
+#' a value or vector with several values - number of components to show the plot for
+#' @param type
+#' type of the plot ('b', 'l', 'h')
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param show.legend
+#' logical, show or not a legend on the plot
+#' @param show.axes
+#' logical, show or not a axes lines crossing origin (0,0)
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{pca}} function.
+#' 
+plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab = NULL, 
                           ylab = NULL, show.labels = F, show.legend = T,
                           show.axes = T, ...)
 {
-   # Makes a scores plot.
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)  
-   #   comp: one or two numbers - which components to make the plot for
-   #   type: type of the plot
-   #   main: main title for the plot
-   #   xlab: label for x axis
-   #   ylab: label for y axis
-   #   show.labels: logical, show or not labels for the data objects
-   #   show.legend: logical, show or not legend on the plot
-   #   show.axes: logical, show or not coordinate axis lines crossing (0, 0)   
-   
    ncomp = length(comp)
    legend = NULL
    
@@ -484,27 +555,27 @@ plotScores.pca = function(model, comp = c(1, 2), type = 'p', main = 'Scores', xl
    {   
       # scores vs objects plot
       
-      if (comp > model$ncomp || comp < 1)
+      if (comp > obj$ncomp || comp < 1)
          stop('Wrong number of components!')
       
       if (is.null(xlab))
          xlab = 'Objects'
       
       if (is.null(ylab))
-         ylab = colnames(model$calres$scores)[comp]
+         ylab = colnames(obj$calres$scores)[comp]
       
-      nobj.cal = nrow(model$calres$scores)      
-      cdata = cbind(1:nobj.cal, model$calres$scores[, comp])      
+      nobj.cal = nrow(obj$calres$scores)      
+      cdata = cbind(1:nobj.cal, obj$calres$scores[, comp])      
       colnames(cdata) = c(xlab, ylab)
-      rownames(cdata) = rownames(model$calres$scores)
+      rownames(cdata) = rownames(obj$calres$scores)
       
       data = list(cdata = cdata)
       
-      if (!is.null(model$testres))
+      if (!is.null(obj$testres))
       {
-         nobj.test = nrow(model$testres$scores)
-         tdata = cbind((nobj.cal + 1):(nobj.cal + nobj.test), model$testres$scores[, comp])      
-         rownames(tdata) = rownames(model$testres$scores)
+         nobj.test = nrow(obj$testres$scores)
+         tdata = cbind((nobj.cal + 1):(nobj.cal + nobj.test), obj$testres$scores[, comp])      
+         rownames(tdata) = rownames(obj$testres$scores)
          data$tdata = tdata
          if (show.legend == T)
             legend = c('cal', 'test')
@@ -517,25 +588,25 @@ plotScores.pca = function(model, comp = c(1, 2), type = 'p', main = 'Scores', xl
    {
       # scores vs scores plot
       
-      if (comp[1] > model$ncomp || comp[1] < 1 || comp[2] > model$ncomp || comp[2] < 1)
+      if (comp[1] > obj$ncomp || comp[1] < 1 || comp[2] > obj$ncomp || comp[2] < 1)
          stop('Wrong component numbers!')
       
       if (is.null(xlab))
-         xlab = colnames(model$calres$scores)[comp[1]]
+         xlab = colnames(obj$calres$scores)[comp[1]]
       
       if (is.null(ylab))
-         ylab = colnames(model$calres$scores)[comp[2]]
+         ylab = colnames(obj$calres$scores)[comp[2]]
 
-      cdata = cbind(model$calres$scores[, comp[1]], model$calres$scores[, comp[2]])      
-      rownames(cdata) = rownames(model$calres$scores)
+      cdata = cbind(obj$calres$scores[, comp[1]], obj$calres$scores[, comp[2]])      
+      rownames(cdata) = rownames(obj$calres$scores)
       
       data = list(cdata = cdata)
       
-      if (!is.null(model$testres))
+      if (!is.null(obj$testres))
       {
-         tdata = cbind(model$testres$scores[, comp[1]], model$testres$scores[, comp[2]])      
+         tdata = cbind(obj$testres$scores[, comp[1]], obj$testres$scores[, comp[2]])      
          colnames(tdata) = c(xlab, ylab)
-         rownames(tdata) = rownames(model$testres$scores)
+         rownames(tdata) = rownames(obj$testres$scores)
          data$tdata = tdata
          if (show.legend == T)
             legend = c('cal', 'test')
@@ -555,21 +626,37 @@ plotScores.pca = function(model, comp = c(1, 2), type = 'p', main = 'Scores', xl
    }   
 }  
 
-plotResiduals.pca = function(model, ncomp = NULL, main = NULL, xlab = 'T2',
+
+#' Residuals plot for PCA
+#' 
+#' @description
+#' Shows a plot with Q2 residuals vs. Hotelling T2 values for selected number of components.
+#' 
+#' @param obj
+#' a PCA model (object of class \code{pca})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param show.legend
+#' logical, show or not a legend on the plot
+#' @param show.limits
+#' logical, show or not lines with statistical limits for the residuals
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{pca}} function.
+#' 
+plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
                              ylab = 'Q2', show.labels = F, show.legend = T, show.limits = T, ...)
 {
-   # Makes a residuals (T2 vs Q2) plot.
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)  
-   #   ncomp: number of componnts to make the plot for
-   #   main: main title for the plot
-   #   xlab: label for x axis
-   #   ylab: label for y axis
-   #   show.labels: logical, show or not labels for the data objects
-   #   show.legend: logical, show or not legend on the plot
-   #   show.limits: logical, show or not statistical limits on the plot   
-   
    if (is.null(main))
    {
       if (is.null(ncomp))
@@ -579,33 +666,33 @@ plotResiduals.pca = function(model, ncomp = NULL, main = NULL, xlab = 'T2',
    }   
    
    if (is.null(ncomp))
-      ncomp = model$ncomp.selected
+      ncomp = obj$ncomp.selected
    
    if (show.limits == T)
-      show.lines = c(model$T2lim[1, ncomp], model$Q2lim[1, ncomp])
+      show.lines = c(obj$T2lim[1, ncomp], obj$Q2lim[1, ncomp])
    else
       show.lines = F
    
-   if (ncomp > model$ncomp || ncomp < 1)
+   if (ncomp > obj$ncomp || ncomp < 1)
       stop('Wrong number of components!')
 
-   cdata = cbind(model$calres$T2[, ncomp], model$calres$Q2[, ncomp])
-   rownames(cdata) = rownames(model$calres$scores)
+   cdata = cbind(obj$calres$T2[, ncomp], obj$calres$Q2[, ncomp])
+   rownames(cdata) = rownames(obj$calres$scores)
    legend = 'cal'   
    data = list(cdata = cdata)
 
-   if (!is.null(model$cvres))
+   if (!is.null(obj$cvres))
    {
-      cvdata = cbind(model$cvres$T2[, ncomp], model$cvres$Q2[, ncomp])      
-      rownames(cvdata) = rownames(model$cvres$T2)      
+      cvdata = cbind(obj$cvres$T2[, ncomp], obj$cvres$Q2[, ncomp])      
+      rownames(cvdata) = rownames(obj$cvres$T2)      
       data$cvdata = cvdata
       legend = c(legend, 'cv')
    }      
    
-   if (!is.null(model$testres))
+   if (!is.null(obj$testres))
    {
-      tdata = cbind(model$testres$T2[, ncomp], model$testres$Q2[, ncomp])      
-      rownames(tdata) = rownames(model$testres$scores)      
+      tdata = cbind(obj$testres$T2[, ncomp], obj$testres$Q2[, ncomp])      
+      rownames(tdata) = rownames(obj$testres$scores)      
       data$tdata = tdata
       legend = c(legend, 'test')
    }      
@@ -617,29 +704,45 @@ plotResiduals.pca = function(model, ncomp = NULL, main = NULL, xlab = 'T2',
             show.labels = show.labels, legend = legend, show.lines = show.lines, ...)
 }  
 
-plotLoadings.pca = function(model, comp = c(1, 2), type = NULL, main = 'Loadings', xlab = NULL, 
+#' Loadings plot for PCA
+#' 
+#' @description
+#' Shows a loadings plot for selected components.
+#' 
+#' @param obj
+#' a PCA model (object of class \code{pca})
+#' @param comp
+#' a value or vector with several values - number of components to show the plot for
+#' @param type
+#' type of the plot ('b', 'l', 'h')
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param show.legend
+#' logical, show or not a legend on the plot
+#' @param show.axes
+#' logical, show or not a axes lines crossing origin (0,0)
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{pca}} function.
+#' 
+plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings', xlab = NULL, 
                             ylab = NULL, show.labels = T, show.legend = T,  show.axes = T, ...)
-{
-   # Makes a loadings plot.
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)  
-   #   comp: one or two numbers - which components to make the plot for
-   #   type: type of the plot ('p', 'b', 'l', 'h')
-   #   main: main title for the plot
-   #   xlab: label for x axis
-   #   ylab: label for y axis
-   #   show.labels: logical, show or not labels for the data objects
-   #   show.legend: logical, show or not legend on the plot
-   #   show.axes: logical, show or not coordinate axis lines crossing (0, 0)   
-   
+{   
    ncomp = length(comp)
    
    if (ncomp == 2 && (type == 'p' || is.null(type)))
    {
       # scatter plot
       
-      data = model$loadings[, c(comp[1], comp[2])]      
+      data = obj$loadings[, c(comp[1], comp[2])]      
       mdaplot(data, show.labels = show.labels, main = main, xlab = xlab, ylab = ylab, 
               show.lines = c(0, 0), ...)      
    }  
@@ -660,8 +763,8 @@ plotLoadings.pca = function(model, comp = c(1, 2), type = NULL, main = 'Loadings
       if (is.null(ylab))
          ylab = 'Loadings'
       
-      data = cbind(1:nrow(model$loadings), model$loadings[, comp, drop = F])            
-      rownames(data) = rownames(model$loadings)
+      data = cbind(1:nrow(obj$loadings), obj$loadings[, comp, drop = F])            
+      rownames(data) = rownames(obj$loadings)
       
       if (show.legend == T)
          legend = colnames(data)[-1];
@@ -671,42 +774,65 @@ plotLoadings.pca = function(model, comp = c(1, 2), type = NULL, main = 'Loadings
    }   
 }
 
-plot.pca = function(model, comp = c(1, 2), show.labels = F, show.legend = T)
+#' Model overview plot for PCA
+#' 
+#' @description
+#' Shows a set of plots (scores, loadings, residuals and explained variance) for PCA model.
+#' 
+#' @param x
+#' a PCA model (object of class \code{pca})
+#' @param comp
+#' vector with two values - number of components to show the scores and loadings plots for
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param show.legend
+#' logical, show or not a legend on the plot
+#' @param ...
+#' other arguments
+#' 
+#' @details
+#' See examples in help for \code{\link{pca}} function.
+#' 
+plot.pca = function(x, comp = c(1, 2), show.labels = F, show.legend = T, ...)
 {   
-   # Makes plots for PCA overview.
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)
-   #   comp: which components to show scores and loadings plots for
-   #   show.labels: logical, show data objects labels on the plots or not
-   #   show.legend: logical, show legend or not   
+   obj = x
    
    par(mfrow = c(2, 2))
-   plotScores(model, comp = comp, show.labels = show.labels, show.legend = show.legend)
-   plotLoadings(model, comp = comp, show.labels = show.labels, show.legend = show.legend)
-   plotResiduals(model, ncomp = model$ncomp.selected,  show.labels = show.labels, 
+   plotScores(obj, comp = comp, show.labels = show.labels, show.legend = show.legend)
+   plotLoadings(obj, comp = comp, show.labels = show.labels, show.legend = show.legend)
+   plotResiduals(obj, ncomp = obj$ncomp.selected,  show.labels = show.labels, 
                  show.legend = show.legend, show.limits = T)
-   plotCumVariance(model, show.legend = show.legend)
+   plotCumVariance(obj, show.legend = show.legend)
    par(mfrow = c(1, 1))
 }
 
-print.pca = function(model, ...)
+#' Print method for PCA model object
+#' 
+#' @method print pca
+#' @S3method print pca
+#'
+#' @description
+#' Prints information about the object structure
+#' 
+#' @param x
+#' a PCA model (object of class \code{pca})
+#' @param ...
+#' other arguments
+#' 
+print.pca = function(x, ...)
 {
-   # Prints information about the PCA model.
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)     
+   obj = x
    
    cat('\nPCA model (class pca)\n')
    
-   if (length(model$info) > 1)
+   if (length(obj$info) > 1)
    {
       cat('\nInfo:\n')
-      cat(model$info)      
+      cat(obj$info)      
    }   
    
    cat('\n\nCall:\n')
-   print(model$call)
+   print(obj$call)
    
    cat('\nMajor fields:\n')   
    cat('$loadings - matrix with loadings\n')
@@ -719,33 +845,43 @@ print.pca = function(model, ...)
    cat('$alpha - significance level for Q2 residuals\n')
    cat('$calres - results (scores, etc) for calibration set\n')
    
-   if (!is.null(model$cvres))
+   if (!is.null(obj$cvres))
    {
       cat('$cvres - results for cross-validation\n')      
    }   
-   if (!is.null(model$testres))
+   if (!is.null(obj$testres))
    {
       cat('$testres - results for test set\n')      
    }    
 }
 
-summary.pca = function(model)
+#' Summary method for PCA model object
+#' 
+#' @method summary pca
+#' @S3method summary pca
+#'
+#' @description
+#' Shows some statistics (explained variance, eigenvalues) for the model.
+#' 
+#' @param object
+#' a PCA model (object of class \code{pca})
+#' @param ...
+#' other arguments
+#' 
+summary.pca = function(object, ...)
 {
-   # Shows summary for a PCA model.
-   #
-   # Arguments:
-   #   model: a PCA model (object of class pca)  
+   obj = object
    
-   ncomp = model$ncomp
+   ncomp = obj$ncomp
    
    cat('\nPCA model (class pca) summary\n')
 
-   if (length(model$info) > 0)
-      cat(sprintf('\nInfo:\n%s\n\n', model$info))
+   if (length(obj$info) > 0)
+      cat(sprintf('\nInfo:\n%s\n\n', obj$info))
    
-   data = cbind(round(model$eigenvals[1:model$ncomp], 3), 
-                round(model$calres$expvar, 2),
-                round(model$calres$cumexpvar, 2))
+   data = cbind(round(obj$eigenvals[1:obj$ncomp], 3), 
+                round(obj$calres$expvar, 2),
+                round(obj$calres$cumexpvar, 2))
    
    colnames(data) = c('Eigvals', 'Expvar', 'Cumexpvar')
    show(data)

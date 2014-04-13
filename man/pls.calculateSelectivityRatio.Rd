@@ -1,0 +1,25 @@
+\name{pls.calculateSelectivityRatio}
+\alias{pls.calculateSelectivityRatio}
+\title{Selectivity ratio calculation}
+\usage{
+pls.calculateSelectivityRatio(model, x)
+}
+\arguments{
+  \item{model}{a PLS model (object of class \code{pls})}
+
+  \item{x}{predictor values from calibration set,
+  preprocessed, centered and scaled}
+}
+\value{
+array \code{nvar x ncomp x ny} with selectivity ratio
+values
+}
+\description{
+Calculates selectivity ration for each component and
+response variable in the PLS model
+}
+\references{
+[1] Tarja Rajalahti et al. Chemometrics and Laboratory
+Systems, 95 (2009), pp. 35-48.
+}
+

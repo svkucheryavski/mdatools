@@ -1,46 +1,39 @@
 \name{plotXScores.pls}
 \alias{plotXScores.pls}
-
-\title{
-X scores plot for PLS model
-}
-
-\description{
-\code{plotXScores.pls} is used to make a plot with scores for predictor variables decomposition. 
-}
-
+\title{X scores plot for PLS}
 \usage{
-plotXScores(model, comp = c(1, 2), show.axes = F, ...)
+\method{plotXScores}{pls}(obj, comp = c(1, 2), main = "X scores",
+  xlab = NULL, ylab = NULL, show.axes = T, show.labels = F,
+  show.legend = T, ...)
 }
-
 \arguments{
-  \item{model }{a PLS model (object of \code{pls} class.)}
-  \item{comp}{either one value or vector with two values - number of components to make the plot for. }
-  \item{show.axes}{logical, show or not coordinate axes, that cross the origin (0, 0).}
-  \item{...}{most of \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{a PLS model (object of class \code{pls})}
 
+  \item{comp}{which components to show the plot for (one or
+  vector with several values)}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{show.axes}{logical, show or not a axes lines
+  crossing origin (0,0)}
+
+  \item{show.labels}{logical, show or not labels for the
+  plot elements}
+
+  \item{show.legend}{logical, show or not legend for the
+  plot}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows plot with X scores values for selected components.
+}
 \details{
-The plot shows x scores (T) for objects from calibration set and test set, if the last was provided. 
-If one value is provided for \code{comp} parameters, the plot will be made for scores vs. objects number.
+See examples in help for \code{\link{pls}} function.
 }
 
-\examples{
-## Examples of using X scores plot
-
-library(mdatools)
-data(Simdata)
-
-model = pls(spectra.c, conc.c, ncomp = 8, x.test = spectra.t, y.test = conc.t)
-
-par(mfrow = c(2, 2))
-plotXScores(model)
-plotXScores(model, c(1, 3), show.axes = T)
-plotXScores(model, 2, colmap = c('orange', 'green'))
-plotXScores(model, 1, type = 'l', ylab = 'LV1', xlab = 'Samples')
-par(mfrow = c(1, 1))
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

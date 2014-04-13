@@ -1,5 +1,5 @@
 library(mdatools)
-data(People)
+data(people)
 
 data = people
 mvdata = data

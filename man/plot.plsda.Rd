@@ -1,0 +1,31 @@
+\name{plot.plsda}
+\alias{plot.plsda}
+\title{Model overview plot for PLS-DA}
+\usage{
+\method{plot}{plsda}(x, ncomp = NULL, nc = 1, show.legend = T,
+  show.labels = F, ...)
+}
+\arguments{
+  \item{x}{a PLS-DA model (object of class \code{plsda})}
+
+  \item{ncomp}{how many components to use (if NULL - user
+  selected optimal value will be used)}
+
+  \item{nc}{which class to show the plots}
+
+  \item{show.labels}{logical, show or not labels for the
+  plot objects}
+
+  \item{show.legend}{logical, show or not a legend on the
+  plot}
+
+  \item{...}{other arguments}
+}
+\description{
+Shows a set of plots (x residuals, regression coefficients,
+misclassification ratio and predictions) for PLS-DA model.
+}
+\details{
+See examples in help for \code{\link{plsda}} function.
+}
+

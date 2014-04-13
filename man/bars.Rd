@@ -1,0 +1,19 @@
+\name{bars}
+\alias{bars}
+\title{Show bars on axes}
+\usage{
+bars(x, y, col = NULL, bwd = 0.8)
+}
+\arguments{
+  \item{x}{vector with x values (centers of bars)}
+
+  \item{y}{vector with y values (height of bars)}
+
+  \item{col}{colors of the bars}
+
+  \item{bwd}{width of the bars (as a ratio for max width)}
+}
+\description{
+Shows bars (bar plot) on predefined axes
+}
+

@@ -1,7 +1,7 @@
 ## class and methods for SIMCA classification ##
 
-simca = function(x, classname, ncomp = 20, center = T, scale = F, cv = NULL, x.test = NULL, 
-                 c.test = NULL, alpha = 0.05, method = 'svd', info = '', ...)
+simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
+                 c.test = NULL, alpha = 0.05, method = 'svd', info = '')
 {
    # Calibrate and validate a SIMCA classification model for one class
    #
@@ -76,19 +76,30 @@ simca = function(x, classname, ncomp = 20, center = T, scale = F, cv = NULL, x.t
    model
 }
 
-predict.simca = function(model, x, c.ref = NULL, cv = F)
+#' SIMCA predictions
+#' 
+#' @description
+#' Applies SIMCA model to a new data set
+#' 
+#' @param object
+#' a SIMCA model (object of class \code{simca})
+#' @param x
+#' a matrix with x values (predictors)
+#' @param c.ref
+#' a vector with reference class values
+#' @param cv
+#' logical, are predictions for cross-validation or not
+#' @param ...
+#' other arguments
+#' 
+#' @return
+#' SIMCA results (an object of class \code{simcares})
+#'
+#' @details
+#' See examples in help for \code{\link{simca}} function.
+#'  
+predict.simca = function(object, x, c.ref = NULL, cv = F, ...)
 {
-   # Apply the SIMCA model to a new data set
-   #
-   # Arguments:
-   #   model: a SIMCA model (object of class simca)
-   #   x: a matrix with new data values
-   #   c.ref: reference class values for the data set (optional)
-   #   cv: logical, is it CV predictions or not 
-   #
-   # Returns:
-   #   res: results of SIMCA classification (object of simcares class)
-   
    x = as.matrix(x)
    
    if (is.null(rownames(x)))
@@ -97,43 +108,50 @@ predict.simca = function(model, x, c.ref = NULL, cv = F)
    if (is.null(colnames(x)))
       colnames(x) = paste('v', 1:ncol(x), sep = '')
    
-   pres = predict.pca(model, x, cv)     
-   pres$Q2lim = model$Q2lim
-   pres$T2lim = model$T2lim
+   pres = predict.pca(object, x, cv)     
+   pres$Q2lim = object$Q2lim
+   pres$T2lim = object$T2lim
    
-   c.pred = simca.classify(model, pres)
+   c.pred = simca.classify(object, pres)
    
    # check c.ref values and add dimnames
    if (!is.null(c.ref))
    {   
       if (is.character(c.ref))
-         c.ref = c.ref == model$classname
+         c.ref = c.ref == object$classname
       
       if (is.logical(c.ref))
          c.ref = c.ref * 2 - 1
       
       c.ref = as.matrix(c.ref)
       rownames(c.ref) = rownames(x)
-      colnames(c.ref) = model$classname
+      colnames(c.ref) = object$classname
    } 
    
-   cres = classres(c.pred, c.ref = c.ref, ncomp.selected = model$ncomp.selected)
+   cres = classres(c.pred, c.ref = c.ref, ncomp.selected = object$ncomp.selected)
    res = simcares(pres, cres)
    
    res
 }
 
+#' SIMCA classification
+#' 
+#' @description
+#' Make classification based on calculated T2 and Q2 values and corresponding limits
+#' 
+#' @param model
+#' a SIMCA model (object of class \code{simca})
+#' @param res
+#' results of projection data to PCA space
+#' 
+#' @return
+#' vector with predicted class values (\code{c.pred})
+#'
+#' @details
+#' This is a service function for SIMCA class, do not use it manually.
+#'  
 simca.classify = function(model, res)
 {
-   # Make classification based on calculated Q2 and T2 statistics
-   #
-   # Arguments:
-   #   model: a SIMCA model (object of class simca)
-   #   res: results of projection of new data to PC space 
-   #
-   # Returns:
-   #   c.pred: predicted class values
-   
    ncomp = model$ncomp
    c.pred = array(0, dim = c(nrow(res$Q2), ncomp, 1))
    dimnames(c.pred) = list(rownames(res$Q2), paste('Comp', 1:ncomp), model$classname)
@@ -149,20 +167,27 @@ simca.classify = function(model, res)
    c.pred
 }  
 
+#' Cross-validation of a SIMCA model
+#' 
+#' @description
+#' Does the cross-validation of a SIMCA model
+#' 
+#' @param model
+#' a SIMCA model (object of class \code{simca})
+#' @param x
+#' a matrix with x values (predictors from calibration set)
+#' @param cv
+#' number of segments (if cv = 1, full cross-validation will be used)
+#' @param center
+#' logical, do mean centering or not
+#' @param scale
+#' logical, do standardization or not
+#'
+#' @return
+#' object of class \code{simcares} with results of cross-validation
+#'  
 simca.crossval = function(model, x, cv, center = T, scale = F)
 {
-   # Cross-validation of a SIMCA model
-   #
-   # Arguments:
-   #   model: a SIMCA model (object of class simca)  
-   #   x: a matrix with data values
-   #   cv: number of segments for cross-validation (1 for full CV)
-   #   center: logical, mean center data values or not
-   #   scale: logical, standardize data values or not
-   #
-   # Returns:
-   #   res: results of cross-validation (object of class simcares) 
-   
    ncomp = model$ncomp   
    nobj = nrow(x)
    nvar = ncol(x)
@@ -213,36 +238,29 @@ simca.crossval = function(model, x, cv, center = T, scale = F)
    res
 }  
 
-getSelectedComponents.simca = function(obj, ncomp = NULL)
+#' Modelling power plot for SIMCA model
+#' 
+#' @description
+#' Shows a plot with modelling power values for each predictor
+#' 
+#' @param obj
+#' a SIMCA model (object of class \code{simca})
+#' @param ncomp
+#' number of components to show the values for
+#' @param type
+#' type of the plot
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' 
+plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL, 
+                                    xlab = 'Variables', ylab = '', ...)
 {
-   if (is.null(ncomp))
-   {   
-      if (is.null(obj$ncomp.selected))
-         ncomp = 1
-      else
-         ncomp = obj$ncomp.selected
-   }   
-
-   ncomp
-}
-
-
-plotModellingPower.simca = function(model, ncomp = NULL, type = 'h', legend = NULL, 
-                                    xlab = 'Variables', ylab = '', 
-                                    main = NULL, ...)
-{
-   # makes a plot with modelling power of variables
-   #
-   # Arguments:
-   #   model: a SIMCA model (object of class simca)
-   #   ncomp: number of components to make the plot for
-   #   type: plot type
-   #   legend: legend strings
-   #   main: main title for the plot
-   #   xlab: label for x axis
-   #   ylab: label for y axis
-   #
-   
    if (is.null(main))
    {
       if (is.null(ncomp))
@@ -251,9 +269,9 @@ plotModellingPower.simca = function(model, ncomp = NULL, type = 'h', legend = NU
          main = sprintf('Modelling power (ncomp = %d)', ncomp)      
    }   
 
-   ncomp = getSelectedComponents(model, ncomp)
+   ncomp = getSelectedComponents(obj, ncomp)
    
-   nvar = nrow(model$modpower)
+   nvar = nrow(obj$modpower)
    if (is.null(type))
    {   
       if (nvar < 20)
@@ -262,34 +280,124 @@ plotModellingPower.simca = function(model, ncomp = NULL, type = 'h', legend = NU
          type = 'l'
    }
    
-   data = cbind(1:nvar, model$modpower[, ncomp, drop = F])
+   data = cbind(1:nvar, obj$modpower[, ncomp, drop = F])
    mdaplot(data, type = type, xlab  = xlab, ylab = ylab, main = main, ...)
 }   
 
-plot.simca = function(model, ncomp = NULL, ...)
+#' Model overview plot for SIMCA
+#' 
+#' @description
+#' Shows a set of plots for SIMCA model.
+#' 
+#' @param x
+#' a SIMCA model (object of class \code{simca})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param ...
+#' other arguments
+#' 
+#' @details
+#' See examples in help for \code{\link{simcam}} function.
+#' 
+plot.simca = function(x, ncomp = NULL, ...)
 {
-   # makes a plot with overview of a SIMCA model
-   #
-   # Arguments:
-   #   model: a SIMCA model (object of class simca)
-   #   ncomp: number of components to make the plot for
-   #
+   obj = x
    
    par(mfrow = c(2, 2))
-   plotScores(model, ...)
-   plotModellingPower(model, ncomp = ncomp, main = 'Modelling power', 
-                      show.labels = ncol(model$modpower) < 10, ...)
-   plotResiduals(model, main = 'Residuals', ncomp = ncomp, ...)
-   plotCumVariance(model, ...)
+   plotScores(obj, ...)
+   plotModellingPower(obj, ncomp = ncomp, main = 'Modelling power', 
+                      show.labels = ncol(obj$modpower) < 10, ...)
+   plotResiduals(obj, main = 'Residuals', ncomp = ncomp, ...)
+   plotCumVariance(obj, ...)
    par(mfrow = c(1, 1))
 }  
 
-print.simca = function(model, ...)
+
+#' Summary method for SIMCA model object
+#' 
+#' @method summary simca
+#' @S3method summary simca
+#'
+#' @description
+#' Shows performance statistics for the model.
+#' 
+#' @param object
+#' a SIMCA model (object of class \code{simca})
+#' @param ...
+#' other arguments
+#' 
+summary.simca = function(object, ...)
 {
+   obj = object
+   
+   ncomp = obj$ncomp   
+   cat(sprintf('\nSIMCA model for class "%s" summary\n\n', obj$classname))
+   
+   if (!is.null(obj$info))
+      cat(sprintf('Info: %s\n', obj$info))
+   
+   cat(sprintf('Significance level (alpha): %.2f\n', obj$alpha))
+   cat(sprintf('Selected number of components: %d\n\n', obj$ncomp.selected))
+   
+   data = cbind(round(obj$calres$expvar, 2),
+                round(obj$calres$cumexpvar, 2),
+                round(obj$calres$sensitivity[1, ], 2)
+   )   
+   colnames(data) = c('Expvar', 'Cumexpvar', 'Sens (cal)')
+   
+   if (!is.null(obj$cvres))
+   {
+      cnames = colnames(data)
+      data = cbind(data,
+                   round(obj$cvres$sensitivity[1, ], 2)
+      )
+      colnames(data) = c(cnames, 'Sens (cv)')
+   }   
+   
+   if (!is.null(obj$testres))
+   {
+      cnames = colnames(data)
+      if (is.null(obj$testres$specificity[1, ]) || min(obj$testres$specificity[1, ]) == 1)
+      {
+         data = cbind(data,
+                      round(obj$testres$sensitivity[1, ], 2)
+         )
+         colnames(data) = c(cnames, 'Sens (test)')         
+      }
+      else  
+      {   
+         data = cbind(data,
+                      round(obj$testres$specificity[1, ], 2),
+                      round(obj$testres$sensitivity[1, ], 2)
+         )
+         colnames(data) = c(cnames, 'Spec (test)', 'Sens (test)')
+      }
+   }   
+   
+   print(data)   
+}  
+
+#' Print method for SIMCA model object
+#' 
+#' @method print simca
+#' @S3method print simca
+#'
+#' @description
+#' Prints information about the object structure
+#' 
+#' @param x
+#' a SIMCA model (object of class \code{simca})
+#' @param ...
+#' other arguments
+#' 
+print.simca = function(x, ...)
+{
+   obj = x
+   
    cat('\nSIMCA one class model (class simca)\n')
    
    cat('\nCall:\n')
-   print(model$call)
+   print(obj$call)
    
    cat('\nMajor fields:\n')   
    cat('$classname - name of the class\n')
@@ -304,61 +412,13 @@ print.simca = function(model, ...)
    cat('$cv - number of segments for cross-validation\n')
    cat('$calres - results (scores, etc) for calibration set\n')
    
-   if (!is.null(model$cvres))
+   if (!is.null(obj$cvres))
    {
       cat('$cvres - results for cross-validation\n')      
    }   
-   if (!is.null(model$testres))
+   if (!is.null(obj$testres))
    {
       cat('$testres - results for test set\n')      
    }       
 }  
 
-summary.simca = function(model, ...)
-{
-   ncomp = model$ncomp   
-   cat(sprintf('\nSIMCA model for class "%s" summary\n\n', model$classname))
-   
-   if (!is.null(model$info))
-      cat(sprintf('Info: %s\n', model$info))
-   
-   cat(sprintf('Significance level (alpha): %.2f\n', model$alpha))
-   cat(sprintf('Selected number of components: %d\n\n', model$ncomp.selected))
-   
-   data = cbind(round(model$calres$expvar, 2),
-                round(model$calres$cumexpvar, 2),
-                round(model$calres$sensitivity[1, ], 2)
-   )   
-   colnames(data) = c('Expvar', 'Cumexpvar', 'Sens (cal)')
-   
-   if (!is.null(model$cvres))
-   {
-      cnames = colnames(data)
-      data = cbind(data,
-                   round(model$cvres$sensitivity[1, ], 2)
-      )
-      colnames(data) = c(cnames, 'Sens (cv)')
-   }   
-   
-   if (!is.null(model$testres))
-   {
-      cnames = colnames(data)
-      if (is.null(model$testres$specificity[1, ]) || min(model$testres$specificity[1, ]) == 1)
-      {
-         data = cbind(data,
-                      round(model$testres$sensitivity[1, ], 2)
-         )
-         colnames(data) = c(cnames, 'Sens (test)')         
-      }
-      else  
-      {   
-         data = cbind(data,
-                      round(model$testres$specificity[1, ], 2),
-                      round(model$testres$sensitivity[1, ], 2)
-         )
-         colnames(data) = c(cnames, 'Spec (test)', 'Sens (test)')
-      }
-   }   
-   
-   print(data)   
-}  

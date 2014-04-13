@@ -1,0 +1,16 @@
+\name{summary.simcares}
+\alias{summary.simcares}
+\title{Summary method for SIMCA results object}
+\usage{
+\method{summary}{simcares}(object, ...)
+}
+\arguments{
+  \item{object}{SIMCA results (object of class
+  \code{simcares})}
+
+  \item{...}{other arguments}
+}
+\description{
+Shows performance statistics for the results.
+}
+

@@ -1,6 +1,6 @@
 # class and methods for Partial Least Squares Discriminant Analysis #
 
-plsda = function(x, c, ncomp = 20, center = T, scale = F, cv = NULL, 
+plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL, 
                x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, info = '')
 {
    # Calibrate and validate a PLS-DA model.
@@ -35,6 +35,7 @@ plsda = function(x, c, ncomp = 20, center = T, scale = F, cv = NULL,
    model$classnames = unique(c)
    model$nclasses = length(model$classnames)
    model$calres = predict.plsda(model, x, c)
+   model = selectCompNum.pls(model, ncomp)
    
    # do cross-validation if needed
    if (!is.null(cv))
@@ -55,6 +56,20 @@ plsda = function(x, c, ncomp = 20, center = T, scale = F, cv = NULL,
    model
 }
 
+#' Reference values for PLS-DA
+#' 
+#' @description
+#' Generates matrix with reference y values (-1 and +1) for a 
+#' vector with class values
+#' 
+#' @param c 
+#' vector with class values (discrete)
+#' @param classnames
+#' vector with names for the classes
+#' 
+#' @return
+#' the generated matrix with one column for each class
+#' 
 plsda.getReferenceValues = function(c, classnames = NULL)
 {
    # generate matrix with y values
@@ -74,28 +89,57 @@ plsda.getReferenceValues = function(c, classnames = NULL)
    y
 }
 
-predict.plsda = function(model, x, c = NULL, cv = F)
+#' PLS-DA predictions
+#' 
+#' @description
+#' Applies PLS-DA model to a new data set
+#' 
+#' @param object
+#' a PLS-DA model (object of class \code{plsda})
+#' @param x
+#' a matrix with x values (predictors)
+#' @param c
+#' a vector with reference class values
+#' @param cv
+#' logical, are predictions for cross-validation or not
+#' @param ...
+#' other arguments
+#' 
+#' @return
+#' PLS-DA results (an object of class \code{plsdares})
+#'
+#' @details
+#' See examples in help for \code{\link{plsda}} function.
+#'  
+predict.plsda = function(object, x, c = NULL, cv = F, ...)
 {   
-   # Applies a PLS-DA model to a new data.
-   #
-   # Arguments:
-   #   model: a PLS model (object of class PLS)
-   #   x: a matrix with predictor values
-   #   c: a vector with reference class values (optional)
-   #   cv: logical, is it prediction for cross-validation or not
-   #
-   # Returns:
-   #   res: PLS results (object of class plsres)
-
-   y = plsda.getReferenceValues(c, model$classnames)
-   plsres = predict.pls(model, x, y)
-   cres = classify.plsda(model, plsres$y.pred, c)
+   y = plsda.getReferenceValues(c, object$classnames)
+   plsres = predict.pls(object, x, y)
+   cres = classify.plsda(object, plsres$y.pred, c)
 
    res = plsdares(plsres, cres)
 
    res
 }  
 
+#' PLS-DA classification
+#' 
+#' @description
+#' Converts PLS predictions of y values to predictions of classes
+#' 
+#' @param model
+#' a PLS-DA model (object of class \code{plsda})
+#' @param y
+#' a matrix with predicted y values
+#' @param c.ref
+#' a vector with reference class values
+#' 
+#' @return
+#' Classification results (an object of class \code{classres})
+#'
+#' @details
+#' This is a service function for PLS-DA class, do not use it manually.
+#'  
 classify.plsda = function(model, y, c.ref = NULL)
 {
    c.pred = array(-1, dim(y))
@@ -106,6 +150,27 @@ classify.plsda = function(model, y, c.ref = NULL)
    cres
 }
 
+#' Cross-validation of a PLS-DA model
+#' 
+#' @description
+#' Does the cross-validation of a PLS-DA model
+#' 
+#' @param model
+#' a PLS-DA model (object of class \code{plsda})
+#' @param x
+#' a matrix with x values (predictors from calibration set)
+#' @param c
+#' a vetor with c values (classes from calibration set)
+#' @param cv
+#' number of segments (if cv = 1, full cross-validation will be used)
+#' @param center
+#' logical, do mean centering or not
+#' @param scale
+#' logical, do standardization or not
+#'
+#' @return
+#' object of class \code{plsdares} with results of cross-validation
+#'  
 plsda.crossval = function(model, x, c, cv, center = T, scale = F)
 {
    y = plsda.getReferenceValues(c, model$classnames)
@@ -117,16 +182,31 @@ plsda.crossval = function(model, x, c, cv, center = T, scale = F)
    res
 }
 
-plot.plsda = function(model, ncomp = NULL, nc = 1, show.legend = T, show.labels = F)
+#' Model overview plot for PLS-DA
+#' 
+#' @description
+#' Shows a set of plots (x residuals, regression coefficients, misclassification ratio and predictions) 
+#' for PLS-DA model.
+#' 
+#' @param x
+#' a PLS-DA model (object of class \code{plsda})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param nc
+#' which class to show the plots
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param show.legend
+#' logical, show or not a legend on the plot
+#' @param ...
+#' other arguments
+#' 
+#' @details
+#' See examples in help for \code{\link{plsda}} function.
+#' 
+plot.plsda = function(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F, ...)
 {
-   # Makes a plot for PLS model overview.
-   #
-   # Arguments:
-   #   model: a PLS model (object of class pls)  
-   #   ncomp: number of components to show the summary for (default: ncomp.selected)
-   #   ny: number of response variable to show the summary for
-   #   show.legend: logical, show the plot legend or not
-   #   show.labels: logical, show data object labels or not
+   model = x
    
    if (!is.null(ncomp) && (ncomp <= 0 || ncomp > model$ncomp)) 
       stop('Wrong value for number of components!')
@@ -144,45 +224,57 @@ plot.plsda = function(model, ncomp = NULL, nc = 1, show.legend = T, show.labels 
    par(mfrow = c(1, 1))
 }
 
-summary.plsda = function(model, ncomp = NULL, nc = NULL)
+#' Summary method for PLS-DA model object
+#' 
+#' @method summary plsda
+#' @S3method summary plsda
+#'
+#' @description
+#' Shows some statistics for the model.
+#' 
+#' @param object
+#' a PLS-DA model (object of class \code{plsda})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param nc
+#' which class to show the summary for (if NULL, will be shown for all)
+#' @param ...
+#' other arguments
+#' 
+summary.plsda = function(object, ncomp = NULL, nc = NULL, ...)
 {
-   # Shows summary information for PLSDA model.
-   #
-   # Arguments:
-   #   model: a PLSDA model (object of class plsda)  
-   #   ncomp: number of components to show the summary for (default: ncomp.selected)
-   #   nc: number of class to show the summary for
+   obj = object
    
    if (is.null(ncomp))
-      ncomp = model$ncomp.selected
-   else if (ncomp <= 0 || ncomp > model$ncomp)
+      ncomp = obj$ncomp.selected
+   else if (ncomp <= 0 || ncomp > obj$ncomp)
       stop('Wrong value for number of components!')
    
    if (is.null(nc))
-      nc = 1:model$nclasses
+      nc = 1:obj$nclasses
    
    cat('\nPLS-DA model (class plsda) summary statistics\n\n')
    cat(sprintf('Number of selected components: %d\n', ncomp))
    
-   if (!is.null(model$info))
-      cat(sprintf('Info: %s\n', model$info))
+   if (!is.null(obj$info))
+      cat(sprintf('Info: %s\n', obj$info))
       
    for (n in nc)
    {   
-      cat(sprintf('\nClass #%d (%s)\n', n, model$classnames[n]))
+      cat(sprintf('\nClass #%d (%s)\n', n, obj$classnames[n]))
       
-      data = as.matrix(model$calres, ncomp = ncomp, nc = n)
+      data = as.matrix(obj$calres, ncomp = ncomp, nc = n)
       rownames(data) = 'Cal'
       
-      if (!is.null(model$cvres))
+      if (!is.null(obj$cvres))
       {
-         data = rbind(data, as.matrix(model$cvres, ncomp = ncomp, nc = n))      
+         data = rbind(data, as.matrix(obj$cvres, ncomp = ncomp, nc = n))      
          rownames(data)[2] = 'CV'
       }
       
-      if (!is.null(model$testres))
+      if (!is.null(obj$testres))
       {
-         data = rbind(data, as.matrix(model$testres, ncomp = ncomp, nc = n))
+         data = rbind(data, as.matrix(obj$testres, ncomp = ncomp, nc = n))
          rownames(data)[nrow(data)] = 'Test'
       }   
       
@@ -192,16 +284,26 @@ summary.plsda = function(model, ncomp = NULL, nc = NULL)
    cat('\n')
 }
 
-print.plsda = function(model, ...)
+#' Print method for PLS-DA model object
+#' 
+#' @method print plsda
+#' @S3method print plsda
+#'
+#' @description
+#' Prints information about the object structure
+#' 
+#' @param x
+#' a PLS-DA model (object of class \code{plsda})
+#' @param ...
+#' other arguments
+#' 
+print.plsda = function(x, ...)
 {
-   # Prints information about the PLS-DA model.
-   #
-   # Arguments:
-   #   model: a PLS-DA model (object of class plsda)  
+   obj = x
    
    cat('\nPLS-DA model (class plsda)\n')
    cat('\nCall:\n')
-   print(model$call)
+   print(obj$call)
    
    cat('\nMajor fields:\n')
    cat('$ncomp - number of calculated components\n')
@@ -211,11 +313,11 @@ print.plsda = function(model, ...)
    cat('$yloadings - vector with Y loadings\n')
    cat('$weights - vector with weights\n')
    cat('$calres - results for calibration set\n')
-   if (!is.null(model$cvres))
+   if (!is.null(obj$cvres))
    {
       cat('$cvres - results for cross-validation\n')      
    }   
-   if (!is.null(model$testres))
+   if (!is.null(obj$testres))
    {
       cat('$testres - results for test set\n')      
    }   

@@ -1,27 +1,35 @@
+#' Check color values
+#' 
+#' @description
+#' Checks if elements of argument are valid color values
+#' 
+#' @param palette
+#' vector with possibly color values (names, RGB, etc.)
+#' 
 mdaplot.areColors = function(palette) {
-   # Check if elements of argument are color values 
-   #
-   # Arguments:
-   #   palette: vector with color values (names, RGB, etc.) 
-   #
-   # Returns:
-   #   res: logical vector of the same size as palette
-   
    sapply(palette, function(X) {tryCatch(is.matrix(col2rgb(X)), error = function(e) FALSE)} )
 }
 
+#' Format vector with numeric values
+#' 
+#' @description
+#' Format vector with values, so only significant decimal numbers are left. 
+#'
+#' @param data
+#' vector or matrix with values
+#' @param round.only
+#' logical, do formatting or only round the values
+#' @param digits
+#' how many significant digits take into account
+#' 
+#' @details
+#' Function takes into accound difference between values and the values themselves.
+#' 
+#' @return
+#' matrix with formatted values
+#' 
 mdaplot.formatValues = function(data, round.only = F, digits = 3)
-{
-   # Format vector with values, so only significant decimal numbers are left.
-   # Function takes into accound difference between values and the values themselves.
-   #
-   # Arguments:
-   #   data: vector or matrix with values 
-   #   round.only: logical, do formatting or only round the values
-   #
-   # Returns:
-   #   fdata: the same values after formatting
-   
+{   
    if (round.only == T)
       fdata = round(data, digits)
    else
@@ -31,36 +39,45 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
    fdata
 }
 
+#' Calculate axes limits
+#' 
+#' @description
+#' Calculates axes limits depending on data values that have to be plotted, 
+#' extra plot elements that have to be shown and margins. 
+#' 
+#' @param data
+#' a matrix or list with data values (values to be plotted).
+#' @param single.x
+#' logical, has data matrix (matrices) one column for X and many for Y or not.
+#' @param show.colorbar
+#' logical, show or not the colorbar on the plot.
+#' @param show.lines
+#' logical or numeric with line coordinates to be shown on the plot.
+#' @param legend
+#' vector with legend items.
+#' @param show.legend
+#' logical, show or not legend on the plot.
+#' @param legend.position
+#' position of the legend (see \code{\link{mdaplotg}} for details).
+#' @param show.labels
+#' logical, show or not labels for the data objects
+#' @param xticks
+#' values for x ticks to show
+#' @param yticks
+#' values for yticks to show 
+#' 
+#' @details
+#' Data can be a list with several matrices or just one matrix. The matrices can have single.x
+#' configuration, where first column is x values and the others are y values or normal configuration,
+#' where every odd column is x values and every even is corresponding y values.
+#'
+#' @return
+#' Returns a list with four limits for the x and y axes.
+#'  
 mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines = F, 
                               legend = NULL, show.legend = F, legend.position = 'topright', show.labels = F,
                               xticks = NULL, yticks = NULL)
-{
-   # Calculates axes limits depending on data values that have to be plotted, 
-   # extra plot elements that have to be shown and margins. 
-   # 
-   # Data can be a list with several matrices or just one matrix. The matrices can have single.x
-   # configuration, where first column is x values and the others are y values or normal configuration,
-   # where every odd column is x values and every even is corresponding y values
-   #
-   # Arguments:
-   #   data: a matrix with data values 
-   #   single.x: logical, TRUE if data matrix has one column for X values and many for Y
-   #   show.colorbar: logical, will colorbar be shown on the plot or not
-   #   show.lines: logical, will any lines (e.g. limits) be shown on the plot or not
-   #   legend: vector with legend items
-   #   show.legend: logical, will legend be shown on the plot or not
-   #   legend.position: position of the legend
-   #   show.labels: logica, show or not labels for the data items
-   #   xticks: values for x ticks
-   #   yticks: values for y ticks
-   #
-   # Returns:
-   #   a list with limit values
-   #   $xmin - minimum value for X axis
-   #   $xmax - maximum value for X axis
-   #   $ymin - minimum value for Y axis
-   #   $ymax - maximum value for Y axis
-   
+{   
    scale = 0.075 # scale for margins - 7.5% of plot width or height
    
    if (single.x == F )
@@ -210,18 +227,24 @@ mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines 
    )   
 }
 
+#' Color values for plot elements
+#' 
+#' @description
+#' Generate vector with color values for plot objects (lines, points, bars), depending
+#' on number of groups for the objects.
+#' 
+#' @param ngroups
+#' number of groups.
+#' @param cgroup
+#' vector of values, used for color grouping of plot points or lines.
+#' @param colmap
+#' which colormap to use ('default', 'gray', or user defined in form c('color1', 'color2', ...)).
+#' 
+#' @return
+#' Returns vector with generated color values
+#' 
 mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
 {   
-   # Returns color values for points
-   #
-   # Arguments:
-   #   ngroup: how many groups shall be used
-   #   cgroup: vector of values, used for color grouping of plot points
-   #   colmap: colormap: 'default', 'gray' or user defined in form c('#00000', '#22000', ...)
-   #
-   # Returns:
-   #   colvals: vector with color values
-   
    if (length(colmap) == 1)
    {   
       # colormap is a name      
@@ -272,21 +295,32 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
    colvals
 }
 
+#' Plot grid
+#' 
+#' @description
+#' Shows grid for a plot
+#' 
+#' @param lwd
+#' line width for the grid 
+#' 
 mdaplot.showGrid = function(lwd = 0.5)
 {
-   # Shows a grid for plots
-   
+   # Shows a grid for plots   
    grid(lwd = lwd)   
 }
 
+#' Plot colorbar
+#' 
+#' @description
+#' Shows a colorbar if plot has color grouping of elements (points or lines).
+#' 
+#' @param cgroup
+#' a vector with values used to make color grouping of the elements
+#' @param colmap
+#' a colormap to be used for color generation
+#' 
 mdaplot.showColorbar = function(cgroup, colmap = 'default')
 {
-   # Shows colobar legend on a top of a plot.
-   #
-   # Arguments:
-   #   cgroup: vector with values used to make color grouping of points  
-   #   colmap: colormap to get colors
-   
    # get number of levels for the cgroup
    cfactor = factor(cgroup)
    nlevels = length(attr(cfactor, 'levels'))
@@ -355,20 +389,30 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default')
    mdaplot.showLabels(labels, pos = 1)
 }
 
+
+#' Plot legend
+#' 
+#' @description
+#' Shows a legend for plot elements or their groups.
+#' 
+#' @param legend
+#' vector with text elements for the legend items
+#' @param col
+#' vector with color values for the legend items
+#' @param pch
+#' vector with marker symbols for the legend items
+#' @param lty
+#' vector with line types for the legend items
+#' @param bty
+#' border type for the legend
+#' @param position
+#' legend position ('topright', 'topleft', 'bottomright', 'bottomleft', 'top', 'bottom')
+#' @param plot
+#' logical, show legend or just calculate and return its size
+#'
 mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, bty = 'o', 
                               position = 'topright', plot = T)
 {
-   # Shows a legend for a plot with groups
-   #
-   # Arguments:
-   #   legend: vector with text elements for the legend items
-   #   col: vector with color values for the legend items
-   #   pch: vector with marker symbols for the legend items
-   #   lty: vector with line types for the legend items
-   #   bty: border type for the legend
-   #   position: legend position
-   #   plot: logical, show legend or just calculate and return its size
-   
    # which positions need multiple columns
    onecolpos = c('topright', 'topleft', 'bottomright', 'bottomleft')
    multcolpos = c('top', 'bottom')
@@ -392,19 +436,27 @@ mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, bty = 'o',
           ncol = ncol)   
 }
 
+
+#' Plot labels
+#' Shows labels for data elements (points, bars) on a plot. 
+#'
+#' @param data
+#' data matrix with coordinates of the points (x, y) 
+#' @param pos
+#' position of the labels relative to the points
+#' @param cex
+#' size of the labels text
+#' @param col
+#' color of the labels text
+#' @param type
+#' type of the plot
+#'
+#' @details
+#' Rownames of matrix \code{data} are used as labels. If matrix has no rownames, row numbers
+#' will be used instead.
+#'
 mdaplot.showLabels = function(data, pos = 3, cex = 0.65, col = 'darkgray', type = NULL)
 {
-   # Shows labels for data points on a plot. 
-   #
-   # Arguments:
-   #   data: data matrix with coordinates of the points (x, y) 
-   #   pos: position of the labels relative to the points
-   #   cex: size of the labels text
-   #   col: color of the labels text
-   #   type: type of the plot
-   
-   # rownames of matrix data are used as labels
-   # if no rownames provided, row names are used instead
 
    if (is.null(rownames(data)))
       rownames(data) = 1:nrow(data)
@@ -424,18 +476,26 @@ mdaplot.showLabels = function(data, pos = 3, cex = 0.65, col = 'darkgray', type 
    
 }  
 
+
+#' Plot lines
+#' 
+#' @description
+#' Shows horisontal and vertical lines on a plot. 
+#'
+#' @param point
+#' vector with two values: x coordinate for vertical point y for horizontal
+#' @param lty
+#' line type
+#' @param lwd
+#' line width
+#' @param col
+#' color of lines
+#'
+#' @details
+#'  If it is needed to show only one line, the other coordinate shall be set to NA.
+#'
 mdaplot.showLines = function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2))
 {
-   # Shows horisontal and vertical lines on a plot. 
-   #
-   # Arguments:
-   #   point: vector with two values: x coordinate for vertical point y for horizontal
-   #   lty: line type
-   #   lwd: line width
-   #   col: color of lines
-   #   
-   #  If it is needed to show only one line, the other coordinate shall be set to NA
-   #
    
    if (!is.na(point[2]))
       abline(h = point[2], lty = lty, lwd = lwd, col = col)
@@ -443,16 +503,24 @@ mdaplot.showLines = function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2
       abline(v = point[1], lty = lty, lwd = lwd, col = col)
 }  
 
+#' Regression line for data points
+#' 
+#' @description
+#' Shows linear fit line for data points.
+#' 
+#' @param data
+#' data values
+#' @param lty
+#' line type
+#' @param lwd
+#' line width
+#' @param colmap
+#' color map 
+#' @param col
+#' color of lines
+#' 
 mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default', col = NULL)
-{
-   # Shows horisontal and vertical lines on a plot. 
-   #
-   # Arguments:
-   #   lty: line type
-   #   lwd: line width
-   #   col: color of lines
-   #      #
-   
+{   
    if (is.list(data))
    {   
       ngroups = length(data)
@@ -481,6 +549,20 @@ mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default'
    }   
 }
 
+#' Show bars on axes
+#' 
+#' @description
+#' Shows bars (bar plot) on predefined axes
+#' 
+#' @param x
+#' vector with x values (centers of bars)
+#' @param y
+#' vector with y values (height of bars)
+#' @param col
+#' colors of the bars
+#' @param bwd
+#' width of the bars (as a ratio for max width)
+#' 
 bars = function(x, y, col = NULL, bwd = 0.8)
 {
    # Show bars on a plot area
@@ -497,21 +579,62 @@ bars = function(x, y, col = NULL, bwd = 0.8)
    }
 }  
 
+#' Show error bars on a plot
+#' 
+#' @description
+#' Shows error bars (errorbar plot) on predefined axes
+#' 
+#' @param x
+#' vector with x values
+#' @param lower
+#' vector with lower limits for the bars
+#' @param upper
+#' vector with upper limits for the bars
+#' @param y
+#' vector with y values (bid points)
+#' @param col
+#' color for the error bars
+#' @param pch
+#' marker symbol for the plot
+#' 
+errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16)
+{
+   e2 = (max(x) - min(x)) / 50
+   e1 = (max(x) - min(x)) / (length(x) * 5)
+   e = min(e1, e2)
+   
+   segments(x, lower, x, upper, col = col)
+   segments(x - e, lower, x + e, lower, col = col)
+   segments(x - e, upper, x + e, upper, col = col)
+   
+   if (!is.null(y))
+      points(x, y, col = col, pch = pch)
+}  
+
+#' Create axes plane
+#' 
+#' @description
+#' Creates an empty axes plane for given parameters
+#' 
+#' @param xticks
+#' tick values for x axis
+#' @param xticklabels
+#' labels for x ticks
+#' @param yticks
+#' tick values for y axis
+#' @param yticklabels
+#' labels for y ticks
+#' @param lim
+#' vector with limits for x and y axis
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' 
 mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
 {
-   # Create an empty axes plane for given parameters
-   #
-   # Arguments:
-   #   xticks: tick values for x axis
-   #   xticklabels: labels for x axis corresponding to x tick values
-   #   yticks: tick values for y axis
-   #   yticklabels: labels for y axis corresponding to y tick values
-   #   lim: vector with limits for x and y axes
-   #   main: main title for the plot
-   #   xlab: label for x axis
-   #   ylab: label for y axis
-   #
-  
    if ((!is.null(xticklabels) || !is.null(xticks)) && (!is.null(yticklabels) || !is.null(yticks)))
    {
       # tick labels for both x and y axes are provided
@@ -557,8 +680,8 @@ mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main,
 
 mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8,
                    cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
-                   main = NULL, xlab = NULL, ylab = NULL, single.x = T, show.labels = F, show.colorbar = T, 
-                   show.lines = F, show.grid = T, show.axes = T, 
+                   main = NULL, xlab = NULL, ylab = NULL, single.x = T, show.labels = F, 
+                   show.colorbar = T, show.lines = F, show.grid = T, show.axes = T, 
                    xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, ...)
 {   
    # Makes a plot for one series of data (scatter, line, scatterline, or bar).
@@ -661,7 +784,17 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
    }
    
    # get x and y values from data
-   if (single.x == T)
+   if (type == 'e')
+   {
+      if (ncol(data) != 4)
+         stop('Number of columns in data for errorbar plot should be equal to four!')   
+      
+      x = data[, 1, drop = F]
+      y = data[, 2, drop = F]      
+      lower = data[, 3, drop = F]      
+      upper = data[, 4, drop = F]      
+   }   
+   else if (single.x == T)
    {   
       x = data[, 1, drop = F]
       y = data[, 2:ncol(data), drop = F]
@@ -687,9 +820,11 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
       matlines(x, y, type = type, col = col, pch = pch, lty = lty, ...)
    else if (type == 'h')
       bars(x, y, col = col, bwd = bwd)
+   else if (type == 'e')
+      errorbars(x, lower, upper, y, col = col)
    
    # show labels if needed
-   if (show.labels == T || !is.null(labels))
+   if ((show.labels == T || !is.null(labels)) && type != 'e')
       mdaplot.showLabels(data, type = type)   
    
    # show lines if needed
@@ -702,8 +837,8 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 }
 
 mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
-                    legend = NULL, xlab = NA, ylab = NA, labels = NULL, ylim = NULL, xlim = NULL,
-                    main = NULL, colmap = 'default', legend.position = 'topright', single.x = T, 
+                    legend = NULL, xlab = NA, ylab = NA, main = NULL, labels = NULL, 
+                    ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', single.x = T, 
                     show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, ...)
 {   
@@ -747,7 +882,7 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    {   
       ngroups = length(data)
    }
-   
+
    if (is.null(xticks) && !is.null(xticklabels))
       xticks = 1:length(xticklabels)
    

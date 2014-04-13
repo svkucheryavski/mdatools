@@ -10,7 +10,7 @@ Principal Component Analysis
 }
 
 \usage{
-pca(x, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL, 
+pca(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
    alpha = 0.05, method = 'svd', info = '')
 }
 
@@ -20,7 +20,7 @@ pca(x, ncomp = 20, center = T, scale = F, cv = NULL, test.data = NULL,
   \item{center}{logical, do mean centering of data or not.}
   \item{scale}{logical, do sdandardization of data or not.}
   \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
-  \item{test.data}{a numerical matrix with test data.}
+  \item{x.test}{a numerical matrix with test data.}
   \item{alpha}{significance level for calculating limit for Q2 residuals.}
   \item{method}{method to compute principal components.}
   \item{info}{a short text line with model description.}
@@ -51,10 +51,6 @@ Returns an object of \code{pca} class with following fields:
 \item{cvres }{an object of class \code{\link{pcares}} with PCA results for cross-validation, if this option was chosen.} 
 }
 
-\references{
-%% ~put references to the literature/web site here ~
-}
-
 \author{
 Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }
@@ -82,32 +78,46 @@ Other methods implemented in \code{pca}:
        }
 }
 \examples{
-## makes a PCA for People data with autoscaling and full cross-validation ##
+### Examples for PCA class
+
+## 1. Make PCA model for People data with autoscaling
+## and full cross-validation
 
 library(mdatools)
 
-data(People)
-model = pca(people, cv = 1, center = T, scale = T, info = 'Simple PCA model')
-model = selectCompNum(model, 5)
+data(people)
+model = pca(people, scale = TRUE, cv = 1, info = 'Simple PCA model')
+model = selectCompNum(model, 4)
 summary(model)
-plot(model, show.labels = T)
+plot(model, show.labels = TRUE)
 
-## add some missing values, make a new model and compare score plots
+## 2. Add missing values, make a new model and show plots
 peoplemv = people
 peoplemv[2, 7] = NA
 peoplemv[6, 2] = NA
 peoplemv[10, 4] = NA
 peoplemv[22, 12] = NA
 
-modelmv = pca(peoplemv, center = T, scale = T, info = 'Model with missing values')
-par(mfrow = c(1, 2))
-plotScores(model, show.labels = T)
-plotScores(modelmv, show.labels = T)
+modelmv = pca(peoplemv, scale = TRUE, info = 'Model with missing values')
+modelmv = selectCompNum(modelmv, 4)
+summary(modelmv)
+plot(modelmv, show.labels = TRUE)
+
+## 3. Show scores and loadings plots for the model
+par(mfrow = c(2, 2))
+plotScores(model, comp = c(1, 3), show.labels = TRUE)
+plotScores(model, comp = 2, type = 'h', show.labels = TRUE)
+plotLoadings(model, comp = c(1, 3), show.labels = TRUE)
+plotLoadings(model, comp = c(1, 2), type = 'h', show.labels = TRUE)
 par(mfrow = c(1, 1))
 
-## show scores plot for calibration set with coloring points
-plotScores(model$calres, comp = c(1, 3), cgroup = people[, 'Income'],
-            show.labels = T, show.axes = F)
+## 4. Show residuals and variance plots for the model
+par(mfrow = c(2, 2))
+plotVariance(model, type = 'h')
+plotCumVariance(model, show.labels = TRUE, legend.position = 'bottomright')
+plotResiduals(model, show.labels = TRUE)
+plotResiduals(model, ncomp = 2, show.labels = TRUE)
+par(mfrow = c(1, 1))
 
 }
 

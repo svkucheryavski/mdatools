@@ -1,0 +1,31 @@
+\name{pls.cal}
+\alias{pls.cal}
+\title{PLS model calibration}
+\usage{
+pls.cal(x, y, ncomp, center, scale, method = "simpls", cv = FALSE)
+}
+\arguments{
+  \item{x}{a matrix with x values (predictors)}
+
+  \item{y}{a matrix with y values (responses)}
+
+  \item{ncomp}{number of components to calculate}
+
+  \item{center}{logical, do mean centering or not}
+
+  \item{scale}{logical, do standardization or not}
+
+  \item{method}{algorithm for compiting PC space (only
+  'simpls' is supported so far)}
+
+  \item{cv}{logical, does calibration for cross-validation
+  or not}
+}
+\value{
+model an object with calibrated PLS model
+}
+\description{
+Calibrates (builds) a PLS model for given data and
+parameters
+}
+

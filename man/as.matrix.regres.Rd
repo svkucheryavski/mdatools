@@ -1,0 +1,23 @@
+\name{as.matrix.regres}
+\alias{as.matrix.regres}
+\title{as.matrix method for regression results}
+\usage{
+\method{as.matrix}{regres}(x, ncomp = NULL, ny = 1, ...)
+}
+\arguments{
+  \item{x}{regression results (object of class
+  \code{regres})}
+
+  \item{ncomp}{model complexity (number of components) to
+  calculate the statistics for}
+
+  \item{ny}{for which response variable calculate the
+  statistics for}
+
+  \item{...}{other arguments}
+}
+\description{
+Returns a matrix with model performance statistics for
+regression results
+}
+

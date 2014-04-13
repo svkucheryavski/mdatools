@@ -1,0 +1,19 @@
+\name{summary.plsdares}
+\alias{summary.plsdares}
+\title{Summary method for PLS-DA results object}
+\usage{
+\method{summary}{plsdares}(object, nc = NULL, ...)
+}
+\arguments{
+  \item{object}{PLS-DA results (object of class
+  \code{plsdares})}
+
+  \item{nc}{which class to show the summary for (if NULL,
+  will be shown for all)}
+
+  \item{...}{other arguments}
+}
+\description{
+Shows performance statistics for the results.
+}
+

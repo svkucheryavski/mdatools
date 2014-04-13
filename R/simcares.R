@@ -1,6 +1,6 @@
 ## class and methods for SIMCA classification results ##
 
-simcares = function(pres, cres, ...)
+simcares = function(pres, cres)
 {
    # Creates an object of simcares class. 
    #
@@ -15,6 +15,33 @@ simcares = function(pres, cres, ...)
    res
 }   
 
+#' Residuals plot for SIMCA results
+#' 
+#' @description
+#' Shows a plot with Q2 vs. T2 residuals for SIMCA results
+#' 
+#' @param obj
+#' SIMCA results (object of class \code{simcares})
+#' @param ncomp
+#' which principal components to show the plot for
+#' @param show.limits
+#' logical, show or not lines with statistical limits for the residuals
+#' @param type
+#' type of the plot
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param legend
+#' vector with legend items
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#' 
+#' @details
+#' See examples in help for \code{\link{simcares}} function.
+#' 
 plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p', main = NULL, 
                                   xlab = 'T2', ylab = 'Q2', legend = NULL, ...)
 {
@@ -94,24 +121,25 @@ plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p'
    }   
 }
 
-plotPerformance.simcares = function(obj, ...)
-{
-   plotPerformance.classres(obj, xlab = 'Components', ...)   
-}  
 
-print.simcares = function(obj)
-{   
-   # Print information on simcares object
-   
-   cat('Result for SIMCA one-class classification (class simcares)\n')
-   print.ldecomp(obj, '')
-   print.classres(obj, '')
-   cat('\n')
-}
-
-summary.simcares = function(obj)
+#' Summary method for SIMCA results object
+#' 
+#' @method summary simcares
+#' @S3method summary simcares
+#'
+#' @description
+#' Shows performance statistics for the results.
+#' 
+#' @param object
+#' SIMCA results (object of class \code{simcares})
+#' @param ...
+#' other arguments
+#' 
+summary.simcares = function(object, ...)
 {
    # Show summary for simcares object
+   
+   obj = object
    
    cat('\nSummary for SIMCA one-class classification result\n')
    cat(sprintf('\nClass name: %s\n', obj$classname))
@@ -121,3 +149,28 @@ summary.simcares = function(obj)
    calres = as.matrix.classres(obj)    
    print(cbind(round(pcares, 2), calres))
 }
+
+#' Print method for SIMCA results object
+#' 
+#' @method print simcares
+#' @S3method print simcares
+#' 
+#' @description
+#' Prints information about the object structure
+#' 
+#' @param x
+#' SIMCA results (object of class \code{simcares})
+#' @param ...
+#' other arguments
+#' 
+print.simcares = function(x, ...)
+{   
+   # Print information on simcares object
+   obj = x
+   
+   cat('Result for SIMCA one-class classification (class simcares)\n')
+   print.ldecomp(obj, '')
+   print.classres(obj, '')
+   cat('\n')
+}
+

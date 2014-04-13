@@ -1,31 +1,38 @@
 \name{plotCooman.simcamres}
 \alias{plotCooman.simcamres}
-
-\title{
-Cooman's plot for SIMCA multiclass classification results
-}
-
-\description{
-\code{plotCooman.simcamres} is used to show Cooman's plot for SIMCA multiclass classification results for two classes. 
-}
-
+\title{Cooman's plot for SIMCAM results}
 \usage{
-plotCooman(obj, nc = c(1, 2), ...)
+\method{plotCooman}{simcamres}(obj, nc = c(1, 2), type = "p",
+  main = "Cooman's plot", xlab = NULL, ylab = NULL, show.limits = T,
+  legend = NULL, ...)
 }
-
 \arguments{
-  \item{obj}{an object of class \code{simcamres} (SIMCA mutliclass classification results).}
-  \item{nc}{number of individual models (classes) to make the plot for.}
-  \item{\dots}{most of \code{\link{mdaplotg}} parameters can be used.}
-}
+  \item{obj}{SIMCAM results (object of class
+  \code{simcamres})}
 
+  \item{nc}{vector with two values - classes (SIMCA models)
+  to show the plot for}
+
+  \item{type}{type of the plot}
+
+  \item{main}{main plot title}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{show.limits}{logical, show or not lines with
+  statistical limits for the residuals}
+
+  \item{legend}{vector with legend items}
+
+  \item{...}{other plot parameters (see \code{mdaplotg} for
+  details)}
+}
+\description{
+Shows a Cooman's plot for a pair of SIMCA models
+}
 \details{
-See examples for \code{\link{simcamres}} class.
+See examples in help for \code{\link{simcamres}} function.
 }
 
-\seealso{
-\code{\link{simcam}} to make SIMCAM model, \code{\link{simcamres}} to store and explore SIMCA multiclass classification results.
-}
-
-\examples{
-}

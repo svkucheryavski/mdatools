@@ -1,0 +1,16 @@
+\name{regres.bias}
+\alias{regres.bias}
+\title{Prediction bias}
+\usage{
+regres.bias(y.ref, y.pred)
+}
+\arguments{
+  \item{y.ref}{vector with reference values}
+
+  \item{y.pred}{matrix with predicted values}
+}
+\description{
+Calculates matrix with bias (average prediction error) for
+every response and components
+}
+

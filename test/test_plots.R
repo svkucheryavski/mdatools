@@ -1,8 +1,8 @@
 library(mdatools)
-data(Simdata)
+data(simdata)
 
-spectra = spectra.c
-conc = conc.c
+spectra = simdata$spectra.c
+conc = simdata$conc.c
 wavelength = 201:350
 
 spectra1 = spectra[conc[, 1] < 0.3, ]

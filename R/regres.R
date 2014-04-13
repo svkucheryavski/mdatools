@@ -1,23 +1,31 @@
+#' Regression results
+#' 
+#' @description
+#' Class for storing and visualisation of regression predictions 
+#'
+#' @param y.pred
+#' vector or matrix with y predicted values
+#' @param y.ref
+#' vector with reference (measured) y values
+#' @param ncomp.selected
+#' if y.pred calculated for different components, which to use as default
+#' 
+#' @return
+#' a list (object of \code{regres} class) with fields, including:
+#' \tabular{ll}{
+#'    \code{y.pred} \tab a matrix with predicted values \cr
+#'    \code{y.pred} \tab a matrix with predicted values \cr
+#'    \code{y.ref} \tab a vector with reference (measured) values \cr
+#'    \code{ncomp.selected} \tab selected column/number of components for predictions \cr
+#'    \code{rmse} \tab root mean squared error for predicted vs measured values \cr
+#'    \code{slope} \tab slope for predicted vs measured values \cr
+#'    \code{r2} \tab coefficient of determination for predicted vs measured values \cr
+#'    \code{bias} \tab bias for predicted vs measured values \cr
+#'    \code{rpd} \tab RPD values \cr
+#' }
+#' 
 regres = function(y.pred, y.ref = NULL, ncomp.selected = 1)
-{
-   # Class for storing and visualising of regression predictions 
-   #
-   # Arguments:
-   #   y.pred: vector or matrix with y predicted values
-   #   y.ref: vector with reference (measured) y values
-   #   ncomp.selected: if y.pred calculated for different components, which to use as default
-   #
-   # Returns:
-   # a list (object of "regres" class) with following fields
-   #   y.pred: a matrix with predicted values
-   #   y.ref: a vector with reference (measured) values
-   #   ncomp.selected: selected column/number of components for predictions
-   #   rmse: root mean squared error for predicted vs measured values
-   #   slope: slope for predicted vs measured values
-   #   r2: coefficient of determination for predicted vs measured values
-   #   bias: bias for predicted vs measured values
-   #   rpd: RPD values
-   
+{   
    obj = list()
    obj$y.pred = y.pred
    obj$ncomp.selected = ncomp.selected
@@ -40,17 +48,18 @@ regres = function(y.pred, y.ref = NULL, ncomp.selected = 1)
    obj
 }
 
+#' Determination coefficient
+#' 
+#' @description
+#' Calculates matrix with coeffient of determination for every response and components 
+#'
+#' @param y.ref
+#' vector with reference values
+#' @param y.pred
+#' matrix with predicted values
+#'
 regres.r2 = function(y.ref, y.pred)
 {
-   # Calculates determination coefficients (R2) 
-   #
-   # Arguments:
-   #   y.ref: vector with reference values
-   #   y.pred: matrix with predicted values
-   #
-   # Returns:
-   #   r2: matrix with R2 values for each component and response variable
-   
    nresp = ncol(y.ref)
    ncomp = ncol(y.pred)
    r2 = matrix(0, nrow = nresp, ncol = ncomp)
@@ -64,17 +73,18 @@ regres.r2 = function(y.ref, y.pred)
    r2
 }  
 
+#' Prediction bias 
+#' 
+#' @description
+#' Calculates matrix with bias (average prediction error) for every response and components 
+#'
+#' @param y.ref
+#' vector with reference values
+#' @param y.pred
+#' matrix with predicted values
+#'
 regres.bias = function(y.ref, y.pred)
 {
-   # Calculates bias (average prediction error) 
-   #
-   # Arguments:
-   #   y.ref: vector with reference values
-   #   y.pred: matrix with predicted values
-   #
-   # Returns:
-   #   bias: matrix with bias values for each component and response variable
-   
    nresp = ncol(y.ref)
    ncomp = ncol(y.pred)
    bias = matrix(0, nrow = nresp, ncol = ncomp)
@@ -88,17 +98,18 @@ regres.bias = function(y.ref, y.pred)
    bias
 }  
 
+#' RMSE
+#' 
+#' @description
+#' Calculates matrix with root mean squared error of prediction for every response and components.
+#'
+#' @param y.ref
+#' vector with reference values
+#' @param y.pred
+#' matrix with predicted values
+#'
 regres.rmse = function(y.ref, y.pred)
 {
-   # Calculates root mean squared error 
-   #
-   # Arguments:
-   #   y.ref: vector with reference values
-   #   y.pred: matrix with predicted values
-   #
-   # Returns:
-   #   rmse: matrix with RMSE values for each component and response variable
-   
    nresp = ncol(y.ref)
    ncomp = ncol(y.pred)
    rmse = matrix(0, nrow = nresp, ncol = ncomp)
@@ -112,17 +123,18 @@ regres.rmse = function(y.ref, y.pred)
    rmse
 } 
 
+#' Slope 
+#' 
+#' @description
+#' Calculates matrix with slope of predicted and measured values for every response and components.
+#'
+#' @param y.ref
+#' vector with reference values
+#' @param y.pred
+#' matrix with predicted values
+#'
 regres.slope = function(y.ref, y.pred)
 {
-   # Calculates a slope for predicted vs. measured valus 
-   #
-   # Arguments:
-   #   y.ref: vector with reference values
-   #   y.pred: matrix with predicted values
-   #
-   # Returns:
-   #   slope: matrix with slope values for each component and response variable
-   
    nresp = ncol(y.ref)
    ncomp = ncol(y.pred)
    slope = matrix(0, nrow = nresp, ncol = ncomp)
@@ -142,19 +154,29 @@ regres.slope = function(y.ref, y.pred)
    slope
 }   
 
+#' RMSE plot for regression results
+#' 
+#' @description
+#' Shows plot with RMSE values vs. model complexity (e.g. number of components).
+#'
+#' @param obj
+#' regression results (object of class \code{regres})
+#' @param ny
+#' number of predictor to show the plot for (if y is multivariate)
+#' @param type
+#' type of the plot
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
 plotRMSE.regres = function(obj, ny = 1, type = 'b', main = 'RMSE', 
                            xlab = 'Complexity', ylab = NULL, ...)
 {
-   # Makes plot with RMSE values for each column of y.pred 
-   #
-   # Arguments:
-   #   obj: object of "regres" class
-   #   ny: number of response variable y to make the plot for
-   #   type: type of the plot 
-   #   main: main title for the plot
-   #   xlab: text for x axis label
-   #   ylab: text for y axis label
-   
    if (!is.null(obj$rmse))
    {   
       if (is.null(ylab))
@@ -174,24 +196,40 @@ plotRMSE.regres = function(obj, ny = 1, type = 'b', main = 'RMSE',
    }   
 }
 
+#' Predictions plot for regression results
+#' 
+#' @description
+#' Shows plot with predicted y values.
+#'
+#' @param obj
+#' regression results (object of class \code{regres})
+#' @param ny
+#' number of predictor to show the plot for (if y is multivariate)
+#' @param ncomp
+#' complexity of model (e.g. number of components) to show the plot for
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.line
+#' logical, show or not line fit for the plot points
+#' @param colmap
+#' a colormap to use for coloring the plot items
+#' @param col
+#' a vector with color values for plot items
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' If reference values are available, the function shows a scatter plot with predicted vs. 
+#' reference values, otherwise predicted values are shown vs. object numbers.
+#' 
 plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, main = 'Predictions', 
                                   xlab = NULL, ylab = NULL, 
                                   show.line = T, colmap = 'default', col = NULL, ...)
 {
-   # Makes plot with predicted vs. measured values or predicted values vs. object number 
-   # for selected column of y.pred 
-   #
-   # Arguments:
-   #   obj: object of "regres" class
-   #   ny: number of response variable y to make the plot for
-   #   ncomp: which column of y.pred to use
-   #   main: main title of the plot
-   #   xlab: text for x axis label
-   #   ylab: text for y axis label
-   #   show.line: logical, show or not target for the points
-   #   colmap: colormap for plot and target line
-   #   col: color for plot and target line
-   
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
    
@@ -228,21 +266,34 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, main = 'Predictions
    }
 }
 
-plotYResiduals.regres = function(obj, ny = 1, ncomp = NULL, main = NULL, type = 'p',
-                                 xlab = 'Objects', ylab = NULL, show.lines = T, ...)
+#' Residuals plot for regression results
+#'
+#' @description
+#' Shows plot with Y residuals (difference between predicted and reference values) for selected 
+#' response variable and complexity (number of components). 
+#'
+#' @param obj
+#' regression results (object of class \code{regres})
+#' @param ny
+#' number of predictor to show the plot for (if y is multivariate)
+#' @param ncomp
+#' complexity of model (e.g. number of components) to show the plot for
+#' @param type
+#' type of the plot
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param show.line
+#' logical, show or zero line on the plot
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#' 
+plotYResiduals.regres = function(obj, ny = 1, ncomp = NULL, type = 'p', main = NULL,
+                                 xlab = 'Objects', ylab = NULL, show.line = T, ...)
 {
-   # Makes plot with Y residuals (difference between predicted and reference values) 
-   # for selected column of y.pred 
-   #
-   # Arguments:
-   #   obj: object of "regres" class
-   #   ny: number of response variable y to make the plot for   
-   #   ncomp: which column of y.pred to use
-   #   main: main title of the plot
-   #   xlab: text for x axis label
-   #   ylab: text for y axis label   
-   #   show.lines: logical, show or not zero line
-   
    if (is.null(obj$y.ref))
    {   
       warning('Y residuals can not be plotted without reference values.')
@@ -254,8 +305,8 @@ plotYResiduals.regres = function(obj, ny = 1, ncomp = NULL, main = NULL, type = 
       else if (ncomp < 1 || ncomp > ncol(obj$y.pred))
          stop('Wrong number of components!')
       
-      if (show.lines == T)
-         show.lines = c(NA, 0)
+      if (show.line == T)
+         show.line = c(NA, 0)
       
       if (is.null(main))
       {   
@@ -274,29 +325,50 @@ plotYResiduals.regres = function(obj, ny = 1, ncomp = NULL, main = NULL, type = 
       }
       data = cbind(1:nrow(obj$y.pred[, , ny]), obj$y.ref[, ny] - obj$y.pred[, ncomp, ny, drop = F])
       colnames(data) = c(xlab, ylab)
-      mdaplot(data, type = type, main = main, show.lines = show.lines, ...)
+      mdaplot(data, type = type, main = main, show.lines = show.line, ...)
    }
 }
 
-plot.regres = function(obj, ny = 1, ...)
+#' plot method for regression results
+#' 
+#' @details
+#' Shows prediction plot for the results (the same as \code{plotPredictions.regres})
+#' 
+#' @param x
+#' regression results (object of class \code{regres})
+#' @param ny
+#' which response to show the plot for (if y is multivariate)
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#' 
+plot.regres = function(x, ny = 1, ...)
 {
-   # Plot method for "regres" objects
-   #
-   # Arguments:
-   #   obj: object of "regres" class
-   #   ny: number of response variable y to make the plot for   
+   obj = x
    
    plotPredictions.regres(obj, ny = ny, ...)
 }   
 
-as.matrix.regres = function(obj, ncomp = NULL, ny = 1)
+#' as.matrix method for regression results
+#' 
+#' @method as.matrix regres
+#' @S3method as.matrix regres
+#'
+#' @description
+#' Returns a matrix with model performance statistics for regression results
+#' 
+#' @param x
+#' regression results (object of class \code{regres})
+#' @param ncomp
+#' model complexity (number of components) to calculate the statistics for
+#' @param ny
+#' for which response variable calculate the statistics for
+#' @param ...
+#' other arguments
+#' 
+as.matrix.regres = function(x, ncomp = NULL, ny = 1, ...)
 {
-   # as.matrix method for "regres" objects
-   #
-   # Arguments:
-   #   obj: object of "regres" class
-   #   ny: number of response variable y to make the plot for   
-
+   obj = x
+   
    if (!is.null(obj$y.ref))
    {  
       if (is.null(ncomp))
@@ -315,39 +387,26 @@ as.matrix.regres = function(obj, ncomp = NULL, ny = 1)
    res
 }
 
-print.regres = function(obj, ...)
+#' summary method for regression results object
+#' 
+#' @method summary regres
+#' @S3method summary regres
+#'
+#' @description
+#' Shows performance statistics for the regression results.
+#' 
+#' @param object
+#' regression results (object of class \code{regres})
+#' @param ncomp
+#' model complexity to show the summary for
+#' @param ny
+#' for which response variable show the summary for
+#' @param ...
+#' other arguments
+#' 
+summary.regres = function(object, ncomp = NULL, ny = NULL, ...)
 {
-   # Print method for "regres" object
-   #
-   # Arguments:
-   #   obj: object of "regres" class
-   
-   cat('\nRegression results (class regres)\n')
-   cat('\nCall:\n')
-   print(obj$call)
-   
-   cat('\nMajor fields:\n')   
-   cat('$y.pred - matrix or vector with predicted y values\n')
-   if (!is.null(obj$y.ref))
-   {   
-      cat('$y.ref - vector with reference y values\n')
-      cat('$rmse - root mean squared error\n')
-      cat('$r2 - coefficient of determination\n')
-      cat('$slope - slope for predicted vs. measured values\n')
-      cat('$bias - bias for prediction vs. measured values\n')
-   }
-   
-   if (ncol(obj$y.pred) > 1)   
-      cat('$ncomp.selected - number of selected components for PCR or PLS\n')
-}   
-
-summary.regres = function(obj, ncomp = NULL, ny = NULL, ...)
-{
-   # Summary method for "regres" object
-   #
-   # Arguments:
-   #   obj: object of "regres" class
-   #   ncomp: which column of y.pred to use
+   obj = object
    
    cat('\nRegression results (class regres) summary\n')
    if (!is.null(obj$y.ref))
@@ -375,3 +434,40 @@ summary.regres = function(obj, ncomp = NULL, ny = NULL, ...)
       cat('No reference data provided to calculate prediction performance.')
    }   
 }   
+
+#' print method for regression results object
+#' 
+#' @method print regres
+#' @S3method print regres
+#ø
+#' @description
+#' Prints information about the object structure
+#' 
+#' @param x
+#' regression results (object of class \code{regres})
+#' @param ...
+#' other arguments
+#' 
+print.regres = function(x, ...)
+{
+   obj = x
+   
+   cat('\nRegression results (class regres)\n')
+   cat('\nCall:\n')
+   print(obj$call)
+   
+   cat('\nMajor fields:\n')   
+   cat('$y.pred - matrix or vector with predicted y values\n')
+   if (!is.null(obj$y.ref))
+   {   
+      cat('$y.ref - vector with reference y values\n')
+      cat('$rmse - root mean squared error\n')
+      cat('$r2 - coefficient of determination\n')
+      cat('$slope - slope for predicted vs. measured values\n')
+      cat('$bias - bias for prediction vs. measured values\n')
+   }
+   
+   if (ncol(obj$y.pred) > 1)   
+      cat('$ncomp.selected - number of selected components for PCR or PLS\n')
+}   
+

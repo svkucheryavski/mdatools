@@ -1,0 +1,24 @@
+\name{plot.regres}
+\alias{plot.regres}
+\title{plot method for regression results}
+\usage{
+\method{plot}{regres}(x, ny = 1, ...)
+}
+\arguments{
+  \item{x}{regression results (object of class
+  \code{regres})}
+
+  \item{ny}{which response to show the plot for (if y is
+  multivariate)}
+
+  \item{...}{other plot parameters (see \code{mdaplot} for
+  details)}
+}
+\description{
+plot method for regression results
+}
+\details{
+Shows prediction plot for the results (the same as
+\code{plotPredictions.regres})
+}
+

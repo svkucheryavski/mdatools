@@ -1,0 +1,30 @@
+\name{plotRMSE.regres}
+\alias{plotRMSE.regres}
+\title{RMSE plot for regression results}
+\usage{
+\method{plotRMSE}{regres}(obj, ny = 1, type = "b", main = "RMSE",
+  xlab = "Complexity", ylab = NULL, ...)
+}
+\arguments{
+  \item{obj}{regression results (object of class
+  \code{regres})}
+
+  \item{ny}{number of predictor to show the plot for (if y
+  is multivariate)}
+
+  \item{type}{type of the plot}
+
+  \item{main}{main title for the plot}
+
+  \item{xlab}{label for x axis}
+
+  \item{ylab}{label for y axis}
+
+  \item{...}{other plot parameters (see \code{mdaplot} for
+  details)}
+}
+\description{
+Shows plot with RMSE values vs. model complexity (e.g.
+number of components).
+}
+

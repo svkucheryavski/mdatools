@@ -4,6 +4,7 @@
 \title{
 Package for Multivariate Data Analysis (Chemometrics)
 }
+
 \description{
 This package contains classes and functions for most common methods used in Chemometrics. For a complete list of functions, use \code{library(help = 'mdatools')}. 
 }
@@ -27,10 +28,12 @@ Methods for data preprocessing:
       \code{\link{prep.autoscale}} \tab data mean centering and/or standardization.\cr
       \code{\link{prep.savgol}} \tab Savitzky-Golay transformation.\cr
       \code{\link{prep.snv}} \tab Standard normal variate.\cr
+      \code{\link{prep.msc}} \tab Multiplicative scatter correction.\cr
 }
 
 All plotting methods are based on two functions, \code{\link{mdaplot}} and \code{\link{mdaplotg}}. The functions extend the basic functionality of R plots and allow to make automatic legend and color grouping of data points or lines with colorbar legend, automatically adjust axes limits when several data groups are plotted and so on. 
 }
 
 \author{
+Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }

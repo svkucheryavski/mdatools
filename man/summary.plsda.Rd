@@ -1,0 +1,22 @@
+\name{summary.plsda}
+\alias{summary.plsda}
+\title{Summary method for PLS-DA model object}
+\usage{
+\method{summary}{plsda}(object, ncomp = NULL, nc = NULL, ...)
+}
+\arguments{
+  \item{object}{a PLS-DA model (object of class
+  \code{plsda})}
+
+  \item{ncomp}{how many components to use (if NULL - user
+  selected optimal value will be used)}
+
+  \item{nc}{which class to show the summary for (if NULL,
+  will be shown for all)}
+
+  \item{...}{other arguments}
+}
+\description{
+Shows some statistics for the model.
+}
+
