@@ -2,7 +2,7 @@
 \alias{summary.pls}
 \title{Summary method for PLS model object}
 \usage{
-summary.pls(object, ncomp = NULL, ny = NULL, ...)
+\method{summary}{pls}(object, ncomp = NULL, ny = NULL, ...)
 }
 \arguments{
   \item{object}{a PLS model (object of class \code{pls})}

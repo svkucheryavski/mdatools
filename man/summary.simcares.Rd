@@ -2,7 +2,7 @@
 \alias{summary.simcares}
 \title{Summary method for SIMCA results object}
 \usage{
-summary.simcares(object, ...)
+\method{summary}{simcares}(object, ...)
 }
 \arguments{
   \item{object}{SIMCA results (object of class

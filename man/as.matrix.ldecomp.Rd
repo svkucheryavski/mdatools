@@ -1,8 +1,8 @@
 \name{as.matrix.ldecomp}
 \alias{as.matrix.ldecomp}
-\title{Converts ldecomp object to a matrix}
+\title{as.matrix method for ldecomp object}
 \usage{
-as.matrix.ldecomp(x, ...)
+\method{as.matrix}{ldecomp}(x, ...)
 }
 \arguments{
   \item{x}{object of class \code{ldecomp}}

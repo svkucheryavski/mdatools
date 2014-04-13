@@ -1,6 +1,6 @@
 ## class and methods for SIMCA classification ##
 
-simca = function(x, classname, ncomp = 20, center = T, scale = F, cv = NULL, x.test = NULL, 
+simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
                  c.test = NULL, alpha = 0.05, method = 'svd', info = '')
 {
    # Calibrate and validate a SIMCA classification model for one class
@@ -238,34 +238,6 @@ simca.crossval = function(model, x, cv, center = T, scale = F)
    res
 }  
 
-#' Get selected components
-#' 
-#' @description
-#' returns number of components depending on a user choice
-#' 
-#' @param obj
-#' a SIMCA model (object of class \code{simca})
-#' @param ncomp
-#' number of components to select, provided by user
-#' 
-#' @details
-#' Depedning on a user choice it returns optimal number of component for the model (if 
-#' use did not provide any value) or check the user choice for correctness and returns
-#' it back
-#'  
-getSelectedComponents.simca = function(obj, ncomp = NULL)
-{
-   if (is.null(ncomp))
-   {   
-      if (is.null(obj$ncomp.selected))
-         ncomp = 1
-      else
-         ncomp = obj$ncomp.selected
-   }   
-
-   ncomp
-}
-
 #' Modelling power plot for SIMCA model
 #' 
 #' @description
@@ -343,6 +315,9 @@ plot.simca = function(x, ncomp = NULL, ...)
 
 #' Summary method for SIMCA model object
 #' 
+#' @method summary simca
+#' @S3method summary simca
+#'
 #' @description
 #' Shows performance statistics for the model.
 #' 
@@ -404,6 +379,9 @@ summary.simca = function(object, ...)
 
 #' Print method for SIMCA model object
 #' 
+#' @method print simca
+#' @S3method print simca
+#'
 #' @description
 #' Prints information about the object structure
 #' 

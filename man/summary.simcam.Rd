@@ -2,7 +2,7 @@
 \alias{summary.simcam}
 \title{Summary method for SIMCAM model object}
 \usage{
-summary.simcam(object, ...)
+\method{summary}{simcam}(object, ...)
 }
 \arguments{
   \item{object}{a SIMCAM model (object of class

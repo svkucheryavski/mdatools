@@ -2,7 +2,7 @@
 \alias{print.regcoeffs}
 \title{print method for regression coefficients class}
 \usage{
-print.regcoeffs(x, ncomp = 1, ny = 1, digits = 3, ...)
+\method{print}{regcoeffs}(x, ncomp = 1, ny = 1, digits = 3, ...)
 }
 \arguments{
   \item{x}{regression coefficients object (class

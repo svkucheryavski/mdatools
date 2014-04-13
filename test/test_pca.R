@@ -4,7 +4,7 @@ do_people = T
 
 if (do_people == T) 
 {
-   data(People)
+   data(people)
    data = people
    data[4, 4] = NA
    pcamodel = pca(data, ncomp = 8, scale = T, cv = 1, info = 'My first model')

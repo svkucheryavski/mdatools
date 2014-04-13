@@ -2,7 +2,7 @@
 \alias{summary.pcares}
 \title{Summary method for PCA results object}
 \usage{
-summary.pcares(object, ...)
+\method{summary}{pcares}(object, ...)
 }
 \arguments{
   \item{object}{PCA results (object of class

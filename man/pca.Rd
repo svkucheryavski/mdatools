@@ -10,7 +10,7 @@ Principal Component Analysis
 }
 
 \usage{
-pca(x, ncomp = 20, center = T, scale = F, cv = NULL, x.test = NULL, 
+pca(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
    alpha = 0.05, method = 'svd', info = '')
 }
 

@@ -2,7 +2,7 @@
 \alias{print.plsda}
 \title{Print method for PLS-DA model object}
 \usage{
-print.plsda(x, ...)
+\method{print}{plsda}(x, ...)
 }
 \arguments{
   \item{x}{a PLS-DA model (object of class \code{plsda})}

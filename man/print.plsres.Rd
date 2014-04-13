@@ -2,7 +2,7 @@
 \alias{print.plsres}
 \title{print method for PLS results object}
 \usage{
-print.plsres(x, ...)
+\method{print}{plsres}(x, ...)
 }
 \arguments{
   \item{x}{PLS results (object of class \code{plsres})}

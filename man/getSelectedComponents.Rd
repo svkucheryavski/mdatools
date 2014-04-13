@@ -5,17 +5,19 @@
 getSelectedComponents(obj, ncomp = NULL)
 }
 \arguments{
-  \item{obj}{a model object (e.g. PCA or PLS model)}
+  \item{obj}{an MDA model or result object (e.g.
+  \code{pca}, \code{pls}, \code{simca}, etc)}
 
-  \item{ncomp}{user selection of components}
+  \item{ncomp}{number of components to select, provided by
+  user}
 }
 \description{
-Service function for user selection of components
+returns number of components depending on a user choice
 }
 \details{
-the function is used with different plots, when user
-selection is expected. It returns optimal number if user
-did not specify the \code{ncomp} value and checks if the
-specified value is correct.
+Depedning on a user choice it returns optimal number of
+component for the model (if use did not provide any value)
+or check the user choice for correctness and returns it
+back
 }
 

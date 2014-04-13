@@ -2,7 +2,7 @@
 \alias{print.plsdares}
 \title{Print method for PLS-DA results object}
 \usage{
-print.plsdares(x, ...)
+\method{print}{plsdares}(x, ...)
 }
 \arguments{
   \item{x}{PLS-DA results (object of class

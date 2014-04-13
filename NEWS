@@ -1,8 +1,17 @@
+v. 0.5.1
+========
+* added more details to documentation
+* bug fixes for variable selection methods
+
 v. 0.5.0
 ========
 * all documentation has been rewritten using `roxygen2` package
-* the first release available in ?CRAN
-* bug fixes and improvements
+* added extra preprocessing methods
+* added VIP scores calculation and plot for PLS and PLS-DA models
+* addec Selectivity ratio calculation and plot for PLS and PLS-DA models
+* added calculation of confidence intervals for PLS regression coefficient using jack-knife
+* bug fixes and small improvements
+* the first release available in CRAN
 
 v. 0.4.0
 ========

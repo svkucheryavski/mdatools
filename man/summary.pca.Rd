@@ -2,7 +2,7 @@
 \alias{summary.pca}
 \title{Summary method for PCA model object}
 \usage{
-summary.pca(object, ...)
+\method{summary}{pca}(object, ...)
 }
 \arguments{
   \item{object}{a PCA model (object of class \code{pca})}

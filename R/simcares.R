@@ -124,6 +124,9 @@ plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p'
 
 #' Summary method for SIMCA results object
 #' 
+#' @method summary simcares
+#' @S3method summary simcares
+#'
 #' @description
 #' Shows performance statistics for the results.
 #' 
@@ -148,6 +151,9 @@ summary.simcares = function(object, ...)
 }
 
 #' Print method for SIMCA results object
+#' 
+#' @method print simcares
+#' @S3method print simcares
 #' 
 #' @description
 #' Prints information about the object structure

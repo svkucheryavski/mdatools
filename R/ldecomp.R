@@ -1,30 +1,55 @@
 ## class and methods for linear decomposition X = TP' + E ##
 
+#' Linear decomposition of data
+#' 
+#' @description
+#' Creates an object of ldecomp class.
+#'
+#' @param scores
+#' matrix with score values (nobj x ncomp).
+#' @param loadings
+#' matrix with loading values (nvar x ncomp).
+#' @param residuals
+#' matrix with data residuals 
+#' @param totvar
+#' full variance of original data, preprocessed and centered
+#' @param tnorm
+#' singular values for score normalization
+#' @param ncomp.selected
+#' number of selected components
+#' @param T2
+#' matrix with calculated T2 values (e.g. for CV)
+#' @param Q2
+#' matrix with calculated Q2 values (e.g. for CV)
+#' @param cal
+#' logical, true if data is for calibration of a LDECOMP based model
+#'
+#' @return
+#' Returns an object (list) of \code{ldecomp} class with following fields:
+#' \item{scores }{matrix with score values (nobj x ncomp).}
+#' \item{residuals }{matrix with data residuals (nobj x nvar).}
+#' \item{T2 }{matrix with T2 distances (nobj x ncomp).}
+#' \item{Q2 }{matrix with Q2 distances (nobj x ncomp).}
+#' \item{tnorm }{vector with singular values used for scores normalization.}
+#' \item{ncomp.selected }{selected number of components.}
+#' \item{expvar }{explained variance for each component.}
+#' \item{cumexpvar }{cumulative explained variance.}
+#' \item{modpower}{modelling power of variables.}
+#'
+#' @details
+#' \code{ldecomp} is a general class for decomposition X = TP' + E. Here, X is a data matrix, 
+#' T - matrix with scores, P - matrix with loadings and E - matrix with residuals. It is used, 
+#' for example, for PCA results (\code{\link{pcares}}), in PLS and other methods. The class also 
+#' includes methods for calculation and plotting residuals, variances, and so on.
+#'
+#' There is no need to use the \code{ldecomp} manually. For example, when build PCA model 
+#' with \code{\link{pca}} or apply it to a new data, the results will automatically inherit 
+#' all methods of \code{ldecomp}.
+#'
 ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL, 
                    totvar, tnorm = NULL, ncomp.selected = NULL,
-                   T2 = NULL, Q2 = NULL)
+                   T2 = NULL, Q2 = NULL, cal = TRUE)
 {
-   # Creates an object of ldecomp class.
-   #
-   # The object is needed to store and visualise results for decomposition X = TP' + E 
-   # In case of cross-validated results, only distances and variances are stored
-   #
-   # Arguments:
-   #   scores: matrix with score values (nobj x ncomp).
-   #   loadings: matrix with loading values (nvar x ncomp).
-   #   residuals: matrix with data residuals 
-   #   totvar: full variance of original data, preprocessed and centered
-   #   tnorm: singular values for score normalization
-   #   ncomp.selected: number of selected components
-   #
-   # Returns:
-   #  object (list) of class ldecomp with following fields:   
-   #   obj$ncomp.selected: selected number of components
-   #   obj$scores: matrix with score values (nobj x ncomp).
-   #   obj$Q2: matrix with Q2 residuals (nobj x ncomp).
-   #   obj$T2: matrix with T2 distances (nobj x ncomp)  
-   #   obj$totvar: total variance of the data
-   
    if (!is.null(scores))
    {   
       scores = as.matrix(scores)
@@ -46,7 +71,7 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
    # calculate residual distances and explained variance
    if (is.null(Q2) && is.null(T2) && !is.null(scores) && !is.null(loadings) && !is.null(residuals))
    {   
-      res = ldecomp.getDistances(scores, loadings, residuals, tnorm)
+      res = ldecomp.getDistances(scores, loadings, residuals, tnorm, cal)
       
       if (is.null(Q2))
          obj$Q2 = res$Q2
@@ -56,7 +81,7 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
       
       if (is.null(tnorm))
          obj$tnorm = res$tnorm
-            
+      
       obj$modpower = res$modpower
    }
    else
@@ -90,15 +115,17 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
 #' matrix with residuals (E).
 #' @param tnorm
 #' vector with singular values for scores normalisation (if NULL will be calculated from \code{scores}).
+#' @param cal
+#' logical, are these results for calibration set or not
 #' 
 #' @details
 #' The distances are calculated for every 1:n components, where n goes from 1 to ncomp 
 #' (number of columns in scores and loadings).
 #' 
 #' @return
-#' Returns a list with Q2, T2 and modelling power values for each component.
+#' Returns a list with Q2, Q2var, T2 and modelling power values for each component.
 #'  
-ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
+ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal = TRUE)
 {
    ncomp = ncol(scores)
    nobj = nrow(scores)
@@ -117,7 +144,7 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
    # calculate variance for data columns
    data = scores %*% t(loadings) + residuals;
    
-   if (nobj > 1)
+   if (nobj > 1 && cal == TRUE)
       datasd = sqrt(colSums(data^2)/(nobj - 1))
    
    # calculate distances for each set of components
@@ -129,7 +156,8 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL)
       
       Q2[, i] = rowSums(res^2)
       T2[, i] = rowSums(scoresn[, 1:i, drop = F]^2)
-      if (nobj > 1)
+      
+      if (nobj > i && cal == TRUE)
          modpower[, i] = 1 - sqrt(colSums(res^2)/(nobj - i - 1))/datasd
    }   
    
@@ -411,7 +439,10 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
            show.lines = show.lines, ...)
 }  
 
-#' Print function for linear decomposition
+#' Print method for linear decomposition
+#'
+#' @method print ldecomp
+#' @S3method print ldecomp
 #' 
 #' @description
 #' Generic \code{print} function for linear decomposition. Prints information about the \code{ldecomp}
@@ -441,8 +472,11 @@ print.ldecomp = function(x, str = NULL, ...)
    cat('$cumexpvar - cumulative explained variance\n')
 }
 
-#' Converts ldecomp object to a matrix
+#' as.matrix method for ldecomp object
 #' 
+#' @method as.matrix ldecomp
+#' @S3method as.matrix ldecomp
+#'
 #' @description
 #' Generic \code{as.matrix} function for linear decomposition. Returns a matrix with information 
 #' about the decomposition.
@@ -460,6 +494,9 @@ as.matrix.ldecomp = function(x, ...)
 }  
 
 #' Summary statistics for linear decomposition
+#'
+#' @method summary ldecomp
+#' @S3method summary ldecomp
 #' 
 #' @description
 #' Generic \code{summary} function for linear decomposition. Prints statistic about the decomposition.

@@ -394,6 +394,9 @@ plot.simcam = function(x, nc = c(1, 2), ...)
 
 #' Summary method for SIMCAM model object
 #' 
+#' @method summary simcam
+#' @S3method summary simcam
+#'
 #' @description
 #' Shows performance statistics for the model.
 #' 
@@ -418,6 +421,9 @@ summary.simcam = function(object, ...)
 
 #' Print method for SIMCAM model object
 #' 
+#' @method print simcam
+#' @S3method print simcam
+#'
 #' @description
 #' Prints information about the object structure
 #' 

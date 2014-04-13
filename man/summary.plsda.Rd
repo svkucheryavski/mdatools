@@ -2,7 +2,7 @@
 \alias{summary.plsda}
 \title{Summary method for PLS-DA model object}
 \usage{
-summary.plsda(object, ncomp = NULL, nc = NULL, ...)
+\method{summary}{plsda}(object, ncomp = NULL, nc = NULL, ...)
 }
 \arguments{
   \item{object}{a PLS-DA model (object of class

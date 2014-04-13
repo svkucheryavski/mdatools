@@ -2,7 +2,7 @@
 \alias{summary.regres}
 \title{summary method for regression results object}
 \usage{
-summary.regres(object, ncomp = NULL, ny = NULL, ...)
+\method{summary}{regres}(object, ncomp = NULL, ny = NULL, ...)
 }
 \arguments{
   \item{object}{regression results (object of class

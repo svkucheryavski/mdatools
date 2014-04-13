@@ -2,7 +2,7 @@
 \alias{ldecomp.getDistances}
 \title{Residuals distances for linear decomposition}
 \usage{
-ldecomp.getDistances(scores, loadings, residuals, tnorm = NULL)
+ldecomp.getDistances(scores, loadings, residuals, tnorm = NULL, cal = TRUE)
 }
 \arguments{
   \item{scores}{matrix with scores (T).}
@@ -14,10 +14,13 @@ ldecomp.getDistances(scores, loadings, residuals, tnorm = NULL)
   \item{tnorm}{vector with singular values for scores
   normalisation (if NULL will be calculated from
   \code{scores}).}
+
+  \item{cal}{logical, are these results for calibration set
+  or not}
 }
 \value{
-Returns a list with Q2, T2 and modelling power values for
-each component.
+Returns a list with Q2, Q2var, T2 and modelling power
+values for each component.
 }
 \description{
 Computes residual distances (Q2 and T2) and modelling power

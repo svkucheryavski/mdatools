@@ -14,31 +14,6 @@ plsdares = function(plsres, cres)
    obj
 }   
 
-#' as.matrix method for PLS-DA results
-#' 
-#' @description
-#' Returns a matrix with model performance statistics for PLS-DA results
-#' 
-#' @param x
-#' PLS-DA results (object of class \code{plsdares})
-#' @param ncomp
-#' number of components to calculate the statistics for
-#' @param nc
-#' for which class to calculate the statistics for
-#' @param ...
-#' other arguments
-#' 
-as.matrix.plsdares = function(x, ncomp = NULL, nc = NULL, ...)
-{
-   obj = x
-   
-   plsmat = as.matrix.plsres(obj, ncomp = ncomp, ny = nc)
-   classmat = as.matrix.classres(obj, ncomp = ncomp, nc = nc)
-   mat = cbind(plsmat[, 1:4, drop = F], classmat)
-
-   mat
-}
-
 #' Overview plot for PLS-DA results
 #' 
 #' @description
@@ -71,8 +46,38 @@ plot.plsdares = function(x, nc = NULL, ncomp = NULL, show.labels = F, ...)
    par(mfrow = c(1, 1))
 }
 
+#' as.matrix method for PLS-DA results
+#' 
+#' @method as.matrix plsdares
+#' @S3method as.matrix plsdares
+#'
+#' @description
+#' Returns a matrix with model performance statistics for PLS-DA results
+#' 
+#' @param x
+#' PLS-DA results (object of class \code{plsdares})
+#' @param ncomp
+#' number of components to calculate the statistics for
+#' @param nc
+#' for which class to calculate the statistics for
+#' @param ...
+#' other arguments
+#' 
+as.matrix.plsdares = function(x, ncomp = NULL, nc = NULL, ...)
+{
+   obj = x
+   
+   plsmat = as.matrix.plsres(obj, ncomp = ncomp, ny = nc)
+   classmat = as.matrix.classres(obj, ncomp = ncomp, nc = nc)
+   mat = cbind(plsmat[, 1:4, drop = F], classmat)
+   
+   mat
+}
 
 #' Summary method for PLS-DA results object
+#' 
+#' @method summary plsdares
+#' @S3method summary plsdares
 #' 
 #' @description
 #' Shows performance statistics for the results.
@@ -104,6 +109,9 @@ summary.plsdares = function(object, nc = NULL, ...)
 }
 
 #' Print method for PLS-DA results object
+#' 
+#' @method print plsdares
+#' @S3method print plsdares
 #' 
 #' @description
 #' Prints information about the object structure

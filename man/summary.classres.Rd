@@ -2,7 +2,7 @@
 \alias{summary.classres}
 \title{Summary statistics about classification result object}
 \usage{
-summary.classres(object, ncomp = NULL, nc = NULL, ...)
+\method{summary}{classres}(object, ncomp = NULL, nc = NULL, ...)
 }
 \arguments{
   \item{object}{classification results (object of class

@@ -2,7 +2,7 @@
 \alias{as.matrix.regcoeffs}
 \title{as.matrix method for regression coefficients class}
 \usage{
-as.matrix.regcoeffs(x, ncomp = 1, ny = 1, ...)
+\method{as.matrix}{regcoeffs}(x, ncomp = 1, ny = 1, ...)
 }
 \arguments{
   \item{x}{regression coefficients object (class

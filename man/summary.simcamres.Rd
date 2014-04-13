@@ -2,7 +2,7 @@
 \alias{summary.simcamres}
 \title{Summary method for SIMCAM results object}
 \usage{
-summary.simcamres(object, ...)
+\method{summary}{simcamres}(object, ...)
 }
 \arguments{
   \item{object}{SIMCAM results (object of class

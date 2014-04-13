@@ -1,6 +1,6 @@
 ## class and methods for Principal Component Analysis based methods ##
 
-pca = function(x, ncomp = 20, center = T, scale = F, cv = NULL, x.test = NULL, 
+pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
                alpha = 0.05, method = 'svd', info = '')
 {
    # Calibrate and validate a PCA model.
@@ -808,6 +808,9 @@ plot.pca = function(x, comp = c(1, 2), show.labels = F, show.legend = T, ...)
 
 #' Print method for PCA model object
 #' 
+#' @method print pca
+#' @S3method print pca
+#'
 #' @description
 #' Prints information about the object structure
 #' 
@@ -854,6 +857,9 @@ print.pca = function(x, ...)
 
 #' Summary method for PCA model object
 #' 
+#' @method summary pca
+#' @S3method summary pca
+#'
 #' @description
 #' Shows some statistics (explained variance, eigenvalues) for the model.
 #' 

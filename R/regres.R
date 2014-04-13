@@ -350,6 +350,9 @@ plot.regres = function(x, ny = 1, ...)
 
 #' as.matrix method for regression results
 #' 
+#' @method as.matrix regres
+#' @S3method as.matrix regres
+#'
 #' @description
 #' Returns a matrix with model performance statistics for regression results
 #' 
@@ -386,6 +389,9 @@ as.matrix.regres = function(x, ncomp = NULL, ny = 1, ...)
 
 #' summary method for regression results object
 #' 
+#' @method summary regres
+#' @S3method summary regres
+#'
 #' @description
 #' Shows performance statistics for the regression results.
 #' 
@@ -431,6 +437,9 @@ summary.regres = function(object, ncomp = NULL, ny = NULL, ...)
 
 #' print method for regression results object
 #' 
+#' @method print regres
+#' @S3method print regres
+#ø
 #' @description
 #' Prints information about the object structure
 #' 

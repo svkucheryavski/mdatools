@@ -488,8 +488,11 @@ plot.classres = function(x, nc = NULL, ...)
    plotPredictions.classres(x, nc = nc, ...)
 }   
 
-#' Converts classification results object to a matrix
+#' as.matrix method for classification results
 #' 
+#' @method as.matrix classres
+#' @S3method as.matrix classres
+#'
 #' @description
 #' Generic \code{as.matrix} function for classification results. Returns matrix with performance 
 #' values for specific class.
@@ -528,6 +531,9 @@ as.matrix.classres = function(x, ncomp = NULL, nc = 1, ...)
 
 #' Print information about classification result object
 #' 
+#' @method print classres
+#' @S3method print classres
+#' 
 #' @description
 #' Generic \code{print} function for classification results. Prints information about major fields
 #' of the object.
@@ -561,6 +567,9 @@ print.classres = function(x, str = NULL, ...)
 }   
 
 #' Summary statistics about classification result object
+#' 
+#' @method summary classres
+#' @S3method summary classres
 #' 
 #' @description
 #' Generic \code{summary} function for classification results. Prints performance values for the 

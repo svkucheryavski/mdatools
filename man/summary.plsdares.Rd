@@ -2,7 +2,7 @@
 \alias{summary.plsdares}
 \title{Summary method for PLS-DA results object}
 \usage{
-summary.plsdares(object, nc = NULL, ...)
+\method{summary}{plsdares}(object, nc = NULL, ...)
 }
 \arguments{
   \item{object}{PLS-DA results (object of class

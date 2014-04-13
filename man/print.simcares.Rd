@@ -2,7 +2,7 @@
 \alias{print.simcares}
 \title{Print method for SIMCA results object}
 \usage{
-print.simcares(x, ...)
+\method{print}{simcares}(x, ...)
 }
 \arguments{
   \item{x}{SIMCA results (object of class \code{simcares})}

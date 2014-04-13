@@ -39,6 +39,9 @@ plot.pcares = function(x, comp = c(1, 2), show.labels = T, ...)
 
 #' Summary method for PCA results object
 #' 
+#' @method summary pcares
+#' @S3method summary pcares
+#'
 #' @description
 #' Shows some statistics (explained variance, eigenvalues) about the results.
 #' 
@@ -55,6 +58,9 @@ summary.pcares = function(object, ...)
 
 #' Print method for PCA results object
 #' 
+#' @method print pcares
+#' @S3method print pcares
+#'
 #' @description
 #' Prints information about the object structure
 #' 

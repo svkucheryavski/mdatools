@@ -3,7 +3,7 @@
 \title{Partial Least Squares Discriminant Analysis}
 
 \usage{
-  plsda(x, c, ncomp = 20, center = T, scale = F, cv = NULL,
+  plsda(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
     x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, info = '')
 }
 

@@ -2,7 +2,7 @@
 \alias{print.simcamres}
 \title{Print method for SIMCAM results object}
 \usage{
-print.simcamres(x, ...)
+\method{print}{simcamres}(x, ...)
 }
 \arguments{
   \item{x}{SIMCAM results (object of class

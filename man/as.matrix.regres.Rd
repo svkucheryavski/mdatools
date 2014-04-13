@@ -2,7 +2,7 @@
 \alias{as.matrix.regres}
 \title{as.matrix method for regression results}
 \usage{
-as.matrix.regres(x, ncomp = NULL, ny = 1, ...)
+\method{as.matrix}{regres}(x, ncomp = NULL, ny = 1, ...)
 }
 \arguments{
   \item{x}{regression results (object of class

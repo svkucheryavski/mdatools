@@ -3,8 +3,9 @@
 \title{Partial Least Squares regression}
 
 \usage{
-  pls(x, y, ncomp = 20, center = T, scale = F, cv = NULL,
-    x.test = NULL, y.test = NULL, method = 'simpls', alpha = 0.05, info = '')
+  pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
+    x.test = NULL, y.test = NULL, method = 'simpls', alpha = 0.05, 
+    coeffs.ci = NULL, coeffs.alpha = 0.1, info = '')
 }
 
 \description{
@@ -22,6 +23,9 @@
   \item{y.test}{matrix with responses for test set.}
   \item{method }{method for calculating PLS model.}
   \item{alpha }{significance level for calculating statistical limits for residuals.}
+  \item{coeffs.ci }{method to calculate p-values and confidence intervals for regression coefficients (so far only jack-knifing is availavle: \code{='jk'}).}
+  \item{coeffs.alpha }{significance level for calculating confidence intervals for
+  regression coefficients.}
   \item{info }{short text with information about the model.}
 }
 
@@ -32,7 +36,9 @@ Returns an object of \code{pls} class with following fields:
    \item{xloadings }{matrix with loading values for x decomposition.} 
    \item{yloadings }{matrix with loading values for y decomposition.} 
    \item{weights }{matrix with PLS weights.} 
-   \item{coeffs }{matrix with regression coefficients calculated for each component.}   
+   \item{selratio }{array with selectivity ratio values.} 
+   \item{vipscores }{matrix with VIP scores values.} 
+   \item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated for each component.}   
    \item{info }{information about the model, provided by user when build the model.} 
    \item{calres }{an object of class \code{\link{plsres}} with PLS results for a calibration data.} 
    \item{testres }{an object of class \code{\link{plsres}} with PLS results for a test data, if it was provided.} 
@@ -44,10 +50,21 @@ So far only SIMPLS method [1] is available, more coming soon. Implementation wor
 
 Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of x variables and the default or provided value. Regression coefficients, predictions and other results are calculated for each set of components from 1 to \code{ncomp}: 1, 1:2, 1:3, etc. Besides that, there is also a  function (\code{\link{selectCompNum.pls}}) for selecting an optimal number of components in a model (\code{ncomp.selected}). The selected optimal number of components is used for all default operations - predictions, plots, etc. 
 
+Selectivity ratio [2] and VIP scores [3] are calculated for any PLS model authomatically, however while 
+selectivity ratio values are calculated for all computed components, the VIP scores are computed
+only for selected components (to save calculation time) and recalculated every time when 
+\code{selectCompNum()} is called for the model. 
+
+Calculation of confidence intervals and p-values for regression coefficients are available
+only by jack-knifing so far. See help for \code{\link{regcoeffs}} objects for details.
 }
 
 \references{
-1. S. de Jong, SIMPLS: an alternative approach to partial least squares regression, Chemometrics and Intelligent Laboratory Systems 18 (1993) 251-263.
+1. S. de Jong, Chemometrics and Intelligent Laboratory Systems 18 (1993) 251-263.
+
+2. Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), 35-48.
+
+3. Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), 103-112.
 }
 
 \seealso{
@@ -176,16 +193,19 @@ modelsel = selectCompNum(modelsel, 3)
 summary(model)
 summary(modelsel)
 
+# calculate average spectrum
 i = 1:ncol(x)
 ms = apply(x, 2, mean)
 
 par(mfrow = c(2, 2))
-mdaplot(cbind(i, ms), col = 'red', main = 'Original variables')
+
+plot(i, ms, type = 'p', pch = 16, col = 'red', main = 'Original variables')
 plotPredictions(model)
 
-mdaplot(cbind(i, ms), type = 'l', main = 'Selected variables')
-mdaplot(cbind(i[selvar], ms[selvar]), col = 'red', show.axes = F)
+plot(i, ms, type = 'p', pch = 16, col = 'lightgray', main = 'Selected variables')
+points(i[selvar], ms[selvar], col = 'red', pch = 16)
 plotPredictions(modelsel)
-par(mfrow = c(2, 2))
+
+par(mfrow = c(1, 1))
 }
 

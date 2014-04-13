@@ -1,6 +1,6 @@
 # class and methods for Partial Least Squares Discriminant Analysis #
 
-plsda = function(x, c, ncomp = 20, center = T, scale = F, cv = NULL, 
+plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL, 
                x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, info = '')
 {
    # Calibrate and validate a PLS-DA model.
@@ -35,6 +35,7 @@ plsda = function(x, c, ncomp = 20, center = T, scale = F, cv = NULL,
    model$classnames = unique(c)
    model$nclasses = length(model$classnames)
    model$calres = predict.plsda(model, x, c)
+   model = selectCompNum.pls(model, ncomp)
    
    # do cross-validation if needed
    if (!is.null(cv))
@@ -225,6 +226,9 @@ plot.plsda = function(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F,
 
 #' Summary method for PLS-DA model object
 #' 
+#' @method summary plsda
+#' @S3method summary plsda
+#'
 #' @description
 #' Shows some statistics for the model.
 #' 
@@ -282,6 +286,9 @@ summary.plsda = function(object, ncomp = NULL, nc = NULL, ...)
 
 #' Print method for PLS-DA model object
 #' 
+#' @method print plsda
+#' @S3method print plsda
+#'
 #' @description
 #' Prints information about the object structure
 #' 

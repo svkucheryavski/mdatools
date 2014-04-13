@@ -2,7 +2,7 @@
 \alias{print.simca}
 \title{Print method for SIMCA model object}
 \usage{
-print.simca(x, ...)
+\method{print}{simca}(x, ...)
 }
 \arguments{
   \item{x}{a SIMCA model (object of class \code{simca})}

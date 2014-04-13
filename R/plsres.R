@@ -319,6 +319,9 @@ plot.plsres = function(x, ncomp = NULL, ny = 1, show.labels = F, ...)
 
 #' as.matrix method for PLS results
 #' 
+#' @method as.matrix plsres
+#' @S3method as.matrix plsres
+#'
 #' @description
 #' Returns a matrix with model performance statistics for PLS results
 #' 
@@ -363,6 +366,9 @@ as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...)
 
 #' summary method for PLS results object
 #' 
+#' @method summary plsres
+#' @S3method summary plsres
+#'
 #' @description
 #' Shows performance statistics for the results.
 #' 
@@ -413,6 +419,9 @@ summary.plsres = function(object, ny = NULL, ncomp = NULL, ...)
 
 #' print method for PLS results object
 #' 
+#' @method print plsres
+#' @S3method print plsres
+#'
 #' @description
 #' Prints information about the object structure
 #' 

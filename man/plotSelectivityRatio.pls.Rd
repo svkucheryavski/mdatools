@@ -14,6 +14,14 @@
   \item{ny}{which response to get the values for (if y is
   multivariate)}
 
+  \item{type}{type of the plot}
+
+  \item{main}{main title for the plot}
+
+  \item{xlab}{label for x axies}
+
+  \item{ylab}{label for y axis}
+
   \item{...}{other plot parameters (see \code{mdaplot} for
   details)}
 }

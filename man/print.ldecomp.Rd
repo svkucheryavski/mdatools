@@ -1,8 +1,8 @@
 \name{print.ldecomp}
 \alias{print.ldecomp}
-\title{Print function for linear decomposition}
+\title{Print method for linear decomposition}
 \usage{
-print.ldecomp(x, str = NULL, ...)
+\method{print}{ldecomp}(x, str = NULL, ...)
 }
 \arguments{
   \item{x}{object of class \code{ldecomp}}

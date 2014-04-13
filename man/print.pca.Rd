@@ -2,7 +2,7 @@
 \alias{print.pca}
 \title{Print method for PCA model object}
 \usage{
-print.pca(x, ...)
+\method{print}{pca}(x, ...)
 }
 \arguments{
   \item{x}{a PCA model (object of class \code{pca})}

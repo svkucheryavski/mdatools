@@ -579,6 +579,38 @@ bars = function(x, y, col = NULL, bwd = 0.8)
    }
 }  
 
+#' Show error bars on a plot
+#' 
+#' @description
+#' Shows error bars (errorbar plot) on predefined axes
+#' 
+#' @param x
+#' vector with x values
+#' @param lower
+#' vector with lower limits for the bars
+#' @param upper
+#' vector with upper limits for the bars
+#' @param y
+#' vector with y values (bid points)
+#' @param col
+#' color for the error bars
+#' @param pch
+#' marker symbol for the plot
+#' 
+errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16)
+{
+   e2 = (max(x) - min(x)) / 50
+   e1 = (max(x) - min(x)) / (length(x) * 5)
+   e = min(e1, e2)
+   
+   segments(x, lower, x, upper, col = col)
+   segments(x - e, lower, x + e, lower, col = col)
+   segments(x - e, upper, x + e, upper, col = col)
+   
+   if (!is.null(y))
+      points(x, y, col = col, pch = pch)
+}  
+
 #' Create axes plane
 #' 
 #' @description
@@ -752,7 +784,17 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
    }
    
    # get x and y values from data
-   if (single.x == T)
+   if (type == 'e')
+   {
+      if (ncol(data) != 4)
+         stop('Number of columns in data for errorbar plot should be equal to four!')   
+      
+      x = data[, 1, drop = F]
+      y = data[, 2, drop = F]      
+      lower = data[, 3, drop = F]      
+      upper = data[, 4, drop = F]      
+   }   
+   else if (single.x == T)
    {   
       x = data[, 1, drop = F]
       y = data[, 2:ncol(data), drop = F]
@@ -778,9 +820,11 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
       matlines(x, y, type = type, col = col, pch = pch, lty = lty, ...)
    else if (type == 'h')
       bars(x, y, col = col, bwd = bwd)
+   else if (type == 'e')
+      errorbars(x, lower, upper, y, col = col)
    
    # show labels if needed
-   if (show.labels == T || !is.null(labels))
+   if ((show.labels == T || !is.null(labels)) && type != 'e')
       mdaplot.showLabels(data, type = type)   
    
    # show lines if needed
@@ -838,7 +882,7 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    {   
       ngroups = length(data)
    }
-   
+
    if (is.null(xticks) && !is.null(xticklabels))
       xticks = 1:length(xticklabels)
    

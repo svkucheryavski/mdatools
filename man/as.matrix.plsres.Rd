@@ -2,7 +2,7 @@
 \alias{as.matrix.plsres}
 \title{as.matrix method for PLS results}
 \usage{
-as.matrix.plsres(x, ncomp = NULL, ny = 1, ...)
+\method{as.matrix}{plsres}(x, ncomp = NULL, ny = 1, ...)
 }
 \arguments{
   \item{x}{PLS results (object of class \code{plsres})}

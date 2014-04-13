@@ -2,7 +2,7 @@
 \alias{getSelectivityRatio.pls}
 \title{Selectivity ratio for PLS model}
 \usage{
-\method{getSelectivityRatio}{pls}(obj, ncomp = NULL, ny = 1)
+\method{getSelectivityRatio}{pls}(obj, ncomp = NULL, ny = 1, ...)
 }
 \arguments{
   \item{obj}{a PLS model (object of class \code{pls})}
@@ -12,6 +12,8 @@
 
   \item{ny}{which response to get the values for (if y is
   multivariate)}
+
+  \item{...}{other parameters}
 }
 \value{
 vector with selectivity ratio values

@@ -2,7 +2,7 @@
 \alias{summary.simca}
 \title{Summary method for SIMCA model object}
 \usage{
-summary.simca(object, ...)
+\method{summary}{simca}(object, ...)
 }
 \arguments{
   \item{object}{a SIMCA model (object of class

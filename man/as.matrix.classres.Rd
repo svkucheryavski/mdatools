@@ -1,8 +1,8 @@
 \name{as.matrix.classres}
 \alias{as.matrix.classres}
-\title{Converts classification results object to a matrix}
+\title{as.matrix method for classification results}
 \usage{
-as.matrix.classres(x, ncomp = NULL, nc = 1, ...)
+\method{as.matrix}{classres}(x, ncomp = NULL, nc = 1, ...)
 }
 \arguments{
   \item{x}{classification results (object of class

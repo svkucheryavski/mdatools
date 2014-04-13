@@ -2,7 +2,7 @@
 \alias{getSelectedComponents.classres}
 \title{Get selected components}
 \usage{
-\method{getSelectedComponents}{classres}(obj, ncomp = NULL)
+getSelectedComponents.classres(obj, ncomp = NULL)
 }
 \arguments{
   \item{obj}{object with classification results (e.g.

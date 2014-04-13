@@ -1,7 +1,8 @@
 # class and methods for Partial Least Squares regression #
 
-pls = function(x, y, ncomp = 20, center = T, scale = F, cv = NULL, 
-               x.test = NULL, y.test = NULL, method = 'simpls', alpha = 0.05, info = '')
+pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL, 
+               x.test = NULL, y.test = NULL, method = 'simpls', alpha = 0.05, 
+               coeffs.ci = NULL, coeffs.alpha = 0.1, info = '')
 {
    # Calibrate and validate a PLS model.
    #
@@ -20,25 +21,65 @@ pls = function(x, y, ncomp = 20, center = T, scale = F, cv = NULL,
    #
    # Returns:
    #   model: a PLS model (object of class pls) 
-   
+
    x = as.matrix(x)
    y = as.matrix(y)
    
    if (is.null(colnames(y)))
       colnames(y) = paste('y', 1:ncol(y), sep = '')
    
+   # set LOO cross-validation if jack.knife is selected
+   jack.knife = F
+   if (!is.null(coeffs.ci) && coeffs.ci == 'jk')
+   {
+      jack.knife = T
+      if (is.null(cv))
+      {   
+         cv = 1      
+      }   
+      else if (cv < 10)
+      {
+         warning('Number of segments in cross-validation is too small for jack-knifing!')   
+      }   
+   }   
+   
    # correct maximum number of components
-   ncomp = min(ncol(x), nrow(x) - 1, ncomp)
+   if (!is.null(cv))
+   {
+      if (cv == 1)
+         nobj.cv = 1
+      else
+         nobj.cv = ceiling(nrow(x)/cv)  
+   }
+   else
+   {   
+      nobj.cv = 0
+   }
+   
+   ncomp = min(ncol(x), nrow(x) - 1 - nobj.cv, ncomp)
    
    # build a model and apply to calibration set
    model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method)
-   model$ncomp.selected = ncomp
    model$alpha = alpha   
    model$calres = predict.pls(model, x, y)
+   model = selectCompNum.pls(model, ncomp)
    
    # do cross-validation if needed
    if (!is.null(cv))
-      model$cvres = pls.crossval(model, x, y, cv, center = center, scale = scale)    
+   {   
+      res = pls.crossval(model, x, y, cv, center = center, scale = scale, 
+                                 jack.knife = T)    
+      if (jack.knife == T)
+      {   
+         model$coeffs = regcoeffs(model$coeffs$values, res$jkcoeffs, coeffs.alpha)
+         res[['jkcoeffs']] = NULL
+         model$cvres = res
+      }
+      else
+      {
+         model$cvres = res;
+      }   
+   }
    
    # do test set validation if provided
    if (!is.null(x.test) && !is.null(y.test))
@@ -100,6 +141,7 @@ pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE)
       res = pls.simpls(x, y, ncomp)
    else
       stop('Method with this name is not supported!')
+
    
    # return a list with model parameters
    model = list(
@@ -118,7 +160,9 @@ pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE)
    )
    
    if (cv == FALSE)
+   {   
       model$selratio = pls.calculateSelectivityRatio(model, x)
+   }
    
    model
 }
@@ -240,11 +284,13 @@ pls.simpls = function(x, y, ncomp)
 #' logical, do mean centering or not
 #' @param scale
 #' logical, do standardization or not
-#'
+#' @param jack.knife
+#' logical, do jack-knifing or not
+#' 
 #' @return
 #' object of class \code{plsres} with results of cross-validation
 #'  
-pls.crossval = function(model, x, y, cv, center = T, scale = F)
+pls.crossval = function(model, x, y, cv, center = T, scale = F, jack.knife = T)
 {
    x = as.matrix(x)
    y = as.matrix(y)
@@ -264,11 +310,11 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F)
    T2x = matrix(0, ncol = ncomp, nrow = nobj)   
    Q2y = matrix(0, ncol = ncomp, nrow = nobj)   
    T2y = matrix(0, ncol = ncomp, nrow = nobj)   
+   jkcoeffs = array(0, dim = c(nvar, ncomp, ncol(y), nrow(idx)))
    
    # loop over segments
    for (i in 1:nrow(idx))
-   {
-      
+   {   
       ind = na.exclude(idx[i,])
       if (length(ind) > 0)
       {   
@@ -290,8 +336,8 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F)
          T2x[ind, ] = xdist$T2        
          Q2y[ind, ] = ydist$Q2        
          T2y[ind, ] = ydist$T2        
-      }
-      
+         jkcoeffs[, , , i] = m$coeffs$values
+      }      
    }  
    
    dimnames(yp) = list(rownames(x), colnames(model$coeffs$values), colnames(model$calres$y.ref))         
@@ -304,8 +350,13 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F)
                 ydecomp = ldecomp(totvar = model$calres$ydecomp$totvar,
                                   tnorm = model$calres$ydecomp$tnorm,
                                   ncomp.selected = model$ncomp.selected,
-                                  Q2 = Q2y, T2 = T2y)   
-   )
+                                  Q2 = Q2y, T2 = T2y)                   
+                )
+   
+   if (jack.knife == T)
+      res$jkcoeffs = jkcoeffs
+   
+   res
 }
 
 #' Select optimal number of components for PLS model
@@ -337,6 +388,8 @@ selectCompNum.pls = function(model, ncomp)
    
    if (!is.null(model$testres)) 
       model$testres$ncomp.selected = ncomp
+
+   model$vipscores = pls.calculateVIPScores(model)
    
    model
 }   
@@ -378,7 +431,7 @@ predict.pls = function(object, x, y.ref = NULL, cv = F, ...)
    yp = array(0, dim = c(nrow(x), object$ncomp, nresp))
    for (i in 1:nresp)
    {   
-      yp[, , i] = x %*% object$coeffs$values[, , i]
+      yp[, , i] = x %*% object$coeffs$values[, , i]      
    }
    
    # if y is provided, calculate y residuals
@@ -397,9 +450,9 @@ predict.pls = function(object, x, y.ref = NULL, cv = F, ...)
    {
       dimnames(yp) = list(rownames(x), colnames(object$coeffs$values), colnames(object$calres$y.ref))         
    }   
-   
+      
    # unscale predicted y values
-   if (object$yscale != F)
+   if (is.numeric(object$yscale))
       for (i in 1:nresp)
          yp[, , i] = sweep(yp[, , i, drop = F], 2L, object$yscale[i], '*', check.margin = F)
    
@@ -494,8 +547,68 @@ pls.calculateSelectivityRatio = function(model, x)
    }   
    
    dimnames(selratio) = dimnames(model$coeffs$values)
-   
+
    selratio
+}   
+
+#' VIP scores calculation for PLS model
+#'
+#' @description
+#' Calculates VIP (Variable Importance in Projection) scores for each component and 
+#' response variable in the PLS model
+#' 
+#' @param object
+#' a PLS model (object of class \code{pls})
+#' 
+#' @return
+#' matrix \code{nvar x ny} with VIP score values for selected number of components
+#' 
+pls.calculateVIPScores = function(object)
+{
+   ny = dim(object$coeffs$values)[3]
+   nvar = dim(object$coeffs$values)[1]
+   vipscores = matrix(0, nrow = nvar, ncol = ny)
+   
+   comp = object$ncomp.selected   
+
+   w = object$weights[, 1:comp, drop = F]
+   xloads = object$xloadings[, 1:comp, drop = F];
+   xscores = object$calres$xdecomp$scores[, 1:comp, drop = F];
+
+   # regression coefficients for working with scores instead of x
+   # T = X * WPW 
+   # T * WPW' = X * WPW * WPW'
+   # T * WPW' * (WPW * WPW')^-1 = X
+   # YP = X * b 
+   # YP = T * WPW' * (WPW * WPW')^-1 * b
+   # YP = T * bT, where bT = WPW' * (WPW * WPW)^-1 * b
+   wpw = (w %*% solve(t(xloads) %*% w))
+
+   # normalise weights
+   n = 1/sqrt(colSums(w^2))
+   if (comp == 1)
+      dim(n) = c(1, 1)
+   else
+      n = diag(n)                     
+   wnorm = w %*% n
+   
+   for (y in 1:ny)
+   {   
+      b = object$coeffs$values[, comp, y, drop = F]
+      dim(b) = c(dim(b)[1], 1) 
+      
+      bscores = ( t(wpw) %*% pinv(wpw %*% t(wpw)) ) %*% b
+         
+      TT = colSums(xscores^2)
+      dim(TT) = c(1, comp)
+      SS = bscores^2 * t(TT)
+      vipscores[, y] = nvar * wnorm^2 %*% as.matrix(SS) / sum(SS)
+   }   
+   
+   rownames(vipscores) = dimnames(object$coeffs$values)[[1]]
+   colnames(vipscores) = dimnames(object$coeffs$values)[[3]]
+   
+   vipscores   
 }   
 
 #' Selectivity ratio for PLS model
@@ -507,9 +620,12 @@ pls.calculateSelectivityRatio = function(model, x)
 #' @param obj
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
-#' number of components to get the values for (if NULL user selected as optimal will be used)
+#' number of components to get the values for (if NULL user selected as optimal will be 
+#' used)
 #' @param ny
 #' which response to get the values for (if y is multivariate)
+#' @param ...
+#' other parameters
 #' 
 #' @references
 #' [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
@@ -517,30 +633,77 @@ pls.calculateSelectivityRatio = function(model, x)
 #' @return
 #' vector with selectivity ratio values
 #' 
-getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1)
+getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, ...)
 {
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
       
    selratio = obj$selratio[, ncomp, ny]
    dim(selratio) = c(dim(obj$selratio)[1], 1)
+   
    rownames(selratio) = dimnames(obj$selratio)[[1]]
-   colnames(selratio) = dimnames(obj$selratio)[[3]]
+   colnames(selratio) = dimnames(obj$selratio)[[3]][[ny]]
    
    selratio
 }  
+ 
+#' VIP scores for PLS model
+#' 
+#' @description
+#' Returns vector with VIP scores values for given number of components
+#' and response variable
+#' 
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param ny
+#' which response to get the values for (if y is multivariate)
+#' @param ...
+#' other parameters
+#' 
+#' @references
+#' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
+#' 
+#' @return
+#' vector with VIP scores values
+#' 
+getVIPScores.pls = function(obj, ny = 1, ...)
+{
+   vipscores = obj$vipscores[, ny, drop = F]
+}
 
-# pls.calculateVIPScores = function(obj)
-# {
-# }
-# 
-# getVIPScores.pls = function(obj, ncomp = NULL, ny = 1)
-# {
-# }
-# 
-# plotVIPScores.pls = function(obj, ncomp = NULL, ny = 1)
-# {   
-# }
+#' VIP scores plot for PLS model
+#' 
+#' @description
+#' Shows a plot with VIP scores values for given number of components
+#' and response variable
+#' 
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param ny
+#' which response to get the values for (if y is multivariate)
+#' @param type
+#' type of the plot
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axies
+#' @param ylab
+#' label for y axis
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#' 
+#' @references
+#' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
+#' 
+plotVIPScores.pls = function(obj, ny = 1, type = 'l', main = NULL, 
+                             xlab = 'Variables', ylab = '', ...)
+{   
+   main = getMainTitle(main, NULL, 'VIP scores')
+   
+   vipscores = getVIPScores.pls(obj, ny)
+   mdaplot(cbind(1:nrow(vipscores), vipscores), type = type, main = main, xlab = xlab,
+           ylab = ylab, ...)
+}
 
 #' Selectivity ratio plot for PLS model
 #' 
@@ -554,6 +717,14 @@ getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1)
 #' number of components to get the values for (if NULL user selected as optimal will be used)
 #' @param ny
 #' which response to get the values for (if y is multivariate)
+#' @param type
+#' type of the plot
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axies
+#' @param ylab
+#' label for y axis
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #' 
@@ -563,10 +734,10 @@ getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1)
 plotSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, type = 'l', main = NULL, 
                                     xlab = 'Variables', ylab = '', ...)
 {
-   if (is.null(ncomp))
-      ncomp = obj$ncomp.selected
+   main = getMainTitle(main, ncomp, 'Seelctivity ratio')
+   ncomp = getSelectedComponents(obj, ncomp)
    
-   selratio = getSelectivityRatio(model, ncomp, ny)
+   selratio = getSelectivityRatio(obj, ncomp, ny)
    mdaplot(cbind(1:nrow(selratio), selratio), type = type, main = main, xlab = xlab,
            ylab = ylab, ...)
 } 
@@ -1527,6 +1698,9 @@ plot.pls = function(x, ncomp = NULL, ny = 1, show.legend = T, show.labels = F, .
 
 #' Summary method for PLS model object
 #' 
+#' @method summary pls
+#' @S3method summary pls
+#'
 #' @description
 #' Shows performance statistics for the model.
 #' 
@@ -1590,6 +1764,9 @@ summary.pls = function(object, ncomp = NULL, ny = NULL, ...)
 
 #' Print method for PLS model object
 #' 
+#' @method print pls
+#' @S3method print pls
+#'
 #' @description
 #' Prints information about the object structure
 #' 

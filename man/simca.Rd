@@ -8,7 +8,7 @@ SIMCA one-class classification
 \code{simca} is used to make SIMCA (Soft Independent Modelling of Class Analogies) model for one-class classification.
 }
 \usage{
-simca(x, classname, ncomp = 20, center = T, scale = F, cv = NULL, x.test = NULL, 
+simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
    c.test = NULL, alpha = 0.05, method = "svd", info = "")
 }
 

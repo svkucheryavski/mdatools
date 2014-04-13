@@ -2,7 +2,7 @@
 \alias{print.regres}
 \title{print method for regression results object}
 \usage{
-print.regres(x, ...)
+\method{print}{regres}(x, ...)
 }
 \arguments{
   \item{x}{regression results (object of class

@@ -1,3 +1,33 @@
+#' VIP scores plot
+#' 
+#' @description
+#' Generic function for plotting VIP scores values for regression model (PCR, PLS, etc)
+#' 
+#' @param obj
+#' a regression model
+#' @param ...
+#' other parameters
+#' 
+plotVIPScores = function(obj, ...)
+{
+   UseMethod("plotVIPScores")
+}  
+
+#' VIP scores 
+#' 
+#' @description
+#' Generic function for returning VIP scores values for regression model (PCR, PLS, etc)
+#' 
+#' @param obj
+#' a regression model
+#' @param ...
+#' other parameters
+#' 
+getVIPScores = function(obj, ...)
+{
+   UseMethod("getVIPScores")
+}  
+
 #' Selectivity ratio plot
 #' 
 #' @description
@@ -42,25 +72,6 @@ selectCompNum = function(model, ncomp)
 {   
    UseMethod("selectCompNum")
 }   
-
-#' Get selected components 
-#' 
-#' @description
-#' Service function for user selection of components
-#' 
-#' @param obj
-#' a model object (e.g. PCA or PLS model)
-#' @param ncomp
-#' user selection of components
-#' 
-#' @details
-#' the function is used with different plots, when user selection is expected. It returns optimal number if
-#' user did not specify the \code{ncomp} value and checks if the specified value is correct.
-#' 
-getSelectedComponents = function(obj, ncomp = NULL)
-{
-   UseMethod("getSelectedComponents")
-}  
 
 #' Cooman's plot
 #' 

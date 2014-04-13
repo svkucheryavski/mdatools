@@ -2,7 +2,7 @@
 \alias{summary.ldecomp}
 \title{Summary statistics for linear decomposition}
 \usage{
-summary.ldecomp(object, str = NULL, ...)
+\method{summary}{ldecomp}(object, str = NULL, ...)
 }
 \arguments{
   \item{object}{object of class \code{ldecomp}}

@@ -177,6 +177,9 @@ plot.simcamres = function(x, ...)
 
 #' Summary method for SIMCAM results object
 #' 
+#' @method summary simcamres
+#' @S3method summary simcamres
+#' 
 #' @description
 #' Shows performance statistics for the results.
 #' 
@@ -205,6 +208,9 @@ summary.simcamres = function(object, ...)
 
 #' Print method for SIMCAM results object
 #' 
+#' @method print simcamres
+#' @S3method print simcamres
+#'
 #' @description
 #' Prints information about the object structure
 #' 

@@ -2,7 +2,7 @@
 \alias{as.matrix.plsdares}
 \title{as.matrix method for PLS-DA results}
 \usage{
-as.matrix.plsdares(x, ncomp = NULL, nc = NULL, ...)
+\method{as.matrix}{plsdares}(x, ncomp = NULL, nc = NULL, ...)
 }
 \arguments{
   \item{x}{PLS-DA results (object of class
