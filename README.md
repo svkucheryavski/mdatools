@@ -11,10 +11,9 @@ For more details read a [short wiki tutorial](https://github.com/svkucheryavski/
 How to install
 --------------
 
-The package is available from CRAN with usual installing procedure.
+The package now is available from CRAN by usual installing procedure.
 
-It can be also installed from sources, just  
-[download](https://github.com/svkucheryavski/mdatools/releases) a source package archive from GitHub and install it using 
+It can be also installed from sources, just [download](https://github.com/svkucheryavski/mdatools/releases) a source package archive from GitHub and install it using 
 the `install.packages` command, e.g. if the downloaded file is `mdatools_0.5.2.tar.gz` and it is located in a current 
 working directory, just run the following:
 
