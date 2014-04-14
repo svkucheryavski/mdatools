@@ -1,3 +1,8 @@
+v. 0.5.2
+========
+* fixed bug for computing classification performance for numeric class names
+* improvements to SIMCA implementation
+
 v. 0.5.1
 ========
 * added more details to documentation

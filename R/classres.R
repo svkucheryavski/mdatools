@@ -87,21 +87,13 @@ getClassificationPerformance = function(c.ref, c.pred)
    sensitivity = matrix(0, nrow = nclasses + 1, ncol = ncomp)
    misclassified = matrix(0, nrow = nclasses + 1, ncol = ncomp)
 
+   classnames = dimnames(c.pred)[[3]]
+   
    for (i in 1:nclasses)         
    {   
-      if (is.numeric(c.ref))
-      {   
-         fn[i, ] = colSums((c.ref[, 1] == i) & (c.pred[, , i, drop = F] == -1))
-         fp[i, ] = colSums((c.ref[, 1] != i) & (c.pred[, , i, drop = F] == 1))
-         tp[i, ] = colSums((c.ref[, 1] == i) & (c.pred[, , i, drop = F] == 1))
-      }
-      else
-      {
-         cname = dimnames(c.pred)[[3]][i]
-         fn[i, ] = colSums((c.ref[, 1] == cname) & (c.pred[, , i, drop = F] == -1))
-         fp[i, ] = colSums((c.ref[, 1] != cname) & (c.pred[, , i, drop = F] == 1))
-         tp[i, ] = colSums((c.ref[, 1] == cname) & (c.pred[, , i, drop = F] == 1))         
-      }   
+      fn[i, ] = colSums((c.ref[, 1] == classnames[i]) & (c.pred[, , i, drop = F] == -1))
+      fp[i, ] = colSums((c.ref[, 1] != classnames[i]) & (c.pred[, , i, drop = F] == 1))
+      tp[i, ] = colSums((c.ref[, 1] == classnames[i]) & (c.pred[, , i, drop = F] == 1))
 
       sensitivity[i, ] = tp[i, ] / (tp[i, ] + fn[i, ])
       specificity[i, ] = tp[i, ] / (tp[i, ] + fp[i, ])

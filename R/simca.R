@@ -57,7 +57,7 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.t
    class(model) = c("simca", "classmodel", "pca")
    
    # apply model to calibration set
-   model$calres = predict.simca(model, x, c.ref = rep(1, nrow(x)))
+   model$calres = predict.simca(model, x, c.ref = rep(classname, nrow(x)))
    model$modpower = model$calres$modpower
    
    # do cross-validation if needed
@@ -68,7 +68,7 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.t
    if (!is.null(x.test))
    {
       if (is.null(c.test))
-         c.test = matrix(T, nrow(x.test), 1)
+         c.test = rep(classname, nrow(x.test))
       
       model$testres = predict.simca(model, x.test, c.ref = c.test)
    }
@@ -86,7 +86,7 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.t
 #' @param x
 #' a matrix with x values (predictors)
 #' @param c.ref
-#' a vector with reference class values
+#' a vector with reference class names (same as class names for models)
 #' @param cv
 #' logical, are predictions for cross-validation or not
 #' @param ...
@@ -117,12 +117,6 @@ predict.simca = function(object, x, c.ref = NULL, cv = F, ...)
    # check c.ref values and add dimnames
    if (!is.null(c.ref))
    {   
-      if (is.character(c.ref))
-         c.ref = c.ref == object$classname
-      
-      if (is.logical(c.ref))
-         c.ref = c.ref * 2 - 1
-      
       c.ref = as.matrix(c.ref)
       rownames(c.ref) = rownames(x)
       colnames(c.ref) = object$classname
@@ -200,7 +194,7 @@ simca.crossval = function(model, x, cv, center = T, scale = F)
    Q2 = matrix(0, ncol = ncomp, nrow = nobj)   
    T2 = matrix(0, ncol = ncomp, nrow = nobj)   
    c.pred = array(0, dim = c(nobj, ncomp, 1))
-   c.ref = matrix(1, ncol = 1, nrow = nobj)
+   c.ref = matrix(model$classname, ncol = 1, nrow = nobj)
    
    # loop over segments
    for (i in 1:nrow(idx))

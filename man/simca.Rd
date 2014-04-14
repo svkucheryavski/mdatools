@@ -20,7 +20,7 @@ simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
   \item{scale}{logical, do sdandardization of data or not.}
   \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
   \item{x.test}{a numerical matrix with test data.}
-  \item{c.test}{a vector with logical values for classes of test data objects.}
+  \item{c.test}{a vector with text values (names of classes) of test data objects.}
   \item{alpha}{significance level for calculating limit for T2 and Q2 residuals.}
   \item{method}{method to compute principal components.}
   \item{info}{text with information about the model}
@@ -98,7 +98,7 @@ class = iris[, 5]
 se = data[1:20, ]
 
 # make SIMCA model and apply to test set
-model = simca(se, 'Se', cv = 1)
+model = simca(se, 'setosa', cv = 1)
 model = selectCompNum(model, 1)
 
 # show infromation, summary and plot overview

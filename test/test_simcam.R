@@ -10,30 +10,30 @@ vi = calset[calset[, 5] == 'virginica', 1:4]
 
 # calibration data with reference
 cal.data = calset[, 1:4]
-cal.c = c(matrix('Se', 1, 25), matrix('Ve', 1, 25), matrix('Vi', 1, 25))
+cal.c = calset[, 5]
 
 # test data with reference
 test.data = tstset[, 1:4]
-test.c = c(matrix(1, 1, 25), matrix(2, 1, 25), matrix(3, 1, 25))
+test.c = tstset[, 5]
 
 # test data with reference for two classes
 test2c.data = tstset2c[, 1:4]
-test2c.c = c(matrix(1, 1, 25), matrix(2, 1, 25))
+test2c.c = tstset2c[, 5]
 
 # test data with reference for with unknown classes
 test2cu.data = tstset2c[, 1:4]
-test2cu.c = c(matrix('Se', 1, 25), matrix('None', 1, 10), matrix('Ar', 1, 15))
+test2cu.c = c(matrix('setosa', 1, 25), matrix('none', 1, 10), matrix('Ar', 1, 15))
 
 # make individual models
-semodel = simca(se, 'Se', ncomp = 4, alpha = 0.01, cv = 1)
+semodel = simca(se, 'setosa', ncomp = 4, alpha = 0.01, cv = 1)
 semodel = selectCompNum(semodel, 1)
 
 # make individual models
-vimodel = simca(vi, 'Vi')
+vimodel = simca(vi, 'virginica')
 vimodel = selectCompNum(vimodel, 3)
 
 # make individual models
-vemodel = simca(ve, 'Ve', ncomp = 4, cv = 5, test.data = test.data, test.c = test.c == 2)
+vemodel = simca(ve, 'versicolor', ncomp = 4, cv = 5, x.test = test.data, c.test = test.c)
 vemodel = selectCompNum(vemodel, 3)
 
 # make group models

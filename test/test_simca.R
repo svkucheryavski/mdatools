@@ -8,7 +8,7 @@ ve = calset[calset[, 5] == 'versicolor', 1:4]
 vi = calset[calset[, 5] == 'virginica', 1:4]
 
 test.data = tstset[, 1:4]
-test.c = c(matrix(1, 1, 25), matrix(2, 1, 25), matrix(3, 1, 25))
+test.c = tstset[, 5]
 
 
 # Select which model to calculate
@@ -17,19 +17,19 @@ option = 2
 if (option == 1)
 {
    # Setosa model with cross-validation
-   model = simca(se, 'Se', ncomp = 4, alpha = 0.01, cv = 1)
+   model = simca(se, 'setosa', ncomp = 4, alpha = 0.01, cv = 1)
    model = selectCompNum(model, 1)
-   pred = predict(model, test.data, test.c == 1)   
+   pred = predict(model, test.data, test.c)   
 } else if (option == 2) {  
    # Virginica model with test set validation (no CV)
-   model = simca(vi, 'Vi', x.test = test.data[test.c == 3, ])
+   model = simca(vi, 'virginica', x.test = test.data[test.c == 'virginica', ])
    model = selectCompNum(model, 3)
-   pred = predict(model, test.data, test.c == 3)   
+   pred = predict(model, test.data, test.c)   
 } else {
    # Versicolor model with 5 segments CV and test set
-   model = simca(ve, 'Ve', ncomp = 4, cv = 5, x.test = test.data, c.test = test.c == 2)
+   model = simca(ve, 'versicolor', ncomp = 4, cv = 5, x.test = test.data, c.test = test.c == 'versicolor')
    model = selectCompNum(model, 3)
-   pred = predict(model, test.data, test.c == 2)   
+   pred = predict(model, test.data, test.c)   
 }
 
 cat('1. Show print and summary')

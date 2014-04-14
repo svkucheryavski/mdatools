@@ -10,7 +10,8 @@
 
   \item{x}{a matrix with x values (predictors)}
 
-  \item{c.ref}{a vector with reference class values}
+  \item{c.ref}{a vector with reference class names (same as
+  class names for models)}
 
   \item{cv}{logical, are predictions for cross-validation
   or not}
