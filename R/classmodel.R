@@ -165,7 +165,7 @@ plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', typ
 
       classname = sprintf('(%s)', obj$classnames[nc])
    }
-
+   
    data = cbind(1:obj$ncomp, obj$calres[[param]][nc, ])
    labels = matrix(mdaplot.formatValues(obj$calres[[param]][nc, ]), ncol = 1)
    legend_str = 'cal'

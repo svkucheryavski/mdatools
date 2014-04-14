@@ -6,7 +6,27 @@ calset.c = iris[seq(1, nrow(iris), 2), 5]
 testset = iris[seq(2, nrow(iris), 2), 1:4] # test set, 3 classes
 testset.c = iris[seq(2, nrow(iris), 2), 5] # test set, 3 classes
 
-model = plsda(calset, calset.c, ncomp = 3, cv = 1, info = 'IRIS data example')
+cc = as.numeric(calset.c)
+ct = as.numeric(testset.c)
+model = plsda(calset, cc, ncomp = 3, cv = 1, info = 'IRIS data example')
+plot(model)
+readline('Press enter to continue...')
+
+cc = as.numeric(calset.c)
+cc[cc == 1] = 10
+cc[cc == 3] = 30
+ct = as.numeric(testset.c)
+ct[ct == 1] = 10
+ct[ct == 3] = 30
+model = plsda(calset, cc, ncomp = 3, cv = 1, info = 'IRIS data example')
+plot(model)
+readline('Press enter to continue...')
+
+cc = calset.c
+ct = testset.c
+model = plsda(calset, cc, ncomp = 3, cv = 1, info = 'IRIS data example')
+plot(model)
+readline('Press enter to continue...')
 
 res = predict(model, testset, testset.c)
 #res = predict(model, testset[1:50, ], testset.c[1:50, ])

@@ -50,7 +50,7 @@ simcam = function(models, info = '')
 #' @param x
 #' a matrix with x values (predictors)
 #' @param c.ref
-#' a vector with reference class values
+#' a vector with reference class names (same as class names in models)
 #' @param cv
 #' logical, are predictions for cross-validation or not
 #' @param ...

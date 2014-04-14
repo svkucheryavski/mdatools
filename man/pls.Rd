@@ -91,6 +91,7 @@ Methods for \code{pls} objects:
       \code{\link{plotYResiduals.pls}} \tab shows residuals plot for y values.\cr
       \code{\link{getSelectivityRatio.pls}} \tab returns vector with selectivity ratio values.\cr
       \code{\link{plotSelectivityRatio.pls}} \tab shows plot with selectivity ratio values.\cr
+      \code{\link{plotVIPScores.pls}} \tab shows plot with VIP scores values.\cr
    }
    
    Most of the methods for plotting data (except loadings and regression coefficients) are also available for PLS results 
