@@ -1,3 +1,8 @@
+v. 0.5.3
+========
+* fixed several small bugs
+* improvemed documentation for basic methods
+
 v. 0.5.2
 ========
 * fixed bug for computing classification performance for numeric class names
