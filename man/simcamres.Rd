@@ -86,16 +86,16 @@ ve = caldata[26:50, ]
 vi = caldata[51:75, ]
 
 testdata = iris[seq(2, nrow(iris), 2), 1:4]
-testdata.cref = rbind(matrix('Se', 25, 1), matrix('Vi', 25, 1), matrix('Ve', 25, 1))
+testdata.cref = iris[seq(2, nrow(iris), 2), 5]
 
 # create individual models
-semodel = simca(se, classname = 'Se')
+semodel = simca(se, classname = 'setosa')
 semodel = selectCompNum(semodel, 1)
 
-vimodel = simca(vi, classname = 'Vi')
+vimodel = simca(vi, classname = 'virginica')
 vimodel = selectCompNum(vimodel, 1)
 
-vemodel = simca(ve, classname = 'Ve')
+vemodel = simca(ve, classname = 'versicolor')
 vemodel = selectCompNum(vemodel, 1)
 
 # combine models into SIMCAM object, show statistics 

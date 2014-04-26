@@ -89,9 +89,10 @@ Methods for \code{pls} objects:
       \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y decomposition.\cr
       \code{\link{plotXResiduals.pls}} \tab shows T2 vs. Q2 plot for x decomposition.\cr
       \code{\link{plotYResiduals.pls}} \tab shows residuals plot for y values.\cr
-      \code{\link{getSelectivityRatio.pls}} \tab returns vector with selectivity ratio values.\cr
       \code{\link{plotSelectivityRatio.pls}} \tab shows plot with selectivity ratio values.\cr
       \code{\link{plotVIPScores.pls}} \tab shows plot with VIP scores values.\cr
+      \code{\link{getSelectivityRatio.pls}} \tab returns vector with selectivity ratio values.\cr
+      \code{\link{getVIPScores.pls}} \tab returns vector with VIP scores values.\cr
    }
    
    Most of the methods for plotting data (except loadings and regression coefficients) are also available for PLS results 
@@ -183,7 +184,7 @@ plotSelectivityRatio(model)
 plotSelectivityRatio(model, ncomp = 1)
 par(mfrow = c(1, 1))
 
-## 9. Variable selection with selectivity ratio and VIP scores
+## 9. Variable selection with selectivity ratio
 selratio = getSelectivityRatio(model)
 selvar = !(selratio < 8)
 
@@ -194,7 +195,7 @@ modelsel = selectCompNum(modelsel, 3)
 summary(model)
 summary(modelsel)
 
-# calculate average spectrum
+## 10. Calculate average spectrum and show the selected variables
 i = 1:ncol(x)
 ms = apply(x, 2, mean)
 

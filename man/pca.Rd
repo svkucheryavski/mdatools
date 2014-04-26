@@ -29,7 +29,7 @@ pca(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
 \details{
 So far only SVD (Singular Value Decompisition) method is available, more coming soon. 
 
-By default \code{pca} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of variables and default or provided value. Besides this, there is also a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal number of components is used to build a residuals plot (with Q2 residuals vs. Hotelling T2 values), calculate confidence limits for Q2 residuals, as well as for SIMCA classification. 
+By default \code{pca} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of variables and default or provided value. Besides that, there is also a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal number of components is used to build a residuals plot (with Q2 residuals vs. Hotelling T2 values), calculate confidence limits for Q2 residuals, as well as for SIMCA classification. 
 
 If data contains missing values (NA) the \code{pca} will use an iterative algorithm to fit the values with most probable ones. The algorithm is implemented in a function \code{\link{pca.mvreplace}}. The same center and scale options will be used. You can also do this step manually before calling \code{pca} and play with extra options.
 

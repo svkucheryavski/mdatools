@@ -10,9 +10,11 @@ This package contains classes and functions for most common methods used in Chem
 }
 
 \details{
-Every model is represented by two classes: a class for keeping and visualising results of applying the model to particular data values and a model class for keeping all parameters and information about the model, including calibration and validation results.
+The porject is hosted on GitHub, there you can find a short Wiki tutorial (https://github.com/svkucheryavski/mdatools/wiki) explaining most important features of the package.
 
-Every model class, e.g. \code{\link{pls}}, has all needed functionality implemented as class methods, including model calibration with several algorithms, validation (test set and cross-validation), visualisation of the calibration and validation results with various plots and summary statistics. 
+Every method is represented by two classes: a model class for keeping all parameters and information about the model, and a class for keeping and visualising results of applying the model to particular data values.
+
+Every model class, e.g. \code{\link{pls}}, has all needed functionality implemented as class methods, including model calibration, validation (test set and cross-validation), visualisation of the calibration and validation results with various plots and summary statistics. 
 
 So far the following modelling methods are implemented:
 \tabular{ll}{
