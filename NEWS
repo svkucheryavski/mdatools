@@ -1,3 +1,7 @@
+v.0.6.0
+========
+* fixed bug in PLS when using maximum number of components lead to NA values in weights
+
 v. 0.5.3
 ========
 * fixed several small bugs

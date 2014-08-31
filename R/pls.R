@@ -62,8 +62,7 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
    model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method)
    model$alpha = alpha   
    model$calres = predict.pls(model, x, y)
-   model = selectCompNum.pls(model, ncomp)
-   
+   model = selectCompNum.pls(model, model$ncomp)
    # do cross-validation if needed
    if (!is.null(cv))
    {   
@@ -142,7 +141,6 @@ pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE)
    else
       stop('Method with this name is not supported!')
 
-   
    # return a list with model parameters
    model = list(
       xloadings = res$xloadings,
@@ -156,7 +154,7 @@ pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE)
       xscale = attr(x, 'prep:scale'),
       ycenter = attr(y, 'prep:center'),
       yscale = attr(y, 'prep:scale'),
-      ncomp = ncomp
+      ncomp = res$ncomp
    )
    
    if (cv == FALSE)
@@ -178,6 +176,8 @@ pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE)
 #' a matrix with y values (responses)
 #' @param ncomp
 #' number of components to calculate
+#' @param cv
+#' logical, is model calibrated during cross-validation or not
 #' 
 #' @return 
 #' a list with computed regression coefficients, loadings and scores for x and y matrices,
@@ -187,7 +187,7 @@ pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE)
 #' [1]. S. de Jong. SIMPLS: An Alternative approach to partial least squares regression. 
 #' Chemometrics and Intelligent Laboratory Systems, 18, 1993 (251-263).
 #' 
-pls.simpls = function(x, y, ncomp)
+pls.simpls = function(x, y, ncomp, cv = F)
 {
    x = as.matrix(x)
    y = as.matrix(y)
@@ -196,7 +196,6 @@ pls.simpls = function(x, y, ncomp)
    objnames = rownames(x);
    prednames = colnames(x);
    respnames = colnames(y);
-   compnames = paste('Comp', 1:ncomp)
    
    nobj = nrow(x)
    npred = ncol(x)
@@ -212,7 +211,7 @@ pls.simpls = function(x, y, ncomp)
    W = matrix(0, nrow = npred, ncol = ncomp)
    P = matrix(0, nrow = npred, ncol = ncomp)
    Q = matrix(0, nrow = nresp, ncol = ncomp)
-  
+   
    # loop for each components
    for (n in 1:ncomp)
    {
@@ -244,13 +243,25 @@ pls.simpls = function(x, y, ncomp)
       C = C - v %*% t(v)
       M = M - p %*% t(p)
       A = C %*% A      
+      
+      if (cv == F && e$value < 10^-12) {
+         # stop cycle is egienvalue is almost zero
+         break
+      }
    }
+   
+   # truncate results if n is smaller than ncomp
+   B = B[, 1:n, , drop = F]
+   W = W[, 1:n, drop = F]
+   P = P[, 1:n, drop = F]
+   Q = Q[, 1:n, drop = F]
    
    # calculate x and y scores
    U = y %*% Q 
    TT = x %*% (W %*% solve(t(P) %*% W))  
    
    # set names for all results
+   compnames = paste('Comp', 1:n)
    colnames(Q) = colnames(B) = colnames(P) = colnames(W) = compnames      
    colnames(TT) = colnames(U) = compnames      
    rownames(P) = rownames(B) = rownames(W) = prednames
@@ -263,7 +274,8 @@ pls.simpls = function(x, y, ncomp)
       xloadings = P,
       xscores = TT,
       yloadings = Q,
-      yscores = U
+      yscores = U,
+      ncomp = n
    )   
 }  
 
@@ -322,8 +334,8 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F, jack.knife = T)
          yc = y[-ind, , drop = F]
          xt = x[ind, , drop = F]
          yt = y[ind, , drop = F]
-         
-         m = pls.cal(xc, yc, ncomp, center = center, scale = scale, cv = TRUE)               
+
+         m = pls.cal(xc, yc, ncomp, center = center, scale = scale, cv = TRUE)            
          res = predict.pls(m, xt, yt, cv = T)
          
          xdist = ldecomp.getDistances(res$xscores, m$xloadings, res$xresiduals, 
