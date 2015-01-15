@@ -96,7 +96,7 @@ Methods for \code{pls} objects:
    }
    
    Most of the methods for plotting data (except loadings and regression coefficients) are also available for PLS results 
-   (\code{\link{plsres}}) objects.    
+   (\code{\link{plsres}}) objects. There is also a randomization test for PLS-regression (\code{\link{randtest}}).   
 }
 
 \author{

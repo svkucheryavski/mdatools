@@ -100,8 +100,7 @@ prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
       
       w = (width - 1)/2                        
       f  = pinv(outer(-w:w, 0:porder, FUN = "^"))  
-      
-      d = convolve(d, rev(f[dorder + 1, ]), type = "o")      
+      d = convolve(d, rev(f[dorder + 1, ]), type = "o")     
       pdata[i, ] = d[(w + 1) : (length(d) - w)] 
    }  
    

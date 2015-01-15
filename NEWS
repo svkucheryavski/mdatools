@@ -1,3 +1,10 @@
+v.0.6.0
+========
+* randomization test for PLS has been added, see `?randtest`
+* systematic and repeated random cross-validation are available, see `?crossval` 
+* fixed bug with labels on bar plot with confidence intervals
+* fixed bug in PLS when using maximum number of components lead to NA values in weights
+
 v. 0.5.3
 ========
 * fixed several small bugs

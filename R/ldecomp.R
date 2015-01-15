@@ -138,7 +138,6 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
    # calculate normalized scores
    if (is.null(tnorm))
       tnorm = sqrt(colSums(scores ^ 2)/(nrow(scores) - 1));
-   
    scoresn = sweep(scores, 2L, tnorm, '/', check.margin = F);  
 
    # calculate variance for data columns
@@ -225,7 +224,7 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
    T2lim = matrix(0, nrow = 1, ncol = ncomp)
    for (i in 1:ncomp)
    {
-      if (nobj == ncomp)
+      if (nobj == i)
          T2lim[1, i] = 0
       else
          T2lim[1, i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - alpha, i, nobj - i);  

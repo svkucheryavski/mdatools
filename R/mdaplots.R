@@ -545,7 +545,7 @@ mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default'
       x = data[, 1]
       y = data[, 2]
       
-      abline(lm(y ~ x), col = col)                
+      abline(lm(y ~ x), lty = lty, lwd = lwd, col = col)                
    }   
 }
 
@@ -735,15 +735,12 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
          # show color groups according to cdata values
          lim = mdaplot.getAxesLim(data, show.colorbar = show.colorbar, show.labels = show.labels,
                                   show.lines = show.lines, single.x = single.x)
-         col = mdaplot.getColors(cgroup = cgroup, colmap = colmap)
       }
       else   
       {
          # show all points with the same color
          lim = mdaplot.getAxesLim(data, show.lines = show.lines, show.labels = show.labels,
                                   single.x = single.x, xticks = xticks, yticks = yticks)
-         if (is.null(col))
-            col = mdaplot.getColors(1, colmap = colmap)
       }
       
       # Correct x axis limits if it is a bar plot
@@ -783,6 +780,19 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
       mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
    }
    
+   #  get proper colors      
+   if (!is.null(cgroup))
+   {   
+      # show color groups according to cdata values
+      col = mdaplot.getColors(cgroup = cgroup, colmap = colmap)
+   }
+   else   
+   {
+      # show all points with the same color
+      if (is.null(col))
+         col = mdaplot.getColors(1, colmap = colmap)
+   }
+   
    # get x and y values from data
    if (type == 'e')
    {
@@ -806,7 +816,7 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
    }
    
    # set up labels
-   if (!is.null(labels))
+   if (!is.null(labels) && !is.logical(labels))
       rownames(data) = labels
    
    # show grid if needed
@@ -837,7 +847,7 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 }
 
 mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
-                    legend = NULL, xlab = NA, ylab = NA, main = NULL, labels = NULL, 
+                    legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', single.x = T, 
                     show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, ...)
@@ -936,10 +946,10 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
       stop('Parameter "lty" should be specified for each group or be common for all!')
    
    # define axis labels as data column names if they are not specified
-   if (is.na(xlab) && !is.null(colnames(data[[1]])))
+   if (is.null(xlab) && !is.null(colnames(data[[1]])))
        xlab = colnames(data[[1]])[1]
    
-   if (is.na(ylab) && !is.null(colnames(data[[1]])))
+   if (is.null(ylab) && !is.null(colnames(data[[1]])))
       ylab = colnames(data[[1]])[2]
 
    # if data is small set up proper x tick labels
@@ -960,8 +970,10 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    {   
       for (i in 1:ngroups)
       {
-         if (!is.null(labels))
+         if (!is.null(labels) && type[i] != 'e')
          {
+            show(labels)
+            show(type)
             if (is.list(labels))
                slabels = labels[[i]]
             else
