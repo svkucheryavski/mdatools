@@ -4,17 +4,19 @@
 \alias{plot.randtest}
 \title{Plot for randomization test results}
 \usage{
-\method{plot}{randtest}(obj, main = "Alpha", xlab = "Components",
-  ylab = "")
+\method{plot}{randtest}(x, main = "Alpha", xlab = "Components", ylab = "",
+  ...)
 }
 \arguments{
-\item{obj}{results of randomization test (object of class `randtest`)}
+\item{x}{results of randomization test (object of class `randtest`)}
 
 \item{main}{main title for the plot}
 
 \item{xlab}{label for x axis}
 
 \item{ylab}{label for y axis}
+
+\item{...}{other optional arguments}
 }
 \description{
 Makes a bar plot with alpha values for each component.

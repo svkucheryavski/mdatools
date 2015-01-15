@@ -3,8 +3,8 @@
 \title{Randomization test for PLS regression}
 
 \usage{
-   randtest = function(x, y, ncomp = 15, center = T, scale = F, nperm = 1000, 
-                    sig.level = 0.05, silent = TRUE)
+randtest(x, y, ncomp = 15, center = T, scale = F, nperm = 1000, 
+   sig.level = 0.05, silent = TRUE)
 }
 
 \description{
@@ -73,7 +73,7 @@ x = simdata$spectra.c
 x = prep.snv(x)
 
 ## Run the test and show summary
-r = randtest(x, y, ncomp = 5, nperm = 2000, silent = F)
+r = randtest(x, y, ncomp = 5, nperm = 2000, silent = FALSE)
 summary(r)
 
 ## Show plots

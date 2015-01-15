@@ -11,7 +11,7 @@ Plotting function for several sets of objects
 
 \usage{
 mdaplotg(data, type = 'p', pch = 16, lty = 1, lwd = 1, bwd = 0.8, legend = NULL, 
-   xlab = NA, ylab = NA, main = NULL, labels = NULL, 
+   xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
    ylim = NULL, xlim = NULL, colmap = 'default', 
    legend.position = "topright", single.x = T, 
    show.legend = T, show.labels = F, show.lines = F, show.grid = T, 

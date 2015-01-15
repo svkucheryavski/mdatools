@@ -97,11 +97,13 @@ randtest = function(x, y, ncomp = 15, center = T, scale = F, nperm = 1000,
 #' label for x axis
 #' @param ylab
 #' label for y axis
+#' @param ...
+#' other optional arguments
 #' 
 #' @details
 #' See examples in help for \code{\link{randtest}} function.
 #' 
-plotHist.randtest = function(obj, comp = NULL, main = NULL, xlab = 'Test statistic', ylab = 'Frequency')    
+plotHist.randtest = function(obj, comp = NULL, main = NULL, xlab = 'Test statistic', ylab = 'Frequency', ...)    
 {
    if (is.null(comp))
       comp = obj$ncomp.selected
@@ -139,11 +141,13 @@ plotHist.randtest = function(obj, comp = NULL, main = NULL, xlab = 'Test statist
 #' label for x axis
 #' @param ylab
 #' label for y axis
+#' @param ...
+#' other optional arguments
 #' 
 #' @details
 #' See examples in help for \code{\link{randtest}} function.
 #' 
-plotCorr.randtest = function(obj, comp = NULL, main = NULL, xlab = expression(r^2), ylab = 'Test statistic')
+plotCorr.randtest = function(obj, comp = NULL, main = NULL, xlab = expression(r^2), ylab = 'Test statistic', ...)
 {
    if (is.null(comp))
       comp = obj$ncomp.selected
@@ -154,16 +158,19 @@ plotCorr.randtest = function(obj, comp = NULL, main = NULL, xlab = expression(r^
    data = list(cbind(obj$corrperm[, comp]^2, obj$statperm[, comp]), cbind(1, obj$stat[, comp]))   
    fitdata = rbind(apply(data[[1]], 2, mean), data[[2]])
    
-   mdaplotg(data, type = 'p', main = main, xlab = xlab, ylab = ylab)
+   mdaplotg(data, type = 'p', main = main, xlab = xlab, ylab = ylab, ...)
    mdaplot.showRegressionLine(fitdata, col = rgb(0.6, 0.6, 0.6), lty = 2, lwd = 0.75)
 }
 
 #' Plot for randomization test results
 #' 
+#' @method plot randtest
+#' @S3method plot randtest
+#' 
 #' @description
 #' Makes a bar plot with alpha values for each component.
 #' 
-#' @param obj
+#' @param x
 #' results of randomization test (object of class `randtest`)
 #' @param main
 #' main title for the plot
@@ -171,14 +178,17 @@ plotCorr.randtest = function(obj, comp = NULL, main = NULL, xlab = expression(r^
 #' label for x axis
 #' @param ylab
 #' label for y axis
+#' @param ...
+#' other optional arguments
 #' 
 #' @details
 #' See examples in help for \code{\link{randtest}} function.
 #' 
-plot.randtest = function(obj, main = 'Alpha', xlab = 'Components', ylab = '')
+plot.randtest = function(x, main = 'Alpha', xlab = 'Components', ylab = '', ...)
 {
+   obj = x
    mdaplot(t(rbind(1:length(obj$alpha), obj$alpha)), show.lines = c(NA, 0.05), type = 'h', 
-           main = main, xlab = xlab, ylab = ylab)      
+           main = main, xlab = xlab, ylab = ylab, ...)      
 }
 
 #' Summary method for randtest object
