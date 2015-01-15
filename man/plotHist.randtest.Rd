@@ -5,7 +5,7 @@
 \title{Histogram plot for randomization test results}
 \usage{
 \method{plotHist}{randtest}(obj, comp = NULL, main = NULL,
-  xlab = "Test statistic", ylab = "Frequency")
+  xlab = "Test statistic", ylab = "Frequency", ...)
 }
 \arguments{
 \item{obj}{results of randomization test (object of class `randtest`)}
@@ -17,6 +17,8 @@
 \item{xlab}{label for x axis}
 
 \item{ylab}{label for y axis}
+
+\item{...}{other optional arguments}
 }
 \description{
 Makes a histogram for statistic values distribution for particular component, also
