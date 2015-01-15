@@ -12,7 +12,7 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
    #   ncomp: maximum number of components to calculate
    #   center: logical, center or not x and y data
    #   scale: logical, standardize or not x data
-   #   cv: number of segments for cross-validation (1 - full CV)
+   #   cv: cross-validation settings (see \code{?crossval} for details)
    #   x.test: a matrix with predictor values for test set validation
    #   y.test: a vector with response values for test set validation
    #   method: a method to calculate PLS model
@@ -46,10 +46,15 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
    # correct maximum number of components
    if (!is.null(cv))
    {
-      if (cv == 1)
+      if (!is.numeric(cv))
+         nseg = cv[[2]]
+      else
+         nseg = cv
+      
+      if (nseg == 1)
          nobj.cv = 1
       else
-         nobj.cv = ceiling(nrow(x)/cv)  
+         nobj.cv = ceiling(nrow(x)/nseg)  
    }
    else
    {   
@@ -137,7 +142,7 @@ pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE)
    
    # do PLS
    if (method == 'simpls')
-      res = pls.simpls(x, y, ncomp)
+      res = pls.simpls(x, y, ncomp, cv = cv)
    else
       stop('Method with this name is not supported!')
 
@@ -187,7 +192,7 @@ pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE)
 #' [1]. S. de Jong. SIMPLS: An Alternative approach to partial least squares regression. 
 #' Chemometrics and Intelligent Laboratory Systems, 18, 1993 (251-263).
 #' 
-pls.simpls = function(x, y, ncomp, cv = F)
+pls.simpls = function(x, y, ncomp, cv = FALSE)
 {
    x = as.matrix(x)
    y = as.matrix(y)
@@ -218,6 +223,7 @@ pls.simpls = function(x, y, ncomp, cv = F)
       # get the dominate eigenvector of A'A
       e = eigen(t(A) %*% A)
       q = e$vectors[1:nresp]
+      
       
       # calculate and store weights
       w = A %*% q
@@ -267,7 +273,7 @@ pls.simpls = function(x, y, ncomp, cv = F)
    rownames(P) = rownames(B) = rownames(W) = prednames
    rownames(TT) = rownames(U) = objnames
    rownames(Q) = dimnames(B)[[3]] = respnames
-   
+
    res = list(
       coeffs = B,
       weights = W,
@@ -314,9 +320,10 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F, jack.knife = T)
    
    # get matrix with indices for cv segments
    idx = crossval(nobj, cv)
-   
    seglen = ncol(idx);
-   
+   nseg = nrow(idx);
+   nrep = dim(idx)[3]
+
    yp = array(0, dim = c(nobj, ncomp, nresp))
    Q2x = matrix(0, ncol = ncomp, nrow = nobj)   
    T2x = matrix(0, ncol = ncomp, nrow = nobj)   
@@ -324,33 +331,47 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F, jack.knife = T)
    T2y = matrix(0, ncol = ncomp, nrow = nobj)   
    jkcoeffs = array(0, dim = c(nvar, ncomp, ncol(y), nrow(idx)))
    
-   # loop over segments
-   for (i in 1:nrow(idx))
+   # loop over segments and repetitions
+   for (iRep in 1:nrep)
    {   
-      ind = na.exclude(idx[i,])
-      if (length(ind) > 0)
-      {   
-         xc = x[-ind, , drop = F]
-         yc = y[-ind, , drop = F]
-         xt = x[ind, , drop = F]
-         yt = y[ind, , drop = F]
-
-         m = pls.cal(xc, yc, ncomp, center = center, scale = scale, cv = TRUE)            
-         res = predict.pls(m, xt, yt, cv = T)
+      for (iSeg in 1:nseg)
+      {         
+         ind = na.exclude(idx[iSeg, , iRep])
          
-         xdist = ldecomp.getDistances(res$xscores, m$xloadings, res$xresiduals, 
-                                      model$calres$xdecomp$tnorm)
-         ydist = ldecomp.getDistances(res$xscores, m$yloadings, res$yresiduals, 
-                                      model$calres$xdecomp$tnorm)
-         
-         yp[ind, , ] = res$yp
-         Q2x[ind, ] = xdist$Q2        
-         T2x[ind, ] = xdist$T2        
-         Q2y[ind, ] = ydist$Q2        
-         T2y[ind, ] = ydist$T2        
-         jkcoeffs[, , , i] = m$coeffs$values
+         if (length(ind) > 0)
+         {   
+            xc = x[-ind, , drop = F]
+            yc = y[-ind, , drop = F]
+            xt = x[ind, , drop = F]
+            yt = y[ind, , drop = F]
+            
+            m = pls.cal(xc, yc, ncomp, center = center, scale = scale, cv = TRUE)            
+            res = predict.pls(m, xt, yt, cv = T)
+            
+            xdist = ldecomp.getDistances(res$xscores, m$xloadings, res$xresiduals, 
+                                         model$calres$xdecomp$tnorm)
+            ydist = ldecomp.getDistances(res$xscores, m$yloadings, res$yresiduals, 
+                                         model$calres$xdecomp$tnorm)
+            
+            dim(m$coeffs$values) = c(dim(m$coeffs$values), 1)
+            
+            yp[ind, , ] = yp[ind, , , drop = F]  + res$yp
+            Q2x[ind, ]  = Q2x[ind, , drop = F] + xdist$Q2        
+            T2x[ind, ]  = T2x[ind, , drop = F] + xdist$T2        
+            Q2y[ind, ]  = ydist$Q2 + Q2y[ind, , drop = F]       
+            T2y[ind, ]  = ydist$T2 + T2y[ind, , drop = F]        
+            jkcoeffs[, , , iSeg] = jkcoeffs[, , , iSeg, drop = F] + m$coeffs$values
+         }   
       }      
    }  
+   
+   # average results over repetitions
+   yp = yp / nrep
+   Q2x = Q2x / nrep
+   T2x = T2x / nrep
+   Q2y = Q2y / nrep
+   T2y = T2y / nrep
+   jkcoeffs = jkcoeffs / nrep
    
    dimnames(yp) = list(rownames(x), colnames(model$coeffs$values), colnames(model$calres$y.ref))         
    

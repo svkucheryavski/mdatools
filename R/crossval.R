@@ -6,30 +6,81 @@
 #' 
 #' @param nobj
 #' number of objects in a dataset
-#' @param nseg
-#' number of segments to split the data to
+#' @param cv
+#' cross-validation settings, can be a number or a list. If cv is a number, it will be 
+#' used as a number of segments for random cross-validation (if cv = 1, full cross-validation 
+#' will be preformed), if it is a list, the following syntax can be used: cv = list('rand', nseg, nrep) 
+#' for random repeated cross-validation with nseg segments and nrep repetitions or cv = list('ven', nseg) 
+#' for systematic splits to nseg segments ('venetian blinds').  
 #' 
 #' @return
 #' matrix with object indices for each segment
 #' 
-crossval = function(nobj, nseg = NULL)
+crossval = function(nobj, cv = NULL)
 {
-   if (is.null(nseg))
+   methods = c('rand', 'ven', 'loo')
+   
+   if (is.null(cv))
    {
+      type = 'rand'
+      rep = 1
       if (nobj < 24) { nseg = nobj}
       else if (nobj >= 24 && nobj < 40) { nseg = 8}
-      else if (nobj > 40) { nseg = 4 }
+      else if (nobj >= 40) { nseg = 4 }
    }   
-   else if (nseg == 1)
+   else if (is.numeric(cv))
    {
-      nseg = nobj
+      type = 'rand'
+      nrep = 1
+      if (cv == 1)
+         nseg = nobj
+      else
+         nseg = cv
+   }
+   else
+   {
+      type = cv[[1]]
+      
+      if ( type == 'loo' )
+      {
+         type = 'rand'
+         nseg = nobj
+         nrep = 1
+      }   
+      else
+      {   
+         nseg = cv[[2]]
+      
+         if (length(cv) > 2)
+            nrep = cv[[3]]
+         else
+            nrep = 1
+      }   
    }   
+   
+   if ( !(type %in% methods) ) 
+      stop('Wrong name for cross-valudation method!')      
+   
+   if (type != 'rand')
+      nrep = 1
    
    seglen = ceiling(nobj / nseg)
    fulllen = seglen * nseg
    
-   idx = c(sample(1:nobj), rep(NA, fulllen - nobj))
-   idx = matrix(idx, nrow = nseg, byrow = T)   
-   
+   idx = array(0, dim = c(nseg, ceiling(nobj / nseg), nrep))
+      
+   if (type == 'rand')
+   {   
+      for (irep in 1:nrep)
+      {   
+         v = c(sample(1:nobj), rep(NA, fulllen - nobj))
+         idx[, , irep] = matrix(v, nrow = nseg, byrow = T)   
+      }
+   }
+   else if (type == 'ven')
+   {
+      v = c(1:nobj, rep(NA, fulllen - nobj))
+      idx[, , 1] = matrix(v, nrow = nseg, byrow = F)               
+   }   
    return (idx)        
 }   

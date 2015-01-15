@@ -493,3 +493,32 @@ plotXYLoadings = function(obj, ...)
    UseMethod("plotXYLoadings")
 }   
 
+#' Statistic histogram 
+#' 
+#' @details
+#' Generic function for plotting statistic histogram plot
+#' 
+#' @param obj
+#' a model or result object
+#' @param ...
+#' other arguments
+#' 
+plotHist = function(obj, ...)
+{   
+   UseMethod("plotHist")
+}   
+
+#' Correlation plot 
+#' 
+#' @details
+#' Generic function for correlation plot
+#' 
+#' @param obj
+#' a model or result object
+#' @param ...
+#' other arguments
+#' 
+plotCorr = function(obj, ...)
+{   
+   UseMethod("plotCorr")
+}   

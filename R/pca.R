@@ -357,29 +357,36 @@ pca.crossval = function(model, x, cv, center = T, scale = F)
    
    # get matrix with indices for cv segments
    idx = crossval(nobj, cv)
-   
    seglen = ncol(idx);
-   
+   nseg = nrow(idx);
+   nrep = dim(idx)[3]
+      
    Q2 = matrix(0, ncol = ncomp, nrow = nobj)   
    T2 = matrix(0, ncol = ncomp, nrow = nobj)   
    
-   # loop over segments
-   for (i in 1:nrow(idx))
-   {
-      ind = na.exclude(idx[i,])
-      
-      if (length(ind) > 0)
-      {   
-         x.cal = x[-ind, , drop = F]
-         x.val = x[ind, , drop = F]
-         
-         m = pca.cal(x.cal, ncomp, center, scale)               
-         res = predict.pca(m, x.val, cv = T)
-         Q2[ind, ] = res$Q2
-         T2[ind, ] = res$T2
-      }
-   }  
+   # loop over repetitions and segments
    
+   for (iRep in 1:nrep)
+   {   
+      for (iSeg in 1:nrow(idx))
+      {
+         ind = na.exclude(idx[iSeg, ,iRep])
+      
+         if (length(ind) > 0)
+         {   
+            x.cal = x[-ind, , drop = F]
+            x.val = x[ind, , drop = F]
+         
+            m = pca.cal(x.cal, ncomp, center, scale)               
+            res = predict.pca(m, x.val, cv = T)
+            Q2[ind, ] = Q2[ind, ] + res$Q2
+            T2[ind, ] = T2[ind, ] + res$T2
+         }
+      }  
+   }
+   
+   Q2 = Q2 / nrep
+   T2 = T2 / nrep
    rownames(Q2) = rownames(T2) = rownames(x)
    colnames(Q2) = colnames(T2) = colnames(model$scores)
 

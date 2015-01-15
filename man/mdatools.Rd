@@ -23,6 +23,7 @@ So far the following modelling methods are implemented:
       \code{\link{simca}}, \code{\link{simcares}} \tab Soft Independent Modelling of Class Analogues (SIMCA)\cr
       \code{\link{simcam}}, \code{\link{simcamres}} \tab SIMCA for multiple classes case (SIMCA)\cr
       \code{\link{plsda}}, \code{\link{plsdares}} \tab Partial Least Squares Dscriminant Analysis (PLS-DA).\cr
+      \code{\link{randtest}} \tab Randomization test for PLS-regression.\cr
 }
 
 Methods for data preprocessing:
