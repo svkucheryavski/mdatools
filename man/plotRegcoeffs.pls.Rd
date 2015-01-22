@@ -5,7 +5,7 @@
 \title{Regression coefficient plot for PLS}
 \usage{
 \method{plotRegcoeffs}{pls}(obj, ncomp = NULL, ny = 1, main = NULL,
-  ylab = NULL, ...)
+  ylab = NULL, show.ci = T, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -17,6 +17,8 @@
 \item{main}{main plot title}
 
 \item{ylab}{label for y axis}
+
+\item{show.ci}{logical, show or not confidence intervals if they are available}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

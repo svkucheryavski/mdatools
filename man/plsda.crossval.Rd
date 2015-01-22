@@ -4,7 +4,7 @@
 \alias{plsda.crossval}
 \title{Cross-validation of a PLS-DA model}
 \usage{
-plsda.crossval(model, x, c, cv, center = T, scale = F)
+plsda.crossval(model, x, c, cv, center = T, scale = F, jack.knife = T)
 }
 \arguments{
 \item{model}{a PLS-DA model (object of class \code{plsda})}
@@ -18,6 +18,8 @@ plsda.crossval(model, x, c, cv, center = T, scale = F)
 \item{center}{logical, do mean centering or not}
 
 \item{scale}{logical, do standardization or not}
+
+\item{jack.knife}{logical, do jack-knifing or not}
 }
 \value{
 object of class \code{plsdares} with results of cross-validation

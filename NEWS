@@ -1,3 +1,9 @@
+v.0.6.1
+========
+* fixed a bug led to incorrect calculation of specificity
+* jack-knife confidence intervals now also calculated for PLS-DA models
+* confidence intervals for regression coefficients are shown by default if calculated
+
 v.0.6.0
 ========
 * randomization test for PLS has been added, see `?randtest`
