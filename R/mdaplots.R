@@ -462,18 +462,20 @@ mdaplot.showLabels = function(data, pos = 3, cex = 0.65, col = 'darkgray', type 
       rownames(data) = 1:nrow(data)
    
    # show labels
-   if (!is.null(type) && type == 'h')
-   {   
-      # show labels properly for bars with positive and negative values
-      neg = data[, 2] < 0
-      if (sum(neg) > 0)
-         text(data[neg, 1], data[neg, 2], rownames(data)[neg], cex = cex, pos = 1, col = col)   
-      if (sum(!neg) > 0)
-         text(data[!neg, 1], data[!neg, 2], rownames(data)[!neg], cex = cex, pos = 3, col = col)   
+   if (!any(is.nan(data)))
+   {
+      if (!is.null(type) && type == 'h')
+      {   
+         # show labels properly for bars with positive and negative values
+         neg = data[, 2] < 0
+         if (sum(neg) > 0)
+            text(data[neg, 1], data[neg, 2], rownames(data)[neg], cex = cex, pos = 1, col = col)   
+         if (sum(!neg) > 0)
+            text(data[!neg, 1], data[!neg, 2], rownames(data)[!neg], cex = cex, pos = 3, col = col)   
+      }
+      else 
+         text(data[, 1], data[, 2], rownames(data), cex = cex, pos = pos, col = col)   
    }
-   else 
-      text(data[, 1], data[, 2], rownames(data), cex = cex, pos = pos, col = col)   
-   
 }  
 
 

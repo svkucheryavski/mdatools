@@ -1,7 +1,8 @@
 # class and methods for Partial Least Squares Discriminant Analysis #
 
 plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL, 
-               x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, info = '')
+               x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, 
+               coeffs.ci = NULL, coeffs.alpha = 0.1, info = '')
 {
    # Calibrate and validate a PLS-DA model.
    #
@@ -25,8 +26,53 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
    c = as.matrix(c)
    y = plsda.getReferenceValues(c)
 
+   # set LOO cross-validation if jack.knife is selected
+   jack.knife = F
+   if (!is.null(coeffs.ci) && coeffs.ci == 'jk')
+   {
+      jack.knife = T
+      if (is.null(cv))
+      {   
+         cv = 1      
+      }   
+      else
+      {
+         if (is.list(cv))
+         {   
+            if (length(cv) == 1 && cv[[1]] == 'loo')
+               cvnseg = nrow(y)
+            else   
+               cvnseg = cv[[2]]
+         }   
+         else
+         {
+            cvnseg = cv
+         }   
+         
+         if (cvnseg > 1 && cvnseg < 10)
+            warning('Number of segments in cross-validation is too small for jack-knifing!')   
+      }   
+   }   
+   
    # correct maximum number of components
-   ncomp = min(ncol(x), nrow(x) - 1, ncomp)
+   if (!is.null(cv))
+   {
+      if (!is.numeric(cv))
+         nseg = cv[[2]]
+      else
+         nseg = cv
+      
+      if (nseg == 1)
+         nobj.cv = 1
+      else
+         nobj.cv = ceiling(nrow(x)/nseg)  
+   }
+   else
+   {   
+      nobj.cv = 0
+   }
+   
+   ncomp = min(ncol(x), nrow(x) - 1 - nobj.cv, ncomp)
    
    # build a model and apply to calibration set
    model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method)
@@ -38,9 +84,21 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
    model = selectCompNum.pls(model, ncomp)
    
    # do cross-validation if needed
-   if (!is.null(cv))
-      model$cvres = plsda.crossval(model, x, c, cv, center = center, scale = scale)    
-   
+   if (!is.null(cv)) 
+   {
+      res = plsda.crossval(model, x, c, cv, center = center, scale = scale, jack.knife = jack.knife)    
+      if (jack.knife == TRUE)
+      {   
+         model$coeffs = regcoeffs(model$coeffs$values, res$jkcoeffs, coeffs.alpha)
+         res[['jkcoeffs']] = NULL
+         model$cvres = res
+      }
+      else
+      {
+         model$cvres = res;
+      }   
+      
+   }
    # do test set validation if provided
    if (!is.null(x.test) && !is.null(c.test))
    {
@@ -167,14 +225,16 @@ classify.plsda = function(model, y, c.ref = NULL)
 #' logical, do mean centering or not
 #' @param scale
 #' logical, do standardization or not
+#' @param jack.knife
+#' logical, do jack-knifing or not
 #'
 #' @return
 #' object of class \code{plsdares} with results of cross-validation
 #'  
-plsda.crossval = function(model, x, c, cv, center = T, scale = F)
+plsda.crossval = function(model, x, c, cv, center = T, scale = F, jack.knife = T)
 {
    y = plsda.getReferenceValues(c, model$classnames)
-   plsres = pls.crossval(model, x, y, cv, center, scale)
+   plsres = pls.crossval(model, x, y, cv, center, scale, jack.knife)
    cres = classify.plsda(model, plsres$y.pred, c)
 
    res = plsdares(plsres, cres)

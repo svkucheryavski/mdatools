@@ -37,9 +37,22 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
       {   
          cv = 1      
       }   
-      else if (cv < 10)
+      else
       {
-         warning('Number of segments in cross-validation is too small for jack-knifing!')   
+         if (is.list(cv))
+         {   
+            if (length(cv) == 1 && cv[[1]] == 'loo')
+               cvnseg = nrow(y)
+            else   
+               cvnseg = cv[[2]]
+         }   
+         else
+         {
+            cvnseg = cv
+         }   
+         
+         if (cvnseg > 1 && cvnseg < 10)
+            warning('Number of segments in cross-validation is too small for jack-knifing!')   
       }   
    }   
    
@@ -71,8 +84,7 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
    # do cross-validation if needed
    if (!is.null(cv))
    {   
-      res = pls.crossval(model, x, y, cv, center = center, scale = scale, 
-                                 jack.knife = T)    
+      res = pls.crossval(model, x, y, cv, center = center, scale = scale, jack.knife = jack.knife)    
       if (jack.knife == T)
       {   
          model$coeffs = regcoeffs(model$coeffs$values, res$jkcoeffs, coeffs.alpha)
@@ -1469,13 +1481,15 @@ plotYResiduals.pls = function(obj, ncomp = NULL, ny = 1, type = 'p',
 #' main plot title
 #' @param ylab
 #' label for y axis
+#' @param show.ci
+#' logical, show or not confidence intervals if they are available
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
-plotRegcoeffs.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, ylab = NULL, ...)
+plotRegcoeffs.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, ylab = NULL, show.ci = T, ...)
 {
    if (is.null(main))
    {   
@@ -1498,7 +1512,7 @@ plotRegcoeffs.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, ylab = NULL
    else if (ncomp <= 0 || ncomp > obj$ncomp) 
       stop('Wrong value for number of components!')
    
-   plot(obj$coeffs, ncomp = ncomp, ny = ny, main = main, ylab = ylab, ...)
+   plot(obj$coeffs, ncomp = ncomp, ny = ny, main = main, ylab = ylab, show.ci = show.ci, ...)
 }
 
 #' X loadings plot for PLS

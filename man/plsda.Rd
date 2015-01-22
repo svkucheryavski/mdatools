@@ -4,7 +4,8 @@
 
 \usage{
   plsda(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
-    x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, info = '')
+    x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, 
+    coeffs.ci = NULL, coeffs.alpha = 0.1, info = '')
 }
 
 \description{
@@ -22,6 +23,8 @@
   \item{c.test }{vector with reference class values for test set (same format as calibration values).}
   \item{method }{method for calculating PLS model.}
   \item{alpha }{significance level for calculating statistical limits for residuals.}  
+  \item{coeffs.ci }{method to calculate p-values and confidence intervals for regression coefficients (so far only jack-knifing is availavle: \code{='jk'}).}
+  \item{coeffs.alpha }{significance level for calculating confidence intervals for regression coefficients.}
   \item{info }{short text with information about the model.}
 }
 
@@ -43,6 +46,9 @@ Returns an object of \code{plsda} class with following fields (most inherited fr
 The \code{plsda} class is based on \code{pls} with extra functions and plots covering classification functionality. All plots for \code{pls}
 can be used. E.g. of you want to see the real predicted values (y in PLS) instead of classes use \code{plotPredictions.pls(model)} instead
 of \code{plotPredictions(model)}.
+
+Calculation of confidence intervals and p-values for regression coefficients are available
+only by jack-knifing so far. See help for \code{\link{regcoeffs}} objects for details.
 }
 
 \seealso{

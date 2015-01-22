@@ -176,7 +176,7 @@ print.regcoeffs = function(x, ncomp = 1, ny = 1, digits = 3, ...)
 plot.regcoeffs = function(x, ncomp = 1, ny = 1, type = NULL, col = NULL, 
                           main = 'Regression coefficients',
                           xlab = 'Variables', ylab = 'Coefficients', show.line = T, 
-                          show.ci = F, ...)
+                          show.ci = T, ...)
 {
    obj = x
    

@@ -83,6 +83,8 @@ getClassificationPerformance = function(c.ref, c.pred)
    tp = matrix(0, nrow = nclasses, ncol = ncomp)
    fp = matrix(0, nrow = nclasses, ncol = ncomp)
    fn = matrix(0, nrow = nclasses, ncol = ncomp)
+   tn = matrix(0, nrow = nclasses, ncol = ncomp)
+   
    specificity = matrix(0, nrow = nclasses + 1, ncol = ncomp)
    sensitivity = matrix(0, nrow = nclasses + 1, ncol = ncomp)
    misclassified = matrix(0, nrow = nclasses + 1, ncol = ncomp)
@@ -94,14 +96,15 @@ getClassificationPerformance = function(c.ref, c.pred)
       fn[i, ] = colSums((c.ref[, 1] == classnames[i]) & (c.pred[, , i, drop = F] == -1))
       fp[i, ] = colSums((c.ref[, 1] != classnames[i]) & (c.pred[, , i, drop = F] == 1))
       tp[i, ] = colSums((c.ref[, 1] == classnames[i]) & (c.pred[, , i, drop = F] == 1))
-
+      tn[i, ] = colSums((c.ref[, 1] != classnames[i]) & (c.pred[, , i, drop = F] == -1))
+      
       sensitivity[i, ] = tp[i, ] / (tp[i, ] + fn[i, ])
-      specificity[i, ] = tp[i, ] / (tp[i, ] + fp[i, ])
+      specificity[i, ] = tn[i, ] / (tn[i, ] + fp[i, ])
       misclassified[i, ] = (fp[i, ] + fn[i, ]) / nobj
    }
 
    sensitivity[nclasses + 1, ] = colSums(tp) / (colSums(tp) + colSums(fn))
-   specificity[nclasses + 1, ] = colSums(tp) / (colSums(tp) + colSums(fp))
+   specificity[nclasses + 1, ] = colSums(tn) / (colSums(tn) + colSums(fp))
    misclassified[nclasses + 1, ] = (colSums(fp) + colSums(fn)) / (nclasses * nobj)
 
    rownames(fn) = rownames(fp) = rownames(tp) = dimnames(c.pred)[[3]]
@@ -112,6 +115,7 @@ getClassificationPerformance = function(c.ref, c.pred)
    obj$fn = fn
    obj$fp = fp
    obj$tp = tp
+   obj$tn = tn
    obj$sensitivity = sensitivity
    obj$specificity = specificity
    obj$misclassified = misclassified
@@ -505,13 +509,14 @@ as.matrix.classres = function(x, ncomp = NULL, nc = 1, ...)
    if (!is.null(obj$c.ref))
    {  
       if (is.null(ncomp))
-         res = cbind(obj$tp[nc, ], obj$fp[nc, ], obj$fn[nc, ], obj$specificity[nc, ], obj$sensitivity[nc, ])
+         res = cbind(obj$tp[nc, ], obj$fp[nc, ], obj$tn[nc, ], obj$fn[nc, ], 
+                     obj$specificity[nc, ], obj$sensitivity[nc, ])
       else
-         res = cbind(obj$tp[nc, ncomp], obj$fp[nc, ncomp], obj$fn[nc, ncomp], 
+         res = cbind(obj$tp[nc, ncomp], obj$fp[nc, ncomp], obj$tn[nc, ncomp], obj$fn[nc, ncomp], 
                      round(obj$specificity[nc, ncomp], 3), round(obj$sensitivity[nc, ncomp], 3))
 
    res[, 4:5] = round(res[, 4:5], 3)
-   colnames(res) = c('TP', 'FP', 'FN', 'Spec', 'Sens')
+   colnames(res) = c('TP', 'FP', 'TN', 'FN', 'Spec', 'Sens')
    }
    else
    {

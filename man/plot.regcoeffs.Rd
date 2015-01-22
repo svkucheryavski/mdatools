@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{regcoeffs}(x, ncomp = 1, ny = 1, type = NULL, col = NULL,
   main = "Regression coefficients", xlab = "Variables",
-  ylab = "Coefficients", show.line = T, show.ci = F, ...)
+  ylab = "Coefficients", show.line = T, show.ci = T, ...)
 }
 \arguments{
 \item{x}{regression coefficients object (class \code{regcoeffs})}

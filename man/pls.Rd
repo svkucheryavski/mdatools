@@ -24,8 +24,7 @@
   \item{method }{method for calculating PLS model.}
   \item{alpha }{significance level for calculating statistical limits for residuals.}
   \item{coeffs.ci }{method to calculate p-values and confidence intervals for regression coefficients (so far only jack-knifing is availavle: \code{='jk'}).}
-  \item{coeffs.alpha }{significance level for calculating confidence intervals for
-  regression coefficients.}
+  \item{coeffs.alpha }{significance level for calculating confidence intervals for regression coefficients.}
   \item{info }{short text with information about the model.}
 }
 
