@@ -72,8 +72,9 @@ y = simdata$conc.c[, 3]
 x = simdata$spectra.c
 x = prep.snv(x)
 
-## Run the test and show summary
-r = randtest(x, y, ncomp = 5, nperm = 2000, silent = FALSE)
+## Run the test and show summary 
+## (normally use higher nperm values > 1000)
+r = randtest(x, y, ncomp = 4, nperm = 200, silent = FALSE)
 summary(r)
 
 ## Show plots
