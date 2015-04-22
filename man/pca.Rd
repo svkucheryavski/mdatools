@@ -21,7 +21,7 @@ pca(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
   \item{scale}{logical, do sdandardization of data or not.}
   \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
   \item{x.test}{a numerical matrix with test data.}
-  \item{alpha}{significance level for calculating limit for Q2 residuals.}
+  \item{alpha}{significance level for calculating limit for Q residuals.}
   \item{method}{method to compute principal components.}
   \item{info}{a short text line with model description.}
 }
@@ -29,7 +29,7 @@ pca(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
 \details{
 So far only SVD (Singular Value Decompisition) method is available, more coming soon. 
 
-By default \code{pca} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of variables and default or provided value. Besides that, there is also a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal number of components is used to build a residuals plot (with Q2 residuals vs. Hotelling T2 values), calculate confidence limits for Q2 residuals, as well as for SIMCA classification. 
+By default \code{pca} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of variables and default or provided value. Besides that, there is also a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal number of components is used to build a residuals plot (with Q residuals vs. Hotelling T2 values), calculate confidence limits for Q residuals, as well as for SIMCA classification. 
 
 If data contains missing values (NA) the \code{pca} will use an iterative algorithm to fit the values with most probable ones. The algorithm is implemented in a function \code{\link{pca.mvreplace}}. The same center and scale options will be used. You can also do this step manually before calling \code{pca} and play with extra options.
 
@@ -44,7 +44,7 @@ Returns an object of \code{pca} class with following fields:
 \item{expvar }{vector with explained variance for each component (in percent).} 
 \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).} 
 \item{T2lim }{statistical limit for T2 distance.} 
-\item{Q2lim }{statistical limit for Q2 distance.} 
+\item{Qlim }{statistical limit for Q residuals.} 
 \item{info }{information about the model, provided by user when build the model.} 
 \item{calres }{an object of class \code{\link{pcares}} with PCA results for a calibration data.} 
 \item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it was provided.} 
@@ -67,7 +67,7 @@ Methods for \code{pca} objects:
       \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
       \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
       \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
-      \code{\link{plotResiduals.pca}} \tab shows Q2 vs. T2 residuals plot.\cr
+      \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
        }
    Most of the methods for plotting data are also available for PCA results 
    (\code{\link{pcares}}) objects.    

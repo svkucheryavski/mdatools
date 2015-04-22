@@ -16,7 +16,7 @@
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
 \description{
-Shows a plot with Q2 residuals vs. Hotelling T2 values for PLS decomposition of x data.
+Shows a plot with Q residuals vs. Hotelling T2 values for PLS decomposition of x data.
 }
 \details{
 See examples in help for \code{\link{plsres}} function.

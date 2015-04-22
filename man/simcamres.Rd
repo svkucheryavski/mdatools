@@ -10,15 +10,15 @@ Results of SIMCA multiclass classification
 }
 
 \usage{
-simcamres(cres, T2, Q2, T2lim, Q2lim)
+simcamres(cres, T2, Q, T2lim, Qlim)
 }
 
 \arguments{
   \item{cres }{results of classification (class \code{classres}).}
   \item{T2 }{matrix with T2 values for each object and class.}
-  \item{Q2 }{matrix with Q2 values for each object and class.}
+  \item{Q }{matrix with Q values for each object and class.}
   \item{T2lim }{vector with T2 statistical limits for each class.}
-  \item{Q2lim }{vector with Q2 statistical limits for each class.}
+  \item{Qlim }{vector with Q statistical limits for each class.}
 }
 
 \details{
@@ -35,14 +35,14 @@ to show summary and plots for the results.
 
 \value{
 Returns an object (list) of class \code{simcamres} with the same fields as \code{\link{classres}} plus extra fields for 
-Q2 and T2 values and limits:
+Q and T2 values and limits:
 
 \item{c.pred}{predicted class values.}
 \item{c.ref}{reference (true) class values if provided.}
 \item{T2}{matrix with T2 values for each object and class.}
-\item{Q2}{matrix with Q2 values for each object and class.}
+\item{Q}{matrix with Q values for each object and class.}
 \item{T2lim}{vector with T2 statistical limits for each class.}
-\item{Q2lim}{vector with Q2 statistical limits for each class.}
+\item{Qlim}{vector with Q statistical limits for each class.}
 
 The following fields are available only if reference values were provided.
 \item{tp}{number of true positives.}
@@ -62,7 +62,7 @@ Methods for \code{simcamres} objects:
   \tabular{ll}{
       \code{print.simcamres} \tab shows information about the object.\cr
       \code{summary.simcamres} \tab shows statistics for results of classification.\cr
-      \code{\link{plotResiduals.simcamres}} \tab makes Q2 vs. T2 residuals plot.\cr
+      \code{\link{plotResiduals.simcamres}} \tab makes Q vs. T2 residuals plot.\cr
       \code{\link{plotCooman.simcamres}} \tab makes Cooman's plot.\cr
    }
    

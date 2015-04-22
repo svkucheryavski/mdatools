@@ -34,7 +34,7 @@ Returns an object (list) of class \code{pcares} and \code{ldecomp} with followin
 \item{scores }{matrix with score values (nobj x ncomp).}
 \item{residuals }{matrix with data residuals (nobj x nvar).}
 \item{T2 }{matrix with T2 distances (nobj x ncomp).}
-\item{Q2 }{matrix with Q2 distances (nobj x ncomp).}
+\item{Q }{matrix with Q residuals (nobj x ncomp).}
 \item{tnorm }{vector with singular values used for scores normalization.}
 \item{ncomp.selected }{selected number of components.}
 \item{expvar }{explained variance for each component.}
@@ -58,7 +58,7 @@ Methods, inherited from \code{\link{ldecomp}} class:
       \code{\link{plotScores.ldecomp}} \tab makes scores plot.\cr
       \code{\link{plotVariance.ldecomp}} \tab makes explained variance plot.\cr
       \code{\link{plotCumVariance.ldecomp}} \tab makes cumulative explained variance plot.\cr
-      \code{\link{plotResiduals.ldecomp}} \tab makes Q2 vs. T2 residuals plot.\cr
+      \code{\link{plotResiduals.ldecomp}} \tab makes Q vs. T2 residuals plot.\cr
    }
    Check also \code{\link{pca}} and \code{\link{ldecomp}}.    
 }

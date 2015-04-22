@@ -5,8 +5,8 @@
 \title{Residuals plot for SIMCAM results}
 \usage{
 \method{plotResiduals}{simcamres}(obj, nc = 1, show.limits = T,
-  type = "p", main = NULL, xlab = "T2", ylab = "Q2", legend = NULL,
-  ...)
+  type = "p", main = NULL, xlab = "T2",
+  ylab = "Squared residual distance (Q)", legend = NULL, ...)
 }
 \arguments{
 \item{obj}{SIMCAM results (object of class \code{simcamres})}
@@ -28,7 +28,7 @@
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
-Shows a plot with Q2 vs. T2 residuals for SIMCAM results
+Shows a plot with Q vs. T2 residuals for SIMCAM results
 }
 \details{
 See examples in help for \code{\link{simcamres}} function.

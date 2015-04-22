@@ -5,7 +5,8 @@
 \title{X residuals plot for PLS}
 \usage{
 \method{plotXResiduals}{pls}(obj, ncomp = NULL, main = NULL, xlab = "T2",
-  ylab = "Q2", show.labels = F, show.legend = T, ...)
+  ylab = "Squared residual distance (Q)", show.labels = F,
+  show.legend = T, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -25,7 +26,7 @@
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
-Shows a plot with Q2 residuals vs. Hotelling T2 values for PLS decomposition of x data.
+Shows a plot with Q residuals vs. Hotelling T2 values for PLS decomposition of x data.
 }
 \details{
 See examples in help for \code{\link{pls}} function.

@@ -15,7 +15,7 @@ simca.classify(model, res)
 vector with predicted class values (\code{c.pred})
 }
 \description{
-Make classification based on calculated T2 and Q2 values and corresponding limits
+Make classification based on calculated T2 and Q values and corresponding limits
 }
 \details{
 This is a service function for SIMCA class, do not use it manually.

@@ -19,8 +19,8 @@
 #' number of selected components
 #' @param T2
 #' matrix with calculated T2 values (e.g. for CV)
-#' @param Q2
-#' matrix with calculated Q2 values (e.g. for CV)
+#' @param Q
+#' matrix with calculated Q statistic (e.g. for CV)
 #' @param cal
 #' logical, true if data is for calibration of a LDECOMP based model
 #'
@@ -29,7 +29,7 @@
 #' \item{scores }{matrix with score values (nobj x ncomp).}
 #' \item{residuals }{matrix with data residuals (nobj x nvar).}
 #' \item{T2 }{matrix with T2 distances (nobj x ncomp).}
-#' \item{Q2 }{matrix with Q2 distances (nobj x ncomp).}
+#' \item{Q }{matrix with Q statistic (nobj x ncomp).}
 #' \item{tnorm }{vector with singular values used for scores normalization.}
 #' \item{ncomp.selected }{selected number of components.}
 #' \item{expvar }{explained variance for each component.}
@@ -48,7 +48,7 @@
 #'
 ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL, 
                    totvar, tnorm = NULL, ncomp.selected = NULL,
-                   T2 = NULL, Q2 = NULL, cal = TRUE)
+                   T2 = NULL, Q = NULL, cal = TRUE)
 {
    if (!is.null(scores))
    {   
@@ -69,12 +69,12 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
       obj$ncomp.selected = ncomp.selected
    
    # calculate residual distances and explained variance
-   if (is.null(Q2) && is.null(T2) && !is.null(scores) && !is.null(loadings) && !is.null(residuals))
+   if (is.null(Q) && is.null(T2) && !is.null(scores) && !is.null(loadings) && !is.null(residuals))
    {   
       res = ldecomp.getDistances(scores, loadings, residuals, tnorm, cal)
       
-      if (is.null(Q2))
-         obj$Q2 = res$Q2
+      if (is.null(Q))
+         obj$Q = res$Q
       
       if (is.null(T2))
          obj$T2 = res$T2
@@ -86,12 +86,12 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
    }
    else
    {
-      obj$Q2 = Q2
+      obj$Q = Q
       obj$T2 = T2
       obj$tnorm = tnorm
    }   
    
-   var = ldecomp.getVariances(obj$Q2, totvar)   
+   var = ldecomp.getVariances(obj$Q, totvar)   
    obj$expvar = var$expvar
    obj$cumexpvar = var$cumexpvar
    
@@ -105,7 +105,7 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
 #' Residuals distances for linear decomposition
 #'
 #' @description
-#' Computes residual distances (Q2 and T2) and modelling power for a data decomposition X = TP' + E.
+#' Computes residual distances (Q and T2) and modelling power for a data decomposition X = TP' + E.
 #' 
 #' @param scores
 #' matrix with scores (T).
@@ -123,7 +123,7 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
 #' (number of columns in scores and loadings).
 #' 
 #' @return
-#' Returns a list with Q2, Q2var, T2 and modelling power values for each component.
+#' Returns a list with Q, Qvar, T2 and modelling power values for each component.
 #'  
 ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal = TRUE)
 {
@@ -132,7 +132,7 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
    nvar = nrow(loadings)
    
    T2 = matrix(0, nrow = nobj, ncol = ncomp)
-   Q2 = matrix(0, nrow = nobj, ncol = ncomp)
+   Q = matrix(0, nrow = nobj, ncol = ncomp)
    modpower = matrix(0, nrow = nvar, ncol = ncomp)
       
    # calculate normalized scores
@@ -153,7 +153,7 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
       exp = scores[, 1:i, drop = F] %*% t(loadings[, 1:i, drop = F]);
       res = data - exp;
       
-      Q2[, i] = rowSums(res^2)
+      Q[, i] = rowSums(res^2)
       T2[, i] = rowSums(scoresn[, 1:i, drop = F]^2)
       
       if (nobj > i && cal == TRUE)
@@ -161,12 +161,12 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
    }   
    
    # set dimnames and return results
-   colnames(Q2) = colnames(T2) = colnames(modpower) = colnames(scores)
-   rownames(Q2) = rownames(T2) = rownames(scores)
+   colnames(Q) = colnames(T2) = colnames(modpower) = colnames(scores)
+   rownames(Q) = rownames(T2) = rownames(scores)
    rownames(modpower) = rownames(loadings)
       
    res = list(
-      Q2 = Q2,
+      Q = Q,
       T2 = T2,
       modpower = modpower,
       tnorm = tnorm
@@ -179,17 +179,17 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
 #' @description
 #' Computes explained variance and cumulative explained variance for a data decomposition X = TP' + E.
 #'
-#' @param Q2
-#' Q2 values (squared residuals distance from object to component space).
+#' @param Q
+#' Q values (squared residuals distance from object to component space).
 #' @param totvar
 #' Total variance of the original data (after preprocessing).
 #' 
 #' @return
 #' Returns a list with two vectors.
 #' 
-ldecomp.getVariances = function(Q2, totvar)
+ldecomp.getVariances = function(Q, totvar)
 {   
-   cumresvar = colSums(Q2) / totvar * 100
+   cumresvar = colSums(Q) / totvar * 100
    cumexpvar = 100 - cumresvar
    expvar = c(cumexpvar[1], diff(cumexpvar))
    
@@ -199,10 +199,10 @@ ldecomp.getVariances = function(Q2, totvar)
    )
 }
 
-#' Statistical limits for Q2 and T2 residuals
+#' Statistical limits for Q and T2 residuals
 #' 
 #' @description
-#' Computes statisticsl limits for Q2 and T2 residuals
+#' Computes statisticsl limits for Q and T2 residuals
 #' 
 #' @param eigenvals
 #' vector with eigenvalues 
@@ -217,7 +217,7 @@ ldecomp.getVariances = function(Q2, totvar)
 #' T2 limits are calculated using Hotelling statistics. 
 #' 
 #' @return
-#' Returns a list with two vectors:  \code{T2lim} and \code{Q2lim}.
+#' Returns a list with two vectors:  \code{T2lim} and \code{Qlim}.
 #' 
 ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
 {   
@@ -230,8 +230,8 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
          T2lim[1, i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - alpha, i, nobj - i);  
    }
    
-   # calculate Q2 limit using F statistics
-   Q2lim = matrix(0, nrow = 1, ncol = ncomp)
+   # calculate Q limit using F statistics
+   Qlim = matrix(0, nrow = 1, ncol = ncomp)
    conflim = 100 - alpha * 100;   
    nvar = length(eigenvals)
    
@@ -253,16 +253,16 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
          ca = sqrt(2) * erfinv(cl/100)
          h1 = ca * sqrt(2 * t2 * h0^2)/t1
          h2 = t2 * h0 * (h0 - 1)/(t1^2)
-         Q2lim[1, i] = t1 * (1 + h1 + h2)^(1/h0)
+         Qlim[1, i] = t1 * (1 + h1 + h2)^(1/h0)
       }
       else
-         Q2lim[1, i] = 0
+         Qlim[1, i] = 0
    }
    
-   colnames(T2lim) = colnames(Q2lim) = paste('Comp', 1:ncomp)
+   colnames(T2lim) = colnames(Qlim) = paste('Comp', 1:ncomp)
    res = list(
       T2lim = T2lim,
-      Q2lim = Q2lim
+      Qlim = Qlim
    )   
 }   
 
@@ -394,7 +394,7 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
 #' Residuals plot for linear decomposition
 #' 
 #' @description
-#' Shows a plot with T2 vs Q2 values for data objects.
+#' Shows a plot with T2 vs Q values for data objects.
 #' 
 #' @param obj
 #' object of \code{ldecomp} class.
@@ -413,7 +413,7 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
-plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', ylab = 'Q2', 
+plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', ylab = 'Squared residual distance (Q)', 
                                  show.labels = F, show.limits = T, ...)
 {
    if (is.null(main))
@@ -428,11 +428,11 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
       ncomp = obj$ncomp.selected
       
    if (show.limits == T)
-      show.lines = c(obj$T2lim[1, ncomp], obj$Q2lim[1, ncomp])
+      show.lines = c(obj$T2lim[1, ncomp], obj$Qlim[1, ncomp])
    else
       show.lines = F
 
-   data = cbind(obj$T2[, ncomp], obj$Q2[, ncomp])
+   data = cbind(obj$T2[, ncomp], obj$Q[, ncomp])
    colnames(data) = c(xlab, ylab)
    mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, 
            show.lines = show.lines, ...)
@@ -465,7 +465,7 @@ print.ldecomp = function(x, str = NULL, ...)
    cat('\nMajor fields:\n')   
    cat('$scores - matrix with score values\n')
    cat('$T2 - matrix with T2 distances\n')
-   cat('$Q2 - matrix with Q2 residuals\n')
+   cat('$Q - matrix with Q residuals\n')
    cat('$ncomp.selected - selected number of components\n')
    cat('$expvar - explained variance for each component\n')
    cat('$cumexpvar - cumulative explained variance\n')

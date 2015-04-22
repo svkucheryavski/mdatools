@@ -2,7 +2,7 @@
 % Please edit documentation in R/ldecomp.R
 \name{ldecomp.getResLimits}
 \alias{ldecomp.getResLimits}
-\title{Statistical limits for Q2 and T2 residuals}
+\title{Statistical limits for Q and T2 residuals}
 \usage{
 ldecomp.getResLimits(eigenvals, nobj, ncomp, alpha = 0.05)
 }
@@ -16,10 +16,10 @@ ldecomp.getResLimits(eigenvals, nobj, ncomp, alpha = 0.05)
 \item{alpha}{significance level}
 }
 \value{
-Returns a list with two vectors:  \code{T2lim} and \code{Q2lim}.
+Returns a list with two vectors:  \code{T2lim} and \code{Qlim}.
 }
 \description{
-Computes statisticsl limits for Q2 and T2 residuals
+Computes statisticsl limits for Q and T2 residuals
 }
 \details{
 T2 limits are calculated using Hotelling statistics.

@@ -5,7 +5,8 @@
 \title{Residuals plot for PCA}
 \usage{
 \method{plotResiduals}{pca}(obj, ncomp = NULL, main = NULL, xlab = "T2",
-  ylab = "Q2", show.labels = F, show.legend = T, show.limits = T, ...)
+  ylab = "Squared residual distance (Q)", show.labels = F,
+  show.legend = T, show.limits = T, ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
@@ -27,7 +28,7 @@
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
-Shows a plot with Q2 residuals vs. Hotelling T2 values for selected number of components.
+Shows a plot with Q residuals vs. Hotelling T2 values for selected number of components.
 }
 \details{
 See examples in help for \code{\link{pca}} function.

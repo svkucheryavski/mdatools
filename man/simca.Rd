@@ -21,7 +21,7 @@ simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
   \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
   \item{x.test}{a numerical matrix with test data.}
   \item{c.test}{a vector with text values (names of classes) of test data objects.}
-  \item{alpha}{significance level for calculating limit for T2 and Q2 residuals.}
+  \item{alpha}{significance level for calculating limit for T2 and Q residuals.}
   \item{method}{method to compute principal components.}
   \item{info}{text with information about the model}
 }
@@ -46,7 +46,7 @@ Fields, inherited from \code{\link{pca}} class:
 \item{expvar }{vector with explained variance for each component (in percent).} 
 \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).} 
 \item{T2lim }{statistical limit for T2 distance.} 
-\item{Q2lim }{statistical limit for Q2 distance.} 
+\item{Qlim }{statistical limit for Q residuals.} 
 \item{info }{information about the model, provided by user when build the model.} 
 }
 
@@ -83,7 +83,7 @@ Methods, inherited from \code{\link{pca}} class:
       \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
       \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
       \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
-      \code{\link{plotResiduals.pca}} \tab shows Q2 vs. T2 residuals plot.\cr
+      \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
    }
 }
 

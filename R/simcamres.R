@@ -1,21 +1,21 @@
 ## class and methods for SIMCA multi class classification results ##
 
-simcamres = function(cres, T2, Q2, T2lim, Q2lim)
+simcamres = function(cres, T2, Q, T2lim, Qlim)
 {
    # Creates an object of simcamres class. 
    #
    # Arguments:
    #  cres: an object of classres class (results for classification)
    #  T2: T2 values for the objects and classes (selected component only)
-   #  Q2: Q2 values for the objects and classes (selected component only)
+   #  Q: Q values for the objects and classes (selected component only)
    #  T2lim: T2 limits for the classes (selected component only)
-   #  Q2lim: Q2 limits for the classes (selected component only)
+   #  Qlim: Q limits for the classes (selected component only)
 
    res = cres
    res$T2 = T2
-   res$Q2 = Q2
+   res$Q = Q
    res$T2lim = T2lim
-   res$Q2lim = Q2lim
+   res$Qlim = Qlim
    res$classnames = dimnames(cres$c.pred)[[3]]
    class(res) = c('simcamres', 'classres')   
    
@@ -25,7 +25,7 @@ simcamres = function(cres, T2, Q2, T2lim, Q2lim)
 #' Residuals plot for SIMCAM results
 #' 
 #' @description
-#' Shows a plot with Q2 vs. T2 residuals for SIMCAM results
+#' Shows a plot with Q vs. T2 residuals for SIMCAM results
 #' 
 #' @param obj
 #' SIMCAM results (object of class \code{simcamres})
@@ -50,7 +50,7 @@ simcamres = function(cres, T2, Q2, T2lim, Q2lim)
 #' See examples in help for \code{\link{simcamres}} function.
 #' 
 plotResiduals.simcamres = function(obj, nc = 1, show.limits = T, type = 'p', main = NULL, 
-                                  xlab = 'T2', ylab = 'Q2', legend = NULL, ...)
+                                  xlab = 'T2', ylab = 'Squared residual distance (Q)', legend = NULL, ...)
 {
    # set main title
    if (is.null(main))
@@ -61,13 +61,13 @@ plotResiduals.simcamres = function(obj, nc = 1, show.limits = T, type = 'p', mai
       classes = unique(obj$c.ref)
       data = list()
       for (i in 1:length(classes))
-         data[[i]] = cbind(obj$T2[obj$c.ref == classes[i], nc], obj$Q2[obj$c.ref == classes[i], nc])
+         data[[i]] = cbind(obj$T2[obj$c.ref == classes[i], nc], obj$Q[obj$c.ref == classes[i], nc])
       
       if (is.null(legend))
          legend = classes
       
       if (show.limits == T)
-         show.lines = c(obj$T2lim[nc], obj$Q2lim[nc])
+         show.lines = c(obj$T2lim[nc], obj$Qlim[nc])
       else
          show.lines = F
       
@@ -77,9 +77,9 @@ plotResiduals.simcamres = function(obj, nc = 1, show.limits = T, type = 'p', mai
    else
    {
 
-      data = cbind(obj$T2[, nc], obj$Q2[, nc])
+      data = cbind(obj$T2[, nc], obj$Q[, nc])
       if (show.limits == T)
-         show.lines = c(obj$T2lim[nc], obj$Q2lim[nc])
+         show.lines = c(obj$T2lim[nc], obj$Qlim[nc])
       else
          show.lines = F
       
@@ -129,15 +129,15 @@ plotCooman.simcamres = function(obj, nc = c(1, 2), type = 'p', main = "Cooman's 
       classes = unique(obj$c.ref)
       data = list()
       for (i in 1:length(classes))
-         data[[i]] = cbind(sqrt(obj$Q2[obj$c.ref == classes[i], nc[1]]), 
-                           sqrt(obj$Q2[obj$c.ref == classes[i], nc[2]])
+         data[[i]] = cbind(sqrt(obj$Q[obj$c.ref == classes[i], nc[1]]), 
+                           sqrt(obj$Q[obj$c.ref == classes[i], nc[2]])
                            )
       
       if (is.null(legend))
          legend = classes
       
       if (show.limits == T)
-         show.lines = c(obj$Q2lim[nc[1]], obj$Q2lim[nc[2]])
+         show.lines = c(obj$Qlim[nc[1]], obj$Qlim[nc[2]])
       else
          show.lines = F
       
@@ -146,10 +146,10 @@ plotCooman.simcamres = function(obj, nc = c(1, 2), type = 'p', main = "Cooman's 
    }
    else
    {
-      data = cbind(sqrt(obj$Q2[, nc[1]]), sqrt(obj$Q2[, nc[2]]))
+      data = cbind(sqrt(obj$Q[, nc[1]]), sqrt(obj$Q[, nc[2]]))
       
       if (show.limits == T)
-         show.lines = c(obj$Q2lim[nc[1]], obj$Q2lim[nc[2]])
+         show.lines = c(obj$Qlim[nc[1]], obj$Qlim[nc[2]])
       else
          show.lines = F
       

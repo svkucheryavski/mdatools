@@ -18,7 +18,7 @@ simcares = function(pres, cres)
 #' Residuals plot for SIMCA results
 #' 
 #' @description
-#' Shows a plot with Q2 vs. T2 residuals for SIMCA results
+#' Shows a plot with Q vs. T2 residuals for SIMCA results
 #' 
 #' @param obj
 #' SIMCA results (object of class \code{simcares})
@@ -43,9 +43,9 @@ simcares = function(pres, cres)
 #' See examples in help for \code{\link{simcares}} function.
 #' 
 plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p', main = NULL, 
-                                  xlab = 'T2', ylab = 'Q2', legend = NULL, ...)
+                                  xlab = 'T2', ylab = 'Squared residual distance (Q)', legend = NULL, ...)
 {
-   # Shows residuals plot (T2 vs Q2) 
+   # Shows residuals plot (T2 vs Q) 
    #
    # Arguments:
    #  obj: SIMCA results (an object of class simcares)
@@ -98,8 +98,8 @@ plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p'
          for (i in 1:nclasses)
          {   
             idx = c.ref == classes[i]
-            data = cbind(obj$T2[idx, ncomp, drop = F], obj$Q2[idx, ncomp, drop = F])
-            colnames(data) = c('T2', 'Q2')
+            data = cbind(obj$T2[idx, ncomp, drop = F], obj$Q[idx, ncomp, drop = F])
+            colnames(data) = c('T2', 'Q')
             rownames(data) = rownames(obj$c.ref[idx])
            
             legend.str = c(legend.str, classes[i])
@@ -111,7 +111,7 @@ plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p'
          
             
          if (show.limits == T)
-            show.lines = c(obj$T2lim[1, ncomp], obj$Q2lim[1, ncomp])
+            show.lines = c(obj$T2lim[1, ncomp], obj$Qlim[1, ncomp])
          else
             show.lines = F
          

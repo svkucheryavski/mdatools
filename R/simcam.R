@@ -68,9 +68,9 @@ predict.simcam = function(object, x, c.ref = NULL, cv = F, ...)
    nobj = nrow(x)
 
    c.pred = array(0, dim = c(nobj, 1, object$nclasses))
-   Q2 = array(0, dim = c(nobj, object$nclasses))
+   Q = array(0, dim = c(nobj, object$nclasses))
    T2 = array(0, dim = c(nobj, object$nclasses))
-   Q2lim = array(0, dim = c(1, object$nclasses))
+   Qlim = array(0, dim = c(1, object$nclasses))
    T2lim = array(0, dim = c(1, object$nclasses))
 
    ncomp.selected = matrix(0, nrow = 1, ncol = object$nclasses)
@@ -89,15 +89,15 @@ predict.simcam = function(object, x, c.ref = NULL, cv = F, ...)
 
       ncomp.selected[i] = object$models[[i]]$ncomp.selected
       c.pred[, , i] = res$c.pred[, ncomp.selected[i], ]
-      Q2[, i] = res$Q2[, ncomp.selected[i], drop = F]
+      Q[, i] = res$Q[, ncomp.selected[i], drop = F]
       T2[, i] = res$T2[, ncomp.selected[i], drop = F]
-      Q2lim[i] = res$Q2lim[ncomp.selected[i]]
+      Qlim[i] = res$Qlim[ncomp.selected[i]]
       T2lim[i] = res$T2lim[ncomp.selected[i]]
    }
    
    dimnames(c.pred) = list(rownames(x), paste('Comp', ncomp.selected[[i]]), object$classnames)
    cres = classres(c.pred, c.ref, ncomp.selected = ncomp.selected)
-   res = simcamres(cres, T2, Q2, T2lim, Q2lim)
+   res = simcamres(cres, T2, Q, T2lim, Qlim)
    res
 }
 
