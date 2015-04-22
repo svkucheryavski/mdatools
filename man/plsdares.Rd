@@ -64,7 +64,7 @@ Methods, inherited from \code{plsres} class:
       \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
       \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y decomposition.\cr
       \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y decomposition.\cr
-      \code{\link{plotXResiduals.plsres}} \tab shows T2 vs. Q2 plot for x decomposition.\cr
+      \code{\link{plotXResiduals.plsres}} \tab shows T2 vs. Q plot for x decomposition.\cr
       \code{\link{plotYResiduals.regres}} \tab shows residuals plot for y values.\cr
    }
 

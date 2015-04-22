@@ -16,7 +16,7 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
    #   x.test: a matrix with predictor values for test set validation
    #   c.test: a vector with class values for test set validation
    #   method: a method to calculate PLS model
-   #   alpha: a sigificance limit for Q2 values
+   #   alpha: a sigificance limit for Q values
    #   info: a short string with information about the model
    #
    # Returns:

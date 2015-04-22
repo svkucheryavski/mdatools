@@ -52,7 +52,7 @@ Methods for \code{simca} objects:
       \code{\link{plotDiscriminationPower.simcam}} \tab shows plot with discrimination power.\cr
       \code{\link{plotModellingPower.simcam}} \tab shows plot with modelling power for individual model.\cr
       \code{\link{plotCooman.simcam}} \tab shows Cooman's plot for calibration data.\cr
-      \code{\link{plotResiduals.simcam}} \tab shows plot with Q2 vs. T2 residuals for calibration data.\cr
+      \code{\link{plotResiduals.simcam}} \tab shows plot with Q vs. T2 residuals for calibration data.\cr
    }
 
 Methods, inherited from \code{classmodel} class:

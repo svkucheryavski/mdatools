@@ -18,10 +18,10 @@ ldecomp.getDistances(scores, loadings, residuals, tnorm = NULL, cal = TRUE)
 \item{cal}{logical, are these results for calibration set or not}
 }
 \value{
-Returns a list with Q2, Q2var, T2 and modelling power values for each component.
+Returns a list with Q, Qvar, T2 and modelling power values for each component.
 }
 \description{
-Computes residual distances (Q2 and T2) and modelling power for a data decomposition X = TP' + E.
+Computes residual distances (Q and T2) and modelling power for a data decomposition X = TP' + E.
 }
 \details{
 The distances are calculated for every 1:n components, where n goes from 1 to ncomp

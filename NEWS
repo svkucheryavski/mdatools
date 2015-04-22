@@ -1,3 +1,8 @@
+v.0.6.2
+========
+* Q2 residuals renamed to Q (Squared residual distance)
+* All plots have parameters `lab.col` and `lab.cex` for changing color and font size for data point labels
+
 v.0.6.1
 ========
 * fixed a bug led to incorrect calculation of specificity

@@ -5,7 +5,7 @@
 \title{Linear decomposition of data}
 \usage{
 ldecomp(scores = NULL, loadings = NULL, residuals = NULL, totvar,
-  tnorm = NULL, ncomp.selected = NULL, T2 = NULL, Q2 = NULL,
+  tnorm = NULL, ncomp.selected = NULL, T2 = NULL, Q = NULL,
   cal = TRUE)
 }
 \arguments{
@@ -23,7 +23,7 @@ ldecomp(scores = NULL, loadings = NULL, residuals = NULL, totvar,
 
 \item{T2}{matrix with calculated T2 values (e.g. for CV)}
 
-\item{Q2}{matrix with calculated Q2 values (e.g. for CV)}
+\item{Q}{matrix with calculated Q statistic (e.g. for CV)}
 
 \item{cal}{logical, true if data is for calibration of a LDECOMP based model}
 }
@@ -32,7 +32,7 @@ Returns an object (list) of \code{ldecomp} class with following fields:
 \item{scores }{matrix with score values (nobj x ncomp).}
 \item{residuals }{matrix with data residuals (nobj x nvar).}
 \item{T2 }{matrix with T2 distances (nobj x ncomp).}
-\item{Q2 }{matrix with Q2 distances (nobj x ncomp).}
+\item{Q }{matrix with Q statistic (nobj x ncomp).}
 \item{tnorm }{vector with singular values used for scores normalization.}
 \item{ncomp.selected }{selected number of components.}
 \item{expvar }{explained variance for each component.}

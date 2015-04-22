@@ -5,8 +5,8 @@
 \title{Residuals plot for SIMCA results}
 \usage{
 \method{plotResiduals}{simcares}(obj, ncomp = NULL, show.limits = T,
-  type = "p", main = NULL, xlab = "T2", ylab = "Q2", legend = NULL,
-  ...)
+  type = "p", main = NULL, xlab = "T2",
+  ylab = "Squared residual distance (Q)", legend = NULL, ...)
 }
 \arguments{
 \item{obj}{SIMCA results (object of class \code{simcares})}
@@ -28,7 +28,7 @@
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
 \description{
-Shows a plot with Q2 vs. T2 residuals for SIMCA results
+Shows a plot with Q vs. T2 residuals for SIMCA results
 }
 \details{
 See examples in help for \code{\link{simcares}} function.

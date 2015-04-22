@@ -14,7 +14,7 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.t
    #   cv: number of segments for random cross-validation (1 - for full CV)
    #   x.test: a matrix with data values for test set validation
    #   c.test: a matrix with class values for test set validation
-   #   alpha: a significance level for Q2 residuals
+   #   alpha: a significance level for Q residuals
    #   method: method to find principal component space (only SVD is supported so far)
    #   info: a text with information about the model
    #
@@ -48,10 +48,10 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.t
    model$info = info
    model$alpha = alpha
    
-   # calculate and assign limit values for T2 and Q2 residuals
+   # calculate and assign limit values for T2 and Q residuals
    lim = ldecomp.getResLimits(model$eigenvals, nrow(x), model$ncomp.selected, model$alpha)
    model$T2lim = lim$T2lim
-   model$Q2lim = lim$Q2lim   
+   model$Qlim = lim$Qlim   
 
    model$call = match.call()   
    class(model) = c("simca", "classmodel", "pca")
@@ -109,7 +109,7 @@ predict.simca = function(object, x, c.ref = NULL, cv = F, ...)
       colnames(x) = paste('v', 1:ncol(x), sep = '')
    
    pres = predict.pca(object, x, cv)     
-   pres$Q2lim = object$Q2lim
+   pres$Qlim = object$Qlim
    pres$T2lim = object$T2lim
    
    c.pred = simca.classify(object, pres)
@@ -131,7 +131,7 @@ predict.simca = function(object, x, c.ref = NULL, cv = F, ...)
 #' SIMCA classification
 #' 
 #' @description
-#' Make classification based on calculated T2 and Q2 values and corresponding limits
+#' Make classification based on calculated T2 and Q values and corresponding limits
 #' 
 #' @param model
 #' a SIMCA model (object of class \code{simca})
@@ -147,14 +147,14 @@ predict.simca = function(object, x, c.ref = NULL, cv = F, ...)
 simca.classify = function(model, res)
 {
    ncomp = model$ncomp
-   c.pred = array(0, dim = c(nrow(res$Q2), ncomp, 1))
-   dimnames(c.pred) = list(rownames(res$Q2), paste('Comp', 1:ncomp), model$classname)
+   c.pred = array(0, dim = c(nrow(res$Q), ncomp, 1))
+   dimnames(c.pred) = list(rownames(res$Q), paste('Comp', 1:ncomp), model$classname)
    
    for (i in 1:ncomp)
    {
       c.pred[, i, 1] = 
-         (res$T2[, i] - model$T2lim[1, i]) < 0.00000001 & 
-         (res$Q2[, i] - model$Q2lim[1, i]) < 0.00000001
+         (res$T2[, i] - model$T2lim[1, i]) < 0.0000001 & 
+         (res$Q[, i] - model$Qlim[1, i]) < 0.0000001
    }   
    c.pred = c.pred * 2 - 1
   
@@ -192,9 +192,9 @@ simca.crossval = function(model, x, cv, center = T, scale = F)
    nseg = nrow(idx);
    nrep = dim(idx)[3]
    
-   Q2 = matrix(0, ncol = ncomp, nrow = nobj)   
+   Q = matrix(0, ncol = ncomp, nrow = nobj)   
    T2 = matrix(0, ncol = ncomp, nrow = nobj)   
-   Q2lim = matrix(0, ncol = ncomp, nrow = 1)   
+   Qlim = matrix(0, ncol = ncomp, nrow = 1)   
    T2lim = matrix(0, ncol = ncomp, nrow = 1)   
    
    c.pred = array(0, dim = c(nobj, ncomp, 1))
@@ -217,30 +217,30 @@ simca.crossval = function(model, x, cv, center = T, scale = F)
          
             m = pca.cal(x.cal, ncomp, center, scale)               
             res = predict.pca(m, x.val, cv = T)
-            Q2[ind, ] = Q2[ind, ] + res$Q2
+            Q[ind, ] = Q[ind, ] + res$Q
             T2[ind, ] = T2[ind, ] + res$T2
                         
             lim = ldecomp.getResLimits(m$eigenvals, nrow(x.cal), ncomp, model$alpha)
             T2lim = T2lim + lim$T2lim
-            Q2lim = Q2lim + lim$Q2lim         
+            Qlim = Qlim + lim$Qlim         
          }
       }  
    }
    
-   Q2 = Q2 / nrep;
+   Q = Q / nrep;
    T2 = T2 / nrep;
-   Q2lim = Q2lim / nrep;
+   Qlim = Qlim / nrep;
    T2lim = T2lim / nrep;
-   m = list(Q2lim = Q2lim, T2lim = T2lim, classname = model$classname, ncomp = model$ncomp)
-   r = list(Q2 = Q2, T2 = T2, classname = model$classname)
+   m = list(Qlim = Qlim, T2lim = T2lim, classname = model$classname, ncomp = model$ncomp)
+   r = list(Q = Q, T2 = T2, classname = model$classname)
    
    c.pred = simca.classify(m, r)
    
    
    dimnames(c.pred) = list(rownames(x), colnames(model$loadings), model$classname)
-   rownames(Q2) = rownames(T2) = rownames(c.pred) = rownames(c.ref) = rownames(x)
-   colnames(Q2) = colnames(T2) = colnames(c.pred) = colnames(model$loadings)
-   pres = pcares(NULL, NULL, NULL, model$calres$totvar, model$tnorm, model$ncomp.selected, T2, Q2)
+   rownames(Q) = rownames(T2) = rownames(c.pred) = rownames(c.ref) = rownames(x)
+   colnames(Q) = colnames(T2) = colnames(c.pred) = colnames(model$loadings)
+   pres = pcares(NULL, NULL, NULL, model$calres$totvar, model$tnorm, model$ncomp.selected, T2, Q)
    cres = classres(c.pred, c.ref = c.ref)   
    res = simcares(pres, cres)
    

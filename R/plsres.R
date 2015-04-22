@@ -120,7 +120,7 @@ plotXYScores.plsres = function(obj, comp = 1, type = 'p', main = 'XY scores',
 #' X residuals plot for PLS results
 #' 
 #' @description
-#' Shows a plot with Q2 residuals vs. Hotelling T2 values for PLS decomposition of x data.
+#' Shows a plot with Q residuals vs. Hotelling T2 values for PLS decomposition of x data.
 #' 
 #' @param obj
 #' PLS results (object of class \code{plsres})

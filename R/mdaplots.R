@@ -684,7 +684,8 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
                    cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
                    main = NULL, xlab = NULL, ylab = NULL, single.x = T, show.labels = F, 
                    show.colorbar = T, show.lines = F, show.grid = T, show.axes = T, 
-                   xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, ...)
+                   xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
+                   lab.col = 'darkgray', lab.cex = 0.65, ...)
 {   
    # Makes a plot for one series of data (scatter, line, scatterline, or bar).
    #
@@ -713,7 +714,7 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
    #   xticklabels: labels for x axis corresponding to x tick values
    #   yticks: tick values for y axis
    #   yticklabels: labels for y axis corresponding to y tick values
-   
+   #   lab.col: color for data point labels
    data = as.matrix(data)
    
    if (is.null(dim(data)) || nrow(data) < 1)
@@ -837,7 +838,7 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
    
    # show labels if needed
    if ((show.labels == T || !is.null(labels)) && type != 'e')
-      mdaplot.showLabels(data, type = type)   
+      mdaplot.showLabels(data, type = type, col = lab.col, cex = lab.cex)   
    
    # show lines if needed
    if (is.numeric(show.lines) && length(show.lines) == 2 )
@@ -852,7 +853,8 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
                     legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', single.x = T, 
                     show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
-                    xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, ...)
+                    xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
+                    lab.col = 'darkgray', lab.cex = 0.65,...)
 {   
    # Makes a group of plots for several data sets
    #
@@ -987,7 +989,8 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
          }   
          
          mdaplot(data[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
-                 labels = slabels, show.grid = F, show.axes = F, show.labels = show.labels)
+                 labels = slabels, show.grid = F, show.axes = F, show.labels = show.labels,
+                 lab.col = lab.col, lab.cex = lab.cex)
       }
    }
    else
@@ -1010,7 +1013,7 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
             
             mdaplot(cbind(x, y), type = type[i], col = col[i], pch = pch[i], lty = lty[i],
                     bwd = 0.9 * gbwd, labels = labels[, i], show.labels = show.labels,
-                    show.grid = F, show.axes = F)
+                    show.grid = F, show.axes = F, lab.col = lab.col, lab.cex = lab.cex)
          }
       }         
       else
@@ -1020,7 +1023,8 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
             x = data[, 2 * i - 1, drop = F]
             y = data[, 2 * i, drop = F]
             mdaplot(cbind(x, y), type = type[i], col = col[i], pch = pch[i], lty = lty[i],
-                    labels = labels[, i], show.grid = F, show.axes = F, show.labels = show.labels)
+                    labels = labels[, i], show.grid = F, show.axes = F, show.labels = show.labels,
+                    lab.col = lab.col, lab.cex = lab.cex)
          }
       }
    }  

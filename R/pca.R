@@ -12,7 +12,7 @@ pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
    #   scale: logical, standardize or not data values
    #   cv: number of segments for random cross-validation (1 - for full CV)
    #   x.test: a matrix with data values for test set validation
-   #   alpha: a significance level for Q2 residuals
+   #   alpha: a significance level for Q residuals
    #   method: method to estimate principal component space (only SVD is supported so far)
    #   info: a short text with information about the model
    #
@@ -49,10 +49,10 @@ pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
    if (!is.null(x.test))
       model$testres = predict.pca(model, x.test)
    
-   # calculate and assign limit values for T2 and Q2 residuals
+   # calculate and assign limit values for T2 and Q residuals
    lim = ldecomp.getResLimits(model$eigenvals, nrow(x), model$ncomp, model$alpha)
    model$T2lim = lim$T2lim
-   model$Q2lim = lim$Q2lim
+   model$Qlim = lim$Qlim
    
    model$call = match.call()   
    class(model) = "pca"
@@ -361,7 +361,7 @@ pca.crossval = function(model, x, cv, center = T, scale = F)
    nseg = nrow(idx);
    nrep = dim(idx)[3]
       
-   Q2 = matrix(0, ncol = ncomp, nrow = nobj)   
+   Q = matrix(0, ncol = ncomp, nrow = nobj)   
    T2 = matrix(0, ncol = ncomp, nrow = nobj)   
    
    # loop over repetitions and segments
@@ -379,21 +379,21 @@ pca.crossval = function(model, x, cv, center = T, scale = F)
          
             m = pca.cal(x.cal, ncomp, center, scale)               
             res = predict.pca(m, x.val, cv = T)
-            Q2[ind, ] = Q2[ind, ] + res$Q2
+            Q[ind, ] = Q[ind, ] + res$Q
             T2[ind, ] = T2[ind, ] + res$T2
          }
       }  
    }
    
-   Q2 = Q2 / nrep
+   Q = Q / nrep
    T2 = T2 / nrep
-   rownames(Q2) = rownames(T2) = rownames(x)
-   colnames(Q2) = colnames(T2) = colnames(model$scores)
+   rownames(Q) = rownames(T2) = rownames(x)
+   colnames(Q) = colnames(T2) = colnames(model$scores)
 
    # in CV results there are no scores only residuals and variances
    res = pcares(NULL, NULL, NULL, model$calres$totvar, model$tnorm, model$ncomp.selected,
-                T2, Q2)
-   res$Q2lim = model$Q2lim
+                T2, Q)
+   res$Qlim = model$Qlim
    res$T2lim = model$T2lim
    
    res
@@ -426,7 +426,7 @@ predict.pca = function(object, x, cv = F, ...)
    {   
       totvar = sum(x^2)
       res = pcares(scores, object$loadings, residuals, totvar, object$tnorm, object$ncomp.selected)
-      res$Q2lim = object$Q2lim
+      res$Qlim = object$Qlim
       res$T2lim = object$T2lim
    }   
    else
@@ -637,7 +637,7 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' Residuals plot for PCA
 #' 
 #' @description
-#' Shows a plot with Q2 residuals vs. Hotelling T2 values for selected number of components.
+#' Shows a plot with Q residuals vs. Hotelling T2 values for selected number of components.
 #' 
 #' @param obj
 #' a PCA model (object of class \code{pca})
@@ -662,7 +662,7 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' See examples in help for \code{\link{pca}} function.
 #' 
 plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
-                             ylab = 'Q2', show.labels = F, show.legend = T, show.limits = T, ...)
+                             ylab = 'Squared residual distance (Q)', show.labels = F, show.legend = T, show.limits = T, ...)
 {
    if (is.null(main))
    {
@@ -676,21 +676,21 @@ plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
       ncomp = obj$ncomp.selected
    
    if (show.limits == T)
-      show.lines = c(obj$T2lim[1, ncomp], obj$Q2lim[1, ncomp])
+      show.lines = c(obj$T2lim[1, ncomp], obj$Qlim[1, ncomp])
    else
       show.lines = F
    
    if (ncomp > obj$ncomp || ncomp < 1)
       stop('Wrong number of components!')
 
-   cdata = cbind(obj$calres$T2[, ncomp], obj$calres$Q2[, ncomp])
+   cdata = cbind(obj$calres$T2[, ncomp], obj$calres$Q[, ncomp])
    rownames(cdata) = rownames(obj$calres$scores)
    legend = 'cal'   
    data = list(cdata = cdata)
 
    if (!is.null(obj$cvres))
    {
-      cvdata = cbind(obj$cvres$T2[, ncomp], obj$cvres$Q2[, ncomp])      
+      cvdata = cbind(obj$cvres$T2[, ncomp], obj$cvres$Q[, ncomp])      
       rownames(cvdata) = rownames(obj$cvres$T2)      
       data$cvdata = cvdata
       legend = c(legend, 'cv')
@@ -698,7 +698,7 @@ plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
    
    if (!is.null(obj$testres))
    {
-      tdata = cbind(obj$testres$T2[, ncomp], obj$testres$Q2[, ncomp])      
+      tdata = cbind(obj$testres$T2[, ncomp], obj$testres$Q[, ncomp])      
       rownames(tdata) = rownames(obj$testres$scores)      
       data$tdata = tdata
       legend = c(legend, 'test')
@@ -849,7 +849,7 @@ print.pca = function(x, ...)
    cat('$center - values for centering data\n')
    cat('$scale - values for scaling data\n')
    cat('$cv - number of segments for cross-validation\n')
-   cat('$alpha - significance level for Q2 residuals\n')
+   cat('$alpha - significance level for Q residuals\n')
    cat('$calres - results (scores, etc) for calibration set\n')
    
    if (!is.null(obj$cvres))

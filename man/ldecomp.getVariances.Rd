@@ -4,10 +4,10 @@
 \alias{ldecomp.getVariances}
 \title{Explained variance for linear decomposition}
 \usage{
-ldecomp.getVariances(Q2, totvar)
+ldecomp.getVariances(Q, totvar)
 }
 \arguments{
-\item{Q2}{Q2 values (squared residuals distance from object to component space).}
+\item{Q}{Q values (squared residuals distance from object to component space).}
 
 \item{totvar}{Total variance of the original data (after preprocessing).}
 }

@@ -86,7 +86,7 @@ Methods for \code{pls} objects:
       \code{\link{plotYVariance.pls}} \tab shows explained variance plot for y decomposition.\cr
       \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for y decomposition.\cr
       \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y decomposition.\cr
-      \code{\link{plotXResiduals.pls}} \tab shows T2 vs. Q2 plot for x decomposition.\cr
+      \code{\link{plotXResiduals.pls}} \tab shows T2 vs. Q plot for x decomposition.\cr
       \code{\link{plotYResiduals.pls}} \tab shows residuals plot for y values.\cr
       \code{\link{plotSelectivityRatio.pls}} \tab shows plot with selectivity ratio values.\cr
       \code{\link{plotVIPScores.pls}} \tab shows plot with VIP scores values.\cr

@@ -16,7 +16,7 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
    #   x.test: a matrix with predictor values for test set validation
    #   y.test: a vector with response values for test set validation
    #   method: a method to calculate PLS model
-   #   alpha: a sigificance limit for Q2 values
+   #   alpha: a sigificance limit for Q values
    #   info: a short string with information about the model
    #
    # Returns:
@@ -337,9 +337,9 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F, jack.knife = T)
    nrep = dim(idx)[3]
 
    yp = array(0, dim = c(nobj, ncomp, nresp))
-   Q2x = matrix(0, ncol = ncomp, nrow = nobj)   
+   Qx = matrix(0, ncol = ncomp, nrow = nobj)   
    T2x = matrix(0, ncol = ncomp, nrow = nobj)   
-   Q2y = matrix(0, ncol = ncomp, nrow = nobj)   
+   Qy = matrix(0, ncol = ncomp, nrow = nobj)   
    T2y = matrix(0, ncol = ncomp, nrow = nobj)   
    jkcoeffs = array(0, dim = c(nvar, ncomp, ncol(y), nrow(idx)))
    
@@ -368,9 +368,9 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F, jack.knife = T)
             dim(m$coeffs$values) = c(dim(m$coeffs$values), 1)
             
             yp[ind, , ] = yp[ind, , , drop = F]  + res$yp
-            Q2x[ind, ]  = Q2x[ind, , drop = F] + xdist$Q2        
+            Qx[ind, ]  = Qx[ind, , drop = F] + xdist$Q        
             T2x[ind, ]  = T2x[ind, , drop = F] + xdist$T2        
-            Q2y[ind, ]  = ydist$Q2 + Q2y[ind, , drop = F]       
+            Qy[ind, ]  = ydist$Q + Qy[ind, , drop = F]       
             T2y[ind, ]  = ydist$T2 + T2y[ind, , drop = F]        
             jkcoeffs[, , , iSeg] = jkcoeffs[, , , iSeg, drop = F] + m$coeffs$values
          }   
@@ -379,9 +379,9 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F, jack.knife = T)
    
    # average results over repetitions
    yp = yp / nrep
-   Q2x = Q2x / nrep
+   Qx = Qx / nrep
    T2x = T2x / nrep
-   Q2y = Q2y / nrep
+   Qy = Qy / nrep
    T2y = T2y / nrep
    jkcoeffs = jkcoeffs / nrep
    
@@ -391,11 +391,11 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F, jack.knife = T)
                 xdecomp = ldecomp(totvar = model$calres$xdecomp$totvar,
                                   tnorm = model$calres$xdecomp$tnorm,
                                   ncomp.selected = model$ncomp.selected,
-                                  Q2 = Q2x, T2 = T2x),
+                                  Q = Qx, T2 = T2x),
                 ydecomp = ldecomp(totvar = model$calres$ydecomp$totvar,
                                   tnorm = model$calres$ydecomp$tnorm,
                                   ncomp.selected = model$ncomp.selected,
-                                  Q2 = Q2y, T2 = T2y)                   
+                                  Q = Qy, T2 = T2y)                   
                 )
    
    if (jack.knife == T)
@@ -522,7 +522,7 @@ predict.pls = function(object, x, y.ref = NULL, cv = F, ...)
          ydist = ldecomp.getDistances(xscores, object$yloadings, yresiduals)
          ydecomp = ldecomp(yscores, object$yloadings, yresiduals, sum(yy^2),
                            object$ytnorm, object$ncomp.selected,
-                           ydist$T2, ydist$Q2)
+                           ydist$T2, ydist$Q)
       }
       else
       {
@@ -1646,7 +1646,7 @@ plotXYLoadings.pls = function(obj, comp = c(1, 2), main = 'XY loadings',
 #' X residuals plot for PLS
 #' 
 #' @description
-#' Shows a plot with Q2 residuals vs. Hotelling T2 values for PLS decomposition of x data.
+#' Shows a plot with Q residuals vs. Hotelling T2 values for PLS decomposition of x data.
 #' 
 #' @param obj
 #' a PLS model (object of class \code{pls})
@@ -1669,7 +1669,7 @@ plotXYLoadings.pls = function(obj, comp = c(1, 2), main = 'XY loadings',
 #' See examples in help for \code{\link{pls}} function.
 #' 
 plotXResiduals.pls = function(obj, ncomp = NULL, 
-                              main = NULL, xlab = 'T2', ylab = 'Q2',
+                              main = NULL, xlab = 'T2', ylab = 'Squared residual distance (Q)',
                               show.labels = F, show.legend = T, ...)
 {
    if (is.null(main))
@@ -1685,9 +1685,9 @@ plotXResiduals.pls = function(obj, ncomp = NULL,
    else if (ncomp <= 0 || ncomp > obj$ncomp) 
       stop('Wrong value for number of components!')
    
-   cdata = cbind(obj$calres$xdecomp$T2[, ncomp], obj$calres$xdecomp$Q2[, ncomp])
+   cdata = cbind(obj$calres$xdecomp$T2[, ncomp], obj$calres$xdecomp$Q[, ncomp])
    
-   colnames(cdata) = c('T2', 'Q2')
+   colnames(cdata) = c('T2', 'Q')
    rownames(cdata) = rownames(obj$calres$xdecomp$scores)
    
    data = list(cdata = cdata)
@@ -1695,8 +1695,8 @@ plotXResiduals.pls = function(obj, ncomp = NULL,
    
    if (!is.null(obj$testres))
    {
-      tdata = cbind(obj$testres$xdecomp$T2[, ncomp], obj$testres$xdecomp$Q2[, ncomp])      
-      colnames(tdata) = c('T2', 'Q2')
+      tdata = cbind(obj$testres$xdecomp$T2[, ncomp], obj$testres$xdecomp$Q[, ncomp])      
+      colnames(tdata) = c('T2', 'Q')
       rownames(tdata) = rownames(obj$testres$xdecomp$scores)
       
       data$tdata = tdata
