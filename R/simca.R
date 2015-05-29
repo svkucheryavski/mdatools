@@ -69,7 +69,6 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.t
    {
       if (is.null(c.test))
          c.test = rep(classname, nrow(x.test))
-      
       model$testres = predict.simca(model, x.test, c.ref = c.test)
    }
    
@@ -153,8 +152,7 @@ simca.classify = function(model, res)
    for (i in 1:ncomp)
    {
       c.pred[, i, 1] = 
-         (res$T2[, i] - model$T2lim[1, i]) < 0.0000001 & 
-         (res$Q[, i] - model$Qlim[1, i]) < 0.0000001
+         res$T2[, i] <= model$T2lim[1, i] & res$Q[, i] <= model$Qlim[1, i]
    }   
    c.pred = c.pred * 2 - 1
   
