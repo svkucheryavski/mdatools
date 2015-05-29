@@ -716,6 +716,62 @@ getVIPScores.pls = function(obj, ny = 1, ...)
    vipscores = obj$vipscores[, ny, drop = F]
 }
 
+
+#' Regression coefficients for PLS model'
+#'
+#' @description 
+#' Returns a vector or a matrix with regression coefficients for
+#' the PLS model which can be applied to a data directly
+#' 
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @ncomp
+#' number of components to return the coefficients for
+#' 
+getRegcoeffs = function(obj, ncomp = NULL, ...)
+{
+   if (is.null(ncomp)) 
+      ncomp = obj$ncomp.selected
+   else if (ncomp <= 0 || ncomp > obj$ncomp) 
+      stop('Wrong value for number of components!')
+   
+   coeffs = obj$coeffs$values[, ncomp, , drop = F]
+   coeffs = matrix(coeffs, nrow = dim(coeffs)[1], ncol = dim(coeffs)[3])
+   xscale = obj$xscale
+   if (is.logical(xscale))
+      xscale = matrix(1, nrow = nrow(coeffs))
+  
+   xcenter = obj$xcenter 
+   if (is.logical(xcenter))
+      xcenter = matrix(0, nrow = nrow(coeffs))
+      
+   yscale = obj$yscale
+   if (is.logical(yscale))
+      yscale = matrix(1, nrow = ncol(coeffs))
+  
+   ycenter = obj$ycenter 
+   if (is.logical(ycenter))
+      ycenter = matrix(0, nrow = ncol(coeffs))
+      
+   # calculate intercept
+   b0 = sweep(coeffs,  1, xcenter, '*')
+   b0 = sweep(b0, 1, xscale, '/')
+   b0 = apply(-b0, 2, sum)
+   b0 = matrix(b0, nrow = 1)
+   b0 = sweep(b0, 2, yscale, '*')
+   b0 = sweep(b0, 2, ycenter, '+')
+   
+   # rescale coefficients
+   coeffs = sweep(coeffs, 1, xscale, '/');
+   coeffs = sweep(coeffs, 2, yscale, '*');
+   coeffs = rbind(b0, coeffs)
+   
+   rownames(coeffs) = c('Intercept', dimnames(obj$coeffs$values)[[1]])
+   colnames(coeffs) = dimnames(obj$coeffs$values)[[3]]
+   
+   coeffs
+}   
+
 #' VIP scores plot for PLS model
 #' 
 #' @description
