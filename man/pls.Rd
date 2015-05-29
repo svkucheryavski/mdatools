@@ -47,7 +47,7 @@ Returns an object of \code{pls} class with following fields:
 \details{
 So far only SIMPLS method [1] is available, more coming soon. Implementation works both with one and multiple response variables.
 
-Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of x variables and the default or provided value. Regression coefficients, predictions and other results are calculated for each set of components from 1 to \code{ncomp}: 1, 1:2, 1:3, etc. Besides that, there is also a  function (\code{\link{selectCompNum.pls}}) for selecting an optimal number of components in a model (\code{ncomp.selected}). The selected optimal number of components is used for all default operations - predictions, plots, etc. 
+Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) as a minimum of number of objects - 1, number of x variables and the default or provided value. Regression coefficients, predictions and other results are calculated for each set of components from 1 to \code{ncomp}: 1, 1:2, 1:3, etc. The optimal number of components, (\code{ncomp.selected}), is found using Wold's R criterion, but can be adjusted by user using function (\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all default operations - predictions, plots, etc. 
 
 Selectivity ratio [2] and VIP scores [3] are calculated for any PLS model authomatically, however while 
 selectivity ratio values are calculated for all computed components, the VIP scores are computed
@@ -107,14 +107,14 @@ Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 ### Examples of using PLS model class
 
 ## 1. Make a PLS model for concentration of first component 
-## using full-cross validation and show overview
+## using full-cross validation and automatic detection of 
+## optimal number of components and show an overview
 
 data(simdata)
 x = simdata$spectra.c
 y = simdata$conc.c[, 1]
 
 model = pls(x, y, ncomp = 8, cv = 1)
-model = selectCompNum(model, 2)
 summary(model)
 plot(model)
 

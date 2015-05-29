@@ -80,7 +80,7 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
    model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method)
    model$alpha = alpha   
    model$calres = predict.pls(model, x, y)
-   model = selectCompNum.pls(model, model$ncomp)
+   
    # do cross-validation if needed
    if (!is.null(cv))
    {   
@@ -114,6 +114,9 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
       
       model$testres = predict.pls(model, x.test, y.test)
    }
+   
+   # select optimal number of components   
+   model = selectCompNum.pls(model)
    
    model$call = match.call()
    model$info = info
@@ -418,13 +421,41 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F, jack.knife = T)
 #' the same model with selected number of components
 #'
 #' @details
+#' If number of components is not specified, the Wold's R criterion is used.
 #' See examples in help for \code{\link{pls}} function.
 #' 
-selectCompNum.pls = function(model, ncomp)
+selectCompNum.pls = function(model, ncomp = NULL)
 {
-   if (ncomp > model$ncomp || ncomp < 0)
-      stop('Wrong number of selected components!')
-   
+   if (!is.null(ncomp))
+   {
+      # user defined number of components
+      if (ncomp > model$ncomp || ncomp < 0)
+         stop('Wrong number of selected components!')
+   }
+   else
+   {
+      # automatic estimation of the number
+      n = dim(model$coeffs$values)[3]
+      
+      if (!is.null(model$cvres))
+         press = (model$cvres$rmse * n)^2
+      else if (!is.null(model$testres))
+         press = (model$testres$rmse * n)^2
+      else
+      {   
+         press = (model$calres$rmse * n)^2
+         warning('No validation results were found!')
+      }
+      
+      ncomp = ncol(press)
+      r = press[, 2:ncomp] / press[, 1:(ncomp - 1)] 
+      ind = which(r > 0.95, arr.ind = TRUE)
+      if (is.null(dim(ind)))
+         ncomp = min(ind)
+      else
+         ncomp = min(ind[, 2])
+   }   
+      
    model$ncomp.selected = ncomp      
    model$calres$ncomp.selected = ncomp
    

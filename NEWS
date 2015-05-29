@@ -1,6 +1,8 @@
 v.0.7.0
+=======
 * method `getRegcoeffs` is added to PLS model
 * normalization is added to preprocessing methods (`prep.norm`)
+* automatic selection of optimal components in PLS (Wold's criterion) is implemented
 
 v.0.6.2
 ========
