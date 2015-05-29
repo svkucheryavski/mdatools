@@ -1,5 +1,6 @@
-v.0.6.3
-* method `getRegcoeffs` added to PLS
+v.0.7.0
+* method `getRegcoeffs` is added to PLS model
+* normalization is added to preprocessing methods (`prep.norm`)
 
 v.0.6.2
 ========

@@ -73,6 +73,41 @@ prep.snv = function(data)
    data = t(scale(t(data), center = T, scale = T))
 } 
 
+#' Normalization
+#' 
+#' @description
+#' Normalizes signals (rows of data matrix) to unit area or unit length
+#' 
+#' @param data
+#' a matrix with data values
+#' @param type
+#' type of normalization \code{'area'} or \code{'length'}
+#' 
+#' @return 
+#' data matrix with normalized values
+#' 
+prep.norm = function(data, type = 'area')
+{
+   if (type == 'area')
+   {   
+      w = apply(abs(data), 1, sum)
+   }   
+   else if (type == 'length')
+   {
+      w = apply(data^2, 1, sum)
+      w = sqrt(w)
+   }   
+   else
+   {   
+      stop('Wrong value for argument "type"!')
+   }   
+    
+   data = sweep(data, 1, w, '/')
+   
+   data
+}   
+
+
 #' Savytzky-Golay filter
 #' 
 #' @description
