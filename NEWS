@@ -1,3 +1,6 @@
+v.0.6.3
+* method `getRegcoeffs` added to PLS
+
 v.0.6.2
 ========
 * Q2 residuals renamed to Q (Squared residual distance)

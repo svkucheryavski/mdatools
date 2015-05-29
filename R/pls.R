@@ -720,14 +720,26 @@ getVIPScores.pls = function(obj, ny = 1, ...)
 #' Regression coefficients for PLS model'
 #'
 #' @description 
-#' Returns a vector or a matrix with regression coefficients for
+#' Returns a matrix with regression coefficients for
 #' the PLS model which can be applied to a data directly
 #' 
 #' @param obj
 #' a PLS model (object of class \code{pls})
-#' @ncomp
+#' @param ncomp
 #' number of components to return the coefficients for
+#'
+#' @details 
+#' The method recalculates the regression coefficients found by the PLS algorithm
+#' taking into account centering and scaling of predictors and responses, so the 
+#' matrix with coefficients can be applied directly to original data (yp = Xb).
 #' 
+#' If number of components is not specified, the optimal number, selected by user
+#' or identified by a model will be used.
+#'  
+#' @return 
+#' A matrix (n of predictors x n of responses) with regression coefficients.
+#'  
+#'  
 getRegcoeffs = function(obj, ncomp = NULL, ...)
 {
    if (is.null(ncomp)) 

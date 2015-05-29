@@ -92,7 +92,8 @@ Methods for \code{pls} objects:
       \code{\link{plotVIPScores.pls}} \tab shows plot with VIP scores values.\cr
       \code{\link{getSelectivityRatio.pls}} \tab returns vector with selectivity ratio values.\cr
       \code{\link{getVIPScores.pls}} \tab returns vector with VIP scores values.\cr
-   }
+      \code{\link{getRegcoeffs.pls}} \tab returns matrix with regression coefficients.\cr
+ }
    
    Most of the methods for plotting data (except loadings and regression coefficients) are also available for PLS results 
    (\code{\link{plsres}}) objects. There is also a randomization test for PLS-regression (\code{\link{randtest}}).   
