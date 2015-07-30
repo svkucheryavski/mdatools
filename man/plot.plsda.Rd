@@ -21,8 +21,8 @@
 \item{...}{other arguments}
 }
 \description{
-Shows a set of plots (x residuals, regression coefficients, misclassification ratio and predictions)
-for PLS-DA model.
+Shows a set of plots (x residuals, regression coefficients, misclassification ratio and
+predictions) for PLS-DA model.
 }
 \details{
 See examples in help for \code{\link{plsda}} function.

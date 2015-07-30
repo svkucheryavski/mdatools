@@ -2,7 +2,7 @@
 % Please edit documentation in R/pcares.R
 \name{plot.pcares}
 \alias{plot.pcares}
-\title{Pplot method for PCA results object}
+\title{Plot method for PCA results object}
 \usage{
 \method{plot}{pcares}(x, comp = c(1, 2), show.labels = T, ...)
 }

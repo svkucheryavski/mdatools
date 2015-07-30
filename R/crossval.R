@@ -84,3 +84,39 @@ crossval = function(nobj, cv = NULL)
    }   
    return (idx)        
 }   
+
+#' String with description of cross-validation method
+#'
+#' @param cv 
+#' a list with cross-validation settings
+#' 
+#' @return
+#' a string with the description text
+#'
+crossval.str = function(cv)
+{
+   str = '';
+   if (is.numeric(cv))
+   {
+      if (cv == 1)
+         str = 'full cross-validation'
+      else
+         str = sprintf('random cross-validation with %d segments', cv)
+   }
+   else
+   {
+      type = cv[[1]]
+      if ( type == 'loo' )
+         str = 'full cross-validation'
+      else if ( type == 'ven')
+      {   
+         str = sprintf('venetian blinds with %d segments', cv[[2]])
+      }   
+      else
+      {
+         str = sprintf('random cross-validation with %d segments', cv[[2]])
+      }   
+   }   
+   
+   str
+}   

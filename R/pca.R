@@ -1,24 +1,123 @@
-## class and methods for Principal Component Analysis based methods ##
-
+#' Principal Component Analysis
+#'
+#' @description 
+#' \code{pca} is used to build and explore a principal component analysis (PCA) model.
+#'
+#' @param x
+#' a numerical matrix with calibration data.
+#' @param ncomp
+#' maximum number of components to calculate.
+#' @param center
+#' logical, do mean centering of data or not.
+#' @param scale
+#' logical, do sdandardization of data or not.
+#' @param cv
+#' number of segments for random cross-validation (1 for full cross-validation).
+#' @param x.test
+#' a numerical matrix with test data.
+#' @param alpha
+#' significance level for calculating limit for Q residuals.
+#' @param method
+#' method to compute principal components.
+#' @param info
+#' a short text line with model description.
+#'
+#' @details 
+#' So far only SVD (Singular Value Decompisition) method is available, more coming soon. 
+#'   
+#' By default \code{pca} uses number of components (\code{ncomp}) as a minimum of number of 
+#' objects - 1, number of variables and default or provided value. Besides that, there is also 
+#' a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal 
+#' number of components is used to build a residuals plot (with Q residuals vs. Hotelling T2 
+#' values), calculate confidence limits for Q residuals, as well as for SIMCA classification. 
+#'   
+#' If data contains missing values (NA) the \code{pca} will use an iterative algorithm to fit the 
+#' values with most probable ones. The algorithm is implemented in a function 
+#' \code{\link{pca.mvreplace}}. The same center and scale options will be used. You can also
+#' do this step manually before calling \code{pca} and play with extra options.
+#' 
+#' @return 
+#' Returns an object of \code{pca} class with following fields:
+#' \item{ncomp }{number of components included to the model.} 
+#' \item{ncomp.selected }{selected (optimal) number of components.} 
+#' \item{loadings }{matrix with loading values (nvar x ncomp).} 
+#' \item{eigenvals }{vector with eigenvalues for all existent components.} 
+#' \item{expvar }{vector with explained variance for each component (in percent).} 
+#' \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).} 
+#' \item{T2lim }{statistical limit for T2 distance.} 
+#' \item{Qlim }{statistical limit for Q residuals.} 
+#' \item{info }{information about the model, provided by user when build the model.} 
+#' \item{calres }{an object of class \code{\link{pcares}} with PCA results for a calibration data.} 
+#' \item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it 
+#' was provided.} 
+#' \item{cvres }{an object of class \code{\link{pcares}} with PCA results for cross-validation, 
+#' if this option was chosen.} 
+#' 
+#' @author 
+#' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
+#'
+#' @seealso 
+#' Methods for \code{pca} objects:
+#' \tabular{ll}{
+#'    \code{plot.pca} \tab makes an overview of PCA model with four plots.\cr
+#'    \code{summary.pca} \tab shows some statistics for the model.\cr
+#'    \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
+#'    \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr
+#'    \code{\link{plotScores.pca}} \tab shows scores plot.\cr
+#'    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
+#'    \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
+#'    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
+#'    \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
+#' }
+#'  Most of the methods for plotting data are also available for PCA results (\code{\link{pcares}})
+#'  objects. Also check \code{\link{pca.mvreplace}}, which replaces missing values in a data matrix 
+#'  with approximated using iterative PCA decomposition.
+#'  
+#' @examples 
+#' library(mdatools)
+#' ### Examples for PCA class
+#' 
+#' ## 1. Make PCA model for People data with autoscaling
+#' ## and full cross-validation
+#' 
+#' data(people)
+#' model = pca(people, scale = TRUE, cv = 1, info = 'Simple PCA model')
+#' model = selectCompNum(model, 4)
+#' summary(model)
+#' plot(model, show.labels = TRUE)
+#' 
+#' ## 2. Add missing values, make a new model and show plots
+#' peoplemv = people
+#' peoplemv[2, 7] = NA
+#' peoplemv[6, 2] = NA
+#' peoplemv[10, 4] = NA
+#' peoplemv[22, 12] = NA
+#' 
+#' modelmv = pca(peoplemv, scale = TRUE, info = 'Model with missing values')
+#' modelmv = selectCompNum(modelmv, 4)
+#' summary(modelmv)
+#' plot(modelmv, show.labels = TRUE)
+#' 
+#' ## 3. Show scores and loadings plots for the model
+#' par(mfrow = c(2, 2))
+#' plotScores(model, comp = c(1, 3), show.labels = TRUE)
+#' plotScores(model, comp = 2, type = 'h', show.labels = TRUE)
+#' plotLoadings(model, comp = c(1, 3), show.labels = TRUE)
+#' plotLoadings(model, comp = c(1, 2), type = 'h', show.labels = TRUE)
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 4. Show residuals and variance plots for the model
+#' par(mfrow = c(2, 2))
+#' plotVariance(model, type = 'h')
+#' plotCumVariance(model, show.labels = TRUE, legend.position = 'bottomright')
+#' plotResiduals(model, show.labels = TRUE)
+#' plotResiduals(model, ncomp = 2, show.labels = TRUE)
+#' par(mfrow = c(1, 1))
+#'
+#' @export   
 pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
                alpha = 0.05, method = 'svd', info = '')
 {
-   # Calibrate and validate a PCA model.
-   #
-   # Arguments:
-   #   x: a matrix with data values
-   #   ncomp: maximum number of components to calculate
-   #   center: logical, mean center or not data values
-   #   scale: logical, standardize or not data values
-   #   cv: number of segments for random cross-validation (1 - for full CV)
-   #   x.test: a matrix with data values for test set validation
-   #   alpha: a significance level for Q residuals
-   #   method: method to estimate principal component space (only SVD is supported so far)
-   #   info: a short text with information about the model
-   #
-   # Returns:
-   #   model: a PCA model (object of pca class)
-      
    x = as.matrix(x)
 
    # check if data has missing values
@@ -96,6 +195,7 @@ getCalibrationData.pca = function(obj, ...)
 #' @return
 #' the same model with selected number of components
 #' 
+#' @export
 selectCompNum.pca = function(model, ncomp)
 {
    if (ncomp < 1 || ncomp > model$ncomp)
@@ -114,23 +214,66 @@ selectCompNum.pca = function(model, ncomp)
    model
 }
 
+#' Replace missing values in data
+#' 
+#' \code{pca.mvreplace} is used to replace missing values in a data matrix with 
+#' approximated by iterative PCA decomposition.
+#'
+#' @param x
+#' a matrix with data, containing missing values.
+#' @param center
+#' logical, do centering of data values or not.
+#' @param scale
+#' logical, do standardization of data values or not.
+#' @param maxncomp
+#' maximum number of components in PCA model.
+#' @param expvarlim
+#' minimum amount of variance, explained by chosen components (used for selection of optimal number 
+#' of components in PCA models).
+#' @param covlim
+#' convergence criterion.
+#' @param maxiter
+#' maximum number of iterations if convergence criterion is not met.
+#'
+#' @details 
+#' The function uses iterative PCA modeling of the data to approximate and impute missing values.  
+#' The result is most optimal for data sets with low or moderate level of noise and with number of
+#' missing values less than 10\% for small dataset and up to 20\% for large data.
+#'
+#' @return 
+#' Returns the same matrix \code{x} where missing values are replaced with approximated.
+#' 
+#' @references 
+#' Philip R.C. Nelson, Paul A. Taylor, John F. MacGregor. Missing data methods in PCA and PLS: 
+#' Score calculations with incomplete observations. Chemometrics and Intelligent Laboratory 
+#' Systems, 35 (1), 1996.
+#'
+#' @author 
+#' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
+#'
+#' @examples
+#' library(mdatools)
+#' 
+#' ## A very simple example of imputing missing values in a data with no noise
+#' 
+#' # generate a matrix with values
+#' s = 1:6
+#' odata = cbind(s, 2*s, 4*s)
+#' 
+#' # make a matrix with missing values
+#' mdata = odata
+#' mdata[5, 2] = mdata[2, 3] = NA
+#' 
+#' # replace missing values with approximated
+#' rdata = pca.mvreplace(mdata, scale = TRUE)
+#' 
+#' # show all matrices together
+#' show(cbind(odata, mdata, round(rdata, 2)))
+#' 
+#' @export
 pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
                          expvarlim = 0.95, covlim = 10^-6, maxiter = 100)
 {
-   # Makes missing values replacement with PCA based estimations.
-   #
-   # Arguments:
-   #   x: a matrix with data values
-   #   center: logical, mean center data or not
-   #   scale: logical, standardize data or not
-   #   maxncomp: maximum number of components to calculate for PCA estimation
-   #   expvarlim: limit for explained variance to chose optimal components
-   #   covlim: limit for covergence 
-   #   maxiter: maximum number of iterations if covergence is not reached
-   #
-   # Returns:
-   #   x.rep: data matrix with replaced missing values 
-   
    x.rep = x
    mvidx = is.na(x.rep)
 
@@ -271,12 +414,15 @@ pca.svd = function(x, ncomp = NULL)
       scores = x %*% loadings,
       eigenvals = (s$d^2)/(nrow(x) - 1)
    )
+   
+   res
 }
 
 #' NIPALS based PCA algorithm
 #' 
 #' @description
-#' Calculates principal component space using non-linear iterative partial least squares algorithm (NIPALS)
+#' Calculates principal component space using non-linear iterative partial least squares algorithm 
+#' (NIPALS)
 #' 
 #' @param x
 #' a matrix with data values (preprocessed)
@@ -287,7 +433,7 @@ pca.svd = function(x, ncomp = NULL)
 #' a list with scores, loadings and eigencalues for the components
 #' 
 #' @references
-#' [1] Geladi, Paul; Kowalski, Bruce (1986), "Partial Least Squares 
+#' Geladi, Paul; Kowalski, Bruce (1986), "Partial Least Squares 
 #' Regression:A Tutorial", Analytica Chimica Acta 185: 1-17 
 #'    
 pca.nipals = function(x, ncomp)
@@ -353,12 +499,9 @@ pca.crossval = function(model, x, cv, center = T, scale = F)
 {      
    ncomp = model$ncomp   
    nobj = nrow(x)
-   nvar = ncol(x)
    
    # get matrix with indices for cv segments
    idx = crossval(nobj, cv)
-   seglen = ncol(idx);
-   nseg = nrow(idx);
    nrep = dim(idx)[3]
       
    Q = matrix(0, ncol = ncomp, nrow = nobj)   
@@ -416,6 +559,7 @@ pca.crossval = function(model, x, cv, center = T, scale = F)
 #' @return
 #' PCA results (an object of class \code{pcares})
 #'  
+#' @export
 predict.pca = function(object, x, cv = F, ...)
 {
    x = prep.autoscale(x, object$center, object$scale)
@@ -464,6 +608,7 @@ predict.pca = function(object, x, cv = F, ...)
 #' @details
 #' See examples in help for \code{\link{pca}} function.
 #' 
+#' @export
 plotVariance.pca = function(obj, type = 'b', variance = 'expvar', 
                             main = 'Variance', xlab = 'Components', 
                             ylab = 'Explained variance, %',
@@ -516,6 +661,7 @@ plotVariance.pca = function(obj, type = 'b', variance = 'expvar',
 #' @details
 #' See examples in help for \code{\link{pca}} function.
 #' 
+#' @export
 plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained variance, %', 
                                main = 'Cumulative variance', ...)
 {
@@ -551,6 +697,7 @@ plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained varia
 #' @details
 #' See examples in help for \code{\link{pca}} function.
 #' 
+#' @export
 plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab = NULL, 
                           ylab = NULL, show.labels = F, show.legend = T,
                           show.axes = T, ...)
@@ -661,8 +808,10 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' @details
 #' See examples in help for \code{\link{pca}} function.
 #' 
+#' @export
 plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
-                             ylab = 'Squared residual distance (Q)', show.labels = F, show.legend = T, show.limits = T, ...)
+                             ylab = 'Squared residual distance (Q)', show.labels = F, 
+                             show.legend = T, show.limits = T, ...)
 {
    if (is.null(main))
    {
@@ -740,6 +889,7 @@ plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
 #' @details
 #' See examples in help for \code{\link{pca}} function.
 #' 
+#' @export
 plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings', xlab = NULL, 
                             ylab = NULL, show.labels = T, show.legend = T,  show.axes = T, ...)
 {   
@@ -800,6 +950,7 @@ plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings',
 #' @details
 #' See examples in help for \code{\link{pca}} function.
 #' 
+#' @export
 plot.pca = function(x, comp = c(1, 2), show.labels = F, show.legend = T, ...)
 {   
    obj = x
@@ -815,9 +966,6 @@ plot.pca = function(x, comp = c(1, 2), show.labels = F, show.legend = T, ...)
 
 #' Print method for PCA model object
 #' 
-#' @method print pca
-#' @S3method print pca
-#'
 #' @description
 #' Prints information about the object structure
 #' 
@@ -826,6 +974,7 @@ plot.pca = function(x, comp = c(1, 2), show.labels = F, show.legend = T, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 print.pca = function(x, ...)
 {
    obj = x
@@ -864,9 +1013,6 @@ print.pca = function(x, ...)
 
 #' Summary method for PCA model object
 #' 
-#' @method summary pca
-#' @S3method summary pca
-#'
 #' @description
 #' Shows some statistics (explained variance, eigenvalues) for the model.
 #' 
@@ -875,11 +1021,10 @@ print.pca = function(x, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 summary.pca = function(object, ...)
 {
    obj = object
-   
-   ncomp = obj$ncomp
    
    cat('\nPCA model (class pca) summary\n')
 

@@ -1,15 +1,140 @@
+#' PLS results
+#'
+#' @description 
+#' \code{plsres} is used to store and visualize results of applying a PLS model to a new data.
+#'
+#' @param y.pred
+#' predicted y values.
+#' @param y.ref
+#' reference (measured) y values.
+#' @param ncomp.selected
+#' selected (optimal) number of components.
+#' @param xdecomp
+#' PLS decomposition of X data (object of class \code{ldecomp}).
+#' @param ydecomp
+#' PLS decomposition of Y data (object of class \code{ldecomp}).
+#' @param info
+#' information about the object.
+#'
+#' @details 
+#' Do not use \code{plsres} manually, the object is created automatically when one applies a PLS 
+#' model to a new data set, e.g. when calibrate and validate a PLS model (all calibration and 
+#' validation results in PLS model are stored as objects of \code{plsres} class) or use function 
+#' \code{\link{predict.pls}}.
+#' 
+#' The object gives access to all PLS results as well as to the plotting methods for visualisation 
+#' of the results. The \code{plsres} class also inherits all properties and methods of \code{regres}
+#'  - general class for regression results.  
+#' 
+#' If no reference values provided, regression statistics will not be calculated and most of the 
+#' plots not available. The class is also used for cross-validation results, in this case some of 
+#' the values and methods are not available (e.g. scores and scores plot, etc.).
+#' 
+#' All plots are based on \code{\link{mdaplot}} function, so most of its options can be used (e.g. 
+#' color grouping, etc.).
+#' 
+#' RPD is ratio of standard deviation of response values to standard error of prediction (SDy/SEP).
+#'
+#' @return 
+#' Returns an object of \code{plsres} class with following fields:
+#' \item{ncomp }{number of components included to the model.} 
+#' \item{ncomp.selected }{selected (optimal) number of components.} 
+#' \item{y.ref }{a matrix with reference values for responses.} 
+#' \item{y.pred }{a matrix with predicted values for responses.} 
+#' \item{rmse }{a matrix with root mean squared error values for each response and component.} 
+#' \item{slope }{a matrix with slope values for each response and component.} 
+#' \item{r2 }{a matrix with determination coefficients for each response and component.} 
+#' \item{bias }{a matrix with bias values for each response and component.} 
+#' \item{sep }{a matrix with standard error values for each response and component.} 
+#' \item{rpd }{a matrix with RPD values for each response and component.} 
+#' \item{xdecomp }{decomposition of predictors (object of class \code{ldecomp}).} 
+#' \item{ydecomp }{decomposition of responses (object of class \code{ldecomp}).} 
+#' \item{info }{information about the object.} 
+#'
+#' @seealso      
+#' Methods for \code{plsres} objects:
+#' \tabular{ll}{
+#'    \code{print} \tab prints information about a \code{plsres} object.\cr
+#'    \code{\link{summary.plsres}} \tab shows performance statistics for the results.\cr
+#'    \code{\link{plot.plsres}} \tab shows plot overview of the results.\cr
+#'    \code{\link{plotPredictions.plsres}} \tab shows predicted vs. measured plot.\cr
+#'    \code{\link{plotXScores.plsres}} \tab shows scores plot for x decomposition.\cr
+#'    \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
+#'    \code{\link{plotRMSE.plsres}} \tab shows RMSE plot.\cr
+#'    \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
+#'    \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
+#'    \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y 
+#'    decomposition.\cr
+#'    \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y 
+#'    decomposition.\cr
+#'    \code{\link{plotXResiduals.plsres}} \tab shows T2 vs. Q plot for x decomposition.\cr
+#'    \code{\link{plotYResiduals.regres}} \tab shows residuals plot for y values.\cr
+#' }
+#' See also \code{\link{pls}} - a class for PLS models.
+#' 
+#' @examples 
+#' ### Examples of using PLS result class
+#' library(mdatools)
+
+#' ## 1. Make a PLS model for concentration of first component 
+#' ## using full-cross validation and get calibration results
+#' 
+#' data(simdata)
+#' x = simdata$spectra.c
+#' y = simdata$conc.c[, 1]
+#' 
+#' model = pls(x, y, ncomp = 8, cv = 1)
+#' model = selectCompNum(model, 2)
+#' res = model$calres
+#' 
+#' summary(res)
+#' plot(res)
+#' 
+#' ## 2. Make a PLS model for concentration of first component 
+#' ## and apply model to a new dataset
+#' 
+#' data(simdata)
+#' x = simdata$spectra.c
+#' y = simdata$conc.c[, 1]
+#' 
+#' model = pls(x, y, ncomp = 6, cv = 1)
+#' model = selectCompNum(model, 2)
+#' 
+#' x.new = simdata$spectra.t
+#' y.new = simdata$conc.t[, 1]
+#' res = predict(model, x.new, y.new)
+#' 
+#' summary(res)
+#' plot(res)
+#' 
+#' ## 3. Show variance and error plots for PLS results
+#' par(mfrow = c(2, 2))
+#' plotXCumVariance(res, type = 'h')
+#' plotYCumVariance(res, type = 'b', show.labels = TRUE, legend.position = 'bottomright')
+#' plotRMSE(res)
+#' plotRMSE(res, type = 'h', show.labels = TRUE)
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 4. Show scores plots for PLS results
+#' ## (for results plot we can use color grouping)
+#' par(mfrow = c(2, 2))
+#' plotXScores(res)
+#' plotXScores(res, show.labels = TRUE, cgroup = y.new)
+#' plotXYScores(res)
+#' plotXYScores(res, comp = 2, show.labels = TRUE)
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 5. Show predictions and residuals plots for PLS results
+#' par(mfrow = c(2, 2))
+#' plotXResiduals(res, show.label = TRUE, cgroup = y.new)
+#' plotYResiduals(res, show.label = TRUE)
+#' plotPredictions(res)
+#' plotPredictions(res, ncomp = 4, xlab = 'C, reference', ylab = 'C, predictions')
+#' par(mfrow = c(1, 1))
+#'
+#' @export
 plsres = function(y.pred, y.ref = NULL, ncomp.selected = NULL, xdecomp = NULL, ydecomp = NULL, info = '')
 {
-   # Class for storing and viasualising PLS results:
-   #
-   # Arguments:
-   #   y.pred: vector or matrix with predicted values
-   #   y.ref: vector with reference (measured) values
-   #   ncomp.selected: if yp is a matrix, wich column to use
-   #   xdecomp: PLS decomposition of X data (class "ldecomp")
-   #   ydecomp: PLS decomposition of Y data (class "ldecomp")
-   #   info: information about the object
-   
    obj = regres(y.pred, y.ref = y.ref, ncomp.selected = ncomp.selected)
    obj$ncomp = ncol(y.pred)
    obj$xdecomp = xdecomp
@@ -42,6 +167,7 @@ plsres = function(y.pred, y.ref = NULL, ncomp.selected = NULL, xdecomp = NULL, y
 #' @details
 #' See examples in help for \code{\link{plsres}} function.
 #' 
+#' @export
 plotRMSE.plsres = function(obj, xlab = 'Components', ...)
 {
    plotRMSE.regres(obj, xlab = xlab, ...)
@@ -64,6 +190,7 @@ plotRMSE.plsres = function(obj, xlab = 'Components', ...)
 #' @details
 #' See examples in help for \code{\link{plsres}} function.
 #' 
+#' @export
 plotXScores.plsres = function(obj, comp = c(1, 2), main = NULL, ...)
 {
    if (is.null(main))
@@ -98,6 +225,7 @@ plotXScores.plsres = function(obj, comp = c(1, 2), main = NULL, ...)
 #' @details
 #' See examples in help for \code{\link{plsres}} function.
 #' 
+#' @export
 plotXYScores.plsres = function(obj, comp = 1, type = 'p', main = 'XY scores', 
                                xlab = 'X scores', ylab = 'Y scores', ...)
 {
@@ -134,6 +262,7 @@ plotXYScores.plsres = function(obj, comp = 1, type = 'p', main = 'XY scores',
 #' @details
 #' See examples in help for \code{\link{plsres}} function.
 #' 
+#' @export
 plotXResiduals.plsres = function(obj, ncomp = NULL, main = NULL, ...)
 {   
    if (is.null(main))
@@ -168,6 +297,7 @@ plotXResiduals.plsres = function(obj, ncomp = NULL, main = NULL, ...)
 #' @details
 #' See examples in help for \code{\link{plsres}} function.
 #' 
+#' @export
 plotXVariance.plsres = function(obj, main = 'X variance', ...)
 {   
    plotVariance.ldecomp(obj$xdecomp, main = main, ...)
@@ -188,6 +318,7 @@ plotXVariance.plsres = function(obj, main = 'X variance', ...)
 #' @details
 #' See examples in help for \code{\link{plsres}} function.
 #' 
+#' @export
 plotYVariance.plsres = function(obj, main = 'Y variance', ...)
 {   
    plotVariance.ldecomp(obj$ydecomp, main = main, ...)
@@ -208,6 +339,7 @@ plotYVariance.plsres = function(obj, main = 'Y variance', ...)
 #' @details
 #' See examples in help for \code{\link{plsres}} function.
 #' 
+#' @export
 plotXCumVariance.plsres = function(obj, main = 'X cumulative variance', ...)
 {   
    plotCumVariance.ldecomp(obj$xdecomp, main = main, ...)
@@ -228,6 +360,7 @@ plotXCumVariance.plsres = function(obj, main = 'X cumulative variance', ...)
 #' @details
 #' See examples in help for \code{\link{plsres}} function.
 #' 
+#' @export
 plotYCumVariance.plsres = function(obj, main = 'Y cumulative variance', ...)
 {   
    plotCumVariance.ldecomp(obj$ydecomp, main = main, ...)
@@ -255,6 +388,7 @@ plotYCumVariance.plsres = function(obj, main = 'Y cumulative variance', ...)
 #' @seealso
 #' \code{\link{plotPredictions.regres}} - prediction plot for regression results.
 #' 
+#' @export
 plotPredictions.plsres = function(obj, ny = 1, ncomp = NULL, main = NULL, ...)
 {
    if (is.null(main))
@@ -292,6 +426,7 @@ plotPredictions.plsres = function(obj, ny = 1, ncomp = NULL, main = NULL, ...)
 #' @details
 #' See examples in help for \code{\link{plsres}} function.
 #' 
+#' @export
 plot.plsres = function(x, ncomp = NULL, ny = 1, show.labels = F, ...)
 {
    obj = x
@@ -319,9 +454,6 @@ plot.plsres = function(x, ncomp = NULL, ny = 1, show.labels = F, ...)
 
 #' as.matrix method for PLS results
 #' 
-#' @method as.matrix plsres
-#' @S3method as.matrix plsres
-#'
 #' @description
 #' Returns a matrix with model performance statistics for PLS results
 #' 
@@ -334,6 +466,7 @@ plot.plsres = function(x, ncomp = NULL, ny = 1, show.labels = F, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...)
 {
    obj = x
@@ -366,9 +499,6 @@ as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...)
 
 #' summary method for PLS results object
 #' 
-#' @method summary plsres
-#' @S3method summary plsres
-#'
 #' @description
 #' Shows performance statistics for the results.
 #' 
@@ -381,6 +511,7 @@ as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 summary.plsres = function(object, ny = NULL, ncomp = NULL, ...)
 {
    obj = object
@@ -419,9 +550,6 @@ summary.plsres = function(object, ny = NULL, ncomp = NULL, ...)
 
 #' print method for PLS results object
 #' 
-#' @method print plsres
-#' @S3method print plsres
-#'
 #' @description
 #' Prints information about the object structure
 #' 
@@ -430,6 +558,7 @@ summary.plsres = function(object, ny = NULL, ncomp = NULL, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 print.plsres = function(x, ...)
 {
    obj = x

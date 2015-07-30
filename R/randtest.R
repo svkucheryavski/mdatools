@@ -1,24 +1,96 @@
+#' Randomization test for PLS regression
+#' 
+#' @description
+#' \code{randtest} is used to carry out randomization/permutation test for a PLS regression model 
+#' 
+#' @param x
+#' matrix with predictors.
+#' @param y
+#' vector or one-column matrix with response.
+#' @param ncomp
+#' maximum number of components to test.
+#' @param center
+#' logical, center or not predictors and response values.
+#' @param scale
+#' logical, scale (standardize) or not predictors and response values.
+#' @param nperm
+#' number of permutations.
+#' @param sig.level
+#' significance level.
+#' @param silent
+#' logical, show or not test progress.
+#' 
+#' @return 
+#' Returns an object of \code{randtest} class with following fields:
+#' \item{nperm }{number of permutations used for the test.} 
+#' \item{stat }{statistic values calculated for each component.} 
+#' \item{alpha }{alpha values calculated for each component.} 
+#' \item{statperm }{matrix with statistic values for each permutation.} 
+#' \item{corrperm }{matrix with correlation between predicted and reference y-vales for each 
+#' permutation.} 
+#' \item{ncomp.selected }{suggested number of components.} 
+#' 
+#' @details    
+#' The class implements a method for selection of optimal number of components in PLS1 regression 
+#' based on the randomization test [1]. The basic idea is that for each component from 1 to
+#' \code{ncomp} a statistic T, which is a covariance between t-score (X score, derived from a PLS 
+#' model) and the reference Y values, is calculated. By repeating this for randomly permuted 
+#' Y-values a distribution of the statistic is obtained. A parameter \code{alpha} is computed to 
+#' show how often the statistic T, calculated for permuted Y-values, is the same or higher than 
+#' the same statistic, calculated for original data without permutations.
+#' 
+#' If a component is important, then the covariance for unpermuted data should be larger than the 
+#' covariance for permuted data and therefore the value for \code{alpha} will be quie small (there 
+#' is still a small chance to get similar covariance). This makes \code{alpha} very similar to 
+#' p-value in a statistical test.
+#' 
+#' The \code{randtest} procedure calculates alpha for each component, the values can be observed 
+#' using \code{summary} or \code{plot} functions. There are also several function, allowing e.g. 
+#' to show distribution of statistics and the critical value for each component.
+#'
+#' @references 
+#' S. Wiklund et al. Journal of Chemometrics 21 (2007) 427-439.
+#'
+#' @seealso 
+#' Methods for \code{randtest} objects:
+#' \tabular{ll}{
+#'  \code{print.randtest} \tab prints information about a \code{randtest} object.\cr
+#'  \code{\link{summary.randtest}} \tab shows summary statistics for the test.\cr
+#'  \code{\link{plot.randtest}} \tab shows bar plot for alpha values.\cr
+#'  \code{\link{plotHist.randtest}} \tab shows distribution of statistic plot.\cr
+#'  \code{\link{plotCorr.randtest}} \tab shows determination coefficient plot.\cr
+#' }
+#' 
+#' @examples
+#' ### Examples of using the test
+#' 
+#' ## Get the spectral data from Simdata set and apply SNV transformation
+#' 
+#' data(simdata)
+#' 
+#' y = simdata$conc.c[, 3]
+#' x = simdata$spectra.c
+#' x = prep.snv(x)
+#' 
+#' ## Run the test and show summary 
+#' ## (normally use higher nperm values > 1000)
+#' r = randtest(x, y, ncomp = 4, nperm = 200, silent = FALSE)
+#' summary(r)
+#' 
+#' ## Show plots
+#' 
+#' par( mfrow = c(3, 2))
+#' plot(r)
+#' plotHist(r, comp = 3)
+#' plotHist(r, comp = 4)
+#' plotCorr(r, 3)
+#' plotCorr(r, 4)
+#' par( mfrow = c(1, 1))
+#' 
+#' @export
 randtest = function(x, y, ncomp = 15, center = T, scale = F, nperm = 1000, 
                     sig.level = 0.05, silent = TRUE)
 {   
-   # Randomization test for PLS regression
-   # 
-   # Carries out randomization/permutation test for a PLS regression model 
-   # with given data and parameters
-   #
-   # Arguments
-   # ---------
-   # x - a matrix with x values (predictors)
-   # y - a vector with y values (responses)
-   # ncomp - maximum number of components to calculate
-   # center - logical, do mean centering or not
-   # scale - logical, do standardization or not
-   #
-   # Return
-   # ------
-   # res - an object with test results
-   #
-      
    x = as.matrix(x)
    y = as.matrix(y)
    nobj = nrow(x)
@@ -103,6 +175,7 @@ randtest = function(x, y, ncomp = 15, center = T, scale = F, nperm = 1000,
 #' @details
 #' See examples in help for \code{\link{randtest}} function.
 #' 
+#' @export
 plotHist.randtest = function(obj, comp = NULL, main = NULL, xlab = 'Test statistic', ylab = 'Frequency', ...)    
 {
    if (is.null(comp))
@@ -147,6 +220,7 @@ plotHist.randtest = function(obj, comp = NULL, main = NULL, xlab = 'Test statist
 #' @details
 #' See examples in help for \code{\link{randtest}} function.
 #' 
+#' @export
 plotCorr.randtest = function(obj, comp = NULL, main = NULL, xlab = expression(r^2), ylab = 'Test statistic', ...)
 {
    if (is.null(comp))
@@ -163,9 +237,6 @@ plotCorr.randtest = function(obj, comp = NULL, main = NULL, xlab = expression(r^
 }
 
 #' Plot for randomization test results
-#' 
-#' @method plot randtest
-#' @S3method plot randtest
 #' 
 #' @description
 #' Makes a bar plot with alpha values for each component.
@@ -184,6 +255,7 @@ plotCorr.randtest = function(obj, comp = NULL, main = NULL, xlab = expression(r^
 #' @details
 #' See examples in help for \code{\link{randtest}} function.
 #' 
+#' @export
 plot.randtest = function(x, main = 'Alpha', xlab = 'Components', ylab = '', ...)
 {
    obj = x
@@ -193,9 +265,6 @@ plot.randtest = function(x, main = 'Alpha', xlab = 'Components', ylab = '', ...)
 
 #' Summary method for randtest object
 #' 
-#' @method summary randtest
-#' @S3method summary randtest
-#'
 #' @description
 #' Shows summary for randomization test results.
 #' 
@@ -203,7 +272,8 @@ plot.randtest = function(x, main = 'Alpha', xlab = 'Components', ylab = '', ...)
 #' randomization test results (object of class \code{randtest})
 #' @param ...
 #' other arguments
-#' 
+#'
+#' @export 
 summary.randtest = function(object, ...)
 {
    obj = object
@@ -217,9 +287,6 @@ summary.randtest = function(object, ...)
 
 #' Print method for randtest object
 #' 
-#' @method print randtest
-#' @S3method print randtest
-#'
 #' @description
 #' Prints information about the object structure
 #' 
@@ -227,7 +294,8 @@ summary.randtest = function(object, ...)
 #' a randomization test results (object of class \code{randtest})
 #' @param ...
 #' other arguments
-#' 
+#'
+#' @export 
 print.randtest = function(x, ...)
 {   
    obj = x

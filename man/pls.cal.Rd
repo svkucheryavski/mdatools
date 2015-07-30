@@ -4,7 +4,8 @@
 \alias{pls.cal}
 \title{PLS model calibration}
 \usage{
-pls.cal(x, y, ncomp, center, scale, method = "simpls", cv = FALSE)
+pls.cal(x, y, ncomp, center, scale, method = "simpls", cv = FALSE,
+  light = FALSE)
 }
 \arguments{
 \item{x}{a matrix with x values (predictors)}
@@ -20,6 +21,8 @@ pls.cal(x, y, ncomp, center, scale, method = "simpls", cv = FALSE)
 \item{method}{algorithm for compiting PC space (only 'simpls' is supported so far)}
 
 \item{cv}{logical, does calibration for cross-validation or not}
+
+\item{light}{logical, calculate a "light" model or normal one}
 }
 \value{
 model

@@ -1,27 +1,235 @@
-# class and methods for Partial Least Squares regression #
-
+#' Partial Least Squares regression
+#'
+#' @description 
+#' \code{pls} is used to calibrate, validate and use of partial least squares (PLS) 
+#' regression model.
+#' 
+#' @param x
+#' matrix with predictors.
+#' @param y  
+#' matrix with responses.
+#' @param ncomp
+#' maximum number of components to calculate.
+#' @param center   
+#' logical, center or not predictors and response values.
+#' @param scale   
+#' logical, scale (standardize) or not predictors and response values.
+#' @param cv  
+#' number of segments for cross-validation (if cv = 1, full cross-validation will be used).
+#' @param x.test   
+#' matrix with predictors for test set.
+#' @param y.test  
+#' matrix with responses for test set.
+#' @param method   
+#' method for calculating PLS model.
+#' @param alpha   
+#' significance level for calculating statistical limits for residuals.
+#' @param coeffs.ci   
+#' method to calculate p-values and confidence intervals for regression coefficients (so far only 
+#' jack-knifing is availavle: \code{='jk'}).
+#' @param coeffs.alpha   
+#' significance level for calculating confidence intervals for regression coefficients.
+#' @param info   
+#' short text with information about the model.
+#' @param light   
+#' run normal or light (faster) version of PLS without calculationg some performance statistics.
+#' @param ncomp.selcrit  
+#' criterion for selecting optimal number of components (\code{'min'} for 
+#' first local minimum of RMSECV and \code{'wold'} for Wold's rule.)
+#' 
+#' @return 
+#' Returns an object of \code{pls} class with following fields:
+#' \item{ncomp }{number of components included to the model.} 
+#' \item{ncomp.selected }{selected (optimal) number of components.} 
+#' \item{xloadings }{matrix with loading values for x decomposition.} 
+#' \item{yloadings }{matrix with loading values for y decomposition.} 
+#' \item{weights }{matrix with PLS weights.} 
+#' \item{selratio }{array with selectivity ratio values.} 
+#' \item{vipscores }{matrix with VIP scores values.} 
+#' \item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated for each component.}   
+#' \item{info }{information about the model, provided by user when build the model.} 
+#' \item{calres }{an object of class \code{\link{plsres}} with PLS results for a calibration data.} 
+#' \item{testres }{an object of class \code{\link{plsres}} with PLS results for a test data, if it was provided.} 
+#' \item{cvres }{an object of class \code{\link{plsres}} with PLS results for cross-validation, if this option was chosen.} 
+#'
+#' @details 
+#' So far only SIMPLS method [1] is available, more coming soon. Implementation works both with one
+#' and multiple response variables.
+#'
+#' Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) as a minimum of 
+#' number of objects - 1, number of x variables and the default or provided value. Regression 
+#' coefficients, predictions and other results are calculated for each set of components from 1
+#' to \code{ncomp}: 1, 1:2, 1:3, etc. The optimal number of components, (\code{ncomp.selected}), 
+#' is found using Wold's R criterion, but can be adjusted by user using function
+#' (\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all 
+#' default operations - predictions, plots, etc. 
+#'
+#' Selectivity ratio [2] and VIP scores [3] are calculated for any PLS model authomatically, however
+#' while selectivity ratio values are calculated for all computed components, the VIP scores are 
+#' computed only for selected components (to save calculation time) and recalculated every time when 
+#' \code{selectCompNum()} is called for the model. 
+#' 
+#' Calculation of confidence intervals and p-values for regression coefficients are available
+#' only by jack-knifing so far. See help for \code{\link{regcoeffs}} objects for details. 
+#'
+#' @references     
+#' 1. S. de Jong, Chemometrics and Intelligent Laboratory Systems 18 (1993) 251-263.
+#' 2. Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), 35-48.
+#' 3. Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), 103-112.
+#'
+#' @seealso    
+#' Methods for \code{pls} objects:
+#' \tabular{ll}{
+#'  \code{print} \tab prints information about a \code{pls} object.\cr
+#'  \code{\link{summary.pls}} \tab shows performance statistics for the model.\cr
+#'  \code{\link{plot.pls}} \tab shows plot overview of the model.\cr
+#'  \code{\link{pls.simpls}} \tab implementation of SIMPLS algorithm.\cr
+#'  \code{\link{predict.pls}} \tab applies PLS model to a new data.\cr
+#'  \code{\link{selectCompNum.pls}} \tab set number of optimal components in the model.\cr
+#'  \code{\link{plotPredictions.pls}} \tab shows predicted vs. measured plot.\cr
+#'  \code{\link{plotRegcoeffs.pls}} \tab shows regression coefficients plot.\cr      
+#'  \code{\link{plotXScores.pls}} \tab shows scores plot for x decomposition.\cr
+#'  \code{\link{plotXYScores.pls}} \tab shows scores plot for x and y decomposition.\cr
+#'  \code{\link{plotXLoadings.pls}} \tab shows loadings plot for x decomposition.\cr
+#'  \code{\link{plotXYLoadings.pls}} \tab shows loadings plot for x and y decomposition.\cr
+#'  \code{\link{plotRMSE.pls}} \tab shows RMSE plot.\cr
+#'  \code{\link{plotXVariance.pls}} \tab shows explained variance plot for x decomposition.\cr
+#'  \code{\link{plotYVariance.pls}} \tab shows explained variance plot for y decomposition.\cr
+#'  \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for y 
+#'  decomposition.\cr
+#'  \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y 
+#'  decomposition.\cr
+#'  \code{\link{plotXResiduals.pls}} \tab shows T2 vs. Q plot for x decomposition.\cr
+#'  \code{\link{plotYResiduals.pls}} \tab shows residuals plot for y values.\cr
+#'  \code{\link{plotSelectivityRatio.pls}} \tab shows plot with selectivity ratio values.\cr
+#'  \code{\link{plotVIPScores.pls}} \tab shows plot with VIP scores values.\cr
+#'  \code{\link{getSelectivityRatio.pls}} \tab returns vector with selectivity ratio values.\cr
+#'  \code{\link{getVIPScores.pls}} \tab returns vector with VIP scores values.\cr
+#'  \code{\link{getRegcoeffs.pls}} \tab returns matrix with regression coefficients.\cr
+#' }
+#'      
+#' Most of the methods for plotting data (except loadings and regression coefficients) are also 
+#' available for PLS results 
+#' (\code{\link{plsres}}) objects. There is also a randomization test for PLS-regression 
+#' (\code{\link{randtest}}).   
+#'
+#' @author 
+#' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
+#'
+#' @examples
+#' ### Examples of using PLS model class
+#' library(mdatools)   
+#'   
+#' ## 1. Make a PLS model for concentration of first component 
+#' ## using full-cross validation and automatic detection of 
+#' ## optimal number of components and show an overview
+#' 
+#' data(simdata)
+#' x = simdata$spectra.c
+#' y = simdata$conc.c[, 1]
+#' 
+#' model = pls(x, y, ncomp = 8, cv = 1)
+#' summary(model)
+#' plot(model)
+#' 
+#' ## 2. Make a PLS model for concentration of first component 
+#' ## using test set and 10 segment cross-validation and show overview
+#' 
+#' data(simdata)
+#' x = simdata$spectra.c
+#' y = simdata$conc.c[, 1]
+#' x.t = simdata$spectra.t
+#' y.t = simdata$conc.t[, 1]
+#' 
+#' model = pls(x, y, ncomp = 8, cv = 10, x.test = x.t, y.test = y.t)
+#' model = selectCompNum(model, 2)
+#' summary(model)
+#' plot(model)
+#' 
+#' ## 3. Make a PLS model for concentration of first component 
+#' ## using only test set validation and show overview
+#' 
+#' data(simdata)
+#' x = simdata$spectra.c
+#' y = simdata$conc.c[, 1]
+#' x.t = simdata$spectra.t
+#' y.t = simdata$conc.t[, 1]
+#' 
+#' model = pls(x, y, ncomp = 6, x.test = x.t, y.test = y.t)
+#' model = selectCompNum(model, 2)
+#' summary(model)
+#' plot(model)
+#' 
+#' ## 4. Show variance and error plots for a PLS model
+#' par(mfrow = c(2, 2))
+#' plotXCumVariance(model, type = 'h')
+#' plotYCumVariance(model, type = 'b', show.labels = TRUE, legend.position = 'bottomright')
+#' plotRMSE(model)
+#' plotRMSE(model, type = 'h', show.labels = TRUE)
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 5. Show scores plots for a PLS model
+#' par(mfrow = c(2, 2))
+#' plotXScores(model)
+#' plotXScores(model, comp = c(1, 3), show.labels = TRUE)
+#' plotXYScores(model)
+#' plotXYScores(model, comp = 2, show.labels = TRUE)
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 6. Show loadings and coefficients plots for a PLS model
+#' par(mfrow = c(2, 2))
+#' plotXLoadings(model)
+#' plotXLoadings(model, comp = c(1, 2), type = 'l')
+#' plotXYLoadings(model, comp = c(1, 2), legend.position = 'topleft')
+#' plotRegcoeffs(model)
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 7. Show predictions and residuals plots for a PLS model
+#' par(mfrow = c(2, 2))
+#' plotXResiduals(model, show.label = TRUE)
+#' plotYResiduals(model, show.label = TRUE)
+#' plotPredictions(model)
+#' plotPredictions(model, ncomp = 4, xlab = 'C, reference', ylab = 'C, predictions')
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 8. Selectivity ratio and VIP scores plots
+#' par(mfrow = c(2, 2))
+#' plotSelectivityRatio(model)
+#' plotSelectivityRatio(model, ncomp = 1)
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 9. Variable selection with selectivity ratio
+#' selratio = getSelectivityRatio(model)
+#' selvar = !(selratio < 8)
+#' 
+#' xsel = x[, selvar]
+#' modelsel = pls(xsel, y, ncomp = 6, cv = 1)
+#' modelsel = selectCompNum(modelsel, 3)
+#' 
+#' summary(model)
+#' summary(modelsel)
+#' 
+#' ## 10. Calculate average spectrum and show the selected variables
+#' i = 1:ncol(x)
+#' ms = apply(x, 2, mean)
+#' 
+#' par(mfrow = c(2, 2))
+#' 
+#' plot(i, ms, type = 'p', pch = 16, col = 'red', main = 'Original variables')
+#' plotPredictions(model)
+#' 
+#' plot(i, ms, type = 'p', pch = 16, col = 'lightgray', main = 'Selected variables')
+#' points(i[selvar], ms[selvar], col = 'red', pch = 16)
+#' plotPredictions(modelsel)
+#' 
+#' par(mfrow = c(1, 1))
+#' 
+#' @export   
 pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL, 
                x.test = NULL, y.test = NULL, method = 'simpls', alpha = 0.05, 
-               coeffs.ci = NULL, coeffs.alpha = 0.1, info = '')
+               coeffs.ci = NULL, coeffs.alpha = 0.1, info = '', light = F, 
+               ncomp.selcrit = 'min')
 {
-   # Calibrate and validate a PLS model.
-   #
-   # Arguments:
-   #   x: a matrix with predictor values    
-   #   y: a vector with response values
-   #   ncomp: maximum number of components to calculate
-   #   center: logical, center or not x and y data
-   #   scale: logical, standardize or not x data
-   #   cv: cross-validation settings (see \code{?crossval} for details)
-   #   x.test: a matrix with predictor values for test set validation
-   #   y.test: a vector with response values for test set validation
-   #   method: a method to calculate PLS model
-   #   alpha: a sigificance limit for Q values
-   #   info: a short string with information about the model
-   #
-   # Returns:
-   #   model: a PLS model (object of class pls) 
-
    x = as.matrix(x)
    y = as.matrix(y)
    
@@ -79,6 +287,7 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
    # build a model and apply to calibration set
    model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method)
    model$alpha = alpha   
+   model$light = light
    model$calres = predict.pls(model, x, y)
    
    # do cross-validation if needed
@@ -116,6 +325,7 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
    }
    
    # select optimal number of components   
+   model$ncomp.selcrit = ncomp.selcrit
    model = selectCompNum.pls(model)
    
    model$call = match.call()
@@ -145,11 +355,13 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
 #' algorithm for compiting PC space (only 'simpls' is supported so far)
 #' @param cv
 #' logical, does calibration for cross-validation or not
+#' @param light 
+#' logical, calculate a "light" model or normal one
 #' 
 #' @return model
 #' an object with calibrated PLS model
 #' 
-pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE)
+pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE, light = FALSE)
 {   
    # center and scale data according to arguments
    x = prep.autoscale(as.matrix(x), center = center, scale = scale)
@@ -177,7 +389,7 @@ pls.cal = function(x, y, ncomp, center, scale, method = 'simpls', cv = FALSE)
       ncomp = res$ncomp
    )
    
-   if (cv == FALSE)
+   if (!cv && !light)
    {   
       model$selratio = pls.calculateSelectivityRatio(model, x)
    }
@@ -297,7 +509,9 @@ pls.simpls = function(x, y, ncomp, cv = FALSE)
       yloadings = Q,
       yscores = U,
       ncomp = n
-   )   
+   )  
+   
+   res
 }  
 
 #' Cross-validation of a PLS model
@@ -424,6 +638,7 @@ pls.crossval = function(model, x, y, cv, center = T, scale = F, jack.knife = T)
 #' If number of components is not specified, the Wold's R criterion is used.
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 selectCompNum.pls = function(model, ncomp = NULL)
 {
    if (!is.null(ncomp))
@@ -434,7 +649,7 @@ selectCompNum.pls = function(model, ncomp = NULL)
    }
    else
    {
-      # automatic estimation of the number
+      # automatic estimation of the optimal number of components
       n = dim(model$coeffs$values)[3]
       
       if (!is.null(model$cvres))
@@ -447,25 +662,52 @@ selectCompNum.pls = function(model, ncomp = NULL)
          warning('No validation results were found!')
       }
       
-      ncomp = ncol(press)
-      r = press[, 2:ncomp] / press[, 1:(ncomp - 1)] 
-      ind = which(r > 0.95, arr.ind = TRUE)
-      if (is.null(dim(ind)))
-         ncomp = min(ind)
+      if (model$ncomp.selcrit == 'wold')
+      {   
+         # using Wold's criterion
+         ncomp = ncol(press)
+         if (ncomp > 2)
+         {
+            r = press[, 2:ncomp] / press[, 1:(ncomp - 1)] 
+            ind = which(r > 0.95, arr.ind = TRUE)
+            if (length(ind) == 0)
+               ncomp = 1
+            else if (is.null(dim(ind)))
+               ncomp = min(ind)
+            else
+               ncomp = min(ind[, 2])
+         }
+         else
+         {
+            ncomp = which.min(press)
+         }   
+      } 
+      else if (model$ncomp.selcrit == 'min')   
+      {
+         # using first local minimum
+         df = diff(as.vector(press)) > 0
+         if (any(df))
+            ncomp = which(df)[1]
+         else
+            ncomp = length(press)
+      }
       else
-         ncomp = min(ind[, 2])
+      {
+         stop('Wrong value for "ncomp.selcrit" argument!')
+      }   
    }   
       
    model$ncomp.selected = ncomp      
    model$calres$ncomp.selected = ncomp
-   
+
    if (!is.null(model$cvres)) 
       model$cvres$ncomp.selected = ncomp
    
    if (!is.null(model$testres)) 
       model$testres$ncomp.selected = ncomp
 
-   model$vipscores = pls.calculateVIPScores(model)
+   if (!model$light)
+      model$vipscores = pls.calculateVIPScores(model)
    
    model
 }   
@@ -492,6 +734,7 @@ selectCompNum.pls = function(model, ncomp = NULL)
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #'  
+#'  @export
 predict.pls = function(object, x, y.ref = NULL, cv = F, ...)
 {   
    nresp = dim(object$coeffs$values)[3]
@@ -709,6 +952,7 @@ pls.calculateVIPScores = function(object)
 #' @return
 #' vector with selectivity ratio values
 #' 
+#' @export
 getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, ...)
 {
    if (is.null(ncomp))
@@ -742,6 +986,7 @@ getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, ...)
 #' @return
 #' vector with VIP scores values
 #' 
+#' @export
 getVIPScores.pls = function(obj, ny = 1, ...)
 {
    vipscores = obj$vipscores[, ny, drop = F]
@@ -771,7 +1016,8 @@ getVIPScores.pls = function(obj, ny = 1, ...)
 #' A matrix (n of predictors x n of responses) with regression coefficients.
 #'  
 #'  
-getRegcoeffs = function(obj, ncomp = NULL, ...)
+#' @export
+getRegcoeffs.pls = function(obj, ncomp = NULL)
 {
    if (is.null(ncomp)) 
       ncomp = obj$ncomp.selected
@@ -839,6 +1085,7 @@ getRegcoeffs = function(obj, ncomp = NULL, ...)
 #' @references
 #' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
 #' 
+#' @export
 plotVIPScores.pls = function(obj, ny = 1, type = 'l', main = NULL, 
                              xlab = 'Variables', ylab = '', ...)
 {   
@@ -875,6 +1122,7 @@ plotVIPScores.pls = function(obj, ny = 1, type = 'l', main = NULL,
 #' @references
 #' [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
 #' 
+#' @export
 plotSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, type = 'l', main = NULL, 
                                     xlab = 'Variables', ylab = '', ...)
 {
@@ -914,6 +1162,7 @@ plotSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, type = 'l', main 
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotRMSE.pls = function(obj, ny = 1, type = 'b',
                         main = 'RMSE', xlab = 'Components', ylab = NULL, 
                         show.legend = T, show.labels = F, ...)
@@ -981,6 +1230,7 @@ plotRMSE.pls = function(obj, ny = 1, type = 'b',
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotXVariance.pls = function(obj, type = 'b',
                              main = 'X variance', xlab = 'Components', 
                              ylab = 'Explained variance, %', 
@@ -1013,6 +1263,7 @@ plotXVariance.pls = function(obj, type = 'b',
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotYVariance.pls = function(obj, type = 'b',
                              main = 'Y variance', xlab = 'Components', 
                              ylab = 'Explained variance, %', 
@@ -1045,6 +1296,7 @@ plotYVariance.pls = function(obj, type = 'b',
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotXCumVariance.pls = function(obj, type = 'b',
                                 main = 'X cumulative variance', 
                                 xlab = 'Components', ylab = 'Explained variance, %', 
@@ -1078,6 +1330,7 @@ plotXCumVariance.pls = function(obj, type = 'b',
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotYCumVariance.pls = function(obj, type = 'b',
                                 main = 'Y cumulative variance', 
                                 xlab = 'Components', ylab = 'Explained variance, %', 
@@ -1117,6 +1370,7 @@ plotYCumVariance.pls = function(obj, type = 'b',
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotVariance.pls = function(obj, decomp = 'xdecomp', variance = 'expvar',
                             type = 'b',
                             main = 'X variance', xlab = 'Components', 
@@ -1181,6 +1435,7 @@ plotVariance.pls = function(obj, decomp = 'xdecomp', variance = 'expvar',
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotXScores.pls = function(obj, comp = c(1, 2), main = 'X scores',
                            xlab = NULL, ylab = NULL,
                            show.axes = T, 
@@ -1280,6 +1535,7 @@ plotXScores.pls = function(obj, comp = c(1, 2), main = 'X scores',
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #'
+#' @export
 plotXYScores.pls = function(obj, comp = 1, main = NULL,
                             xlab = 'X scores', ylab = 'Y scores',
                             show.axes = T,
@@ -1353,7 +1609,8 @@ plotXYScores.pls = function(obj, comp = 1, main = NULL,
 #'
 #' @details
 #' See examples in help for \code{\link{pls}} function.
-#' 
+#'
+#' @export
 plotPredictions.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, xlab = NULL,
                                ylab = NULL, legend.position = 'topleft', show.line = T, show.labels = F,
                                show.legend = T, colmap = 'default', col = NULL, ...)
@@ -1456,6 +1713,7 @@ plotPredictions.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, xlab = NU
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotYResiduals.pls = function(obj, ncomp = NULL, ny = 1, type = 'p', 
                               main = NULL, 
                               ylab = NULL,
@@ -1588,6 +1846,7 @@ plotYResiduals.pls = function(obj, ncomp = NULL, ny = 1, type = 'p',
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotRegcoeffs.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, ylab = NULL, show.ci = T, ...)
 {
    if (is.null(main))
@@ -1639,6 +1898,7 @@ plotRegcoeffs.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, ylab = NULL
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotXLoadings.pls = function(obj, comp = c(1, 2), type = 'p', main = 'X loadings', 
                              ylab = NULL, xlab = NULL, show.axes = T, ...)
 {
@@ -1712,6 +1972,7 @@ plotXLoadings.pls = function(obj, comp = c(1, 2), type = 'p', main = 'X loadings
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotXYLoadings.pls = function(obj, comp = c(1, 2), main = 'XY loadings', 
                              ylab = NULL, xlab = NULL, show.axes = F, ...)
 {
@@ -1767,6 +2028,7 @@ plotXYLoadings.pls = function(obj, comp = c(1, 2), main = 'XY loadings',
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plotXResiduals.pls = function(obj, ncomp = NULL, 
                               main = NULL, xlab = 'T2', ylab = 'Squared residual distance (Q)',
                               show.labels = F, show.legend = T, ...)
@@ -1785,7 +2047,6 @@ plotXResiduals.pls = function(obj, ncomp = NULL,
       stop('Wrong value for number of components!')
    
    cdata = cbind(obj$calres$xdecomp$T2[, ncomp], obj$calres$xdecomp$Q[, ncomp])
-   
    colnames(cdata) = c('T2', 'Q')
    rownames(cdata) = rownames(obj$calres$xdecomp$scores)
    
@@ -1827,6 +2088,7 @@ plotXResiduals.pls = function(obj, ncomp = NULL,
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #' 
+#' @export
 plot.pls = function(x, ncomp = NULL, ny = 1, show.legend = T, show.labels = F, ...)
 {
    obj = x
@@ -1844,9 +2106,6 @@ plot.pls = function(x, ncomp = NULL, ny = 1, show.legend = T, show.labels = F, .
 
 #' Summary method for PLS model object
 #' 
-#' @method summary pls
-#' @S3method summary pls
-#'
 #' @description
 #' Shows performance statistics for the model.
 #' 
@@ -1859,6 +2118,7 @@ plot.pls = function(x, ncomp = NULL, ny = 1, show.legend = T, show.labels = F, .
 #' @param ...
 #' other arguments
 #' 
+#' @export
 summary.pls = function(object, ncomp = NULL, ny = NULL, ...)
 {
    obj = object
@@ -1910,9 +2170,6 @@ summary.pls = function(object, ncomp = NULL, ny = NULL, ...)
 
 #' Print method for PLS model object
 #' 
-#' @method print pls
-#' @S3method print pls
-#'
 #' @description
 #' Prints information about the object structure
 #' 
@@ -1920,7 +2177,8 @@ summary.pls = function(object, ncomp = NULL, ny = NULL, ...)
 #' a PLS model (object of class \code{pls})
 #' @param ...
 #' other arguments
-#' 
+#'
+#' @export 
 print.pls = function(x, ...)
 {
    obj = x

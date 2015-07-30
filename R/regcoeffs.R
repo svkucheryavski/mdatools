@@ -94,13 +94,12 @@ regcoeffs.getStat = function(obj, ci.coeffs, ci.alpha = 0.1)
       t.values = t.values,
       p.values = p.values
       )
+   
+   stat
 }
 
 #' as.matrix method for regression coefficients class
 #' 
-#' @method as.matrix regcoeffs
-#' @S3method as.matrix regcoeffs
-#'
 #' @description
 #' returns matrix with regression coeffocoents for given response number and amount of components
 #' 
@@ -113,6 +112,7 @@ regcoeffs.getStat = function(obj, ci.coeffs, ci.alpha = 0.1)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 as.matrix.regcoeffs = function(x, ncomp = 1, ny = 1, ...)
 {
    return (x$values[, ncomp, ny, drop = F])
@@ -120,9 +120,6 @@ as.matrix.regcoeffs = function(x, ncomp = 1, ny = 1, ...)
 
 #' print method for regression coefficients class
 #' 
-#' @method print regcoeffs
-#' @S3method print regcoeffs
-#'
 #' @description
 #' prints regression coeffocoent values for given response number and amount of components
 #' 
@@ -137,6 +134,7 @@ as.matrix.regcoeffs = function(x, ncomp = 1, ny = 1, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 print.regcoeffs = function(x, ncomp = 1, ny = 1, digits = 3, ...)
 {
    obj = x
@@ -173,6 +171,7 @@ print.regcoeffs = function(x, ncomp = 1, ny = 1, digits = 3, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plot.regcoeffs = function(x, ncomp = 1, ny = 1, type = NULL, col = NULL, 
                           main = 'Regression coefficients',
                           xlab = 'Variables', ylab = 'Coefficients', show.line = T, 

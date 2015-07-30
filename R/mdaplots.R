@@ -78,6 +78,9 @@ mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines 
                               legend = NULL, show.legend = F, legend.position = 'topright', show.labels = F,
                               xticks = NULL, yticks = NULL)
 {   
+   if (is.null(data))
+      return(NULL)
+   
    scale = 0.075 # scale for margins - 7.5% of plot width or height
    
    if (single.x == F )
@@ -564,8 +567,10 @@ mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default'
 #' colors of the bars
 #' @param bwd
 #' width of the bars (as a ratio for max width)
-#' 
-bars = function(x, y, col = NULL, bwd = 0.8)
+#' @param border
+#' color of bar edges 
+#'  
+bars = function(x, y, col = NULL, bwd = 0.8, border = NA)
 {
    # Show bars on a plot area
    #
@@ -575,9 +580,12 @@ bars = function(x, y, col = NULL, bwd = 0.8)
    #   col: color of the bars
    #   bwd: width of the bars
    
+   if (length(bwd) == 1)
+      bwd = matrix(bwd, ncol = length(x))
+   
    for (i in 1:length(x))
    {
-      rect(x[i] - bwd/2, 0, x[i] + bwd/2, y[i], col = col, border = NA)      
+      rect(x[i] - bwd[i]/2, 0, x[i] + bwd[i]/2, y[i], col = col, border = border)      
    }
 }  
 
@@ -679,7 +687,160 @@ mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main,
    }   
 }
 
-
+#' Plotting function for a single set of objects
+#'
+#' @description
+#' \code{mdaplot} is used to make a scatter, line or a bar plot for one set of data objects.
+#' 
+#' @param data  
+#' a matrix with data values.
+#' @param type  
+#' type of the plot ('p', 'l', 'b', 'h').
+#' @param cgroup  
+#' a vector with values to use for make color groups.
+#' @param colmap  
+#' a colormap to use for coloring the plot items.
+#' @param pch  
+#' a character for markers (same as \code{plot} parameter).
+#' @param col  
+#' a color for markers or lines (same as \code{plot} parameter).
+#' @param lty  
+#' the line type (same as \code{plot} parameter).
+#' @param lwd  
+#' the line width (thickness) (same as \code{plot} parameter).
+#' @param bwd  
+#' a width of a bar as a percent of a maximum space available for each bar.
+#' @param xlim  
+#' limits for the x axis (if NULL, will be calculated automatically).
+#' @param ylim  
+#' limits for the y axis (if NULL, will be calculated automatically).
+#' @param xlab  
+#' a title for the x axis (same as \code{plot} parameter).
+#' @param ylab  
+#' a title for the y axis (same as \code{plot} parameter).
+#' @param main  
+#' an overall title for the plot (same as \code{plot} parameter).
+#' @param labels  
+#' a vector with text labels for data points (if NULL, row names will be used).
+#' @param single.x  
+#' logical, is first column of data matrix used for x values (or every odd)?
+#' @param show.labels  
+#' logical, show or not labels for the data objects.
+#' @param show.colorbar  
+#' logical, show or not colorbar legend if color grouping is on.
+#' @param show.lines  
+#' vector with two coordinates (x, y) to show horizontal and vertical line cross the point.
+#' @param show.grid  
+#' logical, show or not a grid for the plot.
+#' @param show.axes  
+#' logical, make a normal plot or show only elements (markers, lines, bars) without axes.
+#' @param xticks  
+#' tick values for x axis.
+#' @param xticklabels  
+#' labels for x ticks.
+#' @param yticks  
+#' tick values for y axis.
+#' @param yticklabels  
+#' labels for y ticks.
+#' @param lab.col  
+#' color for data point labels.
+#' @param lab.cex  
+#' size for data point labels.
+#' @param ...  
+#' other plotting arguments.
+#' 
+#' @details 
+#' Most of the parameters are similar to what are used with standard \code{plot} function. The 
+#' differences are described below.
+#'   
+#' The function makes a plot of one set of objects. It can be a set of points (scatter plot), 
+#' bars, lines or scatter-lines. The data is organized as a matrix. For scatter and bar plot only 
+#' two columns are needed, but to plot set of lines there are two ways to organise the data matrix.
+#' 
+#' If parameter \code{single.x = T} it means first column of the matrix contains x values, as the 
+#' other columns contain y values (one column - one line, e.g. [x y1 y2 y3]). If \code{single.x = F}
+#' it means every odd column of matrix contains x values and every even column - y values of a
+#' line (e.g. [x1 y1 x2 y2 x3 y3]). This option is needed if lines have different x values.
+#'
+#' The function allows to colorize lines and points according to values of a parameter 
+#' \code{cgroup}. The parameter must be a vector with the same elements as number of objects (rows)
+#' in the data. The values are divided into up to eight intervals and for each interval a 
+#' particular color from a selected color scheme is assigned. Parameter \code{show.colorbar} 
+#' allows to turn off and on a color bar legend for this option.
+#'
+#' The used color scheme is defined by the \code{colmap} parameter. The default scheme is based
+#' on color brewer (colorbrewer2.org) diverging scheme with eight colors. There is also a gray 
+#' scheme (\code{colmap = 'gray'}) and user can define its own just by specifing the needed 
+#' sequence of colors (e.g. \code{colmap = c('red', 'yellow', 'green')}, two colors is minimum). 
+#' The scheme will then be generated automatically as a gradient among the colors.  
+#'
+#' Besides that the function allows to change tick values and corresponding tick labels for x and 
+#' y axis, see examples for more details.
+#'
+#' @author 
+#' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
+#' 
+#' @seealso 
+#' \code{\link{mdaplotg}} - to make for several sets of data objects (groups of objects).
+#'
+#' @examples
+#' library(mdatools)
+#' ### Examples of using mdaplot function
+#'  
+#' ## 1. Make a line plot for y = x^2 with different x values for each line
+#' 
+#' x1 = seq(-10, 10, length = 100) 
+#' y1 = x1^2
+#' x2 = seq(-9, 9, length = 100) + 1
+#' y2 = x2^2 * 1.2
+#' x3 = seq(-8, 8, length = 100) + 2
+#' y3 = x3^2 * 1.4
+#' 
+#' mdaplot(cbind(x1, y1, x2, y2, x3, y3), type = 'l', single.x = FALSE)
+#' 
+#' ## 2. Change tick values and labels for x axis
+#' mdaplot(cbind(x1, y1, x2, y2, x3, y3), type = 'l', single.x = FALSE,
+#'         xticks = c(-8, 0, 8), xticklabels = c('Negative', 'Zero', 'Positive'))
+#' 
+#' 
+#' ## 3. Make a line plot of the spectra with coloring by concentration of first component
+#' ## using different color maps
+#' 
+#' data(simdata)
+#' 
+#' # first column of matrix val will contain the wavelength
+#' # and the last columns - spectra from calibration set
+#' val = cbind(simdata$wavelength, t(simdata$spectra.c))
+#' 
+#' # concentration will be used for color groups
+#' c1 = simdata$conc.c[, 1] 
+#' 
+#' par(mfrow = c(2, 2))
+#' mdaplot(val, type = 'l', cgroup = c1)
+#' mdaplot(val, type = 'l', cgroup = c1, colmap = 'gray', show.colorbar = FALSE)
+#' mdaplot(val, type = 'l', cgroup = c1, colmap = c('red', 'green'))
+#' mdaplot(val, type = 'l', cgroup = c1, colmap = c('#ffff00', '#00ffff'))
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 3. Show scatter plots from spectral data with color groups and other parameters
+#' ## see how limits are adjusted if show.lines option is used
+#' 
+#' nobj = 30
+#' # concentration is used for color groups
+#' c1 = simdata$conc.c[1:nobj, 1]
+#' # x values are absorbance of waveband 100, y values - absorbance for waveband 110
+#' pdata = cbind(
+#'    simdata$spectra.c[1:nobj, 100, drop = FALSE], 
+#'    simdata$spectra.c[1:nobj, 110, drop = FALSE])
+#' 
+#' par(mfrow = c(2, 2))
+#' mdaplot(pdata, cgroup = c1, main = 'Spectra', show.lines = c(0.1, 0.06))
+#' mdaplot(pdata, cgroup = c1, main = 'Spectra', show.lines = c(0.06, 0.01))
+#' mdaplot(pdata, cgroup = c1, xlab = '309 nm', ylab = '319 nm', main = 'Spectra', show.labels = TRUE)
+#' mdaplot(pdata, col = 'red', pch = 17, show.labels = TRUE, labels = paste('Obj', 1:nobj))
+#' par(mfrow = c(1, 1))
+#' 
+#' @export
 mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8,
                    cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
                    main = NULL, xlab = NULL, ylab = NULL, single.x = T, show.labels = F, 
@@ -687,34 +848,6 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
                    xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
                    lab.col = 'darkgray', lab.cex = 0.65, ...)
 {   
-   # Makes a plot for one series of data (scatter, line, scatterline, or bar).
-   #
-   # Arguments:
-   #   data: a matrix with data points
-   #   type: type of plot (now supported: "p", "l", "b", "h")
-   #   pch: marker symbol
-   #   col: color of lines, bars or markers
-   #   lty: line type
-   #   lwd: width (thickness) of a plot line
-   #   bwd: width of a bar as a percent of a maximum space available for each bar
-   #   cgroup: vector with values used for color grouping of data points
-   #   xlim: limits for x axis
-   #   ylim: limits for y axis
-   #   colmap: colormap ('default', 'gray' or user defined) used for color groupng
-   #   labels: labels for data items, if NULL, rownames will be used instead
-   #   xlab: label for x axis (if null, column name will be used)
-   #   ylab: label for y axis (if null, column name will be used)
-   #   single.x: logical, is there a single vector with x values for all line series or not
-   #   show.labels: logical, show or not labels for the points
-   #   show.colorbar: logical, show or not colorbar legend if color grouping is used
-   #   show.lines: logical or numeric, in latter case a vector with coordinates for lines
-   #   show.grid: logical, show or not a grid on the plot
-   #   show.axes: logical, make a normal plot or show only points or lines
-   #   xticks: tick values for x axis
-   #   xticklabels: labels for x axis corresponding to x tick values
-   #   yticks: tick values for y axis
-   #   yticklabels: labels for y axis corresponding to y tick values
-   #   lab.col: color for data point labels
    data = as.matrix(data)
    
    if (is.null(dim(data)) || nrow(data) < 1)
@@ -849,38 +982,132 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
       mdaplot.showColorbar(cgroup, colmap)   
 }
 
+#' Plotting function for several sets of objects
+#'
+#' @description 
+#' \code{mdaplotg} is used to make scatter, line or bar plots or their combination for several sets of objects.
+#'
+#' @param data  
+#' a list with data values (see details below).
+#' @param type  
+#' type of the plot ('p', 'l', 'b', 'h').
+#' @param pch  
+#' a character for markers (same as \code{plot} parameter).
+#' @param lty  
+#' the line type (same as \code{plot} parameter).
+#' @param lwd  
+#' the line width (thickness) (same as \code{plot} parameter).
+#' @param bwd  
+#' a width of a bar as a percent of a maximum space available for each bar.
+#' @param legend  
+#' a vector with legend elements (if NULL, no legend will be shown).
+#' @param xlab  
+#' a title for the x axis (same as \code{plot} parameter).
+#' @param ylab  
+#' a title for the y axis (same as \code{plot} parameter).
+#' @param main  
+#' an overall title for the plot (same as \code{plot} parameter).
+#' @param labels  
+#' a matrix with text labels for data points (if NULL, row names for each group will be used).
+#' @param ylim  
+#' limits for the y axis (if NULL, will be calculated automatically).
+#' @param xlim  
+#' limits for the x axis (if NULL, will be calculated automatically).
+#' @param colmap  
+#' a colormap to use for coloring the plot items.
+#' @param legend.position  
+#' position of the legend ('topleft', 'topright', 'top', 'bottomleft', 'bottomright', 'bottom').
+#' @param single.x  
+#' logical, is first column of data matrix used for x values (or every odd)?
+#' @param show.legend  
+#' logical, show or not legend for the data objects.
+#' @param show.labels  
+#' logical, show or not labels for the data objects.
+#' @param show.lines  
+#' vector with two coordinates (x, y) to show horizontal and vertical line cross the point.
+#' @param show.grid  
+#' logical, show or not a grid for the plot.
+#' @param xticks  
+#' tick values for x axis.
+#' @param xticklabels  
+#' labels for x ticks.
+#' @param yticks  
+#' tick values for y axis.
+#' @param yticklabels  
+#' labels for y ticks.
+#' @param lab.col  
+#' color for data point labels.
+#' @param lab.cex  
+#' size for data point labels.
+#' @param ...  
+#' other plotting arguments.
+#' 
+#' @details 
+#' The \code{mdaplotg} function is used to make a plot with several sets of objects. Simply 
+#' speaking, use it when you need a plot with legend. For example to show line plot with spectra 
+#' from calibration and test set, scatter plot for height and weight values for women and men, and 
+#' so on.
+#' 
+#' Most of the parameters are similar to \code{\link{mdaplot}}, the difference is described below.
+#' 
+#' The data should be organized as a list, every item is a matrix with data for one set of objects.
+#' See examples for details.
+#' 
+#' There is no color grouping option, because color is used to separate the sets. Marker symbol, 
+#' line style and type, etc. can be defined as a single value (one for all sets) and as a vector 
+#' with one value for each set.
+#' 
+#' @author 
+#' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
+#' 
+#' @examples 
+#' ### Examples of using mdaplotg
+#' 
+#' ## 1. Show scatter plot for with height and weight values 
+#' ## for males and females
+#' 
+#' data(people)
+#' 
+#' sex = people[, 'Sex']
+#' fdata = cbind(people[sex == 1, 'Height'], people[sex == 1, 'Weight'])
+#' mdata = cbind(people[sex == -1, 'Height'], people[sex == -1, 'Weight'])
+#' colnames(fdata) = colnames(mdata) = c('Height', 'Weight')
+#' pdata = list(fdata, mdata)
+#' 
+#' par(mfrow = c(2, 2))
+#' mdaplotg(pdata, legend = c('female', 'male'))
+#' mdaplotg(pdata, legend = c('female', 'male'), pch = c(17, 19), colmap = c('green', 'orange'))
+#' mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', colmap = 'gray')
+#' mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', show.labels = TRUE)
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 2. Change tick values for x axis
+#' mdaplotg(pdata, legend = c('female', 'male'), xticks = c(160, 175, 190), 
+#'          xticklabels = c('Short', 'Medium', 'Tall'))
+#' 
+#' ## 3. Show line plots with spectra from calibration and test set of the Simdata
+#' 
+#' data(simdata)
+#' 
+#' cdata = cbind(simdata$wavelength, t(simdata$spectra.c))
+#' tdata = cbind(simdata$wavelength, t(simdata$spectra.t))
+#' pdata = list(cdata, tdata)
+#' 
+#' par(mfrow = c(2, 2))
+#' mdaplotg(pdata, type = 'l', legend = c('cal', 'test'))
+#' mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), xlab = 'Wavelength, nm', ylab = 'Log(1/R)')
+#' mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), lty = c(3, 2))
+#' mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), lwd = 2, colmap = c('green', 'orange'))
+#' par(mfrow = c(1, 1))
+#' 
+#' @export
 mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
                     legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', single.x = T, 
                     show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
-                    lab.col = 'darkgray', lab.cex = 0.65,...)
+                    lab.col = 'darkgray', lab.cex = 0.65, ...)
 {   
-   # Makes a group of plots for several data sets
-   #
-   # Arguments:
-   #   data: a matrix or a list with matrices, containing data points for each group
-   #   type: plot type (shall be one for all groups or vector with value for each)
-   #   pch: marker symbol (shall be one for all groups or vector with value for each)
-   #   lty: line type (shall be one for all groups or vector with value for each)
-   #   lwd: width (thickness) of a plot line
-   #   bwd: width of a bar as a percent of a maximum space available for each bar
-   #   legend: vector with text names for the groups to be used in legend
-   #   xlab: label for x axis (if null, column name will be used)
-   #   ylab: label for y axis (if null, column name will be used)
-   #   labels: matrix with data points labels, if null rownames (for list) will be used
-   #   colmap: colormap ('default', 'gray' or user defined) used for color groupng
-   #   legend.position: position of box with legend (top, topright, topleft, bottom, etc)
-   #   single.x: logical, is there a single vector with x values for all line series or not
-   #   show.legend: logical, show or not legend for the data groups
-   #   show.labels: logical, show or not labels for the data objects
-   #   show.lines: logical or numeric, in latter case a vector with coordinates for lines
-   #   show.grid: logical, show or not a grid on the plot
-   #   xticks: tick values for x axis
-   #   xticklabels: labels for x axis corresponding to x tick values
-   #   yticks: tick values for y axis
-   #   yticklabels: labels for y axis corresponding to y tick values
-   
    #   If data for bar plot is organized as a list, the X values should be contioneous,
    #   e.g. 1:20 for first item, 21:35, for second, 36:42 for third, etc.
       

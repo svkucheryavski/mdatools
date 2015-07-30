@@ -4,7 +4,7 @@
 \alias{selectCompNum.pls}
 \title{Select optimal number of components for PLS model}
 \usage{
-\method{selectCompNum}{pls}(model, ncomp)
+\method{selectCompNum}{pls}(model, ncomp = NULL)
 }
 \arguments{
 \item{model}{PLS model (object of class \code{pls})}
@@ -18,6 +18,7 @@ the same model with selected number of components
 Allows user to select optimal number of components for PLS model
 }
 \details{
+If number of components is not specified, the Wold's R criterion is used.
 See examples in help for \code{\link{pls}} function.
 }
 

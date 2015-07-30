@@ -1,27 +1,148 @@
-# class and methods for Partial Least Squares Discriminant Analysis #
-
+#' Partial Least Squares Discriminant Analysis
+#'
+#' @description 
+#' \code{plsda} is used to calibrate, validate and use of partial least squares discrimination 
+#' analysis (PLS-DA) model.
+#'
+#' @param x
+#' matrix with predictors.
+#' @param c
+#' vector with class values (either class number or class name as text for each object).
+#' @param ncomp 
+#' maximum number of components to calculate.
+#' @param center 
+#' logical, center or not predictors and response values.
+#' @param scale 
+#' logical, scale (standardize) or not predictors and response values.
+#' @param cv
+#' number of segments for cross-validation (if cv = 1, full cross-validation will be used).
+#' @param x.test
+#' matrix with predictors for test set.
+#' @param c.test
+#' vector with reference class values for test set (same format as calibration values).
+#' @param method
+#' method for calculating PLS model.
+#' @param alpha
+#' significance level for calculating statistical limits for residuals.
+#' @param coeffs.ci
+#' method to calculate p-values and confidence intervals for regression coefficients (so far only 
+#' jack-knifing is availavle: \code{='jk'}).
+#' @param coeffs.alpha
+#' significance level for calculating confidence intervals for regression coefficients.
+#' @param info
+#' short text with information about the model.
+#' @param light
+#' run normal or light (faster) version of PLS without calculationg some performance statistics.
+#' @param ncomp.selcrit
+#' criterion for selecting optimal number of components (\code{'min'} for first local minimum of 
+#' RMSECV and \code{'wold'} for Wold's rule.)
+#' 
+#' @return
+#' Returns an object of \code{plsda} class with following fields (most inherited from class 
+#' \code{pls}):
+#' \item{ncomp }{number of components included to the model.} 
+#' \item{ncomp.selected }{selected (optimal) number of components.} 
+#' \item{xloadings }{matrix with loading values for x decomposition.} 
+#' \item{yloadings }{matrix with loading values for y (c)  decomposition.} 
+#' \item{weights }{matrix with PLS weights.} 
+#' \item{coeffs }{matrix with regression coefficients calculated for each component.}   
+#' \item{info }{information about the model, provided by user when build the model.} 
+#' \item{calres }{an object of class \code{\link{plsdares}} with PLS-DA results for a calibration 
+#' data.} 
+#' \item{testres }{an object of class \code{\link{plsdares}} with PLS-DA results for a test data, 
+#' if it was provided.} 
+#' \item{cvres }{an object of class \code{\link{plsdares}} with PLS-DA results for cross-validation,
+#' if this option was chosen.} 
+#'
+#' @details 
+#' The \code{plsda} class is based on \code{pls} with extra functions and plots covering 
+#' classification functionality. All plots for \code{pls} can be used. E.g. of you want to see the 
+#' real predicted values (y in PLS) instead of classes use \code{plotPredictions.pls(model)} instead
+#' of \code{plotPredictions(model)}.
+#' 
+#' Calculation of confidence intervals and p-values for regression coefficients are available
+#' only by jack-knifing so far. See help for \code{\link{regcoeffs}} objects for details.
+#'
+#' @seealso 
+#' Specific methods for \code{plsda} class:
+#' \tabular{ll}{
+#'  \code{print.plsda} \tab prints information about a \code{pls} object.\cr
+#'  \code{summary.plsda} \tab shows performance statistics for the model.\cr
+#'  \code{plot.plsda} \tab shows plot overview of the model.\cr
+#'  \code{\link{predict.plsda}} \tab applies PLS-DA model to a new data.\cr
+#' }
+#' 
+#' Methods, inherited from \code{classmodel} class:
+#' \tabular{ll}{
+#'  \code{\link{plotPredictions.classmodel}} \tab shows plot with predicted values.\cr
+#'  \code{\link{plotSensitivity.classmodel}} \tab shows sensitivity plot.\cr
+#'  \code{\link{plotSpecificity.classmodel}} \tab shows specificity plot.\cr
+#'  \code{\link{plotMisclassified.classmodel}} \tab shows misclassified ratio plot.\cr
+#' }
+#' 
+#' See also methods for class \code{\link{pls}}.
+#' 
+#' @author 
+#' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
+#' 
+#' @examples
+#' ### Examples for PLS-DA model class
+#' 
+#' library(mdatools)
+#' 
+#' ## 1. Make a PLS-DA model with full cross-validation and show model overview
+#' 
+#' # make a calibration set from iris data (3 classes)
+#' # use names of classes as class vector
+#' x.cal = iris[seq(1, nrow(iris), 2), 1:4] 
+#' c.cal = iris[seq(1, nrow(iris), 2), 5]
+#' 
+#' model = plsda(x.cal, c.cal, ncomp = 3, cv = 1, info = 'IRIS data example')
+#' model = selectCompNum(model, 1)
+#' 
+#' # show summary and basic model plots
+#' # misclassification will be shown only for first class
+#' summary(model)
+#' plot(model)
+#' 
+#' # summary and model plots for second class
+#' summary(model, nc = 2)
+#' plot(model, nc = 2)
+#' 
+#' # summary and model plot for specific class and number of components
+#' summary(model, nc = 3, ncomp = 3)
+#' plot(model, nc = 3, ncomp = 3)
+#' 
+#' ## 2. Show performance plots for a model
+#' par(mfrow = c(2, 2))
+#' plotSpecificity(model)
+#' plotSensitivity(model)
+#' plotMisclassified(model)
+#' plotMisclassified(model, nc = 2)
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 3. Show both class and y values predictions
+#' par(mfrow = c(2, 2))
+#' plotPredictions(model)
+#' plotPredictions(model, res = 'calres', ncomp = 2, nc = 2)
+#' plotPredictions(structure(model, class = "pls"))
+#' plotPredictions(structure(model, class = "pls"), ncomp = 2, ny = 2)
+#' par(mfrow = c(1, 1))
+#' 
+#' ## 4. All plots from ordinary PLS can be used, e.g.:
+#' par(mfrow = c(2, 2))
+#' plotXYScores(model)
+#' plotYVariance(model)
+#' plotXResiduals(model)
+#' plotRegcoeffs(model, ny = 2)
+#' par(mfrow = c(1, 1))
+#' 
+#' @export
 plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL, 
                x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, 
-               coeffs.ci = NULL, coeffs.alpha = 0.1, info = '')
+               coeffs.ci = NULL, coeffs.alpha = 0.1, info = '', light = F,
+               ncomp.selcrit = 'min')
 {
-   # Calibrate and validate a PLS-DA model.
-   #
-   # Arguments:
-   #   x: a matrix with predictor values    
-   #   c: a vector with class values 
-   #   ncomp: maximum number of components to calculate
-   #   center: logical, center or not x and y data
-   #   scale: logical, standardize or not x data
-   #   cv: number of segments for cross-validation (1 - full CV)
-   #   x.test: a matrix with predictor values for test set validation
-   #   c.test: a vector with class values for test set validation
-   #   method: a method to calculate PLS model
-   #   alpha: a sigificance limit for Q values
-   #   info: a short string with information about the model
-   #
-   # Returns:
-   #   model: a PLS-DA model (object of class pls) 
-   
    x = as.matrix(x)
    c = as.matrix(c)
    y = plsda.getReferenceValues(c)
@@ -75,13 +196,13 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
    ncomp = min(ncol(x), nrow(x) - 1 - nobj.cv, ncomp)
    
    # build a model and apply to calibration set
-   model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method)
-   model$ncomp.selected = ncomp
+   model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method, light = light)
+   model$light = light
+   model$ncomp.selcrit = ncomp.selcrit
    model$alpha = alpha   
    model$classnames = unique(c)
    model$nclasses = length(model$classnames)
    model$calres = predict.plsda(model, x, c)
-   model = selectCompNum.pls(model, ncomp)
    
    # do cross-validation if needed
    if (!is.null(cv)) 
@@ -106,6 +227,7 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
       model$testres = predict.plsda(model, x.test, c.test)
    }
    
+   model = selectCompNum.pls(model, ncomp)
    model$call = match.call()
    model$info = info
    
@@ -128,6 +250,7 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
 #' @return
 #' the generated matrix with one column for each class
 #' 
+#' @export
 plsda.getReferenceValues = function(c, classnames = NULL)
 {
    # generate matrix with y values
@@ -169,6 +292,7 @@ plsda.getReferenceValues = function(c, classnames = NULL)
 #' @details
 #' See examples in help for \code{\link{plsda}} function.
 #'  
+#' @export 
 predict.plsda = function(object, x, c = NULL, cv = F, ...)
 {   
    y = plsda.getReferenceValues(c, object$classnames)
@@ -245,8 +369,8 @@ plsda.crossval = function(model, x, c, cv, center = T, scale = F, jack.knife = T
 #' Model overview plot for PLS-DA
 #' 
 #' @description
-#' Shows a set of plots (x residuals, regression coefficients, misclassification ratio and predictions) 
-#' for PLS-DA model.
+#' Shows a set of plots (x residuals, regression coefficients, misclassification ratio and 
+#' predictions) for PLS-DA model.
 #' 
 #' @param x
 #' a PLS-DA model (object of class \code{plsda})
@@ -264,6 +388,7 @@ plsda.crossval = function(model, x, c, cv, center = T, scale = F, jack.knife = T
 #' @details
 #' See examples in help for \code{\link{plsda}} function.
 #' 
+#' @export
 plot.plsda = function(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F, ...)
 {
    model = x
@@ -277,7 +402,8 @@ plot.plsda = function(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F,
    plotMisclassified(model, nc = nc, show.legend = show.legend)   
    
    if (!is.null(model$cvres))
-      plotPredictions(model, res = 'cvres', ncomp = ncomp, show.labels = show.labels, show.legend = show.legend)   
+      plotPredictions(model, res = 'cvres', ncomp = ncomp, show.labels = show.labels, 
+                      show.legend = show.legend)   
    else
       plotPredictions(model, ncomp = ncomp, show.labels = show.labels, show.legend = show.legend)   
 
@@ -286,9 +412,6 @@ plot.plsda = function(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F,
 
 #' Summary method for PLS-DA model object
 #' 
-#' @method summary plsda
-#' @S3method summary plsda
-#'
 #' @description
 #' Shows some statistics for the model.
 #' 
@@ -301,6 +424,7 @@ plot.plsda = function(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F,
 #' @param ...
 #' other arguments
 #' 
+#' @export
 summary.plsda = function(object, ncomp = NULL, nc = NULL, ...)
 {
    obj = object
@@ -346,9 +470,6 @@ summary.plsda = function(object, ncomp = NULL, nc = NULL, ...)
 
 #' Print method for PLS-DA model object
 #' 
-#' @method print plsda
-#' @S3method print plsda
-#'
 #' @description
 #' Prints information about the object structure
 #' 
@@ -357,6 +478,7 @@ summary.plsda = function(object, ncomp = NULL, nc = NULL, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 print.plsda = function(x, ...)
 {
    obj = x

@@ -4,7 +4,7 @@
 \alias{bars}
 \title{Show bars on axes}
 \usage{
-bars(x, y, col = NULL, bwd = 0.8)
+bars(x, y, col = NULL, bwd = 0.8, border = NA)
 }
 \arguments{
 \item{x}{vector with x values (centers of bars)}
@@ -14,6 +14,8 @@ bars(x, y, col = NULL, bwd = 0.8)
 \item{col}{colors of the bars}
 
 \item{bwd}{width of the bars (as a ratio for max width)}
+
+\item{border}{color of bar edges}
 }
 \description{
 Shows bars (bar plot) on predefined axes

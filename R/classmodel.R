@@ -23,6 +23,7 @@
 #' @details
 #' See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 #'   
+#' @export  
 plotPredictions.classmodel = function(obj, res = NULL, nc = NULL, ncomp = NULL, main = NULL, ...)
 {   
    if (is.null(res))
@@ -71,6 +72,7 @@ plotPredictions.classmodel = function(obj, res = NULL, nc = NULL, ncomp = NULL, 
 #' @details
 #' See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 #' 
+#' @export
 plotSpecificity.classmodel = function(obj, nc = NULL, ...)
 {   
    plotPerformance(obj, nc = nc, param = 'specificity', ...)
@@ -91,6 +93,7 @@ plotSpecificity.classmodel = function(obj, nc = NULL, ...)
 #' @details
 #' See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 #' 
+#' @export
 plotSensitivity.classmodel = function(obj, nc = NULL, ...)
 {
    plotPerformance(obj, nc = nc, param = 'sensitivity', ...)
@@ -112,6 +115,7 @@ plotSensitivity.classmodel = function(obj, nc = NULL, ...)
 #' @details
 #' See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 #' 
+#' @export
 plotMisclassified.classmodel = function(obj, nc = NULL, ...)
 {
    plotPerformance(obj, nc = nc, param = 'misclassified', ...)
@@ -145,6 +149,7 @@ plotMisclassified.classmodel = function(obj, nc = NULL, ...)
 #' @param ...
 #' most of the graphical parameters from \code{\link{mdaplotg}} function can be used.
 #' 
+#' @export
 plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', type = 'h', legend = NULL, 
                                  main = NULL, xlab = 'Components', ylab = '', 
                                  ylim = c(0, 1.15), ...)
@@ -185,7 +190,8 @@ plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', typ
    }
   
    if (is.null(main))
-      main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2, ), toString(classname))
+      main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2, length(param)), 
+                     toString(classname))
 
    if (!is.null(legend))
       legend_str = legend
