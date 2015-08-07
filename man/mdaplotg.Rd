@@ -68,7 +68,8 @@ mdaplotg(data, type = "p", pch = 16, lty = 1, lwd = 1, bwd = 0.8,
 \item{...}{other plotting arguments.}
 }
 \description{
-\code{mdaplotg} is used to make scatter, line or bar plots or their combination for several sets of objects.
+\code{mdaplotg} is used to make scatter, line or bar plots or their combination for several sets
+of objects.
 }
 \details{
 The \code{mdaplotg} function is used to make a plot with several sets of objects. Simply

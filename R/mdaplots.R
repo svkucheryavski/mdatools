@@ -75,8 +75,8 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
 #' Returns a list with four limits for the x and y axes.
 #'  
 mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines = F, 
-                              legend = NULL, show.legend = F, legend.position = 'topright', show.labels = F,
-                              xticks = NULL, yticks = NULL)
+                              legend = NULL, show.legend = F, legend.position = 'topright', 
+                              show.labels = F, xticks = NULL, yticks = NULL)
 {   
    if (is.null(data))
       return(NULL)
@@ -254,7 +254,8 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
       if (colmap == 'gray')
       {   
          # use grayscale colormap
-         palette = c("#E8E8E8", "#D6D6D6", "#C4C4C4", "#B2B2B2", "#9A9A9A", "#808080", "#484848", "#101010")
+         palette = c("#E8E8E8", "#D6D6D6", "#C4C4C4", "#B2B2B2", "#9A9A9A", "#808080", "#484848", 
+                     "#101010")
          
          # if only one color is needed reorder pallete so the black is first
          if (is.null(cgroup) && ngroups == 1)
@@ -263,7 +264,8 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
       else
       {   
          # use default colormap for colorbrew
-         palette = c("#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F")
+         palette = c("#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FEE08B", "#FDAE61", "#F46D43", 
+                     "#D53E4F")
       }   
    }
    else
@@ -667,7 +669,8 @@ mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main,
       if (is.null(xticklabels))
          xticklabels = xticks
       
-      plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, xaxt = 'n')
+      plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
+           xaxt = 'n')
       axis(1, at = xticks, labels = xticklabels)
    }  
    else if (!is.null(yticklabels) || !is.null(yticks))
@@ -677,7 +680,8 @@ mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main,
       if (is.null(yticklabels))
          yticklabels = yticks
 
-      plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, yaxt = 'n')
+      plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
+           yaxt = 'n')
       axis(2, at = yticks, labels = yticklabels)
    }   
    else
@@ -963,7 +967,7 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
    if (type == 'p')
       points(x, y, type = type, col = col, pch = pch, lwd = lwd, ...)
    else if (type == 'l' || type == 'b')
-      matlines(x, y, type = type, col = col, pch = pch, lty = lty, ...)
+      matlines(x, y, type = type, col = col, pch = pch, lty = lty, lwd = lwd, ...)
    else if (type == 'h')
       bars(x, y, col = col, bwd = bwd)
    else if (type == 'e')
@@ -985,7 +989,8 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 #' Plotting function for several sets of objects
 #'
 #' @description 
-#' \code{mdaplotg} is used to make scatter, line or bar plots or their combination for several sets of objects.
+#' \code{mdaplotg} is used to make scatter, line or bar plots or their combination for several sets 
+#' of objects.
 #'
 #' @param data  
 #' a list with data values (see details below).
@@ -1103,8 +1108,8 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 #' @export
 mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
                     legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
-                    ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', single.x = T, 
-                    show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
+                    ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', 
+                    single.x = T, show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
                     lab.col = 'darkgray', lab.cex = 0.65, ...)
 {   
@@ -1180,7 +1185,7 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    if (!is.numeric(lwd))
       stop('Parameter "lwd" mush be numeric!')   
    else if (length(lwd) == 1)
-      lwd = rep(lty, ngroups)
+      lwd = rep(lwd, ngroups)
    else if (length(lwd) != ngroups)
       stop('Parameter "lwd" hould be specified for each group or be common for all!')
    
@@ -1248,6 +1253,7 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
             y = data[, i + 1, drop = F]
             
             mdaplot(cbind(x, y), type = type[i], col = col[i], pch = pch[i], lty = lty[i],
+                    lwd = lwd[i],
                     bwd = 0.9 * gbwd, labels = labels[, i], show.labels = show.labels,
                     show.grid = F, show.axes = F, lab.col = lab.col, lab.cex = lab.cex)
          }
@@ -1259,6 +1265,7 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
             x = data[, 2 * i - 1, drop = F]
             y = data[, 2 * i, drop = F]
             mdaplot(cbind(x, y), type = type[i], col = col[i], pch = pch[i], lty = lty[i],
+                    lwd = lwd[i],
                     labels = labels[, i], show.grid = F, show.axes = F, show.labels = show.labels,
                     lab.col = lab.col, lab.cex = lab.cex)
          }
