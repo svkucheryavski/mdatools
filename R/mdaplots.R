@@ -1176,6 +1176,14 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    else if (length(lty) != ngroups)
       stop('Parameter "lty" should be specified for each group or be common for all!')
    
+   # if line width is not specified for each group multply default value
+   if (!is.numeric(lwd))
+      stop('Parameter "lwd" mush be numeric!')   
+   else if (length(lwd) == 1)
+      lwd = rep(lty, ngroups)
+   else if (length(lwd) != ngroups)
+      stop('Parameter "lwd" hould be specified for each group or be common for all!')
+   
    # define axis labels as data column names if they are not specified
    if (is.null(xlab) && !is.null(colnames(data[[1]])))
        xlab = colnames(data[[1]])[1]
@@ -1216,6 +1224,7 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
          }   
          
          mdaplot(data[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
+                 lwd = lwd[i],
                  labels = slabels, show.grid = F, show.axes = F, show.labels = show.labels,
                  lab.col = lab.col, lab.cex = lab.cex)
       }
