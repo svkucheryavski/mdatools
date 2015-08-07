@@ -142,6 +142,8 @@ plsdares = function(plsres, cres)
 #' which class to show the summary for (if NULL, will be shown for all)
 #' @param show.labels
 #' logical, show or not labels for the plot objects
+#' @param show.line
+#' logical, show or not target line on predictions plot
 #' @param ...
 #' other arguments
 #' 

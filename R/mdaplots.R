@@ -408,6 +408,8 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default')
 #' vector with marker symbols for the legend items
 #' @param lty
 #' vector with line types for the legend items
+#' @param lwd
+#' vector with line width values for the legend items
 #' @param bty
 #' border type for the legend
 #' @param position
@@ -415,7 +417,7 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default')
 #' @param plot
 #' logical, show legend or just calculate and return its size
 #'
-mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, bty = 'o', 
+mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, bty = 'o', 
                               position = 'topright', plot = T)
 {
    # which positions need multiple columns
@@ -436,7 +438,7 @@ mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, bty = 'o',
    inset = c(0.02, 0.02 * (dx/dy))
    
    # show legend
-   legend(position, legend, col = col,  pch = pch, lty = lty, plot = plot, 
+   legend(position, legend, col = col,  pch = pch, lty = lty, lwd = lwd, plot = plot, 
           cex = 0.8, inset = inset, bg = 'white', box.lwd = 0.75, box.col = 'gray',
           ncol = ncol)   
 }
@@ -1282,6 +1284,6 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
       lty[type == 'p' | type == 'h'] = 0
       pch[type == 'l'] = NA_integer_
       pch[type == 'h'] = 15
-      mdaplot.showLegend(legend, col, pch = pch, lty = lty, position = legend.position)      
+      mdaplot.showLegend(legend, col, pch = pch, lty = lty, lwd = lwd, position = legend.position)      
    }   
 }

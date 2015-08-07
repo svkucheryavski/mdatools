@@ -4,8 +4,8 @@
 \alias{mdaplot.showLegend}
 \title{Plot legend}
 \usage{
-mdaplot.showLegend(legend, col, pch = NULL, lty = NULL, bty = "o",
-  position = "topright", plot = T)
+mdaplot.showLegend(legend, col, pch = NULL, lty = NULL, lwd = NULL,
+  bty = "o", position = "topright", plot = T)
 }
 \arguments{
 \item{legend}{vector with text elements for the legend items}
@@ -15,6 +15,8 @@ mdaplot.showLegend(legend, col, pch = NULL, lty = NULL, bty = "o",
 \item{pch}{vector with marker symbols for the legend items}
 
 \item{lty}{vector with line types for the legend items}
+
+\item{lwd}{vector with line width values for the legend items}
 
 \item{bty}{border type for the legend}
 

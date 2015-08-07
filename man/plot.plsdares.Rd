@@ -16,6 +16,8 @@
 
 \item{show.labels}{logical, show or not labels for the plot objects}
 
+\item{show.line}{logical, show or not target line on predictions plot}
+
 \item{...}{other arguments}
 }
 \description{
