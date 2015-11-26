@@ -444,7 +444,7 @@ pca.nipals = function(x, ncomp)
    
    scores = matrix(0, nrow = nobj, ncol = ncomp)
    loadings = matrix(0, nrow = nvar, ncol = ncomp)
-   eigenvals = rep(0, ncomp);
+   eigenvals = rep(0, ncomp)
    
    E = x
    for (i in 1:ncomp)

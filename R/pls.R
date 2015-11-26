@@ -734,7 +734,7 @@ selectCompNum.pls = function(model, ncomp = NULL)
 #' @details
 #' See examples in help for \code{\link{pls}} function.
 #'  
-#'  @export
+#' @export
 predict.pls = function(object, x, y.ref = NULL, cv = F, ...)
 {   
    nresp = dim(object$coeffs$values)[3]
@@ -1003,6 +1003,8 @@ getVIPScores.pls = function(obj, ny = 1, ...)
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
 #' number of components to return the coefficients for
+#' @param ...
+#' other parameters
 #'
 #' @details 
 #' The method recalculates the regression coefficients found by the PLS algorithm
@@ -1015,9 +1017,8 @@ getVIPScores.pls = function(obj, ny = 1, ...)
 #' @return 
 #' A matrix (n of predictors x n of responses) with regression coefficients.
 #'  
-#'  
 #' @export
-getRegcoeffs.pls = function(obj, ncomp = NULL)
+getRegcoeffs.pls = function(obj, ncomp = NULL, ...)
 {
    if (is.null(ncomp)) 
       ncomp = obj$ncomp.selected

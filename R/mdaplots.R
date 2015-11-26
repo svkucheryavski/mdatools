@@ -281,16 +281,26 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
    
    if (!is.null(cgroup))
    {   
-      cfactor = factor(cgroup)
-      nlevels = length(attr(cfactor, 'levels'))
-      if (nlevels < 8)
+      if (is.factor(cgroup))
+      {
+         nlevels = length(attr(cgroup, 'levels'))
          ngroups = nlevels
+         col = colfunc(ngroups)      
+         colvals = col[as.numeric(cgroup)]
+      }   
       else
-         ngroups = 8
-      
-      col = colfunc(ngroups)      
-      cgroup = cut(as.vector(cgroup), ngroups, labels = 1:ngroups)
-      colvals = col[cgroup]
+      { 
+         cfactor = factor(cgroup)
+         nlevels = length(attr(cfactor, 'levels'))
+         if (nlevels < 8)
+            ngroups = nlevels
+         else
+            ngroups = 8
+         
+         col = colfunc(ngroups)      
+         cgroup = cut(as.vector(as.numeric(cgroup)), ngroups, labels = 1:ngroups)
+         colvals = col[cgroup]
+      }
    }
    else
    {
@@ -422,7 +432,7 @@ mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, b
 {
    # which positions need multiple columns
    onecolpos = c('topright', 'topleft', 'bottomright', 'bottomleft')
-   multcolpos = c('top', 'bottom')
+   multcolpos = c('top', 'bottom', 'right', 'left')
    
    if (position %in% onecolpos)
       ncol = 1

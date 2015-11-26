@@ -1,3 +1,19 @@
+#' Get regression coefficients
+#' 
+#' @description
+#' Generic function for getting regression coefficients from PLS model
+#' 
+#' @param obj
+#' a PLS model
+#' @param ...
+#' other parameters
+#' 
+#' @export
+getRegcoeffs = function(obj, ...)
+{
+   UseMethod("getRegcoeffs")
+}  
+
 #' VIP scores plot
 #' 
 #' @description

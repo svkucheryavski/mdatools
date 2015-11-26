@@ -33,6 +33,7 @@ Methods for data preprocessing:
       \code{\link{prep.savgol}} \tab Savitzky-Golay transformation.\cr
       \code{\link{prep.snv}} \tab Standard normal variate.\cr
       \code{\link{prep.msc}} \tab Multiplicative scatter correction.\cr
+      \code{\link{prep.norm}} \tab Spectra normalization.\cr
 }
 
 All plotting methods are based on two functions, \code{\link{mdaplot}} and \code{\link{mdaplotg}}. The functions extend the basic functionality of R plots and allow to make automatic legend and color grouping of data points or lines with colorbar legend, automatically adjust axes limits when several data groups are plotted and so on. 

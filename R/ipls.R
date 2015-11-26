@@ -6,37 +6,37 @@
 #' Applies iPLS alrogithm to find variable intervals most important for
 #' prediction
 #' 
-#'  @param x
-#'  a matrix with predictor values
-#'  @param y
-#'  a vector with response values
-#'  @param glob.ncomp
-#'  maximum number of components for a global PLS model
-#'  @param center
-#'  logical, center or not the data values
-#'  @param scale
-#'  logical, standardize or not the data values
-#'  @param cv
-#'  number of segments for cross-validation (1 - full CV)
-#'  @param int.ncomp
-#'  maximum number of components for interval PLS models
-#'  @param int.num
-#'  number of intervals
-#'  @param int.width
-#'  width of intervals
-#'  @param int.limits
-#'  a two column matrix with manual intervals specification
-#'  @param int.niter
-#'  maximum number of iterations (if NULL it will be the same as number of intervals)
-#'  @param ncomp.selcrit
-#'  criterion for selecting optimal number of components ('min' for minimum of RMSECV)
-#'  @param method
-#'  iPLS method (\code{'forward'} or \code{'backward'})
-#'  @param silent
-#'  logical, show or not information about selection process
+#' @param x
+#' a matrix with predictor values
+#' @param y
+#' a vector with response values
+#' @param glob.ncomp
+#' maximum number of components for a global PLS model
+#' @param center
+#' logical, center or not the data values
+#' @param scale
+#' logical, standardize or not the data values
+#' @param cv
+#' number of segments for cross-validation (1 - full CV)
+#' @param int.ncomp
+#' maximum number of components for interval PLS models
+#' @param int.num
+#' number of intervals
+#' @param int.width
+#' width of intervals
+#' @param int.limits
+#' a two column matrix with manual intervals specification
+#' @param int.niter
+#' maximum number of iterations (if NULL it will be the same as number of intervals)
+#' @param ncomp.selcrit
+#' criterion for selecting optimal number of components ('min' for minimum of RMSECV)
+#' @param method
+#' iPLS method (\code{'forward'} or \code{'backward'})
+#' @param silent
+#' logical, show or not information about selection process
 #'  
-#'  @return 
-#'  object of 'ipls' class with several fields, including:
+#' @return 
+#' object of 'ipls' class with several fields, including:
 #'    \item{var.selected}{a vector with indices of selected variables}
 #'    \item{int.selected}{a vector with indices of selected intervals }
 #'    \item{int.num}{total number of intervals}
@@ -46,55 +46,55 @@
 #'    \item{glob.stat}{a data frame with statistics for the first step (individual intervals)}
 #'    \item{gm}{global PLS model with all variables included}
 #'    \item{om}{optimized PLS model with selected variables}
-#'     
-#'  @details 
-#'  The algorithm splits the predictors into several intervals and tries to find a combination 
-#'  of the intervals, which gives best prediction performance. There are two selection methods:
-#'  "forward" when the intervals are successively included, and "backward" when the intervals
-#'  are successively excluded from a model. On the first step the algorithm finds the best
-#'  (forward) or the worst (backward) individual interval. Then it tests the others to find the 
-#'  one which gives the best model in a combination with the already selected/excluded one. The 
-#'  procedure continues until the maximum number of iteration is reached. 
+#'      
+#' @details 
+#' The algorithm splits the predictors into several intervals and tries to find a combination 
+#' of the intervals, which gives best prediction performance. There are two selection methods:
+#' "forward" when the intervals are successively included, and "backward" when the intervals
+#' are successively excluded from a model. On the first step the algorithm finds the best
+#' (forward) or the worst (backward) individual interval. Then it tests the others to find the 
+#' one which gives the best model in a combination with the already selected/excluded one. The 
+#' procedure continues until the maximum number of iteration is reached. 
 #'  
-#'  There are several ways to specify the intervals. First of all either number of intervals 
-#'  (\code{int.num}) or width of the intervals (\code{int.width}) can be provided. Alternatively
-#'  one can specify the limits (first and last variable number) of the intervals manually 
-#'  with \code{int.limits}.
+#' There are several ways to specify the intervals. First of all either number of intervals 
+#' (\code{int.num}) or width of the intervals (\code{int.width}) can be provided. Alternatively
+#' one can specify the limits (first and last variable number) of the intervals manually 
+#' with \code{int.limits}.
 #' 
-#'  @references 
-#'  [1] Lars Noergaard at al.  Interval partial least-squares regression (iPLS): a
-#'  comparative chemometric study with an example from near-infrared spectroscopy.
-#'  Appl.Spec. 2000; 54: 413-419
+#' @references 
+#' [1] Lars Noergaard at al.  Interval partial least-squares regression (iPLS): a
+#' comparative chemometric study with an example from near-infrared spectroscopy.
+#' Appl.Spec. 2000; 54: 413-419
 #'  
-#'  @examples 
-#'  library(mdatools)
+#' @examples 
+#' library(mdatools)
 #'
-#'  ## forward selection for simdata
+#' ## forward selection for simdata
 #'  
-#'  data(simdata)
-#'  Xc = simdata$spectra.c
-#'  yc = simdata$conc.c[, 3, drop = FALSE]
+#' data(simdata)
+#' Xc = simdata$spectra.c
+#' yc = simdata$conc.c[, 3, drop = FALSE]
 #'
-#'  # run iPLS and show results  
-#'  im = ipls(Xc, yc, int.ncomp = 5, int.num = 10, cv = 4, method = "forward")
-#'  summary(im)
-#'  plot(im)
+#' # run iPLS and show results  
+#' im = ipls(Xc, yc, int.ncomp = 5, int.num = 10, cv = 4, method = "forward")
+#' summary(im)
+#' plot(im)
 #'  
-#'  # show "developing" of RMSECV during the algorithm execution
-#'  plotRMSE(im)
+#' # show "developing" of RMSECV during the algorithm execution
+#' plotRMSE(im)
 #'  
-#'  # plot predictions before and after selection
-#'  par(mfrow = c(1, 2))
-#'  plotPredictions(im$gm)
-#'  plotPredictions(im$om)
+#' # plot predictions before and after selection
+#' par(mfrow = c(1, 2))
+#' plotPredictions(im$gm)
+#' plotPredictions(im$om)
 #'  
-#'  # show selected intervals on spectral plot
-#'  ind = im$var.selected
-#'  mspectrum = apply(Xc, 2, mean)
-#'  plot(simdata$wavelength, mspectrum, type = 'l', col = 'lightblue')
-#'  points(simdata$wavelength[ind], mspectrum[ind], pch = 16, col = 'blue')
+#' # show selected intervals on spectral plot
+#' ind = im$var.selected
+#' mspectrum = apply(Xc, 2, mean)
+#' plot(simdata$wavelength, mspectrum, type = 'l', col = 'lightblue')
+#' points(simdata$wavelength[ind], mspectrum[ind], pch = 16, col = 'blue')
 #'  
-#'  @export
+#' @export
 ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10, 
                 int.ncomp = 10, int.num = NULL, int.width = NULL, int.limits = NULL,
                 int.niter = NULL, ncomp.selcrit = 'min', method = 'forward',
@@ -697,10 +697,10 @@ plotSelection.ipls = function(obj, glob.ncomp = NULL, xlabels = NULL, main = 'iP
 #' at the bottom of each bar corresponds to the interval included or excluded at the
 #' particular iteration. The selected intervals are shown with green color.
 #' 
-#'  @seealso 
-#'  \code{\link{summary.ipls}}, \code{\link{plotSelection.ipls}}
+#' @seealso 
+#' \code{\link{summary.ipls}}, \code{\link{plotSelection.ipls}}
 #' 
-#'  @export      
+#' @export      
 plotRMSE.ipls = function(obj, glob.ncomp = NULL, main = 'RMSE development', xlab = 'Iterations', 
                     ylab = 'RMSECV', xlim = NULL, ylim = NULL, ...)
 {
