@@ -24,6 +24,7 @@ So far the following modelling methods are implemented:
       \code{\link{simcam}}, \code{\link{simcamres}} \tab SIMCA for multiple classes case (SIMCA)\cr
       \code{\link{plsda}}, \code{\link{plsdares}} \tab Partial Least Squares Dscriminant Analysis (PLS-DA).\cr
       \code{\link{randtest}} \tab Randomization test for PLS-regression.\cr
+      \code{\link{ipls}} \tab Interval PLS variable.\cr
 }
 
 Methods for data preprocessing:
@@ -32,6 +33,7 @@ Methods for data preprocessing:
       \code{\link{prep.savgol}} \tab Savitzky-Golay transformation.\cr
       \code{\link{prep.snv}} \tab Standard normal variate.\cr
       \code{\link{prep.msc}} \tab Multiplicative scatter correction.\cr
+      \code{\link{prep.norm}} \tab Spectra normalization.\cr
 }
 
 All plotting methods are based on two functions, \code{\link{mdaplot}} and \code{\link{mdaplotg}}. The functions extend the basic functionality of R plots and allow to make automatic legend and color grouping of data points or lines with colorbar legend, automatically adjust axes limits when several data groups are plotted and so on. 

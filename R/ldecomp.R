@@ -46,6 +46,7 @@
 #' with \code{\link{pca}} or apply it to a new data, the results will automatically inherit 
 #' all methods of \code{ldecomp}.
 #'
+#' @export
 ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL, 
                    totvar, tnorm = NULL, ncomp.selected = NULL,
                    T2 = NULL, Q = NULL, cal = TRUE)
@@ -114,7 +115,8 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
 #' @param residuals
 #' matrix with residuals (E).
 #' @param tnorm
-#' vector with singular values for scores normalisation (if NULL will be calculated from \code{scores}).
+#' vector with singular values for scores normalisation (if NULL will be calculated from 
+#' \code{scores}).
 #' @param cal
 #' logical, are these results for calibration set or not
 #' 
@@ -286,6 +288,7 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
+#' @export
 plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance',
                                    xlab = 'Components', ylab = 'Explained variance, %',
                                    show.labels = F, ...)
@@ -325,6 +328,7 @@ plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance'
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
+#' @export
 plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
                                 xlab = 'Components', ylab = 'Explained variance, %',
                                 show.labels = F, ...)
@@ -354,6 +358,7 @@ plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
+#' @export
 plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores', 
                               show.labels = F, show.axes = F, ...)
 {
@@ -413,6 +418,7 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
+#' @export
 plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', ylab = 'Squared residual distance (Q)', 
                                  show.labels = F, show.limits = T, ...)
 {
@@ -440,9 +446,6 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
 
 #' Print method for linear decomposition
 #'
-#' @method print ldecomp
-#' @S3method print ldecomp
-#' 
 #' @description
 #' Generic \code{print} function for linear decomposition. Prints information about the \code{ldecomp}
 #' object.
@@ -454,6 +457,7 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
 #' @param ...
 #' other arguments
 #' 
+#' @export
 print.ldecomp = function(x, str = NULL, ...)
 {   
    if (is.null(str))
@@ -473,9 +477,6 @@ print.ldecomp = function(x, str = NULL, ...)
 
 #' as.matrix method for ldecomp object
 #' 
-#' @method as.matrix ldecomp
-#' @S3method as.matrix ldecomp
-#'
 #' @description
 #' Generic \code{as.matrix} function for linear decomposition. Returns a matrix with information 
 #' about the decomposition.
@@ -485,6 +486,7 @@ print.ldecomp = function(x, str = NULL, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 as.matrix.ldecomp = function(x, ...)
 {
    data = cbind(x$expvar, x$cumexpvar)   
@@ -494,9 +496,6 @@ as.matrix.ldecomp = function(x, ...)
 
 #' Summary statistics for linear decomposition
 #'
-#' @method summary ldecomp
-#' @S3method summary ldecomp
-#' 
 #' @description
 #' Generic \code{summary} function for linear decomposition. Prints statistic about the decomposition.
 #' 
@@ -507,6 +506,7 @@ as.matrix.ldecomp = function(x, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 summary.ldecomp = function(object, str = NULL, ...)
 {
    if (is.null(str))
@@ -524,6 +524,8 @@ summary.ldecomp = function(object, str = NULL, ...)
 #' 
 #' @param x
 #' a matrix or vector with data values
+#' 
+#' @export
 erfinv = function (x) qnorm((1 + x)/2)/sqrt(2)
 
 

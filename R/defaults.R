@@ -1,3 +1,19 @@
+#' Get regression coefficients
+#' 
+#' @description
+#' Generic function for getting regression coefficients from PLS model
+#' 
+#' @param obj
+#' a PLS model
+#' @param ...
+#' other parameters
+#' 
+#' @export
+getRegcoeffs = function(obj, ...)
+{
+   UseMethod("getRegcoeffs")
+}  
+
 #' VIP scores plot
 #' 
 #' @description
@@ -8,6 +24,7 @@
 #' @param ...
 #' other parameters
 #' 
+#' @export
 plotVIPScores = function(obj, ...)
 {
    UseMethod("plotVIPScores")
@@ -23,6 +40,7 @@ plotVIPScores = function(obj, ...)
 #' @param ...
 #' other parameters
 #' 
+#' @export
 getVIPScores = function(obj, ...)
 {
    UseMethod("getVIPScores")
@@ -38,6 +56,7 @@ getVIPScores = function(obj, ...)
 #' @param ...
 #' other parameters
 #' 
+#' @export
 plotSelectivityRatio = function(obj, ...)
 {
    UseMethod("plotSelectivityRatio")
@@ -53,6 +72,7 @@ plotSelectivityRatio = function(obj, ...)
 #' @param ...
 #' other parameters
 #' 
+#' @export
 getSelectivityRatio = function(obj, ...)
 {
    UseMethod("getSelectivityRatio")
@@ -68,6 +88,7 @@ getSelectivityRatio = function(obj, ...)
 #' @param ncomp
 #' number of components to select
 #' 
+#' @export
 selectCompNum = function(model, ncomp)
 {   
    UseMethod("selectCompNum")
@@ -83,6 +104,7 @@ selectCompNum = function(model, ncomp)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotCooman = function(obj, ...)
 {
    UseMethod("plotCooman")
@@ -98,6 +120,7 @@ plotCooman = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotModelDistance = function(obj, ...)
 {
    UseMethod("plotModelDistance")
@@ -113,6 +136,7 @@ plotModelDistance = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotDiscriminationPower = function(obj, ...)
 {
    UseMethod("plotDiscriminationPower")      
@@ -128,6 +152,7 @@ plotDiscriminationPower = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 getCalibrationData = function(obj, ...)
 {
    UseMethod("getCalibrationData")   
@@ -143,6 +168,7 @@ getCalibrationData = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotModellingPower = function(obj, ...)
 {
    UseMethod("plotModellingPower")   
@@ -158,6 +184,7 @@ plotModellingPower = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotMisclassified = function(obj, ...)
 {
    UseMethod('plotMisclassified')
@@ -173,6 +200,7 @@ plotMisclassified = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotSpecificity = function(obj, ...)
 {
    UseMethod("plotSpecificity")   
@@ -188,6 +216,7 @@ plotSpecificity = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotSensitivity = function(obj, ...)
 {
    UseMethod("plotSensitivity")   
@@ -203,6 +232,7 @@ plotSensitivity = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotPerformance = function(obj, ...)
 {
    UseMethod("plotPerformance")   
@@ -218,6 +248,7 @@ plotPerformance = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 showPredictions = function(obj, ...)
 {
    UseMethod("showPredictions")   
@@ -233,6 +264,7 @@ showPredictions = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotXResiduals = function(obj, ...)
 {   
    UseMethod("plotXResiduals")
@@ -248,6 +280,7 @@ plotXResiduals = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotYResiduals = function(obj, ...)
 {   
    UseMethod("plotYResiduals")
@@ -263,6 +296,7 @@ plotYResiduals = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotXVariance = function(obj, ...)
 {   
    UseMethod("plotXVariance")
@@ -278,6 +312,7 @@ plotXVariance = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotYVariance = function(obj, ...)
 {   
    UseMethod("plotYVariance")
@@ -293,6 +328,7 @@ plotYVariance = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotScores = function(obj, ...)
 {   
    UseMethod("plotScores")
@@ -308,6 +344,7 @@ plotScores = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotXScores = function(obj, ...)
 {   
    UseMethod("plotXScores")
@@ -323,9 +360,26 @@ plotXScores = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotXYScores = function(obj, ...)
 {   
    UseMethod("plotXYScores")
+}   
+
+#' Selected intervals plot
+#' 
+#' @details
+#' Generic function for plotting selected intervals or variables
+#' 
+#' @param obj
+#' a model or result object
+#' @param ...
+#' other arguments
+#' 
+#' @export
+plotSelection = function(obj, ...)
+{   
+   UseMethod("plotSelection")
 }   
 
 #' RMSE plot
@@ -337,7 +391,8 @@ plotXYScores = function(obj, ...)
 #' a model or result object
 #' @param ...
 #' other arguments
-#' 
+#'
+#' @export
 plotRMSE = function(obj, ...)
 {   
    UseMethod("plotRMSE")
@@ -353,6 +408,7 @@ plotRMSE = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotCumVariance = function(obj, ...)
 {   
    UseMethod("plotCumVariance")
@@ -368,6 +424,7 @@ plotCumVariance = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotXCumVariance = function(obj, ...)
 {   
    UseMethod("plotXCumVariance")
@@ -383,6 +440,7 @@ plotXCumVariance = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotYCumVariance = function(obj, ...)
 {   
    UseMethod("plotYCumVariance")
@@ -398,6 +456,7 @@ plotYCumVariance = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotLoadings = function(obj, ...)
 {   
    UseMethod("plotLoadings")
@@ -413,6 +472,7 @@ plotLoadings = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotPredictions = function(obj, ...)
 {   
    UseMethod("plotPredictions")
@@ -428,6 +488,7 @@ plotPredictions = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotRegcoeffs = function(obj, ...)
 {   
    UseMethod("plotRegcoeffs")
@@ -443,6 +504,7 @@ plotRegcoeffs = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotResiduals = function(obj, ...)
 {   
    UseMethod("plotResiduals")
@@ -458,6 +520,7 @@ plotResiduals = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotVariance = function(obj, ...)
 {   
    UseMethod("plotVariance")
@@ -473,6 +536,7 @@ plotVariance = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotXLoadings = function(obj, ...)
 {   
    UseMethod("plotXLoadings")
@@ -488,6 +552,7 @@ plotXLoadings = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotXYLoadings = function(obj, ...)
 {   
    UseMethod("plotXYLoadings")
@@ -503,6 +568,7 @@ plotXYLoadings = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotHist = function(obj, ...)
 {   
    UseMethod("plotHist")
@@ -518,6 +584,7 @@ plotHist = function(obj, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 plotCorr = function(obj, ...)
 {   
    UseMethod("plotCorr")

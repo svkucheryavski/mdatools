@@ -10,10 +10,10 @@ For more details and examples read a [GitBook tutorial](http://svkucheryavski.gi
 How to install
 --------------
 
-The package now is available from CRAN by usual installing procedure.  However due to restrictions in CRAN politics regarding number of submissions (one in 3-4 month) only major releases will be published there. To get the latest release plase use GitHub sources. You can [download](https://github.com/svkucheryavski/mdatools/releases) a zip-file with source package and install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.6.2.tar.gz` and it is located in a current working directory, just run the following:
+The package now is available from CRAN by usual installing procedure.  However due to restrictions in CRAN politics regarding number of submissions (one in 3-4 month) only major releases will be published there. To get the latest release plase use GitHub sources. You can [download](https://github.com/svkucheryavski/mdatools/releases) a zip-file with source package and install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.7.0.tar.gz` and it is located in a current working directory, just run the following:
 
 ```
-install.packages('mdatools_0.6.2.tar.gz')
+install.packages('mdatools_0.7.0.tar.gz')
 ```
 
 If you have `devtools` package installed, the following command will install the latest release from the master branch of GitHub repository (do not forget to load the `devtools` package first):

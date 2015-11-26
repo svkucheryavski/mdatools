@@ -1,17 +1,117 @@
-## class and methods for SIMCA multi class classification results ##
-
+#' Results of SIMCA multiclass classification
+#' 
+#' @description
+#' \code{simcamres} is used to store results for SIMCA multiclass classification.
+#' 
+#' @param cres
+#' results of classification (class \code{classres}).
+#' @param T2
+#' matrix with T2 values for each object and class.
+#' @param Q
+#' matrix with Q values for each object and class.
+#' @param T2lim
+#' vector with T2 statistical limits for each class.
+#' @param Qlim
+#' vector with Q statistical limits for each class.
+#' 
+#' @details 
+#' Class \code{simcamres} inherits all properties and methods of class \code{\link{classres}}, plus 
+#' store values necessary to visualise prediction decisions (e.g. Cooman's plot or Residuals plot).
+#' 
+#' In cotrast to \code{simcares} here only values for optimal (selected) number of components in 
+#' each individual SIMCA models are presented.
+#' 
+#' There is no need to create a \code{simcamres} object manually, it is created automatically when 
+#' make a SIMCAM model (see \code{\link{simcam}}) or apply the model to a new data (see 
+#' \code{\link{predict.simcam}}). The object can be used to show summary and plots for the results.
+#'
+#' @return
+#' Returns an object (list) of class \code{simcamres} with the same fields as \code{\link{classres}} 
+#' plus extra fields for Q and T2 values and limits:
+#' 
+#' \item{c.pred}{predicted class values.}
+#' \item{c.ref}{reference (true) class values if provided.}
+#' \item{T2}{matrix with T2 values for each object and class.}
+#' \item{Q}{matrix with Q values for each object and class.}
+#' \item{T2lim}{vector with T2 statistical limits for each class.}
+#' \item{Qlim}{vector with Q statistical limits for each class.}
+#' 
+#' The following fields are available only if reference values were provided.
+#' \item{tp}{number of true positives.}
+#' \item{fp}{nmber of false positives.}
+#' \item{fn}{number of false negatives.}
+#' \item{specificity}{specificity of predictions.}
+#' \item{sensitivity}{sensitivity of predictions.}
+#'
+#' @seealso 
+#' Methods for \code{simcamres} objects:
+#' \tabular{ll}{
+#'  \code{print.simcamres} \tab shows information about the object.\cr
+#'  \code{summary.simcamres} \tab shows statistics for results of classification.\cr
+#'  \code{\link{plotResiduals.simcamres}} \tab makes Q vs. T2 residuals plot.\cr
+#'  \code{\link{plotCooman.simcamres}} \tab makes Cooman's plot.\cr
+#' }
+#' 
+#' Methods, inherited from \code{\link{classres}} class:
+#' \tabular{ll}{
+#'  \code{\link{showPredictions.classres}} \tab show table with predicted values.\cr
+#'  \code{\link{plotPredictions.classres}} \tab makes plot with predicted values.\cr
+#' }
+#' 
+#' Check also \code{\link{simcam}}.    
+#'
+#' @examples
+#' ## make a multiclass SIMCA model for Iris data and apply to test set
+#' library(mdatools)
+#' 
+#' # split data 
+#' caldata = iris[seq(1, nrow(iris), 2), 1:4]
+#' se = caldata[1:25, ]
+#' ve = caldata[26:50, ]
+#' vi = caldata[51:75, ]
+#' 
+#' testdata = iris[seq(2, nrow(iris), 2), 1:4]
+#' testdata.cref = iris[seq(2, nrow(iris), 2), 5]
+#' 
+#' # create individual models
+#' semodel = simca(se, classname = 'setosa')
+#' semodel = selectCompNum(semodel, 1)
+#' 
+#' vimodel = simca(vi, classname = 'virginica')
+#' vimodel = selectCompNum(vimodel, 1)
+#' 
+#' vemodel = simca(ve, classname = 'versicolor')
+#' vemodel = selectCompNum(vemodel, 1)
+#' 
+#' # combine models into SIMCAM object, show statistics 
+#' model = simcam(list(semodel, vimodel, vemodel), info = 'Iris data')
+#' res = predict(model, testdata, testdata.cref)
+#' summary(res)
+#' 
+#' # show predicted values
+#' showPredictions(res)
+#' 
+#' # plot predictions
+#' par(mfrow = c(2, 2))
+#' plotPredictions(res)
+#' plotPredictions(res, nc = 1)
+#' plotPredictions(res, nc = c(1, 2))
+#' plotPredictions(res, show.labels = TRUE)
+#' par(mfrow = c(1, 1))
+#' 
+#' # show residuals and Cooman's plot
+#' 
+#' par(mfrow = c(2, 2))
+#' plotCooman(res)
+#' plotCooman(res, nc = c(1, 3))
+#' plotResiduals(res)
+#' plotResiduals(res, nc = 3)
+#' par(mfrow = c(1, 1))
+#' 
+#' @export
 simcamres = function(cres, T2, Q, T2lim, Qlim)
 {
-   # Creates an object of simcamres class. 
-   #
-   # Arguments:
-   #  cres: an object of classres class (results for classification)
-   #  T2: T2 values for the objects and classes (selected component only)
-   #  Q: Q values for the objects and classes (selected component only)
-   #  T2lim: T2 limits for the classes (selected component only)
-   #  Qlim: Q limits for the classes (selected component only)
-
-   res = cres
+  res = cres
    res$T2 = T2
    res$Q = Q
    res$T2lim = T2lim
@@ -49,6 +149,7 @@ simcamres = function(cres, T2, Q, T2lim, Qlim)
 #' @details
 #' See examples in help for \code{\link{simcamres}} function.
 #' 
+#' @export
 plotResiduals.simcamres = function(obj, nc = 1, show.limits = T, type = 'p', main = NULL, 
                                   xlab = 'T2', ylab = 'Squared residual distance (Q)', legend = NULL, ...)
 {
@@ -114,6 +215,7 @@ plotResiduals.simcamres = function(obj, nc = 1, show.limits = T, type = 'p', mai
 #' @details
 #' See examples in help for \code{\link{simcamres}} function.
 #' 
+#' @export
 plotCooman.simcamres = function(obj, nc = c(1, 2), type = 'p', main = "Cooman's plot", xlab = NULL, 
                                 ylab = NULL, show.limits = T, legend = NULL, ...)
 {
@@ -170,15 +272,13 @@ plotCooman.simcamres = function(obj, nc = c(1, 2), type = 'p', main = "Cooman's 
 #' @details
 #' See examples in help for \code{\link{simcamres}} function.
 #' 
+#' @export
 plot.simcamres = function(x, ...)
 {
    plotPredictions(x)
 }
 
 #' Summary method for SIMCAM results object
-#' 
-#' @method summary simcamres
-#' @S3method summary simcamres
 #' 
 #' @description
 #' Shows performance statistics for the results.
@@ -187,6 +287,8 @@ plot.simcamres = function(x, ...)
 #' SIMCAM results (object of class \code{simcamres})
 #' @param ...
 #' other arguments
+#' 
+#' @export
 summary.simcamres = function(object, ...)
 {
    obj = object
@@ -208,9 +310,6 @@ summary.simcamres = function(object, ...)
 
 #' Print method for SIMCAM results object
 #' 
-#' @method print simcamres
-#' @S3method print simcamres
-#'
 #' @description
 #' Prints information about the object structure
 #' 
@@ -218,7 +317,8 @@ summary.simcamres = function(object, ...)
 #' SIMCAM results (object of class \code{simcamres})
 #' @param ...
 #' other arguments
-#' 
+#'
+#' @export 
 print.simcamres = function(x, ...)
 {   
    obj = x

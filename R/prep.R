@@ -13,6 +13,7 @@
 #' @return
 #' data matrix with processed values
 #' 
+#' @export
 prep.autoscale = function(data, center = T, scale = F)
 {   
    # define values for centering
@@ -68,10 +69,46 @@ prep.autoscale = function(data, center = T, scale = F)
 #'  mdaplot(cbind(wavelength, t(spectra)), type = 'l', main = 'Before SNV')
 #'  mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After SNV')
 #'
+#' @export
 prep.snv = function(data)
 {
    data = t(scale(t(data), center = T, scale = T))
 } 
+
+#' Normalization
+#' 
+#' @description
+#' Normalizes signals (rows of data matrix) to unit area or unit length
+#' 
+#' @param data
+#' a matrix with data values
+#' @param type
+#' type of normalization \code{'area'} or \code{'length'}
+#' 
+#' @return 
+#' data matrix with normalized values
+#' 
+prep.norm = function(data, type = 'area')
+{
+   if (type == 'area')
+   {   
+      w = apply(abs(data), 1, sum)
+   }   
+   else if (type == 'length')
+   {
+      w = apply(data^2, 1, sum)
+      w = sqrt(w)
+   }   
+   else
+   {   
+      stop('Wrong value for argument "type"!')
+   }   
+    
+   data = sweep(data, 1, w, '/')
+   
+   data
+}   
+
 
 #' Savytzky-Golay filter
 #' 
@@ -87,6 +124,7 @@ prep.snv = function(data)
 #' @param dorder
 #' order of derivative to take (0 - no derivative)
 #' 
+#' @export
 prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
 {
    nobj = nrow(data)
@@ -141,6 +179,7 @@ prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
 #'  mdaplot(cbind(wavelength, t(spectra)), type = 'l', main = 'Before MSC')
 #'  mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After MSC')
 #'
+#' @export
 prep.msc = function(spectra, mspectrum = NULL)
 {
    if (is.null(mspectrum))
@@ -192,6 +231,7 @@ prep.msc = function(spectra, mspectrum = NULL)
 #' @param data
 #' a matrix with data values to compute inverse for
 #' 
+#' @export
 pinv = function(data)
 {
    # Calculates pseudo-inverse of data matrix

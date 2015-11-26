@@ -24,6 +24,7 @@
 #'    \code{rpd} \tab RPD values \cr
 #' }
 #' 
+#' @export
 regres = function(y.pred, y.ref = NULL, ncomp.selected = 1)
 {   
    obj = list()
@@ -90,7 +91,7 @@ regres.bias = function(y.ref, y.pred)
    bias = matrix(0, nrow = nresp, ncol = ncomp)
    
    for (i in 1:nresp)
-      bias[i, ] = as.vector(apply(y.ref[, i] - y.pred[, , i], 2, mean))
+      bias[i, ] = as.vector(apply(y.ref[, i] - y.pred[, , i, drop = F], 2, mean))
 
    rownames(bias) = colnames(y.ref)
    colnames(bias) = dimnames(y.pred)[[2]]
@@ -174,6 +175,7 @@ regres.slope = function(y.ref, y.pred)
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
+#' @export
 plotRMSE.regres = function(obj, ny = 1, type = 'b', main = 'RMSE', 
                            xlab = 'Complexity', ylab = NULL, ...)
 {
@@ -226,6 +228,7 @@ plotRMSE.regres = function(obj, ny = 1, type = 'b', main = 'RMSE',
 #' If reference values are available, the function shows a scatter plot with predicted vs. 
 #' reference values, otherwise predicted values are shown vs. object numbers.
 #' 
+#' @export
 plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, main = 'Predictions', 
                                   xlab = NULL, ylab = NULL, 
                                   show.line = T, colmap = 'default', col = NULL, ...)
@@ -291,6 +294,7 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, main = 'Predictions
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #' 
+#' @export
 plotYResiduals.regres = function(obj, ny = 1, ncomp = NULL, type = 'p', main = NULL,
                                  xlab = 'Objects', ylab = NULL, show.line = T, ...)
 {
@@ -341,6 +345,7 @@ plotYResiduals.regres = function(obj, ny = 1, ncomp = NULL, type = 'p', main = N
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #' 
+#' @export
 plot.regres = function(x, ny = 1, ...)
 {
    obj = x
@@ -350,9 +355,6 @@ plot.regres = function(x, ny = 1, ...)
 
 #' as.matrix method for regression results
 #' 
-#' @method as.matrix regres
-#' @S3method as.matrix regres
-#'
 #' @description
 #' Returns a matrix with model performance statistics for regression results
 #' 
@@ -365,6 +367,7 @@ plot.regres = function(x, ny = 1, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 as.matrix.regres = function(x, ncomp = NULL, ny = 1, ...)
 {
    obj = x
@@ -389,9 +392,6 @@ as.matrix.regres = function(x, ncomp = NULL, ny = 1, ...)
 
 #' summary method for regression results object
 #' 
-#' @method summary regres
-#' @S3method summary regres
-#'
 #' @description
 #' Shows performance statistics for the regression results.
 #' 
@@ -404,6 +404,7 @@ as.matrix.regres = function(x, ncomp = NULL, ny = 1, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 summary.regres = function(object, ncomp = NULL, ny = NULL, ...)
 {
    obj = object
@@ -437,9 +438,6 @@ summary.regres = function(object, ncomp = NULL, ny = NULL, ...)
 
 #' print method for regression results object
 #' 
-#' @method print regres
-#' @S3method print regres
-#ø
 #' @description
 #' Prints information about the object structure
 #' 
@@ -448,6 +446,7 @@ summary.regres = function(object, ncomp = NULL, ny = NULL, ...)
 #' @param ...
 #' other arguments
 #' 
+#' @export
 print.regres = function(x, ...)
 {
    obj = x
