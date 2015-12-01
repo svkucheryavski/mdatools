@@ -46,6 +46,9 @@
 #' with \code{\link{pca}} or apply it to a new data, the results will automatically inherit 
 #' all methods of \code{ldecomp}.
 #'
+#' @importFrom methods show
+#' @importFrom stats convolve cor lm na.exclude predict pt qf qnorm qt sd var
+#'
 #' @export
 ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL, 
                    totvar, tnorm = NULL, ncomp.selected = NULL,

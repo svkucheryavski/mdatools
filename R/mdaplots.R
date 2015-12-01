@@ -243,6 +243,8 @@ mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines 
 #' @param colmap
 #' which colormap to use ('default', 'gray', or user defined in form c('color1', 'color2', ...)).
 #' 
+#' @importFrom grDevices col2rgb colorRampPalette rgb
+#' 
 #' @return
 #' Returns vector with generated color values
 #' 
@@ -1116,6 +1118,8 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 #' mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), lty = c(3, 2))
 #' mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), lwd = 2, colmap = c('green', 'orange'))
 #' par(mfrow = c(1, 1))
+#' 
+#' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text
 #' 
 #' @export
 mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
