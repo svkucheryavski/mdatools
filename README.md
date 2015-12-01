@@ -19,5 +19,5 @@ install.packages('mdatools_0.7.0.tar.gz')
 If you have `devtools` package installed, the following command will install the latest release from the master branch of GitHub repository (do not forget to load the `devtools` package first):
 
 ```
-install_github('mdatools', username = 'svkucheryavski')
+install_github('svkucheryavski/mdatools')
 ```
