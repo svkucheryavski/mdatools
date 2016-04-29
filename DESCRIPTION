@@ -7,6 +7,6 @@ Maintainer: Sergey Kucheryavskiy <svkucheryavski@gmail.com>
 Description: Package implements projection based methods for preprocessing,
     exploring and analysis of multivariate data used in chemometrics.
 License: GPL-3
-Imports: methods
-RoxygenNote: 5.0.0
-
+Imports:
+    methods
+RoxygenNote: 5.0.1
