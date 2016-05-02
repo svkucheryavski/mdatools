@@ -18,13 +18,11 @@
 #' @param alpha
 #' significance level for calculating limit for Q residuals.
 #' @param method
-#' method to compute principal components.
+#' method to compute principal components ('svd', 'nipals').
 #' @param info
 #' a short text line with model description.
 #'
 #' @details 
-#' So far only SVD (Singular Value Decompisition) method is available, more coming soon. 
-#'   
 #' By default \code{pca} uses number of components (\code{ncomp}) as a minimum of number of 
 #' objects - 1, number of variables and default or provided value. Besides that, there is also 
 #' a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal 
@@ -171,7 +169,7 @@ pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
 #' 
 getCalibrationData.pca = function(obj, ...)
 {
-   x = obj$calres$scores %*% t(obj$loadings) + obj$calres$residuals
+   x = tcrossprod(obj$calres$scores, obj$loadings) + obj$calres$residuals
    
    if (is.numeric(attr(x, 'prep:scale')))
       x = sweep(x, 2L, attr(x, 'prep:scale'), '*', check.margin = F)
@@ -326,7 +324,7 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
       scoresp = scores
       loadings = res$loadings[, 1:ncomp]      
       scores = x.rep %*% loadings
-      x.new = scores %*% t(loadings)   
+      x.new = tcrossprod(scores, loadings)   
       
       # remove centering
       x.new = sweep(x.new, 2L, lmean, '+', check.margin = F)
@@ -366,7 +364,7 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
 #' @param scale
 #' logical, do standardization or not
 #' @param method
-#' algorithm for compiting PC space (only 'svd' is supported so far)
+#' algorithm for compiting PC space (only 'svd' and 'nipals' are supported so far)
 #' 
 #' @return
 #' an object with calibrated PCA model
@@ -374,7 +372,13 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
 pca.cal = function(x, ncomp, center = T, scale = F, method = 'svd')
 {
    x = prep.autoscale(x, center = center, scale = scale)
-   model = pca.svd(x, ncomp)
+   
+   if (method == 'svd')
+      model = pca.svd(x, ncomp)
+   else if(method == 'nipals')
+      model = pca.nipals(x, ncomp)
+   else
+      stop('Wrong value for PCA method!')
    
    model$tnorm = sqrt(colSums(model$scores ^ 2)/(nrow(model$scores) - 1));   
    
@@ -456,23 +460,25 @@ pca.nipals = function(x, ncomp)
 
       while (th > 0.000001)
       {      
-         p = (t(E) %*% t) / as.vector((t(t) %*% t))
-         p = p / as.vector(t(p) %*% p) ^ 0.5
-         t = (E %*% p)/as.vector(t(p) %*% p)
-         th = abs(tau - as.vector(t(t) %*% t))
-         tau = as.vector(t(t) %*% t)
+         p = crossprod(E, t) / as.vector(crossprod(t))
+         p = p / as.vector(crossprod(p)) ^ 0.5
+         t = (E %*% p)/as.vector(crossprod(p))
+         th = abs(tau - as.vector(crossprod(t)))
+         tau = as.vector(crossprod(t))
       }
-            
-      E = E - t %*% t(p)
+      
+      E = E - tcrossprod(t, p)
       scores[, i] = t
       loadings[, i] = p
       eigenvals[i] = tau / (nobj - 1)
    }
-
+   
+   s = svd(E)
+   
    res = list(
       loadings = loadings,
       scores = scores,
-      eigenvals = eigenvals
+      eigenvals = c(eigenvals, (s$d[1:(nvar - ncomp + 1)]^2)/(nrow(x) - 1))
    )   
 }
 
@@ -564,7 +570,7 @@ predict.pca = function(object, x, cv = F, ...)
 {
    x = prep.autoscale(x, object$center, object$scale)
    scores = x %*% object$loadings
-   residuals = x - scores %*% t(object$loadings)
+   residuals = x - tcrossprod(scores, object$loadings)
    
    if (cv == F)
    {   

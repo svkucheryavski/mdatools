@@ -1,3 +1,11 @@
+v.0.7.1
+=======
+* fixed an issue lead to plot.new() error in some cases
+* documentation was regenerated with new version of Roxygen
+* file People.RData was renamed to people.RData
+* NIPALS method for PCA has been added
+* code optimization to speed calculations up
+
 v.0.7.0
 =======
 * interval PLS variable selection (iPLS) is implemented
