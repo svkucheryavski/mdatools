@@ -1151,6 +1151,13 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    if (is.null(yticks) && !is.null(yticklabels))
       yticks = 1:length(yticklabels)
    
+   # check if plot.new() should be called first
+   tryCatch(
+      {par(new = TRUE)},
+      warning = function(w){plot.new()},
+      finally = {par(new = FALSE)}
+   )
+   
    # calculate limits and get colors
    lim = mdaplot.getAxesLim(data, show.lines = show.lines, single.x = single.x, 
                             show.legend = show.legend, legend = legend, show.labels = show.labels,

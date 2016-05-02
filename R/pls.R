@@ -448,13 +448,12 @@ pls.simpls = function(x, y, ncomp, cv = FALSE)
    for (n in 1:ncomp)
    {
       # get the dominate eigenvector of A'A
-      e = eigen(t(A) %*% A)
+      e = eigen(crossprod(A))
       q = e$vectors[1:nresp]
-      
       
       # calculate and store weights
       w = A %*% q
-      c = t(w) %*% M %*% w
+      c = crossprod(w, (M %*% w))
       w = w/sqrt(as.numeric(c))
       W[, n] = w
       
@@ -463,18 +462,18 @@ pls.simpls = function(x, y, ncomp, cv = FALSE)
       P[, n] = p
       
       # calculate and store y loadings
-      q = t(A) %*% w
+      q = crossprod(A, w)
       Q[, n] = q
       
       v = C %*% p
-      v = v/sqrt(as.numeric(t(v) %*% v))
+      v = v/sqrt(as.numeric(crossprod(v)))
       
       # calculate and store regression coefficients
-      B[, n, ] = W[, 1:n, drop = FALSE] %*% t(Q[, 1:n, drop = FALSE])
+      B[, n, ] = tcrossprod(W[, 1:n, drop = FALSE], Q[, 1:n, drop = FALSE])
       
       # recalculate matrices for the next compnonent
-      C = C - v %*% t(v)
-      M = M - p %*% t(p)
+      C = C - tcrossprod(v)
+      M = M - tcrossprod(p)
       A = C %*% A      
       
       if (cv == F && e$value < 10^-12) {

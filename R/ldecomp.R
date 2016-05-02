@@ -244,8 +244,7 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
    {   
       if (i < nvar)
       {         
-         evals = eigenvals[(i + 1):nvar]         
-         
+         evals = eigenvals[(i + 1):nvar]   
          cl = 2 * conflim - 100
          t1 = sum(evals)
          t2 = sum(evals^2)
