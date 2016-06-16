@@ -29,7 +29,13 @@ prep.autoscale = function(data, center = T, scale = F)
       scale = scale         
    
    # make autoscaling and attach preprocessing attributes
-   data = scale(data, center = center, scale = scale)
+   
+   data = scale(data, center = center, scale = F)
+   if(is.numeric(scale)) {
+      ind = scale > 0.00000001
+      data[, ind] = scale(data[, ind], center = F, scale = scale[ind])
+   } 
+   
    attr(data, 'scaled:center') = NULL
    attr(data, 'scaled:scale') = NULL
    attr(data, 'prep:center') = center
@@ -108,7 +114,6 @@ prep.norm = function(data, type = 'area')
    
    data
 }   
-
 
 #' Savytzky-Golay filter
 #' 
@@ -194,34 +199,6 @@ prep.msc = function(spectra, mspectrum = NULL)
    
    list(cspectra = cspectra, mspectrum = mspectrum)
 }  
-
-# prep.alsbasecor = function(spectra, penalty = 0.1, smoothness = 10^5)
-# {
-#    m = ncol(spectra)
-#    
-#    if (m == 1)
-#    {
-#       
-#    }  
-#       
-#    D = diff(speye(m), 2);
-#    w = matrix(1, nrow = m, ncol = 1)
-#    
-#    for (n in 1:nrow(spectra))
-#    {  
-#       spectrum = spectra[n, ]
-#       
-#       for (it in 1:20)
-#       {   
-#          W = spdiags(w, 0, m, m);
-#          C = chol(W + smoothness * t(D) * D)
-#          baseline = C \ (t(C) \ (w * spectrum));
-#          w = penalty * (spectrum > baseline) + (1 - penalty) * (spectrum < baseline);
-#       }
-#    
-#       spectra[n, ] = spectrum - t(baseline) 
-#    }                
-# }   
 
 #' Pseudo-inverse matrix
 #' 

@@ -1126,7 +1126,7 @@ plotVIPScores.pls = function(obj, ny = 1, type = 'l', main = NULL,
 plotSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, type = 'l', main = NULL, 
                                     xlab = 'Variables', ylab = '', ...)
 {
-   main = getMainTitle(main, ncomp, 'Seelctivity ratio')
+   main = getMainTitle(main, ncomp, 'Selectivity ratio')
    ncomp = getSelectedComponents(obj, ncomp)
    
    selratio = getSelectivityRatio(obj, ncomp, ny)
