@@ -9,12 +9,14 @@
 #' a logical value or vector with numbers for centering
 #' @param scale
 #' a logical value or vector with numbers for weighting
+#' @param max.cov
+#' columns that have coefficient of variation (in percent) below `max.cv` will not be scaled
 #' 
 #' @return
 #' data matrix with processed values
 #' 
 #' @export
-prep.autoscale = function(data, center = T, scale = F)
+prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1)
 {   
    # define values for centering
    if (is.logical(center) && center == T )
@@ -30,11 +32,15 @@ prep.autoscale = function(data, center = T, scale = F)
    
    # make autoscaling and attach preprocessing attributes
    
-   data = scale(data, center = center, scale = F)
    if(is.numeric(scale)) {
-      ind = scale > 0.00000001
-      data[, ind] = scale(data[, ind], center = F, scale = scale[ind])
+      if (!is.numeric(center))
+         m = apply(data, 2, mean)
+      else
+         m = center
+      cv = scale/m * 100
+      scale[is.nan(cv) | cv < 0.1] = 1
    } 
+   data = scale(data, center = center, scale = scale)
    
    attr(data, 'scaled:center') = NULL
    attr(data, 'scaled:scale') = NULL

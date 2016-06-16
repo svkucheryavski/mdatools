@@ -1,6 +1,7 @@
 v.0.7.2
-* `prep.autoscale()` skip columns which have very small standard deviation
+=======
 * corrected a typo in title of selectivity ratio plot 
+* `prep.autoscale()` do not scale columns with coefficient of variation below given threshold
 
 v.0.7.1
 =======
