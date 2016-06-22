@@ -895,6 +895,8 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' size for data point labels.
 #' @param show.excluded
 #' logical, show or hide rows marked as excluded (attribute `exclrows`)
+#' @param col.excluded
+#' color for the excluded objects (rows)
 #' @param ...  
 #' other plotting arguments.
 #' 
@@ -931,7 +933,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' See all examples in GitBook
 #' 
 #' @export
-mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8,
+mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8,
                    cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
                    main = NULL, xlab = NULL, ylab = NULL, show.labels = F, 
                    show.colorbar = T, show.lines = F, show.grid = T, show.axes = T, 
@@ -940,18 +942,21 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
                    show.excluded = FALSE, col.excluded = '#E0E0E0', ...)
 {   
   
-   pd = prepare.plot.data(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, show.lines,
-                          show.axes)
-   pd$lower -> lower
-   pd$upper -> upper
-   pd$x.values -> x.values
-   pd$y.values -> y.values
-   pd$x.values.excludedrows -> x.values.excludedrows
-   pd$y.values.excludedrows -> y.values.excludedrows
-   pd$lim -> lim
-   pd$excluded.rows -> excluded.rows
-   pd$excluded.cols -> excluded.cols
-   pd$data.attr -> data.attr
+   if (is.null(plot.data)) {
+      plot.data = prepare.plot.data(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, 
+                             show.lines, show.axes)
+   }
+   
+   plot.data$lower -> lower
+   plot.data$upper -> upper
+   plot.data$x.values -> x.values
+   plot.data$y.values -> y.values
+   plot.data$x.values.excludedrows -> x.values.excludedrows
+   plot.data$y.values.excludedrows -> y.values.excludedrows
+   plot.data$lim -> lim
+   plot.data$excluded.rows -> excluded.rows
+   plot.data$excluded.cols -> excluded.cols
+   plot.data$data.attr -> data.attr
    
    # if some columns are excluded and xticklabels is provided for all columns - exclude some of the values
    if (!is.null(excluded.cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data))
@@ -1166,19 +1171,24 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 #' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text
 #' 
 #' @export
-mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
+mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
                     legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', 
                     single.x = T, show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
+                    show.excluded = FALSE, 
                     lab.col = 'darkgray', lab.cex = 0.65, ...)
 {   
-   # get number of groups
-   if (!is.list(data)) {   
-      ngroups = nrow(data)
-   } else {   
-      ngroups = length(data)
-   }
+   # prepare list with groups of objects
+   if (!is.list(data)) {
+      if (is.null(groupby)) {
+         
+      } else {
+         
+      }
+   } 
+   
+   ngroups = length(data)
 
    # check if plot.new() should be called first
    tryCatch(
@@ -1187,11 +1197,16 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
       finally = {par(new = FALSE)}
    )
    
-   # calculate limits and get colors
-   lim = mdaplot.getAxesLim(data, show.lines = show.lines, single.x = single.x, 
-                            show.legend = show.legend, legend = legend, show.labels = show.labels,
-                            legend.position = legend.position, xticks = xticks, yticks = yticks)
+   pd = lapply(data, prepare.plot.data, type, xlim, ylim, bwd, show.excluded, show.colorbar = FALSE, show.labels, 
+               show.lines, show.axes = TRUE)
+   
+   loc.xlim = matrix(unlist(lapply(pd, function(x) {x$lim$xlim})), ncol = 2, byrow = TRUE)
+   loc.ylim = matrix(unlist(lapply(pd, function(y) {y$lim$ylim})), ncol = 2, byrow = TRUE)
 
+   loc.xlim = c(min(loc.xlim[, 1]), max(loc.xlim[, 2]))
+   loc.ylim = c(min(loc.ylim[, 1]), max(loc.ylim[, 2]))
+   lim = list(xlim = loc.xlim, ylim = loc.ylim)
+   
    if (!is.null(ylim))
       lim$ylim = ylim
    
@@ -1208,15 +1223,6 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    else if (!(sum(type == 'h') == 0 | sum(type == 'h') == length(pch)))
       stop('Barplot (type = "h") for groups can not be combined with other plots!');
       
-   # Correct x axis limits if it is a bar plot
-   if (type[1] == 'h')
-   {
-      if (is.list(data))      
-         lim$xlim = c(1 - bwd/2 - 0.1, lim$xlim[2] + bwd/2 + 0.1)
-      else   
-         lim$xlim = c(1 - bwd/2 - 0.1, nrow(data) + bwd/2 + 0.1)
-   }   
-   
    # if marker symbol is not specified for each group multply default value
    if (!is.numeric(pch))
       stop('Parameter "pch" mush be numeric!')   
@@ -1241,20 +1247,6 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    else if (length(lwd) != ngroups)
       stop('Parameter "lwd" hould be specified for each group or be common for all!')
    
-   # define axis labels as data column names if they are not specified
-   if (is.null(xlab) && !is.null(colnames(data[[1]])))
-       xlab = colnames(data[[1]])[1]
-   
-   if (is.null(ylab) && !is.null(colnames(data[[1]])))
-      ylab = colnames(data[[1]])[2]
-
-   # if data is small set up proper x tick labels
-   if (!is.list(data) && nrow(data) < 10 && type != 'p' && single.x == T && is.null(xticklabels))
-   {   
-      xticks = data[, 1]
-      xticklabels = data[, 1]
-   }
-   
    # make an empty plot with proper limits and axis labels
    mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
    
@@ -1262,66 +1254,11 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
       mdaplot.showGrid()
    
    # make a plot for each group   
-   if (is.list(data))
-   {   
-      for (i in 1:ngroups)
-      {
-         if (!is.null(labels) && type[i] != 'e')
-         {
-            show(labels)
-            show(type)
-            if (is.list(labels))
-               slabels = labels[[i]]
-            else
-               slabels = labels[, i]
-         }
-         else
-         {
-            slabels = NULL
-         }   
-         
-         mdaplot(data[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
-                 lwd = lwd[i],
-                 labels = slabels, show.grid = F, show.axes = F, show.labels = show.labels,
-                 lab.col = lab.col, lab.cex = lab.cex)
-      }
-   }
-   else
-   {
-      if (single.x == T)
-      {   
-         gbwd = bwd/ngroups            
-         for (i in 1:ngroups)
-         {
-            if (type[1] == 'h')
-            {
-               x = (1:nrow(data)) + gbwd * (i - 1) - gbwd/2 * (ngroups - 1)   
-            }  
-            else
-            {   
-               x = data[, 1, drop = F]
-            }
-            
-            y = data[, i + 1, drop = F]
-            
-            mdaplot(cbind(x, y), type = type[i], col = col[i], pch = pch[i], lty = lty[i],
-                    lwd = lwd[i],
-                    bwd = 0.9 * gbwd, labels = labels[, i], show.labels = show.labels,
-                    show.grid = F, show.axes = F, lab.col = lab.col, lab.cex = lab.cex)
-         }
-      }         
-      else
-      {
-         for (i in 1:ngroups)
-         {
-            x = data[, 2 * i - 1, drop = F]
-            y = data[, 2 * i, drop = F]
-            mdaplot(cbind(x, y), type = type[i], col = col[i], pch = pch[i], lty = lty[i],
+   for (i in 1:ngroups) {
+      mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
                     lwd = lwd[i],
                     labels = labels[, i], show.grid = F, show.axes = F, show.labels = show.labels,
                     lab.col = lab.col, lab.cex = lab.cex)
-         }
-      }
    }  
    
    # show lines if needed
