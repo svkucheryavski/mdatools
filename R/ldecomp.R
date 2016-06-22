@@ -362,25 +362,14 @@ plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
 #' 
 #' @export
 plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores', 
+                              type = 'p', xlab = NULL, ylab = NULL,
                               show.labels = F, show.axes = F, ...)
 {
-   if (is.null(obj$scores))
-   {
+   if (is.null(obj$scores)) {
       warning('Scores values are not specified!')
-   }   
-   else
-   {   
-      if (length(comp) == 1)
-      {   
-         # scores vs objects
-         data = cbind(1:nrow(obj$scores), obj$scores[, comp])      
-         colnames(data) = c('Objects', colnames(obj$scores)[comp])
-         rownames(data) = rownames(obj$scores)
-         
-         mdaplot(data, main = main, show.labels = show.labels, ...)
-      }
-      else if (length(comp) == 2)
-      {
+   } else {   
+      
+      if (length(comp) == 2 && type == 'p') {
          # scores vs scores
          data = obj$scores[, c(comp[1], comp[2])]   
          
@@ -388,13 +377,22 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
             show.lines = c(0, 0)      
          else
             show.lines = F
+        
+         if (is.null(xlab))
+            xlab = sprintf('Comp %d (%.2f%%)', comp[1], obj$expvar[comp[1]])
          
-         mdaplot(data, main = main, show.labels = show.labels, show.lines = show.lines, ...)
+         if (is.null(ylab))
+            ylab = sprintf('Comp %d (%.2f%%)', comp[2], obj$expvar[comp[2]])
+         
+         mdaplot(data, main = main, show.labels = show.labels, show.lines = show.lines, 
+                 xlab = xlab, ylab = ylab, ...)
+      } else if (length(comp) == 1) {   
+         data = cbind(1:nrow(obj$scores), obj$scores[, comp])      
+         colnames(data) = c('Objects', colnames(obj$scores)[comp])
+         rownames(data) = rownames(obj$scores)
+         
+         mdaplot(data, main = main, show.labels = show.labels, ...)
       }
-      else
-      {
-         stop('Wrong number of components!')
-      }   
    }
 }  
 

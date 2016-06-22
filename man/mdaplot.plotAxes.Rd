@@ -4,15 +4,11 @@
 \alias{mdaplot.plotAxes}
 \title{Create axes plane}
 \usage{
-mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab,
-  ylab)
+mdaplot.plotAxes(xticklabels = NULL, yticklabels = NULL, lim = NULL,
+  main = NULL, xlab = NULL, ylab = NULL)
 }
 \arguments{
-\item{xticks}{tick values for x axis}
-
 \item{xticklabels}{labels for x ticks}
-
-\item{yticks}{tick values for y axis}
 
 \item{yticklabels}{labels for y ticks}
 

@@ -7,13 +7,12 @@
 mdaplot(data, type = "p", pch = 16, col = NULL, lty = 1, lwd = 1,
   bwd = 0.8, cgroup = NULL, xlim = NULL, ylim = NULL,
   colmap = "default", labels = NULL, main = NULL, xlab = NULL,
-  ylab = NULL, single.x = T, show.labels = F, show.colorbar = T,
-  show.lines = F, show.grid = T, show.axes = T, xticks = NULL,
-  xticklabels = NULL, yticks = NULL, yticklabels = NULL,
+  ylab = NULL, show.labels = F, show.colorbar = T, show.lines = F,
+  show.grid = T, show.axes = T, xticklabels = NULL, yticklabels = NULL,
   lab.col = "darkgray", lab.cex = 0.65, ...)
 }
 \arguments{
-\item{data}{a matrix with data values.}
+\item{data}{a matrix or a data.frame with data values.}
 
 \item{type}{type of the plot ('p', 'l', 'b', 'h').}
 
@@ -43,8 +42,6 @@ mdaplot(data, type = "p", pch = 16, col = NULL, lty = 1, lwd = 1,
 
 \item{ylab}{a title for the y axis (same as \code{plot} parameter).}
 
-\item{single.x}{logical, is first column of data matrix used for x values (or every odd)?}
-
 \item{show.labels}{logical, show or not labels for the data objects.}
 
 \item{show.colorbar}{logical, show or not colorbar legend if color grouping is on.}
@@ -55,11 +52,7 @@ mdaplot(data, type = "p", pch = 16, col = NULL, lty = 1, lwd = 1,
 
 \item{show.axes}{logical, make a normal plot or show only elements (markers, lines, bars) without axes.}
 
-\item{xticks}{tick values for x axis.}
-
 \item{xticklabels}{labels for x ticks.}
-
-\item{yticks}{tick values for y axis.}
 
 \item{yticklabels}{labels for y ticks.}
 
