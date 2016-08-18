@@ -674,9 +674,10 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    if (is.null(data) || length(data) < 1)
       stop('The provided dataset is empty!')
    
+   # get data attributes
    data.attr = attributes(data)
 
-   # correct data if vector is provided   
+   # correct dimension if a vector is provided   
    if (is.null(dim(data))) {
       names = names(data)
       data = matrix(data, nrow = 1)
@@ -687,17 +688,28 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    
    # process excluded columns
    excluded.cols = data.attr$exclcols
-   if (!is.null(excluded.cols)) {
-      excluded.cols = prep.getexclind(excluded.cols, colnames(data), ncol(data))      
-      data = data[, -excluded.cols, drop = F]    
+   if (!is.null(excluded.cols) && length(excluded.cols) > 0) {
+      excluded.cols = mda.getexclind(excluded.cols, colnames(data), ncol(data))      
+      if (length(excluded.cols) > 0)
+         data = data[, -excluded.cols, drop = F]    
    }
    
    # process excluded rows
    excluded.rows = data.attr$exclrows
-   if (!is.null(excluded.rows)) {
-      excluded.rows = prep.getexclind(excluded.rows, rownames(data), nrow(data))      
+   if (!is.null(excluded.rows) && length(excluded.rows) > 0) {
+      excluded.rows = mda.getexclind(excluded.rows, rownames(data), nrow(data))      
+      
+      # if no excluded rows found do not exclude anything
+      if (length(excluded.rows) == 0) {
+         excluded.rows = NULL
+         show.excluded = FALSE
+      }
+      
+      # if we do not have to show the excluded rows just remove them from the data
       if (show.excluded == FALSE || type == 'h' || type == 'e')
          data = data[-excluded.rows, , drop = F]
+   } else {
+      show.excluded = FALSE
    }
    
    # split data to x and y 
@@ -749,7 +761,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
       attr(y.values, 'name') = ifelse(is.null(yaxis.name), '', yaxis.name)
    }
    
-   # if y.values have no dimention correct this
+   # if y.values have no dimension correct this
    if ( is.null(dim(y.values)) ){
       y.values = matrix(y.values, nrow = length(y.values))   
    }
@@ -757,7 +769,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    # process excluded rows if they have to be shown
    y.values.excludedrows = NULL
    x.values.excludedrows = NULL
-   if (show.excluded == T && !(type == 'h' || type == 'e')) {
+   if (show.excluded == TRUE && length(excluded.rows) > 0 && !(type == 'h' || type == 'e')) {
       y.values.name = attr(y.values, 'name')
       y.values.excludedrows = y.values[excluded.rows, , drop = F]
       y.values = y.values[-excluded.rows, , drop = F]         
@@ -803,6 +815,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    res$x.values.excludedrows = x.values.excludedrows
    res$y.values.excludedrows = y.values.excludedrows
    res$lim = lim
+   res$show.excluded = show.excluded
    res$excluded.rows = excluded.rows
    res$excluded.cols = excluded.cols
    res$data.attr = data.attr
@@ -938,13 +951,14 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    plot.data$excluded.rows -> excluded.rows
    plot.data$excluded.cols -> excluded.cols
    plot.data$data.attr -> data.attr
+   plot.data$show.excluded -> show.excluded
    
    # if some columns are excluded and xticklabels is provided for all columns - exclude some of the values
    if (!is.null(excluded.cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data))
       xticklabels = xticklabels[-excluded.cols]
 
    # if some rows are excluded remove part of values from cgroup   
-   if (!is.null(excluded.cols) && !is.null(cgroup) && length(cgroup) > 1)
+   if (length(excluded.rows) > 0 && !is.null(cgroup) && length(cgroup) > 1)
       cgroup = cgroup[-excluded.rows]
    
    # if number of x-values is up to 12 show all of them via xticks
