@@ -4,18 +4,18 @@
 \alias{mdaplotg}
 \title{Plotting function for several sets of objects}
 \usage{
-mdaplotg(data, type = "p", pch = 16, lty = 1, lwd = 1, bwd = 0.8,
-  legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL,
-  ylim = NULL, xlim = NULL, colmap = "default",
+mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1, lwd = 1,
+  bwd = 0.8, legend = NULL, xlab = NULL, ylab = NULL, main = NULL,
+  labels = NULL, ylim = NULL, xlim = NULL, colmap = "default",
   legend.position = "topright", single.x = T, show.legend = T,
   show.labels = F, show.lines = F, show.grid = T, xticks = NULL,
   xticklabels = NULL, yticks = NULL, yticklabels = NULL,
-  lab.col = "darkgray", lab.cex = 0.65, ...)
+  show.excluded = FALSE, lab.col = "darkgray", lab.cex = 0.65, ...)
 }
 \arguments{
-\item{data}{a list with data values (see details below).}
+\item{data}{a matrix, data frame or a list with data values (see details below).}
 
-\item{type}{type of the plot ('p', 'l', 'b', 'h').}
+\item{type}{type of the plot ('p', 'l', 'b', 'h', 'e').}
 
 \item{pch}{a character for markers (same as \code{plot} parameter).}
 
@@ -43,8 +43,6 @@ mdaplotg(data, type = "p", pch = 16, lty = 1, lwd = 1, bwd = 0.8,
 
 \item{legend.position}{position of the legend ('topleft', 'topright', 'top', 'bottomleft', 'bottomright', 'bottom').}
 
-\item{single.x}{logical, is first column of data matrix used for x values (or every odd)?}
-
 \item{show.legend}{logical, show or not legend for the data objects.}
 
 \item{show.labels}{logical, show or not labels for the data objects.}
@@ -68,7 +66,7 @@ mdaplotg(data, type = "p", pch = 16, lty = 1, lwd = 1, bwd = 0.8,
 \item{...}{other plotting arguments.}
 }
 \description{
-\code{mdaplotg} is used to make scatter, line or bar plots or their combination for several sets 
+\code{mdaplotg} is used to make different kinds of plots or their combination for several sets 
 of objects.
 }
 \details{
@@ -88,43 +86,6 @@ with one value for each set.
 }
 \examples{
 ### Examples of using mdaplotg
-
-## 1. Show scatter plot for with height and weight values 
-## for males and females
-
-data(people)
-
-sex = people[, 'Sex']
-fdata = cbind(people[sex == 1, 'Height'], people[sex == 1, 'Weight'])
-mdata = cbind(people[sex == -1, 'Height'], people[sex == -1, 'Weight'])
-colnames(fdata) = colnames(mdata) = c('Height', 'Weight')
-pdata = list(fdata, mdata)
-
-par(mfrow = c(2, 2))
-mdaplotg(pdata, legend = c('female', 'male'))
-mdaplotg(pdata, legend = c('female', 'male'), pch = c(17, 19), colmap = c('green', 'orange'))
-mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', colmap = 'gray')
-mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', show.labels = TRUE)
-par(mfrow = c(1, 1))
-
-## 2. Change tick values for x axis
-mdaplotg(pdata, legend = c('female', 'male'), xticks = c(160, 175, 190), 
-         xticklabels = c('Short', 'Medium', 'Tall'))
-
-## 3. Show line plots with spectra from calibration and test set of the Simdata
-
-data(simdata)
-
-cdata = cbind(simdata$wavelength, t(simdata$spectra.c))
-tdata = cbind(simdata$wavelength, t(simdata$spectra.t))
-pdata = list(cdata, tdata)
-
-par(mfrow = c(2, 2))
-mdaplotg(pdata, type = 'l', legend = c('cal', 'test'))
-mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), xlab = 'Wavelength, nm', ylab = 'Log(1/R)')
-mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), lty = c(3, 2))
-mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), lwd = 2, colmap = c('green', 'orange'))
-par(mfrow = c(1, 1))
 
 }
 \author{

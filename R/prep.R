@@ -100,6 +100,7 @@ prep.snv = function(data)
 #' @return 
 #' data matrix with normalized values
 #' 
+#' @export
 prep.norm = function(data, type = 'area')
 {
    if (type == 'area')
@@ -115,7 +116,7 @@ prep.norm = function(data, type = 'area')
    {   
       stop('Wrong value for argument "type"!')
    }   
-    
+   
    data = sweep(data, 1, w, '/')
    
    data
@@ -221,3 +222,4 @@ pinv = function(data)
    s = svd(data)
    s$v %*% diag(1/s$d) %*% t(s$u)
 }
+

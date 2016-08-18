@@ -675,7 +675,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
       stop('The provided dataset is empty!')
    
    data.attr = attributes(data)
-   
+
    # correct data if vector is provided   
    if (is.null(dim(data))) {
       names = names(data)
@@ -688,35 +688,16 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    # process excluded columns
    excluded.cols = data.attr$exclcols
    if (!is.null(excluded.cols)) {
-      if (is.character(excluded.cols))
-         excluded.cols = which(colnames(data) %in% excluded.cols)
-      if (is.logical(excluded.cols))
-         excluded.cols = which(excluded.cols)
-      if (!is.numeric(excluded.cols) || min(excluded.cols) < 1 || max(excluded.cols) > ncol(data))
-         stop('Wrong values for excluded columns!')
-      
+      excluded.cols = prep.getexclind(excluded.cols, colnames(data), ncol(data))      
       data = data[, -excluded.cols, drop = F]    
-   
-      if (ncol(data) == 0)
-         stop('All columns of the dataset were excluded, nothing to show!')
    }
    
    # process excluded rows
    excluded.rows = data.attr$exclrows
    if (!is.null(excluded.rows)) {
-      if (is.character(excluded.rows))
-         excluded.rows = which(rownames(data) %in% excluded.rows)
-      if (is.logical(excluded.rows))
-         excluded.rows = which(excluded.rows)
-      
-      if (!is.numeric(excluded.rows) || min(excluded.rows) < 1 || max(excluded.rows) > nrow(data))
-         stop('Wrong values for excluded rows!')
-      
+      excluded.rows = prep.getexclind(excluded.rows, rownames(data), nrow(data))      
       if (show.excluded == FALSE || type == 'h' || type == 'e')
          data = data[-excluded.rows, , drop = F]
-      
-      if (nrow(data) == 0)
-         stop('All rows of the dataset were excluded, nothing to show!')
    }
    
    # split data to x and y 
@@ -1189,7 +1170,8 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    } 
    
    ngroups = length(data)
-
+   legend = names(data)
+   show(names(data))
    # check if plot.new() should be called first
    tryCatch(
       {par(new = TRUE)},

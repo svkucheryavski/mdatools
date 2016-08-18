@@ -4,9 +4,9 @@
 \alias{mdaplot.getAxesLim}
 \title{Calculate axes limits}
 \usage{
-mdaplot.getAxesLim(x.values, y.values, show.colorbar = F, show.lines = F,
-  legend = NULL, show.legend = F, legend.position = "topright",
-  show.labels = F)
+mdaplot.getAxesLim(x.values, y.values, lower = NULL, upper = NULL,
+  show.colorbar = F, show.lines = F, legend = NULL, show.legend = F,
+  legend.position = "topright", show.labels = F)
 }
 \arguments{
 \item{show.colorbar}{logical, show or not the colorbar on the plot.}
