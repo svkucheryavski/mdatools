@@ -1080,6 +1080,11 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       labels.excl = NULL
       if (is.null(labels) || (length(labels) == 1 && labels == 'names')) {
          # if labels were not provided, by default use names
+         
+         # generate names if they are empty
+         if (is.null(names(x.values)))
+             names(x.values) = 1:length(x.values)
+             
          labels.incl = names(x.values)
          if (length(excluded.rows) > 0) 
             labels.excl = names(x.values.excludedrows)
