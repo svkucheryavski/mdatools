@@ -11,7 +11,8 @@ mdaplot(data = NULL, plot.data = NULL, type = "p", pch = 16,
   show.colorbar = T, show.lines = F, show.grid = T, show.axes = T,
   xticks = NULL, yticks = NULL, xticklabels = NULL, yticklabels = NULL,
   xlas = 0, ylas = 0, lab.col = "darkgray", lab.cex = 0.65,
-  show.excluded = FALSE, col.excluded = "#E0E0E0", ...)
+  show.excluded = FALSE, col.excluded = "#E0E0E0", force.x.values = NA,
+  ...)
 }
 \arguments{
 \item{data}{a vector, matrix or a data.frame with data values.}

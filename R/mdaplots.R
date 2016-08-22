@@ -933,7 +933,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
                    show.colorbar = T, show.lines = F, show.grid = T, show.axes = T, 
                    xticks = NULL, yticks = NULL, xticklabels = NULL, yticklabels = NULL, 
                    xlas = 0, ylas = 0, lab.col = 'darkgray', lab.cex = 0.65, 
-                   show.excluded = FALSE, col.excluded = '#E0E0E0', ...)
+                   show.excluded = FALSE, col.excluded = '#E0E0E0', 
+                   force.x.values = NA, ...)
 {   
   
    if (is.null(plot.data)) {
@@ -971,7 +972,12 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       # define main label
       if (is.null(main)) {
          if (type == 'h')
-            main = rownames(data)[1]
+            if (length(excluded.rows) > 0) {
+               row.names = rownames(data)[-excluded.rows]
+               main = row.names[1]
+            } else {
+               main = rownames(data)[1]
+            }
          else
             main = data.attr[["name"]]
             
@@ -1033,6 +1039,12 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    if (show.grid == T)
       mdaplot.showGrid()
    
+   # correct x.values if they were forced by bwd
+   if (is.numeric(force.x.values)) {
+      x.values = x.values - bwd/2 + force.x.values[1] * bwd/force.x.values[2]
+      bwd = bwd/force.x.values[2]
+   }
+   
    # make plot for the data 
    if (type == 'p')
       points(x.values, y.values, type = type, col = col, pch = pch, lwd = lwd, ...)
@@ -1055,21 +1067,62 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 
    # show labels if needed
    if (show.labels == T) {
-      if (is.null(labels)) {
-         labels.incl = names(x.values)
-      } else if (length(excluded.rows) > 0) {
-         labels.incl = labels[-excluded.rows]
-      } else {
-         labels.incl = labels
+      
+      # compute vector with y-values for labels (line and linescatter plot)
+      if (type == 'l' || type == 'b') {
+         if (show.excluded == TRUE && length(excluded.rows) > 0){
+            y.values.labels = apply(rbind(y.values, y.values.excludedrows), 2, max)
+         } else {
+            y.values.labels = apply(y.values, 2, max)
+         }
       }
+      
+      labels.excl = NULL
+      if (is.null(labels) || (length(labels) == 1 && labels == 'names')) {
+         # if labels were not provided, by default use names
+         labels.incl = names(x.values)
+         if (length(excluded.rows) > 0) 
+            labels.excl = names(x.values.excludedrows)
+      } else if (length(labels) == 1 && labels == 'values') {
+         if (type == 'p' || type == 'h') {
+            labels.incl = y.values
+            if (length(excluded.rows) > 0)
+               labels.excl = y.values.excludedrows
+         } else {
+            labels.incl = y.values.labels               
+         }
+      } else if (length(labels) == 1 && labels == 'indices') {
+         if (type == 'p') {
+            ind = 1:nrow(data)
+            if (length(excluded.rows) > 0) {
+               labels.incl = ind[-excluded.rows]
+               labels.excl = ind[excluded.rows]
+            } else {
+               labels.incl = ind
+            }
+         } else {
+            labels.incl = 1:length(x.values)
+         }
+      } else {
+         # labels were provided
+         if (length(excluded.rows) > 0) {
+            labels.incl = labels[-excluded.rows]
+            labels.excl = labels[excluded.rows]
+         } else {
+            labels.incl = labels
+         }
+      }
+      
+      if (type == 'l' || type == 'b') {
+         y.values = y.values.labels
+      }
+     
+      if (is.null(labels.incl) || length(labels.incl) != length(x.values))
+         stop('No correct labels or label type was provided!')
+      
       mdaplot.showLabels(x.values, y.values, labels.incl, type = type, col = lab.col, cex = lab.cex)   
       
-      if (show.excluded && type == 'p') {
-         if (is.null(labels)) {
-            labels.excl = names(x.values.excludedrows)
-         } else {
-            labels.excl = labels[excluded.rows]
-         }
+      if (show.excluded && !is.null(labels.excl) && type == 'p') {
          mdaplot.showLabels(x.values.excludedrows, y.values.excludedrows, labels.excl, type = type, col = lab.col, cex = lab.cex)   
       }         
    }      
@@ -1175,17 +1228,35 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
                     lab.col = 'darkgray', lab.cex = 0.65, ...)
 {   
    # prepare list with groups of objects
-   if (!is.list(data)) {
+   if (is.matrix(data) || is.data.frame(data)) {
       if (is.null(groupby)) {
+         # take every line as a group
+         name = attr(data, 'name', exact = TRUE)
          
+         if (!all(type %in% c('h', 'l', 'b')))
+            stop('Group plot with just one matrix or dataframe is available only for types "h", "l" and "b"!')
+         
+         # split data into a list of subsets for each group
+         data.list = list()
+         for (i in 1:nrow(data)) {
+            data.list[[i]] = mda.subset(data, subset = i)
+         }
+         
+         # get rownames as legend values
+         if (is.null(legend))
+            legend = rownames(data)
+         
+         # redefine the data with list
+         data = data.list
       } else {
-         
+         # split rows into groups
+         name = attr(data, 'name', exact = TRUE)
+         xaxis.values = attr(data, 'xaxis.values')         
+         xaxis.name = attr(data, 'xaxis.values')         
+         yaxis.name = attr(data, 'xaxis.values')         
       }
    } 
    
-   ngroups = length(data)
-   legend = names(data)
-   show(names(data))
    # check if plot.new() should be called first
    tryCatch(
       {par(new = TRUE)},
@@ -1193,9 +1264,20 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       finally = {par(new = FALSE)}
    )
    
+   # get plot data for each group 
    pd = lapply(data, prepare.plot.data, type, xlim, ylim, bwd, show.excluded, show.colorbar = FALSE, show.labels, 
                show.lines, show.axes = TRUE)
    
+   ngroups = length(pd)
+   
+   # process legend
+   if (is.null(legend)) {
+      legend = names(pd)
+      if (is.null(legend))
+         legend = unlist(lapply(data, function(x) {attr(x, 'name')}))
+   }
+   
+   # compute limits   
    loc.xlim = matrix(unlist(lapply(pd, function(x) {x$lim$xlim})), ncol = 2, byrow = TRUE)
    loc.ylim = matrix(unlist(lapply(pd, function(y) {y$lim$ylim})), ncol = 2, byrow = TRUE)
 
@@ -1242,19 +1324,30 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       lwd = rep(lwd, ngroups)
    else if (length(lwd) != ngroups)
       stop('Parameter "lwd" hould be specified for each group or be common for all!')
+  
+   if (is.null(main))
+      main = name
    
+    
    # make an empty plot with proper limits and axis labels
-   mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
+   #mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
    
    if (show.grid == T)
       mdaplot.showGrid()
-   
+
    # make a plot for each group   
    for (i in 1:ngroups) {
+      if (type[i] == 'h')
+         force.x.values = c(i, ngroups)
+      else
+         force.x.values = NA
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
-                    lwd = lwd[i],
-                    labels = labels[, i], show.grid = F, show.axes = F, show.labels = show.labels,
-                    lab.col = lab.col, lab.cex = lab.cex)
+              lwd = lwd[i], force.x.values = force.x.values, bwd = bwd,
+              labels = labels[, i], show.grid = F, show.labels = show.labels,
+              lab.col = lab.col, lab.cex = lab.cex, show.axes = ifelse(i == 1, TRUE, FALSE), 
+              xticks = xticks, xticklabels = xticklabels, yticks = yticks, yticklabels = yticklabels, lim = lim, 
+              main = main, xlab = xlab, ylab = ylab
+              )
    }  
    
    # show lines if needed
