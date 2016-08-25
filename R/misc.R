@@ -409,10 +409,10 @@ mda.getexclind = function(excl, names, n) {
       stop('At least one index or name is incorrect!')
    
    if (!(is.null(excl) || length(excl) == 0) && (!is.numeric(excl) || min(excl) < 1 || max(excl) > n))
-      stop('Wrong values for excluded objects!')
+      stop('At least one index or name is incorrect!')
    
-   if (length(excl) >= n)
-      stop('All columns of the dataset were excluded, nothing to use!')
+#   if (length(excl) >= n)
+#      stop('All elements of the dataset were excluded, nothing to use!')
    
    excl 
 }

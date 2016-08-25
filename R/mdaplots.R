@@ -630,6 +630,9 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
    # generate x ticks
    if (is.null(xticks)) {
       xticks = axTicks(1)
+      # if xticklabels were provided it is expected that xticks should be integers
+      if (!is.null(xticklabels))
+         xticks = xticks[xticks > 0 & xticks <= length(xticklabels)]
    }
   
    # check if xtikclabels are provided and show x-axis
@@ -1055,7 +1058,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    
    # correct x.values if they were forced by bwd
    if (is.numeric(force.x.values)) {
-      x.values = x.values - bwd/2 + force.x.values[1] * bwd/force.x.values[2]
+      x.values = x.values - bwd/2 + (force.x.values[1] - 0.5) * bwd/force.x.values[2]
       bwd = bwd/force.x.values[2]
    }
    
