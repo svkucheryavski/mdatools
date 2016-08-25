@@ -1,7 +1,20 @@
+v.0.8.0
+=======
+* tutorial has been moved from GitBook to Bookdown and fully rewritten
+* the `mdaplot()` and `mdaplotg()` were rewritten completely and now are more easy to use (check Bookdown docs)
+* support for `xlas` and `ylas` in plots to rotate axis ticks
+* support for sevearal data attributes to give extra functionality for plots (including manual x-values for line plots)
+* rows and columns can be now hidden/excluded via attributes
+* factor columns of data frames are now converted to dummy variables automatically when model is fitted/applied
+* scores and loadings plots in PCA show % of explained variance as axis labels
+* cross-validation in PLS has been improved to make it faster
+* MCR-ALS (in its very simple form so far) was implemented
+* SUPURE (a purity based method for MCR) was implemented
+
 v.0.7.2
 =======
 * corrected a typo in title of selectivity ratio plot 
-* `prep.autoscale()` do not scale columns with coefficient of variation below given threshold
+* `prep.autoscale()` now do not scale columns with coefficient of variation below given threshold
 
 v.0.7.1
 =======

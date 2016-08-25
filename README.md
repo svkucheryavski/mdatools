@@ -5,7 +5,28 @@ mdatools is an R package for preprocessing, exploring and analysis of multivaria
 
 The general idea of the package is to collect most widespread chemometric methods and give a similar "user interface" for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.
 
-For more details and examples read a [GitBook tutorial](http://svkucheryavski.gitbooks.io/mdatools/). 
+For more details and examples read a [Bookdown tutorial](http://svkucheryavski.gitbooks.io/mdatools/). 
+
+What is new
+-----------
+
+The latest version (0.8.0) has a lot of new features. First of all the tutorial has been moved from GitBook to Bookdown
+as there were many issues with the first. The tutorial was rewritten completely and now almost comprehensive. The other
+improvements are:
+
+*v.0.8.0*
+* tutorial has been moved from GitBook to Bookdown and fully rewritten
+* the `mdaplot()` and `mdaplotg()` were rewritten completely and now are more easy to use (check Bookdown docs)
+* support for `xlas` and `ylas` in plots to rotate axis ticks
+* new option to group data easier for `mdaplotg()` method
+* support for several data attributes to give extra functionality for plots (including manual x-values for line plots)
+* rows and columns can be now hidden/excluded via attributes
+* factor columns of data frames are now converted to dummy variables automatically when model is fitted/applied
+* scores and loadings plots in PCA show % of explained variance as axis labels
+* cross-validation in PLS has been improved to make it faster
+* MCR-ALS (in its very simple form so far) was implemented
+* SUPURE (a purity based method for MCR) was implemented
+
 
 How to install
 --------------

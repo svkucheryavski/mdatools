@@ -443,7 +443,7 @@ mda.df2mat = function(x) {
    col.num = which(!col.fac)
    col.fac = which(col.fac)
    
-   dummy = function(i, x, col.ind, exccols.ind) {
+   dummy = function(i, x, col.ind) {
       name = colnames(x)[i]
       x = x[, i]
       names = levels(x)
@@ -489,7 +489,7 @@ mda.df2mat = function(x) {
       }
       
       # convert all non-excluded factors to dummy variables
-      fac.data = lapply(1:ncol(fac.data), dummy, x = fac.data, col.ind = col.fac, exccols.ind = exclcols.fac.ind)
+      fac.data = lapply(1:ncol(fac.data), dummy, x = fac.data, col.ind = col.fac)
       fac.data = do.call(cbind, fac.data)
       
       # convert all excluded factors to numeric values

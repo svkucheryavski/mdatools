@@ -631,7 +631,9 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
    if (is.null(xticks)) {
       xticks = axTicks(1)
    }
-   
+  
+   show(xticks)
+   show(xticklabels)
    # check if xtikclabels are provided and show x-axis
    if (is.null(xticklabels)) {
       axis(1, at = xticks, las = xlas)
@@ -685,13 +687,28 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    } else {
       data = as.matrix(data)
    }
-   
-   # process excluded columns
+
+   # prepare vector with x.values for non-scatter plots 
+   # we do it here in order to process excluded columns correctly
+   x.values = NULL
+   if (type != 'p') {
+      x.values = attr(data, 'xaxis.values')
+      if (is.null(x.values)) {
+         x.values = 1:ncol(data)
+         names(x.values) = colnames(data)
+      }
+   }
+
+   # process excluded columns, broken.lines is needed to show line plots with excluded columns correctly
+   broken.lines = FALSE
    excluded.cols = data.attr$exclcols
    if (!is.null(excluded.cols) && length(excluded.cols) > 0) {
       excluded.cols = mda.getexclind(excluded.cols, colnames(data), ncol(data))      
-      if (length(excluded.cols) > 0)
+      if (length(excluded.cols) > 0){
          data = data[, -excluded.cols, drop = F]    
+         x.values = x.values[-excluded.cols]
+         broken.lines = TRUE
+      }
    }
    
    # process excluded rows
@@ -730,22 +747,20 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
          attr(y.values, 'name') = colnames(data)[1]
       }
    } else {
-      x.values = attr(data, 'xaxis.values')
-      if (is.null(x.values)) {
-         x.values = 1:ncol(data)
-         names(x.values) = colnames(data)
-      }
-      
+      # the x.values have been defined earlier     
       attr(x.values, 'name') = ifelse(is.null(xaxis.name), 'Variables', xaxis.name)
       
+      # for bar plot we show only the first row
       if (type == 'h') {
          y.values = data[1, , drop = F]
       }
       
+      # for other types we plot all rows as lines/polygons
       if (type == 'l' || type == 'b') {
          y.values = data
       }
       
+      # prepare data for errorbar plot
       if (type == 'e') {
          if (nrow(data) < 2)
             stop('For errorbar plot data should contain at least two rows!')
@@ -954,21 +969,23 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    plot.data$data.attr -> data.attr
    plot.data$show.excluded -> show.excluded
    
-   # if some columns are excluded and xticklabels is provided for all columns - exclude some of the values
-   if (!is.null(excluded.cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data))
-      xticklabels = xticklabels[-excluded.cols]
 
    # if some rows are excluded remove part of values from cgroup   
    if (length(excluded.rows) > 0 && !is.null(cgroup) && length(cgroup) > 1)
       cgroup = cgroup[-excluded.rows]
    
-   # if number of x-values is up to 12 show all of them via xticks
-   if (is.null(xticks) && length(x.values) < 13)
-      xticks = x.values
    
    # processs labels and ticklabels
    if (show.axes == T)
    {  
+      # if some columns are excluded and xticklabels is provided for all columns - exclude some of the values
+      if (!is.null(excluded.cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data))
+         xticklabels = xticklabels[-excluded.cols]
+      
+      # if number of x-values is up to 12 show all of them via xticks
+      if (is.null(xticks) && length(x.values) < 13)
+         xticks = x.values
+      
       # define main label
       if (is.null(main)) {
          if (type == 'h')
@@ -980,7 +997,6 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
             }
          else
             main = data.attr[["name"]]
-            
       }
       
       # define label for x-axis
@@ -1229,9 +1245,10 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', 
                     single.x = T, show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
-                    show.excluded = FALSE, 
-                    lab.col = 'darkgray', lab.cex = 0.65, ...)
+                    show.excluded = FALSE, lab.col = 'darkgray', lab.cex = 0.65, xlas = 1, ylas = 1, ...)
 {   
+   name = NULL
+   
    # prepare list with groups of objects
    if (is.matrix(data) || is.data.frame(data)) {
       if (is.null(groupby)) {
@@ -1330,29 +1347,41 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    else if (length(lwd) != ngroups)
       stop('Parameter "lwd" hould be specified for each group or be common for all!')
   
-   if (is.null(main))
+   if (is.null(main) && !is.null(name))
       main = name
    
-    
-   # make an empty plot with proper limits and axis labels
-   #mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
+   # define main label
+   if (is.null(main))
+         main = pd[[1]]$data.attr$name
+
+   # define label for x-axis
+   if (is.null(xlab))
+      xlab = attr(pd[[1]]$x.values, 'name')         
    
+   # define label for y-axis
+   if (is.null(ylab))
+      ylab = attr(pd[[1]]$y.values, 'name')
+   
+   # make an empty plot with proper limits and axis labels
+   mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas)
+
+   # show initial exes
    if (show.grid == T)
       mdaplot.showGrid()
-
+           
    # make a plot for each group   
    for (i in 1:ngroups) {
+      
       if (type[i] == 'h')
          force.x.values = c(i, ngroups)
       else
          force.x.values = NA
+      
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
               lwd = lwd[i], force.x.values = force.x.values, bwd = bwd,
-              labels = labels[, i], show.grid = F, show.labels = show.labels,
-              lab.col = lab.col, lab.cex = lab.cex, show.axes = ifelse(i == 1, TRUE, FALSE), 
-              xticks = xticks, xticklabels = xticklabels, yticks = yticks, yticklabels = yticklabels, lim = lim, 
-              main = main, xlab = xlab, ylab = ylab
-              )
+              labels = labels, show.grid = F, show.labels = show.labels,
+              lab.col = lab.col, lab.cex = lab.cex, show.axes = FALSE
+      )
    }  
    
    # show lines if needed
