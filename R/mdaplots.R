@@ -632,8 +632,6 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
       xticks = axTicks(1)
    }
   
-   show(xticks)
-   show(xticklabels)
    # check if xtikclabels are provided and show x-axis
    if (is.null(xticklabels)) {
       axis(1, at = xticks, las = xlas)
@@ -1291,12 +1289,16 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
                show.lines, show.axes = TRUE)
    
    ngroups = length(pd)
-   
+  
    # process legend
    if (is.null(legend)) {
       legend = names(pd)
-      if (is.null(legend))
-         legend = unlist(lapply(data, function(x) {attr(x, 'name')}))
+      if (is.null(legend)) {
+         if (all(type == 'h'))
+            legend = unlist(lapply(pd, function(x) {rownames(x$y.values)[1]}))
+         else
+            legend = unlist(lapply(pd, function(x) {x$data.attr$name}))
+      }
    }
    
    # compute limits   
