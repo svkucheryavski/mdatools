@@ -952,7 +952,6 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
                    show.excluded = FALSE, col.excluded = '#E0E0E0', 
                    force.x.values = NA, ...)
 {   
-  
    if (is.null(plot.data)) {
       plot.data = prepare.plot.data(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, 
                              show.lines, show.axes)
@@ -1084,7 +1083,6 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 
    # show labels if needed
    if (show.labels == T) {
-      
       # compute vector with y-values for labels (line and linescatter plot)
       if (type == 'l' || type == 'b') {
          if (show.excluded == TRUE && length(excluded.rows) > 0){
@@ -1115,7 +1113,12 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
          }
       } else if (length(labels) == 1 && labels == 'indices') {
          if (type == 'p') {
-            ind = 1:nrow(data)
+            # if indices are provided via attribute - use them
+            if (!is.null(data.attr$labels))
+               ind = data.attr$labels
+            else
+               ind = 1:(nrow(y.values) + nrow(y.values.excludedrows))
+            
             if (length(excluded.rows) > 0) {
                labels.incl = ind[-excluded.rows]
                labels.excl = ind[excluded.rows]
@@ -1272,11 +1275,29 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
          # redefine the data with list
          data = data.list
       } else {
-         # split rows into groups
-         name = attr(data, 'name', exact = TRUE)
-         xaxis.values = attr(data, 'xaxis.values')         
-         xaxis.name = attr(data, 'xaxis.values')         
-         yaxis.name = attr(data, 'xaxis.values')         
+         # split rows into groups using data frame with factors
+         
+         if (is.data.frame(groupby))
+            is.groupby.factor = all(unlist(lapply(groupby, is.factor)))
+         else
+            is.groupby.factor = is.factor(groupby)
+         
+         if (is.groupby.factor == FALSE)
+            stop('Parameter "groupby" should be a factor or data frame with several factors')
+         
+         attrs = mda.getattr(data)
+         data = as.data.frame(data)
+         
+         # in this case if labels = indices generate labels for each case
+         data$row.ind = 1:nrow(data)
+         data = split(data, groupby)
+         for (i in 1:length(data)) {
+            row.ind = data[[i]]$row.ind
+            data[[i]] = subset(data[[i]], select = -row.ind)
+            data[[i]] = mda.setattr(data[[i]], attrs)
+            attr(data[[i]], 'exclrows') = which(row.ind %in% attrs$exclrows)
+            attr(data[[i]], 'labels') = row.ind
+         }
       }
    } 
    
@@ -1286,7 +1307,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       warning = function(w){plot.new()},
       finally = {par(new = FALSE)}
    )
-   
+  
    # get plot data for each group 
    pd = lapply(data, prepare.plot.data, type, xlim, ylim, bwd, show.excluded, show.colorbar = FALSE, show.labels, 
                show.lines, show.axes = TRUE)
