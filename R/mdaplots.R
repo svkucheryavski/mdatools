@@ -722,10 +722,6 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
          excluded.rows = NULL
          show.excluded = FALSE
       }
-      
-      # if we do not have to show the excluded rows just remove them from the data
-      if (show.excluded == FALSE || type == 'h' || type == 'e')
-         data = data[-excluded.rows, , drop = F]
    } else {
       show.excluded = FALSE
    }
@@ -785,7 +781,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    # process excluded rows if they have to be shown
    y.values.excludedrows = NULL
    x.values.excludedrows = NULL
-   if (show.excluded == TRUE && length(excluded.rows) > 0 && !(type == 'h' || type == 'e')) {
+   if (length(excluded.rows) > 0 && !(type == 'h' || type == 'e')) {
       y.values.name = attr(y.values, 'name')
       y.values.excludedrows = y.values[excluded.rows, , drop = F]
       y.values = y.values[-excluded.rows, , drop = F]         
@@ -1070,8 +1066,6 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       bars(x.values, y.values, col = col, bwd = bwd)
    else if (type == 'e')
       errorbars(x.values, lower, upper, y = y.values, col = col)
-   else if (type == 'i')
-      imshow()
 
    # show excluded rows
    if (show.excluded) {
@@ -1117,8 +1111,13 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
             if (!is.null(data.attr$labels))
                ind = data.attr$labels
             else
-               ind = 1:(nrow(y.values) + nrow(y.values.excludedrows))
-            
+               ind = 1:(nrow(y.values) + 
+                           ifelse(
+                              is.null(y.values.excludedrows), 
+                              0, 
+                              nrow(y.values.excludedrows)
+                           )
+               )
             if (length(excluded.rows) > 0) {
                labels.incl = ind[-excluded.rows]
                labels.excl = ind[excluded.rows]
@@ -1141,7 +1140,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       if (type == 'l' || type == 'b') {
          y.values = y.values.labels
       }
-     
+  
       if (is.null(labels.incl) || length(labels.incl) != length(x.values))
          stop('No correct labels or label type was provided!')
       
