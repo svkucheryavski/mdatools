@@ -1,15 +1,16 @@
 v.0.8.0
 =======
-* tutorial has been moved from GitBook to Bookdown and fully rewritten
 * the `mdaplot()` and `mdaplotg()` were rewritten completely and now are more easy to use (check Bookdown docs)
 * support for `xlas` and `ylas` in plots to rotate axis ticks
 * support for sevearal data attributes to give extra functionality for plots (including manual x-values for line plots)
 * rows and columns can be now hidden/excluded via attributes
 * factor columns of data frames are now converted to dummy variables automatically when model is fitted/applied
-* scores and loadings plots in PCA show % of explained variance in axis labels
-* biplot is now available for PCA models (`plotBiplot`)
-* scores plot for PCA model can be now also shown with color grouping (`cgroup`) if no there is no test set
-* cross-validation in PCA and PLS has been improved to make it faster
+* scores and loadings plots in PCA show % of explained variance as axis labels
+
+* tutorial has been moved from GitBook to Bookdown and fully rewritten
+* cross-validation in PLS has been improved to make it faster
+* new plots for PCA: biplot, individual object and variable residuals (see `?pca` for details)
+* support for images is implemented (see tutorial)
 
 v.0.7.2
 =======
@@ -107,13 +108,13 @@ you need to do in your code if you used mdatools PLS before: `selectNumComp(mode
 of `pls.selectncomp(model, ncomp)`, `test.x` ad `test.y` instead of `Xt` and `yt`, finally separate logical
 arguments `center` and `scale` are used instead of previously used `autoscale`. By default `scale = F` and `center = T`.
 
-Before:
-model = pls(xc, yc, ncomp = 5, autoscale = 2, Xt = xt, yt = yt)
-model = pls.selectncomp(model, 3)
+   Before:
+   `model = pls(xc, yc, ncomp = 5, autoscale = 2, Xt = xt, yt = yt)`
+   `model = pls.selectncomp(model, 3)`
 
-Now:
-model = pls(xc, yc, ncomp = 5, scale = T, test.x = xt, test.y = yt)
-model = selectNumComp(model, 3)
+   Now:
+   `model = pls(xc, yc, ncomp = 5, scale = T, test.x = xt, test.y = yt)`
+   `model = selectNumComp(model, 3)`
 
 
 * PLS and all related methods are now well documented (see `?pls`)

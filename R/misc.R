@@ -51,6 +51,9 @@ mda.show = function(x, n = 50) {
 #' 
 #' @export  
 mda.subset = function(x, subset = NULL, select = NULL) {
+   if (is.null(x))
+      return(NULL)
+   
    attrs = mda.getattr(x)
    
    if (!is.null(subset)) {
@@ -210,8 +213,8 @@ mda.t = function(x) {
    out.attrs$exclcols = attrs$exclrows
    out.attrs$xaxis.name = attrs$yaxis.name
    out.attrs$yaxis.name = attrs$xaxis.name
-   out.attrs$xaxis.values = attrs$xaxis.values 
-   out.attrs$yaxis.values = attrs$yaxis.values 
+   out.attrs$xaxis.values = attrs$yaxis.values 
+   out.attrs$yaxis.values = attrs$xaxis.values 
 
    x = t(x)
    x = mda.setattr(x, out.attrs) 
@@ -438,7 +441,13 @@ mda.getexclind = function(excl, names, n) {
 #' @export
 mda.df2mat = function(x) {
    attrs = mda.getattr(x)
+
+   if (is.null(x))
+      return()
    
+   if (is.matrix(x))
+      return(x)
+  
    col.fac = unlist(lapply(x, is.factor))
    col.num = which(!col.fac)
    col.fac = which(col.fac)

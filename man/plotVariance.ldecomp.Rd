@@ -6,7 +6,7 @@
 \usage{
 \method{plotVariance}{ldecomp}(obj, type = "b", main = "Variance",
   xlab = "Components", ylab = "Explained variance, \%", show.labels = F,
-  ...)
+  labels = "values", ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}

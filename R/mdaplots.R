@@ -34,8 +34,11 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
       fdata = round(data, digits)
    else
       fdata = prettyNum(data, digits = digits)
+   if (!is.null(dim(data))){
+      dim(fdata) = dim(data)
+      dimnames(fdata) = dimnames(data)
+   }
    
-   dimnames(fdata) = dimnames(data)
    fdata
 }
 
@@ -81,6 +84,9 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
 {   
    if (is.null(x.values) || is.null(y.values))
       return(NULL)
+  
+   if (is.null(show.labels))
+      show.labels = FALSE
    
    scale = 0.075 # scale for margins - 7.5% of plot width or height
   
@@ -438,7 +444,10 @@ mdaplot.showLabels = function(x.values, y.values, labels, pos = 3,
    # show labels
    x.values = as.vector(x.values)
    y.values = as.vector(y.values)
-   
+  
+   if (is.numeric(labels))
+      labels = mdaplot.formatValues(labels)
+
    if (!any(is.nan(x.values) || is.nan(y.values))) {
       
       if (!is.null(type) && type == 'h') {   
@@ -629,7 +638,7 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
    
    # generate x ticks
    if (is.null(xticks)) {
-      xticks = axTicks(1)
+      xticks = axisTicks(lim$xlim, log = FALSE)
       # if xticklabels were provided it is expected that xticks should be integers
       if (!is.null(xticklabels))
          xticks = xticks[xticks > 0 & xticks <= length(xticklabels)]
@@ -650,7 +659,7 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
 
    # generate y ticks
    if (is.null(yticks)) {
-      yticks = axTicks(2)
+      yticks = axisTicks(lim$ylim, log = FALSE)
    }
    
    # check if yticklabels are provided and show y-axis
@@ -669,11 +678,12 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
 
 prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, 
                              show.lines, show.axes) {
+   
    # check plot type 
    valid.types = c('p', 'l', 'b', 'h', 'e', 'i')
    if (!(type %in% valid.types))
       stop('Wrong plot type!')
-   
+  
    if (is.null(data) || length(data) < 1)
       stop('The provided dataset is empty!')
    
@@ -693,7 +703,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    # we do it here in order to process excluded columns correctly
    x.values = NULL
    if (type != 'p') {
-      x.values = attr(data, 'xaxis.values')
+      x.values = data.attr$xaxis.values
       if (is.null(x.values)) {
          x.values = 1:ncol(data)
          names(x.values) = colnames(data)
@@ -729,8 +739,8 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    # split data to x and y 
    lower = NULL
    upper = NULL
-   xaxis.name = attr(data, 'xaxis.name')
-   yaxis.name = attr(data, 'yaxis.name')
+   xaxis.name = data.attr$xaxis.name
+   yaxis.name = data.attr$yaxis.name
    if (type == 'p') {
       if (ncol(data) > 1) {
          x.values = data[, 1]
@@ -738,7 +748,9 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
          y.values = data[, 2, drop = F]
          attr(y.values, 'name') = colnames(data)[2]
       } else {
-         x.values = 1:nrow(data)
+         x.values = data.attr$yaxis.values
+         if (is.null(x.values))
+            x.values = 1:nrow(data)
          attr(x.values, 'name') = ifelse(is.null(yaxis.name), 'Objects', yaxis.name)
          y.values = data[, 1, drop = F]
          attr(y.values, 'name') = colnames(data)[1]
@@ -965,11 +977,9 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    plot.data$data.attr -> data.attr
    plot.data$show.excluded -> show.excluded
    
-
    # if some rows are excluded remove part of values from cgroup   
    if (length(excluded.rows) > 0 && !is.null(cgroup) && length(cgroup) > 1)
       cgroup = cgroup[-excluded.rows]
-   
    
    # processs labels and ticklabels
    if (show.axes == T)
@@ -977,10 +987,12 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       # if some columns are excluded and xticklabels is provided for all columns - exclude some of the values
       if (!is.null(excluded.cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data))
          xticklabels = xticklabels[-excluded.cols]
+
+      nxvals = length(x.values)
       
       # if number of x-values is up to 12 show all of them via xticks
-      if (is.null(xticks) && length(x.values) < 13)
-         xticks = x.values
+      #if (is.null(xticks) && length(x.values) < 13)
+      #   xticks = x.values
       
       # define main label
       if (is.null(main)) {
@@ -1003,9 +1015,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       if (is.null(ylab))
          ylab = attr(y.values, 'name')
       
-
       # correct xticklabels and xticks if only one variable is provided for line or bar plot      
-      nxvals = length(x.values)
       if (type != 'p' && nxvals == 1) {
          xticks = 1
          if (is.null(xticklabels))
@@ -1025,12 +1035,12 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       
       # redefine x axis limits if user specified values
       if (!is.null(xlim))
-         lim$xlim = xlim
+         xlim = lim$xlim
          
       # redefine y axis limits if user specified values
       if (!is.null(ylim))
-         lim$ylim = ylim
-         
+         ylim = lim$ylim
+   
       # make an empty plot with proper limits and axis labels
       mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas)
    }
@@ -1056,17 +1066,17 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       x.values = x.values - bwd/2 + (force.x.values[1] - 0.5) * bwd/force.x.values[2]
       bwd = bwd/force.x.values[2]
    }
-   
+  
    # make plot for the data 
    if (type == 'p')
-      points(x.values, y.values, type = type, col = col, pch = pch, lwd = lwd, ...)
+      points(x.values, y.values, col = col, pch = pch, lwd = lwd, ...)
    else if (type == 'l' || type == 'b')
       matlines(x.values, t(y.values), type = type, col = col, pch = pch, lty = lty, lwd = lwd, ...)
    else if (type == 'h')
       bars(x.values, y.values, col = col, bwd = bwd)
    else if (type == 'e')
       errorbars(x.values, lower, upper, y = y.values, col = col)
-
+   
    # show excluded rows
    if (show.excluded) {
       if (type == 'p')
@@ -1074,7 +1084,11 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       else if (type == 'l' || type == 'b')
          matlines(x.values, t(y.values.excludedrows), type = type, col = col.excluded, pch = pch, lty = lty, lwd = lwd, ...)
    }  
-
+   
+   # show lines if needed
+   if (is.numeric(show.lines) && length(show.lines) == 2 )
+      mdaplot.showLines(show.lines)
+   
    # show labels if needed
    if (show.labels == T) {
       # compute vector with y-values for labels (line and linescatter plot)
@@ -1148,12 +1162,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       
       if (show.excluded && !is.null(labels.excl) && type == 'p') {
          mdaplot.showLabels(x.values.excludedrows, y.values.excludedrows, labels.excl, type = type, col = lab.col, cex = lab.cex)   
-      }         
+      }        
    }      
-   
-   # show lines if needed
-   if (is.numeric(show.lines) && length(show.lines) == 2 )
-      mdaplot.showLines(show.lines)
    
    # show colorbar if needed
    if (!is.null(cgroup) && show.colorbar == T)
@@ -1306,39 +1316,8 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       warning = function(w){plot.new()},
       finally = {par(new = FALSE)}
    )
-  
-   # get plot data for each group 
-   pd = lapply(data, prepare.plot.data, type, xlim, ylim, bwd, show.excluded, show.colorbar = FALSE, show.labels, 
-               show.lines, show.axes = TRUE)
-   
-   ngroups = length(pd)
-  
-   # process legend
-   if (is.null(legend)) {
-      legend = names(pd)
-      if (is.null(legend)) {
-         if (all(type == 'h'))
-            legend = unlist(lapply(pd, function(x) {rownames(x$y.values)[1]}))
-         else
-            legend = unlist(lapply(pd, function(x) {x$data.attr$name}))
-      }
-   }
-   
-   # compute limits   
-   loc.xlim = matrix(unlist(lapply(pd, function(x) {x$lim$xlim})), ncol = 2, byrow = TRUE)
-   loc.ylim = matrix(unlist(lapply(pd, function(y) {y$lim$ylim})), ncol = 2, byrow = TRUE)
 
-   loc.xlim = c(min(loc.xlim[, 1]), max(loc.xlim[, 2]))
-   loc.ylim = c(min(loc.ylim[, 1]), max(loc.ylim[, 2]))
-   lim = list(xlim = loc.xlim, ylim = loc.ylim)
-   
-   if (!is.null(ylim))
-      lim$ylim = ylim
-   
-   if (!is.null(xlim))
-      lim$xlim = xlim
-   
-   col = mdaplot.getColors(ngroups, colmap = colmap)
+   ngroups = length(data)
    
    # if plot type is not specified for each group multply default value
    if (length(type) == 1)
@@ -1371,7 +1350,47 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       lwd = rep(lwd, ngroups)
    else if (length(lwd) != ngroups)
       stop('Parameter "lwd" hould be specified for each group or be common for all!')
-  
+
+   # if label color is not specified for each group multply default value
+   if (length(lab.col) == 1)
+      lab.col = rep(lab.col, ngroups)
+   else if (length(lab.col) != ngroups)
+      stop('Parameter "lab.col" should be specified for each group or be common for all!')
+   
+   # get plot data for each group 
+   pd = list()
+   for (i in 1:ngroups) {
+      pd[[i]] = prepare.plot.data(data[[i]], type[i], xlim, ylim, bwd, show.excluded, show.colorbar = FALSE, show.labels, 
+                                  show.lines, show.axes = TRUE)
+   }
+   
+   # process legend
+   if (is.null(legend)) {
+      legend = names(data)
+      if (is.null(legend)) {
+         if (all(type == 'h'))
+            legend = unlist(lapply(pd, function(x) {rownames(x$y.values)[1]}))
+         else
+            legend = unlist(lapply(pd, function(x) {x$data.attr$name}))
+      }
+   }
+   
+   # compute limits   
+   loc.xlim = matrix(unlist(lapply(pd, function(x) {x$lim$xlim})), ncol = 2, byrow = TRUE)
+   loc.ylim = matrix(unlist(lapply(pd, function(y) {y$lim$ylim})), ncol = 2, byrow = TRUE)
+   
+   loc.xlim = c(min(loc.xlim[, 1]), max(loc.xlim[, 2]))
+   loc.ylim = c(min(loc.ylim[, 1]), max(loc.ylim[, 2]))
+   lim = list(xlim = loc.xlim, ylim = loc.ylim)
+   
+   if (!is.null(ylim))
+      lim$ylim = ylim
+   
+   if (!is.null(xlim))
+      lim$xlim = xlim
+   
+   col = mdaplot.getColors(ngroups, colmap = colmap)
+   
    if (is.null(main) && !is.null(name))
       main = name
    
@@ -1389,29 +1408,28 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    
    # make an empty plot with proper limits and axis labels
    mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas)
-
+   
+   # show lines if needed
+   if (is.numeric(show.lines) && length(show.lines) == 2 )
+      mdaplot.showLines(show.lines)
+   
    # show initial exes
    if (show.grid == T)
       mdaplot.showGrid()
            
    # make a plot for each group   
    for (i in 1:ngroups) {
-      
       if (type[i] == 'h')
          force.x.values = c(i, ngroups)
       else
          force.x.values = NA
-      
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
               lwd = lwd[i], force.x.values = force.x.values, bwd = bwd,
               labels = labels, show.grid = F, show.labels = show.labels,
-              lab.col = lab.col, lab.cex = lab.cex, show.axes = FALSE
+              lab.col = lab.col[i], lab.cex = lab.cex, show.axes = FALSE, ...
       )
    }  
    
-   # show lines if needed
-   if (is.numeric(show.lines) && length(show.lines) == 2 )
-      mdaplot.showLines(show.lines)
    
    # show legend if needed
    if (!is.null(legend) && length(legend) > 0 && show.legend == T)

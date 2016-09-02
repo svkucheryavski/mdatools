@@ -103,13 +103,12 @@
 #' par(mfrow = c(1, 1))
 #'
 #' @export 
-pcares = function(scores, loadings, residuals, totvar, tnorm = NULL, ncomp.selected = NULL, ...)
+pcares = function(...)
 {
    # Creates an object of pcares class. In fact the class is a wrapper for ldecomp and
    # uses its methods and attributes.
    
-   res = ldecomp(scores, loadings, residuals, totvar, tnorm = tnorm, ncomp.selected = ncomp.selected
-                 , ...)
+   res = ldecomp(...)
    class(res) = c('pcares', 'ldecomp')   
    
    res

@@ -4,26 +4,25 @@
 \alias{ldecomp}
 \title{Linear decomposition of data}
 \usage{
-ldecomp(scores = NULL, loadings = NULL, residuals = NULL, totvar,
-  tnorm = NULL, ncomp.selected = NULL, T2 = NULL, Q = NULL,
-  cal = TRUE)
+ldecomp(scores = NULL, residuals = NULL, ncomp.selected, T2, Q, expvar,
+  cumexpvar)
 }
 \arguments{
 \item{scores}{matrix with score values (nobj x ncomp).}
 
-\item{loadings}{matrix with loading values (nvar x ncomp).}
-
 \item{residuals}{matrix with data residuals}
-
-\item{totvar}{full variance of original data, preprocessed and centered}
-
-\item{tnorm}{singular values for score normalization}
 
 \item{ncomp.selected}{number of selected components}
 
 \item{T2}{matrix with calculated T2 values (e.g. for CV)}
 
 \item{Q}{matrix with calculated Q statistic (e.g. for CV)}
+
+\item{loadings}{matrix with loading values (nvar x ncomp).}
+
+\item{totvar}{full variance of original data, preprocessed and centered}
+
+\item{tnorm}{singular values for score normalization}
 
 \item{cal}{logical, true if data is for calibration of a LDECOMP based model}
 }

@@ -6,7 +6,7 @@
 \usage{
 \method{plotResiduals}{pca}(obj, ncomp = NULL, main = NULL, xlab = "T2",
   ylab = "Squared residual distance (Q)", show.labels = F,
-  show.legend = T, show.limits = T, ...)
+  show.legend = T, show.limits = T, cgroup = NULL, ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}

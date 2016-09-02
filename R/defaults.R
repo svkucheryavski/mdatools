@@ -318,6 +318,22 @@ plotYVariance = function(obj, ...)
    UseMethod("plotYVariance")
 }   
 
+#' Biplot
+#' 
+#' @details
+#' Generic function for biplot
+#' 
+#' @param obj
+#' a model or result object
+#' @param ...
+#' other arguments
+#' 
+#' @export
+plotBiplot = function(obj, ...)
+{   
+   UseMethod("plotBiplot")
+}   
+
 #' Scores plot
 #' 
 #' @details

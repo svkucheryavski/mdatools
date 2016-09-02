@@ -50,21 +50,16 @@
 #' @importFrom stats convolve cor lm na.exclude predict pt qf qnorm qt sd var
 #'
 #' @export
-ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL, 
-                   totvar, tnorm = NULL, ncomp.selected = NULL,
-                   T2 = NULL, Q = NULL, cal = TRUE)
+ldecomp = function(scores = NULL, residuals = NULL, ncomp.selected, T2, Q, expvar, cumexpvar)
 {
-   if (!is.null(scores))
-   {   
-      scores = as.matrix(scores)
-      rownames(scores) = rownames(residuals)
-      colnames(scores) = paste('Comp', 1:ncol(scores))
-   }
-   
    obj = list(
       scores = scores,
       residuals = residuals, 
-      totvar = totvar
+      ncomp.selected = ncomp.selected,
+      T2 = T2,
+      Q = Q,
+      cumexpvar = cumexpvar,
+      expvar = expvar
    )
    
    if (is.null(ncomp.selected))
@@ -72,35 +67,7 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
    else
       obj$ncomp.selected = ncomp.selected
    
-   # calculate residual distances and explained variance
-   if (is.null(Q) && is.null(T2) && !is.null(scores) && !is.null(loadings) && !is.null(residuals))
-   {   
-      res = ldecomp.getDistances(scores, loadings, residuals, tnorm, cal)
-      
-      if (is.null(Q))
-         obj$Q = res$Q
-      
-      if (is.null(T2))
-         obj$T2 = res$T2
-      
-      if (is.null(tnorm))
-         obj$tnorm = res$tnorm
-      
-      obj$modpower = res$modpower
-   }
-   else
-   {
-      obj$Q = Q
-      obj$T2 = T2
-      obj$tnorm = tnorm
-   }   
-   
-   var = ldecomp.getVariances(obj$Q, totvar)   
-   obj$expvar = var$expvar
-   obj$cumexpvar = var$cumexpvar
-   
    obj$call = match.call()
-   
    class(obj) = "ldecomp"
    
    obj
@@ -118,64 +85,111 @@ ldecomp = function(scores = NULL, loadings = NULL, residuals = NULL,
 #' @param residuals
 #' matrix with residuals (E).
 #' @param tnorm
-#' vector with singular values for scores normalisation (if NULL will be calculated from 
-#' \code{scores}).
-#' @param cal
-#' logical, are these results for calibration set or not
+#' vector with singular values for scores normalisation
 #' 
 #' @details
 #' The distances are calculated for every 1:n components, where n goes from 1 to ncomp 
-#' (number of columns in scores and loadings).
+#' (number of columns in scores and loadings). 
 #' 
 #' @return
 #' Returns a list with Q, Qvar, T2 and modelling power values for each component.
 #'  
-ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal = TRUE)
+ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal = FALSE, cv = FALSE)
 {
+   # get attributes
+   attrs.scores = mda.getattr(scores)
+   attrs.loadings = mda.getattr(loadings)
+   
+   # get sizes
    ncomp = ncol(scores)
    nobj = nrow(scores)
    nvar = nrow(loadings)
    
+   # prepare zero matrices for the distances
    T2 = matrix(0, nrow = nobj, ncol = ncomp)
    Q = matrix(0, nrow = nobj, ncol = ncomp)
    modpower = matrix(0, nrow = nvar, ncol = ncomp)
-      
+
    # calculate normalized scores
-   if (is.null(tnorm))
-      tnorm = sqrt(colSums(scores ^ 2)/(nrow(scores) - 1));
    scoresn = sweep(scores, 2L, tnorm, '/', check.margin = F);  
 
    # calculate variance for data columns
-   data = scores %*% t(loadings) + residuals;
+   data = tcrossprod(scores, loadings) + residuals;
+  
+   # correct data and loadings for excluded columns
+   varnames = rownames(loadings)
+   if (length(attrs.loadings$exclrows) > 0){
+      loadings = loadings[-attrs.loadings$exclrows, , drop = F]
+      data = data[, -attrs.loadings$exclrows, drop = F]
+   }
    
+   # standard deviation for data values 
    if (nobj > 1 && cal == TRUE)
       datasd = sqrt(colSums(data^2)/(nobj - 1))
    
    # calculate distances for each set of components
-   for (i in 1:ncomp)
-   {
-      
-      exp = scores[, 1:i, drop = F] %*% t(loadings[, 1:i, drop = F]);
+   modpower.loc = matrix(0, nrow = nrow(loadings), ncol = ncomp)
+   for (i in 1:ncomp) {
+      exp = tcrossprod(scores[, 1:i, drop = F], loadings[, 1:i, drop = F]);
       res = data - exp;
-      
+
       Q[, i] = rowSums(res^2)
       T2[, i] = rowSums(scoresn[, 1:i, drop = F]^2)
       
       if (nobj > i && cal == TRUE)
-         modpower[, i] = 1 - sqrt(colSums(res^2)/(nobj - i - 1))/datasd
-   }   
+         modpower.loc[, i] = 1 - sqrt(colSums(res^2)/(nobj - i - 1))/datasd
+   }  
    
-   # set dimnames and return results
-   colnames(Q) = colnames(T2) = colnames(modpower) = colnames(scores)
-   rownames(Q) = rownames(T2) = rownames(scores)
-   rownames(modpower) = rownames(loadings)
+   # fill in modpower table
+   if (length(attrs.loadings$exclrows) > 0)
+      modpower[-attrs.loadings$exclrows, ] = modpower.loc
+   else
+      modpower = modpower.loc
       
+   # set names and attributes if this is not for CV 
+   if (cv == FALSE) {
+      # set dimnames and return results
+      colnames(Q) = colnames(T2) = colnames(modpower) = colnames(scores)
+      rownames(Q) = rownames(T2) = rownames(scores)
+      rownames(modpower) = varnames
+      
+      # set attributes for modpower and exclude rows if necessary
+      attr(modpower, 'name') = 'Modelling power'
+      attr(modpower, 'xaxis.name') = 'Components'
+      attr(modpower, 'yaxis.name') = attrs.loadings$yaxis.name
+      attr(modpower, 'yaxis.values') = attrs.loadings$yaxis.values
+      
+      if (length(attrs.loadings$exclrows > 0))
+         modpower = mda.exclrows(modpower, attrs.loadings$exclrows)
+      
+      # set attributes for Q 
+      attr(Q, 'name') = 'Squared residual distance (Q)'
+      attr(Q, 'xaxis.name') = attrs.scores$xaxis.name
+      attr(Q, 'yaxis.name') = attrs.scores$yaxis.name
+      attr(Q, 'yaxis.values') = attrs.scores$yaxis.values
+      
+      # set attributes for T2 
+      attr(T2, 'name') = 'T2 residuals'
+      attr(T2, 'xaxis.name') = attrs.scores$xaxis.name
+      attr(T2, 'yaxis.name') = attrs.scores$yaxis.name
+      attr(T2, 'yaxis.values') = attrs.scores$yaxis.values
+      
+      # correct Q and T2 for excluded rows
+      if (length(attrs.scores$exclrows > 0)) {
+         T2 = mda.exclrows(T2, attrs.scores$exclrows)
+         Q = mda.exclrows(Q, attrs.scores$exclrows)
+      }
+   }
+   
+   # return the results
    res = list(
       Q = Q,
       T2 = T2,
       modpower = modpower,
       tnorm = tnorm
    )
+   
+   res
 }
 
 
@@ -194,6 +208,9 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
 #' 
 ldecomp.getVariances = function(Q, totvar)
 {   
+   if (length(attr(Q, 'exclrows')) > 0)
+      Q = Q[-attr(Q, 'exclrows'), , drop = F]
+   
    cumresvar = colSums(Q) / totvar * 100
    cumexpvar = 100 - cumresvar
    expvar = c(cumexpvar[1], diff(cumexpvar))
@@ -295,19 +312,7 @@ plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance'
                                    xlab = 'Components', ylab = 'Explained variance, %',
                                    show.labels = F, ...)
 {
-   data = cbind(1:length(obj$cumexpvar), obj$cumexpvar)
-   if (type != 'h')
-   {   
-      data = rbind(c(0, 0), data)
-      rownames(data) = round(c(0, obj$cumexpvar), 2)
-   }
-   else
-   {
-      rownames(data) = round(obj$cumexpvar, 2)      
-   }  
-   
-   colnames(data) = c(xlab, ylab)
-   mdaplot(data, main = main, xlab = xlab, ylab = ylab, type = type, show.labels = show.labels, ...)
+   mdaplot(obj$cumexpvar, main = main, xlab = xlab, ylab = ylab, type = type, show.labels = show.labels, ...)
 }
 
 #' Explained variance plot for linear decomposition
@@ -333,12 +338,10 @@ plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance'
 #' @export
 plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
                                 xlab = 'Components', ylab = 'Explained variance, %',
-                                show.labels = F, ...)
+                                show.labels = F, labels = 'values', ...)
 {
-   data = cbind(1:length(obj$expvar), obj$expvar)
-   colnames(data) = c(xlab, ylab)
-   rownames(data) = round(obj$expvar, 2)
-   mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, type = type, ...)
+   mdaplot(obj$expvar, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, 
+           labels = labels, type = type, ...)
 }
 
 
@@ -363,39 +366,54 @@ plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
 #' @export
 plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores', 
                               type = 'p', xlab = NULL, ylab = NULL,
-                              show.labels = F, show.axes = F, ...)
+                              show.labels = FALSE, show.legend = TRUE, 
+                              show.axes = TRUE, ...)
 {
    if (is.null(obj$scores)) {
       warning('Scores values are not specified!')
    } else {   
+      data = mda.subset(obj$scores, select = comp)
+      colnames(data) = paste('Comp ', comp, ' (', round(obj$expvar[comp], 2) , '%)', sep = '')
       
-      if (length(comp) == 2 && type == 'p') {
-         # scores vs scores
-         data = obj$scores[, c(comp[1], comp[2])]   
-         
-         if (show.axes == T)
-            show.lines = c(0, 0)      
-         else
-            show.lines = F
-        
-         if (is.null(xlab))
-            xlab = sprintf('Comp %d (%.2f%%)', comp[1], obj$expvar[comp[1]])
-         
-         if (is.null(ylab))
-            ylab = sprintf('Comp %d (%.2f%%)', comp[2], obj$expvar[comp[2]])
-         
-         mdaplot(data, main = main, show.labels = show.labels, show.lines = show.lines, 
-                 xlab = xlab, ylab = ylab, ...)
-      } else if (length(comp) == 1) {   
-         data = cbind(1:nrow(obj$scores), obj$scores[, comp])      
-         colnames(data) = c('Objects', colnames(obj$scores)[comp])
-         rownames(data) = rownames(obj$scores)
-         
-         mdaplot(data, main = main, show.labels = show.labels, ...)
+      if (show.axes == T) {
+         if (type == 'p') {
+            if (length(comp) > 1)
+               show.lines = c(0, 0)
+            else
+               show.lines = c(NA, 0)
+         } else if (type != 'h') {
+            show.lines = c(NA, 0)      
+         } else {
+            show.lines = FALSE
+         }
+      } else {
+         show.lines = FALSE
       }
-   }
-}  
-
+     
+      if (is.null(xlab) && length(comp) == 1)
+         xlab = ifelse(is.null(attr(data, 'yaxis.name')), 'Objects', attr(data, 'yaxis.name'))
+      
+      if (type != 'p') {
+         data = mda.t(data)
+        
+         if (nrow(data) == 1) {
+            if (is.null(ylab))
+               ylab = rownames(data)[1]
+            mdaplot(data, main = main, type = type, show.labels = show.labels, show.lines = show.lines, 
+                    xlab = xlab, ylab = ylab, ...)
+         } else {
+            if (is.null(show.legend))
+               show.legend = TRUE
+            
+            mdaplotg(data, main = main, type = type, show.labels = show.labels, show.lines = show.lines, 
+                     xlab = xlab, ylab = ylab, show.legend = show.legend, ...)
+         }
+      } else {
+         mdaplot(data, main = main, type = type, show.labels = show.labels, show.lines = show.lines, 
+                 xlab = xlab, ylab = ylab, ...)
+      }
+   }  
+}
 #' Residuals plot for linear decomposition
 #' 
 #' @description
@@ -438,7 +456,7 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
    else
       show.lines = F
 
-   data = cbind(obj$T2[, ncomp], obj$Q[, ncomp])
+   data = mda.cbind(mda.subset(obj$T2, select = ncomp), mda.subset(obj$Q, select = ncomp))
    colnames(data) = c(xlab, ylab)
    mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, 
            show.lines = show.lines, ...)

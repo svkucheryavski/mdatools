@@ -5,8 +5,8 @@
 \title{Scores plot for linear decomposition}
 \usage{
 \method{plotScores}{ldecomp}(obj, comp = c(1, 2), main = "Scores",
-  type = "p", xlab = NULL, ylab = NULL, show.labels = F,
-  show.axes = F, ...)
+  type = "p", xlab = NULL, ylab = NULL, show.labels = FALSE,
+  show.legend = TRUE, show.axes = TRUE, ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}

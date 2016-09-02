@@ -5,8 +5,8 @@
 \title{Loadings plot for PCA}
 \usage{
 \method{plotLoadings}{pca}(obj, comp = c(1, 2), type = NULL,
-  main = "Loadings", xlab = NULL, ylab = NULL, show.labels = T,
-  show.legend = T, show.axes = T, ...)
+  main = "Loadings", xlab = NULL, ylab = NULL, show.labels = NULL,
+  show.legend = TRUE, show.axes = TRUE, ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}

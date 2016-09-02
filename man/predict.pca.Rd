@@ -4,14 +4,12 @@
 \alias{predict.pca}
 \title{PCA predictions}
 \usage{
-\method{predict}{pca}(object, x, cv = F, ...)
+\method{predict}{pca}(object, x, cal = FALSE, ...)
 }
 \arguments{
 \item{object}{a PCA model (object of class \code{pca})}
 
 \item{x}{a matrix with data values}
-
-\item{cv}{logical, are predictions for cross-validation or not}
 
 \item{...}{other arguments}
 }
