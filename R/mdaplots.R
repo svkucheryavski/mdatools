@@ -1327,12 +1327,6 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    } 
    
    # check if plot.new() should be called first
-   #tryCatch(
-   #   {par(new = TRUE)},
-   #   warning = function(w){plot.new()},
-   #   finally = {par(new = FALSE)}
-   #)
-   
    if (dev.cur() == 1)
       plot.new()
    
@@ -1401,7 +1395,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    loc.xlim = c(min(loc.xlim[, 1]), max(loc.xlim[, 2]))
    loc.ylim = c(min(loc.ylim[, 1]), max(loc.ylim[, 2]))
    lim = list(xlim = loc.xlim, ylim = loc.ylim)
-   
+
    if (!is.null(ylim))
       lim$ylim = ylim
    
