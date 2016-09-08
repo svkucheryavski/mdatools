@@ -18,6 +18,9 @@
 #' @export
 prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1)
 {   
+   
+   attrs = mda.getattr(data)
+   
    # define values for centering
    if (is.logical(center) && center == T )
       center = apply(data, 2, mean)
@@ -42,6 +45,7 @@ prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1)
    } 
    data = scale(data, center = center, scale = scale)
    
+   data = mda.setattr(data, attrs)
    attr(data, 'scaled:center') = NULL
    attr(data, 'scaled:scale') = NULL
    attr(data, 'prep:center') = center
@@ -84,7 +88,11 @@ prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1)
 #' @export
 prep.snv = function(data)
 {
+   attrs = mda.getattr(data)
    data = t(scale(t(data), center = T, scale = T))
+   data = mda.setattr(data, attrs)
+   
+   data
 } 
 
 #' Normalization
@@ -103,6 +111,8 @@ prep.snv = function(data)
 #' @export
 prep.norm = function(data, type = 'area')
 {
+   attrs = mda.getattr(data)
+   
    if (type == 'area')
    {   
       w = apply(abs(data), 1, sum)
@@ -118,6 +128,7 @@ prep.norm = function(data, type = 'area')
    }   
    
    data = sweep(data, 1, w, '/')
+   data = mda.setattr(data)
    
    data
 }   
@@ -139,6 +150,8 @@ prep.norm = function(data, type = 'area')
 #' @export
 prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
 {
+   attrs = mda.getattr(data)
+   
    nobj = nrow(data)
    nvar = ncol(data)
    
@@ -153,6 +166,8 @@ prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
       d = convolve(d, rev(f[dorder + 1, ]), type = "o")     
       pdata[i, ] = d[(w + 1) : (length(d) - w)] 
    }  
+   
+   pdata = mda.setattr(pdata, attrs)
    
    pdata
 }
@@ -194,6 +209,8 @@ prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
 #' @export
 prep.msc = function(spectra, mspectrum = NULL)
 {
+   attrs = mda.getattr(spectra)
+   
    if (is.null(mspectrum))
       mspectrum = apply(spectra, 2, mean)   
    
@@ -204,7 +221,10 @@ prep.msc = function(spectra, mspectrum = NULL)
       cspectra[i, ] = (spectra[i, ] - coef[1]) / coef[2]   
    }
    
-   list(cspectra = cspectra, mspectrum = mspectrum)
+   cspectra = mda.setattr(cspectra, attrs)
+   attr(cspectra, 'mspectrum') = mspectrum
+   
+   cspectra
 }  
 
 #' Pseudo-inverse matrix

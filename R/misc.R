@@ -1,3 +1,106 @@
+#' Convert image to data matrix
+#' 
+#' @param img
+#' an image (3-way array)
+#' 
+#' @export
+mda.im2data = function(img) {
+   width = dim(img)[2]
+   height = dim(img)[1]
+   nchannels = dim(img)[3]
+   
+   npixels = width * height
+   dim(img) = c(npixels, nchannels)
+   attr(img, 'width') = width
+   attr(img, 'height') = height
+   
+   img
+}
+
+#' Convert data matrix to an image
+#' 
+#' @param data
+#' data matrix 
+#' 
+#' @export
+mda.data2im = function(data) {
+   width = attr(data, 'width', exact = TRUE)
+   height = attr(data, 'height', exact = TRUE)
+   bgpixels = attr(data, 'bgpixels', exact = TRUE)
+   
+   if (length(bgpixels) > 0) {
+      img = matrix(NA, nrow = nrow(data) + length(bgpixels), ncol = ncol(data))
+      img[-bgpixels, ] = data
+   } else {
+      img = data
+   }
+   
+   dim(img) = c(height, width, ncol(data))
+   img
+}
+
+#' Remove background pixels from image data
+#' 
+#' @param data
+#' a matrix with image data
+#' @param bgpixels
+#' vector with indices or logical values corresponding to background pixels
+#' 
+#' @export
+mda.setimbg = function(data, bgpixels) {
+   attrs = mda.getattr(data)
+  
+   # unfold bgpixels to a vector 
+   dim(bgpixels) = NULL
+   
+   # get indices instead of logical values
+   if (is.logical(bgpixels))
+      bgpixels = which(bgpixels)
+   
+   # correct indices of bgpixels if some of the pixels were already removed   
+   if (length(attrs$bgpixels) > 0) {
+      npixels = attrs$width * attrs$height
+      row.ind = 1:npixels
+      row.ind = row.ind[-attrs$bgpixels]
+      bgpixels = row.ind[bgpixels]
+   }
+
+   # remove corresponding rows and correct attributes   
+   data = data[-bgpixels, ]      
+   attrs$bgpixels = unique(c(attrs$bgpixels, bgpixels))
+   if (length(attrs$exclrows) > 0)
+      attrs$exclrows = attrs$exclrows[-which(!(attrs$exclrows %in% bgpixels))]
+
+   data = mda.setattr(data, attrs)
+}
+
+#' show image data as an image
+#' 
+#' @param data
+#' data with image
+#' @param channels
+#' indices for one or three columns to show as image channels
+#' 
+#' @export
+imshow = function(data, channels = 1, main = NULL) {
+   names = colnames(data)
+   attrs = mda.getattr(data)
+   data = mda.subset(data, select = channels)
+   data = mda.data2im(data)
+   data = (data - min(data)) / (max(data) - min(data))
+   
+   if (length(channels) == 1) 
+      data = as.raster(data[, , 1])
+  
+   if (is.null(main) && !is.null(names))
+      main = paste(' ', names[channels], sep = '', collapse = '')
+   
+   plot(0, main = main, type = 'n', xaxt = 'n', yaxt = 'n', xlab = '', ylab = '', 
+        xlim = c(0, 1), ylim = c(0, 1))
+   
+   rasterImage(data, 0, 0, 1, 1)
+}
+
 #' Wrapper for show() method
 #' 
 #' @description 
@@ -351,6 +454,9 @@ mda.inclcols = function(x, ind) {
 #' @export
 mda.setattr = function(x, attrs, type = 'all') {
    attr(x, 'name') = attrs$name
+   attr(x, 'width') = attrs$width
+   attr(x, 'height') = attrs$height
+   attr(x, 'bgpixels') = attrs$bgpixels
    
    if (type == 'row' || type == 'all') {
       attr(x, 'yaxis.name') = attrs$yaxis.name
@@ -379,6 +485,7 @@ mda.setattr = function(x, attrs, type = 'all') {
 #' @export
 mda.getattr = function(x, type = 'all') {
    attrs = list()
+   
    attrs$name = attr(x, 'name', exact = TRUE) 
    attrs$exclrows = attr(x, 'exclrows', exact = TRUE) 
    attrs$exclcols = attr(x, 'exclcols', exact = TRUE) 
@@ -386,6 +493,9 @@ mda.getattr = function(x, type = 'all') {
    attrs$yaxis.values = attr(x, 'yaxis.values', exact = TRUE) 
    attrs$xaxis.name = attr(x, 'xaxis.name', exact = TRUE) 
    attrs$yaxis.name = attr(x, 'yaxis.name', exact = TRUE) 
+   attrs$width = attr(x, 'width', exact = TRUE)
+   attrs$height = attr(x, 'height', exact = TRUE)
+   attrs$bgpixels = attr(x, 'bgpixels', exact = TRUE)
    
    attrs
 }

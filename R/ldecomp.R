@@ -162,23 +162,13 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
       if (length(attrs.loadings$exclrows > 0))
          modpower = mda.exclrows(modpower, attrs.loadings$exclrows)
       
-      # set attributes for Q 
+      # set attributes for Q
+      Q = mda.setattr(Q, attrs.scores)
       attr(Q, 'name') = 'Squared residual distance (Q)'
-      attr(Q, 'xaxis.name') = attrs.scores$xaxis.name
-      attr(Q, 'yaxis.name') = attrs.scores$yaxis.name
-      attr(Q, 'yaxis.values') = attrs.scores$yaxis.values
       
       # set attributes for T2 
+      T2 = mda.setattr(T2, attrs.scores)
       attr(T2, 'name') = 'T2 residuals'
-      attr(T2, 'xaxis.name') = attrs.scores$xaxis.name
-      attr(T2, 'yaxis.name') = attrs.scores$yaxis.name
-      attr(T2, 'yaxis.values') = attrs.scores$yaxis.values
-      
-      # correct Q and T2 for excluded rows
-      if (length(attrs.scores$exclrows > 0)) {
-         T2 = mda.exclrows(T2, attrs.scores$exclrows)
-         Q = mda.exclrows(Q, attrs.scores$exclrows)
-      }
    }
    
    # return the results

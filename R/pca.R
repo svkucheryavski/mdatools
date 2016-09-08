@@ -665,18 +665,14 @@ predict.pca = function(object, x, cal = FALSE, ...)
    # set names and attributes
    rownames(scores) = rownames(x)
    colnames(scores) = colnames(object$loadings)
+   scores = mda.setattr(scores, attrs, type = 'row')
    attr(scores, 'name') = 'Scores'
    attr(scores, 'xaxis.name') = 'Components'
-   attr(scores, 'yaxis.name') = attrs$yaxis.name
-   attr(scores, 'yaxis.values') = attrs$yaxis.values
-   
-   # correct scores for missing rows in x
-   if (length(attrs$exclrows) > 0)
-      scores = mda.exclrows(scores, attrs$exclrows)      
    
    # calculate residuals and set all attributes from x
    residuals = x - tcrossprod(scores, object$loadings)
    residuals = mda.setattr(residuals, attrs)
+   attr(scores, 'name') = 'Residuals'
    
    # calculate residual distances
    dist = ldecomp.getDistances(scores, object$loadings, residuals, object$tnorm, cal = cal) 
