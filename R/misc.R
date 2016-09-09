@@ -29,7 +29,6 @@ mda.data2im = function(data, show.excluded = NULL) {
    bgpixels = attr(data, 'bgpixels', exact = TRUE)
   
    attrs = mda.getattr(data)
-   
    if (!is.null(show.excluded) && length(attrs$exclrows) > 0) {
       if (show.excluded == TRUE)
          data[attrs$exclrows, ] = mean(data)
@@ -38,7 +37,7 @@ mda.data2im = function(data, show.excluded = NULL) {
    }
    
    if (length(bgpixels) > 0) {
-      img = matrix(max(data), nrow = nrow(data) + length(bgpixels), ncol = ncol(data))
+      img = matrix(NA, nrow = nrow(data) + length(bgpixels), ncol = ncol(data))
       img[-bgpixels, ] = data
    } else {
       img = data
@@ -100,7 +99,8 @@ imshow = function(data, channels = 1, show.excluded = FALSE, main = NULL) {
    data = mda.subset(data, select = channels)
    data = (data - min(data)) / (max(data) - min(data))
    data = mda.data2im(data, show.excluded = show.excluded)
-
+   data[is.na(data)] = 1
+   
    if (length(channels) == 1) 
       data = as.raster(data[, , 1])
   
