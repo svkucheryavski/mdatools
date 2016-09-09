@@ -23,18 +23,28 @@ mda.im2data = function(img) {
 #' data matrix 
 #' 
 #' @export
-mda.data2im = function(data) {
+mda.data2im = function(data, show.excluded = NULL) {
    width = attr(data, 'width', exact = TRUE)
    height = attr(data, 'height', exact = TRUE)
    bgpixels = attr(data, 'bgpixels', exact = TRUE)
+  
+   attrs = mda.getattr(data)
+   
+   if (!is.null(show.excluded) && length(attrs$exclrows) > 0) {
+      if (show.excluded == TRUE)
+         data[attrs$exclrows, ] = mean(data)
+      else
+         data[attrs$exclrows, ] = max(data)
+   }
    
    if (length(bgpixels) > 0) {
-      img = matrix(NA, nrow = nrow(data) + length(bgpixels), ncol = ncol(data))
+      img = matrix(max(data), nrow = nrow(data) + length(bgpixels), ncol = ncol(data))
       img[-bgpixels, ] = data
    } else {
       img = data
    }
    
+      
    dim(img) = c(height, width, ncol(data))
    img
 }
@@ -49,7 +59,10 @@ mda.data2im = function(data) {
 #' @export
 mda.setimbg = function(data, bgpixels) {
    attrs = mda.getattr(data)
-  
+
+   if (length(attrs$exclrows) > 0)
+      stop('You can not set background pixels if some of them were excluded!')
+   
    # unfold bgpixels to a vector 
    dim(bgpixels) = NULL
    
@@ -68,10 +81,9 @@ mda.setimbg = function(data, bgpixels) {
    # remove corresponding rows and correct attributes   
    data = data[-bgpixels, ]      
    attrs$bgpixels = unique(c(attrs$bgpixels, bgpixels))
-   if (length(attrs$exclrows) > 0)
-      attrs$exclrows = attrs$exclrows[-which(!(attrs$exclrows %in% bgpixels))]
 
    data = mda.setattr(data, attrs)
+   data
 }
 
 #' show image data as an image
@@ -82,13 +94,13 @@ mda.setimbg = function(data, bgpixels) {
 #' indices for one or three columns to show as image channels
 #' 
 #' @export
-imshow = function(data, channels = 1, main = NULL) {
+imshow = function(data, channels = 1, show.excluded = FALSE, main = NULL) {
    names = colnames(data)
    attrs = mda.getattr(data)
    data = mda.subset(data, select = channels)
-   data = mda.data2im(data)
    data = (data - min(data)) / (max(data) - min(data))
-   
+   data = mda.data2im(data, show.excluded = show.excluded)
+
    if (length(channels) == 1) 
       data = as.raster(data[, , 1])
   

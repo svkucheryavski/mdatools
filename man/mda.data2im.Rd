@@ -4,7 +4,7 @@
 \alias{mda.data2im}
 \title{Convert data matrix to an image}
 \usage{
-mda.data2im(data)
+mda.data2im(data, show.excluded = NULL)
 }
 \arguments{
 \item{data}{data matrix}
