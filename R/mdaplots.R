@@ -680,9 +680,17 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
                              show.lines, show.axes) {
    
    # check plot type 
-   valid.types = c('p', 'l', 'b', 'h', 'e', 'i')
+   valid.types = c('p', 'l', 'b', 'h', 'e', 'd')
    if (!(type %in% valid.types))
       stop('Wrong plot type!')
+   
+   density = FALSE
+   if (type == 'd') {
+      if (ncol(data) < 2)
+         stop('Density plot can be created for dataset with at least two columns!')
+      type = 'p'
+      density = TRUE
+   }
    
    if (is.null(data) || length(data) < 1)
       stop('The provided dataset is empty!')
@@ -847,6 +855,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    }
    
    res = list()
+   res$density = density
    res$lower = lower
    res$upper = upper
    res$x.values = x.values
@@ -972,8 +981,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
                    show.colorbar = T, show.lines = F, show.grid = T, show.axes = T, 
                    xticks = NULL, yticks = NULL, xticklabels = NULL, yticklabels = NULL, 
                    xlas = 0, ylas = 0, lab.col = 'darkgray', lab.cex = 0.65, 
-                   show.excluded = FALSE, col.excluded = '#E0E0E0', 
-                   force.x.values = NA, ...)
+                   show.excluded = FALSE, col.excluded = '#E0E0E0', nbins = 256,
+                   colramp = mdaplot.getColors, force.x.values = NA, ...)
 {   
    if (is.null(plot.data)) {
       plot.data = prepare.plot.data(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, 
@@ -991,6 +1000,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    plot.data$excluded.cols -> excluded.cols
    plot.data$data.attr -> data.attr
    plot.data$show.excluded -> show.excluded
+   plot.data$density -> density
    
    # if some rows are excluded remove part of values from cgroup   
    if (length(excluded.rows) > 0 && !is.null(cgroup) && length(cgroup) > 1)
@@ -1062,7 +1072,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    }
    
    #  get proper colors      
-   if (!is.null(cgroup) && !(type == 'h' || type == 'e')) {   
+   if (is.null(density) && !is.null(cgroup) && !(type == 'h' || type == 'e')) {   
       # show color groups according to cdata values
       col = mdaplot.getColors(cgroup = cgroup, colmap = colmap)
    } else {
@@ -1084,8 +1094,10 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    }
    
    # make plot for the data 
-   if (type == 'p')
+   if (type == 'p' && density == FALSE)
       points(x.values, y.values, col = col, pch = pch, lwd = lwd, ...)
+   if (type == 'd' && density == TRUE)
+      {par(new = T);smoothScatter(x.values, y.values, nbin = nbins, colramp = colramp, axes = F, ann = F,...)}
    else if (type == 'l' || type == 'b')
       matlines(x.values, t(y.values), type = type, col = col, pch = pch, lty = lty, lwd = lwd, ...)
    else if (type == 'h')
