@@ -2,6 +2,8 @@ v.0.8.0
 =======
 * tutorial has been moved from GitBook to Bookdown and fully rewritten
 * the `mdaplot()` and `mdaplotg()` were rewritten completely and now are more easy to use (check Bookdown docs)
+* new color scheme 'jet' with jet colors
+* new plot type (`'d'`) for density scatter plot
 * support for `xlas` and `ylas` in plots to rotate axis ticks
 * support for sevearal data attributes to give extra functionality for plots (including manual x-values for line plots)
 * rows and columns can be now hidden/excluded via attributes

@@ -4,7 +4,8 @@
 \alias{imshow}
 \title{show image data as an image}
 \usage{
-imshow(data, channels = 1, show.excluded = FALSE, main = NULL)
+imshow(data, channels = 1, show.excluded = FALSE, main = NULL,
+  colmap = "jet")
 }
 \arguments{
 \item{data}{data with image}

@@ -209,13 +209,13 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
 #' @return
 #' Returns vector with generated color values
 #' 
+#' @export
 mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
 {   
    if (length(colmap) == 1)
    {   
       # colormap is a name      
-      if (colmap == 'gray')
-      {   
+      if (colmap == 'gray') {   
          # use grayscale colormap
          palette = c("#E8E8E8", "#D6D6D6", "#C4C4C4", "#B2B2B2", "#9A9A9A", "#808080", "#484848", 
                      "#101010")
@@ -223,9 +223,10 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
          # if only one color is needed reorder pallete so the black is first
          if (is.null(cgroup) && ngroups == 1)
             palette = palette[length(palette):1]      
-      }   
-      else
-      {   
+      } else if (colmap == 'jet') {
+         palette = c("#00007F", "blue", "#007FFF", "cyan",
+           "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000")
+      } else {   
          # use default colormap for colorbrew
          palette = c("#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FEE08B", "#FDAE61", "#F46D43", 
                      "#D53E4F")

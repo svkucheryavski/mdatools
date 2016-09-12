@@ -28,21 +28,12 @@ mda.data2im = function(data, show.excluded = NULL) {
    height = attr(data, 'height', exact = TRUE)
    bgpixels = attr(data, 'bgpixels', exact = TRUE)
   
-   attrs = mda.getattr(data)
-   if (!is.null(show.excluded) && length(attrs$exclrows) > 0) {
-      if (show.excluded == TRUE)
-         data[attrs$exclrows, ] = mean(data)
-      else
-         data[attrs$exclrows, ] = max(data)
-   }
-   
    if (length(bgpixels) > 0) {
       img = matrix(NA, nrow = nrow(data) + length(bgpixels), ncol = ncol(data))
       img[-bgpixels, ] = data
    } else {
       img = data
    }
-   
       
    dim(img) = c(height, width, ncol(data))
    img
@@ -93,24 +84,58 @@ mda.setimbg = function(data, bgpixels) {
 #' indices for one or three columns to show as image channels
 #' 
 #' @export
-imshow = function(data, channels = 1, show.excluded = FALSE, main = NULL) {
+imshow = function(data, channels = 1, show.excluded = FALSE, main = NULL, colmap = 'jet') {
    names = colnames(data)
    attrs = mda.getattr(data)
+   
    data = mda.subset(data, select = channels)
    data = (data - min(data)) / (max(data) - min(data))
-   data = mda.data2im(data, show.excluded = show.excluded)
-   data[is.na(data)] = 1
+   data = mda.data2im(data)
    
-   if (length(channels) == 1) 
-      data = as.raster(data[, , 1])
-  
+   bg = is.na(data)
+   
+   nrows = dim(data)[1]
+   ncols = dim(data)[2]
+   
+   if (is.character(colmap)) {
+      if (colmap == 'gray')
+         colmap = colorRampPalette(c('#000000', '#ffffff'), space = 'Lab')(256)
+      else
+         colmap = mdaplot.getColors(256, NULL, colmap)
+   }
+
    if (is.null(main) && !is.null(names))
       main = paste(' ', names[channels], sep = '', collapse = '')
+ 
+   if (length(channels) == 1) {
+      nrows = nrow(data)
+      image(t(data[seq(nrows, 1, -1), , 1]), xlim = c(0, 1), ylim = c(0, 1), zlim = c(0, 1), 
+            main = main, useRaster = T, col = colmap, axes = FALSE)
+      if (any(bg)) {
+         bgimg = matrix(NA, nrows, ncols)
+         bgimg[bg[, , 1]] = 0
+         rasterImage(bgimg, 0, 0, 1, 1)
+      }
+         
+   } else {
+      if (any(bg))
+         data[bg] = 0
+      plot(0, main = main, type = 'n', xaxs = 'i', yaxs = 'i', xlab = '', ylab = '', 
+           xlim = c(0, 1), ylim = c(0, 1), axes = FALSE)
+      rasterImage(data, 0, 0, 1, 1)
+   } 
+  
+   # hide excluded pixels with dark gray color
+   if (show.excluded == FALSE && length(attrs$exclrows) > 0) {
+      ind = 1:(nrows * ncols)
+      if (length(attrs$bgpixels) > 0)
+         ind = ind[-attrs$bgpixels]
+      eximage = rep(NA, nrows * ncols)
+      eximage[ind[attrs$exclrows]] = 0.25
+      dim(eximage) = c(nrows, ncols)
+      rasterImage(eximage, 0, 0, 1, 1)
+   }
    
-   plot(0, main = main, type = 'n', xaxt = 'n', yaxt = 'n', xlab = '', ylab = '', 
-        xlim = c(0, 1), ylim = c(0, 1))
-   
-   rasterImage(data, 0, 0, 1, 1)
 }
 
 #' Wrapper for show() method
