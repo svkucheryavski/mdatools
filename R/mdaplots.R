@@ -1072,8 +1072,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas)
    }
    
-   #  get proper colors      
-   if (is.null(density) && !is.null(cgroup) && !(type == 'h' || type == 'e')) {   
+   #  get proper colors     
+   if (density == FALSE && !is.null(cgroup) && !(type == 'h' || type == 'e')) {   
       # show color groups according to cdata values
       col = mdaplot.getColors(cgroup = cgroup, colmap = colmap)
    } else {
