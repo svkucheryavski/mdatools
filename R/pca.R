@@ -829,10 +829,12 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
          show.lines = FALSE
       }
       
-      if (is.null(show.legend) && length(data) > 0)
-         show.legend = TRUE
-      else
-         show.legend = FALSE 
+      if (is.null(show.legend)) {
+         if (length(data) > 0)
+            show.legend = TRUE
+         else
+            show.legend = FALSE 
+      }
       
       if (length(data) == 1)
          mdaplot(data[[1]], type = type, main = main, show.labels = show.labels, show.lines = show.lines, 
@@ -1056,7 +1058,7 @@ plotBiplot.pca = function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.ge
 #' See examples in help for \code{\link{pca}} function.
 #' 
 #' @export
-plot.pca = function(x, comp = c(1, 2), show.labels = F, show.legend = T, ...)
+plot.pca = function(x, comp = c(1, 2), show.labels = FALSE, show.legend = TRUE, ...)
 {   
    obj = x
    
