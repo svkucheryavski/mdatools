@@ -182,12 +182,12 @@ predict.simca = function(object, x, c.ref = NULL, cal = FALSE, ...) {
    } else {
       pres = object$calres
    }
-   
+  
+    
    c.pred = simca.classify(object, pres)
    dimnames(c.pred) = list(rownames(x), colnames(object$loadings), object$classname)
    c.pred = mda.setattr(c.pred, mda.getattr(object$calres$scores))
    attr(c.pred, 'name') = 'Class, predicted values'
-
    cres = classres(c.pred, c.ref = c.ref, ncomp.selected = object$ncomp.selected)
    res = simcares(pres, cres)
    
@@ -462,42 +462,27 @@ summary.simca = function(object, ...)
    cat(sprintf('Significance level (alpha): %.2f\n', obj$alpha))
    cat(sprintf('Selected number of components: %d\n\n', obj$ncomp.selected))
    
-   data = cbind(round(obj$calres$expvar, 2),
-                round(obj$calres$cumexpvar, 2),
-                round(obj$calres$sensitivity[1, ], 2)
-   )   
+   data = cbind(obj$calres$expvar, obj$calres$cumexpvar, obj$calres$sensitivity[1, ])
    colnames(data) = c('Expvar', 'Cumexpvar', 'Sens (cal)')
    
-   if (!is.null(obj$cvres))
-   {
+   if (!is.null(obj$cvres)) {
       cnames = colnames(data)
-      data = cbind(data,
-                   round(obj$cvres$sensitivity[1, ], 2)
-      )
-      colnames(data) = c(cnames, 'Sens (cv)')
+      data = cbind(data, obj$cvres$expvar, obj$cvres$sensitivity[1, ])
+      colnames(data) = c(cnames, 'Expvar (cv)', 'Sens (cv)')
    }   
    
-   if (!is.null(obj$testres))
-   {
+   if (!is.null(obj$testres)) {
       cnames = colnames(data)
-      if (is.null(obj$testres$specificity[1, ]) || min(obj$testres$specificity[1, ]) == 1)
-      {
-         data = cbind(data,
-                      round(obj$testres$sensitivity[1, ], 2)
-         )
-         colnames(data) = c(cnames, 'Sens (test)')         
-      }
-      else  
-      {   
-         data = cbind(data,
-                      round(obj$testres$specificity[1, ], 2),
-                      round(obj$testres$sensitivity[1, ], 2)
-         )
-         colnames(data) = c(cnames, 'Spec (test)', 'Sens (test)')
+      if (!is.null(obj$testres$c.ref)) {
+         data = cbind(data, obj$testres$expvar, obj$testres$specificity[1, ], obj$testres$sensitivity[1, ])
+         colnames(data) = c(cnames, 'Expvar (test)', 'Spec (test)', 'Sens (test)')
+      } else {
+         data = cbind(data, obj$testres$expvar, obj$testres$sensitivity[1, ])
+         colnames(data) = c(cnames, 'Expvar (test)', 'Sens (test)')
       }
    }   
    
-   print(data)   
+   print(round(data, 2))   
 }  
 
 #' Print method for SIMCA model object

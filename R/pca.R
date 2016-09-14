@@ -373,7 +373,7 @@ pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info)
    x = mda.df2mat(x)
    x.nrows = nrow(x)
    x.ncols = ncol(x)
-  
+   
    # check if data has missing values
    if (sum(is.na(x)) > 0)
       stop('Data has missing values, try to fix this using pca.mvreplace.')
@@ -668,7 +668,13 @@ predict.pca = function(object, x, cal = FALSE, ...)
 {
    # get attributes
    attrs = mda.getattr(x)
- 
+
+   # convert to matrix
+   x = mda.df2mat(x)
+   
+   if (ncol(x) != nrow(object$loadings))
+      stop('Number and type of data columns should be the same as in calibration dataset!')
+   
    # compute scores
    x = prep.autoscale(x, center = object$center, scale = object$scale)
    scores = x %*% object$loadings
