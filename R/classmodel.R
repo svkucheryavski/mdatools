@@ -173,16 +173,20 @@ plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', typ
    
    data = list(cal = obj$calres[[param]][nc, ])
 
-   if (!is.null(obj$cvres))
-      data$cv = obj$cvres[[param]][nc, ]   
-
-   if (!is.null(obj$testres))
-      data$test = obj$testres[[param]][nc, ]   
-
-   if (is.null(main))
-      main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2, length(param)), 
-                     toString(classname))
-
-   mdaplotg(data, type = type, main = main, xlab = xlab, ylab = ylab, ylim = ylim, ...)
+   if (any(is.nan(data$cal))) {
+      warning('Specificity values are not available!')
+   } else {
+      if (!is.null(obj$cvres))
+         data$cv = obj$cvres[[param]][nc, ]   
+      
+      if (!is.null(obj$testres))
+         data$test = obj$testres[[param]][nc, ]   
+      
+      if (is.null(main))
+         main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2), 
+                        toString(classname))
+      mdaplotg(data, type = type, main = main, xlab = xlab, ylab = ylab, ylim = ylim, ...)
+   }
+   
 }
 
