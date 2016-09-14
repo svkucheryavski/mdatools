@@ -1,15 +1,16 @@
 v.0.8.0
 =======
 * tutorial has been moved from GitBook to Bookdown and fully rewritten
-* the `mdaplot()` and `mdaplotg()` were rewritten completely and now are more easy to use (check Bookdown docs)
+* GitHub repo for the package has the tutorial as a static html site in `docs` folder
+* the `mdaplot()` and `mdaplotg()` were rewritten completely and now are more easy to use (check tutorial)
 * new color scheme 'jet' with jet colors
 * new plot type (`'d'`) for density scatter plot
 * support for `xlas` and `ylas` in plots to rotate axis ticks
 * support for sevearal data attributes to give extra functionality for plots (including manual x-values for line plots)
 * rows and columns can be now hidden/excluded via attributes
-* factor columns of data frames are now converted to dummy variables automatically when model is fitted/applied
+* factor columns of data frames are now converted to dummy variables automatically when model is created/applied
 * scores and loadings plots in PCA show % of explained variance in axis labels
-* biplot is now available for PCA models (`plotBiplot`)
+* biplot is now available for PCA models (`plotBiplot()`)
 * scores plot for PCA model can be now also shown with color grouping (`cgroup`) if no there is no test set
 * cross-validation in PCA and PLS has been improved to make it faster
 

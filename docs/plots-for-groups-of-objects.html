@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Getting started with mdatools for R</title>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
+  <meta name="generator" content="bookdown 0.1.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Getting started with mdatools for R" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  <meta name="github-repo" content="svkucheryavski/mdatools.bookdown" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Getting started with mdatools for R" />
+  
+  <meta name="twitter:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  
+
+<meta name="author" content="Sergey Kucheryavskiy">
+
+<meta name="date" content="2016-09-13">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="simple-plots.html">
+<link rel="next" href="working-with-images.html">
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a></li>
+<li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
+<li class="chapter" data-level="" data-path="what-mdatools-can-do.html"><a href="what-mdatools-can-do.html"><i class="fa fa-check"></i>What mdatools can do?</a></li>
+<li class="chapter" data-level="" data-path="how-to-install.html"><a href="how-to-install.html"><i class="fa fa-check"></i>How to install</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="datasets-and-plots.html"><a href="datasets-and-plots.html"><i class="fa fa-check"></i>Datasets and plots</a><ul>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html"><i class="fa fa-check"></i>Attributes and factors</a><ul>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#package-specific-attributes"><i class="fa fa-check"></i>Package specific attributes</a></li>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#attributes-for-plots"><i class="fa fa-check"></i>Attributes for plots</a></li>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#excludinghiding-rows-and-columns"><i class="fa fa-check"></i>Excluding/hiding rows and columns</a></li>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#special-methods-for-data-transformations"><i class="fa fa-check"></i>Special methods for data transformations</a></li>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#data-frames-with-factors"><i class="fa fa-check"></i>Data frames with factors</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html"><i class="fa fa-check"></i>Simple plots</a><ul>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html#scatter-plots"><i class="fa fa-check"></i>Scatter plots</a></li>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html#line-plots"><i class="fa fa-check"></i>Line plots</a></li>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html#bar-and-errorbar-plots"><i class="fa fa-check"></i>Bar and errorbar plots</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html"><i class="fa fa-check"></i>Plots for groups of objects</a><ul>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html#one-matrix-or-data-frame"><i class="fa fa-check"></i>One matrix or data frame</a></li>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html#list-with-matrices-or-data-frames"><i class="fa fa-check"></i>List with matrices or data frames</a></li>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html#use-factors-to-split-a-dataset-into-groups"><i class="fa fa-check"></i>Use factors to split a dataset into groups</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="working-with-images.html"><a href="working-with-images.html"><i class="fa fa-check"></i>Working with images</a></li>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html"><i class="fa fa-check"></i>Preprocessing</a><ul>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html#autoscaling"><i class="fa fa-check"></i>Autoscaling</a></li>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html#correction-of-spectral-baseline"><i class="fa fa-check"></i>Correction of spectral baseline</a></li>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html#smoothing-and-derivatives"><i class="fa fa-check"></i>Smoothing and derivatives</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="principal-component-analysis.html"><a href="principal-component-analysis.html"><i class="fa fa-check"></i>Principal component analysis</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results.html"><a href="models-and-results.html"><i class="fa fa-check"></i>Models and results</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results.html"><a href="models-and-results.html#model-calibration"><i class="fa fa-check"></i>Model calibration</a></li>
+<li class="chapter" data-level="" data-path="models-and-results.html"><a href="models-and-results.html#model-validation"><i class="fa fa-check"></i>Model validation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#support-for-images"><i class="fa fa-check"></i>Support for images</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluded-rows-and-columns"><i class="fa fa-check"></i>Excluded rows and columns</a></li>
+</ul></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Getting started with mdatools for R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="plots-for-groups-of-objects" class="section level2 unnumbered">
+<h2>Plots for groups of objects</h2>
+<p>The package has another method for creating plots, <code>mdaplotg()</code>, which aims at making plots for groups of objects. It can be several groups of points, lines or bars, where evry group has its own attributes, such as color, marker, line type and width, etc. There is a simple criterion to distinguish between the simple and group plots: group plots usually need a legend and simple plots — not. The <code>mdaplotg()</code> method allows to do a lot of things (e.g. split data into groups, add a legend and labels, etc) much easier and this section will show most of the details.</p>
+<p>I will use the <em>People</em> dataset for most of the examples, so let us load it first, add some attributes, and exclude column with income.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(people)
+<span class="kw">attr</span>(people, <span class="st">&#39;name&#39;</span>) =<span class="st"> &#39;People&#39;</span>
+<span class="kw">attr</span>(people, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> &#39;Parameters&#39;</span>
+
+people =<span class="st"> </span><span class="kw">mda.exclcols</span>(people, <span class="st">&#39;Income&#39;</span>)</code></pre></div>
+<p>There are three ways to provide data sets for making the group plots. Let’s discuss them first and then talk about some extra features.</p>
+<div id="one-matrix-or-data-frame" class="section level3 unnumbered">
+<h3>One matrix or data frame</h3>
+<p>If dataset is a matrix or a data frame, <code>mdaplotg()</code> will make a line, scatter-line or a bar plot, considering every row as a separate group. This can be useful, when, for example, you want to show how explained variance depends on a number of components for calibration and test set, or how loadings for first two components look like. If you want to change any parameters, like <code>pch</code>, <code>lty</code>, <code>lwd</code>, <code>col</code> or similar you need to provide either a vector with value for each group or one value for all groups. Axis limits, ticks, ticklabels, etc. can be defined similarly to the simple plots. Here are some examples.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># let&#39;s create a small subset of the people data</span>
+p =<span class="st"> </span><span class="kw">mda.subset</span>(people, <span class="dt">subset =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>), <span class="dt">select =</span> <span class="kw">c</span>(<span class="st">&#39;Height&#39;</span>, <span class="st">&#39;Weight&#39;</span>, <span class="st">&#39;Shoesize&#39;</span>, <span class="st">&#39;Swim&#39;</span>))
+
+<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>)
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">xticks =</span> <span class="dv">1</span>:<span class="dv">4</span>)
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>), <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;green&#39;</span>, <span class="st">&#39;blue&#39;</span>), <span class="dt">pch =</span> <span class="dv">1</span>, 
+         <span class="dt">xticklabels =</span> <span class="kw">colnames</span>(p))</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-35-1.png" width="864" /></p>
+<p>As you can see, <code>mdaplotg()</code> automatically created the legend and set colors, line parameters, etc. correctly. You can change position of the legend using same names as for basic <code>legend()</code> command from R, or hide it using parameter <code>show.legend = FALSE</code>, as it is shown below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;top&#39;</span>)
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;bottomleft&#39;</span>)
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;bottom&#39;</span>)
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.legend =</span> F)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-36-1.png" width="864" /></p>
+<p>Group plot also allow to show labels, in this case they can be either values, names or indices of the columns.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">show.labels =</span> T)
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;indices&#39;</span>)
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)
+<span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-37-1.png" width="864" /></p>
+</div>
+<div id="list-with-matrices-or-data-frames" class="section level3 unnumbered">
+<h3>List with matrices or data frames</h3>
+<p>In this case every element of the list will be treated as a separate group. This way allow to make scatter plots as well and line plots with several line in a group. Barplot can be also made but in this case first row from each datasets will be used. If you use names when create the list, the names will be taken as legend labels, otherwise method will look at attribute <code>'name'</code> for each data set.</p>
+<p>In the example below we split <em>People</em> data to males and females and show the group plots.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sex =<span class="st"> </span>people[, <span class="st">&#39;Sex&#39;</span>]
+m =<span class="st"> </span><span class="kw">mda.subset</span>(people, <span class="dt">subset =</span> sex ==<span class="st"> </span>-<span class="dv">1</span>)
+f =<span class="st"> </span><span class="kw">mda.subset</span>(people, <span class="dt">subset =</span> sex ==<span class="st">  </span><span class="dv">1</span>)
+d =<span class="st"> </span><span class="kw">list</span>(<span class="dt">male =</span> m, <span class="dt">female =</span> f)
+
+<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)
+<span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>)
+<span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>)
+<span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;blue&#39;</span>), <span class="dt">pch =</span> <span class="dv">1</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-38-1.png" width="864" /></p>
+<p>Most of the things described in the previous subsection will work similarly for this case. We will just add a bit more details on how labels and excluded rows are processed for the scatter plots. By default labels are row names or indices. In <code>mdaplotg()</code> you can not provide vector with manual values, so the best way to change them is to assign them as the row names. Indices are unique within each group, so if you have, e.g. three groups of points, there will be three points with index “1”, three with “2”, etc. The points from excluded rows are shown similarly to <code>mdaplot()</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#let&#39;s exclude some rows</span>
+m =<span class="st"> </span><span class="kw">mda.exclrows</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">5</span>))
+f =<span class="st"> </span><span class="kw">mda.exclrows</span>(f, <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>))
+
+d =<span class="st"> </span><span class="kw">list</span>(<span class="dt">male =</span> m, <span class="dt">female =</span> f)
+
+<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;topleft&#39;</span>, <span class="dt">show.labels =</span> T)
+<span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;topleft&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.excluded =</span> T)
+<span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;topleft&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;indices&#39;</span>)
+<span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;topleft&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;indices&#39;</span>, 
+         <span class="dt">show.excluded =</span> T)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-39-1.png" width="864" /></p>
+<p>Working with excluding columns is a bit more difficult in case of the group plots, as, in practice, different groups might have different columns excluded. To avoid any issues it is recommended to assign the attribute <code>xaxis.values</code> in this case even if the values are just order numbers (1, 2, 3, …).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">attr</span>(m, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span><span class="dv">1</span>:<span class="dv">12</span>
+<span class="kw">attr</span>(f, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span><span class="dv">1</span>:<span class="dv">12</span>
+m =<span class="st"> </span><span class="kw">mda.exclcols</span>(m, <span class="kw">c</span>(<span class="st">&#39;Hairleng&#39;</span>, <span class="st">&#39;Beer&#39;</span>))
+f =<span class="st"> </span><span class="kw">mda.exclcols</span>(f, <span class="kw">c</span>(<span class="st">&#39;Weight&#39;</span>, <span class="st">&#39;Shoesize&#39;</span>))
+
+
+d =<span class="st"> </span><span class="kw">list</span>(<span class="dt">male =</span> m, <span class="dt">female =</span> f)
+
+<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;topleft&#39;</span>, <span class="dt">show.labels =</span> T)
+<span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;topleft&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.excluded =</span> T)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-40-1.png" width="864" /></p>
+<p>As you can note, the behavior in this case is similar to what we have seen for the <code>mdaplot()</code> — the excluded columns are simply ignored and the points before and after are connected with a straight line.</p>
+</div>
+<div id="use-factors-to-split-a-dataset-into-groups" class="section level3 unnumbered">
+<h3>Use factors to split a dataset into groups</h3>
+<p>One more way to split data set into groups is to provide one or several factor columns using argument <code>groupby</code>. In this case <code>mdaplotg()</code> will find all combinations of the factor levels and split rows of dataset to the corresponding groups. In the example below we use variables <em>Region</em> and <em>Sex</em> to make plots for four groups.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sex =<span class="st"> </span><span class="kw">factor</span>(people[, <span class="st">&#39;Sex&#39;</span>], <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&#39;M&#39;</span>, <span class="st">&#39;F&#39;</span>))
+reg =<span class="st"> </span><span class="kw">factor</span>(people[, <span class="st">&#39;Region&#39;</span>], <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&#39;S&#39;</span>, <span class="st">&#39;M&#39;</span>))
+groups =<span class="st"> </span><span class="kw">data.frame</span>(sex, reg)
+
+<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">mdaplotg</span>(people, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">groupby =</span> groups)
+<span class="kw">mdaplotg</span>(people, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">groupby =</span> groups)
+<span class="kw">mdaplotg</span>(people, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">groupby =</span> groups)
+<span class="kw">mdaplotg</span>(people, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">groupby =</span> groups)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-41-1.png" width="864" /></p>
+<p>All parameters, described before, will work the same way in this case.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="simple-plots.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="working-with-images.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
+
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 1
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

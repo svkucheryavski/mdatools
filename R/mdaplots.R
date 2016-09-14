@@ -777,7 +777,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
          y.values = data[, 1, drop = F]
          attr(y.values, 'name') = colnames(data)[1]
          x.values = 1:length(y.values)
-         attr(x.values, 'name') = ifelse(is.null(data.attr$xaxis.name), 'Objects', data.attr$xaxis.name)
+         attr(x.values, 'name') = ifelse(is.null(data.attr$yaxis.name), 'Objects', data.attr$yaxis.name)
       }
    } else {
       # the x.values have been defined earlier     
@@ -1287,8 +1287,9 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', 
                     single.x = T, show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
-                    show.excluded = FALSE, lab.col = 'darkgray', lab.cex = 0.65, xlas = 1, ylas = 1, ...)
-{   
+                    show.excluded = FALSE, lab.col = 'darkgray', lab.cex = 0.65, xlas = 1, ylas = 1, ...) {   
+
+   # name for the plot (mdain)
    name = NULL
    
    # prepare list with groups of objects
@@ -1409,11 +1410,18 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    loc.ylim = c(min(loc.ylim[, 1]), max(loc.ylim[, 2]))
    lim = list(xlim = loc.xlim, ylim = loc.ylim)
 
+   # change limits to user defined if any
    if (!is.null(ylim))
       lim$ylim = ylim
    
    if (!is.null(xlim))
       lim$xlim = xlim
+
+   # correct x limits if bar plot should be shown
+   if (type[1] == 'h') {
+      dx = diff(lim$xlim) / 20
+      lim$xlim = lim$xlim + c(-dx, dx)
+   }
    
    col = mdaplot.getColors(ngroups, colmap = colmap)
    

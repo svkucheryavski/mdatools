@@ -150,7 +150,7 @@ plotMisclassified.classmodel = function(obj, nc = NULL, ...)
 #' most of the graphical parameters from \code{\link{mdaplotg}} function can be used.
 #' 
 #' @export
-plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', type = 'h', legend = NULL, 
+plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', type = 'h', 
                                  main = NULL, xlab = 'Components', ylab = '', 
                                  ylim = c(0, 1.15), ...)
 {
@@ -171,32 +171,18 @@ plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', typ
       classname = sprintf('(%s)', obj$classnames[nc])
    }
    
-   data = cbind(1:obj$ncomp, obj$calres[[param]][nc, ])
-   labels = matrix(mdaplot.formatValues(obj$calres[[param]][nc, ]), ncol = 1)
-   legend_str = 'cal'
-   
+   data = list(cal = obj$calres[[param]][nc, ])
+
    if (!is.null(obj$cvres))
-   {
-      data = cbind(data, obj$cvres[[param]][nc, ])   
-      labels = cbind(labels, mdaplot.formatValues(obj$cvres[[param]][nc, ]))
-      legend_str = c(legend_str, 'cv')
-   }   
-   
+      data$cv = obj$cvres[[param]][nc, ]   
+
    if (!is.null(obj$testres))
-   {
-      data = cbind(data, obj$testres[[param]][nc, ])   
-      labels = cbind(labels, mdaplot.formatValues(obj$testres[[param]][nc, ]))
-      legend_str = c(legend_str, 'test')
-   }
-  
+      data$test = obj$testres[[param]][nc, ]   
+
    if (is.null(main))
       main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2, length(param)), 
                      toString(classname))
 
-   if (!is.null(legend))
-      legend_str = legend
-   
-   mdaplotg(data, type = type, main = main, xlab = xlab, ylab = ylab, legend = legend_str,
-            ylim = ylim, labels = labels, ...)
+   mdaplotg(data, type = type, main = main, xlab = xlab, ylab = ylab, ylim = ylim, ...)
 }
 

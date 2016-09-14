@@ -5,16 +5,15 @@
 \title{Prediction plot for classification results}
 \usage{
 \method{plotPredictions}{classres}(obj, nc = NULL, ncomp = NULL,
-  type = "p", legend = NULL, main = NULL, xlab = "Objects",
-  ylab = NULL, ylim = c(-1.2, 1.2), ...)
+  type = "p", legend = NULL, main = NULL, ylab = "", ylim = c(-1.2,
+  1.2), ...)
 }
 \arguments{
 \item{obj}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
 
 \item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
 
-\item{ncomp}{which number of components to make the plot for (can be one value for all classes or vector with
-separate values for each, if NULL - model selected number will be used).}
+\item{ncomp}{which number of components to make the plot for (one value, if NULL - model selected number will be used).}
 
 \item{type}{type of the plot}
 
@@ -22,14 +21,14 @@ separate values for each, if NULL - model selected number will be used).}
 
 \item{main}{main title for the plot}
 
-\item{xlab}{label for x axis}
-
 \item{ylab}{label for y axis}
 
 \item{ylim}{vector with two values - limits for y axis}
 
 \item{...}{most of the graphical parameters from \code{\link{mdaplotg}} or \code{\link{mdaplot}} function 
 can be used.}
+
+\item{xlab}{label for x axis}
 }
 \description{
 Makes a plot with predicted class values for classification results.

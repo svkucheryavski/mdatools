@@ -123,14 +123,6 @@
 simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
                  c.test = NULL, alpha = 0.05, method = 'svd', info = '')
 {
-   x = as.matrix(x)
-   
-   # check if data has missing values
-   if (sum(is.na(x)) > 0)
-   {
-      warning('Data has missing values, will try to fix using pca.mvreplace.')
-      x = pca.mvreplace(x, center = center, scale = scale)
-   }   
    
    if (!is.character(classname))
       stop('Argument "classname" must be a text!')
@@ -138,41 +130,23 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.t
    if (length(classname) > 20)
       stop('Argument "classname" must have up to 20 symbols!')
    
-   # correct maximum number of components
-   ncomp = min(ncomp, ncol(x), nrow(x) - 1)
-   
    # calibrate model  
-   model = pca.cal(x, ncomp, center = center, scale = scale, method = method)
-   model$ncomp = ncomp
-   model$ncomp.selected = model$ncomp
+   model = pca.cal(x, ncomp, center = center, scale = scale, method = method, alpha = alpha, info = info, cv = NULL)
    model$nclasses = 1
    model$classname = classname
-   model$info = info
-   model$alpha = alpha
-   
-   # calculate and assign limit values for T2 and Q residuals
-   lim = ldecomp.getResLimits(model$eigenvals, nrow(x), model$ncomp.selected, model$alpha)
-   model$T2lim = lim$T2lim
-   model$Qlim = lim$Qlim   
-
    model$call = match.call()   
    class(model) = c("simca", "classmodel", "pca")
    
    # apply model to calibration set
-   model$calres = predict.simca(model, x, c.ref = rep(classname, nrow(x)))
-   model$modpower = model$calres$modpower
+   model$calres = predict.simca(model, x, c.ref = rep(classname, nrow(x)), cal = TRUE)
    
    # do cross-validation if needed
    if (!is.null(cv))
       model$cvres = simca.crossval(model, x, cv, center = center, scale = scale)
    
    # apply model to test set if provided
-   if (!is.null(x.test))
-   {
-      if (is.null(c.test))
-         c.test = rep(classname, nrow(x.test))
+   if (!is.null(x.test)) 
       model$testres = predict.simca(model, x.test, c.ref = c.test)
-   }
    
    model
 }
@@ -200,30 +174,20 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.t
 #' See examples in help for \code{\link{simca}} function.
 #' 
 #' @export
-predict.simca = function(object, x, c.ref = NULL, cv = F, ...)
-{
-   x = as.matrix(x)
-   
-   if (is.null(rownames(x)))
-      rownames(x) = 1:nrow(x)
-   
-   if (is.null(colnames(x)))
-      colnames(x) = paste('v', 1:ncol(x), sep = '')
-   
-   pres = predict.pca(object, x, cv)     
-   pres$Qlim = object$Qlim
-   pres$T2lim = object$T2lim
+predict.simca = function(object, x, c.ref = NULL, cal = FALSE, ...) {
+   if (cal == FALSE) {
+      pres = predict.pca(object, x, cal = cal)     
+      pres$Qlim = object$Qlim
+      pres$T2lim = object$T2lim
+   } else {
+      pres = object$calres
+   }
    
    c.pred = simca.classify(object, pres)
-   
-   # check c.ref values and add dimnames
-   if (!is.null(c.ref))
-   {   
-      c.ref = as.matrix(c.ref)
-      rownames(c.ref) = rownames(x)
-      colnames(c.ref) = object$classname
-   } 
-   
+   dimnames(c.pred) = list(rownames(x), colnames(object$loadings), object$classname)
+   c.pred = mda.setattr(c.pred, mda.getattr(object$calres$scores))
+   attr(c.pred, 'name') = 'Class, predicted values'
+
    cres = classres(c.pred, c.ref = c.ref, ncomp.selected = object$ncomp.selected)
    res = simcares(pres, cres)
    
@@ -246,19 +210,15 @@ predict.simca = function(object, x, c.ref = NULL, cv = F, ...)
 #' @details
 #' This is a service function for SIMCA class, do not use it manually.
 #'  
-simca.classify = function(model, res)
-{
+simca.classify = function(model, res) {
    ncomp = model$ncomp
    c.pred = array(0, dim = c(nrow(res$Q), ncomp, 1))
-   dimnames(c.pred) = list(rownames(res$Q), paste('Comp', 1:ncomp), model$classname)
    
-   for (i in 1:ncomp)
-   {
+   for (i in 1:ncomp) {
       c.pred[, i, 1] = 
          res$T2[, i] <= model$T2lim[1, i] & res$Q[, i] <= model$Qlim[1, i]
    }   
    c.pred = c.pred * 2 - 1
-  
    c.pred
 }  
 
@@ -281,12 +241,25 @@ simca.classify = function(model, res)
 #' @return
 #' object of class \code{simcares} with results of cross-validation
 #'  
-simca.crossval = function(model, x, cv, center = T, scale = F)
-{
+simca.crossval = function(model, x, cv, center = T, scale = F) {
    ncomp = model$ncomp   
-   nobj = nrow(x)
+   
+   # convert data to a matrix 
+   attrs = mda.getattr(x)
+   x = mda.df2mat(x)
+   x.nrows = nrow(x)
+   x.ncols = ncol(x)
+   
+   # remove excluded rows 
+   if (length(attrs$exclrows) > 0)
+      x = x[-attrs$exclrows, , drop = F]
+   
+   # remove excluded columns
+   if (length(attrs$exclcols) > 0)
+      x = x[, -attrs$exclcols, drop = F]
    
    # get matrix with indices for cv segments
+   nobj = nrow(x)
    idx = crossval(nobj, cv)
    nseg = nrow(idx);
    nrep = dim(idx)[3]
@@ -311,15 +284,29 @@ simca.crossval = function(model, x, cv, center = T, scale = F)
          {   
             x.cal = x[-ind, , drop = F]
             x.val = x[ind, , drop = F]
-         
-            m = pca.cal(x.cal, ncomp, center, scale)               
-            res = predict.pca(m, x.val, cv = T)
+            
+            # autoscale calibration set
+            x.cal = prep.autoscale(x.cal, center = center, scale = scale)
+            
+            # get loadings
+            m = pca.run(x.cal, ncomp, model$method)               
+            
+            # apply autoscaling to the validation set
+            x.val = prep.autoscale(x.val, center = attr(x.cal, 'prep:center'), scale = attr(x.cal, 'prep:scale'))
+            
+            # get scores
+            scores = x.val %*% m$loadings
+            residuals = x.val - tcrossprod(scores, m$loadings)
+            
+            # compute distances
+            res = ldecomp.getDistances(scores, m$loadings, residuals, model$tnorm, cv = TRUE)
             Q[ind, ] = Q[ind, ] + res$Q
             T2[ind, ] = T2[ind, ] + res$T2
-                        
+            
+            # compute limits
             lim = ldecomp.getResLimits(m$eigenvals, nrow(x.cal), ncomp, model$alpha)
+            Qlim = Qlim + lim$Qlim
             T2lim = T2lim + lim$T2lim
-            Qlim = Qlim + lim$Qlim         
          }
       }  
    }
@@ -328,16 +315,49 @@ simca.crossval = function(model, x, cv, center = T, scale = F)
    T2 = T2 / nrep;
    Qlim = Qlim / nrep;
    T2lim = T2lim / nrep;
+   
    m = list(Qlim = Qlim, T2lim = T2lim, classname = model$classname, ncomp = model$ncomp)
    r = list(Q = Q, T2 = T2, classname = model$classname)
-   
    c.pred = simca.classify(m, r)
    
-   
+   # classify data
    dimnames(c.pred) = list(rownames(x), colnames(model$loadings), model$classname)
+  
+
+   # add names
    rownames(Q) = rownames(T2) = rownames(c.pred) = rownames(c.ref) = rownames(x)
    colnames(Q) = colnames(T2) = colnames(c.pred) = colnames(model$loadings)
-   pres = pcares(NULL, NULL, NULL, model$calres$totvar, model$tnorm, model$ncomp.selected, T2, Q)
+   
+   # add attributes
+   attr(Q, 'name') = 'Squared residual distance (Q)'
+   attr(Q, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
+   attr(Q, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
+   attr(Q, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
+   
+   attr(T2, 'name') = 'T2 residuals'
+   attr(T2, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
+   attr(T2, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
+   attr(T2, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
+
+   attr(c.pred, 'name') = 'Class, predicted values'
+   attr(c.pred, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
+   attr(c.pred, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
+   attr(c.pred, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
+   
+   attr(c.ref, 'name') = 'Class, reference values'
+   attr(c.ref, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
+   attr(c.ref, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
+   attr(c.ref, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
+   
+   # compute variance
+   var = ldecomp.getVariances(Q, model$calres$totvar)
+   
+   # in CV results there are no scores nor residuals, only residual distances and variances
+   pres = pcares(NULL, NULL, model$ncomp.selected, T2, Q, var$expvar, var$cumexpvar)
+   pres$Qlim = model$Qlim
+   pres$T2lim = model$T2lim
+
+   # combine results together   
    cres = classres(c.pred, c.ref = c.ref)   
    res = simcares(pres, cres)
    
@@ -365,9 +385,7 @@ simca.crossval = function(model, x, cv, center = T, scale = F)
 #' other plot parameters (see \code{mdaplotg} for details)
 #' 
 #' @export
-plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL, 
-                                    xlab = 'Variables', ylab = '', ...)
-{
+plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL, ylab = '', ...){
    if (is.null(main))
    {
       if (is.null(ncomp))
@@ -387,8 +405,8 @@ plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL,
          type = 'l'
    }
    
-   data = cbind(1:nvar, obj$modpower[, ncomp, drop = F])
-   mdaplot(data, type = type, xlab  = xlab, ylab = ylab, main = main, ...)
+   data = mda.subset(obj$modpower, select = ncomp)
+   mdaplot(mda.t(data), type = type, ylab = ylab, main = main, ...)
 }   
 
 #' Model overview plot for SIMCA

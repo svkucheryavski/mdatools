@@ -366,17 +366,18 @@ pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info)
    # prepare empty list for model object
    model = list()
    
+   # get attributes
+   attrs = mda.getattr(x)
+   
    # convert data to a matrix 
    x = mda.df2mat(x)
    x.nrows = nrow(x)
    x.ncols = ncol(x)
-   
+  
    # check if data has missing values
    if (sum(is.na(x)) > 0)
       stop('Data has missing values, try to fix this using pca.mvreplace.')
    
-   # get attributes
-   attrs = mda.getattr(x)
    
    # correct maximum number of components
    ncols = x.ncols - length(attrs$exclcols) 
@@ -389,7 +390,7 @@ pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info)
    # remove excluded rows 
    if (length(attrs$exclrows) > 0)
       x.cal = x.cal[-attrs$exclrows, , drop = F]
-   
+  
    # autoscale and save the mean and std values for predictions 
    x.cal = prep.autoscale(x.cal, center = center, scale = scale)
    model$center = attr(x.cal, 'prep:center')
@@ -450,7 +451,7 @@ pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info)
    
    # do cross-validation if needed
    if (!is.null(cv))
-      model$cvres = pca.crossval(model, x.cal, cv, center = center, scale = scale)
+      model$cvres = pca.crossval(model, x, cv, center = center, scale = scale)
 
    model
 }  
@@ -566,28 +567,35 @@ pca.nipals = function(x, ncomp)
 #' @return
 #' object of class \code{pcares} with results of cross-validation
 #'  
-pca.crossval = function(model, x, cv, center = T, scale = F)
-{      
-   ncomp = model$ncomp   
-   nobj = nrow(x)
+pca.crossval = function(model, x, cv, center = T, scale = F) {
+
+   # get attributes
+   attrs = mda.getattr(x)
+   
+   # remove excluded rows 
+   if (length(attrs$exclrows) > 0)
+      x = x[-attrs$exclrows, , drop = F]
+   
+   # remove excluded columns 
+   if (length(attrs$exclcols) > 0)
+      x = x[-attrs$exclcols, , drop = F]
    
    # get matrix with indices for cv segments
+   nobj = nrow(x)
    idx = crossval(nobj, cv)
    nrep = dim(idx)[3]
       
+   ncomp = model$ncomp   
    Q = matrix(0, ncol = ncomp, nrow = nobj)   
    T2 = matrix(0, ncol = ncomp, nrow = nobj)   
    
    # loop over repetitions and segments
-   
-   for (iRep in 1:nrep)
-   {   
-      for (iSeg in 1:nrow(idx))
-      {
+   for (iRep in 1:nrep) {   
+      for (iSeg in 1:nrow(idx)) {
+         
          ind = na.exclude(idx[iSeg, ,iRep])
       
-         if (length(ind) > 0)
-         {   
+         if (length(ind) > 0) {   
             x.cal = x[-ind, , drop = F]
             x.val = x[ind, , drop = F]
          
@@ -597,11 +605,14 @@ pca.crossval = function(model, x, cv, center = T, scale = F)
             # get loadings
             m = pca.run(x.cal, ncomp, model$method)               
             
+            # apply autoscaling to the validation set
+            x.val = prep.autoscale(x.val, center = attr(x.cal, 'prep:center'), scale = attr(x.cal, 'prep:scale'))
+            
             # get scores
             scores = x.val %*% m$loadings
             residuals = x.val - tcrossprod(scores, m$loadings)
              
-            # comput distances
+            # compute distances
             res = ldecomp.getDistances(scores, m$loadings, residuals, model$tnorm, cv = TRUE)
             Q[ind, ] = Q[ind, ] + res$Q
             T2[ind, ] = T2[ind, ] + res$T2
@@ -691,10 +702,12 @@ predict.pca = function(object, x, cal = FALSE, ...)
    
    # create and return the results object
    res = pcares(scores, residuals, object$ncomp.selected, dist$T2, dist$Q, var$expvar, var$cumexpvar)
-   res$modpower = dist$modpower
    res$Qlim = object$Qlim
    res$T2lim = object$T2lim
    res$totvar = totvar
+
+   if (cal == TRUE)
+      res$modpower = dist$modpower
    
    res
 }  
@@ -742,7 +755,8 @@ plotVariance.pca = function(obj, type = 'b', variance = 'expvar',
    if (!is.null(obj$testres))
       data$test = obj$testres[[variance]]
    
-   mdaplotg(data, main = main, xlab = xlab, ylab = ylab, show.legend = show.legend, type = type, ...)   
+   mdaplotg(data, main = main, xlab = xlab, xticks = 1:obj$ncomp, ylab = ylab, 
+            show.legend = show.legend, type = type, ...)   
 }
 
 #' Cumulative explained variance plot for PCA
@@ -766,8 +780,8 @@ plotVariance.pca = function(obj, type = 'b', variance = 'expvar',
 #' 
 #' @export
 plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained variance, %', 
-                               main = 'Cumulative variance', ...)
-{
+                               main = 'Cumulative variance', ...) {
+   
    plotVariance.pca(obj, variance = 'cumexpvar', xlab = xlab, ylab = ylab, main = main, ...)   
 }
 
@@ -988,6 +1002,9 @@ plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings',
       
       if (is.null(show.labels))
          show.labels = FALSE
+     
+      if (is.null(ylab))
+         ylab = ''
       
       if (show.axes == TRUE && type != 'h')
          show.lines = c(NA, 0)

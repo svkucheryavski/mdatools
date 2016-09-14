@@ -4,7 +4,7 @@
 \alias{predict.simca}
 \title{SIMCA predictions}
 \usage{
-\method{predict}{simca}(object, x, c.ref = NULL, cv = F, ...)
+\method{predict}{simca}(object, x, c.ref = NULL, cal = FALSE, ...)
 }
 \arguments{
 \item{object}{a SIMCA model (object of class \code{simca})}
@@ -13,9 +13,9 @@
 
 \item{c.ref}{a vector with reference class names (same as class names for models)}
 
-\item{cv}{logical, are predictions for cross-validation or not}
-
 \item{...}{other arguments}
+
+\item{cv}{logical, are predictions for cross-validation or not}
 }
 \value{
 SIMCA results (an object of class \code{simcares})

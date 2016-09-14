@@ -97,7 +97,7 @@ imshow = function(data, channels = 1, show.excluded = FALSE, main = NULL, colmap
    nrows = dim(data)[1]
    ncols = dim(data)[2]
    
-   if (is.character(colmap)) {
+   if (is.character(colmap) && length(colmap) == 1) {
       if (colmap == 'gray')
          colmap = colorRampPalette(c('#000000', '#ffffff'), space = 'Lab')(256)
       else
@@ -377,6 +377,10 @@ mda.t = function(x) {
 #'  
 #' @export 
 mda.exclrows = function(x, ind) {
+
+   if(is.null(ind))
+      return(x)
+   
    excl.rows = attr(x, 'exclrows', exact = TRUE)
    nrows.tot = nrow(x)
    nrows.excl = length(excl.rows)
@@ -435,6 +439,9 @@ mda.inclrows = function(x, ind) {
 #'  
 #' @export 
 mda.exclcols = function(x, ind) {
+   if(is.null(ind))
+      return(x)
+
    excl.cols = attr(x, 'exclcols', exact = TRUE)
    ncols.tot = ncol(x)
    ncols.excl = length(excl.cols)
@@ -589,12 +596,9 @@ mda.getexclind = function(excl, names, n) {
 mda.df2mat = function(x) {
    attrs = mda.getattr(x)
 
-   if (is.null(x))
-      return()
-   
-   if (is.matrix(x))
+   if (is.null(x) || is.matrix(x) || is.vector(x))
       return(x)
-  
+   
    col.fac = unlist(lapply(x, is.factor))
    col.num = which(!col.fac)
    col.fac = which(col.fac)
@@ -635,7 +639,11 @@ mda.df2mat = function(x) {
       }
       
       # split data to numeric columns and factors
-      num.data = as.matrix(x[, -col.fac, drop = FALSE])
+      if (length(col.fac) < ncol(x))
+         num.data = as.matrix(x[, -col.fac, drop = FALSE])
+      else
+         num.data = NULL
+      
       fac.data = x[, col.fac, drop = FALSE]
       if (!is.null(exclcols.fac.ind) && length(exclcols.fac.ind) > 0) {
          fac.data.hidden = fac.data[, exclcols.fac.ind, drop = FALSE]

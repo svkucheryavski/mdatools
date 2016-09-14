@@ -5,8 +5,8 @@
 \title{Performance plot for classification model}
 \usage{
 \method{plotPerformance}{classmodel}(obj, nc = NULL, param = "specificity",
-  type = "h", legend = NULL, main = NULL, xlab = "Components",
-  ylab = "", ylim = c(0, 1.15), ...)
+  type = "h", main = NULL, xlab = "Components", ylab = "", ylim = c(0,
+  1.15), ...)
 }
 \arguments{
 \item{obj}{classification model (object of class \code{plsda}, \code{simca}, etc.).}
@@ -18,8 +18,6 @@ or \code{'misclassified'})}
 
 \item{type}{type of the plot}
 
-\item{legend}{vector with legend items}
-
 \item{main}{main title for the plot}
 
 \item{xlab}{label for x axis}
@@ -29,6 +27,8 @@ or \code{'misclassified'})}
 \item{ylim}{vector with two values - limits for y axis}
 
 \item{...}{most of the graphical parameters from \code{\link{mdaplotg}} function can be used.}
+
+\item{legend}{vector with legend items}
 }
 \description{
 Makes a plot with sensitivity values vs. model complexity (e.g. number of components)

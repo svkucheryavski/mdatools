@@ -40,16 +40,14 @@
 #'  \code{\link{plotMisclassified.classres}} \tab makes plot with misclassified ratio values.\cr
 #'  \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity and sensitivity values.\cr
 #' }
-classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL)
-{
-   if (!is.null(c.ref))
-   {
+classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL) {
+   if (!is.null(c.ref)) {
+      attrs = mda.getattr(c.ref)
       c.ref = as.matrix(c.ref)
+      c.ref = mda.setattr(c.ref, attrs)
       obj = getClassificationPerformance(c.ref, c.pred)
       obj$c.ref = c.ref
-   }
-   else
-   {
+   } else {
       obj = list()
    }   
 
@@ -108,7 +106,6 @@ getClassificationPerformance = function(c.ref, c.pred)
    misclassified = matrix(0, nrow = nclasses + 1, ncol = ncomp)
 
    classnames = dimnames(c.pred)[[3]]
-   
    for (i in 1:nclasses)         
    {   
       fn[i, ] = colSums((c.ref[, 1] == classnames[i]) & (c.pred[, , i, drop = F] == -1))
@@ -314,48 +311,37 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
                                     main = NULL, xlab = 'Components', 
                                     ylab = '', ylim = c(0, 1.1), ...)
 {
-   if (is.null(nc))
-   {
+   if (is.null(nc)) {
       nc =  obj$nclasses + 1
       
       if (obj$nclasses > 1)
          classname = '(all classes)'
       else
          classname = ''
-   }
-   else
-   {
+   } else {
       if (nc > obj$nclasses || nc < 1)
          stop('Wrong value for argument "nc"!')
 
       classname = sprintf('(%s)', dimnames(obj$c.pred)[[3]][nc])
    }
 
-   if (param == 'all')
-   {   
+   if (param == 'all') {   
       if (is.null(main))
-      {  
          main = sprintf('Prediction performance %s', classname);
-      }
 
-      if (is.null(legend))
-         legend = c('sensitivity', 'specificity', 'misclassified')
+      data = list(
+         sensitivity = obj$sensitivity[nc, ],
+         specificity = obj$specificity[nc, ],
+         misclassified = obj$misclassified[nc, ]
+      )
 
-      data = cbind(1:length(obj$sensitivity[nc, ]), obj$sensitivity[nc, ], obj$specificity[nc, ],
-                   obj$misclassified[nc, ])
-      labels = round(cbind(obj$sensitivity[nc, ], obj$specificity[nc, ], obj$misclassified[nc, ]), 2)
-      
-      mdaplotg(data, type = type, legend = legend, main = main, xlab = xlab, ylim = ylim,
-               ylab = ylab, labels = labels, ...)
-   }
-   else
-   {
+      mdaplotg(data, type = type, legend = legend, main = main, xlab = xlab, ylim = ylim, ylab = ylab, ...)
+   } else {
       if (is.null(main))
-         main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2, ), classname)
+         main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2), classname)
       
-      data = cbind(1:length(obj[[param]][nc, ]), obj[[param]][nc, ])
-      labels = round(obj[[param]][nc, ], 2)
-      mdaplot(data, type = type, main = main, xlab = xlab, ylab = ylab, ylim = ylim, labels = labels, ...)
+      data = obj[[param]][nc, , drop = F]
+      mdaplot(data, type = type, main = main, xlab = xlab, ylab = ylab, ylim = ylim, ...)
    }
 }
 
@@ -369,8 +355,7 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
 #' @param nc
 #' if there are several classes, which class to make the plot for (NULL - summary for all classes).
 #' @param ncomp
-#' which number of components to make the plot for (can be one value for all classes or vector with
-#' separate values for each, if NULL - model selected number will be used).
+#' which number of components to make the plot for (one value, if NULL - model selected number will be used).
 #' @param type
 #' type of the plot
 #' @param legend
@@ -392,14 +377,13 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
 #' 
 #' @export
 plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', legend = NULL, 
-                                    main = NULL, xlab = 'Objects', ylab = NULL, ylim = c(-1.2, 1.2),
+                                    main = NULL, ylab = '', ylim = c(-1.2, 1.2),
                                     ...)
 {
    if (is.null(nc))
       nc = 1:obj$nclasses
 
-   if (is.null(main))
-   {   
+   if (is.null(main)) {   
       main = 'Predictions'
 
       if (!is.null(ncomp) && length(ncomp) == 1)
@@ -411,84 +395,45 @@ plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', le
    if (max(ncomp) > dim(obj$c.pred)[2])
       stop('Wrong value for ncomp parameter!')
 
-   if (is.null(ylab))
-      ylab = 'Classes'
-
-   if (!is.null(obj$c.ref))
-   {   
-      cdata = NULL
-      refdata = NULL
-      nullidx = matrix(TRUE, nrow = nrow(obj$c.pred), ncol = 1)
-
-      for (i in 1:length(nc))
-      {
-         nullidx = obj$c.pred[, ncomp[i], nc[i]] == -1 & nullidx
-
-         objn = which(obj$c.pred[, ncomp[i], nc[i]] == 1)
-
-         if (length(objn) > 0)
-         {   
-            vals = matrix(nc[i], nrow = length(objn), ncol = 1)
-
-            data = cbind(objn, vals)
-            rownames(data) = rownames(obj$c.pred)[objn]
-
-            refdata = c(refdata, obj$c.ref[objn])
-            cdata = rbind(cdata, data)
-         }   
-      }
-
-      if (length(which(nullidx == T)) > 0)
-      {  
-         data = cbind(which(nullidx == T), 0)
-         rownames(data) = rownames(obj$c.pred)[nullidx]
-         cdata = rbind(cdata, data)
-         refdata = c(refdata, obj$c.ref[nullidx == T])
-      }
-
-      pdata = list()
-      refc = unique(obj$c.ref)
-      legend_str = NULL;
-
-      for (i in 1:length(refc))
-      {
-         idx = refdata == refc[i]         
-         data = cdata[idx, 1:2]
-         pdata[[i]] = data
-         legend_str[i] = toString(refc[i])
-      }  
-
-      if (is.null(legend) && length(legend_str) > 1)
-         legend = legend_str
-
-      mdaplotg(pdata, type = 'p', main = main, xlab = xlab, ylab = ylab, legend = legend,
-               yticks = c(0, nc), yticklabels = c('None', dimnames(obj$c.pred)[[3]][nc]), ...)
+   # extract predicted values for particular component
+   attrs = mda.getattr(obj$c.pred)
+   c.pred = as.matrix(obj$c.pred[, ncomp, nc])
+   
+   if (length(nc) > 1) {
+      # prepare matrix for the results
+      pdata = matrix(0, nrow = nrow(cpred), ncol = nc + 1)
+      # find objects that were not classified for any of the class and set rows = 1 in first column
+      pdata[, 1] = apply(c.pred, 1, function(x)(all(x == -1)))
+      # set values for the other 
+      for (i in 1:nc)
+         pdata[, i + 2] = (c.pred[, i] == 1) * i
+      # unfold the matrix
+      dim(pdata) = NULL
+      # add evector with indices of objects
+      pdata = cbind(rep(1:nrow(c.pred), nc), pdata)
+      # remove all rows with zeros in the second column
+      pdata = pdata[pdata[, 2] != 0, ]
+      # assign proper rownames
+      rownames(pdata) = rownames(c.pred)[pdata[, 1]]
+      # assign other attributes
+      pdata = mda.setattr(pdata, attrs)
+      # exclude rows
+      attr(pdata, 'exclrows') = NULL
+      pdata = mda.exclrows(pdata, pdata[, 1] %in% attrs$exclrows)
+      row.ind = pdata[, 1]
+   } else {
+      pdata = cbind((1:nrow(c.pred)), (c.pred == 1) * 1)
+      pdata = mda.setattr(pdata, attrs)
    }
-   else
-   {
-      cdata = NULL
-      nullidx = matrix(TRUE, nrow = nrow(obj$c.pred), ncol = 1)
-
-      for (i in 1:length(nc))
-      {
-         nullidx = obj$c.pred[, ncomp[i], nc[i]] == -1 & nullidx
-
-         objn = which(obj$c.pred[, ncomp[i], nc[i]] == 1)
-         vals = matrix(nc[i], nrow = length(objn), ncol = 1)
-
-         data = cbind(objn, vals)            
-         rownames(data) = rownames(obj$c.pred)[objn]
-
-         cdata = rbind(cdata, data)
-      }
-
-      data = cbind(which(nullidx == T), 0)
-      rownames(data) = rownames(obj$c.pred)[nullidx]
-      cdata = rbind(cdata, data)
-
-      mdaplot(cdata, type = 'p', main = main, xlab = xlab, ylab = ylab,
-              yticks = c(0, nc), yticklabels = c('None', dimnames(obj$c.pred)[[3]][nc]), ...)         
-   }   
+   
+   if (is.null(obj$c.ref)) {   
+      mdaplot(pdata, type = 'p', main = main, ylab = ylab, yticks = c(0, nc), 
+              yticklabels = c('None', dimnames(obj$c.pred)[[3]][nc]), ylim = c(-0.2, max(nc) + 0.2), ...)
+   } else {
+      pdata.g = as.factor(obj$c.ref[pdata[, 1]])
+      mdaplotg(pdata, type = 'p', main = main, ylab = ylab, yticks = c(0, nc), groupby = pdata.g,
+              yticklabels = c('None', dimnames(obj$c.pred)[[3]][nc]), ylim = c(-0.2, max(nc) + 0.2), ...)
+   }
 }
 
 #' Plot function for classification results

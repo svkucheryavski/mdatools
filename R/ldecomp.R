@@ -302,7 +302,8 @@ plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance'
                                    xlab = 'Components', ylab = 'Explained variance, %',
                                    show.labels = F, ...)
 {
-   mdaplot(obj$cumexpvar, main = main, xlab = xlab, ylab = ylab, type = type, show.labels = show.labels, ...)
+   mdaplot(obj$cumexpvar, main = main, xtick = 1:obj$ncomp, xlab = xlab, ylab = ylab, type = type, 
+           show.labels = show.labels, ...)
 }
 
 #' Explained variance plot for linear decomposition
@@ -330,7 +331,7 @@ plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
                                 xlab = 'Components', ylab = 'Explained variance, %',
                                 show.labels = F, labels = 'values', ...)
 {
-   mdaplot(obj$expvar, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, 
+   mdaplot(obj$expvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, show.labels = show.labels, 
            labels = labels, type = type, ...)
 }
 
