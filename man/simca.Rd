@@ -23,7 +23,7 @@ simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL,
 
 \item{x.test}{a numerical matrix with test data.}
 
-\item{c.test}{a vector with text values (names of classes) of test data objects.}
+\item{c.test}{a vector with classes of test data objects (can be text with names of classes or logical).}
 
 \item{alpha}{significance level for calculating limit for T2 and Q residuals.}
 

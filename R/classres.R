@@ -92,6 +92,14 @@ classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL) 
 #' 
 getClassificationPerformance = function(c.ref, c.pred)
 {
+   # remove excluded rows for correct calculation of performance
+   attrs = mda.getattr(c.pred)
+   if (length(attrs$exclrows) > 0) {
+      c.pred = c.pred[-attrs$exclrows, , , drop = F]
+      if (nrow(c.ref) > nrow(c.pred))
+         c.ref = c.ref[-attrs$exclrows, , drop = F]
+   }
+  
    ncomp = dim(c.pred)[2]
    nobj = dim(c.pred)[1]
    nclasses = dim(c.pred)[3]

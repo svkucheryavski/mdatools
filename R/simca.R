@@ -19,7 +19,7 @@
 #' @param x.test
 #' a numerical matrix with test data.
 #' @param c.test
-#' a vector with text values (names of classes) of test data objects.
+#' a vector with classes of test data objects (can be text with names of classes or logical).
 #' @param alpha
 #' significance level for calculating limit for T2 and Q residuals.
 #' @param method
@@ -145,8 +145,13 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.t
       model$cvres = simca.crossval(model, x, cv, center = center, scale = scale)
    
    # apply model to test set if provided
-   if (!is.null(x.test)) 
+   if (!is.null(x.test)){
+      # if classes are not provided we assume the object are from the same class
+      if (is.null(c.test)) 
+         c.test = matrix(classname, nrow = nrow(x.test), ncol = 1) 
       model$testres = predict.simca(model, x.test, c.ref = c.test)
+   }
+      
    
    model
 }
@@ -183,7 +188,17 @@ predict.simca = function(object, x, c.ref = NULL, cal = FALSE, ...) {
       pres = object$calres
    }
   
-    
+   if (!is.null(c.ref)) {
+      if (is.logical(c.ref))
+         c.ref = ifelse(c.ref, object$classname, 'None')
+      if (!is.matrix(c.ref))
+         c.ref = matrix(c.ref, ncol = 1)
+      if(nrow(c.ref) != nrow(x))
+         stop('Matrix with predictors and classes should have the same number of rows!')
+      if (!is.character(c.ref))
+         stop('Matrix/vector with reference class values should be either logical or character!')
+   } 
+   
    c.pred = simca.classify(object, pres)
    dimnames(c.pred) = list(rownames(x), colnames(object$loadings), object$classname)
    c.pred = mda.setattr(c.pred, mda.getattr(object$calres$scores))
@@ -473,7 +488,7 @@ summary.simca = function(object, ...)
    
    if (!is.null(obj$testres)) {
       cnames = colnames(data)
-      if (!is.null(obj$testres$c.ref)) {
+      if (!is.null(obj$testres$c.ref) && !any(is.nan(obj$testres$specificity))) {
          data = cbind(data, obj$testres$expvar, obj$testres$specificity[1, ], obj$testres$sensitivity[1, ])
          colnames(data) = c(cnames, 'Expvar (test)', 'Spec (test)', 'Sens (test)')
       } else {
