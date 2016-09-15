@@ -1,5 +1,21 @@
 ## class and methods for classification models ##
 
+checkReferenceValues.classmodel = function(model, c.ref, x) {
+   if (is.null(c.ref))
+      return()
+   
+   if (is.logical(c.ref))
+      c.ref = ifelse(c.ref, object$classname, 'None')
+   if (!is.matrix(c.ref))
+      c.ref = matrix(c.ref, ncol = 1)
+   if(nrow(c.ref) != nrow(x))
+      stop('Matrix with predictors and classes should have the same number of rows!')
+   if (!is.character(c.ref))
+      stop('Matrix/vector with reference class values should be either logical or character!')
+   
+   c.ref
+}
+
 #' Predictions plot for classification model
 #' 
 #' @description

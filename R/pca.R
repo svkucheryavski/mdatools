@@ -137,6 +137,7 @@ pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
 #' @param ...
 #' other parameters
 #' 
+#' @export
 getCalibrationData.pca = function(obj, ...)
 {
    x = tcrossprod(obj$calres$scores, obj$loadings) + obj$calres$residuals
@@ -146,7 +147,8 @@ getCalibrationData.pca = function(obj, ...)
    
    if (is.numeric(attr(x, 'prep:center')))
       x = sweep(x, 2L, attr(x, 'prep:center'), '+', check.margin = F)
-   
+  
+   x = mda.setattr(x, mda.getattr(obj$calres$residuals)) 
    x
 }
 

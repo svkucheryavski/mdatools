@@ -110,13 +110,8 @@
 #' @export     
 simcam = function(models, info = '')
 {
-  nclasses = length(models)
-   
-   classnames = models[[1]]$classname
-   for (i in 2:nclasses)
-   {   
-      classnames = c(classnames, models[[i]]$classname)
-   }
+   nclasses = length(models)
+   classnames = unlist(lapply(models, function(x){x$classname}))
    
    model = list()
    model$models = models
@@ -128,7 +123,7 @@ simcam = function(models, info = '')
    stat = simcam.getPerformanceStatistics(model)
    model$dispower = stat$dispower
    model$moddist = stat$moddist
-
+   
    model$call = match.call()   
    class(model) = c("simcam", "classmodel")
    
@@ -162,42 +157,22 @@ simcam = function(models, info = '')
 #' See examples in help for \code{\link{simcam}} function.
 #' 
 #' @export
-predict.simcam = function(object, x, c.ref = NULL, cv = F, ...)
-{
-   x = as.matrix(x)
-   nobj = nrow(x)
-
-   c.pred = array(0, dim = c(nobj, 1, object$nclasses))
-   Q = array(0, dim = c(nobj, object$nclasses))
-   T2 = array(0, dim = c(nobj, object$nclasses))
-   Qlim = array(0, dim = c(1, object$nclasses))
-   T2lim = array(0, dim = c(1, object$nclasses))
-
-   ncomp.selected = matrix(0, nrow = 1, ncol = object$nclasses)
+predict.simcam = function(object, x, c.ref = NULL, cv = F, ...) {
+   attrs = mda.getattr(x)
    
-   for (i in 1:object$nclasses)
-   {  
-      if (!is.null(c.ref))
-      {   
-         if (is.numeric(c.ref))
-            res = predict(object$models[[i]], x, c.ref == i)
-         else
-            res = predict(object$models[[i]], x, c.ref == object$models[[i]]$classname)
-      }
-      else
-         res = predict(object$models[[i]], x)
-
-      ncomp.selected[i] = object$models[[i]]$ncomp.selected
-      c.pred[, , i] = res$c.pred[, ncomp.selected[i], ]
-      Q[, i] = res$Q[, ncomp.selected[i], drop = F]
-      T2[, i] = res$T2[, ncomp.selected[i], drop = F]
-      Qlim[i] = res$Qlim[ncomp.selected[i]]
-      T2lim[i] = res$T2lim[ncomp.selected[i]]
+   c.pred = array(0, dim = c(nrow(x), 1, object$nclasses))
+   pred.res = list()
+   for (i in 1:object$nclasses) {  
+      pred.res[[i]] = predict(object$models[[i]], x, c.ref)
+      c.pred[, , i] = pred.res[[i]]$c.pred[, object$models[[i]]$ncomp.selected, ]
    }
    
-   dimnames(c.pred) = list(rownames(x), paste('Comp', ncomp.selected[[i]]), object$classnames)
-   cres = classres(c.pred, c.ref, ncomp.selected = ncomp.selected)
-   res = simcamres(cres, T2, Q, T2lim, Qlim)
+   dimnames(c.pred) = list(rownames(x), paste('Comp'), object$classnames)
+   c.pred = mda.setattr(c.pred, attrs, 'row')
+   attr(c.pred, 'name') = 'SIMCAM predictions'
+   cres = classres(c.pred, c.ref)
+   res = simcamres(cres, pred.res)
+              
    res
 }
 
@@ -214,19 +189,19 @@ predict.simcam = function(object, x, c.ref = NULL, cv = F, ...)
 #' @details
 #' See examples in help for \code{\link{simcam}} function.
 #' 
+#' @export
 getCalibrationData.simcam = function(obj, ...)
 {
-   x = NULL
-   c.ref = NULL
-   for (i in 1:obj$nclasses)
-   {
+   x = getCalibrationData(obj$models[[1]])
+   c.ref = matrix(obj$models[[1]]$classname, nrow = nrow(x), ncol = 1)            
+   for (i in 2:obj$nclasses) {
       classdata = getCalibrationData(obj$models[[i]])
-      x = rbind(x, classdata)
+      x = mda.rbind(x, classdata)
       c.ref = rbind(c.ref, matrix(obj$models[[i]]$classname, nrow = nrow(classdata), ncol = 1))            
    }
-
+   
    res = list(x = x, c.ref = c.ref)
-
+   
    res
 }
 
@@ -238,19 +213,16 @@ getCalibrationData.simcam = function(obj, ...)
 #' @param model
 #' SIMCAM model (object of class \code{simcam})
 #' 
-simcam.getPerformanceStatistics = function(model)
-{
+simcam.getPerformanceStatistics = function(model) {
    nvar = nrow(model$models[[1]]$loadings)
    nc = length(model$models)
    
    dispower = array(0, dim = c(nc, nc, nvar))
    moddist = array(0, dim = c(nc, nc))
-
+   
    # loop through all combinations of classes
-   for (nc1 in 1:nc)
-   {   
-      for (nc2 in 1:nc)
-      {     
+   for (nc1 in 1:nc) {   
+      for (nc2 in 1:nc) {     
          m1 = model$models[[nc1]]
          d1 = getCalibrationData(m1)
          m2 = model$models[[nc2]]
@@ -259,10 +231,9 @@ simcam.getPerformanceStatistics = function(model)
          # apply model 1 to data 2 and vice versa
          m12 = predict.pca(m1, d2)
          m21 = predict.pca(m2, d1)   
-
+         
          # calculate residuals for projections 
-         if (m1$ncomp.selected < m1$ncomp)
-         {   
+         if (m1$ncomp.selected < m1$ncomp) {   
             res1 = 
                m1$calres$scores[, (m1$ncomp.selected + 1):m1$ncomp] %*% 
                t(m1$loadings[, (m1$ncomp.selected + 1):m1$ncomp]) + 
@@ -271,28 +242,22 @@ simcam.getPerformanceStatistics = function(model)
                m12$scores[, (m1$ncomp.selected + 1):m1$ncomp] %*% 
                t(m1$loadings[, (m1$ncomp.selected + 1):m1$ncomp]) + 
                m12$residuals
-         }
-         else
-         {
+         } else {
             res1 = m1$calres$residuals
             res12 = m12$residuals            
          }   
-
-         if (m2$ncomp.selected < m2$ncomp)
-         {   
+         
+         if (m2$ncomp.selected < m2$ncomp) {   
             res2 = 
                m2$calres$scores[, (m2$ncomp.selected + 1):m2$ncomp] %*% 
                t(m2$loadings[, (m2$ncomp.selected + 1):m2$ncomp]) + 
                m2$calres$residuals
             
-            
             res21 = 
                m21$scores[, (m2$ncomp.selected + 1):m2$ncomp] %*% 
                t(m2$loadings[, (m2$ncomp.selected + 1):m2$ncomp]) + 
                m21$residuals
-         }
-         else
-         {
+         } else {
             res2 = m2$calres$residuals
             res21 = m21$residuals               
          }   
@@ -306,17 +271,19 @@ simcam.getPerformanceStatistics = function(model)
          # calculate model distance and discrimination power
          dispower[nc1, nc2, ] = sqrt((s12 + s21)/(s1 + s2))
          moddist[nc1, nc2] = sqrt(sum(s12 + s21)/sum(s1 + s2))
-         
       }
    }
-
+   
    dimnames(dispower) = list(model$classnames, model$classnames, rownames(model$models[[1]]$loadings))
    dimnames(moddist) = list(model$classnames, model$classnames)
+  
+   attrs = mda.getattr(model$models[[1]]$loadings)
+   dispower = mda.setattr(dispower, attrs, 'row')
    
    stat = list(
       dispower = dispower,
       moddist = moddist
-      )
+   )
    
    stat
 }
@@ -347,17 +314,11 @@ simcam.getPerformanceStatistics = function(model)
 #' See examples in help for \code{\link{simcam}} function.
 #' 
 #' @export
-plotModelDistance.simcam = function(obj, nc = 1, type = 'h', main = NULL, xlab = 'Models', ylab = '', 
-                                    xticklabels = NULL, ...)
-{
+plotModelDistance.simcam = function(obj, nc = 1, type = 'h', main = NULL, xlab = 'Models', ylab = '', ...) {
    if (is.null(main))
       main = sprintf('Model distance (%s)', obj$classnames[nc])
-
-   if (is.null(xticklabels) && length(obj$moddist[, nc]) < 8)
-      xticklabels = obj$classnames
-
-   data = cbind(1:length(obj$models), obj$moddist[, nc, drop = F])
-   mdaplot(data, type = type, main = main, xlab = xlab, ylab = ylab, xticklabels = xticklabels, ...)
+   
+   mdaplot(mda.t(obj$moddist[, nc, drop = F]), type = type, main = main, xlab = xlab, ylab = ylab, ...)
 }
 
 #' Discrimination power plot for SIMCAM model
@@ -385,11 +346,10 @@ plotModelDistance.simcam = function(obj, nc = 1, type = 'h', main = NULL, xlab =
 #' 
 #' @export
 plotDiscriminationPower.simcam = function(obj, nc = c(1, 2), type = 'h', main = NULL, 
-                                          xlab = 'Variables', ylab = '', ...)
-{
+                                          xlab = 'Variables', ylab = '', ...) {
    if (is.null(main))
       main = sprintf('Discrimination power (%s vs %s)', obj$classnames[nc[1]], obj$classnames[nc[2]])
-
+   
    nvar = dim(obj$dispower)[[3]]
    
    if (is.null(type))
@@ -400,11 +360,13 @@ plotDiscriminationPower.simcam = function(obj, nc = c(1, 2), type = 'h', main = 
          type = 'l'
    }   
    
+   attrs = mda.getattr(obj$dispower)
    data = obj$dispower[nc[1], nc[2], , drop = F]
    varnames = dimnames(obj$dispower)[[3]]
    dim(data) = c(dim(data)[3], 1)
-   data = cbind(1:nvar, data)
    rownames(data) = varnames
+   data = mda.setattr(data, attrs)
+   
    mdaplot(data, type = type, main = main, xlab = xlab, ylab = ylab, ...)
 }   
 

@@ -188,17 +188,10 @@ predict.simca = function(object, x, c.ref = NULL, cal = FALSE, ...) {
       pres = object$calres
    }
   
-   if (!is.null(c.ref)) {
-      if (is.logical(c.ref))
-         c.ref = ifelse(c.ref, object$classname, 'None')
-      if (!is.matrix(c.ref))
-         c.ref = matrix(c.ref, ncol = 1)
-      if(nrow(c.ref) != nrow(x))
-         stop('Matrix with predictors and classes should have the same number of rows!')
-      if (!is.character(c.ref))
-         stop('Matrix/vector with reference class values should be either logical or character!')
-   } 
-   
+   # check reference values
+   c.ref = checkReferenceValues.classmodel(object, c.ref, x)
+  
+   # do predictions 
    c.pred = simca.classify(object, pres)
    dimnames(c.pred) = list(rownames(x), colnames(object$loadings), object$classname)
    c.pred = mda.setattr(c.pred, mda.getattr(object$calres$scores))

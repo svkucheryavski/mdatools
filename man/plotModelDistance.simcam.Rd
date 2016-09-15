@@ -5,7 +5,7 @@
 \title{Modelling distance plot for SIMCAM model}
 \usage{
 \method{plotModelDistance}{simcam}(obj, nc = 1, type = "h", main = NULL,
-  xlab = "Models", ylab = "", xticklabels = NULL, ...)
+  xlab = "Models", ylab = "", ...)
 }
 \arguments{
 \item{obj}{a SIMCAM model (object of class \code{simcam})}
@@ -20,9 +20,9 @@
 
 \item{ylab}{label for y axis}
 
-\item{xticklabels}{labels for x axis ticks}
-
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
+\item{xticklabels}{labels for x axis ticks}
 }
 \description{
 Shows a plot with distance from data objects to a SIMCA model

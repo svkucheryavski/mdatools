@@ -160,18 +160,13 @@ getClassificationPerformance = function(c.ref, c.pred)
 #' This is a technical function used for selection proper value for number of components in 
 #' plotting functions.
 #' 
-getSelectedComponents.classres = function(obj, ncomp = NULL)
-{
-   if (is.null(ncomp))
-   {   
+getSelectedComponents.classres = function(obj, ncomp = NULL) {
+   if (is.null(ncomp)) {   
       if (is.null(obj$ncomp.selected) || dim(obj$c.pred)[2] == 1)
          ncomp = 1
       else
          ncomp = obj$ncomp.selected
    }   
-
-   if (length(ncomp) == 1)
-      ncomp = matrix(ncomp, nrow = 1, ncol = obj$nclasses)
    
    ncomp
 }
@@ -365,18 +360,14 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
 #' if there are several classes, which class to make the plot for (NULL - summary for all classes).
 #' @param ncomp
 #' which number of components to make the plot for (one value, if NULL - model selected number will be used).
+#' This parameter shal not be used for multiclass models or results as predictions in this case are made only
+#' for optimal number of components
 #' @param type
 #' type of the plot
-#' @param legend
-#' vector with legend items
 #' @param main
 #' main title for the plot
-#' @param xlab
-#' label for x axis
 #' @param ylab
 #' label for y axis
-#' @param ylim
-#' vector with two values - limits for y axis
 #' @param ...
 #' most of the graphical parameters from \code{\link{mdaplotg}} or \code{\link{mdaplot}} function 
 #' can be used.
@@ -385,8 +376,7 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 #' 
 #' @export
-plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', legend = NULL, 
-                                    main = NULL, ylab = '', ylim = c(-1.2, 1.2), ...) {
+plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', main = NULL, ylab = '', ...) {
    
    # get classnames
    classnames = dimnames(obj$c.pred)[[3]]
@@ -403,6 +393,7 @@ plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', le
    nc = unique(nc)
    if (length(nc) == 0 || min(nc)< 1 || max(nc) > dim(obj$c.pred)[3])
       stop('Incorrect class numbers or names!')
+   nclasses = length(nc)   
    
    # set main title
    if (is.null(main)) {   
@@ -412,7 +403,7 @@ plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', le
    }
 
    ncomp = getSelectedComponents.classres(obj, ncomp)
-   
+  
    if (max(ncomp) > dim(obj$c.pred)[2])
       stop('Wrong value for ncomp parameter!')
 
@@ -420,18 +411,18 @@ plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', le
    attrs = mda.getattr(obj$c.pred)
    c.pred = as.matrix(obj$c.pred[, ncomp, nc])
    
-   if (length(nc) > 1) {
+   if (nclasses > 1) {
       # prepare matrix for the results
-      pdata = matrix(0, nrow = nrow(cpred), ncol = nc + 1)
+      pdata = matrix(0, nrow = nrow(c.pred), ncol = nclasses + 1)
       # find objects that were not classified for any of the class and set rows = 1 in first column
       pdata[, 1] = apply(c.pred, 1, function(x)(all(x == -1)))
       # set values for the other 
-      for (i in 1:nc)
-         pdata[, i + 2] = (c.pred[, i] == 1) * i
+      for (i in 1:nclasses)
+         pdata[, i + 1] = (c.pred[, i] == 1) * (i + 1)
       # unfold the matrix
       dim(pdata) = NULL
       # add evector with indices of objects
-      pdata = cbind(rep(1:nrow(c.pred), nc), pdata)
+      pdata = cbind(rep(1:nrow(c.pred), nclasses + 1), pdata)
       # remove all rows with zeros in the second column
       pdata = pdata[pdata[, 2] != 0, ]
       # assign proper rownames
@@ -443,19 +434,19 @@ plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', le
       pdata = mda.exclrows(pdata, pdata[, 1] %in% attrs$exclrows)
       row.ind = pdata[, 1]
    } else {
-      pdata = cbind((1:nrow(c.pred)), (c.pred == 1) * 1)
+      pdata = cbind((1:nrow(c.pred)), (c.pred == 1) + 1)
       pdata = mda.setattr(pdata, attrs)
    }
    
    colnames(pdata) = c(ifelse(is.null(attrs$yaxis.name), 'Objects', attrs$yaxis.name), 'Classes')
    
    if (is.null(obj$c.ref)) {   
-      mdaplot(pdata, type = 'p', main = main, ylab = ylab, yticks = c(0, nc), 
-              yticklabels = c('None', classnames[nc]), ylim = c(-0.2, max(nc) + 0.2), ...)
+      mdaplot(pdata, type = 'p', main = main, ylab = ylab, yticks = c(1:(nclasses + 1)), 
+              yticklabels = c('None', classnames[nc]), ylim = c(0.8, nclasses + 1.2), ...)
    } else {
       pdata.g = as.factor(obj$c.ref[pdata[, 1]])
-      mdaplotg(pdata, type = 'p', main = main, ylab = ylab, yticks = c(0, nc), groupby = pdata.g,
-              yticklabels = c('None', classnames[nc]), ylim = c(-0.2, max(nc) + 0.2), ...)
+      mdaplotg(pdata, type = 'p', main = main, ylab = ylab, yticks = c(1:(nclasses + 1)), groupby = pdata.g,
+              yticklabels = c('None', classnames[nc]), ylim = c(0.8, nclasses + 1.2), ...)
    }
 }
 

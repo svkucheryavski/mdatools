@@ -4,7 +4,7 @@
 \alias{simcamres}
 \title{Results of SIMCA multiclass classification}
 \usage{
-simcamres(cres, T2, Q, T2lim, Qlim)
+simcamres(cres, pred.res)
 }
 \arguments{
 \item{cres}{results of classification (class \code{classres}).}

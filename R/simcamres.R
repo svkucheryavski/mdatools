@@ -109,13 +109,10 @@
 #' par(mfrow = c(1, 1))
 #' 
 #' @export
-simcamres = function(cres, T2, Q, T2lim, Qlim)
+simcamres = function(cres, pred.res)
 {
-  res = cres
-   res$T2 = T2
-   res$Q = Q
-   res$T2lim = T2lim
-   res$Qlim = Qlim
+   res = cres
+   res$pred.res = pred.res
    res$classnames = dimnames(cres$c.pred)[[3]]
    class(res) = c('simcamres', 'classres')   
    
@@ -150,42 +147,12 @@ simcamres = function(cres, T2, Q, T2lim, Qlim)
 #' See examples in help for \code{\link{simcamres}} function.
 #' 
 #' @export
-plotResiduals.simcamres = function(obj, nc = 1, show.limits = T, type = 'p', main = NULL, 
-                                  xlab = 'T2', ylab = 'Squared residual distance (Q)', legend = NULL, ...)
-{
+plotResiduals.simcamres = function(obj, nc = 1, main = NULL, ...) {
    # set main title
    if (is.null(main))
       main = sprintf('Residuals (%s)', obj$classnames[nc])
-
-   if (!is.null(obj$c.ref))
-   {   
-      classes = unique(obj$c.ref)
-      data = list()
-      for (i in 1:length(classes))
-         data[[i]] = cbind(obj$T2[obj$c.ref == classes[i], nc], obj$Q[obj$c.ref == classes[i], nc])
-      
-      if (is.null(legend))
-         legend = classes
-      
-      if (show.limits == T)
-         show.lines = c(obj$T2lim[nc], obj$Qlim[nc])
-      else
-         show.lines = F
-      
-      mdaplotg(data, type = type, xlab = xlab, ylab = ylab, main = main, show.lines = show.lines,
-               legend = legend, ...)
-   }
-   else
-   {
-
-      data = cbind(obj$T2[, nc], obj$Q[, nc])
-      if (show.limits == T)
-         show.lines = c(obj$T2lim[nc], obj$Qlim[nc])
-      else
-         show.lines = F
-      
-      mdaplot(data, type = type, xlab = xlab, ylab = ylab, main = main, show.lines = show.lines, ...)
-   }
+   
+   plotResiduals(obj$pred.res[[nc]], main = main, ...)
 }
 
 #' Cooman's plot for SIMCAM results
@@ -217,8 +184,7 @@ plotResiduals.simcamres = function(obj, nc = 1, show.limits = T, type = 'p', mai
 #' 
 #' @export
 plotCooman.simcamres = function(obj, nc = c(1, 2), type = 'p', main = "Cooman's plot", xlab = NULL, 
-                                ylab = NULL, show.limits = T, legend = NULL, ...)
-{
+                                ylab = NULL, show.limits = T, legend = NULL, ...) {
    # set labels for axes
    if (is.null(xlab))
       xlab = sprintf('Distance to class %s', obj$classnames[nc[1]])
@@ -226,37 +192,23 @@ plotCooman.simcamres = function(obj, nc = c(1, 2), type = 'p', main = "Cooman's 
    if (is.null(ylab))
       ylab = sprintf('Distance to class %s', obj$classnames[nc[2]])
    
-   if (!is.null(obj$c.ref))
-   {   
-      classes = unique(obj$c.ref)
-      data = list()
-      for (i in 1:length(classes))
-         data[[i]] = cbind(sqrt(obj$Q[obj$c.ref == classes[i], nc[1]]), 
-                           sqrt(obj$Q[obj$c.ref == classes[i], nc[2]])
-                           )
-      
-      if (is.null(legend))
-         legend = classes
-      
-      if (show.limits == T)
-         show.lines = c(obj$Qlim[nc[1]], obj$Qlim[nc[2]])
-      else
-         show.lines = F
-      
-      mdaplotg(data, type = type, xlab = xlab, ylab = ylab, main = main, show.lines = show.lines,
-               legend = legend, ...)
-   }
+   attrs = mda.getattr(obj$c.pred)
+   res1 = obj$pred.res[[nc[1]]]
+   res2 = obj$pred.res[[nc[2]]]
+   data = cbind(sqrt(res1$Q[, res1$ncomp.selected]), sqrt(res2$Q[, res2$ncomp.selected]))
+   rownames(data) = rownames(obj$c.pred)
+   data = mda.setattr(data, attrs, 'row') 
+   if (show.limits == T)
+      show.lines = c(res1$Qlim[res1$ncomp.selected], res2$Qlim[res2$ncomp.selected])
    else
-   {
-      data = cbind(sqrt(obj$Q[, nc[1]]), sqrt(obj$Q[, nc[2]]))
-      
-      if (show.limits == T)
-         show.lines = c(obj$Qlim[nc[1]], obj$Qlim[nc[2]])
-      else
-         show.lines = F
-      
+      show.lines = F
+
+   if (is.null(obj$c.ref))      
       mdaplot(data, type = type, xlab = xlab, ylab = ylab, main = main, show.lines = show.lines, ...)
-   }
+   else
+      mdaplotg(data, type = type, xlab = xlab, ylab = ylab, main = main, show.lines = show.lines, 
+              groupby = as.factor(obj$c.ref), ...)
+   
 }
 
 #' Model overview plot for SIMCAM results

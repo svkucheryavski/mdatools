@@ -1423,7 +1423,6 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    if (!is.null(xlim))
       lim$xlim = xlim
    
-   
    col = mdaplot.getColors(ngroups, colmap = colmap)
    
    if (is.null(main) && !is.null(name))
