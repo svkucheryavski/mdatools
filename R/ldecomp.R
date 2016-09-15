@@ -54,7 +54,8 @@ ldecomp = function(scores = NULL, residuals = NULL, ncomp.selected, T2, Q, expva
 {
    obj = list(
       scores = scores,
-      residuals = residuals, 
+      residuals = residuals,
+      ncomp = ncol(Q),
       ncomp.selected = ncomp.selected,
       T2 = T2,
       Q = Q,
@@ -69,7 +70,6 @@ ldecomp = function(scores = NULL, residuals = NULL, ncomp.selected, T2, Q, expva
    
    obj$call = match.call()
    class(obj) = "ldecomp"
-   
    obj
 }
 
@@ -302,7 +302,7 @@ plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance'
                                    xlab = 'Components', ylab = 'Explained variance, %',
                                    show.labels = F, ...)
 {
-   mdaplot(obj$cumexpvar, main = main, xtick = 1:obj$ncomp, xlab = xlab, ylab = ylab, type = type, 
+   mdaplot(obj$cumexpvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, type = type, 
            show.labels = show.labels, ...)
 }
 

@@ -1414,14 +1414,15 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    if (!is.null(ylim))
       lim$ylim = ylim
    
-   if (!is.null(xlim))
-      lim$xlim = xlim
-
    # correct x limits if bar plot should be shown
    if (type[1] == 'h') {
-      dx = diff(lim$xlim) / 20 * ngroups
+      dx = 0.35
       lim$xlim = lim$xlim + c(-dx, dx)
    }
+   
+   if (!is.null(xlim))
+      lim$xlim = xlim
+   
    
    col = mdaplot.getColors(ngroups, colmap = colmap)
    
