@@ -185,7 +185,7 @@ plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', typ
       if (is.null(main))
          main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2), 
                         toString(classname))
-      mdaplotg(data, type = type, main = main, xlab = xlab, ylab = ylab, ylim = ylim, ...)
+      mdaplotg(data, type = type, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, ylim = ylim, ...)
    }
    
 }

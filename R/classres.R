@@ -343,13 +343,14 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
          misclassified = obj$misclassified[nc, ]
       )
 
-      mdaplotg(data, type = type, legend = legend, main = main, xlab = xlab, ylim = ylim, ylab = ylab, ...)
+      mdaplotg(data, type = type, legend = legend, main = main, xticks = 1:obj$ncomp, 
+               xlab = xlab, ylim = ylim, ylab = ylab, ...)
    } else {
       if (is.null(main))
          main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2), classname)
       
       data = obj[[param]][nc, , drop = F]
-      mdaplot(data, type = type, main = main, xlab = xlab, ylab = ylab, ylim = ylim, ...)
+      mdaplot(data, type = type, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, ylim = ylim, ...)
    }
 }
 
@@ -385,15 +386,27 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
 #' 
 #' @export
 plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', legend = NULL, 
-                                    main = NULL, ylab = '', ylim = c(-1.2, 1.2),
-                                    ...)
-{
+                                    main = NULL, ylab = '', ylim = c(-1.2, 1.2), ...) {
+   
+   # get classnames
+   classnames = dimnames(obj$c.pred)[[3]]
+
+   # if vector with class number was not provided show plot for all of them
    if (is.null(nc))
       nc = 1:obj$nclasses
 
+   # if vector with names were provided instead of numbers - convert to numbers
+   if (is.character(nc))
+      nc = which(classnames %in% nc)
+   
+   # take unique values and check correctness
+   nc = unique(nc)
+   if (length(nc) == 0 || min(nc)< 1 || max(nc) > dim(obj$c.pred)[3])
+      stop('Incorrect class numbers or names!')
+   
+   # set main title
    if (is.null(main)) {   
       main = 'Predictions'
-
       if (!is.null(ncomp) && length(ncomp) == 1)
          main = sprintf('%s (ncomp = %d)', main, ncomp)
    }
@@ -434,13 +447,15 @@ plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', le
       pdata = mda.setattr(pdata, attrs)
    }
    
+   colnames(pdata) = c(ifelse(is.null(attrs$yaxis.name), 'Objects', attrs$yaxis.name), 'Classes')
+   
    if (is.null(obj$c.ref)) {   
       mdaplot(pdata, type = 'p', main = main, ylab = ylab, yticks = c(0, nc), 
-              yticklabels = c('None', dimnames(obj$c.pred)[[3]][nc]), ylim = c(-0.2, max(nc) + 0.2), ...)
+              yticklabels = c('None', classnames[nc]), ylim = c(-0.2, max(nc) + 0.2), ...)
    } else {
       pdata.g = as.factor(obj$c.ref[pdata[, 1]])
       mdaplotg(pdata, type = 'p', main = main, ylab = ylab, yticks = c(0, nc), groupby = pdata.g,
-              yticklabels = c('None', dimnames(obj$c.pred)[[3]][nc]), ylim = c(-0.2, max(nc) + 0.2), ...)
+              yticklabels = c('None', classnames[nc]), ylim = c(-0.2, max(nc) + 0.2), ...)
    }
 }
 
@@ -457,8 +472,7 @@ plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', le
 #' other arguments
 #' 
 #' @export
-plot.classres = function(x, nc = NULL, ...)
-{
+plot.classres = function(x, nc = NULL, ...){
    plotPredictions.classres(x, nc = nc, ...)
 }   
 
@@ -481,23 +495,21 @@ plot.classres = function(x, nc = NULL, ...)
 as.matrix.classres = function(x, ncomp = NULL, nc = 1, ...)
 {
    obj = x
-   
-   if (!is.null(obj$c.ref))
-   {  
-      if (is.null(ncomp))
-         res = cbind(obj$tp[nc, ], obj$fp[nc, ], obj$tn[nc, ], obj$fn[nc, ], 
-                     obj$specificity[nc, ], obj$sensitivity[nc, ])
-      else
-         res = cbind(obj$tp[nc, ncomp], obj$fp[nc, ncomp], obj$tn[nc, ncomp], obj$fn[nc, ncomp], 
-                     round(obj$specificity[nc, ncomp], 3), round(obj$sensitivity[nc, ncomp], 3))
 
-   res[, 4:5] = round(res[, 4:5], 3)
-   colnames(res) = c('TP', 'FP', 'TN', 'FN', 'Spec', 'Sens')
-   }
+   if (is.null(obj$c.ref))
+      return()
+   
+   if (is.null(ncomp))
+      res = cbind(obj$tp[nc, ], obj$fp[nc, ], obj$tn[nc, ], obj$fn[nc, ], 
+               round(obj$specificity[nc, ], 3), round(obj$sensitivity[nc, ], 3))
    else
-   {
-      res = NULL
-   }   
+      res = cbind(obj$tp[nc, ncomp], obj$fp[nc, ncomp], obj$tn[nc, ncomp], obj$fn[nc, ncomp], 
+               round(obj$specificity[nc, ncomp], 3), round(obj$sensitivity[nc, ncomp], 3))
+   
+   colnames(res) = c('TP', 'FP', 'TN', 'FN', 'Spec', 'Sens')
+   
+   if (any(is.na(obj$specificity)))
+      res = res[, -5]
 
    res
 }

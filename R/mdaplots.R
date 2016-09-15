@@ -630,7 +630,7 @@ errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16)
 #' @param ylas
 #' orientation of yticklabels
 #' 
-mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NULL, yticks = NULL,
+mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NULL, yticks = NULL, 
                             lim = NULL, main = NULL, xlab = NULL, ylab = NULL, xlas = 0, ylas = 0) {
    
    # make plot without ticks
@@ -641,7 +641,7 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
    if (is.null(xticks)) {
       xticks = axisTicks(lim$xlim, log = FALSE)
       # if xticklabels were provided it is expected that xticks should be integers
-      if (!is.null(xticklabels))
+      if (!is.null(xticklabels)) 
          xticks = unique(round(xticks[xticks > 0 & xticks <= length(xticklabels)]))
    }
    
@@ -709,7 +709,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    
    # get data attributes
    data.attr = attributes(data)
-   
+  
    # if data has no dimension   
    if (is.null(dim(data))) {
       names = names(data)
@@ -1069,7 +1069,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
          lim$ylim = ylim
       
       # make an empty plot with proper limits and axis labels
-      mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas)
+      mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas) 
    }
    
    #  get proper colors     
@@ -1419,7 +1419,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
 
    # correct x limits if bar plot should be shown
    if (type[1] == 'h') {
-      dx = diff(lim$xlim) / 20
+      dx = diff(lim$xlim) / 20 * ngroups
       lim$xlim = lim$xlim + c(-dx, dx)
    }
    
