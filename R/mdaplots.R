@@ -1068,6 +1068,12 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       if (!is.null(ylim))
          lim$ylim = ylim
       
+      # if no x-values were provided to line or bar plot we generate them as integer numbers
+      if ( (type %in% c('h', 'l', 'b')) && is.null(xticks) && is.null(data.attr$xaxis.values)) {
+         xticks = axisTicks(lim$xlim, log = FALSE)
+         xticks = unique(round(xticks[xticks > 0 & xticks <= max(x.values)]))
+      }
+         
       # make an empty plot with proper limits and axis labels
       mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas) 
    }
