@@ -4,8 +4,7 @@
 \alias{ldecomp.getDistances}
 \title{Residuals distances for linear decomposition}
 \usage{
-ldecomp.getDistances(scores, loadings, residuals, tnorm = NULL, cal = FALSE,
-  cv = FALSE)
+ldecomp.getDistances(scores, loadings, residuals, tnorm = NULL, cal = FALSE)
 }
 \arguments{
 \item{scores}{matrix with scores (T).}

@@ -4,18 +4,18 @@
 \alias{predict.pls}
 \title{PLS predictions}
 \usage{
-\method{predict}{pls}(object, x, y.ref = NULL, cv = F, ...)
+\method{predict}{pls}(object, x, y = NULL, ...)
 }
 \arguments{
 \item{object}{a PLS model (object of class \code{pls})}
 
 \item{x}{a matrix with x values (predictors)}
 
-\item{y.ref}{a matrix with reference y values (responses)}
-
-\item{cv}{logical, are predictions for cross-validation or not}
+\item{y}{a matrix with reference y values (responses)}
 
 \item{...}{other arguments}
+
+\item{cv}{logical, are predictions for cross-validation or not}
 }
 \value{
 PLS results (an object of class \code{plsres})

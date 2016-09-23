@@ -114,8 +114,8 @@
 #'
 #' @export   
 pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
-               alpha = 0.05, method = 'svd', info = '')
-{
+               alpha = 0.05, method = 'svd', info = '') {
+   
    # calibrate and cross-validate model  
    model = pca.cal(x, ncomp, center = center, scale = scale, method = method, cv = cv, alpha = alpha, info = info)
    model$call = match.call()   
@@ -138,8 +138,7 @@ pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
 #' other parameters
 #' 
 #' @export
-getCalibrationData.pca = function(obj, ...)
-{
+getCalibrationData.pca = function(obj, ...) {
    x = tcrossprod(obj$calres$scores, obj$loadings) + obj$calres$residuals
    
    if (is.numeric(attr(x, 'prep:scale')))
@@ -166,8 +165,7 @@ getCalibrationData.pca = function(obj, ...)
 #' the same model with selected number of components
 #' 
 #' @export
-selectCompNum.pca = function(model, ncomp)
-{
+selectCompNum.pca = function(model, ncomp) {
    if (ncomp < 1 || ncomp > model$ncomp)
       stop('Wrong number of selected components!')
    
@@ -242,8 +240,7 @@ selectCompNum.pca = function(model, ncomp)
 #' 
 #' @export
 pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
-                         expvarlim = 0.95, covlim = 10^-6, maxiter = 100)
-{
+                         expvarlim = 0.95, covlim = 10^-6, maxiter = 100) {
    x.rep = x
    mvidx = is.na(x.rep)
 
@@ -363,8 +360,7 @@ pca.run = function(x, ncomp, method) {
 #' @return
 #' an object with calibrated PCA model
 #' 
-pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info)
-{
+pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info) {
    # prepare empty list for model object
    model = list()
    
@@ -377,7 +373,7 @@ pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info)
    x.ncols = ncol(x)
    
    # check if data has missing values
-   if (sum(is.na(x)) > 0)
+   if (any(is.na(x)))
       stop('Data has missing values, try to fix this using pca.mvreplace.')
    
    
@@ -471,8 +467,7 @@ pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info)
 #' @return
 #' a list with scores, loadings and eigencalues for the components
 #' 
-pca.svd = function(x, ncomp = NULL)
-{
+pca.svd = function(x, ncomp = NULL) {
    if (is.null(ncomp)) 
       ncomp = min(ncol(x), nrow(x) - 1)
    else
@@ -508,8 +503,7 @@ pca.svd = function(x, ncomp = NULL)
 #' Geladi, Paul; Kowalski, Bruce (1986), "Partial Least Squares 
 #' Regression:A Tutorial", Analytica Chimica Acta 185: 1-17 
 #'    
-pca.nipals = function(x, ncomp)
-{
+pca.nipals = function(x, ncomp) {
    nobj = nrow(x)
    nvar = ncol(x)   
    ncomp = min(ncomp, nobj - 1, nvar)
@@ -572,7 +566,7 @@ pca.nipals = function(x, ncomp)
 pca.crossval = function(model, x, cv, center = T, scale = F) {
 
    # get attributes
-   attrs = mda.getattr(x)
+   attrs = attributes(x)
    
    # remove excluded rows 
    if (length(attrs$exclrows) > 0)
@@ -615,7 +609,8 @@ pca.crossval = function(model, x, cv, center = T, scale = F) {
             residuals = x.val - tcrossprod(scores, m$loadings)
              
             # compute distances
-            res = ldecomp.getDistances(scores, m$loadings, residuals, model$tnorm, cv = TRUE)
+            res = ldecomp.getDistances(scores = scores, loadings = m$loadings, residuals = residuals, 
+                                       tnorm = model$tnorm)
             Q[ind, ] = Q[ind, ] + res$Q
             T2[ind, ] = T2[ind, ] + res$T2
          }
@@ -625,25 +620,15 @@ pca.crossval = function(model, x, cv, center = T, scale = F) {
    # prepare results
    Q = Q / nrep
    T2 = T2 / nrep
-   rownames(Q) = rownames(T2) = rownames(x)
-   colnames(Q) = colnames(T2) = colnames(model$calres$scores)
-
-   # add attributes
-   attr(Q, 'name') = 'Squared residual distance (Q)'
-   attr(Q, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
-   attr(Q, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
-   attr(Q, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
    
-   attr(T2, 'name') = 'T2 residuals'
-   attr(T2, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
-   attr(T2, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
-   attr(T2, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
-   
-   # compute variance
-   var = ldecomp.getVariances(Q, model$calres$totvar)
+   var = ldecomp.getVariances(Q, model$calres$totvar) 
    
    # in CV results there are no scores nor residuals, only residual distances and variances
-   res = pcares(NULL, NULL, model$ncomp.selected, T2, Q, var$expvar, var$cumexpvar)
+   attrs$exclrows = NULL
+   attrs$exclcols = NULL
+   attrs$dimnames = dimnames(x)
+   res = pcares(ncomp.selected = model$ncomp.selected, dist = list(Q = Q, T2 = T2), var = var, attrs = attrs,
+                loadings = model$loadings)
    res$Qlim = model$Qlim
    res$T2lim = model$T2lim
    
@@ -666,36 +651,19 @@ pca.crossval = function(model, x, cv, center = T, scale = F) {
 #' PCA results (an object of class \code{pcares})
 #'  
 #' @export
-predict.pca = function(object, x, cal = FALSE, ...)
-{
-   # get attributes
-   attrs = mda.getattr(x)
-
+predict.pca = function(object, x, cal = FALSE, ...) {
    # convert to matrix
    x = mda.df2mat(x)
+   attrs = attributes(x)
    
    if (ncol(x) != nrow(object$loadings))
       stop('Number and type of data columns should be the same as in calibration dataset!')
    
-   # compute scores
+   # compute scores and residuals
    x = prep.autoscale(x, center = object$center, scale = object$scale)
    scores = x %*% object$loadings
-   
-   # set names and attributes
-   rownames(scores) = rownames(x)
-   colnames(scores) = colnames(object$loadings)
-   scores = mda.setattr(scores, attrs, type = 'row')
-   attr(scores, 'name') = 'Scores'
-   attr(scores, 'xaxis.name') = 'Components'
-   
-   # calculate residuals and set all attributes from x
    residuals = x - tcrossprod(scores, object$loadings)
-   residuals = mda.setattr(residuals, attrs)
-   attr(scores, 'name') = 'Residuals'
-   
-   # calculate residual distances
-   dist = ldecomp.getDistances(scores, object$loadings, residuals, object$tnorm, cal = cal) 
-   
+      
    # compute total variance 
    if (length(attrs$exclrows) > 0)
       x = x[-attrs$exclrows, , drop = F]
@@ -705,18 +673,12 @@ predict.pca = function(object, x, cal = FALSE, ...)
    
    totvar = sum(x^2)
    
-   # calculate explained variance
-   var = ldecomp.getVariances(dist$Q, totvar) 
-   
    # create and return the results object
-   res = pcares(scores, residuals, object$ncomp.selected, dist$T2, dist$Q, var$expvar, var$cumexpvar)
+   res = pcares(scores = scores, loadings = object$loadings, residuals = residuals, attrs = attrs, 
+                ncomp.selected = object$ncomp.selected, tnorm = object$tnorm, totvar = totvar)
    res$Qlim = object$Qlim
    res$T2lim = object$T2lim
-   res$totvar = totvar
 
-   if (cal == TRUE)
-      res$modpower = dist$modpower
-   
    res
 }  
 
@@ -751,8 +713,7 @@ predict.pca = function(object, x, cal = FALSE, ...)
 plotVariance.pca = function(obj, type = 'b', variance = 'expvar', 
                             main = 'Variance', xlab = 'Components', 
                             ylab = 'Explained variance, %',
-                            show.legend = T, ...)
-{
+                            show.legend = T, ...) {
 
    data = list()
    data$cal = obj$calres[[variance]]
@@ -825,8 +786,7 @@ plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained varia
 #' @export
 plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab = NULL, 
                           ylab = NULL, show.labels = F, show.legend = NULL, cgroup = NULL,
-                          show.axes = TRUE, ...)
-{
+                          show.axes = TRUE, ...) {
    ncomp = length(comp)
 
    if (type != 'p') {
@@ -1168,5 +1128,6 @@ summary.pca = function(object, ...)
                 round(obj$calres$cumexpvar, 2))
    
    colnames(data) = c('Eigvals', 'Expvar', 'Cumexpvar')
+   rownames(data) = colnames(object$loadings)
    show(data)
 }

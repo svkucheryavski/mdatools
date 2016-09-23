@@ -4,7 +4,7 @@
 \alias{pls.crossval}
 \title{Cross-validation of a PLS model}
 \usage{
-pls.crossval(model, x, y, cv, center = T, scale = F, jack.knife = T)
+pls.crossval(model, x, y, cv, center, scale, method, jack.knife = T)
 }
 \arguments{
 \item{model}{a PLS model (object of class \code{pls})}

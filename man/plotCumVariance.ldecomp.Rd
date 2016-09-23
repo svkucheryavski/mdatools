@@ -6,7 +6,8 @@
 \usage{
 \method{plotCumVariance}{ldecomp}(obj, type = "b",
   main = "Cumulative variance", xlab = "Components",
-  ylab = "Explained variance, \%", show.labels = F, ...)
+  ylab = "Explained variance, \%", show.labels = F, labels = "values",
+  ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}

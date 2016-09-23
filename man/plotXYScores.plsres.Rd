@@ -4,23 +4,14 @@
 \alias{plotXYScores.plsres}
 \title{XY scores plot for PLS results}
 \usage{
-\method{plotXYScores}{plsres}(obj, comp = 1, type = "p",
-  main = "XY scores", xlab = "X scores", ylab = "Y scores", ...)
+\method{plotXYScores}{plsres}(obj, ncomp = 1, ...)
 }
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}
 
-\item{comp}{which component to show the plot for}
-
-\item{type}{type of the plot}
-
-\item{main}{main plot title}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
+
+\item{comp}{which component to show the plot for}
 }
 \description{
 Shows plot with X vs. Y scores values for PLS results.

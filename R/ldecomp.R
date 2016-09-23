@@ -50,17 +50,70 @@
 #' @importFrom stats convolve cor lm na.exclude predict pt qf qnorm qt sd var
 #'
 #' @export
-ldecomp = function(scores = NULL, residuals = NULL, ncomp.selected, T2, Q, expvar, cumexpvar)
-{
+ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selected = NULL, attrs = NULL,
+                   tnorm = NULL, dist = NULL, var = NULL, cal = FALSE, totvar = NULL){
+  
+   if (!is.null(scores) && !is.null(loadings)) {
+      # there are scores and loadings, calculate the rest and add attributes
+      ncomp = ncol(loadings)
+      
+      rownames(scores) = attrs$rownames
+      colnames(scores) = colnames(loadings) = paste('Comp', 1:ncomp)
+      scores = mda.setattr(scores, attrs, type = 'row')
+      attr(scores, 'name') = 'Scores'
+      attr(scores, 'xaxis.name') = 'Components'
+      residuals = mda.setattr(residuals, attrs)
+      attr(residuals, 'name') = 'Residuals'
+      
+   } else {
+      ncomp = ncol(dist$Q)
+   }
+
+   # calculate residual distances
+   if (is.null(dist))
+      dist = ldecomp.getDistances(scores, loadings, residuals, tnorm, cal = cal) 
+      
+   # calculate explained variance
+   if (is.null(var))
+      var = ldecomp.getVariances(dist$Q, totvar) 
+
+   # set names and attributes for common results 
+   colnames(dist$Q) = colnames(dist$T2) = colnames(loadings)
+   rownames(dist$Q) = rownames(dist$T2) = attrs$dimnames[[1]]
+ 
+   if (!is.null(dist$modpower)) {
+      # set attributes for modpower and exclude rows if necessary
+      rownames(dist$modpower) = rownames(loadings)
+      colnames(dist$modpower) = colnames(loadings)
+      attr(dist$modpower, 'name') = 'Modelling power'
+      attr(dist$modpower, 'xaxis.name') = 'Components'
+      attr(dist$modpower, 'yaxis.name') = attr(loadings, 'yaxis.name')
+      attr(dist$modpower, 'yaxis.values') = attr(loadings, 'yaxis.values')
+      if (length(attrs$exclcols > 0))
+         dist$modpower = mda.exclrows(dist$modpower, attrs$exclcols)
+   }     
+      
+   # set attributes for Q
+   dist$Q = mda.setattr(dist$Q, attrs, type = 'row')
+   attr(dist$Q, 'name') = 'Squared residual distance (Q)'
+   attr(dist$Q, 'xaxis.name') = 'Components'
+      
+   # set attributes for T2 
+   dist$T2 = mda.setattr(dist$T2, mda.getattr(dist$Q))
+   attr(dist$T2, 'name') = 'T2 residuals'
+
    obj = list(
       scores = scores,
       residuals = residuals,
-      ncomp = ncol(Q),
+      ncomp = ncomp,
       ncomp.selected = ncomp.selected,
-      T2 = T2,
-      Q = Q,
-      cumexpvar = cumexpvar,
-      expvar = expvar
+      T2 = dist$T2,
+      Q = dist$Q,
+      tnorm = dist$tnorm,
+      modpower = dist$modpower,
+      cumexpvar = var$cumexpvar,
+      expvar = var$expvar,
+      totvar = totvar
    )
    
    if (is.null(ncomp.selected))
@@ -94,8 +147,7 @@ ldecomp = function(scores = NULL, residuals = NULL, ncomp.selected, T2, Q, expva
 #' @return
 #' Returns a list with Q, Qvar, T2 and modelling power values for each component.
 #'  
-ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal = FALSE, cv = FALSE)
-{
+ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal = FALSE) {
    # get attributes
    attrs.scores = mda.getattr(scores)
    attrs.loadings = mda.getattr(loadings)
@@ -108,9 +160,12 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
    # prepare zero matrices for the distances
    T2 = matrix(0, nrow = nobj, ncol = ncomp)
    Q = matrix(0, nrow = nobj, ncol = ncomp)
-   modpower = matrix(0, nrow = nvar, ncol = ncomp)
-
+   modpower = matrix(0, nrow = nrow(loadings), ncol = ncomp)
+   
    # calculate normalized scores
+   if (is.null(tnorm) && nrow(scores) > 0)
+      tnorm = sqrt(colSums(scores^2)/(nrow(scores) - 1));   
+   
    scoresn = sweep(scores, 2L, tnorm, '/', check.margin = F);  
 
    # calculate variance for data columns
@@ -128,7 +183,6 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
       datasd = sqrt(colSums(data^2)/(nobj - 1))
    
    # calculate distances for each set of components
-   modpower.loc = matrix(0, nrow = nrow(loadings), ncol = ncomp)
    for (i in 1:ncomp) {
       exp = tcrossprod(scores[, 1:i, drop = F], loadings[, 1:i, drop = F]);
       res = data - exp;
@@ -137,39 +191,8 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
       T2[, i] = rowSums(scoresn[, 1:i, drop = F]^2)
       
       if (nobj > i && cal == TRUE)
-         modpower.loc[, i] = 1 - sqrt(colSums(res^2)/(nobj - i - 1))/datasd
+         modpower[, i] = 1 - sqrt(colSums(res^2)/(nobj - i - 1))/datasd
    }  
-   
-   # fill in modpower table
-   if (length(attrs.loadings$exclrows) > 0)
-      modpower[-attrs.loadings$exclrows, ] = modpower.loc
-   else
-      modpower = modpower.loc
-      
-   # set names and attributes if this is not for CV 
-   if (cv == FALSE) {
-      # set dimnames and return results
-      colnames(Q) = colnames(T2) = colnames(modpower) = colnames(scores)
-      rownames(Q) = rownames(T2) = rownames(scores)
-      rownames(modpower) = varnames
-      
-      # set attributes for modpower and exclude rows if necessary
-      attr(modpower, 'name') = 'Modelling power'
-      attr(modpower, 'xaxis.name') = 'Components'
-      attr(modpower, 'yaxis.name') = attrs.loadings$yaxis.name
-      attr(modpower, 'yaxis.values') = attrs.loadings$yaxis.values
-      
-      if (length(attrs.loadings$exclrows > 0))
-         modpower = mda.exclrows(modpower, attrs.loadings$exclrows)
-      
-      # set attributes for Q
-      Q = mda.setattr(Q, attrs.scores)
-      attr(Q, 'name') = 'Squared residual distance (Q)'
-      
-      # set attributes for T2 
-      T2 = mda.setattr(T2, attrs.scores)
-      attr(T2, 'name') = 'T2 residuals'
-   }
    
    # return the results
    res = list(
@@ -196,8 +219,7 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
 #' @return
 #' Returns a list with two vectors.
 #' 
-ldecomp.getVariances = function(Q, totvar)
-{   
+ldecomp.getVariances = function(Q, totvar) {   
    if (length(attr(Q, 'exclrows')) > 0)
       Q = Q[-attr(Q, 'exclrows'), , drop = F]
    
@@ -231,8 +253,7 @@ ldecomp.getVariances = function(Q, totvar)
 #' @return
 #' Returns a list with two vectors:  \code{T2lim} and \code{Qlim}.
 #' 
-ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
-{   
+ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05) {   
    T2lim = matrix(0, nrow = 1, ncol = ncomp)
    for (i in 1:ncomp)
    {
@@ -300,10 +321,10 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05)
 #' @export
 plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance',
                                    xlab = 'Components', ylab = 'Explained variance, %',
-                                   show.labels = F, ...)
+                                   show.labels = F, labels = 'values', ...)
 {
    mdaplot(obj$cumexpvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, type = type, 
-           show.labels = show.labels, ...)
+           show.labels = show.labels, labels = labels, ...)
 }
 
 #' Explained variance plot for linear decomposition
@@ -329,8 +350,7 @@ plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance'
 #' @export
 plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
                                 xlab = 'Components', ylab = 'Explained variance, %',
-                                show.labels = F, labels = 'values', ...)
-{
+                                show.labels = F, labels = 'values', ...) {
    mdaplot(obj$expvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, show.labels = show.labels, 
            labels = labels, type = type, ...)
 }
@@ -498,7 +518,9 @@ print.ldecomp = function(x, str = NULL, ...)
 #' @export
 as.matrix.ldecomp = function(x, ...)
 {
+   show(x)
    data = cbind(x$expvar, x$cumexpvar)   
+   rownames(data) = colnames(x$Q)
    colnames(data) = c('Expvar', 'Cumexpvar')   
    data
 }  
@@ -516,8 +538,7 @@ as.matrix.ldecomp = function(x, ...)
 #' other arguments
 #' 
 #' @export
-summary.ldecomp = function(object, str = NULL, ...)
-{
+summary.ldecomp = function(object, str = NULL, ...) {
    if (is.null(str))
       str ='Summary for data decomposition (class ldecomp)'
    
