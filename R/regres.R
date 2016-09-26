@@ -246,7 +246,7 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T, col 
    else
       xaxis.name = 'y, reference'
 
-   attrs = mda.getattr(obj$c.pred)
+   attrs = mda.getattr(obj$y.pred)
    if (is.null(obj$y.ref)) {   
       data = matrix(obj$y.pred[, ncomp, ny], ncol = 1)
       xaxis.name = NULL
@@ -258,7 +258,6 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T, col 
    colnames(data) = c(xaxis.name, yaxis.name)
    rownames(data) = rownames(obj$y.pred)
    attr(data, 'name') = 'Predictions'
-   
    mdaplot(data, type = 'p', ...)
    
    if (show.line == T && ncol(data) == 2)
