@@ -374,7 +374,7 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    xloadings = matrix(0, nrow = x.ncols, ncol = ncomp)
    weights = matrix(0, nrow = x.ncols, ncol = ncomp)
    coeffs = array(0, dim = c(x.ncols, ncomp, ncol(y.cal)))
-   if (length(x.attrs$exclcols) > 0) {
+   if (length(x.attrs$exclcols) > 0) {
       xloadings[-x.attrs$exclcols, ] = res$xloadings
       xloadings = mda.exclrows(xloadings, x.attrs$exclcols)      
       weights[-x.attrs$exclcols, ] = res$weights
@@ -398,7 +398,7 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
 
    # do the same for response related results
    yloadings = matrix(0, nrow = y.ncols, ncol = ncomp)
-   if (length(y.attrs$exclcols) > 0) {
+   if (length(y.attrs$exclcols) > 0) {
       yloadings[-y.attrs$exclcols, ] = res$xloadings
       yloadings = mda.exclrows(xloadings, y.attrs$exclcols)      
    } else {
@@ -837,8 +837,8 @@ selectCompNum.pls = function(model, ncomp = NULL)
 predict.pls = function(object, x, y = NULL, ...) {   
    
    # preprocess x and calculate scores, total and full variance
-   x.attrs = mda.getattr(x)
-   y.attrs = mda.getattr(y)
+   x.attrs = attributes(x)
+   y.attrs = attributes(y)
 
    # correct dimension for y if it is a vector
    if (!is.null(y) && is.null(dim(y))) {
@@ -867,28 +867,60 @@ predict.pls = function(object, x, y = NULL, ...) {
          stop('Wrong number of columns in matrix with response values (y)!')
    }
    
-   # autoscale x and compute x scores and residuals
+   # autoscale x
    x = prep.autoscale(x, center = object$xcenter, scale = object$xscale)
+ 
+   # compute x scores and residuals
    xscores = x %*% (object$weights %*% solve(crossprod(object$xloadings, object$weights)))  
    xresiduals = x - tcrossprod(xscores, object$xloadings)
    xdist = ldecomp.getDistances(xscores, object$xloadings, xresiduals, object$xtnorm) 
+   
    
    # make predictions
    yp = apply(object$coeffs$values, 3, function(x, y)(y %*% x), x)
    dim(yp) = c(nrow(x), ncomp, dim(object$coeffs$values)[3])
    
-   # unscale predicted y values
-   if (is.numeric(object$yscale))
-      yp = sweep(yp, 3, object$yscale, '*')
-   
-   # uncenter predicted y values
-   if (is.numeric(object$ycenter))
-      yp = sweep(yp, 3, object$ycenter, '+')
-   
-   # set up all attributes and names
-   dimnames(yp) = list(rownames(x), dimnames(object$coeffs$values)[[2]], dimnames(object$coeffs$values)[[3]])
-   yp = mda.setattr(yp, y.attrs)
-   attr(yp, 'name') = 'Response values, predicted'
+   # if reference values are provided calculate and set up names for ydecomp
+   y.ref = NULL
+   ydecomp = NULL
+   if (!is.null(y)) {   
+      y.ref = y      
+      
+      # compute everything for yldecomp
+      y = prep.autoscale(y, center = object$ycenter, scale = object$yscale)
+      yscores = as.matrix(y) %*% object$yloadings   
+      yresiduals = as.matrix(yp[, ncol(yp), ]) - y
+      ydist = ldecomp.getDistances(xscores, object$yloadings, yresiduals, object$ytnorm) 
+      
+      # unscale predicted y values
+      if (is.numeric(object$yscale))
+         yp = sweep(yp, 3, object$yscale, '*')
+      
+      # uncenter predicted y values
+      if (is.numeric(object$ycenter))
+         yp = sweep(yp, 3, object$ycenter, '+')
+      
+      # set up all attributes and names
+      
+      dimnames(yp) = list(rownames(x), dimnames(object$coeffs$values)[[2]], dimnames(object$coeffs$values)[[3]])
+      yp = mda.setattr(yp, y.attrs)
+      attr(yp, 'name') = 'Response values, predicted'
+      
+      # compute total variance 
+      if (length(y.attrs$exclrows) > 0)
+         y = y[-y.attrs$exclrows, , drop = F]
+      
+      if (length(y.attrs$exclcols) > 0)
+         y = y[, -y.attrs$exclcols, drop = F]
+      
+      ytotvar = sum(y^2)
+      
+      # create ydecomp object
+      ydecomp = ldecomp(scores = yscores, residuals = yresiduals, loadings = object$yloadings, 
+                        attrs = y.attrs, ncomp.selected = object$ncomp.selected, dist = ydist, 
+                        totvar = ytotvar)
+      ydecomp$totvar = ytotvar
+   }
    
    # compute total variance 
    if (length(x.attrs$exclrows) > 0)
@@ -905,35 +937,10 @@ predict.pls = function(object, x, y = NULL, ...) {
    xdecomp$totvar = xtotvar
    
    
-   # if reference values are provided calculate and set up names for ydecomp
-   y.ref = NULL
-   ydecomp = NULL
-   if (!is.null(y)) {   
-      y.ref = y      
-      
-      # compute everything for yldecomp
-      y = prep.autoscale(y, center = object$ycenter, scale = object$yscale)
-      yscores = as.matrix(y) %*% object$yloadings   
-      yresiduals = as.matrix(yp[, ncol(yp), ]) - y.ref
-      ydist = ldecomp.getDistances(yscores, object$yloadings, yresiduals, object$ytnorm) 
-      
-      # compute total variance 
-      if (length(y.attrs$exclrows) > 0)
-         y = y[-y.attrs$exclrows, , drop = F]
-      
-      if (length(y.attrs$exclcols) > 0)
-         y = y[, -y.attrs$exclcols, drop = F]
-      
-      ytotvar = sum(y^2)
-      
-      # create ydecomp object
-      ydist = ldecomp.getDistances(scores = xscores, loadings = object$yloadings, residuals = yresiduals)
-      ydecomp = ldecomp(scores = yscores, residuals = yresiduals, loadings = object$yloadings, attrs = y.attrs,
-                        ncomp.selected = object$ncomp.selected, dist = ydist, totvar = ytotvar)
-      ydecomp$totvar = ytotvar
-   }
-   
-   res = plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, xdecomp = xdecomp, ydecomp = ydecomp)    
+  
+   res = plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, 
+                xdecomp = xdecomp, ydecomp = ydecomp)
+   res
 }  
 
 #' Selectivity ratio calculation
@@ -958,16 +965,17 @@ pls.calculateSelectivityRatio = function(model, x) {
    ncomp = dim(model$coeffs$values)[2]
    nvar = ncol(x)
    
-   selratio = array(0, dim = c(nvar, ncomp, ny))
-   
    # get coefficients 
    coeffs = model$coeffs$values
    attrs = mda.getattr(coeffs)
-   if (length(attrs$exclrows) > 0) {
-      coeffs = coeffs[-attrs$exclrows, , , drop = FALSE]
+   exclvars = attrs$exclrows
+   nexclvar = length(exclvars)
+   if (nexclvar > 0) {
+      coeffs = coeffs[-exclvars, , , drop = FALSE]
       attrs$exclrow = NULL
    }
    
+   selratio = array(0, dim = c(nvar, ncomp, ny))
    for (y in 1:ny) {   
       for (comp in 1:model$ncomp) {   
          b = coeffs[, comp, y]
@@ -984,10 +992,18 @@ pls.calculateSelectivityRatio = function(model, x) {
          selratio[, comp, y] = expvar / resvar        
       }
    }   
+
+   if (nexclvar > 0) {
+      selratio.out = array(0, dim = c(nvar + nexclvar, ncomp, ny))
+      selratio.out[-exclvars, , ] = selratio
+   } else {
+      selratio.out = selratio
+   }
    
-   dimnames(selratio) = dimnames(model$coeffs$values)
-   selratio = mda.setattr(selratio, attrs)   
-   selratio
+   dimnames(selratio.out) = dimnames(model$coeffs$values)
+   selratio.out = mda.setattr(selratio.out, attrs)   
+   attr(selratio.out, 'name') = 'Selectivity ratio'
+   selratio.out
 }   
 
 #' VIP scores calculation for PLS model
@@ -1013,11 +1029,12 @@ pls.calculateVIPScores = function(object) {
    
    # remove hidden variables
    attrs = mda.getattr(coeffs)
-   if (length(attrs$exclrows) > 0) {
-      coeffs = coeffs[-attrs$exclrows, , , drop = FALSE]
-      w = w[-attrs$exclrows, , drop = FALSE]
-      xloads = xloads[-attrs$exclrows, , drop = FALSE]
-      attrs$exclrow = NULL
+   exclvars = attrs$exclrows
+   nexclvar = length(exclvars)
+   if (nexclvar > 0) {
+      coeffs = coeffs[-exclvars, , , drop = FALSE]
+      w = w[-exclvars, , drop = FALSE]
+      xloads = xloads[-exclvars, , drop = FALSE]
    }
 
    # remove hidden objects
@@ -1027,8 +1044,6 @@ pls.calculateVIPScores = function(object) {
    ny = dim(coeffs)[3]
    nvar = dim(coeffs)[1]
    vipscores = matrix(0, nrow = nvar, ncol = ny)
-   
-
 
    # regression coefficients for working with scores instead of x
    # T = X * WPW 
@@ -1038,7 +1053,7 @@ pls.calculateVIPScores = function(object) {
    # YP = T * WPW' * (WPW * WPW')^-1 * b
    # YP = T * bT, where bT = WPW' * (WPW * WPW)^-1 * b
    wpw = (w %*% solve(t(xloads) %*% w))
-
+   
    # normalise weights
    n = 1/sqrt(colSums(w^2))
    if (comp == 1)
@@ -1048,7 +1063,7 @@ pls.calculateVIPScores = function(object) {
    wnorm = w %*% n
    
    for (y in 1:ny) {   
-      b = object$coeffs$values[, comp, y, drop = F]
+      b = coeffs[, comp, y, drop = F]
       dim(b) = c(dim(b)[1], 1) 
       
       bscores = ( t(wpw) %*% pinv(wpw %*% t(wpw)) ) %*% b
@@ -1058,12 +1073,19 @@ pls.calculateVIPScores = function(object) {
       SS = bscores^2 * t(TT)
       vipscores[, y] = nvar * wnorm^2 %*% as.matrix(SS) / sum(SS)
    }   
+
+   if (nexclvar > 0) {
+      vipscores.out = matrix(0, nrow = nvar + nexclvar, ncol = ny)
+      vipscores.out[-exclvars, ] = vipscores
+   } else {
+      vipscores.out = vipscores
+   }
    
-   rownames(vipscores) = dimnames(object$coeffs$values)[[1]]
-   colnames(vipscores) = dimnames(object$coeffs$values)[[3]]
-   vipscores = mda.setattr(vipscores, attrs)
-   
-   vipscores   
+   rownames(vipscores.out) = dimnames(object$coeffs$values)[[1]]
+   colnames(vipscores.out) = dimnames(object$coeffs$values)[[3]]
+   vipscores.out = mda.setattr(vipscores.out, attrs)
+   attr(vipscores.out, 'name') = 'VIP scores'
+   vipscores.out   
 }   
 
 #' Selectivity ratio for PLS model
@@ -1749,7 +1771,7 @@ plotYResiduals.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, show.line 
 #' @param ncomp
 #' how many components to use (if NULL - user selected optimal value will be used)
 #' @param ...
-#' other plot parameters (see \code{mdaplotg} and \cide{plot.regcoeffs} for details)
+#' other plot parameters (see \code{mdaplotg} and \code{plot.regcoeffs} for details)
 #'
 #' @details
 #' See examples in help for \code{\link{pls}} function.

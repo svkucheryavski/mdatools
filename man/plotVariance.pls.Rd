@@ -6,7 +6,7 @@
 \usage{
 \method{plotVariance}{pls}(obj, decomp = "xdecomp", variance = "expvar",
   type = "b", main = "X variance", xlab = "Components",
-  ylab = "Explained variance, \%", show.labels = F, show.legend = T, ...)
+  ylab = "Explained variance, \%", labels = "values", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -22,10 +22,6 @@
 \item{xlab}{label for x axis}
 
 \item{ylab}{label for y axis}
-
-\item{show.labels}{logical, show or not labels for the plot elements}
-
-\item{show.legend}{logical, show or not legend for the plot}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

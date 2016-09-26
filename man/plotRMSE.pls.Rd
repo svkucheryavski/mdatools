@@ -5,8 +5,7 @@
 \title{RMSE plot for PLS}
 \usage{
 \method{plotRMSE}{pls}(obj, ny = 1, type = "b", main = "RMSE",
-  xlab = "Components", ylab = NULL, show.legend = T, show.labels = F,
-  ...)
+  xlab = "Components", ylab = NULL, labels = "values", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -21,11 +20,9 @@
 
 \item{ylab}{label for y axis}
 
-\item{show.legend}{logical, show or not legend for the plot}
-
-\item{show.labels}{logical, show or not labels for the plot elements}
-
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
+\item{values}{what to show as labels (if this option is on)}
 }
 \description{
 Shows plot with root mean squared error values vs. number of components for PLS model.

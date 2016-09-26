@@ -92,7 +92,7 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
    
    xmin = min(x.values)
    xmax = max(x.values)
-   if (is.null(lower) || is.null(upper)) {
+   if (is.null(lower) || is.null(upper)) {
       ymin = min(y.values, y.values)
       ymax = max(y.values, y.values)
    } else {
@@ -746,7 +746,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 
 
    # process excluded columns, broken.lines is needed to show line plots with excluded columns correctly
-   broken.lines = FALSE
+   #broken.lines = FALSE
    
    # process excluded rows
    excluded.rows = data.attr$exclrows
@@ -1025,7 +1025,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
          if (type == 'h' ) {
             row.names = data.attr$dimnames[[1]]
             if (!is.null(row.names)) {
-               if (length(excluded.rows) > 0) {
+               if (length(excluded.rows) > 0) {
                   row.names = row.names[-excluded.rows]
                } 
                main = row.names[1]
@@ -1147,7 +1147,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
          if (length(excluded.rows) > 0) 
             labels.excl = names(x.values.excludedrows)
       } else if (length(labels) == 1 && labels == 'values') {
-         if (type == 'p' || type == 'h') {
+         if (type == 'p' || type == 'h') {
             labels.incl = y.values
             if (length(excluded.rows) > 0)
                labels.excl = y.values.excludedrows
@@ -1299,7 +1299,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    name = NULL
    
    # prepare list with groups of objects
-   if (is.matrix(data) || is.data.frame(data)) {
+   if (is.matrix(data) || is.data.frame(data)) {
       if (is.null(groupby)) {
          # take every line as a group
          name = attr(data, 'name', exact = TRUE)

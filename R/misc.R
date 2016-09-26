@@ -284,7 +284,7 @@ mda.rbind = function(...) {
       yaxis.values = attr(x, 'yaxis.values')
       if (!is.null(exclrows))
          out.exclrows = c(out.exclrows, exclrows + nrow(out.x))
-      if (is.null(out.yaxis.values) || is.null(yaxis.values))
+      if (is.null(out.yaxis.values) || is.null(yaxis.values))
          out.yaxis.values = NULL
       else
          out.yaxis.values = c(out.yaxis.values, yaxis.values)
@@ -322,7 +322,7 @@ mda.cbind = function(...) {
       xaxis.values = attr(x, 'xaxis.values')
       if (!is.null(exclcols))
          out.exclcols = c(out.exclcols, exclcols + ncol(out.x))
-      if (is.null(out.xaxis.values) || is.null(xaxis.values))
+      if (is.null(out.xaxis.values) || is.null(xaxis.values))
          out.xaxis.values = NULL
       else
          out.xaxis.values = c(out.xaxis.values, xaxis.values)
@@ -502,13 +502,13 @@ mda.setattr = function(x, attrs, type = 'all') {
    attr(x, 'height') = attrs$height
    attr(x, 'bgpixels') = attrs$bgpixels
    
-   if (type == 'row' || type == 'all') {
+   if (type == 'row' || type == 'all') {
       attr(x, 'yaxis.name') = attrs$yaxis.name
       attr(x, 'yaxis.values') = attrs$yaxis.values
       attr(x, 'exclrows') = attrs$exclrows
    }
    
-   if (type == 'col' || type == 'all') {
+   if (type == 'col' || type == 'all') {
       attr(x, 'xaxis.name') = attrs$xaxis.name
       attr(x, 'xaxis.values') = attrs$xaxis.values
       attr(x, 'exclcols') = attrs$exclcols

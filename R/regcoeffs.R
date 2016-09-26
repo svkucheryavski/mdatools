@@ -55,15 +55,21 @@ regcoeffs = function(coeffs, ci.coeffs = NULL, ci.alpha = 0.1) {
 #' a list with statistics (\code{$ci} - array with confidence intervals, 
 #' \code{$p.values} - array with p-values, \code{$t.values} - array with t-values)
 #' 
-regcoeffs.getStat = function(obj, ci.coeffs, ci.alpha = 0.1) {
-   s = dim(ci.coeffs)
-   nvar = s[1]
-   ncomp = s[2]
-   ny = s[3]
-   nobj = s[4]
+regcoeffs.getStat = function(coeffs.values, ci.coeffs, ci.alpha = 0.1) {
 
+   # get attributes   
+   attrs = mda.getattr(coeffs.values)
+   exclvars = attrs$exclrows
+   nexclvar = length(exclvars)
+
+   # get dimensions and set t-value
+   nvar = dim(ci.coeffs)[1]
+   ncomp = dim(ci.coeffs)[2]
+   ny = dim(ci.coeffs)[3]
+   nobj = dim(ci.coeffs)[4]
    t = qt(1 - ci.alpha/2, nobj - 1)
-
+ 
+   # set up matrices and calculate statistics 
    ci = array(0, dim = c(nvar, ncomp, ny, 2))
    t.values = array(0, dim = c(nvar, ncomp, ny))
    p.values = array(0, dim = c(nvar, ncomp, ny))
@@ -80,15 +86,34 @@ regcoeffs.getStat = function(obj, ci.coeffs, ci.alpha = 0.1) {
          p.values[, comp, y] = 2 * pt(tmin, nobj - 1)
       }   
    }   
+
+   if (nexclvar > 0) {
+      ci.out = array(0, dim = c(nvar + nexclvar, ncomp, ny, 2))
+      t.values.out = array(0, dim = c(nvar + nexclvar, ncomp, ny))
+      p.values.out = array(0, dim = c(nvar + nexclvar, ncomp, ny))
+      ci.out[-exclvars, , ,] = ci
+      t.values.out[-exclvars, , ] = t.values
+      p.values.out[-exclvars, , ] = p.values
+   } else {
+      ci.out = ci
+      t.values.out = t.values
+      p.values.out = p.values
+   }  
    
-   dimnames(t.values) = dimnames(obj)
-   dimnames(p.values) = dimnames(obj)
+   dimnames(t.values.out) = dimnames(p.values.out) = dimnames(coeffs.values)
+   dimnames(ci.out) = c(dimnames(coeffs.values), list(c('Lo', 'Up')))
+   t.values.out = mda.setattr(t.values.out, attrs)
+   p.values.out = mda.setattr(t.values.out, attrs)
+   ci.out = mda.setattr(ci.out, attrs)
+   attr(t.values.out, 'name') = 't-values (Jack-knife)'
+   attr(p.values.out, 'name') = 'p-values (Jack-knife)'
+   attr(t.values.out, 'name') = sprintf('%d%% confidence interval', round((1 - ci.alpha)*100))
    
    stat = list(
-      ci = ci,
-      t.values = t.values,
-      p.values = p.values
-      )
+      ci = ci.out,
+      t.values = t.values.out,
+      p.values = p.values.out
+   )
    
    stat
 }

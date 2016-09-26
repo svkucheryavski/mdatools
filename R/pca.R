@@ -405,7 +405,7 @@ pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info) {
    # corresponding rows in loadings will be set to 0 and excluded
    loadings = matrix(0, nrow = x.ncols, ncol = ncomp)
    
-   if (length(attrs$exclcols) > 0) {
+   if (length(attrs$exclcols) > 0) {
       loadings[-attrs$exclcols, ] = res$loadings
       loadings = mda.exclrows(loadings, attrs$exclcols)      
    } else {

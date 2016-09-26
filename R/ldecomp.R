@@ -73,14 +73,9 @@ ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selec
    if (is.null(dist))
       dist = ldecomp.getDistances(scores, loadings, residuals, tnorm, cal = cal) 
       
-   # calculate explained variance
-   if (is.null(var))
-      var = ldecomp.getVariances(dist$Q, totvar) 
-
    # set names and attributes for common results 
    colnames(dist$Q) = colnames(dist$T2) = colnames(loadings)
    rownames(dist$Q) = rownames(dist$T2) = attrs$dimnames[[1]]
- 
    if (!is.null(dist$modpower)) {
       # set attributes for modpower and exclude rows if necessary
       rownames(dist$modpower) = rownames(loadings)
@@ -101,7 +96,11 @@ ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selec
    # set attributes for T2 
    dist$T2 = mda.setattr(dist$T2, mda.getattr(dist$Q))
    attr(dist$T2, 'name') = 'T2 residuals'
-
+  
+   # calculate explained variance
+   if (is.null(var))
+      var = ldecomp.getVariances(dist$Q, totvar) 
+   
    obj = list(
       scores = scores,
       residuals = residuals,
@@ -219,10 +218,9 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
 #' @return
 #' Returns a list with two vectors.
 #' 
-ldecomp.getVariances = function(Q, totvar) {   
+ldecomp.getVariances = function(Q, totvar) { 
    if (length(attr(Q, 'exclrows')) > 0)
       Q = Q[-attr(Q, 'exclrows'), , drop = F]
-   
    cumresvar = colSums(Q) / totvar * 100
    cumexpvar = 100 - cumresvar
    expvar = c(cumexpvar[1], diff(cumexpvar))
@@ -518,7 +516,6 @@ print.ldecomp = function(x, str = NULL, ...)
 #' @export
 as.matrix.ldecomp = function(x, ...)
 {
-   show(x)
    data = cbind(x$expvar, x$cumexpvar)   
    rownames(data) = colnames(x$Q)
    colnames(data) = c('Expvar', 'Cumexpvar')   

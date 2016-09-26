@@ -5,7 +5,7 @@
 \title{X loadings plot for PLS}
 \usage{
 \method{plotXLoadings}{pls}(obj, comp = c(1, 2), type = "p",
-  main = "X loadings", ylab = NULL, xlab = NULL, show.axes = T, ...)
+  main = "X loadings", show.axes = T, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -15,10 +15,6 @@
 \item{type}{type of the plot}
 
 \item{main}{main plot title}
-
-\item{ylab}{label for y axis}
-
-\item{xlab}{label for x axis}
 
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
