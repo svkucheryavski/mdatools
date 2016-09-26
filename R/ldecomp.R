@@ -56,13 +56,13 @@ ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selec
    if (!is.null(scores) && !is.null(loadings)) {
       # there are scores and loadings, calculate the rest and add attributes
       ncomp = ncol(loadings)
-      
-      rownames(scores) = attrs$rownames
-      colnames(scores) = colnames(loadings) = paste('Comp', 1:ncomp)
       scores = mda.setattr(scores, attrs, type = 'row')
-      attr(scores, 'name') = 'Scores'
-      attr(scores, 'xaxis.name') = 'Components'
       residuals = mda.setattr(residuals, attrs)
+
+      rownames(scores) = rownames(residuals) = attrs$dimnames[[1]]
+      colnames(scores) = colnames(loadings)
+      colnames(residuals) = attrs$dimnames[[2]]
+      attr(scores, 'name') = 'Scores'
       attr(residuals, 'name') = 'Residuals'
       
    } else {
