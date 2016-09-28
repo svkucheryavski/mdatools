@@ -1357,8 +1357,8 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       type = rep(type, ngroups)
    else if (length(type) != ngroups)
       stop('Parameter "type" should be specified for each group or be common for all!')
-   else if (!(sum(type == 'h') == 0 | sum(type == 'h') == length(pch)))
-      stop('Barplot (type = "h") for groups can not be combined with other plots!');
+   #else if (!(sum(type == 'h') == 0 | sum(type == 'h') == length(pch)))
+   #   stop('Barplot (type = "h") for groups can not be combined with other plots!');
    
    # if marker symbol is not specified for each group multply default value
    if (!is.numeric(pch))
@@ -1421,7 +1421,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       lim$ylim = ylim
    
    # correct x limits if bar plot should be shown
-   if (type[1] == 'h') {
+   if (any(type == 'h')) {
       dx = 0.35
       lim$xlim = lim$xlim + c(-dx, dx)
    }
@@ -1457,10 +1457,12 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    if (show.grid == T)
       mdaplot.showGrid()
    
+   nbarplots =  sum(type == 'h')
+   
    # make a plot for each group   
    for (i in 1:ngroups) {
       if (type[i] == 'h')
-         force.x.values = c(i, ngroups)
+         force.x.values = c(i, nbarplots)
       else
          force.x.values = NA
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],

@@ -393,7 +393,7 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    
    attr(xloadings, 'name') = 'X loadings'
    attr(xloadings, 'xaxis.name') = attr(weights, 'xaxis.name') = attr(coeffs, 'xaxis.name') = 'Components'
-   attr(xloadings, 'yaxis.name') = attr(weights, 'yaxis.name') = attr(coeffs, 'xaxis.name') = x.attrs$xaxis.name
+   attr(xloadings, 'yaxis.name') = attr(weights, 'yaxis.name') = attr(coeffs, 'yaxis.name') = x.attrs$xaxis.name
    attr(xloadings, 'yaxis.values') = attr(weights, 'yaxis.values') = attr(coeffs, 'yaxis.values') = x.attrs$xaxis.values
 
    # do the same for response related results
@@ -712,10 +712,10 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
    vary = ldecomp.getVariances(Qy, model$calres$ydecomp$totvar)
 
    # get rid of some of the attributed
-   attr(x.attrs, 'exclrows') = NULL
-   attr(x.attrs, 'exclcols') = NULL
-   attr(y.attrs, 'exclrows') = NULL
-   attr(y.attrs, 'exclcols') = NULL
+   x.attrs$exclrows = NULL
+   x.attrs$exclcols = NULL
+   y.attrs$exclrows = NULL
+   y.attrs$exclcols = NULL
    
    # make pls results and return
    res = plsres(yp.cv, y.ref = y, ncomp.selected = model$ncomp.selected,
@@ -724,7 +724,6 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
                 ydecomp = ldecomp(ncomp.selected = model$ncomp.selected, dist = list(Q = Qy, T2 = T2y), 
                                   var = vary, loadings = model$yloadings, attrs = y.attrs)
    )
-   
    if (jack.knife == T)
       res$jkcoeffs = jkcoeffs
    
@@ -1117,10 +1116,11 @@ pls.calculateVIPScores = function(object) {
 getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, ...) {
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
-      
+   
+   attrs = mda.getattr(obj$selratio)   
    selratio = obj$selratio[, ncomp, ny]
    dim(selratio) = c(dim(obj$selratio)[1], 1)
-   
+   selratio = mda.setattr(selratio, attrs)   
    rownames(selratio) = dimnames(obj$selratio)[[1]]
    colnames(selratio) = dimnames(obj$selratio)[[3]][[ny]]
    
@@ -1148,7 +1148,7 @@ getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, ...) {
 #' 
 #' @export
 getVIPScores.pls = function(obj, ny = 1, ...) {
-   vipscores = obj$vipscores[, ny, drop = F]
+   vipscores = mda.subset(obj$vipscores, select = ny)
 }
 
 
@@ -1256,13 +1256,11 @@ getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = TRUE, ...) {
 #' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
 #' 
 #' @export
-plotVIPScores.pls = function(obj, ny = 1, type = 'l', main = NULL, 
-                             xlab = 'Variables', ylab = '', ...) {   
+plotVIPScores.pls = function(obj, ny = 1, type = 'l', main = NULL, ylab = '', ...) {   
    
    main = getMainTitle(main, NULL, 'VIP scores')
    vipscores = getVIPScores.pls(obj, ny)
-   mdaplot(mda.t(vipscores), type = type, main = main, xlab = xlab,
-           ylab = ylab, ...)
+   mdaplot(mda.t(vipscores), type = type, main = main, ylab = ylab, ...)
 }
 
 #' Selectivity ratio plot for PLS model
@@ -1292,14 +1290,13 @@ plotVIPScores.pls = function(obj, ny = 1, type = 'l', main = NULL,
 #' [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
 #' 
 #' @export
-plotSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, type = 'l', main = NULL, 
-                                    xlab = 'Variables', ylab = '', ...) {
+plotSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, type = 'l', 
+                                    main = NULL, ylab = '', ...) {
    main = getMainTitle(main, ncomp, 'Selectivity ratio')
    ncomp = getSelectedComponents(obj, ncomp)
    
    selratio = getSelectivityRatio(obj, ncomp, ny)
-   mdaplot(mda.t(selratio), type = type, main = main, xlab = xlab,
-           ylab = ylab, ...)
+   mdaplot(mda.t(selratio), type = type, main = main, ylab = ylab, ...)
 } 
 
 

@@ -232,7 +232,6 @@ plot.regcoeffs = function(x, ncomp = 1, ny = 1, type = NULL, col = NULL, main = 
    data = matrix(obj$values[, ncomp, ny, drop = F], ncol = 1)
    data = mda.setattr(data, attrs)
    rownames(data) = rownames(obj$values)
-   
    if (show.ci == TRUE && !is.null(obj$ci)) {   
       ci.col = mdaplot.getColors(1)
       main.col   = 'lightgray'

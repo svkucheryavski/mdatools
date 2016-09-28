@@ -16,10 +16,10 @@
 #' data matrix with processed values
 #' 
 #' @export
-prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1)
-{   
+prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1) {   
    
    attrs = mda.getattr(data)
+   dimnames = dimnames(data)
    
    # define values for centering
    if (is.logical(center) && center == T )
@@ -50,7 +50,7 @@ prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1)
    attr(data, 'scaled:scale') = NULL
    attr(data, 'prep:center') = center
    attr(data, 'prep:scale') = scale
-   
+   dimnames(data) = dimnames
    data
 }
 
@@ -86,12 +86,13 @@ prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1)
 #'  mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After SNV')
 #'
 #' @export
-prep.snv = function(data)
-{
+prep.snv = function(data){
    attrs = mda.getattr(data)
+   dimnames = dimnames(data)
+   
    data = t(scale(t(data), center = T, scale = T))
    data = mda.setattr(data, attrs)
-   
+   dimnames(data) = dimnames
    data
 } 
 
@@ -109,9 +110,9 @@ prep.snv = function(data)
 #' data matrix with normalized values
 #' 
 #' @export
-prep.norm = function(data, type = 'area')
-{
+prep.norm = function(data, type = 'area') {
    attrs = mda.getattr(data)
+   dimnames = dimnames(data)
    
    if (type == 'area')
    {   
@@ -129,7 +130,7 @@ prep.norm = function(data, type = 'area')
    
    data = sweep(data, 1, w, '/')
    data = mda.setattr(data)
-   
+   dimnames(data) = dimnames
    data
 }   
 
@@ -148,9 +149,9 @@ prep.norm = function(data, type = 'area')
 #' order of derivative to take (0 - no derivative)
 #' 
 #' @export
-prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
-{
+prep.savgol = function(data, width = 3, porder = 1, dorder = 0) {
    attrs = mda.getattr(data)
+   dimnames = dimnames(data)
    
    nobj = nrow(data)
    nvar = ncol(data)
@@ -168,7 +169,7 @@ prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
    }  
    
    pdata = mda.setattr(pdata, attrs)
-   
+   dimnames(pdata) = dimnames
    pdata
 }
 
@@ -207,9 +208,9 @@ prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
 #'  mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After MSC')
 #'
 #' @export
-prep.msc = function(spectra, mspectrum = NULL)
-{
+prep.msc = function(spectra, mspectrum = NULL) {
    attrs = mda.getattr(spectra)
+   dimnames = dimnames(spectra)
    
    if (is.null(mspectrum))
       mspectrum = apply(spectra, 2, mean)   
@@ -223,7 +224,7 @@ prep.msc = function(spectra, mspectrum = NULL)
    
    cspectra = mda.setattr(cspectra, attrs)
    attr(cspectra, 'mspectrum') = mspectrum
-   
+   dimnames(cspectra) = dimnames
    cspectra
 }  
 
