@@ -73,10 +73,11 @@ regres.r2 = function(y.ref, y.pred) {
    nresp = ncol(y.ref)
    ncomp = ncol(y.pred)
    r2 = matrix(0, nrow = nresp, ncol = ncomp)
-   
+  
+   ytot = colSums(y.ref^2)
    for (i in 1:nresp)
-      r2[i, ] = as.vector(cor(y.ref[, i], y.pred[, , i])^2)   
-
+      r2[i, ] = (1 - colSums(apply(y.pred[, , i], 2, '-', y.ref[, i])^2)/ytot[i]) * 100   
+   
    rownames(r2) = colnames(y.ref)
    colnames(r2) = dimnames(y.pred)[[2]]
    attr(r2, 'name') = 'Coefficient of determination'
@@ -188,7 +189,7 @@ regres.slope = function(y.ref, y.pred) {
 #' other plot parameters (see \code{mdaplot} for details)
 #'
 #' @export
-plotRMSE.regres = function(obj, ny = 1, type = 'b', ...) {
+plotRMSE.regres = function(obj, ny = 1, type = 'b', labels = 'values', ...) {
    
    if (is.null(obj$rmse)) {
       warning('RMSE values are not available.')
@@ -200,9 +201,9 @@ plotRMSE.regres = function(obj, ny = 1, type = 'b', ...) {
    attr(data, 'yaxis.name') = 'RMSE'
    attr(data, 'name') = 'RMSE'
    if (length(ny) == 1)
-      mdaplot(data, type = type, ...)
+      mdaplot(data, type = type, labels = labels, ...)
    else
-      mdaplotg(data, type = type, ...)
+      mdaplotg(data, type = type, labels = labels, ...)
 }
 
 #' Predictions plot for regression results

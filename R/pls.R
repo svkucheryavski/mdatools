@@ -639,7 +639,7 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
             yc = y[-ind, , drop = F]
             xt = x[ind, , drop = F]
             yt = y[ind, , drop = F]
-            
+           
             # autoscale calibration set
             xc = prep.autoscale(xc, center = center, scale = scale)
             yc = prep.autoscale(yc, center = center, scale = scale)
@@ -665,7 +665,7 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
             
             # get residuals
             xresiduals = xt - tcrossprod(xscores, m$xloadings)
-            yresiduals = yp[, ncol(yp), ] - yt
+            yresiduals = yt - yp[, ncol(yp), ]
 
             # unscale predicted y values
             if (scale == TRUE)
@@ -674,16 +674,16 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
             # uncenter predicted y values
             if (center == TRUE)
                yp = sweep(yp, 3, m$ycenter, '+')
-
+            
             # get distances
             xdist = ldecomp.getDistances(scores = xscores, loadings = m$xloadings, residuals = xresiduals, 
                                          tnorm = model$xtnorm)
             ydist = ldecomp.getDistances(scores = xscores, loadings = m$yloadings, residuals = yresiduals, 
                                          tnorm = model$ytnorm)
-
+            
             # correct dimenstion for reg coeffs for JK
             dim(m$coeffs) = c(dim(m$coeffs), 1)
-            
+          
             # save results
             yp.cv[ind, , ] = yp.cv[ind, , , drop = F]  + yp
             Qx[ind, ]  = Qx[ind, , drop = F] + xdist$Q        
@@ -702,7 +702,7 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
    Qy = Qy / nrep
    T2y = T2y / nrep
    jkcoeffs = jkcoeffs / nrep
-   
+  
    # set up names
    dimnames(jkcoeffs) = list(colnames(x), colnames(model$coeffs$values), colnames(model$calres$y.ref), 1:nseg)
    dimnames(yp.cv) = list(rownames(x), colnames(model$coeffs$values), colnames(model$calres$y.ref))         
@@ -888,23 +888,11 @@ predict.pls = function(object, x, y = NULL, ...) {
       
       # compute everything for yldecomp
       y = prep.autoscale(y, center = object$ycenter, scale = object$yscale)
-      yscores = as.matrix(y) %*% object$yloadings   
-      yresiduals = as.matrix(yp[, ncol(yp), ]) - y
+      yscores = as.matrix(y) %*% object$yloadings 
+      
+      yresiduals = y - as.matrix(yp[, ncol(yp), ])
       ydist = ldecomp.getDistances(xscores, object$yloadings, yresiduals, object$ytnorm) 
       
-      # unscale predicted y values
-      if (is.numeric(object$yscale))
-         yp = sweep(yp, 3, object$yscale, '*')
-      
-      # uncenter predicted y values
-      if (is.numeric(object$ycenter))
-         yp = sweep(yp, 3, object$ycenter, '+')
-      
-      # set up all attributes and names
-      
-      dimnames(yp) = list(rownames(x), dimnames(object$coeffs$values)[[2]], dimnames(object$coeffs$values)[[3]])
-      yp = mda.setattr(yp, y.attrs)
-      attr(yp, 'name') = 'Response values, predicted'
       
       # compute total variance 
       if (length(y.attrs$exclrows) > 0)
@@ -922,6 +910,23 @@ predict.pls = function(object, x, y = NULL, ...) {
       ydecomp$totvar = ytotvar
    }
    
+   # unscale predicted y values
+   if (is.numeric(object$yscale))
+      yp = sweep(yp, 3, object$yscale, '*')
+   
+   # uncenter predicted y values
+   if (is.numeric(object$ycenter))
+      yp = sweep(yp, 3, object$ycenter, '+')
+   
+   # set up all attributes and names
+   dimnames(yp) = list(rownames(x), dimnames(object$coeffs$values)[[2]], dimnames(object$coeffs$values)[[3]])
+   yp = mda.setattr(yp, y.attrs)
+   attr(yp, 'name') = 'Response values, predicted'
+   
+   # we exclude rows always based on information from x (in case if y is NULL)
+   attr(yp, 'exclrows') = NULL
+   yp = mda.exclrows(yp, attr(x, 'exclrows'))
+   
    # compute total variance 
    if (length(x.attrs$exclrows) > 0)
       x = x[-x.attrs$exclrows, , drop = F]
@@ -935,8 +940,6 @@ predict.pls = function(object, x, y = NULL, ...) {
    xdecomp = ldecomp(scores = xscores, residuals = xresiduals, loadings = object$xloadings, attrs = x.attrs,
                      ncomp.selected = object$ncomp.selected, tnorm = object$xtnorm, totvar = xtotvar)
    xdecomp$totvar = xtotvar
-   
-   
   
    res = plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, 
                 xdecomp = xdecomp, ydecomp = ydecomp)
@@ -2007,7 +2010,7 @@ summary.pls = function(object, ncomp = NULL, ny = NULL, ...) {
       if (!is.null(obj$cvres))
       {
          data = rbind(data, as.matrix(obj$cvres, ncomp = ncomp, ny = y))      
-         rownames(data)[2] = 'CV'
+         rownames(data)[nrow(data)] = 'CV'
       }
       
       if (!is.null(obj$testres))
@@ -2017,12 +2020,11 @@ summary.pls = function(object, ncomp = NULL, ny = NULL, ...) {
       }   
       
       data = data[, -c(1, 3), drop = F]
-      
       data[, 1:2] = round(data[, 1:2], 2)      
-      data[, 4:5] = round(data[, 4:5], 2)  
       data[, 3] = mdaplot.formatValues(data[, 3], round.only = T)
-      data[, 6] = round(data[, 6], 4)      
-      data[, 7] = round(data[, 7], 2)      
+      data[, 4] = round(data[, 4], 2)  
+      data[, 5] = round(data[, 5], 4)      
+      data[, 6] = round(data[, 6], 2)      
       
       print(data)
    }   

@@ -447,7 +447,7 @@ as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...) {
       rownames(res) = colnames(obj$y.pred)[ncomp]
    }
    colnames(res)[1:4] = c('X expvar', 'X cumexpvar', 'Y expvar', 'Y cumexpvar')
-   
+   res = res[, -6, drop = FALSE] 
    res
 }
 
@@ -485,10 +485,9 @@ summary.plsres = function(object, ny = NULL, ncomp = NULL, ...) {
          cat(sprintf('\nResponse variable %s:\n', colnames(obj$y.ref)[i]))
          res = as.matrix.plsres(obj, ny = i, ncomp = ncomp)
          res[, 1:4] = round(res[, 1:4], 3)      
-         res[, 6:7] = round(res[, 6:7], 3)  
-         res[, 5] = mdaplot.formatValues(res[, 5], round.only = T)
-         res[, 8] = round(res[, 8], 4)      
-         res[, 9] = round(res[, 9], 1)      
+         res[, 5:6] = round(res[, 5:6], 3)
+         res[, 7] = round(res[, 7], 4)      
+         res[, 8] = round(res[, 8], 1)      
          print(res)
       }
       
