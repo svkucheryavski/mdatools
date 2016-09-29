@@ -7,7 +7,7 @@
 #' @param x
 #' matrix with predictors.
 #' @param c
-#' vector with class values (either class number or class name as text for each object).
+#' vector with class values (should be a factor with either class number or class name for each object).
 #' @param ncomp 
 #' maximum number of components to calculate.
 #' @param center 
@@ -141,72 +141,35 @@
 plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL, 
                x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, 
                coeffs.ci = NULL, coeffs.alpha = 0.1, info = '', light = F,
-               ncomp.selcrit = 'min')
-{
-   x = as.matrix(x)
-   c = as.matrix(c)
-   y = plsda.getReferenceValues(c)
+               ncomp.selcrit = 'min') {
+   
+   # build a model and apply to calibration set
+   model = plsda.cal(x, y, ncomp, center = center, scale = scale, method = method, light = light,
+                     alpha = alpha, coeffs.ci = coeffs.ci, coeffs.alpha = coeffs.alpha, info = info,
+                     ncomp.selcrit = ncomp.selcrit)
+   
+   # do test set validation if provided
+   if (!is.null(x.test) && !is.null(c.test))
+      model$testres = predict.plsda(model, x.test, c.test)
 
-   # set LOO cross-validation if jack.knife is selected
-   jack.knife = F
-   if (!is.null(coeffs.ci) && coeffs.ci == 'jk')
-   {
-      jack.knife = T
-      if (is.null(cv))
-      {   
-         cv = 1      
-      }   
-      else
-      {
-         if (is.list(cv))
-         {   
-            if (length(cv) == 1 && cv[[1]] == 'loo')
-               cvnseg = nrow(y)
-            else   
-               cvnseg = cv[[2]]
-         }   
-         else
-         {
-            cvnseg = cv
-         }   
-         
-         if (cvnseg > 1 && cvnseg < 10)
-            warning('Number of segments in cross-validation is too small for jack-knifing!')   
-      }   
-   }   
-   
-   # correct maximum number of components
-   if (!is.null(cv))
-   {
-      if (!is.numeric(cv))
-         nseg = cv[[2]]
-      else
-         nseg = cv
-      
-      if (nseg == 1)
-         nobj.cv = 1
-      else
-         nobj.cv = ceiling(nrow(x)/nseg)  
-   }
-   else
-   {   
-      nobj.cv = 0
-   }
-   
-   ncomp = min(ncol(x), nrow(x) - 1 - nobj.cv, ncomp)
+   # select optimal number of components and return object with model
+   model = selectCompNum.pls(model, ncomp)
+   model
+}
+
+#' Calibrate PLS-DA model
+#' 
+#' @export
+plsda.cal = function() {
    
    # build a model and apply to calibration set
    model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method, light = light)
-   model$light = light
-   model$ncomp.selcrit = ncomp.selcrit
-   model$alpha = alpha   
    model$classnames = unique(c)
    model$nclasses = length(model$classnames)
    model$calres = predict.plsda(model, x, c)
    
    # do cross-validation if needed
-   if (!is.null(cv)) 
-   {
+   if (!is.null(cv)) {
       res = plsda.crossval(model, x, c, cv, center = center, scale = scale, jack.knife = jack.knife)    
       if (jack.knife == TRUE)
       {   
@@ -220,54 +183,8 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
       }   
       
    }
-   # do test set validation if provided
-   if (!is.null(x.test) && !is.null(c.test))
-   {
-      x.test = as.matrix(x.test)
-      model$testres = predict.plsda(model, x.test, c.test)
-   }
-   
-   model = selectCompNum.pls(model, ncomp)
-   model$call = match.call()
-   model$info = info
-   
    class(model) = c("plsda", "classmodel", "pls")
    
-   model
-}
-
-#' Reference values for PLS-DA
-#' 
-#' @description
-#' Generates matrix with reference y values (-1 and +1) for a 
-#' vector with class values
-#' 
-#' @param c 
-#' vector with class values (discrete)
-#' @param classnames
-#' vector with names for the classes
-#' 
-#' @return
-#' the generated matrix with one column for each class
-#' 
-#' @export
-plsda.getReferenceValues = function(c, classnames = NULL)
-{
-   # generate matrix with y values
-   
-   if (is.null(classnames))
-      classnames = unique(c)
-
-   nclasses = length(classnames)
-   y = matrix(-1, nrow = length(c), ncol = nclasses)
-   
-   for (i in 1:nclasses)
-      y[c == classnames[i], i] = 1
-   
-   rownames(y) = rownames(c)
-   colnames(y) = classnames
-
-   y
 }
 
 #' PLS-DA predictions
@@ -279,10 +196,8 @@ plsda.getReferenceValues = function(c, classnames = NULL)
 #' a PLS-DA model (object of class \code{plsda})
 #' @param x
 #' a matrix with x values (predictors)
-#' @param c
-#' a vector with reference class values
-#' @param cv
-#' logical, are predictions for cross-validation or not
+#' @param c.ref
+#' a vector with reference class values (should be a factor)
 #' @param ...
 #' other arguments
 #' 
@@ -293,14 +208,24 @@ plsda.getReferenceValues = function(c, classnames = NULL)
 #' See examples in help for \code{\link{plsda}} function.
 #'  
 #' @export 
-predict.plsda = function(object, x, c = NULL, cv = F, ...)
-{   
-   y = plsda.getReferenceValues(c, object$classnames)
-   plsres = predict.pls(object, x, y)
-   cres = classify.plsda(object, plsres$y.pred, c)
+predict.plsda = function(object, x, c.ref = NULL, ...) {   
+   
+   y.ref = NULL
+   if (!is.null(c.ref)) {
+      y.ref = mda.df2mat(as.factor(c.ref))
+      y.ref[y.ref == 0] = -1      
+      c.ref = checkReferenceValues.classmodel(object, c.ref, x)
+   }
 
+   # do PLS predictions
+   plsres = predict.pls(object, x, y.ref)
+
+   # classify objects and set attributes   
+   c.pred = plsda.classify(object, plsres$y.pred, c.ref)   
+
+   # combine everything to plsdares object
+   cres = classres(c.pred, c.ref = c.ref, p.pred = plsres$y.pred, ncomp.selected = object$ncomp.selected)
    res = plsdares(plsres, cres)
-
    res
 }  
 
@@ -313,8 +238,6 @@ predict.plsda = function(object, x, c = NULL, cv = F, ...)
 #' a PLS-DA model (object of class \code{plsda})
 #' @param y
 #' a matrix with predicted y values
-#' @param c.ref
-#' a vector with reference class values
 #' 
 #' @return
 #' Classification results (an object of class \code{classres})
@@ -322,14 +245,15 @@ predict.plsda = function(object, x, c = NULL, cv = F, ...)
 #' @details
 #' This is a service function for PLS-DA class, do not use it manually.
 #'  
-classify.plsda = function(model, y, c.ref = NULL)
-{
+classify.plsda = function(model, y) {
    c.pred = array(-1, dim(y))
    c.pred[y >= 0] = 1
-   dimnames(c.pred) = list(rownames(y), paste('Comp', 1:model$ncomp), model$classnames)
-   cres = classres(c.pred, c.ref = c.ref, p.pred = y, ncomp.selected = model$ncomp.selected)
-
-   cres
+   
+   dimnames(c.pred) = dimnames(y)
+   c.pred = mda.setattr(c.pred, mda.getattr(y))
+   attr(c.pred, 'name') = 'Class, predicted values'
+   
+   c.pred
 }
 
 #' Cross-validation of a PLS-DA model
@@ -355,14 +279,14 @@ classify.plsda = function(model, y, c.ref = NULL)
 #' @return
 #' object of class \code{plsdares} with results of cross-validation
 #'  
-plsda.crossval = function(model, x, c, cv, center = T, scale = F, jack.knife = T)
-{
-   y = plsda.getReferenceValues(c, model$classnames)
-   plsres = pls.crossval(model, x, y, cv, center, scale, jack.knife)
+plsda.crossval = function(model, x, c, cv, center, scale, method, jack.knife) {
+   y = mda.df2mat(as.factor(c.ref))
+   y[y == 0] = -1      
+   
+   plsres = pls.crossval(model, x, y, cv, center, scale, method, jack.knife)
    cres = classify.plsda(model, plsres$y.pred, c)
-
+   
    res = plsdares(plsres, cres)
-
    res
 }
 
@@ -389,8 +313,7 @@ plsda.crossval = function(model, x, c, cv, center = T, scale = F, jack.knife = T
 #' See examples in help for \code{\link{plsda}} function.
 #' 
 #' @export
-plot.plsda = function(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F, ...)
-{
+plot.plsda = function(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F, ...) {
    model = x
    
    if (!is.null(ncomp) && (ncomp <= 0 || ncomp > model$ncomp)) 
@@ -425,8 +348,7 @@ plot.plsda = function(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F,
 #' other arguments
 #' 
 #' @export
-summary.plsda = function(object, ncomp = NULL, nc = NULL, ...)
-{
+summary.plsda = function(object, ncomp = NULL, nc = NULL, ...) {
    obj = object
    
    if (is.null(ncomp))
@@ -443,8 +365,7 @@ summary.plsda = function(object, ncomp = NULL, nc = NULL, ...)
    if (!is.null(obj$info))
       cat(sprintf('Info: %s\n', obj$info))
       
-   for (n in nc)
-   {   
+   for (n in nc) {   
       cat(sprintf('\nClass #%d (%s)\n', n, obj$classnames[n]))
       
       data = as.matrix(obj$calres, ncomp = ncomp, nc = n)
@@ -479,8 +400,7 @@ summary.plsda = function(object, ncomp = NULL, nc = NULL, ...)
 #' other arguments
 #' 
 #' @export
-print.plsda = function(x, ...)
-{
+print.plsda = function(x, ...) {
    obj = x
    
    cat('\nPLS-DA model (class plsda)\n')
