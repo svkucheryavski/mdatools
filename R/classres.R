@@ -377,6 +377,9 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
 #' 
 #' @export
 plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', main = NULL, ylab = '', ...) {
+  
+   if (is.null(obj))
+      error('No classification results were provided!')
    
    # get classnames
    classnames = dimnames(obj$c.pred)[[3]]

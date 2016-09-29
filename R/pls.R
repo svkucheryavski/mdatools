@@ -283,7 +283,7 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    # if y is a vector convert it to a matrix
    if (is.null(dim(y)))
       y = matrix(y, ncol = 1)
-   
+  
    # check dimensions
    if (nrow(x) != nrow(y))
       stop('Number of rows for predictos and responses should be the same!')
@@ -425,6 +425,7 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    model$alpha = alpha   
    model$light = light
    model$info = info
+   model$cv = cv
    model$ncomp.selcrit = ncomp.selcrit
    
    model$call = match.call()

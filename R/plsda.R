@@ -144,9 +144,9 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
                ncomp.selcrit = 'min') {
    
    # build a model and apply to calibration set
-   model = plsda.cal(x, y, ncomp, center = center, scale = scale, method = method, light = light,
+   model = plsda.cal(x, c, ncomp, center = center, scale = scale, method = method, light = light,
                      alpha = alpha, coeffs.ci = coeffs.ci, coeffs.alpha = coeffs.alpha, info = info,
-                     ncomp.selcrit = ncomp.selcrit)
+                     ncomp.selcrit = ncomp.selcrit, cv = cv)
    
    # do test set validation if provided
    if (!is.null(x.test) && !is.null(c.test))
@@ -160,31 +160,28 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
 #' Calibrate PLS-DA model
 #' 
 #' @export
-plsda.cal = function() {
+plsda.cal = function(x, c, ncomp, center, scale, cv, method, light, alpha, coeffs.ci, coeffs.alpha,
+                     info, ncomp.selcrit) {
+
+   y = mda.df2mat(as.factor(c), full = TRUE)
+   y[y == 0] = -1      
    
    # build a model and apply to calibration set
-   model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method, light = light)
+   model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method, coeffs.ci = coeffs.ci,
+                    coeffs.alpha = coeffs.alpha, info = info, light = light, alpha = alpha, cv = cv, 
+                    ncomp.selcrit = ncomp.selcrit)
    model$classnames = unique(c)
    model$nclasses = length(model$classnames)
+   
    model$calres = predict.plsda(model, x, c)
    
    # do cross-validation if needed
-   if (!is.null(cv)) {
-      res = plsda.crossval(model, x, c, cv, center = center, scale = scale, jack.knife = jack.knife)    
-      if (jack.knife == TRUE)
-      {   
-         model$coeffs = regcoeffs(model$coeffs$values, res$jkcoeffs, coeffs.alpha)
-         res[['jkcoeffs']] = NULL
-         model$cvres = res
-      }
-      else
-      {
-         model$cvres = res;
-      }   
-      
-   }
-   class(model) = c("plsda", "classmodel", "pls")
+   if (!is.null(cv)) 
+      model$cvres = plsda.crossval(model, x, c, center, scale, method)    
    
+   # combine everything to model object
+   class(model) = c("plsda", "classmodel", "pls")
+   model
 }
 
 #' PLS-DA predictions
@@ -212,7 +209,7 @@ predict.plsda = function(object, x, c.ref = NULL, ...) {
    
    y.ref = NULL
    if (!is.null(c.ref)) {
-      y.ref = mda.df2mat(as.factor(c.ref))
+      y.ref = mda.df2mat(as.factor(c.ref), full = TRUE)
       y.ref[y.ref == 0] = -1      
       c.ref = checkReferenceValues.classmodel(object, c.ref, x)
    }
@@ -221,7 +218,7 @@ predict.plsda = function(object, x, c.ref = NULL, ...) {
    plsres = predict.pls(object, x, y.ref)
 
    # classify objects and set attributes   
-   c.pred = plsda.classify(object, plsres$y.pred, c.ref)   
+   c.pred = classify.plsda(object, plsres$y.pred)   
 
    # combine everything to plsdares object
    cres = classres(c.pred, c.ref = c.ref, p.pred = plsres$y.pred, ncomp.selected = object$ncomp.selected)
@@ -249,9 +246,9 @@ classify.plsda = function(model, y) {
    c.pred = array(-1, dim(y))
    c.pred[y >= 0] = 1
    
-   dimnames(c.pred) = dimnames(y)
    c.pred = mda.setattr(c.pred, mda.getattr(y))
    attr(c.pred, 'name') = 'Class, predicted values'
+   dimnames(c.pred) = dimnames(y)
    
    c.pred
 }
@@ -279,13 +276,20 @@ classify.plsda = function(model, y) {
 #' @return
 #' object of class \code{plsdares} with results of cross-validation
 #'  
-plsda.crossval = function(model, x, c, cv, center, scale, method, jack.knife) {
-   y = mda.df2mat(as.factor(c.ref))
+plsda.crossval = function(model, x, c, center, scale, method) {
+   
+   y = mda.df2mat(as.factor(c), full = TRUE)
    y[y == 0] = -1      
    
-   plsres = pls.crossval(model, x, y, cv, center, scale, method, jack.knife)
-   cres = classify.plsda(model, plsres$y.pred, c)
+   if (!is.null(model$coeffs$p.values))
+      jack.knife = TRUE
+   else
+      jack.knife = FALSE
    
+   plsres = pls.crossval(model, x, y, model$cv, center, scale, method, jack.knife)
+   c.pred = classify.plsda(model, plsres$y.pred)
+   cres = classres(c.pred, c.ref = c, p.pred = plsres$y.pred, ncomp.selected = model$ncomp.selected)
+
    res = plsdares(plsres, cres)
    res
 }
@@ -323,12 +327,7 @@ plot.plsda = function(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F,
    plotXResiduals(model, ncomp = ncomp, show.labels = show.labels, show.legend = show.legend)   
    plotRegcoeffs(model, ncomp = ncomp, ny = nc, show.labels = show.labels)   
    plotMisclassified(model, nc = nc, show.legend = show.legend)   
-   
-   if (!is.null(model$cvres))
-      plotPredictions(model, res = 'cvres', ncomp = ncomp, show.labels = show.labels, 
-                      show.legend = show.legend)   
-   else
-      plotPredictions(model, ncomp = ncomp, show.labels = show.labels, show.legend = show.legend)   
+   plotPredictions(model, ncomp = ncomp, show.labels = show.labels, show.legend = show.legend)   
 
    par(mfrow = c(1, 1))
 }

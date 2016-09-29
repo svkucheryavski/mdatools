@@ -14,8 +14,6 @@
 \item{c.ref}{a vector with reference class values (should be a factor)}
 
 \item{...}{other arguments}
-
-\item{cv}{logical, are predictions for cross-validation or not}
 }
 \value{
 PLS-DA results (an object of class \code{plsdares})

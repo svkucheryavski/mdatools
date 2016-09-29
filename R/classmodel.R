@@ -39,8 +39,7 @@ checkReferenceValues.classmodel = function(model, c.ref, x) {
 #' See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 #'   
 #' @export  
-plotPredictions.classmodel = function(obj, res = NULL, nc = NULL, ncomp = NULL, main = NULL, ...)
-{   
+plotPredictions.classmodel = function(obj, res = NULL, nc = NULL, ncomp = NULL, main = NULL, ...) {   
    if (is.null(res))
    {
       if (!is.null(obj$testres))
@@ -50,7 +49,6 @@ plotPredictions.classmodel = function(obj, res = NULL, nc = NULL, ncomp = NULL, 
       else
          res = 'calres'
    }
-
    resnames = c('calres', 'cvres', 'testres')
    resstrings = c('calbiration', 'cross-validation', 'test set')
    resobj = obj[[res]]
