@@ -593,26 +593,34 @@ mda.getexclind = function(excl, names, n) {
 #' a numeric matrix 
 #' 
 #' @export
-mda.df2mat = function(x) {
+mda.df2mat = function(x, full = FALSE) {
    attrs = mda.getattr(x)
 
    if (is.null(x) || is.matrix(x) || is.vector(x))
       return(x)
    
+   if (is.factor(x))
+      x = data.frame(x)
+   
    col.fac = unlist(lapply(x, is.factor))
    col.num = which(!col.fac)
    col.fac = which(col.fac)
    
-   dummy = function(i, x, col.ind) {
+   dummy = function(i, x, full = FALSE) {
       name = colnames(x)[i]
       x = x[, i]
       names = levels(x)
-      n = nlevels(x)
-      d = matrix(0, nrow = length(x), ncol = n - 1)
-      colnames = rep('', n - 1)
-      for (k in 1:n-1){
+      
+      if (full == TRUE)
+         n = nlevels(x)
+      else
+         n = nlevels(x) - 1
+      
+      d = matrix(0, nrow = length(x), ncol = n)
+      colnames = rep('', n)
+      for (k in 1:n){
          d[, k] = as.numeric(x) == k
-         colnames[k] = paste(name, names[k], sep = '.')
+         colnames[k] = names[k]
       }
       colnames(d) = colnames 
       attr(d, 'cols.info') = c(i, n)    
@@ -653,7 +661,7 @@ mda.df2mat = function(x) {
       }
       
       # convert all non-excluded factors to dummy variables
-      fac.data = lapply(1:ncol(fac.data), dummy, x = fac.data, col.ind = col.fac)
+      fac.data = lapply(1:ncol(fac.data), dummy, x = fac.data, full = full)
       fac.data = do.call(cbind, fac.data)
       
       # convert all excluded factors to numeric values
