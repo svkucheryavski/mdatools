@@ -162,7 +162,8 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
 #' @export
 plsda.cal = function(x, c, ncomp, center, scale, cv, method, light, alpha, coeffs.ci, coeffs.alpha,
                      info, ncomp.selcrit) {
-
+   
+   c = checkReferenceValues.classmodel(model, c, x)
    y = mda.df2mat(as.factor(c), full = TRUE)
    y[y == 0] = -1      
    
@@ -172,7 +173,6 @@ plsda.cal = function(x, c, ncomp, center, scale, cv, method, light, alpha, coeff
                     ncomp.selcrit = ncomp.selcrit)
    model$classnames = unique(c)
    model$nclasses = length(model$classnames)
-   
    model$calres = predict.plsda(model, x, c)
    
    # do cross-validation if needed
@@ -209,9 +209,9 @@ predict.plsda = function(object, x, c.ref = NULL, ...) {
    
    y.ref = NULL
    if (!is.null(c.ref)) {
+      c.ref = checkReferenceValues.classmodel(model, c.ref, x)
       y.ref = mda.df2mat(as.factor(c.ref), full = TRUE)
       y.ref[y.ref == 0] = -1      
-      c.ref = checkReferenceValues.classmodel(object, c.ref, x)
    }
 
    # do PLS predictions
@@ -277,6 +277,15 @@ classify.plsda = function(model, y) {
 #' object of class \code{plsdares} with results of cross-validation
 #'  
 plsda.crossval = function(model, x, c, center, scale, method) {
+  
+   c = checkReferenceValues.classmodel(model, c, x)
+   attrs = mda.getattr(x)
+   if (length(attrs$exclrows) > 0) {
+      c = c[-attrs$exclrows, , drop = F]
+      x = x[-attrs$exclrows, , drop = F]
+      attr(c, 'exclrows') = NULL
+      attr(x, 'exclrows') = NULL
+   }
    
    y = mda.df2mat(as.factor(c), full = TRUE)
    y[y == 0] = -1      
@@ -285,7 +294,6 @@ plsda.crossval = function(model, x, c, center, scale, method) {
       jack.knife = TRUE
    else
       jack.knife = FALSE
-   
    plsres = pls.crossval(model, x, y, model$cv, center, scale, method, jack.knife)
    c.pred = classify.plsda(model, plsres$y.pred)
    cres = classres(c.pred, c.ref = c, p.pred = plsres$y.pred, ncomp.selected = model$ncomp.selected)

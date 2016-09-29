@@ -3,15 +3,23 @@
 checkReferenceValues.classmodel = function(model, c.ref, x) {
    if (is.null(c.ref))
       return()
+   
+   attrs = mda.getattr(c.ref)
+   
    if (is.logical(c.ref))
       c.ref = ifelse(c.ref, object$classname, 'None')
+   if (is.data.frame(c.ref))
+      c.ref = as.matrix(c.ref)
    if (!is.matrix(c.ref))
       c.ref = matrix(c.ref, ncol = 1)
+   if (ncol(c.ref) != 1)
+      stop('Class reference values should be a vector or matrix/data frame with one column')
    if(nrow(c.ref) != nrow(x))
       stop('Matrix with predictors and classes should have the same number of rows!')
    if (!is.character(c.ref))
       stop('Matrix/vector with reference class values should be either logical or character!')
-   
+
+   c.ref = mda.setattr(c.ref, attrs)
    c.ref
 }
 

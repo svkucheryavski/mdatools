@@ -99,7 +99,7 @@ getClassificationPerformance = function(c.ref, c.pred)
       if (nrow(c.ref) > nrow(c.pred))
          c.ref = c.ref[-attrs$exclrows, , drop = F]
    }
-  
+ 
    ncomp = dim(c.pred)[2]
    nobj = dim(c.pred)[1]
    nclasses = dim(c.pred)[3]
