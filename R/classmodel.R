@@ -3,7 +3,6 @@
 checkReferenceValues.classmodel = function(model, c.ref, x) {
    if (is.null(c.ref))
       return()
-   
    if (is.logical(c.ref))
       c.ref = ifelse(c.ref, object$classname, 'None')
    if (!is.matrix(c.ref))

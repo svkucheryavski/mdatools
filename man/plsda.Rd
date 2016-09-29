@@ -12,7 +12,7 @@ plsda(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
 \arguments{
 \item{x}{matrix with predictors.}
 
-\item{c}{vector with class values (either class number or class name as text for each object).}
+\item{c}{vector with class values (should be a factor with either class number or class name for each object).}
 
 \item{ncomp}{maximum number of components to calculate.}
 

@@ -4,14 +4,12 @@
 \alias{classify.plsda}
 \title{PLS-DA classification}
 \usage{
-classify.plsda(model, y, c.ref = NULL)
+classify.plsda(model, y)
 }
 \arguments{
 \item{model}{a PLS-DA model (object of class \code{plsda})}
 
 \item{y}{a matrix with predicted y values}
-
-\item{c.ref}{a vector with reference class values}
 }
 \value{
 Classification results (an object of class \code{classres})

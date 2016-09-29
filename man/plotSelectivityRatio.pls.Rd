@@ -5,7 +5,7 @@
 \title{Selectivity ratio plot for PLS model}
 \usage{
 \method{plotSelectivityRatio}{pls}(obj, ncomp = NULL, ny = 1, type = "l",
-  main = NULL, xlab = "Variables", ylab = "", ...)
+  main = NULL, ylab = "", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -18,11 +18,11 @@
 
 \item{main}{main title for the plot}
 
-\item{xlab}{label for x axies}
-
 \item{ylab}{label for y axis}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
+
+\item{xlab}{label for x axies}
 }
 \description{
 Shows a plot with selectivity ratio values for given number of components

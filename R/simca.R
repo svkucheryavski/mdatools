@@ -191,11 +191,13 @@ predict.simca = function(object, x, c.ref = NULL, cal = FALSE, ...) {
    # check reference values
    c.ref = checkReferenceValues.classmodel(object, c.ref, x)
   
-   # do predictions 
+   # do predictions and set attributes
    c.pred = simca.classify(object, pres)
    dimnames(c.pred) = list(rownames(x), colnames(object$loadings), object$classname)
-   c.pred = mda.setattr(c.pred, mda.getattr(object$calres$scores))
+   c.pred = mda.setattr(c.pred, mda.getattr(x), 'row')
    attr(c.pred, 'name') = 'Class, predicted values'
+   
+   # combine everything to simcares object
    cres = classres(c.pred, c.ref = c.ref, ncomp.selected = object$ncomp.selected)
    res = simcares(pres, cres)
    
@@ -307,7 +309,7 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
             residuals = x.val - tcrossprod(scores, m$loadings)
             
             # compute distances
-            res = ldecomp.getDistances(scores, m$loadings, residuals, model$tnorm, cv = TRUE)
+            res = ldecomp.getDistances(scores, m$loadings, residuals, model$tnorm)
             Q[ind, ] = Q[ind, ] + res$Q
             T2[ind, ] = T2[ind, ] + res$T2
             
@@ -361,7 +363,7 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
    var = ldecomp.getVariances(Q, model$calres$totvar)
    
    # in CV results there are no scores nor residuals, only residual distances and variances
-   pres = pcares(NULL, NULL, model$ncomp.selected, T2, Q, var$expvar, var$cumexpvar)
+   pres = pcares(ncomp.selected = model$ncomp.selected, dist = list(T2 = T2, Q = Q), var = var)
    pres$Qlim = model$Qlim
    pres$T2lim = model$T2lim
 

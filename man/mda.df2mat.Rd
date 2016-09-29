@@ -4,7 +4,7 @@
 \alias{mda.df2mat}
 \title{Convert data frame to a matrix}
 \usage{
-mda.df2mat(x)
+mda.df2mat(x, full = FALSE)
 }
 \arguments{
 \item{x}{a data frame}
