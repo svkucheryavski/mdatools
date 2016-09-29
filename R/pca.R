@@ -934,9 +934,10 @@ plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
 #' See examples in help for \code{\link{pca}} function.
 #' 
 #' @export
-plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings', xlab = NULL, 
-                            ylab = NULL, show.labels = NULL, show.legend = TRUE,  show.axes = TRUE, ...)
-{   
+plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings', 
+                            xlab = NULL, ylab = NULL, show.labels = NULL, show.legend = TRUE,  
+                            show.axes = TRUE, ...) {   
+   
    if (max(comp) > obj$ncomp || min(comp) < 1)
       stop('Wrong number of components!')
    
@@ -962,6 +963,7 @@ plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings',
       if (is.null(show.labels))
          show.labels = TRUE
       
+      colnames(data) = paste('Comp ', comp, ' (', round(obj$calres$expvar[comp], 2) , '%)', sep = '')
       mdaplot(data, type = type, show.labels = show.labels, show.lines = show.lines, 
                main = main, ylab = ylab, xlab = xlab, ...)
    } else {
