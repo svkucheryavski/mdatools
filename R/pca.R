@@ -13,6 +13,10 @@
 #' logical, do sdandardization of data or not.
 #' @param cv
 #' number of segments for random cross-validation (1 for full cross-validation).
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclcols
+#' columns to be excluded from calculations (numbers, names or vector with logical values)
 #' @param x.test
 #' a numerical matrix with test data.
 #' @param alpha
@@ -29,11 +33,20 @@
 #' number of components is used to build a residuals plot (with Q residuals vs. Hotelling T2 
 #' values), calculate confidence limits for Q residuals, as well as for SIMCA classification. 
 #'   
-#' If data contains missing values (NA) the \code{pca} will use an iterative algorithm to fit the 
-#' values with most probable ones. The algorithm is implemented in a function 
-#' \code{\link{pca.mvreplace}}. The same center and scale options will be used. You can also
-#' do this step manually before calling \code{pca} and play with extra options.
+#' You can provde number, names or logical values to exclode rows or columns from calibration and
+#' validation of PCA model. In this case the outcome, e.g. scores and loadings will correspond to 
+#' the original size of the data, but:
 #' 
+#' \enumerate{
+#'   \item Loadings (and all performance statistics) will be computed without excluded objects and variables
+#'   \item Matrix with loadings will have zero values for the excluded variables and the corresponding columns will be hidden.
+#'   \item Matrix with scores will have score values calculated for the hidden objects but the rows will be hidden.
+#' }
+#'
+#' You can see scores and loadings for hidden rows and columns by using parameter 'show.excluded = T'
+#' in plots. If you see other packages to make plots (e.g. ggplot2) you will not be able to distinguish
+#' between hidden and normal objects. 
+#'   
 #' @return 
 #' Returns an object of \code{pca} class with following fields:
 #' \item{ncomp }{number of components included to the model.} 
@@ -113,11 +126,12 @@
 #' par(mfrow = c(1, 1))
 #'
 #' @export   
-pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
-               alpha = 0.05, method = 'svd', info = '') {
+pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
+               exclcols = NULL, x.test = NULL, alpha = 0.05, method = 'svd', info = '') {
    
    # calibrate and cross-validate model  
-   model = pca.cal(x, ncomp, center = center, scale = scale, method = method, cv = cv, alpha = alpha, info = info)
+   model = pca.cal(x, ncomp, center = center, scale = scale, method = method, exclcols = exclcols, 
+                   exclrows = exclrows, cv = cv, alpha = alpha, info = info)
    model$call = match.call()   
    
    # apply model to test set if provided
@@ -360,9 +374,15 @@ pca.run = function(x, ncomp, method) {
 #' @return
 #' an object with calibrated PCA model
 #' 
-pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info) {
+pca.cal = function(x, ncomp, center, scale, method, exclcols, exclrows, cv, alpha, info) {
    # prepare empty list for model object
    model = list()
+   
+   if (length(exclcols) > 0)
+      x = mda.exclcols(x, exclcols)
+   
+   if (length(exclrows) > 0)
+      x = mda.exclrows(x, exclrows)
    
    # get attributes
    attrs = mda.getattr(x)
@@ -438,7 +458,9 @@ pca.cal = function(x, ncomp, center, scale, method, cv, alpha, info) {
    lim = ldecomp.getResLimits(res$eigenvals, nobj = nrows, ncomp = ncomp, alpha = alpha)
    model$Qlim = lim$Qlim
    model$T2lim = lim$T2lim
-
+   model$exclcols = attrs$exclcols
+   model$exclrows = attrs$exclrows
+   
    class(model) = "pca"
    
    # get calibration results
@@ -664,12 +686,11 @@ predict.pca = function(object, x, cal = FALSE, ...) {
    scores = x %*% object$loadings
    residuals = x - tcrossprod(scores, object$loadings)
       
-   # compute total variance 
-   if (length(attrs$exclrows) > 0)
-      x = x[-attrs$exclrows, , drop = F]
-   
-   if (length(attrs$exclcols) > 0)
-      x = x[, -attrs$exclcols, drop = F]
+   # compute total variance
+   if (length(object$exclcols) > 0){
+      x = x[, -object$exclcols, drop = F]
+      attrs$exclcols = exclcols      
+   }
    
    totvar = sum(x^2)
    
@@ -1116,12 +1137,16 @@ print.pca = function(x, ...)
 #' other arguments
 #' 
 #' @export
-summary.pca = function(object, ...)
-{
+summary.pca = function(object, ...) {
    obj = object
    
    cat('\nPCA model (class pca) summary\n')
 
+   if (length(obj$exclrows) > 0)
+      cat(sprintf('Excluded rows: %d\n', length(obj$exclrows)))
+   if (length(obj$exclcols) > 0)
+      cat(sprintf('Excluded coumns: %d\n', length(obj$exclcols)))
+   
    if (length(obj$info) > 0)
       cat(sprintf('\nInfo:\n%s\n\n', obj$info))
    

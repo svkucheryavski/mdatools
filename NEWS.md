@@ -6,7 +6,7 @@ v.0.8.0
 * new plot type (`'d'`) for density scatter plot
 * support for `xlas` and `ylas` in plots to rotate axis ticks
 * support for sevearal data attributes to give extra functionality for plots (including manual x-values for line plots)
-* rows and columns can be now hidden/excluded via attributes
+* rows and columns can be now excluded from calculations when calibrate models
 * factor columns of data frames are now converted to dummy variables automatically when model is fitted/applied
 * scores and loadings plots in PCA show % of explained variance in axis labels
 * biplot is now available for PCA models (`plotBiplot`)

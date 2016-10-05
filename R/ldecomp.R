@@ -63,6 +63,7 @@ ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selec
       colnames(scores) = colnames(loadings)
       colnames(residuals) = attrs$dimnames[[2]]
       attr(scores, 'name') = 'Scores'
+      attr(scores, 'xaxis.name') = 'Components'
       attr(residuals, 'name') = 'Residuals'
       
    } else {
