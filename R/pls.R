@@ -225,15 +225,15 @@
 #' par(mfrow = c(1, 1))
 #' 
 #' @export   
-pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL, 
-               x.test = NULL, y.test = NULL, method = 'simpls', alpha = 0.05, 
-               coeffs.ci = NULL, coeffs.alpha = 0.1, info = '', light = F, 
+pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NULL, exclrows = NULL,
+               x.test = NULL, y.test = NULL, method = 'simpls', alpha = 0.05, coeffs.ci = NULL, 
+               coeffs.alpha = 0.1, info = '', light = F, 
                ncomp.selcrit = 'min') {
    
    # build a model and apply to calibration set
    model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method, coeffs.ci = coeffs.ci,
                    coeffs.alpha = coeffs.alpha, info = info, light = light, alpha = alpha, cv = cv, 
-                   ncomp.selcrit = ncomp.selcrit)
+                   exclcols = exclcols, exclrows = exclrows, ncomp.selcrit = ncomp.selcrit)
    
    # do test set validation if provided
    if (!is.null(x.test) && !is.null(y.test)){
@@ -272,9 +272,17 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
 #' an object with calibrated PLS model
 #' 
 pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coeffs.alpha, info, light,
-                   ncomp.selcrit) {   
+                   exclcols, exclrows, ncomp.selcrit) {   
    # prepare empty list for model object
    model = list()
+  
+   if (length(exclcols) > 0)
+      x = mda.exclcols(x, exclcols)
+   
+   if (length(exclrows) > 0) {
+      x = mda.exclrows(x, exclrows)
+      y = mda.exclrows(y, exclrows)
+   }
    
    # get attributes
    x.attrs = mda.getattr(x)
@@ -425,6 +433,8 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    model$alpha = alpha   
    model$light = light
    model$info = info
+   model$exclrows = x.attrs$exclrows
+   model$exclcols = x.attrs$exclcols
    model$cv = cv
    model$ncomp.selcrit = ncomp.selcrit
    
@@ -931,8 +941,8 @@ predict.pls = function(object, x, y = NULL, ...) {
    if (length(x.attrs$exclrows) > 0)
       x = x[-x.attrs$exclrows, , drop = F]
    
-   if (length(x.attrs$exclcols) > 0)
-      x = x[, -x.attrs$exclcols, drop = F]
+   if (length(object$exclcols) > 0)
+      x = x[, -object$exclcols, drop = F]
    
    xtotvar = sum(x^2)
    

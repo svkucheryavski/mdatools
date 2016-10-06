@@ -5,7 +5,7 @@
 \title{PLS model calibration}
 \usage{
 pls.cal(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coeffs.alpha,
-  info, light, ncomp.selcrit)
+  info, light, exclcols, exclrows, ncomp.selcrit)
 }
 \arguments{
 \item{x}{a matrix with x values (predictors)}
