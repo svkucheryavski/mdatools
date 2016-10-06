@@ -5,8 +5,8 @@
 \title{SIMCA one-class classification}
 \usage{
 simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL,
-  x.test = NULL, c.test = NULL, alpha = 0.05, method = "svd",
-  info = "")
+  exclcols = NULL, exclrows = NULL, x.test = NULL, c.test = NULL,
+  alpha = 0.05, method = "svd", info = "")
 }
 \arguments{
 \item{x}{a numerical matrix with data values.}

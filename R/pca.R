@@ -374,7 +374,7 @@ pca.run = function(x, ncomp, method) {
 #' @return
 #' an object with calibrated PCA model
 #' 
-pca.cal = function(x, ncomp, center, scale, method, exclcols, exclrows, cv, alpha, info) {
+pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL, exclrows = NULL, cv, alpha, info) {
    # prepare empty list for model object
    model = list()
    
@@ -689,14 +689,15 @@ predict.pca = function(object, x, cal = FALSE, ...) {
    # compute total variance
    if (length(object$exclcols) > 0){
       x = x[, -object$exclcols, drop = F]
-      attrs$exclcols = exclcols      
+      attrs$exclcols = object$exclcols      
    }
    
    totvar = sum(x^2)
    
    # create and return the results object
    res = pcares(scores = scores, loadings = object$loadings, residuals = residuals, attrs = attrs, 
-                ncomp.selected = object$ncomp.selected, tnorm = object$tnorm, totvar = totvar)
+                ncomp.selected = object$ncomp.selected, tnorm = object$tnorm, totvar = totvar, 
+                cal = TRUE)
    res$Qlim = object$Qlim
    res$T2lim = object$T2lim
 

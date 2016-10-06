@@ -160,7 +160,6 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
    # prepare zero matrices for the distances
    T2 = matrix(0, nrow = nobj, ncol = ncomp)
    Q = matrix(0, nrow = nobj, ncol = ncomp)
-   modpower = matrix(0, nrow = nrow(loadings), ncol = ncomp)
    
    # calculate normalized scores
    if (is.null(tnorm) && nrow(scores) > 0)
@@ -178,6 +177,8 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
       data = data[, -attrs.loadings$exclrows, drop = F]
    }
    
+   modpower = matrix(0, nrow = nrow(loadings), ncol = ncomp)
+   
    # standard deviation for data values 
    if (nobj > 1 && cal == TRUE)
       datasd = sqrt(colSums(data^2)/(nobj - 1))
@@ -190,15 +191,23 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
       Q[, i] = rowSums(res^2)
       T2[, i] = rowSums(scoresn[, 1:i, drop = F]^2)
       
-      if (nobj > i && cal == TRUE)
+      if (nobj > i && cal == TRUE){
          modpower[, i] = 1 - sqrt(colSums(res^2)/(nobj - i - 1))/datasd
+      }
    }  
+   
+   if (length(attrs.loadings$exclrows) > 0){
+      out.modpower = matrix(0, nrow = nvar, ncol = ncomp)
+      out.modpower[-attrs.loadings$exclrows, ] = modpower
+   } else {
+      out.modpower = modpower
+   }
    
    # return the results
    res = list(
       Q = Q,
       T2 = T2,
-      modpower = modpower,
+      modpower = out.modpower,
       tnorm = tnorm
    )
    

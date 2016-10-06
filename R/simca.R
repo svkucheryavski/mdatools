@@ -120,15 +120,22 @@
 #' par(mfrow = c(1, 1))
 #'
 #' @export
-simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
-                 c.test = NULL, alpha = 0.05, method = 'svd', info = '')
-{
+simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NULL,
+                 exclrows = NULL, x.test = NULL,  c.test = NULL, alpha = 0.05, method = 'svd', 
+                 info = '') {
    
    if (!is.character(classname))
       stop('Argument "classname" must be a text!')
    
    if (length(classname) > 20)
       stop('Argument "classname" must have up to 20 symbols!')
+
+   # add proper attributes if some rows or columns must be excluded
+   if (length(exclcols) > 0)
+      x = mda.exclcols(x, exclcols)
+   
+   if (length(exclrows) > 0)
+      x = mda.exclrows(x, exclrows)
    
    # calibrate model  
    model = pca.cal(x, ncomp, center = center, scale = scale, method = method, alpha = alpha, info = info, cv = NULL)

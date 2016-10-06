@@ -278,7 +278,8 @@ simcam.getPerformanceStatistics = function(model) {
    dimnames(moddist) = list(model$classnames, model$classnames)
   
    attrs = mda.getattr(model$models[[1]]$loadings)
-   dispower = mda.setattr(dispower, attrs, 'row')
+   attr(dispower, 'name') = 'Discrimination power'
+   attr(dispower, 'xaxis.name') = attrs$yaxis.name
    
    stat = list(
       dispower = dispower,
