@@ -22,6 +22,10 @@ pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
 
 \item{cv}{number of segments for cross-validation (if cv = 1, full cross-validation will be used).}
 
+\item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values)}
+
+\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
+
 \item{x.test}{matrix with predictors for test set.}
 
 \item{y.test}{matrix with responses for test set.}

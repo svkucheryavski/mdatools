@@ -5,9 +5,9 @@
 \title{Partial Least Squares Discriminant Analysis}
 \usage{
 plsda(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
-  x.test = NULL, c.test = NULL, method = "simpls", alpha = 0.05,
-  coeffs.ci = NULL, coeffs.alpha = 0.1, info = "", light = F,
-  ncomp.selcrit = "min")
+  exclcols = NULL, exclrows = NULL, x.test = NULL, c.test = NULL,
+  method = "simpls", alpha = 0.05, coeffs.ci = NULL, coeffs.alpha = 0.1,
+  info = "", light = F, ncomp.selcrit = "min")
 }
 \arguments{
 \item{x}{matrix with predictors.}
@@ -21,6 +21,10 @@ plsda(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
 \item{scale}{logical, scale (standardize) or not predictors and response values.}
 
 \item{cv}{number of segments for cross-validation (if cv = 1, full cross-validation will be used).}
+
+\item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values)}
+
+\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
 
 \item{x.test}{matrix with predictors for test set.}
 

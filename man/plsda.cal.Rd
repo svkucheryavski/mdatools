@@ -5,7 +5,7 @@
 \title{Calibrate PLS-DA model}
 \usage{
 plsda.cal(x, c, ncomp, center, scale, cv, method, light, alpha, coeffs.ci,
-  coeffs.alpha, info, ncomp.selcrit)
+  coeffs.alpha, info, exclcols = NULL, exclrows = NULL, ncomp.selcrit)
 }
 \description{
 Calibrate PLS-DA model

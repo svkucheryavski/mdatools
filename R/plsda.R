@@ -16,6 +16,10 @@
 #' logical, scale (standardize) or not predictors and response values.
 #' @param cv
 #' number of segments for cross-validation (if cv = 1, full cross-validation will be used).
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclcols
+#' columns of x to be excluded from calculations (numbers, names or vector with logical values)
 #' @param x.test
 #' matrix with predictors for test set.
 #' @param c.test
@@ -138,15 +142,15 @@
 #' par(mfrow = c(1, 1))
 #' 
 #' @export
-plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL, 
-               x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, 
-               coeffs.ci = NULL, coeffs.alpha = 0.1, info = '', light = F,
-               ncomp.selcrit = 'min') {
+plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NULL, 
+                 exclrows = NULL, x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, 
+                 coeffs.ci = NULL, coeffs.alpha = 0.1, info = '', light = F, 
+                 ncomp.selcrit = 'min') {
    
    # build a model and apply to calibration set
    model = plsda.cal(x, c, ncomp, center = center, scale = scale, method = method, light = light,
                      alpha = alpha, coeffs.ci = coeffs.ci, coeffs.alpha = coeffs.alpha, info = info,
-                     ncomp.selcrit = ncomp.selcrit, cv = cv)
+                     ncomp.selcrit = ncomp.selcrit, cv = cv, exclcols = exclcols, exclrows = exclrows)
    
    # do test set validation if provided
    if (!is.null(x.test) && !is.null(c.test))
@@ -161,11 +165,20 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
 #' 
 #' @export
 plsda.cal = function(x, c, ncomp, center, scale, cv, method, light, alpha, coeffs.ci, coeffs.alpha,
-                     info, ncomp.selcrit) {
+                     info, exclcols = NULL, exclrows = NULL, ncomp.selcrit) {
    
    c = checkReferenceValues.classmodel(model, c, x)
    y = mda.df2mat(as.factor(c), full = TRUE)
    y[y == 0] = -1      
+   
+   if (length(exclcols) > 0)
+      x = mda.exclcols(x, exclcols)
+   
+   if (length(exclrows) > 0) {
+      x = mda.exclrows(x, exclrows)
+      y = mda.exclrows(y, exclrows)
+      c = mda.exclrows(c, exclrows)
+   }
    
    # build a model and apply to calibration set
    model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method, coeffs.ci = coeffs.ci,

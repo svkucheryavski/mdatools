@@ -16,6 +16,10 @@
 #' logical, do sdandardization of data or not.
 #' @param cv
 #' number of segments for random cross-validation (1 for full cross-validation).
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclcols
+#' columns to be excluded from calculations (numbers, names or vector with logical values)
 #' @param x.test
 #' a numerical matrix with test data.
 #' @param c.test

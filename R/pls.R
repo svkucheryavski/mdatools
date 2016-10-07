@@ -16,6 +16,10 @@
 #' logical, scale (standardize) or not predictors and response values.
 #' @param cv  
 #' number of segments for cross-validation (if cv = 1, full cross-validation will be used).
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclcols
+#' columns of x to be excluded from calculations (numbers, names or vector with logical values)
 #' @param x.test   
 #' matrix with predictors for test set.
 #' @param y.test  
@@ -272,7 +276,7 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NU
 #' an object with calibrated PLS model
 #' 
 pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coeffs.alpha, info, light,
-                   exclcols, exclrows, ncomp.selcrit) {   
+                   exclcols = NULL, exclrows = NULL, ncomp.selcrit) {   
    # prepare empty list for model object
    model = list()
   
