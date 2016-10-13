@@ -15,7 +15,15 @@
 
 \item{main}{main title for the plot}
 
+\item{type}{type of the plot}
+
+\item{xlab}{label for x-axis.}
+
+\item{ylab}{label for y-axis.}
+
 \item{show.labels}{logical, show or not labels for the plot objects}
+
+\item{show.legend}{logical, show or not a legend on the plot.}
 
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 

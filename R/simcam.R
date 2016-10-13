@@ -306,8 +306,6 @@ simcam.getPerformanceStatistics = function(model) {
 #' label for x axis
 #' @param ylab
 #' label for y axis
-#' @param xticklabels
-#' labels for x axis ticks
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #' 

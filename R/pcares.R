@@ -2,19 +2,6 @@
 #' @description 
 #' \code{pcares} is used to store results for PCA decomposition of data.
 #'
-#'
-#' @param scores
-#' matrix with score values (nobj x ncomp).
-#' @param loadings
-#' matrix with loading values (nvar x ncomp).
-#' @param residuals
-#' matrix with data residuals.
-#' @param totvar
-#' total variance for data matrix.
-#' @param tnorm
-#' vector with singular values for scores normalization.
-#' @param ncomp.selected
-#' selected number of components for decomposition.
 #' @param ...
 #' other arguments supported by \code{ldecomp}.
 #' 

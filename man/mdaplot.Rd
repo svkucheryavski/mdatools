@@ -17,6 +17,9 @@ mdaplot(data = NULL, plot.data = NULL, type = "p", pch = 16,
 \arguments{
 \item{data}{a vector, matrix or a data.frame with data values.}
 
+\item{plot.data}{a list of parameters and values obtained after preprocessing of original data provided
+by a user (if NULL it will be created automatically)}
+
 \item{type}{type of the plot ('p', 'l', 'b', 'h', 'e', 'i').}
 
 \item{pch}{a character for markers (same as \code{plot} parameter).}
@@ -75,6 +78,12 @@ mdaplot(data = NULL, plot.data = NULL, type = "p", pch = 16,
 
 \item{col.excluded}{color for the excluded objects (rows)}
 
+\item{nbins}{if scatter density plot is shown, number of segments to split the plot area into (see also ?smoothScatter)}
+
+\item{colramp}{Colramp function for density scatter plot}
+
+\item{force.x.values}{vector with corrected x-values for a bar plot (do not specify this manually)}
+
 \item{...}{other plotting arguments.}
 }
 \description{
@@ -101,10 +110,10 @@ sequence of colors (e.g. \code{colmap = c('red', 'yellow', 'green')}, two colors
 The scheme will then be generated automatically as a gradient among the colors.  
 
 Besides that the function allows to change tick values and corresponding tick labels for x and 
-y axis, see GitBook tutorial for more details.
+y axis, see Bookdown tutorial for more details.
 }
 \examples{
-See all examples in GitBook
+# See all examples in the tutorial.
 
 }
 \author{

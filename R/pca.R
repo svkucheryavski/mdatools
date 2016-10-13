@@ -97,18 +97,6 @@
 #' summary(model)
 #' plot(model, show.labels = TRUE)
 #' 
-#' ## 2. Add missing values, make a new model and show plots
-#' peoplemv = people
-#' peoplemv[2, 7] = NA
-#' peoplemv[6, 2] = NA
-#' peoplemv[10, 4] = NA
-#' peoplemv[22, 12] = NA
-#' 
-#' modelmv = pca(peoplemv, scale = TRUE, info = 'Model with missing values')
-#' modelmv = selectCompNum(modelmv, 4)
-#' summary(modelmv)
-#' plot(modelmv, show.labels = TRUE)
-#' 
 #' ## 3. Show scores and loadings plots for the model
 #' par(mfrow = c(2, 2))
 #' plotScores(model, comp = c(1, 3), show.labels = TRUE)
@@ -370,6 +358,16 @@ pca.run = function(x, ncomp, method) {
 #' logical, do standardization or not
 #' @param method
 #' algorithm for compiting PC space (only 'svd' and 'nipals' are supported so far)
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclcols
+#' columns to be excluded from calculations (numbers, names or vector with logical values)
+#' @param cv
+#' number of segments for random cross-validation (1 for full cross-validation).
+#' @param alpha
+#' significance level for calculating limit for Q residuals.
+#' @param info
+#' a short text line with model description.
 #' 
 #' @return
 #' an object with calibrated PCA model
@@ -666,6 +664,8 @@ pca.crossval = function(model, x, cv, center = T, scale = F) {
 #' a PCA model (object of class \code{pca})
 #' @param x
 #' a matrix with data values
+#' @param cal
+#' logical, if TRUE the predictions are made for calibration set
 #' @param ...
 #' other arguments
 #' 
@@ -723,8 +723,6 @@ predict.pca = function(object, x, cal = FALSE, ...) {
 #' label for y axis
 #' @param show.legend
 #' logical, show or not a legend on the plot
-#' @param show.labels
-#' logical, show or not labels for the plot objects
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #' 
@@ -793,6 +791,8 @@ plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained varia
 #' label for x axis
 #' @param ylab
 #' label for y axis
+#' @param cgroup
+#' a vector with numeric values or a factor used for color grouping of plot points.
 #' @param show.labels
 #' logical, show or not labels for the plot objects
 #' @param show.legend
@@ -871,6 +871,8 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' logical, show or not a legend on the plot
 #' @param show.limits
 #' logical, show or not lines with statistical limits for the residuals
+#' @param cgroup
+#' a vector with numeric values or a factor for color grouping of plot points.
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #' 
@@ -1011,6 +1013,33 @@ plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings',
 
 #' PCA biplot
 #' 
+#' @description
+#' Shows a biplot for selected components.
+#' 
+#' @param obj
+#' a PCA model (object of class \code{pca})
+#' @param comp
+#' a value or vector with several values - number of components to show the plot for
+#' @param pch
+#' a vector with two values - markers for scores and loadings
+#' @param col
+#' a vector with two colors for scores and loadings
+#' @param main
+#' main title for the plot
+#' @param lty
+#' line type for loadings
+#' @param lwd
+#' line width for loadings
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param show.axes
+#' logical, show or not a axes lines crossing origin (0,0)
+#' @param show.excluded
+#' logical, show or hide rows marked as excluded (attribute `exclrows`)
+#' @param lab.col
+#' a vector with two colors for scores and loadings labels
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
 #' @export
 plotBiplot.pca = function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.getColors(2), main = 'Biplot', 
                           lty = 1, lwd = 1, show.labels = FALSE, show.axes = TRUE, show.excluded = FALSE,
@@ -1039,7 +1068,7 @@ plotBiplot.pca = function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.ge
    
    mdaplotg(list(scores = scores, loadings = loadings), type = 'p', pch = pch, 
             show.legend = FALSE, show.labels = show.labels, lab.col = lab.col,
-            main = main, col = col, show.lines = show.lines, show.excluded = show.excluded, ...)   
+            main = main, colmap = col, show.lines = show.lines, show.excluded = show.excluded, ...)   
    
    if (show.excluded == TRUE && length(attr(loadings, 'exclrows')) > 0)
       loadings = loadings[-attr(loadings, 'exclrows'), , drop = F]

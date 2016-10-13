@@ -19,8 +19,6 @@
 \item{ylab}{label for y axis}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
-
-\item{xlab}{label for x axies}
 }
 \description{
 Shows a plot with VIP scores values for given number of components

@@ -16,6 +16,8 @@
 
 \item{show.line}{logical, show or not line fit for the plot points}
 
+\item{col}{color for the plot objects.}
+
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
 \description{

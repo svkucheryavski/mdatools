@@ -5,7 +5,7 @@
 \title{Randomization test for PLS regression}
 \usage{
 randtest(x, y, ncomp = 15, center = T, scale = F, nperm = 1000,
-  sig.level = 0.05, silent = TRUE)
+  sig.level = 0.05, silent = TRUE, exclcols = NULL, exclrows = NULL)
 }
 \arguments{
 \item{x}{matrix with predictors.}
@@ -23,6 +23,10 @@ randtest(x, y, ncomp = 15, center = T, scale = F, nperm = 1000,
 \item{sig.level}{significance level.}
 
 \item{silent}{logical, show or not test progress.}
+
+\item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values)}
+
+\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
 }
 \value{
 Returns an object of \code{randtest} class with following fields:

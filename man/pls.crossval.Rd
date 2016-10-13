@@ -19,6 +19,8 @@ pls.crossval(model, x, y, cv, center, scale, method, jack.knife = T)
 
 \item{scale}{logical, do standardization or not}
 
+\item{method}{algorithm for computing PLS model}
+
 \item{jack.knife}{logical, do jack-knifing or not}
 }
 \value{

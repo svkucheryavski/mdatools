@@ -14,6 +14,8 @@ ldecomp.getDistances(scores, loadings, residuals, tnorm = NULL, cal = FALSE)
 \item{residuals}{matrix with residuals (E).}
 
 \item{tnorm}{vector with singular values for scores normalisation}
+
+\item{cal}{if TRUE method will realize that these distances are calculated for calibration set}
 }
 \value{
 Returns a list with Q, Qvar, T2 and modelling power values for each component.

@@ -48,10 +48,14 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
 #' Calculates axes limits depending on data values that have to be plotted, 
 #' extra plot elements that have to be shown and margins. 
 #' 
-#' @param data
-#' a matrix or list with data values (values to be plotted).
-#' @param single.x
-#' logical, has data matrix (matrices) one column for X and many for Y or not.
+#' @param x.values
+#' a vector with x values.
+#' @param y.values
+#' a vector or a matrix with y values.
+#' @param lower
+#' a lower margin for y limits.
+#' @param upper
+#' an upper margin for y limits.
 #' @param show.colorbar
 #' logical, show or not the colorbar on the plot.
 #' @param show.lines
@@ -64,10 +68,6 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
 #' position of the legend (see \code{\link{mdaplotg}} for details).
 #' @param show.labels
 #' logical, show or not labels for the data objects
-#' @param xticks
-#' values for x ticks to show
-#' @param yticks
-#' values for yticks to show 
 #' 
 #' @details
 #' Data can be a list with several matrices or just one matrix. The matrices can have single.x
@@ -89,7 +89,6 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
       show.labels = FALSE
    
    scale = 0.075 # scale for margins - 7.5% of plot width or height
-   
    xmin = min(x.values)
    xmax = max(x.values)
    if (is.null(lower) || is.null(upper)) {
@@ -421,8 +420,12 @@ mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, b
 #' Plot labels
 #' Shows labels for data elements (points, bars) on a plot. 
 #'
-#' @param data
-#' data matrix with coordinates of the points (x, y) 
+#' @param x.values
+#' a vector with x-values
+#' @param y.values
+#' a vector with y-values
+#' @param labels
+#' a vector with labels 
 #' @param pos
 #' position of the labels relative to the points
 #' @param cex
@@ -482,8 +485,7 @@ mdaplot.showLabels = function(x.values, y.values, labels, pos = 3,
 #' @details
 #'  If it is needed to show only one line, the other coordinate shall be set to NA.
 #'
-mdaplot.showLines = function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2))
-{
+mdaplot.showLines = function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2)) {
    
    if (!is.na(point[2]))
       abline(h = point[2], lty = lty, lwd = lwd, col = col)
@@ -698,7 +700,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    
    # correct dimension if one row or one column is provided
    if (!is.null(dim(data))) {
-      if (nrow(data) == 1 && type == 'p') {
+      if (nrow(data) == 1 && ncol(data) > 2 && type == 'p') {
          data = mda.t(data)
          attr(data, 'xaxis.name') = ifelse(is.null(attr(data, 'xaxis.name')), 'Variables', attr(data, 'xaxis.name'))      
       } else if (ncol(data) == 1 && !(type == 'p' || type == 'e')) {
@@ -882,6 +884,9 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' 
 #' @param data  
 #' a vector, matrix or a data.frame with data values.
+#' @param plot.data
+#' a list of parameters and values obtained after preprocessing of original data provided
+#' by a user (if NULL it will be created automatically) 
 #' @param type  
 #' type of the plot ('p', 'l', 'b', 'h', 'e', 'i').
 #' @param cgroup  
@@ -940,6 +945,12 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' logical, show or hide rows marked as excluded (attribute `exclrows`)
 #' @param col.excluded
 #' color for the excluded objects (rows)
+#' @param nbins
+#' if scatter density plot is shown, number of segments to split the plot area into (see also ?smoothScatter)
+#' @param colramp
+#' Colramp function for density scatter plot
+#' @param force.x.values
+#' vector with corrected x-values for a bar plot (do not specify this manually)
 #' @param ...  
 #' other plotting arguments.
 #' 
@@ -964,7 +975,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' The scheme will then be generated automatically as a gradient among the colors.  
 #'
 #' Besides that the function allows to change tick values and corresponding tick labels for x and 
-#' y axis, see GitBook tutorial for more details.
+#' y axis, see Bookdown tutorial for more details.
 #'
 #' @author 
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
@@ -973,7 +984,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' \code{\link{mdaplotg}} - to make plots for several sets of data objects (groups of objects).
 #'
 #' @examples
-#' See all examples in GitBook
+#' # See all examples in the tutorial.
 #' 
 #' @export
 mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8,
@@ -1257,10 +1268,18 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' tick values for y axis.
 #' @param yticklabels  
 #' labels for y ticks.
+#' @param xlas
+#' orientation of xticklabels
+#' @param ylas
+#' orientation of yticklabels
 #' @param lab.col  
 #' color for data point labels.
 #' @param lab.cex  
 #' size for data point labels.
+#' @param show.excluded
+#' logical, show or hide rows marked as excluded (attribute `exclrows`)
+#' @param groupby
+#' one or several factors used to create groups of data matrix rows (works if data is a matrix)
 #' @param ...  
 #' other plotting arguments.
 #' 
@@ -1273,7 +1292,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' Most of the parameters are similar to \code{\link{mdaplot}}, the difference is described below.
 #' 
 #' The data should be organized as a list, every item is a matrix with data for one set of objects.
-#' See examples for details.
+#' Alternatively you can provide data as a matrix and use parameter \code{groupby} to create groups.
+#' See tutorial for more details. 
 #' 
 #' There is no color grouping option, because color is used to separate the sets. Marker symbol, 
 #' line style and type, etc. can be defined as a single value (one for all sets) and as a vector 
@@ -1282,16 +1302,14 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' @author 
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
 #' 
-#' @examples 
-#' ### Examples of using mdaplotg
-#' 
-#' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text
+#' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text image plot.new rasterImage smoothScatter
+#' @importFrom grDevices axisTicks dev.cur 
 #' 
 #' @export
 mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
                     legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', 
-                    single.x = T, show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
+                    show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
                     show.excluded = FALSE, lab.col = 'darkgray', lab.cex = 0.65, xlas = 1, ylas = 1, ...) {   
 

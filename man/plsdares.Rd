@@ -111,7 +111,7 @@ Methods, inherited from \code{plsres} class:
  \code{\link{plotPredictions.plsres}} \tab shows predicted vs. measured plot.\cr
  \code{\link{plotXScores.plsres}} \tab shows scores plot for x decomposition.\cr
  \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
- \code{\link{plotRMSE.plsres}} \tab shows RMSE plot.\cr
+ \code{\link{plotRMSE.regres}} \tab shows RMSE plot.\cr
  \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
  \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
  \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y 

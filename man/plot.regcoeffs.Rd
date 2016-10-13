@@ -27,8 +27,6 @@
 \item{show.ci}{logical, show or not confidence intervals if they are available}
 
 \item{...}{other arguments}
-
-\item{xlab}{label for x axis}
 }
 \description{
 Shows plot with regression coefficient values for every predictor variable (x)

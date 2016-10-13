@@ -6,6 +6,17 @@
 \usage{
 pls.run(x, y, ncomp, method, cv)
 }
+\arguments{
+\item{x}{a matrix with x values (predictors from calibration set)}
+
+\item{y}{a matrix with y values (responses from calibration set)}
+
+\item{ncomp}{how many components to compute}
+
+\item{method}{algorithm for computing PLS model}
+
+\item{cv}{logical, is this for CV or not}
+}
 \description{
 Runs selected PLS algorithm
 }

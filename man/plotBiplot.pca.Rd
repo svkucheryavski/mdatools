@@ -9,7 +9,32 @@
   show.labels = FALSE, show.axes = TRUE, show.excluded = FALSE,
   lab.col = c("#90A0D0", "#D09090"), ...)
 }
+\arguments{
+\item{obj}{a PCA model (object of class \code{pca})}
+
+\item{comp}{a value or vector with several values - number of components to show the plot for}
+
+\item{pch}{a vector with two values - markers for scores and loadings}
+
+\item{col}{a vector with two colors for scores and loadings}
+
+\item{main}{main title for the plot}
+
+\item{lty}{line type for loadings}
+
+\item{lwd}{line width for loadings}
+
+\item{show.labels}{logical, show or not labels for the plot objects}
+
+\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+
+\item{show.excluded}{logical, show or hide rows marked as excluded (attribute `exclrows`)}
+
+\item{lab.col}{a vector with two colors for scores and loadings labels}
+
+\item{...}{other plot parameters (see \code{mdaplotg} for details)}
+}
 \description{
-PCA biplot
+Shows a biplot for selected components.
 }
 

@@ -332,11 +332,13 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
       if (is.null(main))
          main = sprintf('Prediction performance %s', classname);
 
-      data = list(
-         sensitivity = obj$sensitivity[nc, ],
-         specificity = obj$specificity[nc, ],
-         misclassified = obj$misclassified[nc, ]
-      )
+      data = list()
+      if (!any(is.na(obj$sensitivity[nc, ])))
+          data$sensitivity = obj$sensitivity[nc, ]
+      if (!any(is.na(obj$specificity[nc, ])))
+         data$specificity = obj$specificity[nc, ]
+      if (!any(is.na(obj$misclassified[nc, ])))
+         data$misclassified = obj$misclassified[nc, ]
 
       mdaplotg(data, type = type, legend = legend, main = main, xticks = 1:obj$ncomp, 
                xlab = xlab, ylim = ylim, ylab = ylab, ...)
@@ -345,6 +347,9 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
          main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2), classname)
       
       data = obj[[param]][nc, , drop = F]
+      if (any(is.na(data)))
+         stop('This performance parameter has NA values!')
+      
       mdaplot(data, type = type, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, ylim = ylim, ...)
    }
 }
@@ -379,7 +384,7 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
 plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', main = NULL, ylab = '', ...) {
   
    if (is.null(obj))
-      error('No classification results were provided!')
+      stop('No classification results were provided!')
    
    # get classnames
    classnames = dimnames(obj$c.pred)[[3]]

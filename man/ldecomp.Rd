@@ -17,15 +17,17 @@ ldecomp(scores = NULL, residuals = NULL, loadings = NULL,
 
 \item{ncomp.selected}{number of selected components}
 
+\item{attrs}{list with attributes of original dataset}
+
 \item{tnorm}{singular values for score normalization}
+
+\item{dist}{list with calculated T2 and Q values (e.g. for CV)}
+
+\item{var}{list with explained and cumulative explained variance (e.g. for CV)}
 
 \item{cal}{logical, true if data is for calibration of a LDECOMP based model}
 
 \item{totvar}{full variance of original data, preprocessed and centered}
-
-\item{T2}{matrix with calculated T2 values (e.g. for CV)}
-
-\item{Q}{matrix with calculated Q statistic (e.g. for CV)}
 }
 \value{
 Returns an object (list) of \code{ldecomp} class with following fields:

@@ -20,9 +20,9 @@
 
 \item{ylab}{label for y axis}
 
-\item{...}{other plot parameters (see \code{mdaplotg} for details)}
+\item{labels}{what to show as labels (if this option is on)}
 
-\item{values}{what to show as labels (if this option is on)}
+\item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
 Shows plot with root mean squared error values vs. number of components for PLS model.

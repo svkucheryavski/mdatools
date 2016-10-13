@@ -8,6 +8,9 @@ mda.df2mat(x, full = FALSE)
 }
 \arguments{
 \item{x}{a data frame}
+
+\item{full}{logical, if TRUE number of dummy variables for a factor will be the same as number of levels, 
+otherwise by one smaller}
 }
 \value{
 a numeric matrix

@@ -163,6 +163,38 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = 
 
 #' Calibrate PLS-DA model
 #' 
+#' @param x
+#' matrix with predictors.
+#' @param c
+#' vector with reference class values.
+#' @param ncomp 
+#' maximum number of components to calculate.
+#' @param center 
+#' logical, center or not predictors and response values.
+#' @param scale 
+#' logical, scale (standardize) or not predictors and response values.
+#' @param cv
+#' number of segments for cross-validation (if cv = 1, full cross-validation will be used).
+#' @param method
+#' method for calculating PLS model.
+#' @param light
+#' run normal or light (faster) version of PLS without calculationg some performance statistics.
+#' @param alpha
+#' significance level for calculating statistical limits for residuals.
+#' @param coeffs.ci
+#' method to calculate p-values and confidence intervals for regression coefficients (so far only 
+#' jack-knifing is availavle: \code{='jk'}).
+#' @param coeffs.alpha
+#' significance level for calculating confidence intervals for regression coefficients.
+#' @param info
+#' short text with information about the model.
+#' @param exclcols
+#' columns of x to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param ncomp.selcrit
+#' criterion for selecting optimal number of components (\code{'min'} for first local minimum of 
+#' 
 #' @export
 plsda.cal = function(x, c, ncomp, center, scale, cv, method, light, alpha, coeffs.ci, coeffs.alpha,
                      info, exclcols = NULL, exclrows = NULL, ncomp.selcrit) {
@@ -222,7 +254,7 @@ predict.plsda = function(object, x, c.ref = NULL, ...) {
    
    y.ref = NULL
    if (!is.null(c.ref)) {
-      c.ref = checkReferenceValues.classmodel(model, c.ref, x)
+      c.ref = checkReferenceValues.classmodel(object, c.ref, x)
       y.ref = mda.df2mat(as.factor(c.ref), full = TRUE)
       y.ref[y.ref == 0] = -1      
    }
@@ -277,14 +309,12 @@ classify.plsda = function(model, y) {
 #' a matrix with x values (predictors from calibration set)
 #' @param c
 #' a vetor with c values (classes from calibration set)
-#' @param cv
-#' number of segments (if cv = 1, full cross-validation will be used)
 #' @param center
 #' logical, do mean centering or not
 #' @param scale
 #' logical, do standardization or not
-#' @param jack.knife
-#' logical, do jack-knifing or not
+#' @param method
+#' method for calculating PLS model.
 #'
 #' @return
 #' object of class \code{plsdares} with results of cross-validation

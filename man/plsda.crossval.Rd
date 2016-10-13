@@ -17,9 +17,7 @@ plsda.crossval(model, x, c, center, scale, method)
 
 \item{scale}{logical, do standardization or not}
 
-\item{cv}{number of segments (if cv = 1, full cross-validation will be used)}
-
-\item{jack.knife}{logical, do jack-knifing or not}
+\item{method}{method for calculating PLS model.}
 }
 \value{
 object of class \code{plsdares} with results of cross-validation

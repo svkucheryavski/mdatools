@@ -14,8 +14,6 @@
 \item{y}{a matrix with reference y values (responses)}
 
 \item{...}{other arguments}
-
-\item{cv}{logical, are predictions for cross-validation or not}
 }
 \value{
 PLS results (an object of class \code{plsres})

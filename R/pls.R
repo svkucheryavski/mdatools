@@ -16,16 +16,16 @@
 #' logical, scale (standardize) or not predictors and response values.
 #' @param cv  
 #' number of segments for cross-validation (if cv = 1, full cross-validation will be used).
-#' @param exclrows
-#' rows to be excluded from calculations (numbers, names or vector with logical values)
 #' @param exclcols
 #' columns of x to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
 #' @param x.test   
 #' matrix with predictors for test set.
 #' @param y.test  
 #' matrix with responses for test set.
-#' @param method   
-#' method for calculating PLS model.
+#' @param method
+#' algorithm for computing PLS model (only 'simpls' is supported so far)
 #' @param alpha   
 #' significance level for calculating statistical limits for residuals.
 #' @param coeffs.ci   
@@ -266,11 +266,27 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NU
 #' @param scale
 #' logical, do standardization or not
 #' @param method
-#' algorithm for compiting PC space (only 'simpls' is supported so far)
+#' algorithm for computing PLS model (only 'simpls' is supported so far)
 #' @param cv
 #' logical, does calibration for cross-validation or not
-#' @param light 
-#' logical, calculate a "light" model or normal one
+#' @param alpha   
+#' significance level for calculating statistical limits for residuals.
+#' @param coeffs.ci   
+#' method to calculate p-values and confidence intervals for regression coefficients (so far only 
+#' jack-knifing is availavle: \code{='jk'}).
+#' @param coeffs.alpha   
+#' significance level for calculating confidence intervals for regression coefficients.
+#' @param info   
+#' short text with information about the model.
+#' @param light   
+#' run normal or light (faster) version of PLS without calculationg some performance statistics.
+#' @param exclcols
+#' columns of x to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param ncomp.selcrit  
+#' criterion for selecting optimal number of components (\code{'min'} for 
+#' first local minimum of RMSECV and \code{'wold'} for Wold's rule.)
 #' 
 #' @return model
 #' an object with calibrated PLS model
@@ -280,14 +296,6 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    # prepare empty list for model object
    model = list()
   
-   if (length(exclcols) > 0)
-      x = mda.exclcols(x, exclcols)
-   
-   if (length(exclrows) > 0) {
-      x = mda.exclrows(x, exclrows)
-      y = mda.exclrows(y, exclrows)
-   }
-   
    # get attributes
    x.attrs = mda.getattr(x)
    y.attrs = mda.getattr(y)
@@ -295,10 +303,23 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    # if y is a vector convert it to a matrix
    if (is.null(dim(y)))
       y = matrix(y, ncol = 1)
-  
+   
    # check dimensions
    if (nrow(x) != nrow(y))
       stop('Number of rows for predictos and responses should be the same!')
+   
+   # exclude rows and columns if necessary
+   if (length(exclcols) > 0) {
+      x = mda.exclcols(x, exclcols)
+      x.attrs$exclcols = attr(x, 'exclcols')
+   }
+   
+   if (length(exclrows) > 0) {
+      x = mda.exclrows(x, exclrows)
+      y = mda.exclrows(y, exclrows)
+      x.attrs$exclrows = attr(x, 'exclrows')
+      y.attrs$exclrows = attr(y, 'exclrows')
+   }
    
    # convert data to a matrix 
    x = mda.df2mat(x)
@@ -317,6 +338,12 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    # set column names for predictors if missing   
    if (is.null(colnames(y)))
       colnames(y) = paste('y', 1:ncol(y), sep = '')
+   
+   # correct x-axis name
+   if (is.null(x.attrs$xaxis.name))
+      x.attrs$xaxis.name = 'Variables'
+   if (is.null(x.attrs$yaxis.name))
+      x.attrs$yaxis.name = 'Objects'
    
    # correct maximum number of components
    ncols = x.ncols - length(x.attrs$exclcols) 
@@ -400,9 +427,8 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    }
    
    # set names and attributes 
-   rownames(xloadings) = rownames(weights) = dimnames(coeffs)[[1]] = colnames(x)
-   colnames(xloadings) = colnames(weights) = dimnames(coeffs)[[2]] = paste('Comp', 1:ncomp)
-   
+   rownames(xloadings) = rownames(weights) = colnames(x)
+   colnames(xloadings) = colnames(weights) = paste('Comp', 1:ncomp)
    attr(xloadings, 'name') = 'X loadings'
    attr(xloadings, 'xaxis.name') = attr(weights, 'xaxis.name') = attr(coeffs, 'xaxis.name') = 'Components'
    attr(xloadings, 'yaxis.name') = attr(weights, 'yaxis.name') = attr(coeffs, 'yaxis.name') = x.attrs$xaxis.name
@@ -418,7 +444,8 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    }
    
    # set names and attributes 
-   rownames(yloadings) = dimnames(coeffs)[[3]] = colnames(y)
+   dimnames(coeffs) = list(colnames(x), colnames(xloadings), colnames(y))
+   rownames(yloadings) = colnames(y)
    colnames(yloadings) = colnames(xloadings)
    attr(yloadings, 'name') = 'Y loadings'
    attr(yloadings, 'xaxis.name') = 'Components'
@@ -471,6 +498,16 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
 
 #' Runs selected PLS algorithm
 #' 
+#' @param x
+#' a matrix with x values (predictors from calibration set)
+#' @param y
+#' a matrix with y values (responses from calibration set)
+#' @param ncomp
+#' how many components to compute
+#' @param method
+#' algorithm for computing PLS model
+#' @param cv
+#' logical, is this for CV or not
 #' 
 #' @export
 pls.run = function(x, y, ncomp, method, cv) {
@@ -603,6 +640,8 @@ pls.simpls = function(x, y, ncomp, cv = FALSE) {
 #' logical, do mean centering or not
 #' @param scale
 #' logical, do standardization or not
+#' @param method
+#' algorithm for computing PLS model
 #' @param jack.knife
 #' logical, do jack-knifing or not
 #' 
@@ -836,8 +875,6 @@ selectCompNum.pls = function(model, ncomp = NULL)
 #' a matrix with x values (predictors)
 #' @param y
 #' a matrix with reference y values (responses)
-#' @param cv
-#' logical, are predictions for cross-validation or not
 #' @param ...
 #' other arguments
 #' 
@@ -1177,6 +1214,10 @@ getVIPScores.pls = function(obj, ny = 1, ...) {
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
 #' number of components to return the coefficients for
+#' @param ny
+#' if y is multivariate which variables you want to see the coefficients for
+#' @param full
+#' if TRUE the method also shows p-values for the coefficients (if available)
 #' @param ...
 #' other parameters
 #'
@@ -1192,7 +1233,7 @@ getVIPScores.pls = function(obj, ny = 1, ...) {
 #' A matrix (n of predictors x n of responses) with regression coefficients.
 #'  
 #' @export
-getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = TRUE, ...) {
+getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = FALSE, ...) {
    if (is.null(ncomp)) 
       ncomp = obj$ncomp.selected
    else if (length(ncomp) != 1 || ncomp <= 0 || ncomp > obj$ncomp) 
@@ -1260,8 +1301,6 @@ getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = TRUE, ...) {
 #' type of the plot
 #' @param main
 #' main title for the plot
-#' @param xlab
-#' label for x axies
 #' @param ylab
 #' label for y axis
 #' @param ...
@@ -1294,8 +1333,6 @@ plotVIPScores.pls = function(obj, ny = 1, type = 'l', main = NULL, ylab = '', ..
 #' type of the plot
 #' @param main
 #' main title for the plot
-#' @param xlab
-#' label for x axies
 #' @param ylab
 #' label for y axis
 #' @param ...
@@ -1332,7 +1369,7 @@ plotSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, type = 'l',
 #' label for x axis
 #' @param ylab
 #' label for y axis
-#' @param values
+#' @param labels
 #' what to show as labels (if this option is on)
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
@@ -1503,6 +1540,8 @@ plotYCumVariance.pls = function(obj, type = 'b',
 #' label for x axis
 #' @param ylab
 #' label for y axis
+#' @param labels
+#' what to show as labels for plot objects.
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1833,10 +1872,6 @@ plotXLoadings.pls = function(obj, comp = c(1, 2), type = 'p', main = 'X loadings
    if (type == 'p' && ncomp != 2)
       stop('Scatter plot can be made only for two components!')
 
-   data = mda.subset(obj$xloadings, select = comp)
-   if (type != 'p') 
-      data = mda.t(data)
-
    if (show.axes == T) {
       if (type == 'p')
          show.lines = c(0, 0)
@@ -1846,7 +1881,14 @@ plotXLoadings.pls = function(obj, comp = c(1, 2), type = 'p', main = 'X loadings
       show.lines = F
    }
    
-   mdaplotg(data, main = main, type = type, ylab = ylab, xlab = xlab, show.lines = show.lines, ...)
+   data = mda.subset(obj$xloadings, select = comp)
+   if (type == 'p') {
+      colnames(data) = paste('Comp ', comp, ' (', round(obj$calres$xdecomp$expvar[comp], 2) , '%)', sep = '')
+      mdaplot(data, main = main, type = type, show.lines = show.lines, ...)
+   } else {
+      data = mda.t(data)
+      mdaplotg(data, main = main, type = type, show.lines = show.lines, ...)
+   }
 }
 
 
@@ -2063,9 +2105,9 @@ print.pls = function(x, ...) {
    cat('\nMajor fields:\n')
    cat('$ncomp - number of calculated components\n')
    cat('$ncomp.selected - number of selected components\n')
-   cat('$coeffs - vector with regression coefficients\n')
+   cat('$coeffs - object (regcoeffs) with regression coefficients\n')
    cat('$xloadings - vector with x loadings\n')
-   cat('$yloadings - vector with Y loadings\n')
+   cat('$yloadings - vector with y loadings\n')
    cat('$weights - vector with weights\n')
    cat('$calres - results for calibration set\n')
    if (!is.null(obj$cvres))

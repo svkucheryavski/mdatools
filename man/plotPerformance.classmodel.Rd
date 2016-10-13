@@ -27,8 +27,6 @@ or \code{'misclassified'})}
 \item{ylim}{vector with two values - limits for y axis}
 
 \item{...}{most of the graphical parameters from \code{\link{mdaplotg}} function can be used.}
-
-\item{legend}{vector with legend items}
 }
 \description{
 Makes a plot with sensitivity values vs. model complexity (e.g. number of components)

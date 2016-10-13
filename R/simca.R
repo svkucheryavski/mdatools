@@ -178,8 +178,8 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, exc
 #' a matrix with x values (predictors)
 #' @param c.ref
 #' a vector with reference class names (same as class names for models)
-#' @param cv
-#' logical, are predictions for cross-validation or not
+#' @param cal
+#' logical, are predictions for calibration set or not
 #' @param ...
 #' other arguments
 #' 
@@ -398,8 +398,6 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
 #' type of the plot
 #' @param main
 #' main plot title
-#' @param xlab
-#' label for x axis
 #' @param ylab
 #' label for y axis
 #' @param ...

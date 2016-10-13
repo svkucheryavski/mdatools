@@ -11,6 +11,8 @@
 
 \item{x}{a matrix with data values}
 
+\item{cal}{logical, if TRUE the predictions are made for calibration set}
+
 \item{...}{other arguments}
 }
 \value{

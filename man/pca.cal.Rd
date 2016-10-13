@@ -17,6 +17,16 @@ pca.cal(x, ncomp, center, scale, method, exclcols = NULL, exclrows = NULL,
 \item{scale}{logical, do standardization or not}
 
 \item{method}{algorithm for compiting PC space (only 'svd' and 'nipals' are supported so far)}
+
+\item{exclcols}{columns to be excluded from calculations (numbers, names or vector with logical values)}
+
+\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
+
+\item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
+
+\item{alpha}{significance level for calculating limit for Q residuals.}
+
+\item{info}{a short text line with model description.}
 }
 \value{
 an object with calibrated PCA model

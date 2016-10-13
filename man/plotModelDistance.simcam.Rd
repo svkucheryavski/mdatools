@@ -21,8 +21,6 @@
 \item{ylab}{label for y axis}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{xticklabels}{labels for x axis ticks}
 }
 \description{
 Shows a plot with distance from data objects to a SIMCA model

@@ -23,6 +23,8 @@
 
 \item{ylab}{label for y axis}
 
+\item{labels}{what to show as labels for plot objects.}
+
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{

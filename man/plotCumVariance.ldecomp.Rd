@@ -22,6 +22,8 @@
 
 \item{show.labels}{logical, show or not labels for the plot objects}
 
+\item{labels}{what to show as labels for plot objects}
+
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
 }
 \description{

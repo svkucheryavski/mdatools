@@ -15,6 +15,6 @@ mda.inclcols(x, ind)
 dataset with included columns.
 }
 \description{
-
+include colmns specified by user (earlier excluded using mda.exclcols)
 }
 

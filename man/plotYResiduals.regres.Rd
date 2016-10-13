@@ -17,8 +17,6 @@
 \item{show.line}{logical, show or not zero line on the plot}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
-
-\item{type}{type of the plot}
 }
 \description{
 Shows plot with Y residuals (difference between predicted and reference values) for selected 

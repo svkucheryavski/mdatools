@@ -23,7 +23,7 @@ mda.im2data = function(img) {
 #' data matrix 
 #' 
 #' @export
-mda.data2im = function(data, show.excluded = NULL) {
+mda.data2im = function(data) {
    width = attr(data, 'width', exact = TRUE)
    height = attr(data, 'height', exact = TRUE)
    bgpixels = attr(data, 'bgpixels', exact = TRUE)
@@ -82,6 +82,12 @@ mda.setimbg = function(data, bgpixels) {
 #' data with image
 #' @param channels
 #' indices for one or three columns to show as image channels
+#' @param show.excluded
+#' logical, if TRUE the method also shows the excluded (hidden) pixels
+#' @param main
+#' main title for the image
+#' @param colmap
+#' colormap using to show the intensity levels
 #' 
 #' @export
 imshow = function(data, channels = 1, show.excluded = FALSE, main = NULL, colmap = 'jet') {
@@ -140,8 +146,10 @@ imshow = function(data, channels = 1, show.excluded = FALSE, main = NULL, colmap
 
 #' Wrapper for show() method
 #' 
-#' @description 
-#' 
+#' @param x
+#' data set
+#' @param n
+#' number of rows to show
 #' 
 #' @export
 mda.show = function(x, n = 50) {
@@ -412,6 +420,7 @@ mda.exclrows = function(x, ind) {
 #' dataset with included rows
 #' 
 #' @description 
+#' include rows specified by user (earlier excluded using mda.exclrows)
 #' 
 #' @export 
 mda.inclrows = function(x, ind) {
@@ -473,6 +482,7 @@ mda.exclcols = function(x, ind) {
 #' dataset with included columns.
 #' 
 #' @description 
+#' include colmns specified by user (earlier excluded using mda.exclcols) 
 #' 
 #' @export 
 mda.inclcols = function(x, ind) {
@@ -527,7 +537,7 @@ mda.setattr = function(x, attrs, type = 'all') {
 #' a dataset
 #' 
 #' @export
-mda.getattr = function(x, type = 'all') {
+mda.getattr = function(x) {
    attrs = list()
    
    attrs$name = attr(x, 'name', exact = TRUE) 
@@ -581,6 +591,9 @@ mda.getexclind = function(excl, names, n) {
 #' 
 #' @param x
 #' a data frame
+#' @param full
+#' logical, if TRUE number of dummy variables for a factor will be the same as number of levels, 
+#' otherwise by one smaller 
 #'
 #' @details 
 #' If one or several columns of the data frame are factors they will be converted to a set of dummy 

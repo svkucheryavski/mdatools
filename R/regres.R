@@ -75,8 +75,11 @@ regres.r2 = function(y.ref, y.pred) {
    r2 = matrix(0, nrow = nresp, ncol = ncomp)
   
    ytot = colSums(y.ref^2)
-   for (i in 1:nresp)
-      r2[i, ] = (1 - colSums(apply(y.pred[, , i], 2, '-', y.ref[, i])^2)/ytot[i]) * 100   
+   for (i in 1:nresp){
+      yp = y.pred[, , i, drop = F]
+      dim(yp) = dim(y.pred)[1:2]
+      r2[i, ] = (1 - colSums(apply(yp, 2, '-', y.ref[, i])^2)/ytot[i]) * 100   
+   }
    
    rownames(r2) = colnames(y.ref)
    colnames(r2) = dimnames(y.pred)[[2]]
@@ -184,7 +187,8 @@ regres.slope = function(y.ref, y.pred) {
 #' number of predictor to show the plot for (if y is multivariate)
 #' @param type
 #' type of the plot
-#' label for y axis
+#' @param labels
+#' what to show as labels for plot objects. 
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
@@ -219,6 +223,8 @@ plotRMSE.regres = function(obj, ny = 1, type = 'b', labels = 'values', ...) {
 #' complexity of model (e.g. number of components) to show the plot for
 #' @param show.line
 #' logical, show or not line fit for the plot points
+#' @param col
+#' color for the plot objects.
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
@@ -277,8 +283,6 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T, col 
 #' number of predictor to show the plot for (if y is multivariate)
 #' @param ncomp
 #' complexity of model (e.g. number of components) to show the plot for
-#' @param type
-#' type of the plot
 #' @param show.line
 #' logical, show or not zero line on the plot
 #' @param ...

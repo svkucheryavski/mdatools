@@ -9,9 +9,9 @@
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}
 
-\item{...}{other plot parameters (see \code{mdaplot} for details)}
+\item{ncomp}{which component to show the plot for}
 
-\item{comp}{which component to show the plot for}
+\item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
 \description{
 Shows plot with X vs. Y scores values for PLS results.

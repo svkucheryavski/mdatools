@@ -7,7 +7,7 @@ checkReferenceValues.classmodel = function(model, c.ref, x) {
    attrs = mda.getattr(c.ref)
    
    if (is.logical(c.ref))
-      c.ref = ifelse(c.ref, object$classname, 'None')
+      c.ref = ifelse(c.ref, model$classname, 'None')
    if (is.data.frame(c.ref))
       c.ref = as.matrix(c.ref)
    if (!is.matrix(c.ref))
@@ -157,8 +157,6 @@ plotMisclassified.classmodel = function(obj, nc = NULL, ...)
 #' or \code{'misclassified'})
 #' @param type
 #' type of the plot
-#' @param legend
-#' vector with legend items
 #' @param main
 #' main title for the plot
 #' @param xlab

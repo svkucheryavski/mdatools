@@ -4,7 +4,7 @@
 \alias{mda.getattr}
 \title{Get data attributes}
 \usage{
-mda.getattr(x, type = "all")
+mda.getattr(x)
 }
 \arguments{
 \item{x}{a dataset}

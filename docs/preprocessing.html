@@ -8,7 +8,7 @@
   <title>Getting started with mdatools for R</title>
   <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.1.7 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.1 and GitBook 2.6.7">
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -115,7 +115,6 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html"><i class="fa fa-check"></i>Attributes and factors</a><ul>
 <li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#package-specific-attributes"><i class="fa fa-check"></i>Package specific attributes</a></li>
 <li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#attributes-for-plots"><i class="fa fa-check"></i>Attributes for plots</a></li>
-<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#excludinghiding-rows-and-columns"><i class="fa fa-check"></i>Excluding/hiding rows and columns</a></li>
 <li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#special-methods-for-data-transformations"><i class="fa fa-check"></i>Special methods for data transformations</a></li>
 <li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#data-frames-with-factors"><i class="fa fa-check"></i>Data frames with factors</a></li>
 </ul></li>
@@ -144,7 +143,18 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#support-for-images"><i class="fa fa-check"></i>Support for images</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
-<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluded-rows-and-columns"><i class="fa fa-check"></i>Excluded rows and columns</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluding-rows-and-columns"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="partial-least-squares-regression.html"><a href="partial-least-squares-regression.html"><i class="fa fa-check"></i>Partial least squares regression</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html"><i class="fa fa-check"></i>Models and results</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-calibration-1"><i class="fa fa-check"></i>Model calibration</a></li>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#support-for-images-1"><i class="fa fa-check"></i>Support for images</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#manual-x-values-for-loading-line-plot-1"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -166,7 +176,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="preprocessing" class="section level2 unnumbered">
 <h2>Preprocessing</h2>
-<p>The package has several preprocessing methods implemented, mostly for different kinds of spectral data. All functions for preprocessing starts from prefix <code>prep.</code> which makes them easier to find by using code completion. If dataset has excluded rows, the preprocessing methods will process them and keep them excluded in the results. However if a method needs to calculate some parameters (e.g. mean values for centering, slope and intercept for MSC) the excluded rows will not be used for these calculations. The methods work similarly with the excluded columns. In this chapter a brief description of the methods with several examples will be shown.</p>
+<p>The package has several preprocessing methods implemented, mostly for different kinds of spectral data. All functions for preprocessing starts from prefix <code>prep.</code> which makes them easier to find by using code completion. In this chapter a brief description of the methods with several examples will be shown.</p>
 <div id="autoscaling" class="section level3 unnumbered">
 <h3>Autoscaling</h3>
 <p><em>Autoscaling</em> consists of two steps. First step is <em>centering</em> (or, more precise, <em>mean centering</em>) when center of a data cloud in variable space is moved to an origin. Mathematically it is done by subtracting mean from the data values separately for every column/variable. Second step is <em>scaling</em> og <em>standardization</em> when data values are divided to standard deviation so the variables have unit variance. This autoscaling procedure (both steps) is known in statistics simply as *standardization’. You can also use arbitrary values to center or/and scale the data, in this case use sequence or vector with these values should be provided as an argument for <code>center</code> or <code>scale</code>.</p>
@@ -196,7 +206,7 @@ data4 =<span class="st"> </span><span class="kw">prep.autoscale</span>(data4, <s
 <span class="kw">boxplot</span>(data2, <span class="dt">main =</span> <span class="st">&#39;Standardized&#39;</span>)
 <span class="kw">boxplot</span>(data3, <span class="dt">main =</span> <span class="st">&#39;Mean centered and standardized&#39;</span>)
 <span class="kw">boxplot</span>(data4, <span class="dt">main =</span> <span class="st">&#39;Median centered and standardized&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-49-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-39-1.png" width="864" /></p>
 </div>
 <div id="correction-of-spectral-baseline" class="section level3 unnumbered">
 <h3>Correction of spectral baseline</h3>
@@ -213,7 +223,7 @@ pspectra =<span class="st"> </span><span class="kw">prep.snv</span>(ospectra)
 <span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
 <span class="kw">mdaplot</span>(ospectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;Original&#39;</span>)
 <span class="kw">mdaplot</span>(pspectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;after SNV&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-50-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-40-1.png" width="864" /></p>
 <p>Multiplicative Scatter Correction does the same as SNV but in a different way. First it calculates a mean spectrum for the whole set (mean spectrum can be also provided as an extra argument). Then, for each individual spectrum, it makes a line fit for the spectral values and the mean spectrum. The coefficients of the line, intercept and slope, are used to correct the additive and multiplicative effects correspondingly.</p>
 <p>The <code>prep.msc()</code> function adds the mean spectrum calculated for the original spectral data, to the attributes of the results, so it can be reused later.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># apply MSC and and get the preprocessed spectra</span>
@@ -223,7 +233,7 @@ pspectra =<span class="st"> </span><span class="kw">prep.msc</span>(ospectra)
 <span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
 <span class="kw">mdaplot</span>(ospectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;Original&#39;</span>)
 <span class="kw">mdaplot</span>(pspectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;after MSC&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-51-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-41-1.png" width="864" /></p>
 </div>
 <div id="smoothing-and-derivatives" class="section level3 unnumbered">
 <h3>Smoothing and derivatives</h3>
@@ -243,7 +253,7 @@ dpspectra =<span class="st"> </span><span class="kw">prep.savgol</span>(nspectra
 <span class="kw">mdaplot</span>(nspectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;Noise added&#39;</span>)
 <span class="kw">mdaplot</span>(pspectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;Smoothing&#39;</span>)
 <span class="kw">mdaplot</span>(dpspectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>,<span class="dt">main =</span> <span class="st">&#39;First derivative&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-52-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-42-1.png" width="864" /></p>
 
 </div>
 </div>

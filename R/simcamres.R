@@ -5,14 +5,8 @@
 #' 
 #' @param cres
 #' results of classification (class \code{classres}).
-#' @param T2
-#' matrix with T2 values for each object and class.
-#' @param Q
-#' matrix with Q values for each object and class.
-#' @param T2lim
-#' vector with T2 statistical limits for each class.
-#' @param Qlim
-#' vector with Q statistical limits for each class.
+#' @param pred.res
+#' prediction results from each model (as pcares)
 #' 
 #' @details 
 #' Class \code{simcamres} inherits all properties and methods of class \code{\link{classres}}, plus 
@@ -128,18 +122,8 @@ simcamres = function(cres, pred.res)
 #' SIMCAM results (object of class \code{simcamres})
 #' @param nc
 #' which class (SIMCA model) to show the plot for
-#' @param show.limits
-#' logical, show or not lines with statistical limits for the residuals
-#' @param type
-#' type of the plot
 #' @param main
 #' main plot title
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param legend
-#' vector with legend items
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #' 

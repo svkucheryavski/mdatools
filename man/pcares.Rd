@@ -8,18 +8,6 @@ pcares(...)
 }
 \arguments{
 \item{...}{other arguments supported by \code{ldecomp}.}
-
-\item{scores}{matrix with score values (nobj x ncomp).}
-
-\item{loadings}{matrix with loading values (nvar x ncomp).}
-
-\item{residuals}{matrix with data residuals.}
-
-\item{totvar}{total variance for data matrix.}
-
-\item{tnorm}{vector with singular values for scores normalization.}
-
-\item{ncomp.selected}{selected number of components for decomposition.}
 }
 \value{
 Returns an object (list) of class \code{pcares} and \code{ldecomp} with following fields:

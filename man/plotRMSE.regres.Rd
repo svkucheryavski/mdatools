@@ -11,8 +11,9 @@
 
 \item{ny}{number of predictor to show the plot for (if y is multivariate)}
 
-\item{type}{type of the plot
-label for y axis}
+\item{type}{type of the plot}
+
+\item{labels}{what to show as labels for plot objects.}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }

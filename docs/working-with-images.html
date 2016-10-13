@@ -8,7 +8,7 @@
   <title>Getting started with mdatools for R</title>
   <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.1.7 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.1 and GitBook 2.6.7">
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -115,7 +115,6 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html"><i class="fa fa-check"></i>Attributes and factors</a><ul>
 <li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#package-specific-attributes"><i class="fa fa-check"></i>Package specific attributes</a></li>
 <li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#attributes-for-plots"><i class="fa fa-check"></i>Attributes for plots</a></li>
-<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#excludinghiding-rows-and-columns"><i class="fa fa-check"></i>Excluding/hiding rows and columns</a></li>
 <li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#special-methods-for-data-transformations"><i class="fa fa-check"></i>Special methods for data transformations</a></li>
 <li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#data-frames-with-factors"><i class="fa fa-check"></i>Data frames with factors</a></li>
 </ul></li>
@@ -144,7 +143,18 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#support-for-images"><i class="fa fa-check"></i>Support for images</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
-<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluded-rows-and-columns"><i class="fa fa-check"></i>Excluded rows and columns</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluding-rows-and-columns"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="partial-least-squares-regression.html"><a href="partial-least-squares-regression.html"><i class="fa fa-check"></i>Partial least squares regression</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html"><i class="fa fa-check"></i>Models and results</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-calibration-1"><i class="fa fa-check"></i>Model calibration</a></li>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#support-for-images-1"><i class="fa fa-check"></i>Support for images</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#manual-x-values-for-loading-line-plot-1"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -195,24 +205,24 @@ d =<span class="st"> </span><span class="kw">mda.im2data</span>(img)
 <span class="kw">imshow</span>(d, <span class="dv">2</span>)
 <span class="kw">imshow</span>(d, <span class="dv">3</span>)
 <span class="kw">imshow</span>(d, <span class="dv">1</span>:<span class="dv">3</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-43-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-34-1.png" width="864" /></p>
 <p>By default image for one channels is shown using jet color palette for intensities, but you can also use gray colors, palette from colorbrewer2 as well as your own.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
 <span class="kw">imshow</span>(d, <span class="dv">1</span>)
 <span class="kw">imshow</span>(d, <span class="dv">1</span>, <span class="dt">colmap =</span> <span class="st">&#39;gray&#39;</span>)
 <span class="kw">imshow</span>(d, <span class="dv">1</span>, <span class="dt">colmap =</span> <span class="kw">heat.colors</span>(<span class="dv">256</span>))
 <span class="kw">imshow</span>(d, <span class="dv">1</span>, <span class="dt">colmap =</span> <span class="kw">colorRampPalette</span>(<span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;green&#39;</span>))(<span class="dv">256</span>))</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-44-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-35-1.png" width="864" /></p>
 <p>You can work with the image values as normal dataset and show scatter, line plots, calculate statistics, etc.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)
 <span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-45-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-36-1.png" width="864" /></p>
 <p>However, it will take some time to show these plots as this image has several hundreds of thousands pixels, a faster alternative can be the use of <code>smoothScatter()</code> function. The <code>mdaplot()</code> has a wrapper for the function (<code>type = 'd'</code>).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;d&#39;</span>)
 <span class="kw">mdaplot</span>(<span class="kw">mda.subset</span>(d, <span class="dt">select =</span> <span class="kw">c</span>(<span class="st">&#39;Red&#39;</span>, <span class="st">&#39;Blue&#39;</span>)), <span class="dt">type =</span> <span class="st">&#39;d&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-46-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-37-1.png" width="864" /></p>
 <p>Another useful thing is to set some of the pixels as background. The background pixels are removed from the image dataset physically, there is no way to get them back (in cotrast to excluded rows/pixels). It can be particularly useful when working with e.g. geocorrected hyperspectral images, where, often, many pixels have NA values and there is no need to keep them in memory. To set pixels as background you need to use method <code>mda.setimbg()</code> with either pixel indices or vector with logical values as it is shown below.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># original size</span>
 <span class="kw">show</span>(<span class="kw">dim</span>(d))</code></pre></div>
@@ -225,15 +235,7 @@ d =<span class="st"> </span><span class="kw">mda.setimbg</span>(d, d[, <span cla
 <span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">imshow</span>(d, <span class="dv">1</span>)
 <span class="kw">imshow</span>(d, <span class="dv">1</span>:<span class="dv">3</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-47-1.png" width="864" /></p>
-<p>You can also exclude pixels as rows in the image dataset. By default the excluded pixels are not shown with <code>imshow()</code> function (or actually they are shown as dark gray pixels), however providing argument <code>show.excluded = TRUE</code> you can make them visible. Note that once you exclude any pixels you can not use method <code>mda.setimbg()</code>, so define the background pixels first.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d =<span class="st"> </span><span class="kw">mda.exclrows</span>(d, d[, <span class="st">&#39;Green&#39;</span>] &gt;<span class="st"> </span><span class="dv">100</span>)
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">imshow</span>(d, <span class="dv">2</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>:<span class="dv">3</span>)
-<span class="kw">imshow</span>(d, <span class="dv">2</span>, <span class="dt">show.excluded =</span> T)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>:<span class="dv">3</span>, <span class="dt">show.excluded =</span> T)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-48-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-38-1.png" width="864" /></p>
 <p>All image related attributes are inherited by all object/rows related results, e.g. scores, residuals, predicted values and classes, etc. This means if you provide an image to any modelling method, you can visualise the corresponding results also as an image. Some examples will be shown in <a href="principal-component-analysis.html#principal-component-analysis">chapter about PCA</a></p>
 
 </div>

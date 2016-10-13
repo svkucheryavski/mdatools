@@ -7,22 +7,24 @@
 #'
 #' @param scores
 #' matrix with score values (nobj x ncomp).
-#' @param loadings
-#' matrix with loading values (nvar x ncomp).
 #' @param residuals
 #' matrix with data residuals 
-#' @param totvar
-#' full variance of original data, preprocessed and centered
-#' @param tnorm
-#' singular values for score normalization
+#' @param loadings
+#' matrix with loading values (nvar x ncomp).
 #' @param ncomp.selected
 #' number of selected components
-#' @param T2
-#' matrix with calculated T2 values (e.g. for CV)
-#' @param Q
-#' matrix with calculated Q statistic (e.g. for CV)
+#' @param attrs
+#' list with attributes of original dataset
+#' @param totvar
+#' full variance of original data, preprocessed and centered
+#' @param dist
+#' list with calculated T2 and Q values (e.g. for CV)
+#' @param var
+#' list with explained and cumulative explained variance (e.g. for CV)
 #' @param cal
 #' logical, true if data is for calibration of a LDECOMP based model
+#' @param tnorm
+#' singular values for score normalization
 #'
 #' @return
 #' Returns an object (list) of \code{ldecomp} class with following fields:
@@ -139,6 +141,8 @@ ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selec
 #' matrix with residuals (E).
 #' @param tnorm
 #' vector with singular values for scores normalisation
+#' @param cal
+#' if TRUE method will realize that these distances are calculated for calibration set
 #' 
 #' @details
 #' The distances are calculated for every 1:n components, where n goes from 1 to ncomp 
@@ -323,6 +327,8 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05) {
 #' label for y axis
 #' @param show.labels
 #' logical, show or not labels for the plot objects
+#' @param labels
+#' what to show as labels for plot objects
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
@@ -351,7 +357,9 @@ plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance'
 #' @param ylab
 #' label for y axis
 #' @param show.labels
-#' logical, show or not labels for the plot objects
+#' logical, show or not labels for plot objects.
+#' @param labels
+#' what to show as labels for plot objects.
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
@@ -375,6 +383,14 @@ plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
 #' which components to show the plot for (can be one value or vector with two values).
 #' @param main
 #' main title for the plot
+#' @param type
+#' type of the plot
+#' @param xlab
+#' label for x-axis.
+#' @param ylab
+#' label for y-axis.
+#' @param show.legend
+#' logical, show or not a legend on the plot.
 #' @param show.labels
 #' logical, show or not labels for the plot objects
 #' @param show.axes

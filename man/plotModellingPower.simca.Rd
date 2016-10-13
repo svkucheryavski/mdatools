@@ -19,8 +19,6 @@
 \item{ylab}{label for y axis}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{xlab}{label for x axis}
 }
 \description{
 Shows a plot with modelling power values for each predictor

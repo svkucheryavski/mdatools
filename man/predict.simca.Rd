@@ -13,9 +13,9 @@
 
 \item{c.ref}{a vector with reference class names (same as class names for models)}
 
-\item{...}{other arguments}
+\item{cal}{logical, are predictions for calibration set or not}
 
-\item{cv}{logical, are predictions for cross-validation or not}
+\item{...}{other arguments}
 }
 \value{
 SIMCA results (an object of class \code{simcares})

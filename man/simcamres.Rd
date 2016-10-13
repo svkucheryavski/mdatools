@@ -9,13 +9,7 @@ simcamres(cres, pred.res)
 \arguments{
 \item{cres}{results of classification (class \code{classres}).}
 
-\item{T2}{matrix with T2 values for each object and class.}
-
-\item{Q}{matrix with Q values for each object and class.}
-
-\item{T2lim}{vector with T2 statistical limits for each class.}
-
-\item{Qlim}{vector with Q statistical limits for each class.}
+\item{pred.res}{prediction results from each model (as pcares)}
 }
 \value{
 Returns an object (list) of class \code{simcamres} with the same fields as \code{\link{classres}} 

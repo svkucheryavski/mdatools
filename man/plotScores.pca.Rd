@@ -25,6 +25,8 @@
 
 \item{show.legend}{logical, show or not a legend on the plot}
 
+\item{cgroup}{a vector with numeric values or a factor used for color grouping of plot points.}
+
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}

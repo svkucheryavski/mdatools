@@ -7,14 +7,15 @@
 mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1, lwd = 1,
   bwd = 0.8, legend = NULL, xlab = NULL, ylab = NULL, main = NULL,
   labels = NULL, ylim = NULL, xlim = NULL, colmap = "default",
-  legend.position = "topright", single.x = T, show.legend = T,
-  show.labels = F, show.lines = F, show.grid = T, xticks = NULL,
-  xticklabels = NULL, yticks = NULL, yticklabels = NULL,
-  show.excluded = FALSE, lab.col = "darkgray", lab.cex = 0.65, xlas = 1,
-  ylas = 1, ...)
+  legend.position = "topright", show.legend = T, show.labels = F,
+  show.lines = F, show.grid = T, xticks = NULL, xticklabels = NULL,
+  yticks = NULL, yticklabels = NULL, show.excluded = FALSE,
+  lab.col = "darkgray", lab.cex = 0.65, xlas = 1, ylas = 1, ...)
 }
 \arguments{
 \item{data}{a matrix, data frame or a list with data values (see details below).}
+
+\item{groupby}{one or several factors used to create groups of data matrix rows (works if data is a matrix)}
 
 \item{type}{type of the plot ('p', 'l', 'b', 'h', 'e').}
 
@@ -60,9 +61,15 @@ mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1, lwd = 1,
 
 \item{yticklabels}{labels for y ticks.}
 
+\item{show.excluded}{logical, show or hide rows marked as excluded (attribute `exclrows`)}
+
 \item{lab.col}{color for data point labels.}
 
 \item{lab.cex}{size for data point labels.}
+
+\item{xlas}{orientation of xticklabels}
+
+\item{ylas}{orientation of yticklabels}
 
 \item{...}{other plotting arguments.}
 }
@@ -79,15 +86,12 @@ so on.
 Most of the parameters are similar to \code{\link{mdaplot}}, the difference is described below.
 
 The data should be organized as a list, every item is a matrix with data for one set of objects.
-See examples for details.
+Alternatively you can provide data as a matrix and use parameter \code{groupby} to create groups.
+See tutorial for more details. 
 
 There is no color grouping option, because color is used to separate the sets. Marker symbol, 
 line style and type, etc. can be defined as a single value (one for all sets) and as a vector 
 with one value for each set.
-}
-\examples{
-### Examples of using mdaplotg
-
 }
 \author{
 Sergey Kucheryavskiy (svkucheryavski@gmail.com)

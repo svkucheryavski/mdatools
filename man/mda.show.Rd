@@ -6,7 +6,12 @@
 \usage{
 mda.show(x, n = 50)
 }
-\description{
+\arguments{
+\item{x}{data set}
 
+\item{n}{number of rows to show}
+}
+\description{
+Wrapper for show() method
 }
 

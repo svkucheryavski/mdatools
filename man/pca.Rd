@@ -85,18 +85,6 @@ model = selectCompNum(model, 4)
 summary(model)
 plot(model, show.labels = TRUE)
 
-## 2. Add missing values, make a new model and show plots
-peoplemv = people
-peoplemv[2, 7] = NA
-peoplemv[6, 2] = NA
-peoplemv[10, 4] = NA
-peoplemv[22, 12] = NA
-
-modelmv = pca(peoplemv, scale = TRUE, info = 'Model with missing values')
-modelmv = selectCompNum(modelmv, 4)
-summary(modelmv)
-plot(modelmv, show.labels = TRUE)
-
 ## 3. Show scores and loadings plots for the model
 par(mfrow = c(2, 2))
 plotScores(model, comp = c(1, 3), show.labels = TRUE)

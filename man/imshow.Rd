@@ -11,6 +11,12 @@ imshow(data, channels = 1, show.excluded = FALSE, main = NULL,
 \item{data}{data with image}
 
 \item{channels}{indices for one or three columns to show as image channels}
+
+\item{show.excluded}{logical, if TRUE the method also shows the excluded (hidden) pixels}
+
+\item{main}{main title for the image}
+
+\item{colmap}{colormap using to show the intensity levels}
 }
 \description{
 show image data as an image

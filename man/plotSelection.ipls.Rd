@@ -4,16 +4,13 @@
 \alias{plotSelection.ipls}
 \title{iPLS performance plot}
 \usage{
-\method{plotSelection}{ipls}(obj, glob.ncomp = NULL, xlabels = NULL,
-  main = "iPLS results", xlab = "Variables", ylab = "RMSECV",
-  xlim = NULL, ylim = NULL, ...)
+\method{plotSelection}{ipls}(obj, glob.ncomp = NULL, main = "iPLS results",
+  xlab = obj$xaxis.name, ylab = "RMSECV", xlim = NULL, ylim = NULL, ...)
 }
 \arguments{
 \item{obj}{iPLS results (object of class ipls)}
 
 \item{glob.ncomp}{number of components for global PLS model with all intervals}
-
-\item{xlabels}{vector with values to be used for x axis ticks (if NULL variable number is used)}
 
 \item{main}{main title for the plot}
 

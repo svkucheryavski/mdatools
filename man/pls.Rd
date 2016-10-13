@@ -30,7 +30,7 @@ pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
 
 \item{y.test}{matrix with responses for test set.}
 
-\item{method}{method for calculating PLS model.}
+\item{method}{algorithm for computing PLS model (only 'simpls' is supported so far)}
 
 \item{alpha}{significance level for calculating statistical limits for residuals.}
 

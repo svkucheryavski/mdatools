@@ -25,6 +25,8 @@
 
 \item{show.limits}{logical, show or not lines with statistical limits for the residuals}
 
+\item{cgroup}{a vector with numeric values or a factor for color grouping of plot points.}
+
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{

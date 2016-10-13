@@ -14,16 +14,6 @@
 \item{main}{main plot title}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{show.limits}{logical, show or not lines with statistical limits for the residuals}
-
-\item{type}{type of the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{legend}{vector with legend items}
 }
 \description{
 Shows a plot with Q vs. T2 residuals for SIMCAM results

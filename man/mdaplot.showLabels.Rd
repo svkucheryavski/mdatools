@@ -9,6 +9,12 @@ mdaplot.showLabels(x.values, y.values, labels, pos = 3, cex = 0.65,
   col = "darkgray", type = NULL)
 }
 \arguments{
+\item{x.values}{a vector with x-values}
+
+\item{y.values}{a vector with y-values}
+
+\item{labels}{a vector with labels}
+
 \item{pos}{position of the labels relative to the points}
 
 \item{cex}{size of the labels text}
@@ -16,8 +22,6 @@ mdaplot.showLabels(x.values, y.values, labels, pos = 3, cex = 0.65,
 \item{col}{color of the labels text}
 
 \item{type}{type of the plot}
-
-\item{data}{data matrix with coordinates of the points (x, y)}
 }
 \description{
 Plot labels

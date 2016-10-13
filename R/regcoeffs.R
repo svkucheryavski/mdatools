@@ -44,7 +44,7 @@ regcoeffs = function(coeffs, ci.coeffs = NULL, ci.alpha = 0.1) {
 #' calculates confidence intervals and t-test based p-values for 
 #' regression coefficients based on jack-knifing procedure
 #' 
-#' @param obj
+#' @param coeffs.values
 #' regression coefficients array for a model
 #' @param ci.coeffs
 #' array with regression coefficients for calculation of condifence intervals
@@ -186,8 +186,6 @@ print.regcoeffs = function(x, ncomp = 1, ny = 1, digits = 3, ...) {
 #' vector with colors for the plot (vector or one value)
 #' @param main
 #' main plot title
-#' @param xlab
-#' label for x axis
 #' @param ylab
 #' label for y axis
 #' @param show.line
@@ -241,12 +239,12 @@ plot.regcoeffs = function(x, ncomp = 1, ny = 1, type = NULL, col = NULL, main = 
       
       if (type == 'l')
          mdaplotg(list(data, data + err.margin, data - err.margin), type = c('l', 'l', 'l'), 
-                  main = main, ylab = ylab, show.legend = F,
-                  col = c(main.col, ci.col, ci.col), show.grid = T, show.lines = show.line, ...)
+                  main = main, ylab = ylab, show.legend = F, colmap = c(main.col, ci.col, ci.col), 
+                  show.grid = T, show.lines = show.line, ...)
      else
         mdaplotg(list(data, mda.t(mda.cbind(data, err.margin))), type = c(type, 'e'), 
                  main = main, ylab = ylab, show.legend = F, 
-                 col = c(main.col, ci.col), show.grid = T, show.lines = show.line, ...)
+                 colmap = c(main.col, ci.col), show.grid = T, show.lines = show.line, ...)
       
    } else {
       main.col = ifelse(is.null(col), mdaplot.getColors(1), col)
