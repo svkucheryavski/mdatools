@@ -129,7 +129,7 @@ prep.norm = function(data, type = 'area') {
    }   
    
    data = sweep(data, 1, w, '/')
-   data = mda.setattr(data)
+   data = mda.setattr(data, attrs)
    dimnames(data) = dimnames
    data
 }   
