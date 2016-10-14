@@ -271,8 +271,7 @@ plotCorr.randtest = function(obj, comp = NULL, main = NULL, xlab = expression(r^
 plot.randtest = function(x, main = 'Alpha', xlab = 'Components', ylab = '', ...)
 {
    obj = x
-   mdaplot(t(rbind(1:length(obj$alpha), obj$alpha)), show.lines = c(NA, 0.05), type = 'h', 
-           main = main, xlab = xlab, ylab = ylab, ...)      
+   mdaplot(obj$alpha, show.lines = c(NA, 0.05), type = 'h', main = main, xlab = xlab, ylab = ylab, ...)      
 }
 
 #' Summary method for randtest object
