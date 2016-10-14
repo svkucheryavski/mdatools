@@ -201,7 +201,8 @@ plotHist.randtest = function(obj, comp = NULL, main = NULL, xlab = 'Test statist
    
    data = h$counts
    attr(data, 'xaxis.values') = h$mids
-   mdaplot(data, type = 'h', show.lines = c(obj$stat[comp], NA), xlab = xlab, ylab = ylab, bwd = 0.9)
+   mdaplot(data, type = 'h', show.lines = c(obj$stat[comp], NA), xlab = xlab, ylab = ylab, 
+           main = main, bwd = 0.9)
 }
 
 #' Correlation plot for randomization test results
