@@ -25,7 +25,7 @@
 
 <meta name="author" content="Sergey Kucheryavskiy">
 
-<meta name="date" content="2016-09-13">
+<meta name="date" content="2016-10-16">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -39,7 +39,7 @@ MathJax.Hub.Config({
   
   
 <link rel="prev" href="models-and-results-1.html">
-
+<link rel="next" href="variable-selection.html">
 
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -106,7 +106,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-to-expect-from-future-releases"><i class="fa fa-check"></i>What to expect from future releases</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
 <li class="chapter" data-level="" data-path="what-mdatools-can-do.html"><a href="what-mdatools-can-do.html"><i class="fa fa-check"></i>What mdatools can do?</a></li>
 <li class="chapter" data-level="" data-path="how-to-install.html"><a href="how-to-install.html"><i class="fa fa-check"></i>How to install</a></li>
@@ -152,10 +155,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#support-for-images-1"><i class="fa fa-check"></i>Support for images</a></li>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#manual-x-values-for-loading-line-plot-1"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
 </ul></li>
 </ul>
 
@@ -176,109 +178,144 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="plotting-methods-1" class="section level2 unnumbered">
 <h2>Plotting methods</h2>
-<p>First of all you can use the methods <code>mdaplot()</code> and <code>mdaplotg()</code> (or any others, e.g. <code>ggplot2</code>) for easy visualisation the results as they all available as matrices with proper names, attributes, etc. In the example below we create several scores and loadings plots. Here I assume that the last model you have created was the one with test set and cross-validation.</p>
+<p>Plotting methods, again, work similar to PCA, so in this section we will look more detailed on the available methods instead of on how to customize them. PLS has a lot of different results and much more possible plots. Here is a list of methods, which will work both for a model and for a particular results.</p>
+<p>Methods for summary statistics.</p>
+<table>
+<colgroup>
+<col width="43%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Methods</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>plotRMSE(obj, ny = 1, ...)</code></td>
+<td align="left">RMSE values vs. number of components in a model</td>
+</tr>
+<tr class="even">
+<td align="left"><code>plotXVariance(obj)</code></td>
+<td align="left">explained variance for X decomposition for each component</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>plotXCumVariance(obj)</code></td>
+<td align="left">same as above but cumulative</td>
+</tr>
+<tr class="even">
+<td align="left"><code>plotYVariance(obj)</code></td>
+<td align="left">explained variance for Y decomposition for each component</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>plotYCumVariance(obj)</code></td>
+<td align="left">same as above but cumulative</td>
+</tr>
+</tbody>
+</table>
+<p>Here and in some other methods parameter <code>ny</code> is used to specify which y-variable you want to see a plot for (if <em>y</em> is multivariate).</p>
+<p>Methods for objects.</p>
+<table>
+<colgroup>
+<col width="43%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Methods</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>plotPredictions(obj, ny = 1, ncomp)</code></td>
+<td align="left">Plot with predicted vs. measured (reference) y-values</td>
+</tr>
+<tr class="even">
+<td align="left"><code>plotXScores(obj, comp)</code></td>
+<td align="left">Scores for decompositon of X (similar to PCA scores plot)</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>plotYScores(obj, comp)</code></td>
+<td align="left">Scores for decompositon of y (similar to PCA scores plot)</td>
+</tr>
+<tr class="even">
+<td align="left"><code>plotXResiduals(obj, ncomp)</code></td>
+<td align="left">Residuals for decompositon of X (similar to PCA residuals plot)</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>plotYResiduals(obj, ncomp)</code></td>
+<td align="left">Residuals for y vs. real (reference) y-values</td>
+</tr>
+<tr class="even">
+<td align="left"><code>plotXScores(obj, ncomp)</code></td>
+<td align="left">Y-scores vs. X-scores for a particular PLS component.</td>
+</tr>
+</tbody>
+</table>
+<p>Parameter <code>comp</code> allows to provide a number of selected components (one or several) to show the plot for, while parameter <code>ncomp</code> assume that only one number is expected (number of components in a model or individual component). So if e.g. you created model for five components and selected three, you can also see, for example, prediction plot if you use only one or four components.</p>
+<p>Here is an example for <code>m1</code> model:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">mdaplot</span>(m$calres$scores, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.lines =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))
-<span class="kw">mdaplot</span>(m$loadings, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.lines =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-75-1.png" width="864" /></p>
-<p>To simplify this routine, every model and result class also has a number of functions for visualization. Thus for PCA the function list includes scores and loadings plots, explained variance and cumulative explained variance plots, T<sup>2</sup> vs. Q residuals and many others.</p>
-<p>A function that does the same for different models and results has always the same name. For example <code>plotPredictions</code> will show predicted vs. measured plot for PLS model and PLS result, MLR model and MLR result, PCR model and PCR result and so on. The first argument must always be either a model or a result object.</p>
-<p>The major difference between plots for model and plots for result is following. A plot for result always shows one set of data objects — one set of points, lines or bars. For example predicted vs. measured values for calibration set or scores values for test set and so on. For such plots method <code>mdaplot()</code> is used and you can provide any arguments, available for this method (e.g. color group scores for calibration results).</p>
-<p>And a plot for a model in most cases shows several sets of data objects, e.g. predicted values for calibration and validation. In this case, a corresponding method uses <code>mdaplotg()</code> and therefore you can adjust the plot using arguments described for this method.</p>
-<p>Here are some examples for results:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotScores</span>(m$calres, <span class="dt">show.labels =</span> T)
-<span class="kw">plotScores</span>(m$calres, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">pch =</span> <span class="dv">18</span>, <span class="dt">cgroup =</span> X.c[, <span class="st">&#39;Income&#39;</span>], <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;indices&#39;</span>)
-<span class="kw">plotResiduals</span>(m$calres, <span class="dt">show.labels =</span> T, <span class="dt">cgroup =</span> X.c[, <span class="st">&#39;Weight&#39;</span>])
-<span class="kw">plotVariance</span>(m$calres, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)</code></pre></div>
+<span class="kw">plotPredictions</span>(m1)
+<span class="kw">plotPredictions</span>(m1, <span class="dt">ncomp =</span> <span class="dv">1</span>)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-76-1.png" width="864" /></p>
-<p>The color grouping option is not available for the group (model) plots as colors are used there to underline the groups.</p>
-<p>Now let’s look at similar plots (plus loadings) for a model.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotScores</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)
-<span class="kw">plotLoadings</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)
-<span class="kw">plotResiduals</span>(m, <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;green&#39;</span>, <span class="st">&#39;blue&#39;</span>))
-<span class="kw">plotVariance</span>(m, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)</code></pre></div>
+<p>The plots for variables are available only for a model object and include:</p>
+<table>
+<colgroup>
+<col width="43%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Methods</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>plotXLoadings(obj, comp)</code></td>
+<td align="left">Loadings for decompositon of X (similar to PCA loadings plot)</td>
+</tr>
+<tr class="even">
+<td align="left"><code>plotYLoadings(obj, comp)</code></td>
+<td align="left">Loadings for decompositon of y (similar to PCA loadings plot)</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>plotWeights(obj, comp)</code></td>
+<td align="left">Weights (<em>W</em>) for PLS decomposition</td>
+</tr>
+<tr class="even">
+<td align="left"><code>plotRegcoeffs(obj, ny, ncomp)</code></td>
+<td align="left">Plot with regression coefficients</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>plotVIPScores(obj, ny)</code></td>
+<td align="left">VIP scores for the predictors</td>
+</tr>
+<tr class="even">
+<td align="left"><code>plotSelectivityRation(obj, ny, ncomp)</code></td>
+<td align="left">Selectivity ratio of the predictors</td>
+</tr>
+</tbody>
+</table>
+<p>And, of course, both model and result objects have method <code>plot()</code> for giving an overview.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(m1)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-77-1.png" width="864" /></p>
-<p>Method <code>plot()</code> shows the main four PCA plots as a model (or results) overview.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(m, <span class="dt">show.labels =</span> T)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-78-1.png" width="864" /></p>
-<p>You do not have to care about labels, names, legend and so on, however if necessary you can always change almost anything. See full list of methods available for PCA by <code>?pca</code> and <code>?pcares</code>.</p>
-<div id="support-for-images-1" class="section level3 unnumbered">
-<h3>Support for images</h3>
-<p>As it was described before, images can be used as a source of data for any methods. In this case the results, related to objects/pixels will inherit all necessary attributes and can be show as images as well. In the example below we make a PCA model for the image data from the package and show scores and residuals.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(image)
-X =<span class="st"> </span><span class="kw">mda.im2data</span>(img)
-m =<span class="st"> </span><span class="kw">pca</span>(X)
-
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">imshow</span>(m$calres$scores)
-<span class="kw">imshow</span>(m$calres$Q)
-<span class="kw">imshow</span>(m$calres$scores, <span class="dv">2</span>)
-<span class="kw">imshow</span>(m$calres$Q, <span class="dv">2</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-79-1.png" width="864" /></p>
-</div>
-<div id="manual-x-values-for-loading-line-plot-1" class="section level3 unnumbered">
-<h3>Manual x-values for loading line plot</h3>
-<p>As it was discussed in the previous chapter, you can specify a special attribute, <code>'xaxis.values'</code> to a dataset, which will be used as manual x-values in bar and line plots. When we create any model and/or results the most important attributes, including this one, are inherited. For example when you make a loading line plot it will be shown using the attribute values.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(simdata)
-
-X =<span class="st"> </span>simdata$spectra.c
-<span class="kw">attr</span>(X, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> &#39;Wavelength, nm&#39;</span>
-<span class="kw">attr</span>(X, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span>simdata$wavelength
-
-m =<span class="st"> </span><span class="kw">pca</span>(X, <span class="dv">3</span>)
-<span class="kw">plotLoadings</span>(m, <span class="dv">1</span>:<span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-80-1.png" width="864" /></p>
-</div>
 <div id="excluding-rows-and-columns-1" class="section level3 unnumbered">
 <h3>Excluding rows and columns</h3>
-<p>From v. 0.8.0 PCA implementation as well as any other method in <code>mdatools</code> can exclude rows and columns from calculations. For example it can be useful if you have some candidates for outliers or do variable selection and do not want to remove rows and columns physically from the data matrix. In this case you can just specify two additional parameters, <code>exclcols</code> and <code>exclrows</code>, using either numbers or names of rows/columns to be excluded. You can also specify a vector with logical values (all <code>TRUE</code>s will be excluded).</p>
-<p>The excluded rows are not used for creating a model and calculaiton of model’s and results’ performance (e.g. explained variance). However main results (for PCA — scores and residuals) are calculated for these rows as well and set hidden, so you will not see them on plots. You can always e.g. show scores for excluded objects by using <code>show.excluded = TRUE</code>. It is implemented via attributes “known” for plotting methods from <em>mdatools</em> so if you use e.g. <em>ggplot2</em> you will see all points.</p>
-<p>The excluded columns are not used for any calculations either, the corresponding results (e.g. loadings or regression coefficients) will have zero values for such columns and be also hidden on plots. Here is a simple example.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(people)
-
-m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">exclrows =</span> <span class="kw">c</span>(<span class="st">&#39;Lars&#39;</span>, <span class="st">&#39;Federico&#39;</span>), <span class="dt">exclcols =</span> <span class="st">&#39;Income&#39;</span>)
-
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotScores</span>(m, <span class="dt">show.labels =</span> T)
-<span class="kw">plotScores</span>(m, <span class="dt">show.excluded =</span> T, <span class="dt">show.labels =</span> T)
-<span class="kw">plotResiduals</span>(m, <span class="dt">show.excluded =</span> T, <span class="dt">show.labels =</span> T)
-<span class="kw">plotLoadings</span>(m, <span class="dt">show.excluded =</span> T, <span class="dt">show.labels =</span> T)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-81-1.png" width="864" /></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># show matrix with loadings (look at row Income and attribute &quot;exclrows&quot;)</span>
-<span class="kw">show</span>(m$loadings)</code></pre></div>
-<pre><code>##                Comp 1      Comp 2       Comp 3      Comp 4      Comp 5
-## Height   -0.386393327  0.10697019 -0.004829174  0.12693029 -0.13128331
-## Weight   -0.391013398  0.07820097  0.051916032  0.04049593 -0.14757465
-## Hairleng  0.350435073 -0.11623295 -0.103852349 -0.04969503 -0.73669997
-## Shoesize -0.385424793  0.13805817 -0.069172117  0.01049098 -0.17075488
-## Age      -0.103466285  0.18964288 -0.337243182 -0.89254403 -0.02998028
-## Income    0.000000000  0.00000000  0.000000000  0.00000000  0.00000000
-## Beer     -0.317356319 -0.38259695  0.044338872 -0.03908064 -0.21419831
-## Wine      0.140711271  0.57861817 -0.059833970  0.12347379 -0.41488773
-## Sex       0.364537185 -0.23838610  0.010818891  0.04025631 -0.18263577
-## Swim     -0.377470722  0.04330411  0.008151288  0.18149268 -0.30163601
-## Region    0.140581701  0.60435183  0.040969200  0.15147464  0.17857614
-## IQ        0.009849911  0.09372132  0.927669306 -0.32978247 -0.11815762
-## attr(,&quot;exclrows&quot;)
-## [1] 6
-## attr(,&quot;name&quot;)
-## [1] &quot;Loadings&quot;
-## attr(,&quot;xaxis.name&quot;)
-## [1] &quot;Components&quot;</code></pre>
-<p>Such behavior will help to exclude and include rows and columns interactively, when GUI add-in for <code>mdatools()</code> is available.</p>
-
+<p>From v. 0.8.0 PCA implementation as well as any other method in <code>mdatools</code> can exclude rows and columns from calculations. The implementation works similar to what was described for PCA. For example it can be useful if you have some candidates for outliers or do variable selection and do not want to remove rows and columns physically from the data matrix. In this case you can just specify two additional parameters, <code>exclcols</code> and <code>exclrows</code>, using either numbers or names of rows/columns to be excluded. You can also specify a vector with logical values (all <code>TRUE</code>s will be excluded).</p>
+<p>The excluded rows are not used for creating a model and calculation of model’s and results’ performance (e.g. explained variance). However main results (for PLS — scores, predictions, residuals) are calculated for these rows as well and set hidden, so you will not see them on plots. You can always e.g. show scores for excluded objects by using <code>show.excluded = TRUE</code>. It is implemented via attributes “known” for plotting methods from <em>mdatools</em> so if you use e.g. <em>ggplot2</em> you will see all points.</p>
+<p>The excluded columns are not used for any calculations either, the corresponding results (e.g. loadings, weights or regression coefficients) will have zero values for such columns and be also hidden on plots.</p>
 </div>
 </div>
-<!-- </div> -->
             </section>
 
           </div>
         </div>
       </div>
-<a href="models-and-results-1.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="models-and-results-1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="variable-selection.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
 
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/lunr.js"></script>

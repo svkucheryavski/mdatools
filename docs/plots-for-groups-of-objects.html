@@ -25,7 +25,7 @@
 
 <meta name="author" content="Sergey Kucheryavskiy">
 
-<meta name="date" content="2016-09-13">
+<meta name="date" content="2016-10-16">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -106,7 +106,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-to-expect-from-future-releases"><i class="fa fa-check"></i>What to expect from future releases</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
 <li class="chapter" data-level="" data-path="what-mdatools-can-do.html"><a href="what-mdatools-can-do.html"><i class="fa fa-check"></i>What mdatools can do?</a></li>
 <li class="chapter" data-level="" data-path="how-to-install.html"><a href="how-to-install.html"><i class="fa fa-check"></i>How to install</a></li>
@@ -152,10 +155,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#support-for-images-1"><i class="fa fa-check"></i>Support for images</a></li>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#manual-x-values-for-loading-line-plot-1"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
 </ul></li>
 </ul>
 
@@ -196,21 +198,21 @@ p =<span class="st"> </span><span class="kw">mda.subset</span>(people, <span cla
 <span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">xticks =</span> <span class="dv">1</span>:<span class="dv">4</span>)
 <span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>), <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;green&#39;</span>, <span class="st">&#39;blue&#39;</span>), <span class="dt">pch =</span> <span class="dv">1</span>, 
          <span class="dt">xticklabels =</span> <span class="kw">colnames</span>(p))</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-28-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-29-1.png" width="864" /></p>
 <p>As you can see, <code>mdaplotg()</code> automatically created the legend and set colors, line parameters, etc. correctly. You can change position of the legend using same names as for basic <code>legend()</code> command from R, or hide it using parameter <code>show.legend = FALSE</code>, as it is shown below.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
 <span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;top&#39;</span>)
 <span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;bottomleft&#39;</span>)
 <span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">legend.position =</span> <span class="st">&#39;bottom&#39;</span>)
 <span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.legend =</span> F)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-29-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-30-1.png" width="864" /></p>
 <p>Group plot also allow to show labels, in this case they can be either values, names or indices of the columns.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
 <span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;indices&#39;</span>)
 <span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)
 <span class="kw">mdaplotg</span>(p, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-30-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-31-1.png" width="864" /></p>
 </div>
 <div id="list-with-matrices-or-data-frames" class="section level3 unnumbered">
 <h3>List with matrices or data frames</h3>
@@ -226,7 +228,7 @@ d =<span class="st"> </span><span class="kw">list</span>(<span class="dt">male =
 <span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>)
 <span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>)
 <span class="kw">mdaplotg</span>(d, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;blue&#39;</span>), <span class="dt">pch =</span> <span class="dv">1</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-31-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-32-1.png" width="864" /></p>
 <p>Most of the things described in the previous subsection will work similarly for this case. We will just add a bit more details on how labels and excluded rows are processed for the scatter plots. By default labels are row names or indices. In <code>mdaplotg()</code> you can not provide vector with manual values, so the best way to change them is to assign them as the row names. Indices are unique within each group, so if you have, e.g. three groups of points, there will be three points with index “1”, three with “2”, etc.</p>
 </div>
 <div id="use-factors-to-split-a-dataset-into-groups" class="section level3 unnumbered">
@@ -241,7 +243,7 @@ groups =<span class="st"> </span><span class="kw">data.frame</span>(sex, reg)
 <span class="kw">mdaplotg</span>(people, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">groupby =</span> groups)
 <span class="kw">mdaplotg</span>(people, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">groupby =</span> groups)
 <span class="kw">mdaplotg</span>(people, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">groupby =</span> groups)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-32-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-33-1.png" width="864" /></p>
 <p>All parameters, described before, will work the same way in this case.</p>
 
 </div>

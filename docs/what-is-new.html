@@ -25,7 +25,7 @@
 
 <meta name="author" content="Sergey Kucheryavskiy">
 
-<meta name="date" content="2016-09-13">
+<meta name="date" content="2016-10-16">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -106,7 +106,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-to-expect-from-future-releases"><i class="fa fa-check"></i>What to expect from future releases</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
 <li class="chapter" data-level="" data-path="what-mdatools-can-do.html"><a href="what-mdatools-can-do.html"><i class="fa fa-check"></i>What mdatools can do?</a></li>
 <li class="chapter" data-level="" data-path="how-to-install.html"><a href="how-to-install.html"><i class="fa fa-check"></i>How to install</a></li>
@@ -152,10 +155,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#support-for-images-1"><i class="fa fa-check"></i>Support for images</a></li>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#manual-x-values-for-loading-line-plot-1"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
 </ul></li>
 </ul>
 
@@ -176,8 +178,26 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="what-is-new" class="section level1 unnumbered">
 <h1>What is new</h1>
-<p><strong>10.10.2016</strong></p>
-<p>A new version (0.8.0) brings a lot of new features, therefore it was decided to rewrite this tutorial completely and start this log from the scratch. Most of the things available in the previous version of the package will work without any changes. But if you have been using functions <code>mdaplot()</code> and <code>mdaplotg()</code> it makes sense to read how the new implementation works and rewrite your code. The use of plotting tools became much simpler and more efficient. The main changes in the package are:</p>
+<div id="what-to-expect-from-future-releases" class="section level3 unnumbered">
+<h3>What to expect from future releases</h3>
+<p><strong>Book</strong></p>
+<ul>
+<li>Chapters about classification (SIMCA, SIMCA for multiple classes, PLS-DA)</li>
+<li>Chapter about interval PLS (iPLS)</li>
+<li>Chapter about randomization test (randtest)</li>
+</ul>
+<p><strong>Package</strong></p>
+<ul>
+<li>Implementation of MCR-ALS and purity based method for curve resolution</li>
+<li>Possibility to combine preprocessing methods into an object and provide it to a model</li>
+<li>Randomized algorithms to work with big data faster</li>
+<li>GUI for interactive modelling</li>
+</ul>
+</div>
+<div id="last-changes-and-improvements-to-book-and-package" class="section level3 unnumbered">
+<h3>Last changes and improvements to book and package</h3>
+<p><strong>14.10.2016</strong></p>
+<p>The new version (0.8.0) brings a lot of new features, therefore it was decided to rewrite this tutorial completely and start this log from the scratch. Most of the things available in the previous version of the package will work without any changes. But if you have been using functions <code>mdaplot()</code> and <code>mdaplotg()</code> it makes sense to read how the new implementation works and rewrite your code. The use of plotting tools became much simpler and more efficient. The main changes in the package are:</p>
 <ul>
 <li>added a possibility to assign specific attributes to datasets, which makes plotting easier.</li>
 <li>added a possibility to exclude (hide) selected rows and columns when create a model.</li>
@@ -187,11 +207,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>scores and loadings plots now show a percent of explained variance</li>
 <li>biplot is now available for PCA models (<code>plotBiplot</code>)</li>
 <li>added support for images, see a <a href="working-with-images.html#working-with-images">specific chapter</a> for details</li>
-<li>cross-validation procedure were optimized for most of the methods and now takes less time</li>
+<li>cross-validation procedures were optimized for most of the methods and now takes less time</li>
 <li>several bug fixes and small improvements</li>
 </ul>
-<p>Besides that, the tutorial is now available in <code>docs</code> folder of the package repository in GitHub. The tutorial is a static HTML site, which can be used locally without internet connection (start with <code>index.html</code>). However it is not available from CRAN repository due to CRAN limitations. You can also access the tutorial via <a href="https://svkucheryavski.github.io/mdatools">GitHub Pages</a></p>
+<p>Besides that, the tutorial is now available in <code>docs</code> folder of the package repository in GitHub. The tutorial is a static HTML site, which can be used locally without internet connection (start with <code>index.html</code>). However, it is not available from CRAN repository due to CRAN limitations. You can also access the tutorial via <a href="https://svkucheryavski.github.io/mdatools">GitHub Pages</a></p>
 
+</div>
 </div>
             </section>
 

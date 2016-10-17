@@ -25,7 +25,7 @@
 
 <meta name="author" content="Sergey Kucheryavskiy">
 
-<meta name="date" content="2016-10-16">
+<meta name="date" content="2016-09-13">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -38,8 +38,8 @@ MathJax.Hub.Config({
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="plots-for-groups-of-objects.html">
-<link rel="next" href="preprocessing.html">
+<link rel="prev" href="methods-for-summary-statistics-.html">
+<link rel="next" href="methods-for-objects-.html">
 
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -106,10 +106,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-to-expect-from-future-releases"><i class="fa fa-check"></i>What to expect from future releases</a></li>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
-</ul></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a></li>
 <li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
 <li class="chapter" data-level="" data-path="what-mdatools-can-do.html"><a href="what-mdatools-can-do.html"><i class="fa fa-check"></i>What mdatools can do?</a></li>
 <li class="chapter" data-level="" data-path="how-to-install.html"><a href="how-to-install.html"><i class="fa fa-check"></i>How to install</a></li>
@@ -154,8 +151,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-calibration-1"><i class="fa fa-check"></i>Model calibration</a></li>
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a></li>
+<li class="chapter" data-level="0.1" data-path="methods-for-summary-statistics-.html"><a href="methods-for-summary-statistics-.html"><i class="fa fa-check"></i><b>0.1</b> Methods for summary statistics.</a></li>
+<li class="chapter" data-level="0.2" data-path="plotycumvarianceobj-same-as-above-but-cumulative.html"><a href="plotycumvarianceobj-same-as-above-but-cumulative.html"><i class="fa fa-check"></i><b>0.2</b> plotYCumVariance(obj) same as above but cumulative</a></li>
+<li class="chapter" data-level="0.3" data-path="methods-for-objects-.html"><a href="methods-for-objects-.html"><i class="fa fa-check"></i><b>0.3</b> Methods for objects.</a></li>
+<li class="chapter" data-level="0.4" data-path="plotxscoresobj-ncomp-y-scores-vs-x-scores-for-a-particular-pls-component-.html"><a href="plotxscoresobj-ncomp-y-scores-vs-x-scores-for-a-particular-pls-component-.html"><i class="fa fa-check"></i><b>0.4</b> plotXScores(obj, ncomp) Y-scores vs. X-scores for a particular PLS component.</a><ul>
+<li class="chapter" data-level="" data-path="plotxscoresobj-ncomp-y-scores-vs-x-scores-for-a-particular-pls-component-.html"><a href="plotxscoresobj-ncomp-y-scores-vs-x-scores-for-a-particular-pls-component-.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
 </ul></li>
@@ -176,78 +177,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="working-with-images" class="section level2 unnumbered">
-<h2>Working with images</h2>
-<p>From version 0.8.0 the package also supports images, however they have to be transformed into datasets. The idea is very simple, we keep information about image pixels in an unfolded form, as a matrix, and use attributes <code>width</code> and <code>height</code> to reshape the data when we need to show it as an image.</p>
-<p>There are three methods that make this procedure easier: <code>mda.im2data()</code>, <code>mda.data2im()</code> and <code>imshow()</code>. The first convert an image (represented as 3-way array) to a data set, second does the opposite and the third takes dataset and shows it as an image. In the code chunk below you will see several examples how the methods work. We will use a dataset <code>image</code> available in the package. It is a 3-way array of numbers, if you want to work with e.g. JPEG, PNG or other standard image files you can load them using specific packages (<a href="https://cran.r-project.org/web/packages/jpeg/index.html">jpeg</a>, <a href="https://cran.r-project.org/web/packages/png/index.html">png</a>).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(pellets)
-<span class="co"># convert image to a data matrix and add some attributed</span>
-d =<span class="st"> </span><span class="kw">mda.im2data</span>(pellets)
-<span class="kw">colnames</span>(d) =<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;Red&#39;</span>, <span class="st">&#39;Green&#39;</span>, <span class="st">&#39;Blue&#39;</span>)
-<span class="kw">attr</span>(d, <span class="st">&#39;name&#39;</span>) =<span class="st"> &#39;Image&#39;</span>
-
-<span class="co"># show data values </span>
-<span class="kw">mda.show</span>(d, <span class="dv">10</span>)</code></pre></div>
-<pre><code>## Image
-## -----
-##       Red Green Blue
-##  [1,] 183    80  101
-##  [2,] 191    76  105
-##  [3,] 187    73   99
-##  [4,] 199    81  113
-##  [5,] 198    81  110
-##  [6,] 197    84  114
-##  [7,] 191    83  109
-##  [8,] 193    83  110
-##  [9,] 188    83  114
-## [10,] 172    86  115</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># show separate channels and the whole image in plots</span>
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">imshow</span>(d, <span class="dv">1</span>)
-<span class="kw">imshow</span>(d, <span class="dv">2</span>)
-<span class="kw">imshow</span>(d, <span class="dv">3</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>:<span class="dv">3</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-35-1.png" width="864" /></p>
-<p>By default image for one channels is shown using jet color palette for intensities, but you can also use gray colors, palette from colorbrewer2 as well as your own.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">imshow</span>(d, <span class="dv">1</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>, <span class="dt">colmap =</span> <span class="st">&#39;gray&#39;</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>, <span class="dt">colmap =</span> <span class="kw">heat.colors</span>(<span class="dv">256</span>))
-<span class="kw">imshow</span>(d, <span class="dv">1</span>, <span class="dt">colmap =</span> <span class="kw">colorRampPalette</span>(<span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;green&#39;</span>))(<span class="dv">256</span>))</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-36-1.png" width="864" /></p>
-<p>You can work with the image values as normal dataset and show scatter, line plots, calculate statistics, etc.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)
-<span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-37-1.png" width="864" /></p>
-<p>However, it will take some time to show these plots as this image has several hundreds of thousands pixels, a faster alternative can be the use of <code>smoothScatter()</code> function. The <code>mdaplot()</code> has a wrapper for the function (<code>type = 'd'</code>).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;d&#39;</span>)
-<span class="kw">mdaplot</span>(<span class="kw">mda.subset</span>(d, <span class="dt">select =</span> <span class="kw">c</span>(<span class="st">&#39;Red&#39;</span>, <span class="st">&#39;Blue&#39;</span>)), <span class="dt">type =</span> <span class="st">&#39;d&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-38-1.png" width="864" /></p>
-<p>Another useful thing is to set some of the pixels as background. The background pixels are removed from the image dataset physically, there is no way to get them back (in cotrast to excluded rows/pixels). It can be particularly useful when working with e.g. geocorrected hyperspectral images, where, often, many pixels have NA values and there is no need to keep them in memory. To set pixels as background you need to use method <code>mda.setimbg()</code> with either pixel indices or vector with logical values as it is shown below.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># original size</span>
-<span class="kw">show</span>(<span class="kw">dim</span>(d))</code></pre></div>
-<pre><code>## [1] 114000      3</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># set red epixels as background and show new size</span>
-d =<span class="st"> </span><span class="kw">mda.setimbg</span>(d, d[, <span class="st">&#39;Red&#39;</span>] &gt;<span class="st"> </span><span class="dv">100</span>)
-<span class="kw">show</span>(<span class="kw">dim</span>(d))</code></pre></div>
-<pre><code>## [1] 66471     3</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># show image with background pixels</span>
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">imshow</span>(d, <span class="dv">1</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>:<span class="dv">3</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-39-1.png" width="864" /></p>
-<p>All image related attributes are inherited by all object/rows related results, e.g. scores, residuals, predicted values and classes, etc. This means if you provide an image to any modelling method, you can visualise the corresponding results also as an image. Some examples will be shown in <a href="principal-component-analysis.html#principal-component-analysis">chapter about PCA</a></p>
-
+<div id="plotycumvarianceobj-same-as-above-but-cumulative" class="section level2">
+<h2><span class="header-section-number">0.2</span> plotYCumVariance(obj) same as above but cumulative</h2>
+<p>Here and in some other methods parameter <code>ny</code> is used to specify which y-variable you want to see a plot for (if <em>y</em> is multivariate).</p>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="plots-for-groups-of-objects.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="preprocessing.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
+<a href="methods-for-summary-statistics-.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="methods-for-objects-.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
 
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/lunr.js"></script>

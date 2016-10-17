@@ -25,7 +25,7 @@
 
 <meta name="author" content="Sergey Kucheryavskiy">
 
-<meta name="date" content="2016-09-13">
+<meta name="date" content="2016-10-16">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -106,7 +106,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-to-expect-from-future-releases"><i class="fa fa-check"></i>What to expect from future releases</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
 <li class="chapter" data-level="" data-path="what-mdatools-can-do.html"><a href="what-mdatools-can-do.html"><i class="fa fa-check"></i>What mdatools can do?</a></li>
 <li class="chapter" data-level="" data-path="how-to-install.html"><a href="how-to-install.html"><i class="fa fa-check"></i>How to install</a></li>
@@ -152,10 +155,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#support-for-images-1"><i class="fa fa-check"></i>Support for images</a></li>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#manual-x-values-for-loading-line-plot-1"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
 </ul></li>
 </ul>
 
@@ -177,7 +179,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="principal-component-analysis" class="section level1 unnumbered">
 <h1>Principal component analysis</h1>
 <p>In this chapter we will discuss how to use PCA method implemented in the <em>mdatools</em>. Besides that, we will use PCA examples to introduce some principles, which are common for most of the other methods (e.g. PLS, SIMCA, PLS-DA, etc.) available in this package. This includes such things as model and result objects, showing performance statistics for models and results, validation, different kinds of plots, and so on.</p>
-<p>Principal component analysis is one of the methods that decompose a data matrix X into a combination of three matrices: <span class="math inline">\(X = TP&#39; + E\)</span>. Here <span class="math inline">\(P\)</span> is a matrix with unit vectors, defined in the original variables space. The unit vectors form a new basis, which is used to project all data points into. Matrix <span class="math inline">\(T\)</span> contains coordinates of the projections in the new basis and product of the two matrices, <span class="math inline">\(TP&#39;\)</span> represent the coordinates of projections in original variable space. Matrix <span class="math inline">\(E\)</span> contains residuals — difference between position of projected data points and their original locations.</p>
+<p>Principal component analysis is one of the methods that decompose a data matrix X into a combination of three matrices: <span class="math inline">\(X = TP^T + E\)</span>. Here <span class="math inline">\(P\)</span> is a matrix with unit vectors, defined in the original variables space. The unit vectors form a new basis, which is used to project all data points into. Matrix <span class="math inline">\(T\)</span> contains coordinates of the projections in the new basis and product of the two matrices, <span class="math inline">\(TP^T\)</span> represent the coordinates of projections in original variable space. Matrix <span class="math inline">\(E\)</span> contains residuals — difference between position of projected data points and their original locations.</p>
 <p>In terms of PCA, the unit-vectors defining the new coordinate space are called loadings and the coordinate axes oriented alongside the loadings are Principal Components (PC). The coordinates of data points projected to the principal components are called scores.</p>
 <p>There are several other methods, such as Projection Pursuit (PP), Independent Component Analysis (ICA) and some others, that work in a similar way and resulting in the data decomposition shown above. The principal difference among the methods is the way they find the orientation of the unit-vectors. Thus, PCA finds them as directions of maximum variance of data points. In addition to that, all PCA loadings are orthogonal to each other. The PP and ICA use other criteria for the orientation of the basis vectors and e.g. for ICA the vectors are not orthogonal.</p>
 <p>It was decided to put several methods, including ICA (and in future PP) under the PCA umbrella. First of all it was done to reduce amount of code, as the interpretation and analysis of the results, the methods return, is very similar. In order to select which method (algorithm) to use for the decomposition there is a parameter <code>method</code> which can be defined by a user as it will be shown in the examples below.</p> 

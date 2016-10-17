@@ -38,8 +38,8 @@ MathJax.Hub.Config({
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="plots-for-groups-of-objects.html">
-<link rel="next" href="preprocessing.html">
+<link rel="prev" href="plotting-methods-1.html">
+
 
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -176,78 +176,106 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="working-with-images" class="section level2 unnumbered">
-<h2>Working with images</h2>
-<p>From version 0.8.0 the package also supports images, however they have to be transformed into datasets. The idea is very simple, we keep information about image pixels in an unfolded form, as a matrix, and use attributes <code>width</code> and <code>height</code> to reshape the data when we need to show it as an image.</p>
-<p>There are three methods that make this procedure easier: <code>mda.im2data()</code>, <code>mda.data2im()</code> and <code>imshow()</code>. The first convert an image (represented as 3-way array) to a data set, second does the opposite and the third takes dataset and shows it as an image. In the code chunk below you will see several examples how the methods work. We will use a dataset <code>image</code> available in the package. It is a 3-way array of numbers, if you want to work with e.g. JPEG, PNG or other standard image files you can load them using specific packages (<a href="https://cran.r-project.org/web/packages/jpeg/index.html">jpeg</a>, <a href="https://cran.r-project.org/web/packages/png/index.html">png</a>).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(pellets)
-<span class="co"># convert image to a data matrix and add some attributed</span>
-d =<span class="st"> </span><span class="kw">mda.im2data</span>(pellets)
-<span class="kw">colnames</span>(d) =<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;Red&#39;</span>, <span class="st">&#39;Green&#39;</span>, <span class="st">&#39;Blue&#39;</span>)
-<span class="kw">attr</span>(d, <span class="st">&#39;name&#39;</span>) =<span class="st"> &#39;Image&#39;</span>
-
-<span class="co"># show data values </span>
-<span class="kw">mda.show</span>(d, <span class="dv">10</span>)</code></pre></div>
-<pre><code>## Image
-## -----
-##       Red Green Blue
-##  [1,] 183    80  101
-##  [2,] 191    76  105
-##  [3,] 187    73   99
-##  [4,] 199    81  113
-##  [5,] 198    81  110
-##  [6,] 197    84  114
-##  [7,] 191    83  109
-##  [8,] 193    83  110
-##  [9,] 188    83  114
-## [10,] 172    86  115</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># show separate channels and the whole image in plots</span>
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">imshow</span>(d, <span class="dv">1</span>)
-<span class="kw">imshow</span>(d, <span class="dv">2</span>)
-<span class="kw">imshow</span>(d, <span class="dv">3</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>:<span class="dv">3</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-35-1.png" width="864" /></p>
-<p>By default image for one channels is shown using jet color palette for intensities, but you can also use gray colors, palette from colorbrewer2 as well as your own.</p>
+<div id="variable-selection" class="section level2 unnumbered">
+<h2>Variable selection</h2>
+<p>PLS calculates several statistics, which can be used to select most important (or remove least important) variables in order to improve performance and make model simpler. The first two are VIP-scores (variables important for projection) and Selectivity ratio. All details and theory can be found e.g. <a href="http://onlinelibrary.wiley.com/store/10.1002/cem.1360/asset/1360_ftp.pdf?v=1&amp;t=iu9nq00b&amp;s=4341cd7b9266e064a7deb9f760cd5ab5e7b36f5f">here</a>.</p>
+<p>Both parameters can be shown as plots and as vector of values for a selected y-variable. Selectivity ration is calculated for all possible components in a model, but VIP scores (due to computational time) only for selected number of components and are recalculated every time you change number of optimal components using <code>selectCompNum()</code> method. Here are some plots.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">imshow</span>(d, <span class="dv">1</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>, <span class="dt">colmap =</span> <span class="st">&#39;gray&#39;</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>, <span class="dt">colmap =</span> <span class="kw">heat.colors</span>(<span class="dv">256</span>))
-<span class="kw">imshow</span>(d, <span class="dv">1</span>, <span class="dt">colmap =</span> <span class="kw">colorRampPalette</span>(<span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;green&#39;</span>))(<span class="dv">256</span>))</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-36-1.png" width="864" /></p>
-<p>You can work with the image values as normal dataset and show scatter, line plots, calculate statistics, etc.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)
-<span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-37-1.png" width="864" /></p>
-<p>However, it will take some time to show these plots as this image has several hundreds of thousands pixels, a faster alternative can be the use of <code>smoothScatter()</code> function. The <code>mdaplot()</code> has a wrapper for the function (<code>type = 'd'</code>).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;d&#39;</span>)
-<span class="kw">mdaplot</span>(<span class="kw">mda.subset</span>(d, <span class="dt">select =</span> <span class="kw">c</span>(<span class="st">&#39;Red&#39;</span>, <span class="st">&#39;Blue&#39;</span>)), <span class="dt">type =</span> <span class="st">&#39;d&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-38-1.png" width="864" /></p>
-<p>Another useful thing is to set some of the pixels as background. The background pixels are removed from the image dataset physically, there is no way to get them back (in cotrast to excluded rows/pixels). It can be particularly useful when working with e.g. geocorrected hyperspectral images, where, often, many pixels have NA values and there is no need to keep them in memory. To set pixels as background you need to use method <code>mda.setimbg()</code> with either pixel indices or vector with logical values as it is shown below.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># original size</span>
-<span class="kw">show</span>(<span class="kw">dim</span>(d))</code></pre></div>
-<pre><code>## [1] 114000      3</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># set red epixels as background and show new size</span>
-d =<span class="st"> </span><span class="kw">mda.setimbg</span>(d, d[, <span class="st">&#39;Red&#39;</span>] &gt;<span class="st"> </span><span class="dv">100</span>)
-<span class="kw">show</span>(<span class="kw">dim</span>(d))</code></pre></div>
-<pre><code>## [1] 66471     3</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># show image with background pixels</span>
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">imshow</span>(d, <span class="dv">1</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>:<span class="dv">3</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-39-1.png" width="864" /></p>
-<p>All image related attributes are inherited by all object/rows related results, e.g. scores, residuals, predicted values and classes, etc. This means if you provide an image to any modelling method, you can visualise the corresponding results also as an image. Some examples will be shown in <a href="principal-component-analysis.html#principal-component-analysis">chapter about PCA</a></p>
+<span class="kw">plotVIPScores</span>(m1, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
+<span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.labels =</span> T)
+<span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">1</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
+<span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-78-1.png" width="864" /></p>
+<p>In the example below, I create two other PLS models by excluding variables with VIP score or selectivity ratio below a threshold (I use 0.5 and 1 correspondingly) and show the performance for both.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m3 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> <span class="kw">getVIPScores</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>) &lt;<span class="st"> </span><span class="fl">0.5</span>)
+<span class="kw">summary</span>(m3)</code></pre></div>
+<pre><code>## 
+## PLS model (class pls) summary
+## 
+## Performance and validation:
+## Number of selected components: 4
+##     X cumexpvar Y cumexpvar  RMSE Slope    Bias  RPD
+## Cal       85.29       98.15 0.527  0.98  0.0000 7.50
+## CV        80.53       96.34 0.741  0.97 -0.0382 5.34</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m4 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> <span class="kw">getSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>) &lt;<span class="st"> </span><span class="dv">1</span>)
+<span class="kw">summary</span>(m4)</code></pre></div>
+<pre><code>## 
+## PLS model (class pls) summary
+## 
+## Performance and validation:
+## Number of selected components: 1
+##     X cumexpvar Y cumexpvar  RMSE Slope   Bias  RPD
+## Cal       86.80       94.97 0.868  0.95 0.0000 4.56
+## CV        84.37       93.91 0.955  0.94 0.0034 4.14</code></pre>
+<p>Another way is make an inference about regression coefficients and calculate confidence intervals and p-values for each variable. This can be done usine Jack-Knife approach, when model is cross-validated using efficient number of segments (at least ten) and statistics are calculated using the distribution of regression coefficient values obtained for each step. There are two parameters, <code>coeffs.ci</code> and <code>coeffs.alpha</code>, first is to select the method (so far only Jack-Knife is available, the value is <code>'jk'</code>) and second is a level of significance for computing confidence intervals (by default is 0.1). Here is an example.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mjk =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">coeffs.ci =</span> <span class="st">&#39;jk&#39;</span>, <span class="dt">coeffs.alpha =</span> <span class="fl">0.05</span>)</code></pre></div>
+<p>If number of segments is not specified as in the example above, full cross-validation will be used.</p>
+<p>The statistics are calculated for each y-variable and each available number of components. When you show a plot for regression coefficients, confidence interval will be shown automatically. You can changes this by using parameter <code>show.ci = FALS</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
+<span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
+<span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.ci =</span> F)
+<span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.ci =</span> F)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-81-1.png" width="864" /></p>
+<p>Function <code>getRegcoeffs()</code> in this case may also return a column with p-values, if user specifies a parameter <code>full</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">full =</span> T))</code></pre></div>
+<pre><code>##                Shoesize      p-value
+## Intercept  1.342626e+01           NA
+## Height     7.456695e-02 2.116375e-18
+## Weight     4.896328e-02 5.012592e-18
+## Hairleng  -6.865495e-01 1.137354e-14
+## Age        1.081716e-02 3.579832e-01
+## Income     5.642220e-06 7.032445e-01
+## Beer       5.010542e-03 2.136646e-06
+## Wine       7.511377e-03 1.204856e-02
+## Sex       -6.865495e-01 1.137354e-14
+## Swim       1.010496e-01 3.941369e-13
+## Region     1.035071e-01 2.708059e-01
+## IQ        -5.277164e-03 6.033516e-01</code></pre>
+<p>The p-values are stored as a 3-way array similar to regression coefficients. The selection can be made by comparing e.g. p-values with a threshold similar to what we have done with VIP-scores and selectivity ratio.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">exclcols =<span class="st"> </span>mjk$coeffs$p.values[, <span class="dv">2</span>, <span class="dv">1</span>] &gt;<span class="st"> </span><span class="fl">0.05</span>
+<span class="kw">show</span>(exclcols)</code></pre></div>
+<pre><code>##   Height   Weight Hairleng      Age   Income     Beer     Wine      Sex 
+##    FALSE    FALSE    FALSE     TRUE     TRUE    FALSE    FALSE    FALSE 
+##     Swim   Region       IQ 
+##    FALSE     TRUE     TRUE</code></pre>
+<p>Here <code>p.values[, 2, 1]</code> means values for all predictors, model with two components, first y-variable.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">newm =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">3</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> exclcols)
+<span class="kw">summary</span>(newm)</code></pre></div>
+<pre><code>## 
+## PLS model (class pls) summary
+## 
+## Performance and validation:
+## Number of selected components: 3
+##     X cumexpvar Y cumexpvar  RMSE Slope    Bias  RPD
+## Cal       97.85       97.79 0.575  0.98  0.0000 6.87
+## CV        96.64       96.49 0.727  0.97 -0.0161 5.44</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(newm))</code></pre></div>
+<pre><code>##               Shoesize
+## Intercept  4.952691046
+## Height     0.091079963
+## Weight     0.052708955
+## Hairleng  -0.315927643
+## Age        0.000000000
+## Income     0.000000000
+## Beer       0.009320427
+## Wine       0.018524717
+## Sex       -0.315927643
+## Swim       0.134354170
+## Region     0.000000000
+## IQ         0.000000000</code></pre>
+<p>As you can see, the variables <em>Age</em>, <em>Income</em>, <em>Region</em> and <em>IQ</em> have been excluded as they are not related to the <em>Shoesize</em>, which seems to be correct.</p>
+<p>Variable selection as well as all described above can be also carried out for PLS discriminant analysis (PLS-DA), which can be explained later in one of the next chapters.</p>
 
 </div>
+<!-- </div> -->
             </section>
 
           </div>
         </div>
       </div>
-<a href="plots-for-groups-of-objects.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="preprocessing.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
+<a href="plotting-methods-1.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
 
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/lunr.js"></script>

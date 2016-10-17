@@ -25,7 +25,7 @@
 
 <meta name="author" content="Sergey Kucheryavskiy">
 
-<meta name="date" content="2016-09-13">
+<meta name="date" content="2016-10-16">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -106,7 +106,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-to-expect-from-future-releases"><i class="fa fa-check"></i>What to expect from future releases</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
 <li class="chapter" data-level="" data-path="what-mdatools-can-do.html"><a href="what-mdatools-can-do.html"><i class="fa fa-check"></i>What mdatools can do?</a></li>
 <li class="chapter" data-level="" data-path="how-to-install.html"><a href="how-to-install.html"><i class="fa fa-check"></i>How to install</a></li>
@@ -152,10 +155,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#support-for-images-1"><i class="fa fa-check"></i>Support for images</a></li>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#manual-x-values-for-loading-line-plot-1"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
 </ul></li>
 </ul>
 
@@ -206,7 +208,7 @@ data4 =<span class="st"> </span><span class="kw">prep.autoscale</span>(data4, <s
 <span class="kw">boxplot</span>(data2, <span class="dt">main =</span> <span class="st">&#39;Standardized&#39;</span>)
 <span class="kw">boxplot</span>(data3, <span class="dt">main =</span> <span class="st">&#39;Mean centered and standardized&#39;</span>)
 <span class="kw">boxplot</span>(data4, <span class="dt">main =</span> <span class="st">&#39;Median centered and standardized&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-39-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-40-1.png" width="864" /></p>
 </div>
 <div id="correction-of-spectral-baseline" class="section level3 unnumbered">
 <h3>Correction of spectral baseline</h3>
@@ -223,7 +225,7 @@ pspectra =<span class="st"> </span><span class="kw">prep.snv</span>(ospectra)
 <span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
 <span class="kw">mdaplot</span>(ospectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;Original&#39;</span>)
 <span class="kw">mdaplot</span>(pspectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;after SNV&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-40-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-41-1.png" width="864" /></p>
 <p>Multiplicative Scatter Correction does the same as SNV but in a different way. First it calculates a mean spectrum for the whole set (mean spectrum can be also provided as an extra argument). Then, for each individual spectrum, it makes a line fit for the spectral values and the mean spectrum. The coefficients of the line, intercept and slope, are used to correct the additive and multiplicative effects correspondingly.</p>
 <p>The <code>prep.msc()</code> function adds the mean spectrum calculated for the original spectral data, to the attributes of the results, so it can be reused later.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># apply MSC and and get the preprocessed spectra</span>
@@ -233,7 +235,7 @@ pspectra =<span class="st"> </span><span class="kw">prep.msc</span>(ospectra)
 <span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
 <span class="kw">mdaplot</span>(ospectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;Original&#39;</span>)
 <span class="kw">mdaplot</span>(pspectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;after MSC&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-41-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-42-1.png" width="864" /></p>
 </div>
 <div id="smoothing-and-derivatives" class="section level3 unnumbered">
 <h3>Smoothing and derivatives</h3>
@@ -253,7 +255,7 @@ dpspectra =<span class="st"> </span><span class="kw">prep.savgol</span>(nspectra
 <span class="kw">mdaplot</span>(nspectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;Noise added&#39;</span>)
 <span class="kw">mdaplot</span>(pspectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>, <span class="dt">main =</span> <span class="st">&#39;Smoothing&#39;</span>)
 <span class="kw">mdaplot</span>(dpspectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>,<span class="dt">main =</span> <span class="st">&#39;First derivative&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-42-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-43-1.png" width="864" /></p>
 
 </div>
 </div>

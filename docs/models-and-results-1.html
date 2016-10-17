@@ -25,7 +25,7 @@
 
 <meta name="author" content="Sergey Kucheryavskiy">
 
-<meta name="date" content="2016-09-13">
+<meta name="date" content="2016-10-16">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -106,7 +106,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-to-expect-from-future-releases"><i class="fa fa-check"></i>What to expect from future releases</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
 <li class="chapter" data-level="" data-path="what-mdatools-can-do.html"><a href="what-mdatools-can-do.html"><i class="fa fa-check"></i>What mdatools can do?</a></li>
 <li class="chapter" data-level="" data-path="how-to-install.html"><a href="how-to-install.html"><i class="fa fa-check"></i>How to install</a></li>
@@ -152,10 +155,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#support-for-images-1"><i class="fa fa-check"></i>Support for images</a></li>
-<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#manual-x-values-for-loading-line-plot-1"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
 </ul></li>
 </ul>
 
@@ -176,23 +178,23 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="models-and-results-1" class="section level2 unnumbered">
 <h2>Models and results</h2>
-<p>Like we discussed in PCA, <em>matools</em> uses creates two types of objects — a model and a result. Every time you build a PLS model you get a <em>model object</em>. Every time you apply the model to a dataset you get a <em>result object</em>. For PLS, the objects have classes <code>pls</code> and <code>plsres</code> correspondingly.</p>
+<p>Like we discussed in PCA, <em>matools</em> creates two types of objects — a model and a result. Every time you build a PLS model you get a <em>model object</em>. Every time you apply the model to a dataset you get a <em>result object</em>. For PLS, the objects have classes <code>pls</code> and <code>plsres</code> correspondingly.</p>
 <div id="model-calibration-1" class="section level3 unnumbered">
 <h3>Model calibration</h3>
-<p>Let’s use the same <em>People</em> data and create PLS-model for prediction of <em>Shoesize</em> (column number four) using other 11 variables. As usual we start with preparing datasets (we will also split the data into calibration and test subsets):</p>
+<p>Let’s use the same <em>People</em> data and create a PLS-model for prediction of <em>Shoesize</em> (column number four) using other 11 variables as predictors. As usual, we start with preparing datasets (we will also split the data into calibration and test subsets):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mdatools)
 <span class="kw">data</span>(people)
 
 idx =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">4</span>, <span class="dv">32</span>, <span class="dv">4</span>)
 X.c =<span class="st"> </span>people[-idx, -<span class="dv">4</span>]
-y.c =<span class="st"> </span>people[-idx, <span class="dv">4</span>]
+y.c =<span class="st"> </span>people[-idx, <span class="dv">4</span>, drop =<span class="st"> </span>F]
 X.t =<span class="st"> </span>people[idx, -<span class="dv">4</span>]
-y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>]</code></pre></div>
-<p>So <code>X.c</code> and <code>y.c</code> are predictors and response valurs for calibration subset. Now let’s calibrate the model and show an information about the model object:</p>
+y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span class="st"> </span>F]</code></pre></div>
+<p>So <code>X.c</code> and <code>y.c</code> are predictors and response values for calibration subset. Now let’s calibrate the model and show an information about the model object:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">info =</span> <span class="st">&quot;Shoesize prediction model&quot;</span>)</code></pre></div>
 <pre><code>## Warning in selectCompNum.pls(model): No validation results were found!</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class="dv">3</span>)</code></pre></div>
-<p>As you can see the procedure is very similar to PCA, here we use 7 latent variables and select 3 first as optimal number. Here is an info for the model object:</p>
+<p>As you can see, the procedure is very similar to PCA, here we use 7 latent variables and select 3 first as an optimal number. Here is an info for the model object:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m)</code></pre></div>
 <pre><code>## 
 ## PLS model (class pls)
@@ -213,43 +215,25 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>]</code></pre
 ## $calres - results for calibration set
 ## 
 ## Try summary(model) and plot(model) to see the model performance.</code></pre>
-<p>As expected we see loadings for predictors and responses, matrix with weights, and a special object (<code>regcoeffs</code>) for regression coefficients. The values for regression coefficients are available at <code>m.regcoeffs.values</code> it is an array with dimension <em>nVariables x nComponents x nPredictors</em>. The reason to use the object instead of just an array is mainly for being able to get and plot regression coefficients for different methods. Besides that it is possible to calculate confidence intervals and other statistics for the values using Jack-Knife method (will be show later) which produces extra entities.</p>
+<p>As expected, we see loadings for predictors and responses, matrix with weights, and a special object (<code>regcoeffs</code>) for regression coefficients. The values for regression coefficients are available in <code>m.regcoeffs.values</code>, it is an array with dimension <em>nVariables x nComponents x nPredictors</em>. The reason to use the object instead of just an array is mainly for being able to get and plot regression coefficients for different methods. Besides that, it is possible to calculate confidence intervals and other statistics for the coefficients using Jack-Knife method (will be shown later), which produces extra entities.</p>
 <p>The regression coefficients can be shown as plot using either function <code>plotRegcoeffs()</code> for the PLS model object or function <code>plot()</code> for the object with regression coefficients. You need to specify for which predictor (if you have more than one y-variable) and which number of components you want to see the coefficients for. By default it shows values for the optimal number of components and first y-variable as it is shown on example below.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
 <span class="kw">plotRegcoeffs</span>(m)
 <span class="kw">plotRegcoeffs</span>(m, <span class="dt">ncomp =</span> <span class="dv">2</span>)
 <span class="kw">plot</span>(m$coeffs, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">plot</span>(m$coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-64-1.png" width="864" /></p>
-<p>The model keeps regression coefficients calculated for centered and standardized data:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m$coeffs$values[, , <span class="dv">1</span>])</code></pre></div>
-<pre><code>##                Comp 1      Comp 2       Comp 3       Comp 4      Comp 5
-## Height    0.176077659  0.19357436  0.210411676  0.221194701  0.22173011
-## Weight    0.175803980  0.18935489  0.197646483  0.214440615  0.22352256
-## Hairleng -0.164627444 -0.17730737 -0.138824482 -0.090224147 -0.07942749
-## Age       0.046606027  0.02508113  0.026613035  0.063230836  0.05727683
-## Income    0.059998121  0.01291497 -0.000590693 -0.006320815 -0.02687952
-## Beer      0.133136867  0.11441573  0.148917913  0.189807440  0.20521753
-## Wine      0.002751573  0.08278735  0.138138095  0.202371185  0.20549919
-## Sex      -0.164627444 -0.17730737 -0.138824482 -0.090224147 -0.07942749
-## Swim      0.173739533  0.19426871  0.223962000  0.251468137  0.25874854
-## Region   -0.031357608  0.02673161  0.010392542 -0.002174170 -0.01021399
-## IQ       -0.003353428 -0.01705852 -0.088658626 -0.048704871 -0.03635425
-##               Comp 6      Comp 7
-## Height    0.12020814  0.06858180
-## Weight    0.34481807  0.50415024
-## Hairleng -0.06995575 -0.03521702
-## Age       0.24194545  0.35595221
-## Income   -0.23074985 -0.35958677
-## Beer      0.26698141  0.08469089
-## Wine      0.19760815  0.18683477
-## Sex      -0.06995575 -0.03521702
-## Swim      0.22959873  0.31927346
-## Region   -0.03387756 -0.16180899
-## IQ       -0.05075568 -0.05323880</code></pre>
-<p>You can get the corrected coefficients, which can be applied directly to the raw data by using method <code>getRegcoeffs()</code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(m))</code></pre></div>
-<pre><code>##                      y1
+<p><img src="_main_files/figure-html/unnamed-chunk-65-1.png" width="864" /></p>
+<p>The model keeps regression coefficients, calculated for centered and standardized data, without intercept, etc. Here are the values for three PLS components.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m$coeffs$values[, <span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
+<pre><code>##       Height       Weight     Hairleng          Age       Income 
+##  0.210411676  0.197646483 -0.138824482  0.026613035 -0.000590693 
+##         Beer         Wine          Sex         Swim       Region 
+##  0.148917913  0.138138095 -0.138824482  0.223962000  0.010392542 
+##           IQ 
+## -0.088658626</code></pre>
+<p>You can get the corrected coefficients, which can be applied directly to the raw data, by using method <code>getRegcoeffs()</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(m, <span class="dt">ncomp =</span> <span class="dv">3</span>))</code></pre></div>
+<pre><code>##                Shoesize
 ## Intercept  1.251537e+01
 ## Height     8.105287e-02
 ## Weight     5.110732e-02
@@ -262,10 +246,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>]</code></pre
 ## Swim       1.164947e-01
 ## Region     4.024083e-02
 ## IQ        -2.742712e-02</code></pre>
-<p>And, again, similar to PLS, we see results for calibration set</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m$loadings[<span class="dv">1</span>:<span class="dv">4</span>, <span class="dv">1</span>:<span class="dv">4</span>]  </code></pre></div>
-<pre><code>## NULL</code></pre>
-<p>One can also notice that the model object has a particular field — <code>calres</code>, which is in fact a PCA <em>result object</em> containing results of applying the model to the calibration set. If we look at the object description we will get the following:</p>
+<p>Similar to PCA, model object may contain three fields for results obtained using calibration set (<code>calres</code>), cross-validation (<code>cvres</code>) and test set validation (<code>testres</code>). All three have class <code>plsres</code>, here is how <code>calres</code> looks like:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m$calres)</code></pre></div>
 <pre><code>## 
 ## PLS results (class plsres)
@@ -284,12 +265,21 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>]</code></pre
 ## $bias - bias for prediction vs. measured values
 ## $ydecomp - decomposition of y values (ldecomp object)
 ## $xdecomp - decomposition of x values (ldecomp object)</code></pre>
-<p>And if we want to look at scores, here is the way:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m$calres$scores[<span class="dv">1</span>:<span class="dv">4</span>, <span class="dv">1</span>:<span class="dv">4</span>]</code></pre></div>
-<pre><code>## NULL</code></pre>
-<p>Both model and result objects also have related functions (methods), first of all for visualizing various values (e.g. scores plot, loadings plot, etc.). Some of the functions will be discussed later in this chapter, a full list can be found in help for a proper method.</p>
-<p>The <em>result object</em> is also created every time you apply a model to a new data. Like in many built-in R methods, method <code>predict()</code> is used in this case. The first argument of the method is always a model object. Here is a PCA example (assuming we have already built the model):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t)
+<p>The <code>xdecomp</code> and <code>ydecomp</code> are objects similar to <code>pcares</code>, they contain scores, residuals and variances for decomposition of X and Y correspondingly.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m$calres$xdecomp)</code></pre></div>
+<pre><code>## 
+## Results of data decomposition (class ldecomp)
+## 
+## Major fields:
+## $scores - matrix with score values
+## $T2 - matrix with T2 distances
+## $Q - matrix with Q residuals
+## $ncomp.selected - selected number of components
+## $expvar - explained variance for each component
+## $cumexpvar - cumulative explained variance</code></pre>
+<p>Other fields are mostly various performance statistics, including slope, coefficient of determination (R<sup>2</sup>), bias, and root mean squared error (RMSE). Besides that, the results also include reference y-values and array with predicted y-values. The array has dimension <em>nObjects x nComponents x nResponses</em>.</p>
+<p>PLS predictions for a new set can be obtained using method <code>predict</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t, y.t)
 <span class="kw">print</span>(res)</code></pre></div>
 <pre><code>## 
 ## PLS results (class plsres)
@@ -301,78 +291,59 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>]</code></pre
 ## Major fields:
 ## $ncomp.selected - number of selected components
 ## $yp - array with predicted y values
+## $y - matrix with reference y values
+## $rmse - root mean squared error
+## $r2 - coefficient of determination
+## $slope - slope for predicted vs. measured values
+## $bias - bias for prediction vs. measured values
+## $ydecomp - decomposition of y values (ldecomp object)
 ## $xdecomp - decomposition of x values (ldecomp object)</code></pre>
 </div>
 <div id="model-validation-1" class="section level3 unnumbered">
 <h3>Model validation</h3>
-<p>Any model can be validated with cross-validation or/and test set validation. The validation results are, of course, represented by <em>result objects</em>, which are fields of a <em>model object</em> similar to <code>calres</code>, but with names <code>cvres</code> and <code>testres</code> correspondingly.</p>
-<p>Here is how to build a PCA model with full cross-validation and test set validation (we will use <code>X.t</code> as test data) at the same time:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pca</span>(X.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">x.test =</span> X.t, <span class="dt">info =</span> <span class="st">&quot;PCA model&quot;</span>)
-m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class="dv">5</span>)</code></pre></div>
-<p>Parameter <code>cv</code> specifies options for cross-validation. If a numeric value is provided then it will be used as number of segments for random cross-validation, e.g. if <code>cv = 2</code> cross-validation with two segments will be used. For full cross-validation use <code>cv = 1</code> like we did in the example above (this is perhaps a bit misleading, but I keep this option for compatability). For more advanced option you can provide a list with name of cross-validation method, number of segments and number of iterations, e.g. <code>cv = list('rand', 4, 4)</code> for running random cross-validation with four segments and four repetitions.</p>
-<p>And here is the model object info:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m)</code></pre></div>
+<p>Validation is implemented similar to PCA, the only difference is that you need to provide two datasets for a test set — one for predictors (<code>x.test</code>) and one for response (<code>y.test</code>) values. Cross-validation is very important for PLS as it helps to find optimal number of PLS components (so test set performance is more fair as in this case you do not use test set for optimization). Therefore, it is always recommended to use cross-validation.</p>
+<p>You probably have noticed a small warning we got when created the first PLS model in this chapter:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">info =</span> <span class="st">&quot;Shoesize prediction model&quot;</span>)</code></pre></div>
+<pre><code>## Warning in selectCompNum.pls(model): No validation results were found!</code></pre>
+<p>When you create a model, it tries to select optimal number of components automatically (which, of course, you can always change later). To do that, the method uses RMSE values, calculated for different number of components and cross-validation predictions. So, if we do not use cross-validation, it warns use about this.</p>
+<p>There are two different ways/criteria for automatic selection. One is using first local minimum on the RMSE plot and second is so called Wold criterion, based on a ratio between PRESS values for current and next component. You can select which criterion to use by specifying parameter <code>ncomp.selcrit</code> (either <code>'min'</code> or <code>'wold'</code>) as it is shown below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">ncomp.selcrit =</span> <span class="st">&#39;min&#39;</span>)
+<span class="kw">show</span>(m1$ncomp.selected)</code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">ncomp.selcrit =</span> <span class="st">&#39;wold&#39;</span>)
+<span class="kw">show</span>(m2$ncomp.selected)</code></pre></div>
+<pre><code>## [1] 4</code></pre>
+<p>And here is the RMSE plots (they are identical of course):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotRMSE</span>(m1)
+<span class="kw">plotRMSE</span>(m2)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-73-1.png" width="864" /></p>
+<p>Parameter <code>cv</code> has the same format as for PCA. If it is a number, it will be used as number of segments for random cross-validation, e.g. if <code>cv = 2</code> cross-validation with two segments will be carried out. For full cross-validation use <code>cv = 1</code> like we did in the example above. For more advanced option you can provide a list with name of cross-validation method, number of segments and number of iterations, e.g. <code>cv = list('rand', 4, 4)</code> for running random cross-validation with four segments and four repetitions or <code>cv = list('ven', 8)</code> for systematic split into eight segments (<em>venetian blinds</em>).</p>
+<p>Method <code>summary()</code> for model shows performance statistics calculated using optimal number of components for each of the results.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1)</code></pre></div>
 <pre><code>## 
-## PCA model (class pca)
+## PLS model (class pls) summary
 ## 
-## 
-## Call:
-## pca(x = X.c, ncomp = 7, scale = T, cv = 1, x.test = X.t, info = &quot;PCA model&quot;)
-## 
-## Major fields:
-## $loadings - matrix with loadings
-## $eigenvals - eigenvalues for components
-## $ncomp - number of calculated components
-## $ncomp.selected - number of selected components
-## $center - values for centering data
-## $scale - values for scaling data
-## $cv - number of segments for cross-validation
-## $alpha - significance level for Q residuals
-## $calres - results (scores, etc) for calibration set
-## $cvres - results for cross-validation
-## $testres - results for test set</code></pre>
-<p>As you can see we have all three types of results now — calibration (<code>calres</code>), cross-validation (<code>cvres</code>) and test set validation (<code>testres</code>). Let us compare, for example, the explained variance values for the results:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">var =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">cal =</span> m$calres$expvar, <span class="dt">cv =</span> m$cvres$expvar, <span class="dt">test =</span> m$testres$expvar)
-<span class="kw">show</span>(<span class="kw">round</span>(var, <span class="dv">1</span>))</code></pre></div>
-<pre><code>##         cal   cv test
-## Comp 1 50.9 39.0 42.1
-## Comp 2 21.7 22.2 17.2
-## Comp 3 14.3 16.3 18.4
-## Comp 4  8.5 14.1  8.7
-## Comp 5  2.4  3.7  5.0
-## Comp 6  1.2  2.3  2.6
-## Comp 7  0.5  0.9  0.6</code></pre>
-<p>Every model and every result has a method <code>summary()</code>, which shows some statistics for evaluation of a model performance. Here are some examples.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m)</code></pre></div>
+## Performance and validation:
+## Number of selected components: 5
+##     X cumexpvar Y cumexpvar  RMSE Slope   Bias  RPD
+## Cal       97.64       98.19 0.521  0.98  0e+00 7.59
+## CV        92.90       96.22 0.753  0.98 -2e-04 5.26</code></pre>
+<p>If you want more details run <code>summury()</code> for one of the result objects.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1$calres)</code></pre></div>
 <pre><code>## 
-## PCA model (class pca) summary
+## PLS regression results (class plsres) summary
 ## 
-## Info:
-## PCA model
-## 
-##        Eigvals Expvar Cumexpvar
-## Comp 1   5.597  50.88     50.88
-## Comp 2   2.386  21.69     72.57
-## Comp 3   1.571  14.29     86.86
-## Comp 4   0.935   8.50     95.36
-## Comp 5   0.260   2.36     97.72
-## Comp 6   0.137   1.24     98.96
-## Comp 7   0.056   0.51     99.47</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m$calres)</code></pre></div>
-<pre><code>## 
-## Summary for PCA results 
-## 
-## Selected components: 5
-## 
-##        Expvar Cumexpvar
-## Comp 1  50.88     50.88
-## Comp 2  21.69     72.57
-## Comp 3  14.29     86.86
-## Comp 4   8.50     95.36
-## Comp 5   2.36     97.72
-## Comp 6   1.24     98.96
-## Comp 7   0.51     99.47</code></pre>
-<p>The same methodology is used for any other method, e.g. PLS or SIMCA. In the next section we will look at how to use plotting functions for models and results.</p>
+## Response variable Shoesize:
+##        X expvar X cumexpvar Y expvar Y cumexpvar  RMSE Slope Bias RPD
+## Comp 1   50.505      50.505   93.779      93.779 0.966 0.938    0 4.1
+## Comp 2   20.979      71.484    2.926      96.705 0.703 0.967    0 5.6
+## Comp 3    8.667      80.151    0.917      97.622 0.597 0.976    0 6.6
+## Comp 4    5.847      85.998    0.479      98.101 0.534 0.981    0 7.4
+## Comp 5   11.642      97.640    0.088      98.189 0.521 0.982    0 7.6
+## Comp 6    0.495      98.135    0.347      98.536 0.468 0.985    0 8.4
+## Comp 7    0.442      98.577    0.202      98.738 0.435 0.987    0 9.1</code></pre>
+<p>There is no column for <em>R<sup>2</sup></em> as <em>Y cumexpvar</em> values are the same.</p>
 </div>
 </div>
             </section>
