@@ -103,7 +103,7 @@ regcoeffs.getStat = function(coeffs.values, ci.coeffs, ci.alpha = 0.1) {
    dimnames(t.values.out) = dimnames(p.values.out) = dimnames(coeffs.values)
    dimnames(ci.out) = c(dimnames(coeffs.values), list(c('Lo', 'Up')))
    t.values.out = mda.setattr(t.values.out, attrs)
-   p.values.out = mda.setattr(t.values.out, attrs)
+   p.values.out = mda.setattr(p.values.out, attrs)
    ci.out = mda.setattr(ci.out, attrs)
    attr(t.values.out, 'name') = 't-values (Jack-knife)'
    attr(p.values.out, 'name') = 'p-values (Jack-knife)'
