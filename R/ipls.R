@@ -126,6 +126,7 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
       exclcols = attr(x, 'exclcols')
       x = x[, -exclcols, drop = F]
       xaxis.values = xaxis.values[-exclcols]
+      attr(x, 'exclcols') = NULL
    }
    
    if (length(exclrows) > 0) {
@@ -133,6 +134,8 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
       exclrows = attr(x, 'exclrows')
       x = x[-exclrows, , drop = F]
       y = y[-exclrows, , drop = F]
+      attr(x, 'exclrows') = NULL
+      attr(y, 'exclrows') = NULL
    }
    
    attr(x, 'xaxis.values') = xaxis.values
