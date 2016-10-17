@@ -6,7 +6,8 @@
 \usage{
 \method{plotCumVariance}{ldecomp}(obj, type = "b",
   main = "Cumulative variance", xlab = "Components",
-  ylab = "Explained variance, \%", show.labels = F, ...)
+  ylab = "Explained variance, \%", show.labels = F, labels = "values",
+  ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
@@ -20,6 +21,8 @@
 \item{ylab}{label for y axis}
 
 \item{show.labels}{logical, show or not labels for the plot objects}
+
+\item{labels}{what to show as labels for plot objects}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
 }

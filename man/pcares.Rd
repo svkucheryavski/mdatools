@@ -4,22 +4,9 @@
 \alias{pcares}
 \title{Results of PCA decomposition}
 \usage{
-pcares(scores, loadings, residuals, totvar, tnorm = NULL,
-  ncomp.selected = NULL, ...)
+pcares(...)
 }
 \arguments{
-\item{scores}{matrix with score values (nobj x ncomp).}
-
-\item{loadings}{matrix with loading values (nvar x ncomp).}
-
-\item{residuals}{matrix with data residuals.}
-
-\item{totvar}{total variance for data matrix.}
-
-\item{tnorm}{vector with singular values for scores normalization.}
-
-\item{ncomp.selected}{selected number of components for decomposition.}
-
 \item{...}{other arguments supported by \code{ldecomp}.}
 }
 \value{

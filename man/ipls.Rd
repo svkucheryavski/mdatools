@@ -5,9 +5,9 @@
 \title{Variable selection with interval PLS}
 \usage{
 ipls(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
-  int.ncomp = 10, int.num = NULL, int.width = NULL, int.limits = NULL,
-  int.niter = NULL, ncomp.selcrit = "min", method = "forward",
-  silent = F)
+  exclcols = NULL, exclrows = NULL, int.ncomp = 10, int.num = NULL,
+  int.width = NULL, int.limits = NULL, int.niter = NULL,
+  ncomp.selcrit = "min", method = "forward", silent = F)
 }
 \arguments{
 \item{x}{a matrix with predictor values}
@@ -21,6 +21,10 @@ ipls(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
 \item{scale}{logical, standardize or not the data values}
 
 \item{cv}{number of segments for cross-validation (1 - full CV)}
+
+\item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values)}
+
+\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
 
 \item{int.ncomp}{maximum number of components for interval PLS models}
 

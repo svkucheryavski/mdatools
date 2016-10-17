@@ -2,19 +2,6 @@
 #' @description 
 #' \code{pcares} is used to store results for PCA decomposition of data.
 #'
-#'
-#' @param scores
-#' matrix with score values (nobj x ncomp).
-#' @param loadings
-#' matrix with loading values (nvar x ncomp).
-#' @param residuals
-#' matrix with data residuals.
-#' @param totvar
-#' total variance for data matrix.
-#' @param tnorm
-#' vector with singular values for scores normalization.
-#' @param ncomp.selected
-#' selected number of components for decomposition.
 #' @param ...
 #' other arguments supported by \code{ldecomp}.
 #' 
@@ -103,13 +90,12 @@
 #' par(mfrow = c(1, 1))
 #'
 #' @export 
-pcares = function(scores, loadings, residuals, totvar, tnorm = NULL, ncomp.selected = NULL, ...)
+pcares = function(...)
 {
    # Creates an object of pcares class. In fact the class is a wrapper for ldecomp and
    # uses its methods and attributes.
    
-   res = ldecomp(scores, loadings, residuals, totvar, tnorm = tnorm, ncomp.selected = ncomp.selected
-                 , ...)
+   res = ldecomp(...)
    class(res) = c('pcares', 'ldecomp')   
    
    res

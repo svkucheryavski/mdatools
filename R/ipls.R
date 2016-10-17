@@ -18,6 +18,10 @@
 #' logical, standardize or not the data values
 #' @param cv
 #' number of segments for cross-validation (1 - full CV)
+#' @param exclcols
+#' columns of x to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
 #' @param int.ncomp
 #' maximum number of components for interval PLS models
 #' @param int.num
@@ -95,26 +99,53 @@
 #' points(simdata$wavelength[ind], mspectrum[ind], pch = 16, col = 'blue')
 #'  
 #' @export
-ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10, 
-                int.ncomp = 10, int.num = NULL, int.width = NULL, int.limits = NULL,
-                int.niter = NULL, ncomp.selcrit = 'min', method = 'forward',
-                silent = F)
-{
+ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
+                exclcols = NULL, exclrows = NULL,  int.ncomp = 10, int.num = NULL, int.width = NULL, 
+                int.limits = NULL, int.niter = NULL, ncomp.selcrit = 'min', method = 'forward',
+                silent = F) {
+   
+   # process names and values for xaxis
+   xaxis.name = attr(x, 'xaxis.name')
+   if (is.null(xaxis.name))
+      xaxis.name = 'Variables'
+
+   xaxis.values = attr(x, 'xaxis.values')
+   if (is.null(xaxis.values))
+      xaxis.values = 1:ncol(x)
+
    x = as.matrix(x)
    
-   if (is.null(dim(y)))
-   {
-      y = matrix(y, nrow = length(y))       
+   if (is.null(dim(y))) {
+      y = matrix(y, ncol = 1)       
       rownames(y) = rownames(x)
    }    
+  
+   # remove excluded columns and rows   
+   if (length(exclcols) > 0) {
+      x = mda.exclcols(x, exclcols)
+      exclcols = attr(x, 'exclcols')
+      x = x[, -exclcols, drop = F]
+      xaxis.values = xaxis.values[-exclcols]
+      attr(x, 'exclcols') = NULL
+   }
    
-   if (length(dim(y)) != 2)
-   {
+   if (length(exclrows) > 0) {
+      x = mda.exclrows(x, exclrows)
+      exclrows = attr(x, 'exclrows')
+      x = x[-exclrows, , drop = F]
+      y = y[-exclrows, , drop = F]
+      attr(x, 'exclrows') = NULL
+      attr(y, 'exclrows') = NULL
+   }
+   
+   attr(x, 'xaxis.values') = xaxis.values
+   attr(x, 'xaxis.name') = xaxis.name
+   
+   if (length(dim(y)) != 2) {
       stop('Response variable (y) should be a matrix or a sequence!')
    }   
    
-   if (ncol(y) > 1)
-   {
+   if (ncol(y) > 1) {
       warning('iPLS can work with one y-variable at time, selecting first column.')
       y = y[, 1, drop = F]
    }
@@ -125,10 +156,8 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
    nx = ncol(x)
    
    # check and define width and number of intervals
-   if (is.null(int.limits))
-   {   
-      if (is.null(int.width))
-      {   
+   if (is.null(int.limits)) {   
+      if (is.null(int.width)) {   
          if (is.null(int.num))
             stop('Specify either interval width or number of intervals!')
    
@@ -136,9 +165,7 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
             stop('Wrong value for number of intervals')
       
          int.width = nx / int.num
-      }
-      else
-      {
+      } else {
          if (int.width < 1 || int.width > nx)
             stop('Wrong value for interval width!')
 
@@ -146,21 +173,15 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
       }   
    
       # generate interval limits similar to the way from [1]
-      if (int.num == nx)
-      {
+      if (int.num == nx) {
          int1 = 1:nx
          int2 = 1:nx
-      }
-      else
-      {   
+      } else {   
          varrem = nx %% int.num
          nvarrem = trunc(nx/int.num)
-         if (varrem == 0)
-         {
+         if (varrem == 0) {
             int1 = seq(1, nx, by = nvarrem)
-         }  
-         else
-         {   
+         } else {   
             int1 = c(
                seq(1, (varrem - 1) * (nvarrem + 1) + 1, by = nvarrem + 1),
                seq((varrem - 1) * (nvarrem + 1) + 2 + nvarrem, nx, by = nvarrem)
@@ -169,9 +190,7 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
          int2 = c(int1[2:int.num] - 1, nx);
       }
       int.limits = cbind(int1, int2);
-   }
-   else
-   {
+   } else {
       if (is.null(dim(int.limits)) || ncol(int.limits) != 2 || nrow(int.limits) < 2)
          stop('Interval limits shall be provided as a matrix with two columns!')
       
@@ -194,8 +213,7 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
    #stop()
    
   # define number of iterations
-   if (is.null(int.niter))
-   {
+   if (is.null(int.niter)) {
       if (int.num < 30)
          int.niter = int.num
       else
@@ -229,7 +247,9 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
       scale = scale,
       method = method,
       ncomp.selcrit = ncomp.selcrit,
-      silent = silent
+      silent = silent,
+      xaxis.name = xaxis.name,
+      xaxis.values = xaxis.values
    )
    
    # make a global model
@@ -243,14 +263,12 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
    else
       stop('Wrong value for parameter "method"!')
    
-   if (!is.null(obj$int.stat))
-   {
+   if (!is.null(obj$int.stat)) {
       rownames(obj$int.stat) = 1:nrow(obj$int.stat)
       obj$int.stat$R2 = round(obj$int.stat$R2, 3)
    }   
    
-   if (!is.null(obj$glob.stat))
-   {
+   if (!is.null(obj$glob.stat)) {
       rownames(obj$glob.stat) = 1:nrow(obj$glob.stat)
       obj$glob.stat$R2 = round(obj$glob.stat$R2, 3)
    }   
@@ -277,8 +295,7 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
 #' @param obj
 #' object with initial settings for iPLS algorithm
 #'  
-ipls.forward = function(x, y, obj)
-{
+ipls.forward = function(x, y, obj) {
    # define vectors with status, selected and non-selected intervals
    int.nonselected = 1:obj$int.num
    int.selected = NULL
@@ -308,15 +325,13 @@ ipls.forward = function(x, y, obj)
    
    # do loop for max number of intervals
    selind = NULL 
-   for (i in 1:obj$int.niter)
-   {
+   for (i in 1:obj$int.niter) {
       if (!obj$silent)
          cat(sprintf('Iteration %3d/%3d... ', i, obj$int.niter))
       
       sel = NULL
       rmse = 99999999999999
-      for (l in int.nonselected)
-      {
+      for (l in int.nonselected) {
          # combine already selected intervals with the current
          ind = obj$int.limits[l, 1]:obj$int.limits[l, 2]
          Xc = x[, c(selind, ind), drop = F]
@@ -326,8 +341,7 @@ ipls.forward = function(x, y, obj)
                  cv = obj$cv, light = TRUE, ncomp.selcrit = obj$ncomp.selcrit)
          
          # if first round, build a data frame with statistics for each interval
-         if (i == 1)
-         { 
+         if (i == 1) { 
             glob.stat = rbind(glob.stat, 
                               data.frame(
                                  'n' = l,
@@ -356,8 +370,7 @@ ipls.forward = function(x, y, obj)
          }
       }
       
-      if (!is.null(sel))
-      {
+      if (!is.null(sel)) {
          selind = c(selind, obj$int.limits[sel, 1]:obj$int.limits[sel, 2])
          int.nonselected = int.nonselected[int.nonselected != sel]
          int.selected = c(int.selected, sel)
@@ -375,9 +388,7 @@ ipls.forward = function(x, y, obj)
          if (!obj$silent)
             cat(sprintf('selected interval %3d (RMSECV = %f)\n', sel, rmse))
          
-      }
-      else
-      {   
+      } else {   
          # no improvements, quit the outer loop
          break
       }
@@ -411,8 +422,7 @@ ipls.forward = function(x, y, obj)
 #' @param obj
 #' object with initial settings for iPLS algorithm
 #'  
-ipls.backward = function(x, y, obj)
-{
+ipls.backward = function(x, y, obj) {
    # define vectors with status, selected and non-selected intervals
    int.selected = 1:obj$int.num
    int.nonselected = NULL
@@ -442,8 +452,7 @@ ipls.backward = function(x, y, obj)
    
    # do loop for max number of intervals
    unselind = NULL 
-   for (i in 1:obj$int.niter)
-   {
+   for (i in 1:obj$int.niter) {
       if (length(int.selected) == 1)
          break
      
@@ -454,8 +463,7 @@ ipls.backward = function(x, y, obj)
       
       unsel = NULL
       rmse = 99999999999999
-      for (l in int.selected)
-      {
+      for (l in int.selected) {
          # combine already selected intervals with the current
          ind = obj$int.limits[l, 1]:obj$int.limits[l, 2]
          Xc = x[, -c(unselind, ind), drop = F]
@@ -486,8 +494,7 @@ ipls.backward = function(x, y, obj)
          #            obj$int.limits[l, 1],obj$int.limits[l, 2]))
         
          # if last two intervals are left keep them both
-         if (length(int.selected) == 2)
-         {
+         if (length(int.selected) == 2) {
             int.stat = rbind(int.stat, data.frame(
                'n' = l,
                'start' = obj$int.limits[l, 1],
@@ -498,11 +505,8 @@ ipls.backward = function(x, y, obj)
                'R2' = m$cvres$r2[1, m$ncomp.selected]
             ))
             unsel = NULL           
-         }  
-         
-         # else check if rmse has been improved
-         else if (rmse - m$cvres$rmse[1, m$ncomp.selected] > 0)
-         {
+         }  else if (rmse - m$cvres$rmse[1, m$ncomp.selected] > 0) {
+            # else check if rmse has been improved
             ncomp = m$ncomp.selected
             rmse = m$cvres$rmse[1, ncomp]
             r2 = m$cvres$r2[1, ncomp]
@@ -510,8 +514,7 @@ ipls.backward = function(x, y, obj)
          }
       }
       
-      if (!is.null(unsel))
-      {
+      if (!is.null(unsel)) {
          unselind = c(unselind, obj$int.limits[unsel, 1]:obj$int.limits[unsel, 2])
          int.selected = int.selected[int.selected != unsel]
          int.nonselected = c(int.nonselected, unsel)
@@ -529,20 +532,16 @@ ipls.backward = function(x, y, obj)
          if (!obj$silent)
             cat(sprintf('excluded interval %3d (RMSECV = %f)\n', unsel, rmse))
          
-      }
-      else
-      {   
+      } else {   
          # no improvements, quit the outer loop
          break
       }
    }   
    
    # sort last two rows if all intervals were processed
-   if (obj$int.niter == obj$int.num)
-   {  
+   if (obj$int.niter == obj$int.num) {  
       nr = nrow(int.stat)
-      if (int.stat$RMSE[nr] < int.stat$RMSE[nr - 1])
-      {
+      if (int.stat$RMSE[nr] < int.stat$RMSE[nr - 1]) {
          a = int.stat[nr, ]
          int.stat[nr, ] = int.stat[nr - 1, ]
          int.stat[nr - 1, ] = a
@@ -579,8 +578,6 @@ ipls.backward = function(x, y, obj)
 #' iPLS results (object of class ipls)
 #' @param glob.ncomp
 #' number of components for global PLS model with all intervals
-#' @param xlabels
-#' vector with values to be used for x axis ticks (if NULL variable number is used)
 #' @param main 
 #' main title for the plot
 #' @param xlab 
@@ -605,25 +602,21 @@ ipls.backward = function(x, y, obj)
 #'  @seealso 
 #'  \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
 #'    
-plotSelection.ipls = function(obj, glob.ncomp = NULL, xlabels = NULL, main = 'iPLS results', 
-                         xlab = 'Variables', ylab = 'RMSECV', xlim = NULL, ylim = NULL, ...)
-{
+plotSelection.ipls = function(obj, glob.ncomp = NULL, main = 'iPLS results', 
+                         xlab = obj$xaxis.name, ylab = 'RMSECV', xlim = NULL, ylim = NULL, ...) {
    int = obj$int.limits
-   if (!is.null(xlabels))
-   {
+   xlabels = obj$xaxis.values
+   if (!is.null(xlabels)) {
       if (!is.numeric(xlabels))
          stop('Parameter "xlabels" should be a vector with numbers!')
       
-      if (length(xlabels) != (max(int) - min(int) + 1))
+      if (length(xlabels) != (max(int) - min(int) + 1)) {
          stop('Wrong values for "xlabels" parameter!')   
-      else
-      {
+      } else {
          int[, 1] = xlabels[int[, 1]]
          int[, 2] = xlabels[int[, 2]]
       }   
-   }
-   else
-   {
+   } else {
        xlabels = 1:max(int)
    }   
    
@@ -702,8 +695,7 @@ plotSelection.ipls = function(obj, glob.ncomp = NULL, xlabels = NULL, main = 'iP
 #' 
 #' @export      
 plotRMSE.ipls = function(obj, glob.ncomp = NULL, main = 'RMSE development', xlab = 'Iterations', 
-                    ylab = 'RMSECV', xlim = NULL, ylim = NULL, ...)
-{
+                    ylab = 'RMSECV', xlim = NULL, ylim = NULL, ...) {
 
    if (is.null(glob.ncomp))
       glob.ncomp = obj$gm$ncomp.selected
@@ -746,8 +738,7 @@ plotRMSE.ipls = function(obj, glob.ncomp = NULL, main = 'RMSE development', xlab
 #' See details for \code{\link{plotSelection.ipls}}.
 #' 
 #' @export
-plot.ipls = function(x, ...)
-{  
+plot.ipls = function(x, ...) {  
    plotSelection(x, ...)
 }
 
@@ -762,8 +753,7 @@ plot.ipls = function(x, ...)
 #' other arguments
 #'
 #' @export 
-print.ipls = function(x, ...)
-{
+print.ipls = function(x, ...) {
    obj = x
    
    cat('\niPLS results (class ipls)\n')
@@ -800,8 +790,7 @@ print.ipls = function(x, ...)
 #' coefficient of determination for the same model.
 #'
 #' @export 
-summary.ipls = function(object, glob.ncomp = NULL, ...)
-{
+summary.ipls = function(object, glob.ncomp = NULL, ...) {
    # statistics for global model   
    if (is.null(glob.ncomp))
       glob.ncomp = object$gm$ncomp.selected

@@ -4,28 +4,30 @@
 \alias{ldecomp}
 \title{Linear decomposition of data}
 \usage{
-ldecomp(scores = NULL, loadings = NULL, residuals = NULL, totvar,
-  tnorm = NULL, ncomp.selected = NULL, T2 = NULL, Q = NULL,
-  cal = TRUE)
+ldecomp(scores = NULL, residuals = NULL, loadings = NULL,
+  ncomp.selected = NULL, attrs = NULL, tnorm = NULL, dist = NULL,
+  var = NULL, cal = FALSE, totvar = NULL)
 }
 \arguments{
 \item{scores}{matrix with score values (nobj x ncomp).}
 
-\item{loadings}{matrix with loading values (nvar x ncomp).}
-
 \item{residuals}{matrix with data residuals}
 
-\item{totvar}{full variance of original data, preprocessed and centered}
-
-\item{tnorm}{singular values for score normalization}
+\item{loadings}{matrix with loading values (nvar x ncomp).}
 
 \item{ncomp.selected}{number of selected components}
 
-\item{T2}{matrix with calculated T2 values (e.g. for CV)}
+\item{attrs}{list with attributes of original dataset}
 
-\item{Q}{matrix with calculated Q statistic (e.g. for CV)}
+\item{tnorm}{singular values for score normalization}
+
+\item{dist}{list with calculated T2 and Q values (e.g. for CV)}
+
+\item{var}{list with explained and cumulative explained variance (e.g. for CV)}
 
 \item{cal}{logical, true if data is for calibration of a LDECOMP based model}
+
+\item{totvar}{full variance of original data, preprocessed and centered}
 }
 \value{
 Returns an object (list) of \code{ldecomp} class with following fields:

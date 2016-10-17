@@ -5,8 +5,8 @@
 \title{Performance plot for classification model}
 \usage{
 \method{plotPerformance}{classmodel}(obj, nc = NULL, param = "specificity",
-  type = "h", legend = NULL, main = NULL, xlab = "Components",
-  ylab = "", ylim = c(0, 1.15), ...)
+  type = "h", main = NULL, xlab = "Components", ylab = "", ylim = c(0,
+  1.15), ...)
 }
 \arguments{
 \item{obj}{classification model (object of class \code{plsda}, \code{simca}, etc.).}
@@ -17,8 +17,6 @@
 or \code{'misclassified'})}
 
 \item{type}{type of the plot}
-
-\item{legend}{vector with legend items}
 
 \item{main}{main title for the plot}
 

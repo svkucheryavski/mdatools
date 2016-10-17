@@ -4,7 +4,7 @@
 \alias{pls.crossval}
 \title{Cross-validation of a PLS model}
 \usage{
-pls.crossval(model, x, y, cv, center = T, scale = F, jack.knife = T)
+pls.crossval(model, x, y, cv, center, scale, method, jack.knife = T)
 }
 \arguments{
 \item{model}{a PLS model (object of class \code{pls})}
@@ -18,6 +18,8 @@ pls.crossval(model, x, y, cv, center = T, scale = F, jack.knife = T)
 \item{center}{logical, do mean centering or not}
 
 \item{scale}{logical, do standardization or not}
+
+\item{method}{algorithm for computing PLS model}
 
 \item{jack.knife}{logical, do jack-knifing or not}
 }

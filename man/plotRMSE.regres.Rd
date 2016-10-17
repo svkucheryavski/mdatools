@@ -4,8 +4,7 @@
 \alias{plotRMSE.regres}
 \title{RMSE plot for regression results}
 \usage{
-\method{plotRMSE}{regres}(obj, ny = 1, type = "b", main = "RMSE",
-  xlab = "Complexity", ylab = NULL, ...)
+\method{plotRMSE}{regres}(obj, ny = 1, type = "b", labels = "values", ...)
 }
 \arguments{
 \item{obj}{regression results (object of class \code{regres})}
@@ -14,11 +13,7 @@
 
 \item{type}{type of the plot}
 
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
+\item{labels}{what to show as labels for plot objects.}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }

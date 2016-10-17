@@ -5,8 +5,7 @@
 \title{X scores plot for PLS}
 \usage{
 \method{plotXScores}{pls}(obj, comp = c(1, 2), main = "X scores",
-  xlab = NULL, ylab = NULL, show.axes = T, show.labels = F,
-  show.legend = T, ...)
+  show.axes = T, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -15,15 +14,7 @@
 
 \item{main}{main plot title}
 
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
-
-\item{show.labels}{logical, show or not labels for the plot elements}
-
-\item{show.legend}{logical, show or not legend for the plot}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

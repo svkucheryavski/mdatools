@@ -4,8 +4,9 @@
 \alias{pca}
 \title{Principal Component Analysis}
 \usage{
-pca(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
-  alpha = 0.05, method = "svd", info = "")
+pca(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
+  exclcols = NULL, x.test = NULL, alpha = 0.05, method = "svd",
+  info = "")
 }
 \arguments{
 \item{x}{a numerical matrix with calibration data.}
@@ -17,6 +18,10 @@ pca(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
 \item{scale}{logical, do sdandardization of data or not.}
 
 \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
+
+\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
+
+\item{exclcols}{columns to be excluded from calculations (numbers, names or vector with logical values)}
 
 \item{x.test}{a numerical matrix with test data.}
 
@@ -53,10 +58,19 @@ a parameter for selecting an optimal number of components (\code{ncomp.selected}
 number of components is used to build a residuals plot (with Q residuals vs. Hotelling T2 
 values), calculate confidence limits for Q residuals, as well as for SIMCA classification. 
   
-If data contains missing values (NA) the \code{pca} will use an iterative algorithm to fit the 
-values with most probable ones. The algorithm is implemented in a function 
-\code{\link{pca.mvreplace}}. The same center and scale options will be used. You can also
-do this step manually before calling \code{pca} and play with extra options.
+You can provde number, names or logical values to exclode rows or columns from calibration and
+validation of PCA model. In this case the outcome, e.g. scores and loadings will correspond to 
+the original size of the data, but:
+
+\enumerate{
+  \item Loadings (and all performance statistics) will be computed without excluded objects and variables
+  \item Matrix with loadings will have zero values for the excluded variables and the corresponding columns will be hidden.
+  \item Matrix with scores will have score values calculated for the hidden objects but the rows will be hidden.
+}
+
+You can see scores and loadings for hidden rows and columns by using parameter 'show.excluded = T'
+in plots. If you see other packages to make plots (e.g. ggplot2) you will not be able to distinguish
+between hidden and normal objects.
 }
 \examples{
 library(mdatools)
@@ -70,18 +84,6 @@ model = pca(people, scale = TRUE, cv = 1, info = 'Simple PCA model')
 model = selectCompNum(model, 4)
 summary(model)
 plot(model, show.labels = TRUE)
-
-## 2. Add missing values, make a new model and show plots
-peoplemv = people
-peoplemv[2, 7] = NA
-peoplemv[6, 2] = NA
-peoplemv[10, 4] = NA
-peoplemv[22, 12] = NA
-
-modelmv = pca(peoplemv, scale = TRUE, info = 'Model with missing values')
-modelmv = selectCompNum(modelmv, 4)
-summary(modelmv)
-plot(modelmv, show.labels = TRUE)
 
 ## 3. Show scores and loadings plots for the model
 par(mfrow = c(2, 2))

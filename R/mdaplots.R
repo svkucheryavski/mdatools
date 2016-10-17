@@ -34,8 +34,11 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
       fdata = round(data, digits)
    else
       fdata = prettyNum(data, digits = digits)
+   if (!is.null(dim(data))){
+      dim(fdata) = dim(data)
+      dimnames(fdata) = dimnames(data)
+   }
    
-   dimnames(fdata) = dimnames(data)
    fdata
 }
 
@@ -45,10 +48,14 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
 #' Calculates axes limits depending on data values that have to be plotted, 
 #' extra plot elements that have to be shown and margins. 
 #' 
-#' @param data
-#' a matrix or list with data values (values to be plotted).
-#' @param single.x
-#' logical, has data matrix (matrices) one column for X and many for Y or not.
+#' @param x.values
+#' a vector with x values.
+#' @param y.values
+#' a vector or a matrix with y values.
+#' @param lower
+#' a lower margin for y limits.
+#' @param upper
+#' an upper margin for y limits.
 #' @param show.colorbar
 #' logical, show or not the colorbar on the plot.
 #' @param show.lines
@@ -61,10 +68,6 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
 #' position of the legend (see \code{\link{mdaplotg}} for details).
 #' @param show.labels
 #' logical, show or not labels for the data objects
-#' @param xticks
-#' values for x ticks to show
-#' @param yticks
-#' values for yticks to show 
 #' 
 #' @details
 #' Data can be a list with several matrices or just one matrix. The matrices can have single.x
@@ -74,69 +77,37 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
 #' @return
 #' Returns a list with four limits for the x and y axes.
 #'  
-mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines = F, 
+mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
+                              show.colorbar = F, show.lines = F, 
                               legend = NULL, show.legend = F, legend.position = 'topright', 
-                              show.labels = F, xticks = NULL, yticks = NULL)
+                              show.labels = F)
 {   
-   if (is.null(data))
+   if (is.null(x.values) || is.null(y.values))
       return(NULL)
    
-   scale = 0.075 # scale for margins - 7.5% of plot width or height
+   if (is.null(show.labels))
+      show.labels = FALSE
    
-   if (single.x == F )
-   {   
-      # if in every data matrix there are x and y columns for each series
-      
-      if (is.list(data))
-      {
-         xmax = max(data[[1]][, seq(1, ncol(data[[1]]), 2)])
-         xmin = min(data[[1]][, seq(1, ncol(data[[1]]), 2)])
-         ymax = max(data[[1]][, seq(2, ncol(data[[1]]), 2)])
-         ymin = min(data[[1]][, seq(2, ncol(data[[1]]), 2)])
-         
-         for (i in 1:length(data))
-         {
-            xmax = max(xmax, data[[i]][, seq(1, ncol(data[[i]]), 2)])
-            xmin = min(xmin, data[[i]][, seq(1, ncol(data[[i]]), 2)])
-            ymax = max(ymax, data[[i]][, seq(2, ncol(data[[i]]), 2)])
-            ymin = min(ymin, data[[i]][, seq(2, ncol(data[[i]]), 2)])         
-         }   
-      }  
-      else
-      {   
-         xmax = max(data[, seq(1, ncol(data), 2)])
-         xmin = min(data[, seq(1, ncol(data), 2)])
-         ymax = max(data[, seq(2, ncol(data), 2)])
-         ymin = min(data[, seq(2, ncol(data), 2)])
-      }
+   scale = 0.075 # scale for margins - 7.5% of plot width or height
+   xmin = min(x.values)
+   xmax = max(x.values)
+   if (is.null(lower) || is.null(upper)) {
+      ymin = min(y.values, y.values)
+      ymax = max(y.values, y.values)
+   } else {
+      ymin = min(y.values, y.values - lower)
+      ymax = max(y.values, y.values + upper)
    }
-   else
-   {
-      # if in every data matrix first column is x and the other columns are y values
-      
-      if (is.list(data))
-      {
-         xmax = max(data[[1]][, 1])
-         xmin = min(data[[1]][, 1])
-         ymax = max(data[[1]][, 2:ncol(data[[1]])])
-         ymin = min(data[[1]][, 2:ncol(data[[1]])])
-         
-         for (i in 1:length(data))
-         {
-            xmax = max(xmax, data[[i]][, 1])
-            xmin = min(xmin, data[[i]][, 1])
-            ymax = max(ymax, data[[i]][, 2:ncol(data[[i]])])
-            ymin = min(ymin, data[[i]][, 2:ncol(data[[i]])])         
-         }   
-      }  
-      else
-      {   
-         xmax = max(data[, 1])
-         xmin = min(data[, 1])
-         ymax = max(data[, 2:ncol(data)])
-         ymin = min(data[, 2:ncol(data)])
-      }      
-   }   
+   
+   if (xmin == xmax) {
+      xmin = xmin - 0.1
+      xmax = xmax + 0.1
+   }
+   
+   if (ymin == ymax) {
+      ymin = ymin - 0.1
+      ymax = ymax + 0.1
+   }
    
    # correct limits if some lines that have to be shown are outside the data points cloud
    if (is.numeric(show.lines))
@@ -153,20 +124,7 @@ mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines 
          ymax = max(ymax, show.lines[2])
       }   
    }
-  
-   # correct limits for manual tick values
-   if (!is.null(xticks))
-   {
-      xmax = max(xmax, xticks)
-      xmin = min(xmin, xticks)
-   }   
-
-   if (!is.null(yticks))
-   {
-      ymax = max(ymax, yticks)
-      ymin = min(ymin, yticks)
-   }   
-
+   
    # calculate margins: dx and dy
    dx = (xmax - xmin) * scale
    dy = (ymax - ymin) * scale
@@ -222,12 +180,14 @@ mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines 
       ylim[1] = ylim[1] - dy 
       ylim[2] = ylim[2] + dy
    }   
-      
+   
    # return the limits
    lim = list(
       xlim = xlim,
       ylim = ylim
    )   
+   
+   lim
 }
 
 #' Color values for plot elements
@@ -248,13 +208,13 @@ mdaplot.getAxesLim = function(data, single.x = T, show.colorbar = F, show.lines 
 #' @return
 #' Returns vector with generated color values
 #' 
+#' @export
 mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
 {   
    if (length(colmap) == 1)
    {   
       # colormap is a name      
-      if (colmap == 'gray')
-      {   
+      if (colmap == 'gray') {   
          # use grayscale colormap
          palette = c("#E8E8E8", "#D6D6D6", "#C4C4C4", "#B2B2B2", "#9A9A9A", "#808080", "#484848", 
                      "#101010")
@@ -262,9 +222,10 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
          # if only one color is needed reorder pallete so the black is first
          if (is.null(cgroup) && ngroups == 1)
             palette = palette[length(palette):1]      
-      }   
-      else
-      {   
+      } else if (colmap == 'jet') {
+         palette = c("#00007F", "blue", "#007FFF", "cyan",
+           "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000")
+      } else {   
          # use default colormap for colorbrew
          palette = c("#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FEE08B", "#FDAE61", "#F46D43", 
                      "#D53E4F")
@@ -403,7 +364,7 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default')
       labels[, 1] = labels[, 1] + w/2
    
    # show labels for colorbar regions
-   mdaplot.showLabels(labels, pos = 1)
+   mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1)
 }
 
 
@@ -459,8 +420,12 @@ mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, b
 #' Plot labels
 #' Shows labels for data elements (points, bars) on a plot. 
 #'
-#' @param data
-#' data matrix with coordinates of the points (x, y) 
+#' @param x.values
+#' a vector with x-values
+#' @param y.values
+#' a vector with y-values
+#' @param labels
+#' a vector with labels 
 #' @param pos
 #' position of the labels relative to the points
 #' @param cex
@@ -474,26 +439,31 @@ mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, b
 #' Rownames of matrix \code{data} are used as labels. If matrix has no rownames, row numbers
 #' will be used instead.
 #'
-mdaplot.showLabels = function(data, pos = 3, cex = 0.65, col = 'darkgray', type = NULL)
-{
-
-   if (is.null(rownames(data)))
-      rownames(data) = 1:nrow(data)
+mdaplot.showLabels = function(x.values, y.values, labels, pos = 3, 
+                              cex = 0.65, col = 'darkgray', type = NULL) {
+   
+   if (!is.null(dim(y.values)) && nrow(y.values) > 1 && type != 'p')
+      y.values = apply(y.values, 2, max)
    
    # show labels
-   if (!any(is.nan(data)))
-   {
-      if (!is.null(type) && type == 'h')
-      {   
+   x.values = as.vector(x.values)
+   y.values = as.vector(y.values)
+   
+   if (is.numeric(labels))
+      labels = mdaplot.formatValues(labels)
+   
+   if (!any(is.nan(x.values) || is.nan(y.values))) {
+      
+      if (!is.null(type) && type == 'h') {   
          # show labels properly for bars with positive and negative values
-         neg = data[, 2] < 0
+         neg = y.values < 0
          if (sum(neg) > 0)
-            text(data[neg, 1], data[neg, 2], rownames(data)[neg], cex = cex, pos = 1, col = col)   
+            text(x.values[neg], y.values[neg], labels[neg], cex = cex, pos = 1, col = col)   
          if (sum(!neg) > 0)
-            text(data[!neg, 1], data[!neg, 2], rownames(data)[!neg], cex = cex, pos = 3, col = col)   
+            text(x.values[!neg], y.values[!neg], labels[!neg], cex = cex, pos = 3, col = col)   
+      } else {
+         text(x.values, y.values, labels, cex = cex, pos = pos, col = col)   
       }
-      else 
-         text(data[, 1], data[, 2], rownames(data), cex = cex, pos = pos, col = col)   
    }
 }  
 
@@ -515,8 +485,7 @@ mdaplot.showLabels = function(data, pos = 3, cex = 0.65, col = 'darkgray', type 
 #' @details
 #'  If it is needed to show only one line, the other coordinate shall be set to NA.
 #'
-mdaplot.showLines = function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2))
-{
+mdaplot.showLines = function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2)) {
    
    if (!is.na(point[2]))
       abline(h = point[2], lty = lty, lwd = lwd, col = col)
@@ -629,9 +598,9 @@ errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16)
    e1 = (max(x) - min(x)) / (length(x) * 5)
    e = min(e1, e2)
    
-   segments(x, lower, x, upper, col = col)
-   segments(x - e, lower, x + e, lower, col = col)
-   segments(x - e, upper, x + e, upper, col = col)
+   segments(x, y - lower, x, y + upper, col = col)
+   segments(x - e, y - lower, x + e, y - lower, col = col)
+   segments(x - e, y + upper, x + e, y + upper, col = col)
    
    if (!is.null(y))
       points(x, y, col = col, pch = pch)
@@ -642,14 +611,14 @@ errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16)
 #' @description
 #' Creates an empty axes plane for given parameters
 #' 
-#' @param xticks
-#' tick values for x axis
 #' @param xticklabels
 #' labels for x ticks
-#' @param yticks
-#' tick values for y axis
 #' @param yticklabels
 #' labels for y ticks
+#' @param xticks
+#' values for x ticks
+#' @param yticks 
+#' values for y ticks
 #' @param lim
 #' vector with limits for x and y axis
 #' @param main
@@ -658,62 +627,268 @@ errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16)
 #' label for x axis
 #' @param ylab
 #' label for y axis
+#' @param xlas
+#' orientation of xticklabels
+#' @param ylas
+#' orientation of yticklabels
 #' 
-mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
-{
-   if ((!is.null(xticklabels) || !is.null(xticks)) && (!is.null(yticklabels) || !is.null(yticks)))
-   {
-      # tick labels for both x and y axes are provided
-      
-      if (is.null(yticklabels))
-         yticklabels = yticks
-      
-      if (is.null(xticklabels))
-         xticklabels = xticks
-      
-      plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
-           xaxt = 'n', yaxt = 'n')
-      axis(1, at = xticks, labels = xticklabels)
-      axis(2, at = yticks, labels = yticklabels)
-   }
-   else if (!is.null(xticklabels))
-   {
-      # tick labels for x only provided
-      
-      if (is.null(xticklabels))
-         xticklabels = xticks
-      
-      plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
-           xaxt = 'n')
-      axis(1, at = xticks, labels = xticklabels)
-   }  
-   else if (!is.null(yticklabels) || !is.null(yticks))
-   {
-      # tick labels for y only provided
-     
-      if (is.null(yticklabels))
-         yticklabels = yticks
+mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NULL, yticks = NULL, 
+                            lim = NULL, main = NULL, xlab = NULL, ylab = NULL, xlas = 0, ylas = 0) {
+   
+   # make plot without ticks
+   plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
+        xaxt = 'n', yaxt = 'n')
 
-      plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
-           yaxt = 'n')
-      axis(2, at = yticks, labels = yticklabels)
-   }   
-   else
-   {   
-      # no tick labels provided
-      plot(0, 0, type = 'n', main = main, xlim = lim$xlim, ylim = lim$ylim, xlab = xlab, ylab = ylab)
-   }   
+   # generate x ticks
+   if (is.null(xticks)) {
+      xticks = axisTicks(lim$xlim, log = FALSE)
+      # if xticklabels were provided it is expected that xticks should be integers
+      if (!is.null(xticklabels)) 
+         xticks = unique(round(xticks[xticks > 0 & xticks <= length(xticklabels)]))
+   }
+   
+   # check if xtikclabels are provided and show x-axis
+   if (is.null(xticklabels)) {
+      axis(1, at = xticks, las = xlas)
+   } else {
+      lxtl = length(xticklabels)
+      if (lxtl == length(xticks))
+         axis(1, at = xticks, labels = xticklabels, las = xlas)
+      else if (lxtl > length(xticks) && lxtl >= max(xticks) && min(xticks) > 0)
+         axis(1, at = xticks, labels = xticklabels[xticks], las = xlas)
+      else
+         axis(1, at = xticks, las = xlas)
+   }
+   
+   # generate y ticks
+   if (is.null(yticks)) {
+      yticks = axisTicks(lim$ylim, log = FALSE)
+   }
+   
+   # check if yticklabels are provided and show y-axis
+   if (is.null(yticklabels)) {
+      axis(2, at = yticks, las = ylas)
+   } else {
+      lytl = length(yticklabels)
+      if (lytl == length(yticks))
+         axis(2, at = yticks, labels = yticklabels, las = ylas)
+      else if (lytl > length(yticks) && lytl >= max(xticks) && min(yticks) > 0)
+         axis(2, at = yticks, labels = yticklabels[xticks], las = ylas)
+      else
+         axis(2, at = yticks, las = ylas)
+   }
 }
+
+prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, 
+                             show.lines, show.axes) {
+   
+   # check plot type 
+   valid.types = c('p', 'l', 'b', 'h', 'e', 'd')
+   if (!(type %in% valid.types))
+      stop('Wrong plot type!')
+   
+   density = FALSE
+   if (type == 'd') {
+      if (ncol(data) < 2)
+         stop('Density plot can be created for dataset with at least two columns!')
+      type = 'p'
+      density = TRUE
+   }
+   
+   if (is.null(data) || length(data) < 1)
+      stop('The provided dataset is empty!')
+   
+   # correct dimension if one row or one column is provided
+   if (!is.null(dim(data))) {
+      if (nrow(data) == 1 && ncol(data) > 2 && type == 'p') {
+         data = mda.t(data)
+         attr(data, 'xaxis.name') = ifelse(is.null(attr(data, 'xaxis.name')), 'Variables', attr(data, 'xaxis.name'))      
+      } else if (ncol(data) == 1 && !(type == 'p' || type == 'e')) {
+         data = mda.t(data)
+         attr(data, 'xaxis.name') = ifelse(is.null(attr(data, 'xaxis.name')), 'Objects', attr(data, 'xaxis.name'))      
+      }
+   }
+   
+   # get data attributes
+   data.attr = attributes(data)
+  
+   # if data has no dimension   
+   if (is.null(dim(data))) {
+      names = names(data)
+      if (type == 'p') {
+         data = matrix(data, ncol = 1)
+         rownames(data) = names         
+      } else {
+         data = matrix(data, nrow = 1)
+         colnames(data) = names
+      }
+   } 
+
+   data = as.matrix(data)
+   
+   # prepare vector with x.values for non-scatter plots 
+   # we do it here in order to process excluded columns correctly
+   excluded.cols = data.attr$exclcols
+   if (length(excluded.cols) > 0) {
+      excluded.cols = mda.getexclind(excluded.cols, colnames(data), ncol(data))      
+      data = data[, -excluded.cols, drop = F]    
+   }
+   
+   x.values = NULL
+   if (type != 'p' && ncol(data) > 0) {
+      if (is.null(data.attr$xaxis.values)) {
+         x.values = 1:ncol(data)
+         names(x.values) = colnames(data)
+      } else {
+         x.values = data.attr$xaxis.values
+         if (length(excluded.cols) > 0)
+            x.values = x.values[-excluded.cols]
+      }
+   }
+
+
+   # process excluded columns, broken.lines is needed to show line plots with excluded columns correctly
+   #broken.lines = FALSE
+   
+   # process excluded rows
+   excluded.rows = data.attr$exclrows
+   if (!is.null(excluded.rows) && length(excluded.rows) > 0) {
+      excluded.rows = mda.getexclind(excluded.rows, rownames(data), nrow(data))      
+      
+      # if no excluded rows found do not exclude anything
+      if (length(excluded.rows) == 0) {
+         excluded.rows = NULL
+         show.excluded = FALSE
+      }
+   } else {
+      show.excluded = FALSE
+   }
+   
+   # split data to x and y 
+   lower = NULL
+   upper = NULL
+   xaxis.name = data.attr$xaxis.name
+   yaxis.name = data.attr$yaxis.name
+   if (type == 'p') {
+      if (ncol(data) > 1) {
+         x.values = data[, 1]
+         attr(x.values, 'name') = colnames(data)[1]
+         y.values = data[, 2, drop = F]
+         attr(y.values, 'name') = colnames(data)[2]
+      } else {
+         y.values = data[, 1, drop = F]
+         attr(y.values, 'name') = colnames(data)[1]
+         x.values = 1:length(y.values)
+         attr(x.values, 'name') = ifelse(is.null(data.attr$yaxis.name), 'Objects', data.attr$yaxis.name)
+      }
+   } else {
+      # the x.values have been defined earlier     
+      attr(x.values, 'name') = ifelse(is.null(xaxis.name), 'Variables', xaxis.name)
+      
+      # for bar plot we show only the first row
+      if (type == 'h') {
+         y.values = data[1, , drop = F]
+      }
+      
+      # for other types we plot all rows as lines/polygons
+      if (type == 'l' || type == 'b') {
+         y.values = data
+      }
+      
+      # prepare data for errorbar plot
+      if (type == 'e') {
+         if (nrow(data) < 2)
+            stop('For errorbar plot data should contain at least two rows!')
+         y.values = data[1, , drop = F]
+         attr(y.values, 'name') = rownames(data)[1]        
+         lower = data[2, ]
+         if (nrow(data) > 2)
+            upper = data[3, ]
+         else
+            upper = lower
+      }
+      
+      attr(y.values, 'name') = ifelse(is.null(yaxis.name), '', yaxis.name)
+   }
+   
+   # if y.values have no dimension correct this
+   if ( is.null(dim(y.values)) ){
+      y.values = matrix(y.values, nrow = length(y.values))   
+   }
+   
+   # process excluded rows if they have to be shown
+   y.values.excludedrows = NULL
+   x.values.excludedrows = NULL
+   if (length(excluded.rows) > 0 && !(type == 'h' || type == 'e')) {
+      y.values.name = attr(y.values, 'name')
+      y.values.excludedrows = y.values[excluded.rows, , drop = F]
+      y.values = y.values[-excluded.rows, , drop = F]         
+      attr(y.values, 'name') = y.values.name
+      
+      if (type == 'p') {
+         x.values.name = attr(x.values, 'name')
+         x.values.excludedrows = x.values[excluded.rows]
+         x.values = x.values[-excluded.rows]
+         attr(x.values, 'name') = x.values.name
+      }
+   }
+   
+   if (show.axes) {
+      # calculate limits       
+      if (show.excluded) {
+         lim = mdaplot.getAxesLim(c(x.values, x.values.excludedrows), 
+                                  rbind(y.values, y.values.excludedrows),  
+                                  lower = lower,
+                                  upper = upper,
+                                  show.colorbar = show.colorbar, 
+                                  show.labels = show.labels,
+                                  show.lines = show.lines)
+         
+      } else {
+         lim = mdaplot.getAxesLim(x.values, 
+                                  y.values,  
+                                  lower = lower,
+                                  upper = upper,
+                                  show.colorbar = show.colorbar, 
+                                  show.labels = show.labels,
+                                  show.lines = show.lines)
+      }
+   } else {
+      lim = NULL
+   }
+   
+   res = list()
+   res$density = density
+   res$lower = lower
+   res$upper = upper
+   res$x.values = x.values
+   res$y.values = y.values
+   res$x.values.excludedrows = x.values.excludedrows
+   res$y.values.excludedrows = y.values.excludedrows
+   res$lim = lim
+   res$show.excluded = show.excluded
+   res$excluded.rows = excluded.rows
+   res$excluded.cols = excluded.cols
+   res$data.attr = data.attr
+   
+   res
+}
+
+
+
 
 #' Plotting function for a single set of objects
 #'
 #' @description
-#' \code{mdaplot} is used to make a scatter, line or a bar plot for one set of data objects.
+#' \code{mdaplot} is used to make different kinds of plot for one set of data objects.
 #' 
 #' @param data  
-#' a matrix with data values.
+#' a vector, matrix or a data.frame with data values.
+#' @param plot.data
+#' a list of parameters and values obtained after preprocessing of original data provided
+#' by a user (if NULL it will be created automatically) 
 #' @param type  
-#' type of the plot ('p', 'l', 'b', 'h').
+#' type of the plot ('p', 'l', 'b', 'h', 'e', 'i').
 #' @param cgroup  
 #' a vector with values to use for make color groups.
 #' @param colmap  
@@ -740,8 +915,6 @@ mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main,
 #' an overall title for the plot (same as \code{plot} parameter).
 #' @param labels  
 #' a vector with text labels for data points (if NULL, row names will be used).
-#' @param single.x  
-#' logical, is first column of data matrix used for x values (or every odd)?
 #' @param show.labels  
 #' logical, show or not labels for the data objects.
 #' @param show.colorbar  
@@ -752,18 +925,32 @@ mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main,
 #' logical, show or not a grid for the plot.
 #' @param show.axes  
 #' logical, make a normal plot or show only elements (markers, lines, bars) without axes.
-#' @param xticks  
-#' tick values for x axis.
+#' @param xticks
+#' values for x ticks
+#' @param yticks 
+#' values for y ticks
 #' @param xticklabels  
 #' labels for x ticks.
-#' @param yticks  
-#' tick values for y axis.
 #' @param yticklabels  
 #' labels for y ticks.
+#' @param xlas
+#' orientation of xticklabels
+#' @param ylas
+#' orientation of yticklabels
 #' @param lab.col  
 #' color for data point labels.
 #' @param lab.cex  
 #' size for data point labels.
+#' @param show.excluded
+#' logical, show or hide rows marked as excluded (attribute `exclrows`)
+#' @param col.excluded
+#' color for the excluded objects (rows)
+#' @param nbins
+#' if scatter density plot is shown, number of segments to split the plot area into (see also ?smoothScatter)
+#' @param colramp
+#' Colramp function for density scatter plot
+#' @param force.x.values
+#' vector with corrected x-values for a bar plot (do not specify this manually)
 #' @param ...  
 #' other plotting arguments.
 #' 
@@ -772,14 +959,9 @@ mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main,
 #' differences are described below.
 #'   
 #' The function makes a plot of one set of objects. It can be a set of points (scatter plot), 
-#' bars, lines or scatter-lines. The data is organized as a matrix. For scatter and bar plot only 
-#' two columns are needed, but to plot set of lines there are two ways to organise the data matrix.
+#' bars, lines, scatter-lines, errorbars og an image. The data is organized as a data frame, matrix or vector. 
+#' For scatter and only first two columns will be used, for bar plot only values from the first row.
 #' 
-#' If parameter \code{single.x = T} it means first column of the matrix contains x values, as the 
-#' other columns contain y values (one column - one line, e.g. [x y1 y2 y3]). If \code{single.x = F}
-#' it means every odd column of matrix contains x values and every even column - y values of a
-#' line (e.g. [x1 y1 x2 y2 x3 y3]). This option is needed if lines have different x values.
-#'
 #' The function allows to colorize lines and points according to values of a parameter 
 #' \code{cgroup}. The parameter must be a vector with the same elements as number of objects (rows)
 #' in the data. The values are divided into up to eight intervals and for each interval a 
@@ -793,207 +975,241 @@ mdaplot.plotAxes = function(xticks, xticklabels, yticks, yticklabels, lim, main,
 #' The scheme will then be generated automatically as a gradient among the colors.  
 #'
 #' Besides that the function allows to change tick values and corresponding tick labels for x and 
-#' y axis, see examples for more details.
+#' y axis, see Bookdown tutorial for more details.
 #'
 #' @author 
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
 #' 
 #' @seealso 
-#' \code{\link{mdaplotg}} - to make for several sets of data objects (groups of objects).
+#' \code{\link{mdaplotg}} - to make plots for several sets of data objects (groups of objects).
 #'
 #' @examples
-#' library(mdatools)
-#' ### Examples of using mdaplot function
-#'  
-#' ## 1. Make a line plot for y = x^2 with different x values for each line
-#' 
-#' x1 = seq(-10, 10, length = 100) 
-#' y1 = x1^2
-#' x2 = seq(-9, 9, length = 100) + 1
-#' y2 = x2^2 * 1.2
-#' x3 = seq(-8, 8, length = 100) + 2
-#' y3 = x3^2 * 1.4
-#' 
-#' mdaplot(cbind(x1, y1, x2, y2, x3, y3), type = 'l', single.x = FALSE)
-#' 
-#' ## 2. Change tick values and labels for x axis
-#' mdaplot(cbind(x1, y1, x2, y2, x3, y3), type = 'l', single.x = FALSE,
-#'         xticks = c(-8, 0, 8), xticklabels = c('Negative', 'Zero', 'Positive'))
-#' 
-#' 
-#' ## 3. Make a line plot of the spectra with coloring by concentration of first component
-#' ## using different color maps
-#' 
-#' data(simdata)
-#' 
-#' # first column of matrix val will contain the wavelength
-#' # and the last columns - spectra from calibration set
-#' val = cbind(simdata$wavelength, t(simdata$spectra.c))
-#' 
-#' # concentration will be used for color groups
-#' c1 = simdata$conc.c[, 1] 
-#' 
-#' par(mfrow = c(2, 2))
-#' mdaplot(val, type = 'l', cgroup = c1)
-#' mdaplot(val, type = 'l', cgroup = c1, colmap = 'gray', show.colorbar = FALSE)
-#' mdaplot(val, type = 'l', cgroup = c1, colmap = c('red', 'green'))
-#' mdaplot(val, type = 'l', cgroup = c1, colmap = c('#ffff00', '#00ffff'))
-#' par(mfrow = c(1, 1))
-#' 
-#' ## 3. Show scatter plots from spectral data with color groups and other parameters
-#' ## see how limits are adjusted if show.lines option is used
-#' 
-#' nobj = 30
-#' # concentration is used for color groups
-#' c1 = simdata$conc.c[1:nobj, 1]
-#' # x values are absorbance of waveband 100, y values - absorbance for waveband 110
-#' pdata = cbind(
-#'    simdata$spectra.c[1:nobj, 100, drop = FALSE], 
-#'    simdata$spectra.c[1:nobj, 110, drop = FALSE])
-#' 
-#' par(mfrow = c(2, 2))
-#' mdaplot(pdata, cgroup = c1, main = 'Spectra', show.lines = c(0.1, 0.06))
-#' mdaplot(pdata, cgroup = c1, main = 'Spectra', show.lines = c(0.06, 0.01))
-#' mdaplot(pdata, cgroup = c1, xlab = '309 nm', ylab = '319 nm', main = 'Spectra', show.labels = TRUE)
-#' mdaplot(pdata, col = 'red', pch = 17, show.labels = TRUE, labels = paste('Obj', 1:nobj))
-#' par(mfrow = c(1, 1))
+#' # See all examples in the tutorial.
 #' 
 #' @export
-mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8,
+mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8,
                    cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
-                   main = NULL, xlab = NULL, ylab = NULL, single.x = T, show.labels = F, 
+                   main = NULL, xlab = NULL, ylab = NULL, show.labels = F, 
                    show.colorbar = T, show.lines = F, show.grid = T, show.axes = T, 
-                   xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
-                   lab.col = 'darkgray', lab.cex = 0.65, ...)
+                   xticks = NULL, yticks = NULL, xticklabels = NULL, yticklabels = NULL, 
+                   xlas = 0, ylas = 0, lab.col = 'darkgray', lab.cex = 0.65, 
+                   show.excluded = FALSE, col.excluded = '#E0E0E0', nbins = 256,
+                   colramp = mdaplot.getColors, force.x.values = NA, ...)
 {   
-   data = as.matrix(data)
-   
-   if (is.null(dim(data)) || nrow(data) < 1)
-   {   
-      warning('Data matrix is empty!')
-      return
+   if (is.null(plot.data)) {
+      plot.data = prepare.plot.data(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, 
+                                    show.lines, show.axes)
    }
    
+   plot.data$lower -> lower
+   plot.data$upper -> upper
+   plot.data$x.values -> x.values
+   plot.data$y.values -> y.values
+   plot.data$x.values.excludedrows -> x.values.excludedrows
+   plot.data$y.values.excludedrows -> y.values.excludedrows
+   plot.data$lim -> lim
+   plot.data$excluded.rows -> excluded.rows
+   plot.data$excluded.cols -> excluded.cols
+   plot.data$data.attr -> data.attr
+   plot.data$show.excluded -> show.excluded
+   plot.data$density -> density
+   
+   # if some rows are excluded remove part of values from cgroup   
+   if (length(excluded.rows) > 0 && !is.null(cgroup) && length(cgroup) > 1)
+      cgroup = cgroup[-excluded.rows]
+   
+   # processs labels and ticklabels
    if (show.axes == T)
    {  
-
-      if (is.null(xticks) && !is.null(xticklabels))
-         xticks = 1:length(xticklabels)
+      # if some columns are excluded and xticklabels is provided for all columns - exclude some of the values
+      if (!is.null(excluded.cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data))
+         xticklabels = xticklabels[-excluded.cols]
       
-      if (is.null(yticks) && !is.null(yticklabels))
-         yticks = 1:length(yticklabels)
+      nxvals = length(x.values)
       
-      # calculate limits and get proper colors      
-      if (!is.null(cgroup))
-      {   
-         # show color groups according to cdata values
-         lim = mdaplot.getAxesLim(data, show.colorbar = show.colorbar, show.labels = show.labels,
-                                  show.lines = show.lines, single.x = single.x)
+      # if number of x-values is up to 12 show all of them via xticks
+      #if (is.null(xticks) && length(x.values) < 13)
+      #   xticks = x.values
+      
+      # define main label
+      if (is.null(main)) {
+         if (type == 'h' ) {
+            row.names = data.attr$dimnames[[1]]
+            if (!is.null(row.names)) {
+               if (length(excluded.rows) > 0) {
+                  row.names = row.names[-excluded.rows]
+               } 
+               main = row.names[1]
+            }
+         } else {
+            main = data.attr[["name"]]
+         }
       }
-      else   
-      {
-         # show all points with the same color
-         lim = mdaplot.getAxesLim(data, show.lines = show.lines, show.labels = show.labels,
-                                  single.x = single.x, xticks = xticks, yticks = yticks)
+      
+      # define label for x-axis
+      if (is.null(xlab))
+         xlab = attr(x.values, 'name')         
+      
+      # define label for y-axis
+      if (is.null(ylab))
+         ylab = attr(y.values, 'name')
+      
+      # correct xticklabels and xticks if only one variable is provided for line or bar plot      
+      if (type != 'p' && nxvals == 1) {
+         xticks = 1
+         if (is.null(xticklabels))
+            xticklabels = x.values
       }
       
-      # Correct x axis limits if it is a bar plot
-      if (type == 'h')
-         lim$xlim = c(1 - bwd/2 - 0.1, nrow(data) + bwd/2 + 0.1)
+      # correct x axis limits and bar width if it is a bar plot
+      if (type == 'h') {
+         if (nxvals == 1) {
+            lim$xlim = c(x.values - bwd, x.values + bwd)
+         } else {
+            bwd = bwd * min(diff(x.values))
+            lim$xlim = c(min(x.values) - bwd/2, max(x.values) + bwd/2)
+         }
+      }
       
-      # Redefine x axis limits if user specified values
+      # redefine x axis limits if user specified values
       if (!is.null(xlim))
          lim$xlim = xlim
       
-      # Redefine y axis limits if user specified values
+      # redefine y axis limits if user specified values
       if (!is.null(ylim))
          lim$ylim = ylim
       
-      # if user did not specified x axis label use 1st column name for it
-      if (is.null(xlab))
-         xlab = colnames(data)[1]
-      
-      # if user did not specified y axis label use 2nd column name for it
-      if (is.null(ylab))
-         ylab = colnames(data)[2]
-      # make an empty plot with proper limits and axis labels
-      if (!is.list(data) && nrow(data) < 10 && type != 'p' && single.x == T && is.null(xticklabels))
-      {   
-         xticks = data[, 1]
-         xticklabels = data[, 1]
+      # if no x-values were provided to line or bar plot we generate them as integer numbers
+      if ( (type %in% c('h', 'l', 'b')) && is.null(xticks) && is.null(data.attr$xaxis.values)) {
+         xticks = axisTicks(lim$xlim, log = FALSE)
+         xticks = unique(round(xticks[xticks > 0 & xticks <= max(x.values)]))
       }
-      
-      # if number of variables is small set up proper tick labels for x      
-      if (nrow(data) < 10 && single.x == T && type != 'p' && is.null(xticklabels))
-      {
-         xticks =  data[, 1];
-         xticklabels = data[, 1]
-      }
-      
+         
       # make an empty plot with proper limits and axis labels
-      mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
+      mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas) 
    }
    
-   #  get proper colors      
-   if (!is.null(cgroup))
-   {   
+   #  get proper colors     
+   if (density == FALSE && !is.null(cgroup) && !(type == 'h' || type == 'e')) {   
       # show color groups according to cdata values
       col = mdaplot.getColors(cgroup = cgroup, colmap = colmap)
-   }
-   else   
-   {
+   } else {
       # show all points with the same color
       if (is.null(col))
          col = mdaplot.getColors(1, colmap = colmap)
+      # set cgroup to NULL so method will not try to show color groups or colorbar legend
+      cgroup = NULL
    }
-   
-   # get x and y values from data
-   if (type == 'e')
-   {
-      if (ncol(data) != 4)
-         stop('Number of columns in data for errorbar plot should be equal to four!')   
-      
-      x = data[, 1, drop = F]
-      y = data[, 2, drop = F]      
-      lower = data[, 3, drop = F]      
-      upper = data[, 4, drop = F]      
-   }   
-   else if (single.x == T)
-   {   
-      x = data[, 1, drop = F]
-      y = data[, 2:ncol(data), drop = F]
-   }
-   else   
-   {
-      x = data[, seq(1, ncol(data), 2), drop = F]
-      y = data[, seq(2, ncol(data), 2), drop = F]
-   }
-   
-   # set up labels
-   if (!is.null(labels) && !is.logical(labels))
-      rownames(data) = labels
    
    # show grid if needed
    if (show.grid == T)
       mdaplot.showGrid()
    
-   # make plot for the data 
-   if (type == 'p')
-      points(x, y, type = type, col = col, pch = pch, lwd = lwd, ...)
-   else if (type == 'l' || type == 'b')
-      matlines(x, y, type = type, col = col, pch = pch, lty = lty, lwd = lwd, ...)
-   else if (type == 'h')
-      bars(x, y, col = col, bwd = bwd)
-   else if (type == 'e')
-      errorbars(x, lower, upper, y, col = col)
+   # correct x.values if they were forced by bwd
+   if (is.numeric(force.x.values)) {
+      x.values = x.values - bwd/2 + (force.x.values[1] - 0.5) * bwd/force.x.values[2]
+      bwd = bwd/force.x.values[2]
+   }
    
-   # show labels if needed
-   if ((show.labels == T || !is.null(labels)) && type != 'e')
-      mdaplot.showLabels(data, type = type, col = lab.col, cex = lab.cex)   
+   # make plot for the data 
+   if (type == 'p' && density == FALSE)
+      points(x.values, y.values, col = col, pch = pch, lwd = lwd, ...)
+   if (type == 'd' && density == TRUE)
+      {par(new = T);smoothScatter(x.values, y.values, nbin = nbins, colramp = colramp, axes = F, ann = F,...)}
+   else if (type == 'l' || type == 'b')
+      matlines(x.values, t(y.values), type = type, col = col, pch = pch, lty = lty, lwd = lwd, ...)
+   else if (type == 'h')
+      bars(x.values, y.values, col = col, bwd = bwd)
+   else if (type == 'e')
+      errorbars(x.values, lower, upper, y = y.values, col = col, pch = pch)
+   
+   # show excluded rows
+   if (show.excluded) {
+      if (type == 'p')
+         points(x.values.excludedrows, y.values.excludedrows, type = type, col = col.excluded, pch = pch, lwd = lwd, ...)
+      else if (type == 'l' || type == 'b')
+         matlines(x.values, t(y.values.excludedrows), type = type, col = col.excluded, pch = pch, lty = lty, lwd = lwd, ...)
+   }  
    
    # show lines if needed
    if (is.numeric(show.lines) && length(show.lines) == 2 )
       mdaplot.showLines(show.lines)
+   
+   # show labels if needed
+   if (show.labels == T) {
+      # compute vector with y-values for labels (line and linescatter plot)
+      if (type == 'l' || type == 'b') {
+         if (show.excluded == TRUE && length(excluded.rows) > 0){
+            y.values.labels = apply(rbind(y.values, y.values.excludedrows), 2, max)
+         } else {
+            y.values.labels = apply(y.values, 2, max)
+         }
+      }
+      
+      labels.excl = NULL
+      if (is.null(labels) || (length(labels) == 1 && labels == 'names')) {
+         # if labels were not provided, by default use names
+         
+         # generate names if they are empty
+         if (is.null(names(x.values)))
+            names(x.values) = 1:length(x.values)
+         
+         labels.incl = names(x.values)
+         if (length(excluded.rows) > 0) 
+            labels.excl = names(x.values.excludedrows)
+      } else if (length(labels) == 1 && labels == 'values') {
+         if (type == 'p' || type == 'h') {
+            labels.incl = y.values
+            if (length(excluded.rows) > 0)
+               labels.excl = y.values.excludedrows
+         } else {
+            labels.incl = y.values.labels               
+         }
+      } else if (length(labels) == 1 && labels == 'indices') {
+         if (type == 'p') {
+            # if indices are provided via attribute - use them
+            if (!is.null(data.attr$labels))
+               ind = data.attr$labels
+            else
+               ind = 1:(nrow(y.values) + 
+                           ifelse(
+                              is.null(y.values.excludedrows), 
+                              0, 
+                              nrow(y.values.excludedrows)
+                           )
+               )
+            if (length(excluded.rows) > 0) {
+               labels.incl = ind[-excluded.rows]
+               labels.excl = ind[excluded.rows]
+            } else {
+               labels.incl = ind
+            }
+         } else {
+            labels.incl = 1:length(x.values)
+         }
+      } else {
+         # labels were provided
+         if (length(excluded.rows) > 0) {
+            labels.incl = labels[-excluded.rows]
+            labels.excl = labels[excluded.rows]
+         } else {
+            labels.incl = labels
+         }
+      }
+      
+      if (type == 'l' || type == 'b') {
+         y.values = y.values.labels
+      }
+      
+      if (is.null(labels.incl) || length(labels.incl) != length(x.values))
+         stop('No correct labels or label type was provided!')
+      
+      mdaplot.showLabels(x.values, y.values, labels.incl, type = type, col = lab.col, cex = lab.cex)   
+      
+      if (show.excluded && !is.null(labels.excl) && type == 'p') {
+         mdaplot.showLabels(x.values.excludedrows, y.values.excludedrows, labels.excl, type = type, col = lab.col, cex = lab.cex)   
+      }        
+   }      
    
    # show colorbar if needed
    if (!is.null(cgroup) && show.colorbar == T)
@@ -1003,13 +1219,13 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 #' Plotting function for several sets of objects
 #'
 #' @description 
-#' \code{mdaplotg} is used to make scatter, line or bar plots or their combination for several sets 
+#' \code{mdaplotg} is used to make different kinds of plots or their combination for several sets 
 #' of objects.
 #'
 #' @param data  
-#' a list with data values (see details below).
+#' a matrix, data frame or a list with data values (see details below).
 #' @param type  
-#' type of the plot ('p', 'l', 'b', 'h').
+#' type of the plot ('p', 'l', 'b', 'h', 'e').
 #' @param pch  
 #' a character for markers (same as \code{plot} parameter).
 #' @param lty  
@@ -1036,8 +1252,6 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 #' a colormap to use for coloring the plot items.
 #' @param legend.position  
 #' position of the legend ('topleft', 'topright', 'top', 'bottomleft', 'bottomright', 'bottom').
-#' @param single.x  
-#' logical, is first column of data matrix used for x values (or every odd)?
 #' @param show.legend  
 #' logical, show or not legend for the data objects.
 #' @param show.labels  
@@ -1054,10 +1268,18 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 #' tick values for y axis.
 #' @param yticklabels  
 #' labels for y ticks.
+#' @param xlas
+#' orientation of xticklabels
+#' @param ylas
+#' orientation of yticklabels
 #' @param lab.col  
 #' color for data point labels.
 #' @param lab.cex  
 #' size for data point labels.
+#' @param show.excluded
+#' logical, show or hide rows marked as excluded (attribute `exclrows`)
+#' @param groupby
+#' one or several factors used to create groups of data matrix rows (works if data is a matrix)
 #' @param ...  
 #' other plotting arguments.
 #' 
@@ -1070,7 +1292,8 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 #' Most of the parameters are similar to \code{\link{mdaplot}}, the difference is described below.
 #' 
 #' The data should be organized as a list, every item is a matrix with data for one set of objects.
-#' See examples for details.
+#' Alternatively you can provide data as a matrix and use parameter \code{groupby} to create groups.
+#' See tutorial for more details. 
 #' 
 #' There is no color grouping option, because color is used to separate the sets. Marker symbol, 
 #' line style and type, etc. can be defined as a single value (one for all sets) and as a vector 
@@ -1079,114 +1302,81 @@ mdaplot = function(data, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd
 #' @author 
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
 #' 
-#' @examples 
-#' ### Examples of using mdaplotg
-#' 
-#' ## 1. Show scatter plot for with height and weight values 
-#' ## for males and females
-#' 
-#' data(people)
-#' 
-#' sex = people[, 'Sex']
-#' fdata = cbind(people[sex == 1, 'Height'], people[sex == 1, 'Weight'])
-#' mdata = cbind(people[sex == -1, 'Height'], people[sex == -1, 'Weight'])
-#' colnames(fdata) = colnames(mdata) = c('Height', 'Weight')
-#' pdata = list(fdata, mdata)
-#' 
-#' par(mfrow = c(2, 2))
-#' mdaplotg(pdata, legend = c('female', 'male'))
-#' mdaplotg(pdata, legend = c('female', 'male'), pch = c(17, 19), colmap = c('green', 'orange'))
-#' mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', colmap = 'gray')
-#' mdaplotg(pdata, legend = c('female', 'male'), legend.position = 'topleft', show.labels = TRUE)
-#' par(mfrow = c(1, 1))
-#' 
-#' ## 2. Change tick values for x axis
-#' mdaplotg(pdata, legend = c('female', 'male'), xticks = c(160, 175, 190), 
-#'          xticklabels = c('Short', 'Medium', 'Tall'))
-#' 
-#' ## 3. Show line plots with spectra from calibration and test set of the Simdata
-#' 
-#' data(simdata)
-#' 
-#' cdata = cbind(simdata$wavelength, t(simdata$spectra.c))
-#' tdata = cbind(simdata$wavelength, t(simdata$spectra.t))
-#' pdata = list(cdata, tdata)
-#' 
-#' par(mfrow = c(2, 2))
-#' mdaplotg(pdata, type = 'l', legend = c('cal', 'test'))
-#' mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), xlab = 'Wavelength, nm', ylab = 'Log(1/R)')
-#' mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), lty = c(3, 2))
-#' mdaplotg(pdata, type = 'l', legend = c('cal', 'test'), lwd = 2, colmap = c('green', 'orange'))
-#' par(mfrow = c(1, 1))
-#' 
-#' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text
+#' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text image plot.new rasterImage smoothScatter
+#' @importFrom grDevices axisTicks dev.cur 
 #' 
 #' @export
-mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
+mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
                     legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', 
-                    single.x = T, show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
+                    show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
-                    lab.col = 'darkgray', lab.cex = 0.65, ...)
-{   
-   #   If data for bar plot is organized as a list, the X values should be contioneous,
-   #   e.g. 1:20 for first item, 21:35, for second, 36:42 for third, etc.
-      
-   # get number of groups
-   if (!is.list(data))
-   {   
-      if (single.x == T)
-         ngroups = ncol(data) - 1
-      else
-         ngroups = round(ncol(data)/2)
-   }
-   else
-   {   
-      ngroups = length(data)
-   }
+                    show.excluded = FALSE, lab.col = 'darkgray', lab.cex = 0.65, xlas = 1, ylas = 1, ...) {   
 
-   if (is.null(xticks) && !is.null(xticklabels))
-      xticks = 1:length(xticklabels)
+   # name for the plot (mdain)
+   name = NULL
    
-   if (is.null(yticks) && !is.null(yticklabels))
-      yticks = 1:length(yticklabels)
+   # prepare list with groups of objects
+   if (is.matrix(data) || is.data.frame(data)) {
+      if (is.null(groupby)) {
+         # take every line as a group
+         name = attr(data, 'name', exact = TRUE)
+         
+         if (!all(type %in% c('h', 'l', 'b')))
+            stop('Group plot with just one matrix or dataframe is available only for types "h", "l" and "b"!')
+         
+         # split data into a list of subsets for each group
+         data.list = list()
+         for (i in 1:nrow(data)) {
+            data.list[[i]] = mda.subset(data, subset = i)
+         }
+         
+         # get rownames as legend values
+         if (is.null(legend))
+            legend = rownames(data)
+         
+         # redefine the data with list
+         data = data.list
+      } else {
+         # split rows into groups using data frame with factors
+         
+         if (is.data.frame(groupby))
+            is.groupby.factor = all(unlist(lapply(groupby, is.factor)))
+         else
+            is.groupby.factor = is.factor(groupby)
+         
+         if (is.groupby.factor == FALSE)
+            stop('Parameter "groupby" should be a factor or data frame with several factors')
+         
+         attrs = mda.getattr(data)
+         data = as.data.frame(data)
+         
+         # in this case if labels = indices generate labels for each case
+         data$row.ind = 1:nrow(data)
+         data = split(data, groupby)
+         for (i in 1:length(data)) {
+            row.ind = data[[i]]$row.ind
+            data[[i]] = subset(data[[i]], select = -row.ind)
+            data[[i]] = mda.setattr(data[[i]], attrs)
+            attr(data[[i]], 'exclrows') = which(row.ind %in% attrs$exclrows)
+            attr(data[[i]], 'labels') = row.ind
+         }
+      }
+   } 
    
    # check if plot.new() should be called first
-   tryCatch(
-      {par(new = TRUE)},
-      warning = function(w){plot.new()},
-      finally = {par(new = FALSE)}
-   )
+   if (dev.cur() == 1)
+      plot.new()
    
-   # calculate limits and get colors
-   lim = mdaplot.getAxesLim(data, show.lines = show.lines, single.x = single.x, 
-                            show.legend = show.legend, legend = legend, show.labels = show.labels,
-                            legend.position = legend.position, xticks = xticks, yticks = yticks)
-
-   if (!is.null(ylim))
-      lim$ylim = ylim
-   
-   if (!is.null(xlim))
-      lim$xlim = xlim
-   
-   col = mdaplot.getColors(ngroups, colmap = colmap)
+   ngroups = length(data)
    
    # if plot type is not specified for each group multply default value
    if (length(type) == 1)
       type = rep(type, ngroups)
    else if (length(type) != ngroups)
       stop('Parameter "type" should be specified for each group or be common for all!')
-   else if (!(sum(type == 'h') == 0 | sum(type == 'h') == length(pch)))
-      stop('Barplot (type = "h") for groups can not be combined with other plots!');
-      
-   # Correct x axis limits if it is a bar plot
-   if (type[1] == 'h')
-   {
-      if (is.list(data))      
-         lim$xlim = c(1 - bwd/2 - 0.1, lim$xlim[2] + bwd/2 + 0.1)
-      else   
-         lim$xlim = c(1 - bwd/2 - 0.1, nrow(data) + bwd/2 + 0.1)
-   }   
+   #else if (!(sum(type == 'h') == 0 | sum(type == 'h') == length(pch)))
+   #   stop('Barplot (type = "h") for groups can not be combined with other plots!');
    
    # if marker symbol is not specified for each group multply default value
    if (!is.numeric(pch))
@@ -1212,92 +1402,94 @@ mdaplotg = function(data, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
    else if (length(lwd) != ngroups)
       stop('Parameter "lwd" hould be specified for each group or be common for all!')
    
-   # define axis labels as data column names if they are not specified
-   if (is.null(xlab) && !is.null(colnames(data[[1]])))
-       xlab = colnames(data[[1]])[1]
+   # if label color is not specified for each group multply default value
+   if (length(lab.col) == 1)
+      lab.col = rep(lab.col, ngroups)
+   else if (length(lab.col) != ngroups)
+      stop('Parameter "lab.col" should be specified for each group or be common for all!')
    
-   if (is.null(ylab) && !is.null(colnames(data[[1]])))
-      ylab = colnames(data[[1]])[2]
-
-   # if data is small set up proper x tick labels
-   if (!is.list(data) && nrow(data) < 10 && type != 'p' && single.x == T && is.null(xticklabels))
-   {   
-      xticks = data[, 1]
-      xticklabels = data[, 1]
+   # get plot data for each group 
+   pd = list()
+   for (i in 1:ngroups) {
+      pd[[i]] = prepare.plot.data(data[[i]], type[i], xlim, ylim, bwd, show.excluded, show.colorbar = FALSE, show.labels, 
+                                  show.lines, show.axes = TRUE)
    }
+   
+   # process legend
+   if (is.null(legend)) {
+      legend = names(data)
+      if (is.null(legend)) {
+         if (all(type == 'h'))
+            legend = unlist(lapply(pd, function(x) {rownames(x$y.values)[1]}))
+         else
+            legend = unlist(lapply(pd, function(x) {x$data.attr$name}))
+      }
+   }
+   
+   # compute limits   
+   loc.xlim = matrix(unlist(lapply(pd, function(x) {x$lim$xlim})), ncol = 2, byrow = TRUE)
+   loc.ylim = matrix(unlist(lapply(pd, function(y) {y$lim$ylim})), ncol = 2, byrow = TRUE)
+   
+   loc.xlim = c(min(loc.xlim[, 1]), max(loc.xlim[, 2]))
+   loc.ylim = c(min(loc.ylim[, 1]), max(loc.ylim[, 2]))
+   lim = list(xlim = loc.xlim, ylim = loc.ylim)
+
+   # change limits to user defined if any
+   if (!is.null(ylim))
+      lim$ylim = ylim
+   
+   # correct x limits if bar plot should be shown
+   if (any(type == 'h')) {
+      dx = 0.35
+      lim$xlim = lim$xlim + c(-dx, dx)
+   }
+   
+   if (!is.null(xlim))
+      lim$xlim = xlim
+   
+   col = mdaplot.getColors(ngroups, colmap = colmap)
+   
+   if (is.null(main) && !is.null(name))
+      main = name
+
+   # define main label
+   if (is.null(main))
+      main = pd[[1]]$data.attr[['name']]
+   
+   # define label for x-axis
+   if (is.null(xlab))
+      xlab = attr(pd[[1]]$x.values, 'name', exact = TRUE)         
+   
+   # define label for y-axis
+   if (is.null(ylab))
+      ylab = attr(pd[[1]]$y.values, 'name', exact = TRUE)
    
    # make an empty plot with proper limits and axis labels
-   mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab, ylab)
-   
-   if (show.grid == T)
-      mdaplot.showGrid()
-   
-   # make a plot for each group   
-   if (is.list(data))
-   {   
-      for (i in 1:ngroups)
-      {
-         if (!is.null(labels) && type[i] != 'e')
-         {
-            show(labels)
-            show(type)
-            if (is.list(labels))
-               slabels = labels[[i]]
-            else
-               slabels = labels[, i]
-         }
-         else
-         {
-            slabels = NULL
-         }   
-         
-         mdaplot(data[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
-                 lwd = lwd[i],
-                 labels = slabels, show.grid = F, show.axes = F, show.labels = show.labels,
-                 lab.col = lab.col, lab.cex = lab.cex)
-      }
-   }
-   else
-   {
-      if (single.x == T)
-      {   
-         gbwd = bwd/ngroups            
-         for (i in 1:ngroups)
-         {
-            if (type[1] == 'h')
-            {
-               x = (1:nrow(data)) + gbwd * (i - 1) - gbwd/2 * (ngroups - 1)   
-            }  
-            else
-            {   
-               x = data[, 1, drop = F]
-            }
-            
-            y = data[, i + 1, drop = F]
-            
-            mdaplot(cbind(x, y), type = type[i], col = col[i], pch = pch[i], lty = lty[i],
-                    lwd = lwd[i],
-                    bwd = 0.9 * gbwd, labels = labels[, i], show.labels = show.labels,
-                    show.grid = F, show.axes = F, lab.col = lab.col, lab.cex = lab.cex)
-         }
-      }         
-      else
-      {
-         for (i in 1:ngroups)
-         {
-            x = data[, 2 * i - 1, drop = F]
-            y = data[, 2 * i, drop = F]
-            mdaplot(cbind(x, y), type = type[i], col = col[i], pch = pch[i], lty = lty[i],
-                    lwd = lwd[i],
-                    labels = labels[, i], show.grid = F, show.axes = F, show.labels = show.labels,
-                    lab.col = lab.col, lab.cex = lab.cex)
-         }
-      }
-   }  
+   mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas)
    
    # show lines if needed
    if (is.numeric(show.lines) && length(show.lines) == 2 )
       mdaplot.showLines(show.lines)
+   
+   # show initial exes
+   if (show.grid == T)
+      mdaplot.showGrid()
+   
+   nbarplots =  sum(type == 'h')
+   
+   # make a plot for each group   
+   for (i in 1:ngroups) {
+      if (type[i] == 'h')
+         force.x.values = c(i, nbarplots)
+      else
+         force.x.values = NA
+      mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
+              lwd = lwd[i], force.x.values = force.x.values, bwd = bwd,
+              labels = labels, show.grid = F, show.labels = show.labels,
+              lab.col = lab.col[i], lab.cex = lab.cex, show.axes = FALSE, ...
+      )
+   }  
+   
    
    # show legend if needed
    if (!is.null(legend) && length(legend) > 0 && show.legend == T)

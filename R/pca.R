@@ -13,6 +13,10 @@
 #' logical, do sdandardization of data or not.
 #' @param cv
 #' number of segments for random cross-validation (1 for full cross-validation).
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclcols
+#' columns to be excluded from calculations (numbers, names or vector with logical values)
 #' @param x.test
 #' a numerical matrix with test data.
 #' @param alpha
@@ -29,11 +33,20 @@
 #' number of components is used to build a residuals plot (with Q residuals vs. Hotelling T2 
 #' values), calculate confidence limits for Q residuals, as well as for SIMCA classification. 
 #'   
-#' If data contains missing values (NA) the \code{pca} will use an iterative algorithm to fit the 
-#' values with most probable ones. The algorithm is implemented in a function 
-#' \code{\link{pca.mvreplace}}. The same center and scale options will be used. You can also
-#' do this step manually before calling \code{pca} and play with extra options.
+#' You can provde number, names or logical values to exclode rows or columns from calibration and
+#' validation of PCA model. In this case the outcome, e.g. scores and loadings will correspond to 
+#' the original size of the data, but:
 #' 
+#' \enumerate{
+#'   \item Loadings (and all performance statistics) will be computed without excluded objects and variables
+#'   \item Matrix with loadings will have zero values for the excluded variables and the corresponding columns will be hidden.
+#'   \item Matrix with scores will have score values calculated for the hidden objects but the rows will be hidden.
+#' }
+#'
+#' You can see scores and loadings for hidden rows and columns by using parameter 'show.excluded = T'
+#' in plots. If you see other packages to make plots (e.g. ggplot2) you will not be able to distinguish
+#' between hidden and normal objects. 
+#'   
 #' @return 
 #' Returns an object of \code{pca} class with following fields:
 #' \item{ncomp }{number of components included to the model.} 
@@ -84,18 +97,6 @@
 #' summary(model)
 #' plot(model, show.labels = TRUE)
 #' 
-#' ## 2. Add missing values, make a new model and show plots
-#' peoplemv = people
-#' peoplemv[2, 7] = NA
-#' peoplemv[6, 2] = NA
-#' peoplemv[10, 4] = NA
-#' peoplemv[22, 12] = NA
-#' 
-#' modelmv = pca(peoplemv, scale = TRUE, info = 'Model with missing values')
-#' modelmv = selectCompNum(modelmv, 4)
-#' summary(modelmv)
-#' plot(modelmv, show.labels = TRUE)
-#' 
 #' ## 3. Show scores and loadings plots for the model
 #' par(mfrow = c(2, 2))
 #' plotScores(model, comp = c(1, 3), show.labels = TRUE)
@@ -113,46 +114,17 @@
 #' par(mfrow = c(1, 1))
 #'
 #' @export   
-pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL, 
-               alpha = 0.05, method = 'svd', info = '')
-{
-   x = as.matrix(x)
-
-   # check if data has missing values
-   if (sum(is.na(x)) > 0)
-   {
-      warning('Data has missing values, will try to fix using pca.mvreplace.')
-      x = pca.mvreplace(x, center = center, scale = scale)
-   }   
+pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
+               exclcols = NULL, x.test = NULL, alpha = 0.05, method = 'svd', info = '') {
    
-   # correct maximum number of components
-   ncomp = min(ncomp, ncol(x), nrow(x) - 1)
-
-   # calibrate model  
-   model = pca.cal(x, ncomp, center = center, scale = scale, method = method)
-   model$ncomp = ncomp
-   model$ncomp.selected = model$ncomp
-   model$info = info
-   model$alpha = alpha
-   
-   # apply model to calibration set
-   model$calres = predict.pca(model, x)
-   
-   # do cross-validation if needed
-   if (!is.null(cv))
-      model$cvres = pca.crossval(model, x, cv, center = center, scale = scale)
+   # calibrate and cross-validate model  
+   model = pca.cal(x, ncomp, center = center, scale = scale, method = method, exclcols = exclcols, 
+                   exclrows = exclrows, cv = cv, alpha = alpha, info = info)
+   model$call = match.call()   
    
    # apply model to test set if provided
    if (!is.null(x.test))
       model$testres = predict.pca(model, x.test)
-   
-   # calculate and assign limit values for T2 and Q residuals
-   lim = ldecomp.getResLimits(model$eigenvals, nrow(x), model$ncomp, model$alpha)
-   model$T2lim = lim$T2lim
-   model$Qlim = lim$Qlim
-   
-   model$call = match.call()   
-   class(model) = "pca"
    
    model
 }
@@ -167,8 +139,8 @@ pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
 #' @param ...
 #' other parameters
 #' 
-getCalibrationData.pca = function(obj, ...)
-{
+#' @export
+getCalibrationData.pca = function(obj, ...) {
    x = tcrossprod(obj$calres$scores, obj$loadings) + obj$calres$residuals
    
    if (is.numeric(attr(x, 'prep:scale')))
@@ -176,7 +148,8 @@ getCalibrationData.pca = function(obj, ...)
    
    if (is.numeric(attr(x, 'prep:center')))
       x = sweep(x, 2L, attr(x, 'prep:center'), '+', check.margin = F)
-   
+  
+   x = mda.setattr(x, mda.getattr(obj$calres$residuals)) 
    x
 }
 
@@ -194,8 +167,7 @@ getCalibrationData.pca = function(obj, ...)
 #' the same model with selected number of components
 #' 
 #' @export
-selectCompNum.pca = function(model, ncomp)
-{
+selectCompNum.pca = function(model, ncomp) {
    if (ncomp < 1 || ncomp > model$ncomp)
       stop('Wrong number of selected components!')
    
@@ -270,8 +242,7 @@ selectCompNum.pca = function(model, ncomp)
 #' 
 #' @export
 pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
-                         expvarlim = 0.95, covlim = 10^-6, maxiter = 100)
-{
+                         expvarlim = 0.95, covlim = 10^-6, maxiter = 100) {
    x.rep = x
    mvidx = is.na(x.rep)
 
@@ -350,6 +321,28 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
    x.rep
 }
 
+#' Runs one of the selected PCA methods
+#' 
+#' @param x
+#' data matrix 
+#' @param ncomp
+#' number of components 
+#' @param method
+#' name of PCA methods ('svd', 'nipals')
+#' 
+#' @export
+pca.run = function(x, ncomp, method) {
+   # compute loadings, scores and eigenvalues for data without excluded elements
+   if (method == 'svd')
+      res = pca.svd(x, ncomp)
+   else if(method == 'nipals')
+      res = pca.nipals(x, ncomp)
+   else
+      stop('Wrong value for PCA method!')
+   
+   res
+}
+
 #' PCA model calibration
 #' 
 #' @description
@@ -365,28 +358,119 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
 #' logical, do standardization or not
 #' @param method
 #' algorithm for compiting PC space (only 'svd' and 'nipals' are supported so far)
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclcols
+#' columns to be excluded from calculations (numbers, names or vector with logical values)
+#' @param cv
+#' number of segments for random cross-validation (1 for full cross-validation).
+#' @param alpha
+#' significance level for calculating limit for Q residuals.
+#' @param info
+#' a short text line with model description.
 #' 
 #' @return
 #' an object with calibrated PCA model
 #' 
-pca.cal = function(x, ncomp, center = T, scale = F, method = 'svd')
-{
-   x = prep.autoscale(x, center = center, scale = scale)
+pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL, exclrows = NULL, cv, alpha, info) {
+   # prepare empty list for model object
+   model = list()
    
-   if (method == 'svd')
-      model = pca.svd(x, ncomp)
-   else if(method == 'nipals')
-      model = pca.nipals(x, ncomp)
-   else
-      stop('Wrong value for PCA method!')
+   if (length(exclcols) > 0)
+      x = mda.exclcols(x, exclcols)
    
-   model$tnorm = sqrt(colSums(model$scores ^ 2)/(nrow(model$scores) - 1));   
+   if (length(exclrows) > 0)
+      x = mda.exclrows(x, exclrows)
    
-   rownames(model$loadings) = colnames(x)
-   colnames(model$loadings) = paste('Comp', 1:ncol(model$loadings))
-   model$center = attr(x, 'prep:center')
-   model$scale = attr(x, 'prep:scale')
-      
+   # get attributes
+   attrs = mda.getattr(x)
+   
+   # convert data to a matrix 
+   x = mda.df2mat(x)
+   x.nrows = nrow(x)
+   x.ncols = ncol(x)
+   
+   # check if data has missing values
+   if (any(is.na(x)))
+      stop('Data has missing values, try to fix this using pca.mvreplace.')
+   
+   
+   # correct maximum number of components
+   ncols = x.ncols - length(attrs$exclcols) 
+   nrows = x.nrows - length(attrs$exclrows) 
+   ncomp = min(ncomp, ncols, nrows - 1)
+  
+   # prepare data for model calibration and cross-validation
+   x.cal = x
+   
+   # remove excluded rows 
+   if (length(attrs$exclrows) > 0)
+      x.cal = x.cal[-attrs$exclrows, , drop = F]
+  
+   # autoscale and save the mean and std values for predictions 
+   x.cal = prep.autoscale(x.cal, center = center, scale = scale)
+   model$center = attr(x.cal, 'prep:center')
+   model$scale = attr(x.cal, 'prep:scale')
+   
+   # remove excluded columns
+   if (length(attrs$exclcols) > 0)
+      x.cal = x.cal[, -attrs$exclcols, drop = F]
+   
+   # compute loadings, scores and eigenvalues for data without excluded elements
+   res = pca.run(x.cal, ncomp, method)
+   
+   # correct loadings for missing columns in x 
+   # corresponding rows in loadings will be set to 0 and excluded
+   loadings = matrix(0, nrow = x.ncols, ncol = ncomp)
+   
+   if (length(attrs$exclcols) > 0) {
+      loadings[-attrs$exclcols, ] = res$loadings
+      loadings = mda.exclrows(loadings, attrs$exclcols)      
+   } else {
+      loadings = res$loadings
+   }
+
+   # set names and attributes for the loadings
+   rownames(loadings) = colnames(x)
+   colnames(loadings) = paste('Comp', 1:ncol(loadings))
+   attr(loadings, 'name') = 'Loadings'
+   attr(loadings, 'xaxis.name') = 'Components'
+   attr(loadings, 'yaxis.name') = attrs$xaxis.name
+   attr(loadings, 'yaxis.values') = attrs$xaxis.values
+  
+   # add calculated loadings and eigenvalues to the model object
+   model$loadings = loadings
+   model$eigenvals = res$eigenvals
+   model$method = method
+   
+   # calculate tnorm using data without excluded values
+   model$tnorm = sqrt(colSums(res$scores ^ 2)/(nrow(res$scores) - 1));   
+
+   # setup other fields and return the model   
+   model$ncomp = ncomp
+   model$ncomp.selected = model$ncomp
+   model$info = info
+   model$alpha = alpha
+
+   # compute statistical limits for the distances
+   lim = ldecomp.getResLimits(res$eigenvals, nobj = nrows, ncomp = ncomp, alpha = alpha)
+   model$Qlim = lim$Qlim
+   model$T2lim = lim$T2lim
+   model$exclcols = attrs$exclcols
+   model$exclrows = attrs$exclrows
+   
+   class(model) = "pca"
+   
+   # get calibration results
+   model$calres = predict(model, x, cal = TRUE)
+   model$calres$Qlim = model$Qlim
+   model$calres$T2lim = model$T2lim
+   model$modpower = model$calres$modpower
+   
+   # do cross-validation if needed
+   if (!is.null(cv))
+      model$cvres = pca.crossval(model, x, cv, center = center, scale = scale)
+
    model
 }  
 
@@ -403,8 +487,7 @@ pca.cal = function(x, ncomp, center = T, scale = F, method = 'svd')
 #' @return
 #' a list with scores, loadings and eigencalues for the components
 #' 
-pca.svd = function(x, ncomp = NULL)
-{
+pca.svd = function(x, ncomp = NULL) {
    if (is.null(ncomp)) 
       ncomp = min(ncol(x), nrow(x) - 1)
    else
@@ -440,8 +523,7 @@ pca.svd = function(x, ncomp = NULL)
 #' Geladi, Paul; Kowalski, Bruce (1986), "Partial Least Squares 
 #' Regression:A Tutorial", Analytica Chimica Acta 185: 1-17 
 #'    
-pca.nipals = function(x, ncomp)
-{
+pca.nipals = function(x, ncomp) {
    nobj = nrow(x)
    nvar = ncol(x)   
    ncomp = min(ncomp, nobj - 1, nvar)
@@ -501,47 +583,72 @@ pca.nipals = function(x, ncomp)
 #' @return
 #' object of class \code{pcares} with results of cross-validation
 #'  
-pca.crossval = function(model, x, cv, center = T, scale = F)
-{      
-   ncomp = model$ncomp   
-   nobj = nrow(x)
+pca.crossval = function(model, x, cv, center = T, scale = F) {
+
+   # get attributes
+   attrs = attributes(x)
+   
+   # remove excluded rows 
+   if (length(attrs$exclrows) > 0)
+      x = x[-attrs$exclrows, , drop = F]
+   
+   # remove excluded columns 
+   if (length(attrs$exclcols) > 0)
+      x = x[-attrs$exclcols, , drop = F]
    
    # get matrix with indices for cv segments
+   nobj = nrow(x)
    idx = crossval(nobj, cv)
    nrep = dim(idx)[3]
       
+   ncomp = model$ncomp   
    Q = matrix(0, ncol = ncomp, nrow = nobj)   
    T2 = matrix(0, ncol = ncomp, nrow = nobj)   
    
    # loop over repetitions and segments
-   
-   for (iRep in 1:nrep)
-   {   
-      for (iSeg in 1:nrow(idx))
-      {
+   for (iRep in 1:nrep) {   
+      for (iSeg in 1:nrow(idx)) {
+         
          ind = na.exclude(idx[iSeg, ,iRep])
       
-         if (length(ind) > 0)
-         {   
+         if (length(ind) > 0) {   
             x.cal = x[-ind, , drop = F]
             x.val = x[ind, , drop = F]
          
-            m = pca.cal(x.cal, ncomp, center, scale)               
-            res = predict.pca(m, x.val, cv = T)
+            # autoscale calibration set
+            x.cal = prep.autoscale(x.cal, center = center, scale = scale)
+            
+            # get loadings
+            m = pca.run(x.cal, ncomp, model$method)               
+            
+            # apply autoscaling to the validation set
+            x.val = prep.autoscale(x.val, center = attr(x.cal, 'prep:center'), scale = attr(x.cal, 'prep:scale'))
+            
+            # get scores
+            scores = x.val %*% m$loadings
+            residuals = x.val - tcrossprod(scores, m$loadings)
+             
+            # compute distances
+            res = ldecomp.getDistances(scores = scores, loadings = m$loadings, residuals = residuals, 
+                                       tnorm = model$tnorm)
             Q[ind, ] = Q[ind, ] + res$Q
             T2[ind, ] = T2[ind, ] + res$T2
          }
       }  
    }
    
+   # prepare results
    Q = Q / nrep
    T2 = T2 / nrep
-   rownames(Q) = rownames(T2) = rownames(x)
-   colnames(Q) = colnames(T2) = colnames(model$scores)
-
-   # in CV results there are no scores only residuals and variances
-   res = pcares(NULL, NULL, NULL, model$calres$totvar, model$tnorm, model$ncomp.selected,
-                T2, Q)
+   
+   var = ldecomp.getVariances(Q, model$calres$totvar) 
+   
+   # in CV results there are no scores nor residuals, only residual distances and variances
+   attrs$exclrows = NULL
+   attrs$exclcols = NULL
+   attrs$dimnames = dimnames(x)
+   res = pcares(ncomp.selected = model$ncomp.selected, dist = list(Q = Q, T2 = T2), var = var, attrs = attrs,
+                loadings = model$loadings)
    res$Qlim = model$Qlim
    res$T2lim = model$T2lim
    
@@ -557,8 +664,8 @@ pca.crossval = function(model, x, cv, center = T, scale = F)
 #' a PCA model (object of class \code{pca})
 #' @param x
 #' a matrix with data values
-#' @param cv
-#' logical, are predictions for cross-validation or not
+#' @param cal
+#' logical, if TRUE the predictions are made for calibration set
 #' @param ...
 #' other arguments
 #' 
@@ -566,23 +673,33 @@ pca.crossval = function(model, x, cv, center = T, scale = F)
 #' PCA results (an object of class \code{pcares})
 #'  
 #' @export
-predict.pca = function(object, x, cv = F, ...)
-{
-   x = prep.autoscale(x, object$center, object$scale)
+predict.pca = function(object, x, cal = FALSE, ...) {
+   # convert to matrix
+   x = mda.df2mat(x)
+   attrs = attributes(x)
+   
+   if (ncol(x) != nrow(object$loadings))
+      stop('Number and type of data columns should be the same as in calibration dataset!')
+   
+   # compute scores and residuals
+   x = prep.autoscale(x, center = object$center, scale = object$scale)
    scores = x %*% object$loadings
    residuals = x - tcrossprod(scores, object$loadings)
-   
-   if (cv == F)
-   {   
-      totvar = sum(x^2)
-      res = pcares(scores, object$loadings, residuals, totvar, object$tnorm, object$ncomp.selected)
-      res$Qlim = object$Qlim
-      res$T2lim = object$T2lim
-   }   
-   else
-   {
-      res = ldecomp.getDistances(scores, object$loadings, residuals, object$tnorm)   
+      
+   # compute total variance
+   if (length(object$exclcols) > 0){
+      x = x[, -object$exclcols, drop = F]
+      attrs$exclcols = object$exclcols      
    }
+   
+   totvar = sum(x^2)
+   
+   # create and return the results object
+   res = pcares(scores = scores, loadings = object$loadings, residuals = residuals, attrs = attrs, 
+                ncomp.selected = object$ncomp.selected, tnorm = object$tnorm, totvar = totvar, 
+                cal = TRUE)
+   res$Qlim = object$Qlim
+   res$T2lim = object$T2lim
 
    res
 }  
@@ -606,8 +723,6 @@ predict.pca = function(object, x, cv = F, ...)
 #' label for y axis
 #' @param show.legend
 #' logical, show or not a legend on the plot
-#' @param show.labels
-#' logical, show or not labels for the plot objects
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #' 
@@ -618,34 +733,19 @@ predict.pca = function(object, x, cv = F, ...)
 plotVariance.pca = function(obj, type = 'b', variance = 'expvar', 
                             main = 'Variance', xlab = 'Components', 
                             ylab = 'Explained variance, %',
-                            show.legend = T, show.labels = F, ...)
-{
-   data = cbind(1:length(obj$calres[[variance]]), obj$calres[[variance]])
-   labels = mdaplot.formatValues(obj$calres[[variance]])
-   legend  = 'cal'
+                            show.legend = T, ...) {
+
+   data = list()
+   data$cal = obj$calres[[variance]]
    
    if (!is.null(obj$cvres))
-   {
-      data = cbind(data, obj$cvres[[variance]])
-      labels = cbind(labels, mdaplot.formatValues(obj$cvres[[variance]]))
-      legend = c(legend, 'cv')
-   }      
-
+      data$cv = obj$cvres[[variance]]
+   
    if (!is.null(obj$testres))
-   {
-      data = cbind(data, obj$testres[[variance]])
-      labels = cbind(labels, mdaplot.formatValues(obj$testres[[variance]]))
-      legend = c(legend, 'test')
-   }      
-      
-   if (show.legend == F)
-      legend = NULL
+      data$test = obj$testres[[variance]]
    
-   if (show.labels == F)
-      labels = NULL
-   
-   mdaplotg(data, main = main, xlab = xlab, ylab = ylab, labels = labels, legend = legend, 
-            type = type, show.labels = show.labels, ...)   
+   mdaplotg(data, main = main, xlab = xlab, xticks = 1:obj$ncomp, ylab = ylab, 
+            show.legend = show.legend, type = type, ...)   
 }
 
 #' Cumulative explained variance plot for PCA
@@ -669,8 +769,8 @@ plotVariance.pca = function(obj, type = 'b', variance = 'expvar',
 #' 
 #' @export
 plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained variance, %', 
-                               main = 'Cumulative variance', ...)
-{
+                               main = 'Cumulative variance', ...) {
+   
    plotVariance.pca(obj, variance = 'cumexpvar', xlab = xlab, ylab = ylab, main = main, ...)   
 }
 
@@ -691,6 +791,8 @@ plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained varia
 #' label for x axis
 #' @param ylab
 #' label for y axis
+#' @param cgroup
+#' a vector with numeric values or a factor used for color grouping of plot points.
 #' @param show.labels
 #' logical, show or not labels for the plot objects
 #' @param show.legend
@@ -701,89 +803,50 @@ plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained varia
 #' other plot parameters (see \code{mdaplotg} for details)
 #' 
 #' @details
-#' See examples in help for \code{\link{pca}} function.
+#' See examples in help for \code{\link{pca}} function. 
 #' 
 #' @export
 plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab = NULL, 
-                          ylab = NULL, show.labels = F, show.legend = T,
-                          show.axes = T, ...)
-{
+                          ylab = NULL, show.labels = F, show.legend = NULL, cgroup = NULL,
+                          show.axes = TRUE, ...) {
    ncomp = length(comp)
-   legend = NULL
-   
-   if (ncomp == 1)
-   {   
-      # scores vs objects plot
-      
-      if (comp > obj$ncomp || comp < 1)
-         stop('Wrong number of components!')
-      
-      if (is.null(xlab))
-         xlab = 'Objects'
-      
-      if (is.null(ylab))
-         ylab = colnames(obj$calres$scores)[comp]
-      
-      nobj.cal = nrow(obj$calres$scores)      
-      cdata = cbind(1:nobj.cal, obj$calres$scores[, comp])      
-      colnames(cdata) = c(xlab, ylab)
-      rownames(cdata) = rownames(obj$calres$scores)
-      
-      data = list(cdata = cdata)
-      
-      if (!is.null(obj$testres))
-      {
-         nobj.test = nrow(obj$testres$scores)
-         tdata = cbind((nobj.cal + 1):(nobj.cal + nobj.test), obj$testres$scores[, comp])      
-         rownames(tdata) = rownames(obj$testres$scores)
-         data$tdata = tdata
-         if (show.legend == T)
-            legend = c('cal', 'test')
-      }   
-      
-      mdaplotg(data, type = type, main = main, show.labels = show.labels, legend = legend, 
-               xlab = xlab, ylab = ylab, ...)
-   }
-   else if (ncomp == 2)
-   {
-      # scores vs scores plot
-      
-      if (comp[1] > obj$ncomp || comp[1] < 1 || comp[2] > obj$ncomp || comp[2] < 1)
-         stop('Wrong component numbers!')
-      
-      if (is.null(xlab))
-         xlab = colnames(obj$calres$scores)[comp[1]]
-      
-      if (is.null(ylab))
-         ylab = colnames(obj$calres$scores)[comp[2]]
 
-      cdata = cbind(obj$calres$scores[, comp[1]], obj$calres$scores[, comp[2]])      
-      rownames(cdata) = rownames(obj$calres$scores)
+   if (type != 'p') {
+      plotScores(obj$calres, comp = comp, type = type, main = main, xlab = xlab, ylab = ylab, 
+                 show.labels = show.labels, show.legend = show.legend, show.axes = show.axes, ...)
+   } else {
+      data = list() 
+      data$cal = mda.subset(obj$calres$scores, select = comp)
+      colnames(data$cal) = paste('Comp ', comp, ' (', round(obj$calres$expvar[comp], 2) , '%)', sep = '')
       
-      data = list(cdata = cdata)
-      
-      if (!is.null(obj$testres))
-      {
-         tdata = cbind(obj$testres$scores[, comp[1]], obj$testres$scores[, comp[2]])      
-         colnames(tdata) = c(xlab, ylab)
-         rownames(tdata) = rownames(obj$testres$scores)
-         data$tdata = tdata
-         if (show.legend == T)
-            legend = c('cal', 'test')
-      }   
-      
-      if (show.axes == T)
-         show.lines = c(0, 0)      
-      else
-         show.lines = F
-
-      mdaplotg(data, type = type, main = main, show.labels = show.labels, legend = legend, 
-               show.lines = show.lines, xlab = xlab, ylab = ylab, ...)
+      if (!is.null(obj$testres)) {
+         data$test = mda.subset(obj$testres$scores, select = comp)
+         colnames(data$test) = paste('Comp ', comp, ' (', round(obj$calres$expvar[comp], 2) , '%)', sep = '')
       }
-   else
-   {
-      stop('Wrong number of components!')
-   }   
+      
+      if (show.axes == TRUE) {
+         if (ncomp == 1)
+            show.lines = c(NA, 0)
+         else
+            show.lines = c(0, 0)
+      } else {
+         show.lines = FALSE
+      }
+      
+      if (is.null(show.legend)) {
+         if (length(data) > 0)
+            show.legend = TRUE
+         else
+            show.legend = FALSE 
+      }
+      
+      if (length(data) == 1)
+         mdaplot(data[[1]], type = type, main = main, show.labels = show.labels, show.lines = show.lines, 
+                 xlab = xlab, ylab = ylab, cgroup = cgroup, ...)
+      else
+         mdaplotg(data, type = type, main = main, show.labels = show.labels, show.lines = show.lines, 
+                  xlab = xlab, ylab = ylab, show.legend = show.legend, ...)
+   }
 }  
 
 
@@ -808,6 +871,8 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' logical, show or not a legend on the plot
 #' @param show.limits
 #' logical, show or not lines with statistical limits for the residuals
+#' @param cgroup
+#' a vector with numeric values or a factor for color grouping of plot points.
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #' 
@@ -817,10 +882,9 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' @export
 plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
                              ylab = 'Squared residual distance (Q)', show.labels = F, 
-                             show.legend = T, show.limits = T, ...)
+                             show.legend = T, show.limits = T, cgroup = NULL, ...)
 {
-   if (is.null(main))
-   {
+   if (is.null(main)) {
       if (is.null(ncomp))
          main = 'Residuals'
       else
@@ -838,32 +902,30 @@ plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
    if (ncomp > obj$ncomp || ncomp < 1)
       stop('Wrong number of components!')
 
-   cdata = cbind(obj$calres$T2[, ncomp], obj$calres$Q[, ncomp])
-   rownames(cdata) = rownames(obj$calres$scores)
-   legend = 'cal'   
-   data = list(cdata = cdata)
-
-   if (!is.null(obj$cvres))
-   {
-      cvdata = cbind(obj$cvres$T2[, ncomp], obj$cvres$Q[, ncomp])      
-      rownames(cvdata) = rownames(obj$cvres$T2)      
-      data$cvdata = cvdata
-      legend = c(legend, 'cv')
+   data = list()
+   
+   data$cal = mda.cbind(mda.subset(obj$calres$T2, select = ncomp), mda.subset(obj$calres$Q, select = ncomp))
+   colnames(data$cal) = c(xlab, ylab)
+   
+   
+   if (!is.null(obj$cvres)) {
+      data$cv = mda.cbind(mda.subset(obj$cvres$T2, select = ncomp), mda.subset(obj$cvres$Q, select = ncomp))
+      colnames(data$cv) = c(xlab, ylab)
    }      
    
-   if (!is.null(obj$testres))
-   {
-      tdata = cbind(obj$testres$T2[, ncomp], obj$testres$Q[, ncomp])      
-      rownames(tdata) = rownames(obj$testres$scores)      
-      data$tdata = tdata
-      legend = c(legend, 'test')
+   if (!is.null(obj$testres)) {
+      data$test = mda.cbind(mda.subset(obj$testres$T2, select = ncomp), mda.subset(obj$testres$Q, select = ncomp))
+      colnames(data$test) = c(xlab, ylab)
    }      
 
-   if (show.legend == F)
-      legend = NULL
-   
-   mdaplotg(data, main = main, xlab = xlab, ylab = ylab,
-            show.labels = show.labels, legend = legend, show.lines = show.lines, ...)
+   if (length(data) == 1) {
+      mdaplot(data[[1]], main = main, xlab = xlab, ylab = ylab, cgroup = cgroup,
+               show.labels = show.labels, show.lines = show.lines, ...)
+   } else {
+      mdaplotg(data, main = main, xlab = xlab, ylab = ylab,
+              show.labels = show.labels, show.legend = show.legend, show.lines = show.lines, ...)
+   }
+      
 }  
 
 #' Loadings plot for PCA
@@ -896,45 +958,122 @@ plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
 #' See examples in help for \code{\link{pca}} function.
 #' 
 #' @export
-plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings', xlab = NULL, 
-                            ylab = NULL, show.labels = T, show.legend = T,  show.axes = T, ...)
-{   
-   ncomp = length(comp)
+plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings', 
+                            xlab = NULL, ylab = NULL, show.labels = NULL, show.legend = TRUE,  
+                            show.axes = TRUE, ...) {   
    
-   if (ncomp == 2 && (type == 'p' || is.null(type)))
-   {
-      # scatter plot
+   if (max(comp) > obj$ncomp || min(comp) < 1)
+      stop('Wrong number of components!')
+   
+   if (is.null(type)) {
+      if (length(comp) == 2)
+         type = 'p'
+      else
+         type = 'l'
+   }
+   
+   data = mda.subset(obj$loadings, select = comp)      
+   
+   if (type == 'p') {
+      if (show.axes == TRUE) {
+         if (length(comp) > 1)
+            show.lines = c(0, 0)
+         else
+            show.lines = c(NA, 0)
+      } else {
+         show.lines = FALSE
+      }
       
-      data = obj$loadings[, c(comp[1], comp[2])]      
-      mdaplot(data, show.labels = show.labels, main = main, xlab = xlab, ylab = ylab, 
-              show.lines = c(0, 0), ...)      
-   }  
-   else if (ncomp < 1 | ncomp > 8 )
-   {
-      stop ('Number of components must be between 1 and 8!')
-   }  
-   else
-   {
-      # loadings vs objects
+      if (is.null(show.labels))
+         show.labels = TRUE
       
-      if (is.null(type))
-         type = 'b'
-      
-      if (is.null(xlab))
-         xlab = 'Variables'
-      
-      if (is.null(ylab))
-         ylab = 'Loadings'
-      
-      data = cbind(1:nrow(obj$loadings), obj$loadings[, comp, drop = F])            
-      rownames(data) = rownames(obj$loadings)
-      
-      if (show.legend == T)
-         legend = colnames(data)[-1];
-
-      mdaplotg(data, legend = legend, type = type, show.labels = show.labels, 
+      colnames(data) = paste('Comp ', comp, ' (', round(obj$calres$expvar[comp], 2) , '%)', sep = '')
+      mdaplot(data, type = type, show.labels = show.labels, show.lines = show.lines, 
                main = main, ylab = ylab, xlab = xlab, ...)
-   }   
+   } else {
+      if (is.null(show.legend))
+         show.legend = TRUE 
+      
+      if (is.null(show.labels))
+         show.labels = FALSE
+     
+      if (is.null(ylab))
+         ylab = ''
+      
+      if (show.axes == TRUE && type != 'h')
+         show.lines = c(NA, 0)
+      else
+         show.lines = FALSE
+      
+      mdaplotg(mda.t(data), show.legend = show.legend, type = type, show.labels = show.labels, 
+               show.lines = show.lines, main = main, ylab = ylab, xlab = xlab, ...)
+   }  
+}
+
+
+#' PCA biplot
+#' 
+#' @description
+#' Shows a biplot for selected components.
+#' 
+#' @param obj
+#' a PCA model (object of class \code{pca})
+#' @param comp
+#' a value or vector with several values - number of components to show the plot for
+#' @param pch
+#' a vector with two values - markers for scores and loadings
+#' @param col
+#' a vector with two colors for scores and loadings
+#' @param main
+#' main title for the plot
+#' @param lty
+#' line type for loadings
+#' @param lwd
+#' line width for loadings
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param show.axes
+#' logical, show or not a axes lines crossing origin (0,0)
+#' @param show.excluded
+#' logical, show or hide rows marked as excluded (attribute `exclrows`)
+#' @param lab.col
+#' a vector with two colors for scores and loadings labels
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#' @export
+plotBiplot.pca = function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.getColors(2), main = 'Biplot', 
+                          lty = 1, lwd = 1, show.labels = FALSE, show.axes = TRUE, show.excluded = FALSE,
+                          lab.col = c('#90A0D0', '#D09090'), ...) {
+   
+   if (length(comp) != 2)
+      stop('Biplot can be made only for two principal components!')
+   
+   if (show.axes == TRUE)
+      show.lines = c(0, 0)
+   else
+      show.lines = FALSE
+   
+   loadings = mda.subset(obj$loadings, select = comp)
+   scores = mda.subset(obj$calres$scores, select = comp)
+   attrs = mda.getattr(scores)
+   
+   loadsScaleFactor = sqrt(max(rowSums(loadings^2)))
+   
+   scoresScaleFactor = max(abs(scores))
+   scores = (scores / scoresScaleFactor) * loadsScaleFactor
+   scores = mda.setattr(scores, attrs)
+   
+   
+   colnames(scores) = paste('Comp ', comp, ' (', round(obj$calres$expvar[comp], 2) , '%)', sep = '')
+   
+   mdaplotg(list(scores = scores, loadings = loadings), type = 'p', pch = pch, 
+            show.legend = FALSE, show.labels = show.labels, lab.col = lab.col,
+            main = main, colmap = col, show.lines = show.lines, show.excluded = show.excluded, ...)   
+   
+   if (show.excluded == TRUE && length(attr(loadings, 'exclrows')) > 0)
+      loadings = loadings[-attr(loadings, 'exclrows'), , drop = F]
+   
+   segments(0, 0, loadings[, 1], loadings[, 2], col = col[2], lty = lty, lwd = lwd)
 }
 
 #' Model overview plot for PCA
@@ -957,7 +1096,7 @@ plotLoadings.pca = function(obj, comp = c(1, 2), type = NULL, main = 'Loadings',
 #' See examples in help for \code{\link{pca}} function.
 #' 
 #' @export
-plot.pca = function(x, comp = c(1, 2), show.labels = F, show.legend = T, ...)
+plot.pca = function(x, comp = c(1, 2), show.labels = FALSE, show.legend = TRUE, ...)
 {   
    obj = x
    
@@ -1028,12 +1167,16 @@ print.pca = function(x, ...)
 #' other arguments
 #' 
 #' @export
-summary.pca = function(object, ...)
-{
+summary.pca = function(object, ...) {
    obj = object
    
    cat('\nPCA model (class pca) summary\n')
 
+   if (length(obj$exclrows) > 0)
+      cat(sprintf('Excluded rows: %d\n', length(obj$exclrows)))
+   if (length(obj$exclcols) > 0)
+      cat(sprintf('Excluded coumns: %d\n', length(obj$exclcols)))
+   
    if (length(obj$info) > 0)
       cat(sprintf('\nInfo:\n%s\n\n', obj$info))
    
@@ -1042,5 +1185,6 @@ summary.pca = function(object, ...)
                 round(obj$calres$cumexpvar, 2))
    
    colnames(data) = c('Eigvals', 'Expvar', 'Cumexpvar')
+   rownames(data) = colnames(object$loadings)
    show(data)
 }

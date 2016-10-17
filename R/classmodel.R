@@ -1,5 +1,28 @@
 ## class and methods for classification models ##
 
+checkReferenceValues.classmodel = function(model, c.ref, x) {
+   if (is.null(c.ref))
+      return()
+   
+   attrs = mda.getattr(c.ref)
+   
+   if (is.logical(c.ref))
+      c.ref = ifelse(c.ref, model$classname, 'None')
+   if (is.data.frame(c.ref))
+      c.ref = as.matrix(c.ref)
+   if (!is.matrix(c.ref))
+      c.ref = matrix(c.ref, ncol = 1)
+   if (ncol(c.ref) != 1)
+      stop('Class reference values should be a vector or matrix/data frame with one column')
+   if(nrow(c.ref) != nrow(x))
+      stop('Matrix with predictors and classes should have the same number of rows!')
+   if (!is.character(c.ref))
+      stop('Matrix/vector with reference class values should be either logical or character!')
+
+   c.ref = mda.setattr(c.ref, attrs)
+   c.ref
+}
+
 #' Predictions plot for classification model
 #' 
 #' @description
@@ -24,8 +47,7 @@
 #' See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 #'   
 #' @export  
-plotPredictions.classmodel = function(obj, res = NULL, nc = NULL, ncomp = NULL, main = NULL, ...)
-{   
+plotPredictions.classmodel = function(obj, res = NULL, nc = NULL, ncomp = NULL, main = NULL, ...) {   
    if (is.null(res))
    {
       if (!is.null(obj$testres))
@@ -35,7 +57,6 @@ plotPredictions.classmodel = function(obj, res = NULL, nc = NULL, ncomp = NULL, 
       else
          res = 'calres'
    }
-
    resnames = c('calres', 'cvres', 'testres')
    resstrings = c('calbiration', 'cross-validation', 'test set')
    resobj = obj[[res]]
@@ -136,8 +157,6 @@ plotMisclassified.classmodel = function(obj, nc = NULL, ...)
 #' or \code{'misclassified'})
 #' @param type
 #' type of the plot
-#' @param legend
-#' vector with legend items
 #' @param main
 #' main title for the plot
 #' @param xlab
@@ -150,7 +169,7 @@ plotMisclassified.classmodel = function(obj, nc = NULL, ...)
 #' most of the graphical parameters from \code{\link{mdaplotg}} function can be used.
 #' 
 #' @export
-plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', type = 'h', legend = NULL, 
+plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', type = 'h', 
                                  main = NULL, xlab = 'Components', ylab = '', 
                                  ylim = c(0, 1.15), ...)
 {
@@ -171,32 +190,22 @@ plotPerformance.classmodel = function(obj, nc = NULL, param = 'specificity', typ
       classname = sprintf('(%s)', obj$classnames[nc])
    }
    
-   data = cbind(1:obj$ncomp, obj$calres[[param]][nc, ])
-   labels = matrix(mdaplot.formatValues(obj$calres[[param]][nc, ]), ncol = 1)
-   legend_str = 'cal'
-   
-   if (!is.null(obj$cvres))
-   {
-      data = cbind(data, obj$cvres[[param]][nc, ])   
-      labels = cbind(labels, mdaplot.formatValues(obj$cvres[[param]][nc, ]))
-      legend_str = c(legend_str, 'cv')
-   }   
-   
-   if (!is.null(obj$testres))
-   {
-      data = cbind(data, obj$testres[[param]][nc, ])   
-      labels = cbind(labels, mdaplot.formatValues(obj$testres[[param]][nc, ]))
-      legend_str = c(legend_str, 'test')
-   }
-  
-   if (is.null(main))
-      main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2, length(param)), 
-                     toString(classname))
+   data = list(cal = obj$calres[[param]][nc, ])
 
-   if (!is.null(legend))
-      legend_str = legend
+   if (any(is.nan(data$cal))) {
+      warning('Specificity values are not available!')
+   } else {
+      if (!is.null(obj$cvres))
+         data$cv = obj$cvres[[param]][nc, ]   
+      
+      if (!is.null(obj$testres))
+         data$test = obj$testres[[param]][nc, ]   
+      
+      if (is.null(main))
+         main = sprintf('%s%s %s', toupper(substring(param, 1, 1)), substring(param, 2), 
+                        toString(classname))
+      mdaplotg(data, type = type, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, ylim = ylim, ...)
+   }
    
-   mdaplotg(data, type = type, main = main, xlab = xlab, ylab = ylab, legend = legend_str,
-            ylim = ylim, labels = labels, ...)
 }
 

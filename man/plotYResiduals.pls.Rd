@@ -4,9 +4,8 @@
 \alias{plotYResiduals.pls}
 \title{Y residuals plot for PLS}
 \usage{
-\method{plotYResiduals}{pls}(obj, ncomp = NULL, ny = 1, type = "p",
-  main = NULL, ylab = NULL, xlab = NULL, show.line = T,
-  show.labels = F, show.legend = T, ...)
+\method{plotYResiduals}{pls}(obj, ncomp = NULL, ny = 1, main = NULL,
+  show.line = T, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -15,19 +14,9 @@
 
 \item{ny}{number of response variable to make the plot for (if y is multivariate)}
 
-\item{type}{type of the plot}
-
 \item{main}{main plot title}
 
-\item{ylab}{label for y axis}
-
-\item{xlab}{label for x axis}
-
 \item{show.line}{logical, show or not line for 0 value}
-
-\item{show.labels}{logical, show or not labels for the plot elements}
-
-\item{show.legend}{logical, show or not legend for the plot}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

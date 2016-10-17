@@ -5,7 +5,7 @@
 \title{Modelling power plot for SIMCA model}
 \usage{
 \method{plotModellingPower}{simca}(obj, ncomp = NULL, type = "h",
-  main = NULL, xlab = "Variables", ylab = "", ...)
+  main = NULL, ylab = "", ...)
 }
 \arguments{
 \item{obj}{a SIMCA model (object of class \code{simca})}
@@ -15,8 +15,6 @@
 \item{type}{type of the plot}
 
 \item{main}{main plot title}
-
-\item{xlab}{label for x axis}
 
 \item{ylab}{label for y axis}
 

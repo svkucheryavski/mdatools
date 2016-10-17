@@ -47,7 +47,7 @@
 #'  \code{\link{plotPredictions.plsres}} \tab shows predicted vs. measured plot.\cr
 #'  \code{\link{plotXScores.plsres}} \tab shows scores plot for x decomposition.\cr
 #'  \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
-#'  \code{\link{plotRMSE.plsres}} \tab shows RMSE plot.\cr
+#'  \code{\link{plotRMSE.regres}} \tab shows RMSE plot.\cr
 #'  \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
 #'  \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
 #'  \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y 
@@ -118,8 +118,7 @@
 #' par(mfrow = c(1, 1))
 #'
 #' @export
-plsdares = function(plsres, cres)
-{
+plsdares = function(plsres, cres) {
    obj = c(plsres, cres)
    class(obj) = c('plsdares', 'classres', 'plsres')   
    
@@ -151,8 +150,7 @@ plsdares = function(plsres, cres)
 #' See examples in help for \code{\link{pls}} function.
 #'
 #' @export 
-plot.plsdares = function(x, nc = NULL, ncomp = NULL, show.labels = F, show.line = T, ...)
-{
+plot.plsdares = function(x, nc = NULL, ncomp = NULL, show.labels = F, show.line = T, ...) {
    obj = x
    
    par(mfrow = c(2, 2))
@@ -178,8 +176,7 @@ plot.plsdares = function(x, nc = NULL, ncomp = NULL, show.labels = F, show.line 
 #' other arguments
 #' 
 #' @export
-as.matrix.plsdares = function(x, ncomp = NULL, nc = NULL, ...)
-{
+as.matrix.plsdares = function(x, ncomp = NULL, nc = NULL, ...) {
    obj = x
    
    plsmat = as.matrix.plsres(obj, ncomp = ncomp, ny = nc)
@@ -202,8 +199,7 @@ as.matrix.plsdares = function(x, ncomp = NULL, nc = NULL, ...)
 #' other arguments
 #'
 #' @export 
-summary.plsdares = function(object, nc = NULL, ...)
-{
+summary.plsdares = function(object, nc = NULL, ...) {
    obj = object
    
    if (is.null(nc))
@@ -232,8 +228,7 @@ summary.plsdares = function(object, nc = NULL, ...)
 #' other arguments
 #'
 #' @export 
-print.plsdares = function(x, ...)
-{
+print.plsdares = function(x, ...) {
    obj = x
    
    cat('\nPLS-DA results (class plsdares)\n')

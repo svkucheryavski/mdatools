@@ -5,8 +5,8 @@
 \title{Scores plot for PCA}
 \usage{
 \method{plotScores}{pca}(obj, comp = c(1, 2), type = "p", main = "Scores",
-  xlab = NULL, ylab = NULL, show.labels = F, show.legend = T,
-  show.axes = T, ...)
+  xlab = NULL, ylab = NULL, show.labels = F, show.legend = NULL,
+  cgroup = NULL, show.axes = TRUE, ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
@@ -24,6 +24,8 @@
 \item{show.labels}{logical, show or not labels for the plot objects}
 
 \item{show.legend}{logical, show or not a legend on the plot}
+
+\item{cgroup}{a vector with numeric values or a factor used for color grouping of plot points.}
 
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 

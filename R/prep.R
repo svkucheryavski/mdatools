@@ -9,13 +9,18 @@
 #' a logical value or vector with numbers for centering
 #' @param scale
 #' a logical value or vector with numbers for weighting
+#' @param max.cov
+#' columns that have coefficient of variation (in percent) below `max.cv` will not be scaled
 #' 
 #' @return
 #' data matrix with processed values
 #' 
 #' @export
-prep.autoscale = function(data, center = T, scale = F)
-{   
+prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1) {   
+   
+   attrs = mda.getattr(data)
+   dimnames = dimnames(data)
+   
    # define values for centering
    if (is.logical(center) && center == T )
       center = apply(data, 2, mean)
@@ -29,12 +34,23 @@ prep.autoscale = function(data, center = T, scale = F)
       scale = scale         
    
    # make autoscaling and attach preprocessing attributes
+   
+   if(is.numeric(scale)) {
+      if (!is.numeric(center))
+         m = apply(data, 2, mean)
+      else
+         m = center
+      cv = scale/m * 100
+      scale[is.nan(cv) | cv < 0.1] = 1
+   } 
    data = scale(data, center = center, scale = scale)
+   
+   data = mda.setattr(data, attrs)
    attr(data, 'scaled:center') = NULL
    attr(data, 'scaled:scale') = NULL
    attr(data, 'prep:center') = center
    attr(data, 'prep:scale') = scale
-   
+   dimnames(data) = dimnames
    data
 }
 
@@ -70,9 +86,14 @@ prep.autoscale = function(data, center = T, scale = F)
 #'  mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After SNV')
 #'
 #' @export
-prep.snv = function(data)
-{
+prep.snv = function(data){
+   attrs = mda.getattr(data)
+   dimnames = dimnames(data)
+   
    data = t(scale(t(data), center = T, scale = T))
+   data = mda.setattr(data, attrs)
+   dimnames(data) = dimnames
+   data
 } 
 
 #' Normalization
@@ -88,8 +109,11 @@ prep.snv = function(data)
 #' @return 
 #' data matrix with normalized values
 #' 
-prep.norm = function(data, type = 'area')
-{
+#' @export
+prep.norm = function(data, type = 'area') {
+   attrs = mda.getattr(data)
+   dimnames = dimnames(data)
+   
    if (type == 'area')
    {   
       w = apply(abs(data), 1, sum)
@@ -103,12 +127,12 @@ prep.norm = function(data, type = 'area')
    {   
       stop('Wrong value for argument "type"!')
    }   
-    
-   data = sweep(data, 1, w, '/')
    
+   data = sweep(data, 1, w, '/')
+   data = mda.setattr(data, attrs)
+   dimnames(data) = dimnames
    data
 }   
-
 
 #' Savytzky-Golay filter
 #' 
@@ -125,8 +149,10 @@ prep.norm = function(data, type = 'area')
 #' order of derivative to take (0 - no derivative)
 #' 
 #' @export
-prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
-{
+prep.savgol = function(data, width = 3, porder = 1, dorder = 0) {
+   attrs = mda.getattr(data)
+   dimnames = dimnames(data)
+   
    nobj = nrow(data)
    nvar = ncol(data)
    
@@ -142,6 +168,8 @@ prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
       pdata[i, ] = d[(w + 1) : (length(d) - w)] 
    }  
    
+   pdata = mda.setattr(pdata, attrs)
+   dimnames(pdata) = dimnames
    pdata
 }
 
@@ -180,8 +208,10 @@ prep.savgol = function(data, width = 3, porder = 1, dorder = 0)
 #'  mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After MSC')
 #'
 #' @export
-prep.msc = function(spectra, mspectrum = NULL)
-{
+prep.msc = function(spectra, mspectrum = NULL) {
+   attrs = mda.getattr(spectra)
+   dimnames = dimnames(spectra)
+   
    if (is.null(mspectrum))
       mspectrum = apply(spectra, 2, mean)   
    
@@ -192,36 +222,11 @@ prep.msc = function(spectra, mspectrum = NULL)
       cspectra[i, ] = (spectra[i, ] - coef[1]) / coef[2]   
    }
    
-   list(cspectra = cspectra, mspectrum = mspectrum)
+   cspectra = mda.setattr(cspectra, attrs)
+   attr(cspectra, 'mspectrum') = mspectrum
+   dimnames(cspectra) = dimnames
+   cspectra
 }  
-
-# prep.alsbasecor = function(spectra, penalty = 0.1, smoothness = 10^5)
-# {
-#    m = ncol(spectra)
-#    
-#    if (m == 1)
-#    {
-#       
-#    }  
-#       
-#    D = diff(speye(m), 2);
-#    w = matrix(1, nrow = m, ncol = 1)
-#    
-#    for (n in 1:nrow(spectra))
-#    {  
-#       spectrum = spectra[n, ]
-#       
-#       for (it in 1:20)
-#       {   
-#          W = spdiags(w, 0, m, m);
-#          C = chol(W + smoothness * t(D) * D)
-#          baseline = C \ (t(C) \ (w * spectrum));
-#          w = penalty * (spectrum > baseline) + (1 - penalty) * (spectrum < baseline);
-#       }
-#    
-#       spectra[n, ] = spectrum - t(baseline) 
-#    }                
-# }   
 
 #' Pseudo-inverse matrix
 #' 
@@ -238,3 +243,4 @@ pinv = function(data)
    s = svd(data)
    s$v %*% diag(1/s$d) %*% t(s$u)
 }
+

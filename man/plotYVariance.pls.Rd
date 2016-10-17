@@ -5,8 +5,7 @@
 \title{Explained Y variance plot for PLS}
 \usage{
 \method{plotYVariance}{pls}(obj, type = "b", main = "Y variance",
-  xlab = "Components", ylab = "Explained variance, \%", show.legend = T,
-  ...)
+  xlab = "Components", ylab = "Explained variance, \%", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -18,8 +17,6 @@
 \item{xlab}{label for x axis}
 
 \item{ylab}{label for y axis}
-
-\item{show.legend}{logical, show or not legend for the plot}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

@@ -5,7 +5,8 @@
 \title{Scores plot for linear decomposition}
 \usage{
 \method{plotScores}{ldecomp}(obj, comp = c(1, 2), main = "Scores",
-  show.labels = F, show.axes = F, ...)
+  type = "p", xlab = NULL, ylab = NULL, show.labels = FALSE,
+  show.legend = TRUE, show.axes = TRUE, ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
@@ -14,7 +15,15 @@
 
 \item{main}{main title for the plot}
 
+\item{type}{type of the plot}
+
+\item{xlab}{label for x-axis.}
+
+\item{ylab}{label for y-axis.}
+
 \item{show.labels}{logical, show or not labels for the plot objects}
+
+\item{show.legend}{logical, show or not a legend on the plot.}
 
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 

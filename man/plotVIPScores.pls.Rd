@@ -5,7 +5,7 @@
 \title{VIP scores plot for PLS model}
 \usage{
 \method{plotVIPScores}{pls}(obj, ny = 1, type = "l", main = NULL,
-  xlab = "Variables", ylab = "", ...)
+  ylab = "", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -15,8 +15,6 @@
 \item{type}{type of the plot}
 
 \item{main}{main title for the plot}
-
-\item{xlab}{label for x axies}
 
 \item{ylab}{label for y axis}
 

@@ -5,8 +5,7 @@
 \title{X residuals plot for PLS}
 \usage{
 \method{plotXResiduals}{pls}(obj, ncomp = NULL, main = NULL, xlab = "T2",
-  ylab = "Squared residual distance (Q)", show.labels = F,
-  show.legend = T, ...)
+  ylab = "Squared residual distance (Q)", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -18,10 +17,6 @@
 \item{xlab}{label for x axis}
 
 \item{ylab}{label for y axis}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
-
-\item{show.legend}{logical, show or not a legend on the plot}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

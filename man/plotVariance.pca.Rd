@@ -6,7 +6,7 @@
 \usage{
 \method{plotVariance}{pca}(obj, type = "b", variance = "expvar",
   main = "Variance", xlab = "Components", ylab = "Explained variance, \%",
-  show.legend = T, show.labels = F, ...)
+  show.legend = T, ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
@@ -22,8 +22,6 @@
 \item{ylab}{label for y axis}
 
 \item{show.legend}{logical, show or not a legend on the plot}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

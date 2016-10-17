@@ -4,12 +4,17 @@
 \alias{getRegcoeffs.pls}
 \title{Regression coefficients for PLS model'}
 \usage{
-\method{getRegcoeffs}{pls}(obj, ncomp = NULL, ...)
+\method{getRegcoeffs}{pls}(obj, ncomp = NULL, ny = NULL, full = FALSE,
+  ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
 \item{ncomp}{number of components to return the coefficients for}
+
+\item{ny}{if y is multivariate which variables you want to see the coefficients for}
+
+\item{full}{if TRUE the method also shows p-values for the coefficients (if available)}
 
 \item{...}{other parameters}
 }

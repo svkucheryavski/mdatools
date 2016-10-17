@@ -5,8 +5,8 @@
 \title{SIMCA one-class classification}
 \usage{
 simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL,
-  x.test = NULL, c.test = NULL, alpha = 0.05, method = "svd",
-  info = "")
+  exclcols = NULL, exclrows = NULL, x.test = NULL, c.test = NULL,
+  alpha = 0.05, method = "svd", info = "")
 }
 \arguments{
 \item{x}{a numerical matrix with data values.}
@@ -21,9 +21,13 @@ simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL,
 
 \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
 
+\item{exclcols}{columns to be excluded from calculations (numbers, names or vector with logical values)}
+
+\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
+
 \item{x.test}{a numerical matrix with test data.}
 
-\item{c.test}{a vector with text values (names of classes) of test data objects.}
+\item{c.test}{a vector with classes of test data objects (can be text with names of classes or logical).}
 
 \item{alpha}{significance level for calculating limit for T2 and Q residuals.}
 

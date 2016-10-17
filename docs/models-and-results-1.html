@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Getting started with mdatools for R</title>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
+  <meta name="generator" content="bookdown 0.1 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Getting started with mdatools for R" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  <meta name="github-repo" content="svkucheryavski/mdatools.bookdown" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Getting started with mdatools for R" />
+  
+  <meta name="twitter:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  
+
+<meta name="author" content="Sergey Kucheryavskiy">
+
+<meta name="date" content="2016-10-16">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="partial-least-squares-regression.html">
+<link rel="next" href="plotting-methods-1.html">
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-to-expect-from-future-releases"><i class="fa fa-check"></i>What to expect from future releases</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
+<li class="chapter" data-level="" data-path="what-mdatools-can-do.html"><a href="what-mdatools-can-do.html"><i class="fa fa-check"></i>What mdatools can do?</a></li>
+<li class="chapter" data-level="" data-path="how-to-install.html"><a href="how-to-install.html"><i class="fa fa-check"></i>How to install</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="datasets-and-plots.html"><a href="datasets-and-plots.html"><i class="fa fa-check"></i>Datasets and plots</a><ul>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html"><i class="fa fa-check"></i>Attributes and factors</a><ul>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#package-specific-attributes"><i class="fa fa-check"></i>Package specific attributes</a></li>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#attributes-for-plots"><i class="fa fa-check"></i>Attributes for plots</a></li>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#special-methods-for-data-transformations"><i class="fa fa-check"></i>Special methods for data transformations</a></li>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#data-frames-with-factors"><i class="fa fa-check"></i>Data frames with factors</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html"><i class="fa fa-check"></i>Simple plots</a><ul>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html#scatter-plots"><i class="fa fa-check"></i>Scatter plots</a></li>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html#line-plots"><i class="fa fa-check"></i>Line plots</a></li>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html#bar-and-errorbar-plots"><i class="fa fa-check"></i>Bar and errorbar plots</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html"><i class="fa fa-check"></i>Plots for groups of objects</a><ul>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html#one-matrix-or-data-frame"><i class="fa fa-check"></i>One matrix or data frame</a></li>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html#list-with-matrices-or-data-frames"><i class="fa fa-check"></i>List with matrices or data frames</a></li>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html#use-factors-to-split-a-dataset-into-groups"><i class="fa fa-check"></i>Use factors to split a dataset into groups</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="working-with-images.html"><a href="working-with-images.html"><i class="fa fa-check"></i>Working with images</a></li>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html"><i class="fa fa-check"></i>Preprocessing</a><ul>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html#autoscaling"><i class="fa fa-check"></i>Autoscaling</a></li>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html#correction-of-spectral-baseline"><i class="fa fa-check"></i>Correction of spectral baseline</a></li>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html#smoothing-and-derivatives"><i class="fa fa-check"></i>Smoothing and derivatives</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="principal-component-analysis.html"><a href="principal-component-analysis.html"><i class="fa fa-check"></i>Principal component analysis</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results.html"><a href="models-and-results.html"><i class="fa fa-check"></i>Models and results</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results.html"><a href="models-and-results.html#model-calibration"><i class="fa fa-check"></i>Model calibration</a></li>
+<li class="chapter" data-level="" data-path="models-and-results.html"><a href="models-and-results.html#model-validation"><i class="fa fa-check"></i>Model validation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#support-for-images"><i class="fa fa-check"></i>Support for images</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluding-rows-and-columns"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="partial-least-squares-regression.html"><a href="partial-least-squares-regression.html"><i class="fa fa-check"></i>Partial least squares regression</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html"><i class="fa fa-check"></i>Models and results</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-calibration-1"><i class="fa fa-check"></i>Model calibration</a></li>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Getting started with mdatools for R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="models-and-results-1" class="section level2 unnumbered">
+<h2>Models and results</h2>
+<p>Like we discussed in PCA, <em>matools</em> creates two types of objects — a model and a result. Every time you build a PLS model you get a <em>model object</em>. Every time you apply the model to a dataset you get a <em>result object</em>. For PLS, the objects have classes <code>pls</code> and <code>plsres</code> correspondingly.</p>
+<div id="model-calibration-1" class="section level3 unnumbered">
+<h3>Model calibration</h3>
+<p>Let’s use the same <em>People</em> data and create a PLS-model for prediction of <em>Shoesize</em> (column number four) using other 11 variables as predictors. As usual, we start with preparing datasets (we will also split the data into calibration and test subsets):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mdatools)
+<span class="kw">data</span>(people)
+
+idx =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">4</span>, <span class="dv">32</span>, <span class="dv">4</span>)
+X.c =<span class="st"> </span>people[-idx, -<span class="dv">4</span>]
+y.c =<span class="st"> </span>people[-idx, <span class="dv">4</span>, drop =<span class="st"> </span>F]
+X.t =<span class="st"> </span>people[idx, -<span class="dv">4</span>]
+y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span class="st"> </span>F]</code></pre></div>
+<p>So <code>X.c</code> and <code>y.c</code> are predictors and response values for calibration subset. Now let’s calibrate the model and show an information about the model object:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">info =</span> <span class="st">&quot;Shoesize prediction model&quot;</span>)</code></pre></div>
+<pre><code>## Warning in selectCompNum.pls(model): No validation results were found!</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class="dv">3</span>)</code></pre></div>
+<p>As you can see, the procedure is very similar to PCA, here we use 7 latent variables and select 3 first as an optimal number. Here is an info for the model object:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m)</code></pre></div>
+<pre><code>## 
+## PLS model (class pls)
+## 
+## Call:
+## pls.cal(x = x, y = y, ncomp = ncomp, center = center, scale = scale, 
+##     method = method, cv = cv, alpha = alpha, coeffs.ci = coeffs.ci, 
+##     coeffs.alpha = coeffs.alpha, info = info, light = light, 
+##     exclcols = exclcols, exclrows = exclrows, ncomp.selcrit = ncomp.selcrit)
+## 
+## Major fields:
+## $ncomp - number of calculated components
+## $ncomp.selected - number of selected components
+## $coeffs - object (regcoeffs) with regression coefficients
+## $xloadings - vector with x loadings
+## $yloadings - vector with y loadings
+## $weights - vector with weights
+## $calres - results for calibration set
+## 
+## Try summary(model) and plot(model) to see the model performance.</code></pre>
+<p>As expected, we see loadings for predictors and responses, matrix with weights, and a special object (<code>regcoeffs</code>) for regression coefficients. The values for regression coefficients are available in <code>m.regcoeffs.values</code>, it is an array with dimension <em>nVariables x nComponents x nPredictors</em>. The reason to use the object instead of just an array is mainly for being able to get and plot regression coefficients for different methods. Besides that, it is possible to calculate confidence intervals and other statistics for the coefficients using Jack-Knife method (will be shown later), which produces extra entities.</p>
+<p>The regression coefficients can be shown as plot using either function <code>plotRegcoeffs()</code> for the PLS model object or function <code>plot()</code> for the object with regression coefficients. You need to specify for which predictor (if you have more than one y-variable) and which number of components you want to see the coefficients for. By default it shows values for the optimal number of components and first y-variable as it is shown on example below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">plotRegcoeffs</span>(m)
+<span class="kw">plotRegcoeffs</span>(m, <span class="dt">ncomp =</span> <span class="dv">2</span>)
+<span class="kw">plot</span>(m$coeffs, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
+<span class="kw">plot</span>(m$coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-65-1.png" width="864" /></p>
+<p>The model keeps regression coefficients, calculated for centered and standardized data, without intercept, etc. Here are the values for three PLS components.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m$coeffs$values[, <span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
+<pre><code>##       Height       Weight     Hairleng          Age       Income 
+##  0.210411676  0.197646483 -0.138824482  0.026613035 -0.000590693 
+##         Beer         Wine          Sex         Swim       Region 
+##  0.148917913  0.138138095 -0.138824482  0.223962000  0.010392542 
+##           IQ 
+## -0.088658626</code></pre>
+<p>You can get the corrected coefficients, which can be applied directly to the raw data, by using method <code>getRegcoeffs()</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(m, <span class="dt">ncomp =</span> <span class="dv">3</span>))</code></pre></div>
+<pre><code>##                Shoesize
+## Intercept  1.251537e+01
+## Height     8.105287e-02
+## Weight     5.110732e-02
+## Hairleng  -5.375404e-01
+## Age        1.147785e-02
+## Income    -2.580586e-07
+## Beer       6.521476e-03
+## Wine       1.253340e-02
+## Sex       -5.375404e-01
+## Swim       1.164947e-01
+## Region     4.024083e-02
+## IQ        -2.742712e-02</code></pre>
+<p>Similar to PCA, model object may contain three fields for results obtained using calibration set (<code>calres</code>), cross-validation (<code>cvres</code>) and test set validation (<code>testres</code>). All three have class <code>plsres</code>, here is how <code>calres</code> looks like:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m$calres)</code></pre></div>
+<pre><code>## 
+## PLS results (class plsres)
+## 
+## Call:
+## plsres(y.pred = yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, 
+##     xdecomp = xdecomp, ydecomp = ydecomp)
+## 
+## Major fields:
+## $ncomp.selected - number of selected components
+## $yp - array with predicted y values
+## $y - matrix with reference y values
+## $rmse - root mean squared error
+## $r2 - coefficient of determination
+## $slope - slope for predicted vs. measured values
+## $bias - bias for prediction vs. measured values
+## $ydecomp - decomposition of y values (ldecomp object)
+## $xdecomp - decomposition of x values (ldecomp object)</code></pre>
+<p>The <code>xdecomp</code> and <code>ydecomp</code> are objects similar to <code>pcares</code>, they contain scores, residuals and variances for decomposition of X and Y correspondingly.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m$calres$xdecomp)</code></pre></div>
+<pre><code>## 
+## Results of data decomposition (class ldecomp)
+## 
+## Major fields:
+## $scores - matrix with score values
+## $T2 - matrix with T2 distances
+## $Q - matrix with Q residuals
+## $ncomp.selected - selected number of components
+## $expvar - explained variance for each component
+## $cumexpvar - cumulative explained variance</code></pre>
+<p>Other fields are mostly various performance statistics, including slope, coefficient of determination (R<sup>2</sup>), bias, and root mean squared error (RMSE). Besides that, the results also include reference y-values and array with predicted y-values. The array has dimension <em>nObjects x nComponents x nResponses</em>.</p>
+<p>PLS predictions for a new set can be obtained using method <code>predict</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t, y.t)
+<span class="kw">print</span>(res)</code></pre></div>
+<pre><code>## 
+## PLS results (class plsres)
+## 
+## Call:
+## plsres(y.pred = yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, 
+##     xdecomp = xdecomp, ydecomp = ydecomp)
+## 
+## Major fields:
+## $ncomp.selected - number of selected components
+## $yp - array with predicted y values
+## $y - matrix with reference y values
+## $rmse - root mean squared error
+## $r2 - coefficient of determination
+## $slope - slope for predicted vs. measured values
+## $bias - bias for prediction vs. measured values
+## $ydecomp - decomposition of y values (ldecomp object)
+## $xdecomp - decomposition of x values (ldecomp object)</code></pre>
+</div>
+<div id="model-validation-1" class="section level3 unnumbered">
+<h3>Model validation</h3>
+<p>Validation is implemented similar to PCA, the only difference is that you need to provide two datasets for a test set — one for predictors (<code>x.test</code>) and one for response (<code>y.test</code>) values. Cross-validation is very important for PLS as it helps to find optimal number of PLS components (so test set performance is more fair as in this case you do not use test set for optimization). Therefore, it is always recommended to use cross-validation.</p>
+<p>You probably have noticed a small warning we got when created the first PLS model in this chapter:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">info =</span> <span class="st">&quot;Shoesize prediction model&quot;</span>)</code></pre></div>
+<pre><code>## Warning in selectCompNum.pls(model): No validation results were found!</code></pre>
+<p>When you create a model, it tries to select optimal number of components automatically (which, of course, you can always change later). To do that, the method uses RMSE values, calculated for different number of components and cross-validation predictions. So, if we do not use cross-validation, it warns use about this.</p>
+<p>There are two different ways/criteria for automatic selection. One is using first local minimum on the RMSE plot and second is so called Wold criterion, based on a ratio between PRESS values for current and next component. You can select which criterion to use by specifying parameter <code>ncomp.selcrit</code> (either <code>'min'</code> or <code>'wold'</code>) as it is shown below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">ncomp.selcrit =</span> <span class="st">&#39;min&#39;</span>)
+<span class="kw">show</span>(m1$ncomp.selected)</code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">ncomp.selcrit =</span> <span class="st">&#39;wold&#39;</span>)
+<span class="kw">show</span>(m2$ncomp.selected)</code></pre></div>
+<pre><code>## [1] 4</code></pre>
+<p>And here is the RMSE plots (they are identical of course):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotRMSE</span>(m1)
+<span class="kw">plotRMSE</span>(m2)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-73-1.png" width="864" /></p>
+<p>Parameter <code>cv</code> has the same format as for PCA. If it is a number, it will be used as number of segments for random cross-validation, e.g. if <code>cv = 2</code> cross-validation with two segments will be carried out. For full cross-validation use <code>cv = 1</code> like we did in the example above. For more advanced option you can provide a list with name of cross-validation method, number of segments and number of iterations, e.g. <code>cv = list('rand', 4, 4)</code> for running random cross-validation with four segments and four repetitions or <code>cv = list('ven', 8)</code> for systematic split into eight segments (<em>venetian blinds</em>).</p>
+<p>Method <code>summary()</code> for model shows performance statistics calculated using optimal number of components for each of the results.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1)</code></pre></div>
+<pre><code>## 
+## PLS model (class pls) summary
+## 
+## Performance and validation:
+## Number of selected components: 5
+##     X cumexpvar Y cumexpvar  RMSE Slope   Bias  RPD
+## Cal       97.64       98.19 0.521  0.98  0e+00 7.59
+## CV        92.90       96.22 0.753  0.98 -2e-04 5.26</code></pre>
+<p>If you want more details run <code>summury()</code> for one of the result objects.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1$calres)</code></pre></div>
+<pre><code>## 
+## PLS regression results (class plsres) summary
+## 
+## Response variable Shoesize:
+##        X expvar X cumexpvar Y expvar Y cumexpvar  RMSE Slope Bias RPD
+## Comp 1   50.505      50.505   93.779      93.779 0.966 0.938    0 4.1
+## Comp 2   20.979      71.484    2.926      96.705 0.703 0.967    0 5.6
+## Comp 3    8.667      80.151    0.917      97.622 0.597 0.976    0 6.6
+## Comp 4    5.847      85.998    0.479      98.101 0.534 0.981    0 7.4
+## Comp 5   11.642      97.640    0.088      98.189 0.521 0.982    0 7.6
+## Comp 6    0.495      98.135    0.347      98.536 0.468 0.985    0 8.4
+## Comp 7    0.442      98.577    0.202      98.738 0.435 0.987    0 9.1</code></pre>
+<p>There is no column for <em>R<sup>2</sup></em> as <em>Y cumexpvar</em> values are the same.</p>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="partial-least-squares-regression.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="plotting-methods-1.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
+
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 1
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

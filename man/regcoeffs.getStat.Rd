@@ -4,10 +4,10 @@
 \alias{regcoeffs.getStat}
 \title{Confidence intervals and p-values for regression coeffificents}
 \usage{
-regcoeffs.getStat(obj, ci.coeffs, ci.alpha = 0.1)
+regcoeffs.getStat(coeffs.values, ci.coeffs, ci.alpha = 0.1)
 }
 \arguments{
-\item{obj}{regression coefficients array for a model}
+\item{coeffs.values}{regression coefficients array for a model}
 
 \item{ci.coeffs}{array with regression coefficients for calculation of condifence intervals}
 

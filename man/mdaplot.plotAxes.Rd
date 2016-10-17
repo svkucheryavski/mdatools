@@ -4,17 +4,18 @@
 \alias{mdaplot.plotAxes}
 \title{Create axes plane}
 \usage{
-mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab,
-  ylab)
+mdaplot.plotAxes(xticklabels = NULL, yticklabels = NULL, xticks = NULL,
+  yticks = NULL, lim = NULL, main = NULL, xlab = NULL, ylab = NULL,
+  xlas = 0, ylas = 0)
 }
 \arguments{
-\item{xticks}{tick values for x axis}
-
 \item{xticklabels}{labels for x ticks}
 
-\item{yticks}{tick values for y axis}
-
 \item{yticklabels}{labels for y ticks}
+
+\item{xticks}{values for x ticks}
+
+\item{yticks}{values for y ticks}
 
 \item{lim}{vector with limits for x and y axis}
 
@@ -23,6 +24,10 @@ mdaplot.plotAxes(xticks, xticklabels, yticks, yticklabels, lim, main, xlab,
 \item{xlab}{label for x axis}
 
 \item{ylab}{label for y axis}
+
+\item{xlas}{orientation of xticklabels}
+
+\item{ylas}{orientation of yticklabels}
 }
 \description{
 Creates an empty axes plane for given parameters

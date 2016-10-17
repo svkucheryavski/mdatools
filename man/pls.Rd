@@ -4,9 +4,10 @@
 \alias{pls}
 \title{Partial Least Squares regression}
 \usage{
-pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
-  y.test = NULL, method = "simpls", alpha = 0.05, coeffs.ci = NULL,
-  coeffs.alpha = 0.1, info = "", light = F, ncomp.selcrit = "min")
+pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
+  exclcols = NULL, exclrows = NULL, x.test = NULL, y.test = NULL,
+  method = "simpls", alpha = 0.05, coeffs.ci = NULL, coeffs.alpha = 0.1,
+  info = "", light = F, ncomp.selcrit = "min")
 }
 \arguments{
 \item{x}{matrix with predictors.}
@@ -21,11 +22,15 @@ pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL, x.test = NULL,
 
 \item{cv}{number of segments for cross-validation (if cv = 1, full cross-validation will be used).}
 
+\item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values)}
+
+\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
+
 \item{x.test}{matrix with predictors for test set.}
 
 \item{y.test}{matrix with responses for test set.}
 
-\item{method}{method for calculating PLS model.}
+\item{method}{algorithm for computing PLS model (only 'simpls' is supported so far)}
 
 \item{alpha}{significance level for calculating statistical limits for residuals.}
 

@@ -60,7 +60,7 @@
 #'    \code{\link{plotPredictions.plsres}} \tab shows predicted vs. measured plot.\cr
 #'    \code{\link{plotXScores.plsres}} \tab shows scores plot for x decomposition.\cr
 #'    \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
-#'    \code{\link{plotRMSE.plsres}} \tab shows RMSE plot.\cr
+#'    \code{\link{plotRMSE.regres}} \tab shows RMSE plot.\cr
 #'    \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
 #'    \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
 #'    \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y 
@@ -133,8 +133,7 @@
 #' par(mfrow = c(1, 1))
 #'
 #' @export
-plsres = function(y.pred, y.ref = NULL, ncomp.selected = NULL, xdecomp = NULL, ydecomp = NULL, info = '')
-{
+plsres = function(y.pred, y.ref = NULL, ncomp.selected = NULL, xdecomp = NULL, ydecomp = NULL, info = '') {
    obj = regres(y.pred, y.ref = y.ref, ncomp.selected = ncomp.selected)
    obj$ncomp = ncol(y.pred)
    obj$xdecomp = xdecomp
@@ -150,27 +149,6 @@ plsres = function(y.pred, y.ref = NULL, ncomp.selected = NULL, xdecomp = NULL, y
    class(obj) = c("plsres", "regres")
    
    obj
-}
-
-#' RMSE plot for PLS results
-#' 
-#' @description
-#' Shows plot with root mean squared error values vs. number of components for PLS results.
-#' 
-#' @param obj
-#' PLS results (object of class \code{plsres})
-#' @param xlab
-#' label for x axis
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{plsres}} function.
-#' 
-#' @export
-plotRMSE.plsres = function(obj, xlab = 'Components', ...)
-{
-   plotRMSE.regres(obj, xlab = xlab, ...)
 }
 
 #' X scores plot for PLS results
@@ -191,11 +169,7 @@ plotRMSE.plsres = function(obj, xlab = 'Components', ...)
 #' See examples in help for \code{\link{plsres}} function.
 #' 
 #' @export
-plotXScores.plsres = function(obj, comp = c(1, 2), main = NULL, ...)
-{
-   if (is.null(main))
-      main = 'X scores'
-   
+plotXScores.plsres = function(obj, comp = c(1, 2), main = 'X scores', ...) {
    if (!is.null(obj$xdecomp$scores))
       plotScores.ldecomp(obj$xdecomp, comp = comp, main = main, ...)
    else
@@ -209,16 +183,8 @@ plotXScores.plsres = function(obj, comp = c(1, 2), main = NULL, ...)
 #' 
 #' @param obj
 #' PLS results (object of class \code{plsres})
-#' @param comp
+#' @param ncomp
 #' which component to show the plot for
-#' @param type
-#' type of the plot
-#' @param main
-#' main plot title
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
@@ -226,23 +192,27 @@ plotXScores.plsres = function(obj, comp = c(1, 2), main = NULL, ...)
 #' See examples in help for \code{\link{plsres}} function.
 #' 
 #' @export
-plotXYScores.plsres = function(obj, comp = 1, type = 'p', main = 'XY scores', 
-                               xlab = 'X scores', ylab = 'Y scores', ...)
-{
-   if (is.null(obj$xdecomp$scores) || is.null(obj$ydecomp$scores))
-   {   
+plotXYScores.plsres = function(obj, ncomp = 1, ...) {
+   
+   if (is.null(obj$xdecomp$scores) || is.null(obj$ydecomp$scores)) {   
       warning('X or Y scores are not available.')
+      return()
    }
-   else
-   {   
-      if (comp < 0 || comp > obj$ncomp)
-         stop('Wrong value for ncomp argument!')
+
+   if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp)
+      stop('Wrong value for ncomp argument!')
+   
       
-      data = cbind(obj$xdecomp$scores[, comp, drop = F],
-                   obj$ydecomp$scores[, comp, drop = F])
-      colnames(data) = c(xlab, ylab)
-      mdaplot(data, type = type, main = sprintf('%s (ncomp = %d)', main, comp), ...)
-   }   
+   data = cbind(obj$xdecomp$scores[, ncomp, drop = F], obj$ydecomp$scores[, ncomp, drop = F])
+   data = mda.setattr(data, mda.getattr(obj$xdecomp$scores))
+   attr(data, 'name') = sprintf('XY scores')
+   rownames(data) = rownames(obj$xdecomp$scores)
+   colnames(data) = c(
+      sprintf('X scores (Comp %d, %.2f%%)', ncomp, obj$xdecomp$expvar[ncomp]), 
+      sprintf('Y scores (Comp %d, %.2f%%)', ncomp, obj$ydecomp$expvar[ncomp])
+   )
+
+   mdaplot(data, type = 'p', ...)
 }
 
 #' X residuals plot for PLS results
@@ -263,10 +233,8 @@ plotXYScores.plsres = function(obj, comp = 1, type = 'p', main = 'XY scores',
 #' See examples in help for \code{\link{plsres}} function.
 #' 
 #' @export
-plotXResiduals.plsres = function(obj, ncomp = NULL, main = NULL, ...)
-{   
-   if (is.null(main))
-   {   
+plotXResiduals.plsres = function(obj, ncomp = NULL, main = NULL, ...) {   
+   if (is.null(main)) {   
       if (is.null(ncomp))
          main = 'X residuals'
       else   
@@ -276,7 +244,7 @@ plotXResiduals.plsres = function(obj, ncomp = NULL, main = NULL, ...)
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
 
-   if (ncomp < 0 || ncomp > obj$ncomp)
+   if (length(ncomp) != 1 || ncomp < 0 || ncomp > obj$ncomp)
       stop('Wrong value for ncomp argument!')
    
    plotResiduals.ldecomp(obj$xdecomp, ncomp = ncomp, main = main, ...)
@@ -298,8 +266,7 @@ plotXResiduals.plsres = function(obj, ncomp = NULL, main = NULL, ...)
 #' See examples in help for \code{\link{plsres}} function.
 #' 
 #' @export
-plotXVariance.plsres = function(obj, main = 'X variance', ...)
-{   
+plotXVariance.plsres = function(obj, main = 'X variance', ...) {   
    plotVariance.ldecomp(obj$xdecomp, main = main, ...)
 }
 
@@ -319,8 +286,7 @@ plotXVariance.plsres = function(obj, main = 'X variance', ...)
 #' See examples in help for \code{\link{plsres}} function.
 #' 
 #' @export
-plotYVariance.plsres = function(obj, main = 'Y variance', ...)
-{   
+plotYVariance.plsres = function(obj, main = 'Y variance', ...) {   
    plotVariance.ldecomp(obj$ydecomp, main = main, ...)
 }
 
@@ -340,8 +306,7 @@ plotYVariance.plsres = function(obj, main = 'Y variance', ...)
 #' See examples in help for \code{\link{plsres}} function.
 #' 
 #' @export
-plotXCumVariance.plsres = function(obj, main = 'X cumulative variance', ...)
-{   
+plotXCumVariance.plsres = function(obj, main = 'X cumulative variance', ...) {   
    plotCumVariance.ldecomp(obj$xdecomp, main = main, ...)
 }
 
@@ -361,8 +326,7 @@ plotXCumVariance.plsres = function(obj, main = 'X cumulative variance', ...)
 #' See examples in help for \code{\link{plsres}} function.
 #' 
 #' @export
-plotYCumVariance.plsres = function(obj, main = 'Y cumulative variance', ...)
-{   
+plotYCumVariance.plsres = function(obj, main = 'Y cumulative variance', ...) {   
    plotCumVariance.ldecomp(obj$ydecomp, main = main, ...)
 }
 
@@ -389,10 +353,8 @@ plotYCumVariance.plsres = function(obj, main = 'Y cumulative variance', ...)
 #' \code{\link{plotPredictions.regres}} - prediction plot for regression results.
 #' 
 #' @export
-plotPredictions.plsres = function(obj, ny = 1, ncomp = NULL, main = NULL, ...)
-{
-   if (is.null(main))
-   {
+plotPredictions.plsres = function(obj, ny = 1, ncomp = NULL, main = NULL, ...) {
+   if (is.null(main)) {
       if (is.null(ncomp))
          main = 'Predictions'
       else
@@ -427,22 +389,18 @@ plotPredictions.plsres = function(obj, ny = 1, ncomp = NULL, main = NULL, ...)
 #' See examples in help for \code{\link{plsres}} function.
 #' 
 #' @export
-plot.plsres = function(x, ncomp = NULL, ny = 1, show.labels = F, ...)
-{
+plot.plsres = function(x, ncomp = NULL, ny = 1, show.labels = F, ...) {
    obj = x
    
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected 
    
-   if (is.null(obj$y.ref))
-   {
+   if (is.null(obj$y.ref)) {
       par(mfrow = c(1, 2))
       plotXResiduals(obj, ...)
       plotPredictions.plsres(obj, ncomp = ncomp, ny = ny, ...)
       par(mfrow = c(1, 1))      
-   }  
-   else
-   {   
+   } else {   
       par(mfrow = c(2, 2))
       plotXResiduals(obj, ncomp = ncomp, ...) 
       plotYVariance(obj, ...)   
@@ -467,12 +425,9 @@ plot.plsres = function(x, ncomp = NULL, ny = 1, show.labels = F, ...)
 #' other arguments
 #' 
 #' @export
-as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...)
-{
+as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...) {
    obj = x
-   
-   if (is.null(ncomp))
-   {   
+   if (is.null(ncomp)) {   
       res = cbind(
          obj$xdecomp$expvar,
          obj$xdecomp$cumexpvar,
@@ -480,9 +435,8 @@ as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...)
          obj$ydecomp$cumexpvar,
          as.matrix.regres(obj, ny = ny)
       )
-   }
-   else
-   {
+      rownames(res) = colnames(obj$xdecomp$Q)
+   } else {
       res = cbind(
          obj$xdecomp$expvar[ncomp],
          obj$xdecomp$cumexpvar[ncomp],
@@ -490,9 +444,10 @@ as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...)
          obj$ydecomp$cumexpvar[ncomp],
          as.matrix.regres(obj, ncomp = ncomp, ny = ny)
       )
-   }   
+      rownames(res) = colnames(obj$y.pred)[ncomp]
+   }
    colnames(res)[1:4] = c('X expvar', 'X cumexpvar', 'Y expvar', 'Y cumexpvar')
-   
+   res = res[, -6, drop = FALSE] 
    res
 }
 
@@ -512,15 +467,13 @@ as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...)
 #' other arguments
 #' 
 #' @export
-summary.plsres = function(object, ny = NULL, ncomp = NULL, ...)
-{
+summary.plsres = function(object, ny = NULL, ncomp = NULL, ...) {
    obj = object
    
    cat('\nPLS regression results (class plsres) summary\n')
-   if (!is.null(obj$y.ref))
-   {         
-      if (is.null(ncomp))
-         ncomp = obj$ncomp.selected
+   if (!is.null(obj$y.ref)) {         
+      #if (is.null(ncomp))
+      #   ncomp = obj$ncomp.selected
       
       if (is.null(ny))
          ny = 1:ncol(obj$y.ref)
@@ -528,22 +481,17 @@ summary.plsres = function(object, ny = NULL, ncomp = NULL, ...)
       if (length(ncomp) == 1)
          cat(sprintf('\nNumber of selected components: %d\n', ncomp))
       
-      for (i in ny)
-      {   
+      for (i in ny) {   
          cat(sprintf('\nResponse variable %s:\n', colnames(obj$y.ref)[i]))
          res = as.matrix.plsres(obj, ny = i, ncomp = ncomp)
          res[, 1:4] = round(res[, 1:4], 3)      
-         res[, 6:7] = round(res[, 6:7], 3)  
-         res[, 5] = mdaplot.formatValues(res[, 5], round.only = T)
-         res[, 8] = round(res[, 8], 4)      
-         res[, 9] = round(res[, 9], 1)      
-         rownames(res) = colnames(obj$y.pred)[ncomp]
+         res[, 5:6] = round(res[, 5:6], 3)
+         res[, 7] = round(res[, 7], 4)      
+         res[, 8] = round(res[, 8], 1)      
          print(res)
       }
       
-   }      
-   else
-   {
+   } else {
       cat('No reference data provided to calculate prediction performance.')
    }   
 }   
@@ -559,8 +507,7 @@ summary.plsres = function(object, ny = NULL, ncomp = NULL, ...)
 #' other arguments
 #' 
 #' @export
-print.plsres = function(x, ...)
-{
+print.plsres = function(x, ...) {
    obj = x
    
    cat('\nPLS results (class plsres)\n')
@@ -570,8 +517,7 @@ print.plsres = function(x, ...)
    cat('\nMajor fields:\n')   
    cat('$ncomp.selected - number of selected components\n')
    cat('$yp - array with predicted y values\n')
-   if (!is.null(obj$y.ref))
-   {   
+   if (!is.null(obj$y.ref)) {   
       cat('$y - matrix with reference y values\n')
       cat('$rmse - root mean squared error\n')
       cat('$r2 - coefficient of determination\n')
@@ -580,6 +526,5 @@ print.plsres = function(x, ...)
       cat('$ydecomp - decomposition of y values (ldecomp object)\n')
    }
    cat('$xdecomp - decomposition of x values (ldecomp object)\n')
-   
 }   
 
