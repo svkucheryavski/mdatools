@@ -25,7 +25,7 @@
 
 <meta name="author" content="Sergey Kucheryavskiy">
 
-<meta name="date" content="2016-10-16">
+<meta name="date" content="2016-10-30">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -107,7 +107,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
 <li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-to-expect-from-future-releases"><i class="fa fa-check"></i>What to expect from future releases</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-expect-from-future-releases"><i class="fa fa-check"></i>What expect from future releases</a></li>
 <li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
@@ -158,6 +158,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="simca-classification.html"><a href="simca-classification.html"><i class="fa fa-check"></i>SIMCA classification</a><ul>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html"><i class="fa fa-check"></i>Calibration and validation</a><ul>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#predictions-and-validation-with-a-test-set"><i class="fa fa-check"></i>Predictions and validation with a test set</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="multiclass-classification.html"><a href="multiclass-classification.html"><i class="fa fa-check"></i>Multiclass classification</a></li>
 </ul></li>
 </ul>
 
@@ -313,7 +319,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">ncomp.selcrit =</span> <span class="st">&#39;wold&#39;</span>)
 <span class="kw">show</span>(m2$ncomp.selected)</code></pre></div>
 <pre><code>## [1] 4</code></pre>
-<p>And here is the RMSE plots (they are identical of course):</p>
+<p>And here are the RMSE plots (they are identical of course):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotRMSE</span>(m1)
 <span class="kw">plotRMSE</span>(m2)</code></pre></div>
@@ -329,7 +335,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 ##     X cumexpvar Y cumexpvar  RMSE Slope   Bias  RPD
 ## Cal       97.64       98.19 0.521  0.98  0e+00 7.59
 ## CV        92.90       96.22 0.753  0.98 -2e-04 5.26</code></pre>
-<p>If you want more details run <code>summury()</code> for one of the result objects.</p>
+<p>If you want more details run <code>summary()</code> for one of the result objects.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1$calres)</code></pre></div>
 <pre><code>## 
 ## PLS regression results (class plsres) summary

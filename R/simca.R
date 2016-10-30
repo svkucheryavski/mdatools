@@ -324,20 +324,14 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
             Q[ind, ] = Q[ind, ] + res$Q
             T2[ind, ] = T2[ind, ] + res$T2
             
-            # compute limits
-            lim = ldecomp.getResLimits(m$eigenvals, nrow(x.cal), ncomp, model$alpha)
-            Qlim = Qlim + lim$Qlim
-            T2lim = T2lim + lim$T2lim
          }
       }  
    }
    
    Q = Q / nrep;
    T2 = T2 / nrep;
-   Qlim = Qlim / nrep;
-   T2lim = T2lim / nrep;
    
-   m = list(Qlim = Qlim, T2lim = T2lim, classname = model$classname, ncomp = model$ncomp)
+   m = list(Qlim = model$Qlim, T2lim = model$T2lim, classname = model$classname, ncomp = model$ncomp)
    r = list(Q = Q, T2 = T2, classname = model$classname)
    c.pred = simca.classify(m, r)
    

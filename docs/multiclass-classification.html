@@ -38,8 +38,8 @@ MathJax.Hub.Config({
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
+<link rel="prev" href="calibration-and-validation.html">
 
-<link rel="next" href="what-is-new.html">
 
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -182,25 +182,101 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Getting started with mdatools for R</h1>
-<h4 class="author"><em>Sergey Kucheryavskiy</em></h4>
-<h4 class="date"><em>October 30, 2016</em></h4>
-</div>
-<div id="introduction" class="section level1 unnumbered">
-<h1>Introduction</h1>
-<p>This is a user guide for <em>mdatools</em> — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for <a href="http://en.wikipedia.org/wiki/Chemometrics">Chemometrics</a>. The general idea of the package is to collect the popular chemometric methods and give a similar “user interface” for using them. So if a user knows how to make a model and visualize results for one method, he or she can easily do this for the other methods as well.</p>
-<p>I decided to rewrite this tutorial in order to add more details and examples for the implemented methods. This is a pre-release version and I am still working on it. So far it only presents how to work with datasets and plots as well as describes in details how to do PCA analysis and PLS regression. More chapters (classification, interval PLS, etc) will be available soon. You can track main changes in the text <a href="what-is-new.html#what-is-new">here</a>.</p>
-<p>All methods implemented in the package were tested using well-known datasets. However, there still could be some bugs, in this case please report to <a href="mailto:svkucheryavski@gmail.com">svkucheryavski@gmail.com</a> or use <a href="https://github.com/svkucheryavski/mdatools/issues">Issues tool</a> at GitHub. You are also very welcome to share your comments and suggestions about the package functionality.</p>
+<div id="multiclass-classification" class="section level2 unnumbered">
+<h2>Multiclass classification</h2>
+<p>Several SIMCA models can be combined to a special object <code>simcam</code>, which is used to make a multiclass classification. Besides this, it also allows calculating distance between individual models and a discrimination power — importance of variables to discriminate between any two classes. Let’s see how it works.</p>
+<p>First we create three single-class SIMCA models with individual settings, such as number of optimal components and alpha.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m.set =<span class="st"> </span><span class="kw">simca</span>(X.set, <span class="st">&#39;setosa&#39;</span>, <span class="dv">3</span>, <span class="dt">alpha =</span> <span class="fl">0.01</span>)
+m.set =<span class="st"> </span><span class="kw">selectCompNum</span>(m.set, <span class="dv">1</span>)
+
+m.vir =<span class="st"> </span><span class="kw">simca</span>(X.vir, <span class="st">&#39;virginica&#39;</span>, <span class="dv">3</span>)
+m.vir =<span class="st"> </span><span class="kw">selectCompNum</span>(m.vir, <span class="dv">2</span>)
+
+m.ver =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicola&#39;</span>, <span class="dv">3</span>)
+m.ver =<span class="st"> </span><span class="kw">selectCompNum</span>(m.ver, <span class="dv">1</span>)</code></pre></div>
+<p>Then we combine the models into a SIMCAM model object. Summary will show the performance on calibration set, which is a combination of calibration sets for each of the individual models</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">simcam</span>(<span class="kw">list</span>(m.set, m.vir, m.ver))
+<span class="kw">summary</span>(m)</code></pre></div>
+<pre><code>## 
+## SIMCA multiple classes classification (class simcam)
+## Nmber of classes: 3
+## Info: 
+## 
+## SIMCA model for class &quot;setosa&quot; summary
+## 
+## Info: 
+## Significance level (alpha): 0.01
+## Selected number of components: 1
+## 
+##        Expvar Cumexpvar Sens (cal)
+## Comp 1  73.51     73.51          1
+## Comp 2  14.24     87.76          1
+## Comp 3  10.44     98.20          1
+## 
+## SIMCA model for class &quot;virginica&quot; summary
+## 
+## Info: 
+## Significance level (alpha): 0.05
+## Selected number of components: 2
+## 
+##        Expvar Cumexpvar Sens (cal)
+## Comp 1  76.16     76.16       0.88
+## Comp 2  14.94     91.10       1.00
+## Comp 3   6.09     97.20       0.96
+## 
+## SIMCA model for class &quot;versicola&quot; summary
+## 
+## Info: 
+## Significance level (alpha): 0.05
+## Selected number of components: 1
+## 
+##        Expvar Cumexpvar Sens (cal)
+## Comp 1  76.44     76.44       0.96
+## Comp 2  13.93     90.37       0.92
+## Comp 3   8.45     98.82       0.92</code></pre>
+<p>Now we apply the combined model to the test set and look at the predictions.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t, c.t)
+<span class="kw">plotPredictions</span>(res)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-95-1.png" width="864" /></p>
+<p>In this case the predictions are shown only for the number of components each model found optimal. The names of classes along y-axis are the individual models. Similarly we can show the predicted values.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(res$c.pred[<span class="dv">20</span>:<span class="dv">30</span>, <span class="dv">1</span>, <span class="dv">1</span>:<span class="dv">3</span>])</code></pre></div>
+<pre><code>##    setosa virginica versicola
+## 40      1        -1        -1
+## 42     -1        -1        -1
+## 44      1        -1        -1
+## 46      1        -1        -1
+## 48      1        -1        -1
+## 50      1        -1        -1
+## 52     -1        -1         1
+## 54     -1        -1         1
+## 56     -1         1         1
+## 58     -1        -1        -1
+## 60     -1        -1         1</code></pre>
+<p>There are three additional plots available for multiclass SIMCA model. First of all it is a distance between a selected model and the others.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotModelDistance</span>(m, <span class="dv">1</span>)
+<span class="kw">plotModelDistance</span>(m, <span class="dv">2</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-97-1.png" width="864" /></p>
+<p>The second plot is a discrimination power, mentioned in the beginning of the section.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotDiscriminationPower</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)
+<span class="kw">plotDiscriminationPower</span>(m, <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-98-1.png" width="864" /></p>
+<p>And, finally, a Cooman’s plot showing an orthogonal distance from objects to two selected classes/models.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotCooman</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)
+<span class="kw">plotCooman</span>(m, <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-99-1.png" width="864" /></p>
 
 </div>
+<!-- </div> -->
             </section>
 
           </div>
         </div>
       </div>
+<a href="calibration-and-validation.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 
-<a href="what-is-new.html" class="navigation navigation-next navigation-unique" aria-label="Next page""><i class="fa fa-angle-right"></i></a>
 
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/lunr.js"></script>
