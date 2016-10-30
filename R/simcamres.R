@@ -179,7 +179,7 @@ plotCooman.simcamres = function(obj, nc = c(1, 2), type = 'p', main = "Cooman's 
    attrs = mda.getattr(obj$c.pred)
    res1 = obj$pred.res[[nc[1]]]
    res2 = obj$pred.res[[nc[2]]]
-   data = cbind(sqrt(res1$Q[, res1$ncomp.selected]), sqrt(res2$Q[, res2$ncomp.selected]))
+   data = cbind(res1$Q[, res1$ncomp.selected], res2$Q[, res2$ncomp.selected])
    rownames(data) = rownames(obj$c.pred)
    data = mda.setattr(data, attrs, 'row') 
    if (show.limits == T)
