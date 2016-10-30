@@ -685,11 +685,15 @@ predict.pca = function(object, x, cal = FALSE, ...) {
    x = prep.autoscale(x, center = object$center, scale = object$scale)
    scores = x %*% object$loadings
    residuals = x - tcrossprod(scores, object$loadings)
-      
+     
    # compute total variance
    if (length(object$exclcols) > 0){
       x = x[, -object$exclcols, drop = F]
       attrs$exclcols = object$exclcols      
+   }
+   
+   if (length(attrs$exclrows) > 0){
+      x = x[-object$exclrows, ,drop = F]
    }
    
    totvar = sum(x^2)

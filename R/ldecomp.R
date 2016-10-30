@@ -238,11 +238,13 @@ ldecomp.getVariances = function(Q, totvar) {
    cumresvar = colSums(Q) / totvar * 100
    cumexpvar = 100 - cumresvar
    expvar = c(cumexpvar[1], diff(cumexpvar))
-   
+  
    res = list(
       expvar = expvar,
       cumexpvar = cumexpvar
    )
+   
+   res
 }
 
 #' Statistical limits for Q and T2 residuals
