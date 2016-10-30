@@ -166,7 +166,6 @@ predict.simcam = function(object, x, c.ref = NULL, cv = F, ...) {
       pred.res[[i]] = predict(object$models[[i]], x, c.ref)
       c.pred[, , i] = pred.res[[i]]$c.pred[, object$models[[i]]$ncomp.selected, ]
    }
-   
    dimnames(c.pred) = list(rownames(x), paste('Comp'), object$classnames)
    c.pred = mda.setattr(c.pred, attrs, 'row')
    attr(c.pred, 'name') = 'SIMCAM predictions'

@@ -25,7 +25,7 @@
 
 <meta name="author" content="Sergey Kucheryavskiy">
 
-<meta name="date" content="2016-10-16">
+<meta name="date" content="2016-10-30">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -107,7 +107,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
 <li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
-<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-to-expect-from-future-releases"><i class="fa fa-check"></i>What to expect from future releases</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-expect-from-future-releases"><i class="fa fa-check"></i>What expect from future releases</a></li>
 <li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
@@ -159,6 +159,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="simca-classification.html"><a href="simca-classification.html"><i class="fa fa-check"></i>SIMCA classification</a><ul>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html"><i class="fa fa-check"></i>Calibration and validation</a><ul>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#predictions-and-validation-with-a-test-set"><i class="fa fa-check"></i>Predictions and validation with a test set</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="multiclass-classification.html"><a href="multiclass-classification.html"><i class="fa fa-check"></i>Multiclass classification</a></li>
+</ul></li>
 </ul>
 
       </nav>
@@ -178,8 +184,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="what-is-new" class="section level1 unnumbered">
 <h1>What is new</h1>
-<div id="what-to-expect-from-future-releases" class="section level3 unnumbered">
-<h3>What to expect from future releases</h3>
+<div id="what-expect-from-future-releases" class="section level3 unnumbered">
+<h3>What expect from future releases</h3>
 <p><strong>Book</strong></p>
 <ul>
 <li>Chapters about classification (SIMCA, SIMCA for multiple classes, PLS-DA)</li>
@@ -196,6 +202,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="last-changes-and-improvements-to-book-and-package" class="section level3 unnumbered">
 <h3>Last changes and improvements to book and package</h3>
+<p><strong>30.10.2016</strong></p>
+<ul>
+<li>fixed a bug in PCA when explained variance was calculated incorrectly for data with excluded rows</li>
+<li>fixed several issues with SIMCA (cross-validation) and SIMCAM (Cooman’s plot)</li>
+<li>added a chapter about SIMCA to the tutorial</li>
+</ul>
 <p><strong>14.10.2016</strong></p>
 <p>The new version (0.8.0) brings a lot of new features, therefore it was decided to rewrite this tutorial completely and start this log from the scratch. Most of the things available in the previous version of the package will work without any changes. But if you have been using functions <code>mdaplot()</code> and <code>mdaplotg()</code> it makes sense to read how the new implementation works and rewrite your code. The use of plotting tools became much simpler and more efficient. The main changes in the package are:</p>
 <ul>

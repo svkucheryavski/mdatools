@@ -38,8 +38,8 @@ MathJax.Hub.Config({
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-
-<link rel="next" href="what-is-new.html">
+<link rel="prev" href="variable-selection.html">
+<link rel="next" href="calibration-and-validation.html">
 
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -182,25 +182,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Getting started with mdatools for R</h1>
-<h4 class="author"><em>Sergey Kucheryavskiy</em></h4>
-<h4 class="date"><em>October 30, 2016</em></h4>
-</div>
-<div id="introduction" class="section level1 unnumbered">
-<h1>Introduction</h1>
-<p>This is a user guide for <em>mdatools</em> — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for <a href="http://en.wikipedia.org/wiki/Chemometrics">Chemometrics</a>. The general idea of the package is to collect the popular chemometric methods and give a similar “user interface” for using them. So if a user knows how to make a model and visualize results for one method, he or she can easily do this for the other methods as well.</p>
-<p>I decided to rewrite this tutorial in order to add more details and examples for the implemented methods. This is a pre-release version and I am still working on it. So far it only presents how to work with datasets and plots as well as describes in details how to do PCA analysis and PLS regression. More chapters (classification, interval PLS, etc) will be available soon. You can track main changes in the text <a href="what-is-new.html#what-is-new">here</a>.</p>
-<p>All methods implemented in the package were tested using well-known datasets. However, there still could be some bugs, in this case please report to <a href="mailto:svkucheryavski@gmail.com">svkucheryavski@gmail.com</a> or use <a href="https://github.com/svkucheryavski/mdatools/issues">Issues tool</a> at GitHub. You are also very welcome to share your comments and suggestions about the package functionality.</p>
-
+<div id="simca-classification" class="section level1 unnumbered">
+<h1>SIMCA classification</h1>
+<p>SIMCA (Soft Independent Modelling of Class Analogy) is a simple one-class classification method mainly based on PCA. The general idea is to create a PCA model using data for samples/objects belonging to a class and classify new objects based on how good the model can fit them. The decision is made using two residual distances — <span class="math inline">\(Q\)</span> (squared residual distance from an object to its projection to PCA space) and <span class="math inline">\(T^2\)</span> - distance between the projection of the object and origin of PC space. The <span class="math inline">\(T^2\)</span> distance is calculated for normalized scores.</p>
+<p>The first distance (also known as “orthogonal distance”) shows how good the new object following the same trend as the other objects from the class used to create the model, while the second (also known as “score distance”) tells how extreme is it. Both distances may have certain statistical limits, which can be used to cut-off the strangers and accept class members with a pre-define expected ratio of false negatives (<span class="math inline">\(\alpha\)</span>). There are several ways to calculate the limits, for example, see <a href="http://onlinelibrary.wiley.com/doi/10.1002/cem.1147/abstract">this paper</a>. In <em>mdatools</em> so far we use a simplest way, suggested by Svante Wold, where the limit for orthogonal distance is calculated using F-distribution and the score distance is computed using Hotelling T<sup>2</sup> distribution. More methods will be available in future releases.</p>
+<p>The classification performance is assessed using true/false positives and negatives and statistics, showing the ability of a classification model to recognize class members (<em>sensitivity</em> or true positive rate) and how good the model is for identifying strangers (<em>specificity</em> or true negative rate). In addition to that, model also calculates a percent of misclassified objects. All statistics are calculated for calibration and validation (if any) results, but one must be aware that specificity can not be computed without objects not belonging to the class and, therefore, calibration and cross-validation results in SIMCA do not have specificity values.</p>
+<p>It must be also noted that any SIMCA model or result is also a PCA object and all plots, methods, statistics, available for PCA, can be used for SIMCA objects as well.</p> 
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="what-is-new.html" class="navigation navigation-next navigation-unique" aria-label="Next page""><i class="fa fa-angle-right"></i></a>
+<a href="variable-selection.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="calibration-and-validation.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
 
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/lunr.js"></script>

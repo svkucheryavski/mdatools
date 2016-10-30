@@ -1,3 +1,9 @@
+v.0.8.1
+=======
+* fixed a bug in PCA when explained variance was calculated incorrectly for data with excluded rows
+* fixed several issues with SIMCA (cross-validation) and SIMCAM (Cooman's plot)
+* added a chapter about SIMCA to the tutorial
+
 v.0.8.0
 =======
 * tutorial has been moved from GitBook to Bookdown and fully rewritten

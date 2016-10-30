@@ -38,8 +38,8 @@ MathJax.Hub.Config({
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-
-<link rel="next" href="what-is-new.html">
+<link rel="prev" href="simca-classification.html">
+<link rel="next" href="multiclass-classification.html">
 
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -182,25 +182,120 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Getting started with mdatools for R</h1>
-<h4 class="author"><em>Sergey Kucheryavskiy</em></h4>
-<h4 class="date"><em>October 30, 2016</em></h4>
-</div>
-<div id="introduction" class="section level1 unnumbered">
-<h1>Introduction</h1>
-<p>This is a user guide for <em>mdatools</em> — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for <a href="http://en.wikipedia.org/wiki/Chemometrics">Chemometrics</a>. The general idea of the package is to collect the popular chemometric methods and give a similar “user interface” for using them. So if a user knows how to make a model and visualize results for one method, he or she can easily do this for the other methods as well.</p>
-<p>I decided to rewrite this tutorial in order to add more details and examples for the implemented methods. This is a pre-release version and I am still working on it. So far it only presents how to work with datasets and plots as well as describes in details how to do PCA analysis and PLS regression. More chapters (classification, interval PLS, etc) will be available soon. You can track main changes in the text <a href="what-is-new.html#what-is-new">here</a>.</p>
-<p>All methods implemented in the package were tested using well-known datasets. However, there still could be some bugs, in this case please report to <a href="mailto:svkucheryavski@gmail.com">svkucheryavski@gmail.com</a> or use <a href="https://github.com/svkucheryavski/mdatools/issues">Issues tool</a> at GitHub. You are also very welcome to share your comments and suggestions about the package functionality.</p>
+<div id="calibration-and-validation" class="section level2 unnumbered">
+<h2>Calibration and validation</h2>
+<p>The model calibration is similar to PCA, but there are several additional arguments, which are important for classification. First of all it is a class name. Class name is a string, which can be used later e.g. for identifying class members for testing. The second important argument is a level of significance, <code>alpha</code>. This parameter is used for calculation of statistical limits and can be considered as probability for false negatives. The default value is 0.05.</p>
+<p>In this chapter as well as for describing other classification methods we will use a famous Iris dataset, available in R. The dataset includes 150 measurements of three Iris species: <em>Setosa</em>, <em>Virginica</em> and <em>Versicola</em>. The measurements are length and width of petals and sepals in cm. Use <code>?iris</code> for more details.</p>
+<p>Let’s get the data and split it to calibration and test sets.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(iris)
+<span class="kw">head</span>(iris)</code></pre></div>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># generate indices for calibration set</span>
+idx =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, <span class="kw">nrow</span>(iris), <span class="dt">by =</span> <span class="dv">2</span>)
 
+<span class="co"># split the values</span>
+X.c =<span class="st"> </span>iris[idx, <span class="dv">1</span>:<span class="dv">4</span>]
+c.c =<span class="st"> </span>iris[idx, <span class="dv">5</span>, drop =<span class="st"> </span>F]
+
+X.t =<span class="st"> </span>iris[-idx, <span class="dv">1</span>:<span class="dv">4</span>]
+c.t =<span class="st"> </span>iris[-idx, <span class="dv">5</span>, drop =<span class="st"> </span>F]</code></pre></div>
+<p>Now, because for calibration we need only objects belonging to a class, we will split the <code>X.c</code> into three matrices — one for each species. The data is ordered by the species, so it can be done relatively easy by taking every 25 rows.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">X.set =<span class="st"> </span>X.c[<span class="dv">1</span>:<span class="dv">25</span>, ]
+X.ver =<span class="st"> </span>X.c[<span class="dv">26</span>:<span class="dv">50</span>, ]
+X.vir =<span class="st"> </span>X.c[<span class="dv">51</span>:<span class="dv">75</span>, ]</code></pre></div>
+<p>Let’s start with creating a model for class <em>Versicolor</em> and exploring available statistics and plots. We will use full cross-validation to validate the results.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mdatools)
+m =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>)
+<span class="kw">summary</span>(m)</code></pre></div>
+<pre><code>## 
+## SIMCA model for class &quot;versicolor&quot; summary
+## 
+## Info: 
+## Significance level (alpha): 0.05
+## Selected number of components: 3
+## 
+##        Expvar Cumexpvar Sens (cal) Expvar (cv) Sens (cv)
+## Comp 1  76.44     76.44       0.96       71.85      0.88
+## Comp 2  13.93     90.37       0.92       13.91      0.84
+## Comp 3   8.45     98.82       0.92       12.24      0.84</code></pre>
+<p>Let’s look at plots and start with summary plot.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(m)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-88-1.png" width="864" /></p>
+<p>The plot is very similar to what we seen for PCA model, the only difference is that it shows <em>modelling power</em> instead of loadings. Modelling power is a measure of contribution of each variable to the model and varies from 0 to 1. Usually variables with modelling power below 0.1 are considered as irrelevant.</p>
+<p>Let’s give a closer look at the residuals plot with different values for alpha (we will keep number of components equal to three in all cases).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.01</span>)
+m2 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.05</span>)
+m3 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.10</span>)
+m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.15</span>)
+
+<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">plotResiduals</span>(m1)
+<span class="kw">plotResiduals</span>(m2)
+<span class="kw">plotResiduals</span>(m3)
+<span class="kw">plotResiduals</span>(m4)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-89-1.png" width="864" /></p>
+<p>As you can see, using alpha = 0.01 reduced number of false negatives to zero, as the acceptance limits became larger, while alpha = 0.15 gives a lot of incorrectly rejected class members. It must be noted, that decreasing alpha will also lead to a larger number of false positives, which we can not see in this case.</p>
+<div id="predictions-and-validation-with-a-test-set" class="section level3 unnumbered">
+<h3>Predictions and validation with a test set</h3>
+<p>When model is ready one can test it using a new test set with know classes. In this case we will use objects from all three species and be able to see how good the model performs on strangers (and calculate the specificity). In order to do that we will provide both the matrix with predictors, <code>X.t</code>, and a vector with names of the classes for corresponding objects/rows (<code>c.t</code>). The values with known classes in this case can be:</p>
+<ul>
+<li>a vector with text values (names)</li>
+<li>a factor using the names as labels</li>
+<li>a vector with logical values (<code>TRUE</code> for class members and <code>FALSE</code> for strangers)</li>
+</ul>
+<p>In our case we have a factor. Instead of creating a new model and providing the values as test set we will make predictions instead.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t, c.t)
+<span class="kw">summary</span>(res)</code></pre></div>
+<pre><code>## 
+## Summary for SIMCA one-class classification result
+## 
+## Class name: versicolor
+## Number of selected components: 3
+## 
+##        Expvar Cumexpvar TP FP TN FN Spec Sens
+## Comp 1  64.27     64.27 23  5 45  2 0.90 0.92
+## Comp 2   1.67     65.95 24  3 47  1 0.94 0.96
+## Comp 3  32.45     98.40 22  3 47  3 0.94 0.88</code></pre>
+<p>In this case we see a more detailed statistics with true/false positives and negatives, specificity and sensitivity. The performance statistics can be also shown as plots.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">plotSpecificity</span>(res)
+<span class="kw">plotSensitivity</span>(res)
+<span class="kw">plotMisclassified</span>(res)
+<span class="kw">plotPerformance</span>(res)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-91-1.png" width="864" /></p>
+<p>The classification results can be shown both graphically and numerically. Here is a prediction plot for the results.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
+<span class="kw">plotPredictions</span>(res)
+<span class="kw">plotPredictions</span>(res, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-92-1.png" width="864" /></p>
+<p>So we can see that for the model with three components we have no false positives (specificity = 1) and one false negative (sensitivity = 24/25 = 0.96). You can also show the predictions as a matrix with -1 and +1 using method <code>showPredictions()</code> or get the array with predicted class values directly as it is shown in the example below (for first 10 rows, different number of components and the first classification variable).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(res$c.pred[<span class="dv">31</span>:<span class="dv">40</span>, <span class="dv">1</span>:<span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
+<pre><code>##    Comp 1 Comp 2 Comp 3
+## 62      1      1      1
+## 64      1      1      1
+## 66      1      1      1
+## 68      1      1     -1
+## 70      1      1      1
+## 72      1      1      1
+## 74      1      1     -1
+## 76      1      1      1
+## 78      1      1      1
+## 80      1      1      1</code></pre>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="what-is-new.html" class="navigation navigation-next navigation-unique" aria-label="Next page""><i class="fa fa-angle-right"></i></a>
+<a href="simca-classification.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="multiclass-classification.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
 
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/lunr.js"></script>
