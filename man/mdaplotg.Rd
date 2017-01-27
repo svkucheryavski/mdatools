@@ -35,7 +35,7 @@ mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1, lwd = 1,
 
 \item{main}{an overall title for the plot (same as \code{plot} parameter).}
 
-\item{labels}{a matrix with text labels for data points (if NULL, row names for each group will be used).}
+\item{labels}{what to use as labels ('names' - row names, 'indices' - row indices, 'values' - values).}
 
 \item{ylim}{limits for the y axis (if NULL, will be calculated automatically).}
 
