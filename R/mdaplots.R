@@ -296,8 +296,12 @@ mdaplot.showGrid = function(lwd = 0.5)
 #' a vector with values used to make color grouping of the elements
 #' @param colmap
 #' a colormap to be used for color generation
+#' @param lab.col
+#' color for legend labels
+#' @param lab.cex
+#' size for legend labels
 #' 
-mdaplot.showColorbar = function(cgroup, colmap = 'default')
+mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray', lab.cex = 0.65)
 {
    # get number of levels for the cgroup
    cfactor = factor(cgroup)
@@ -364,7 +368,7 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default')
       labels[, 1] = labels[, 1] + w/2
    
    # show labels for colorbar regions
-   mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1)
+   mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col, cex = lab.cex)
 }
 
 
@@ -1213,7 +1217,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    
    # show colorbar if needed
    if (!is.null(cgroup) && show.colorbar == T)
-      mdaplot.showColorbar(cgroup, colmap)   
+      mdaplot.showColorbar(cgroup, colmap, lab.col = lab.col, lab.cex = lab.cex)   
 }
 
 #' Plotting function for several sets of objects
