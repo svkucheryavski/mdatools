@@ -296,8 +296,12 @@ mdaplot.showGrid = function(lwd = 0.5)
 #' a vector with values used to make color grouping of the elements
 #' @param colmap
 #' a colormap to be used for color generation
+#' @param lab.col
+#' color for legend labels
+#' @param lab.cex
+#' size for legend labels
 #' 
-mdaplot.showColorbar = function(cgroup, colmap = 'default')
+mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray', lab.cex = 0.65)
 {
    # get number of levels for the cgroup
    cfactor = factor(cgroup)
@@ -364,7 +368,7 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default')
       labels[, 1] = labels[, 1] + w/2
    
    # show labels for colorbar regions
-   mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1)
+   mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col, cex = lab.cex)
 }
 
 
@@ -914,7 +918,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' @param main  
 #' an overall title for the plot (same as \code{plot} parameter).
 #' @param labels  
-#' a vector with text labels for data points (if NULL, row names will be used).
+#' a vector with text labels for data points or one of the following: 'names', 'indices', 'values'.
 #' @param show.labels  
 #' logical, show or not labels for the data objects.
 #' @param show.colorbar  
@@ -1213,7 +1217,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    
    # show colorbar if needed
    if (!is.null(cgroup) && show.colorbar == T)
-      mdaplot.showColorbar(cgroup, colmap)   
+      mdaplot.showColorbar(cgroup, colmap, lab.col = lab.col, lab.cex = lab.cex)   
 }
 
 #' Plotting function for several sets of objects
@@ -1243,7 +1247,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' @param main  
 #' an overall title for the plot (same as \code{plot} parameter).
 #' @param labels  
-#' a matrix with text labels for data points (if NULL, row names for each group will be used).
+#' what to use as labels ('names' - row names, 'indices' - row indices, 'values' - values).
 #' @param ylim  
 #' limits for the y axis (if NULL, will be calculated automatically).
 #' @param xlim  

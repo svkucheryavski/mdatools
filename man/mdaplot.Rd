@@ -40,7 +40,7 @@ by a user (if NULL it will be created automatically)}
 
 \item{colmap}{a colormap to use for coloring the plot items.}
 
-\item{labels}{a vector with text labels for data points (if NULL, row names will be used).}
+\item{labels}{a vector with text labels for data points or one of the following: 'names', 'indices', 'values'.}
 
 \item{main}{an overall title for the plot (same as \code{plot} parameter).}
 

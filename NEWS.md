@@ -1,3 +1,7 @@
+v.0.8.2
+=======
+* parameters `lab.cex` and `lab.col` now are also applied to colorbar labels
+
 v.0.8.1
 =======
 * fixed a bug in PCA when explained variance was calculated incorrectly for data with excluded rows
