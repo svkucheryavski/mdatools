@@ -33,4 +33,3 @@ Shows plot with variance values vs. number of components.
 \details{
 See examples in help for \code{\link{pls}} function.
 }
-

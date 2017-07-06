@@ -16,4 +16,3 @@ mda.setattr(x, attrs, type = "all")
 \description{
 Set most important data attributes (name, xvalues, excluded rows and columns, etc.) to a dataset
 }
-

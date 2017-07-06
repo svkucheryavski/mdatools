@@ -27,4 +27,3 @@ Computes residual distances (Q and T2) and modelling power for a data decomposit
 The distances are calculated for every 1:n components, where n goes from 1 to ncomp 
 (number of columns in scores and loadings).
 }
-

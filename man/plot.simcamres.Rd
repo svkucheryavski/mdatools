@@ -17,4 +17,3 @@ Just shows a prediction plot for SIMCAM results.
 \details{
 See examples in help for \code{\link{simcamres}} function.
 }
-

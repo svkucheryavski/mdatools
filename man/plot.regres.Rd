@@ -19,4 +19,3 @@ plot method for regression results
 \details{
 Shows prediction plot for the results (the same as \code{plotPredictions.regres})
 }
-

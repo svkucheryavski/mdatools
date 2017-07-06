@@ -125,4 +125,3 @@ Methods, inherited from \code{plsres} class:
 See also \code{\link{plsda}} - a class for PLS-DA models, \code{\link{predict.plsda}} applying
 PLS-DA model for a new dataset.
 }
-

@@ -20,4 +20,3 @@ pls.run(x, y, ncomp, method, cv)
 \description{
 Runs selected PLS algorithm
 }
-

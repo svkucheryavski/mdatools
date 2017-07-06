@@ -106,4 +106,3 @@ points(simdata$wavelength[ind], mspectrum[ind], pch = 16, col = 'blue')
 comparative chemometric study with an example from near-infrared spectroscopy.
 Appl.Spec. 2000; 54: 413-419
 }
-

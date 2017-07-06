@@ -26,4 +26,3 @@ Shows a set of plots (x residuals, regression coefficients, RMSE and predictions
 \details{
 See examples in help for \code{\link{pls}} function.
 }
-

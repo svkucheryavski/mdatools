@@ -14,4 +14,3 @@ plotSelectivityRatio(obj, ...)
 \description{
 Generic function for plotting selectivity ratio values for regression model (PCR, PLS, etc)
 }
-

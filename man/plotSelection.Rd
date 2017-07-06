@@ -17,4 +17,3 @@ Selected intervals plot
 \details{
 Generic function for plotting selected intervals or variables
 }
-

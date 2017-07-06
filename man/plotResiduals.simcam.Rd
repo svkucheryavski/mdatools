@@ -17,4 +17,3 @@ Shows a plot with residuals for SIMCAM model
 \details{
 See examples in help for \code{\link{simcam}} function.
 }
-

@@ -17,4 +17,3 @@ Predictions plot
 \details{
 Generic function for plotting predicted values for classification or regression model or results
 }
-

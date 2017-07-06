@@ -22,4 +22,3 @@ Format vector with values, so only significant decimal numbers are left.
 \details{
 Function takes into accound difference between values and the values themselves.
 }
-

@@ -29,4 +29,3 @@
 \description{
 Shows a plot with cumulative explained variance values vs. number of components.
 }
-

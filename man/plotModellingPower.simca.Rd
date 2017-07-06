@@ -23,4 +23,3 @@
 \description{
 Shows a plot with modelling power values for each predictor
 }
-

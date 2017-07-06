@@ -22,4 +22,3 @@ The method assign attribute 'exclcols', which contains number of columns, which 
 from calculations and plots (without removing them physically). The argument \code{ind} should contain 
 column numbers (excluding already hidden), names or logical values.
 }
-

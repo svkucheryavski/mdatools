@@ -19,4 +19,3 @@ Shows a set of plots for SIMCA model.
 \details{
 See examples in help for \code{\link{simcam}} function.
 }
-

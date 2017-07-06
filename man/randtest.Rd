@@ -99,4 +99,3 @@ Methods for \code{randtest} objects:
  \code{\link{plotCorr.randtest}} \tab shows determination coefficient plot.\cr
 }
 }
-

@@ -17,4 +17,3 @@ Biplot
 \details{
 Generic function for biplot
 }
-

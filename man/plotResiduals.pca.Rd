@@ -35,4 +35,3 @@ Shows a plot with Q residuals vs. Hotelling T2 values for selected number of com
 \details{
 See examples in help for \code{\link{pca}} function.
 }
-

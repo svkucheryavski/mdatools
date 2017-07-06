@@ -21,4 +21,3 @@ a list with statistics (\code{$ci} - array with confidence intervals,
 calculates confidence intervals and t-test based p-values for 
 regression coefficients based on jack-knifing procedure
 }
-

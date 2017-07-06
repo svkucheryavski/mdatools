@@ -21,4 +21,3 @@ data matrix with processed values
 \description{
 Autoscale (mean center and standardize) values in columns of data matrix.
 }
-

@@ -97,4 +97,3 @@ Methods, inherited from \code{\link{ldecomp}} class:
 
 Check also \code{\link{pca}} and \code{\link{ldecomp}}.
 }
-

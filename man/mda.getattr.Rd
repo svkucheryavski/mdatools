@@ -12,4 +12,3 @@ mda.getattr(x)
 \description{
 Returns a list with important data attributes (name, xvalues, excluded rows and columns, etc.)
 }
-

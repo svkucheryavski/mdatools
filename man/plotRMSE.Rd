@@ -17,4 +17,3 @@ RMSE plot
 \details{
 Generic function for plotting RMSE values vs. complexity of a regression model
 }
-

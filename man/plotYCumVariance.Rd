@@ -17,4 +17,3 @@ Y cumulative variance plot
 \details{
 Generic function for plotting cumulative explained variance for decomposition of y data
 }
-

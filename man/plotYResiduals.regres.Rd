@@ -22,4 +22,3 @@
 Shows plot with Y residuals (difference between predicted and reference values) for selected 
 response variable and complexity (number of components).
 }
-

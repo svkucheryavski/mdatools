@@ -21,4 +21,3 @@ mdaplot.showRegressionLine(data, lty = 1, lwd = 1, colmap = "default",
 \description{
 Shows linear fit line for data points.
 }
-

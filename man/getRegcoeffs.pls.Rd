@@ -33,4 +33,3 @@ matrix with coefficients can be applied directly to original data (yp = Xb).
 If number of components is not specified, the optimal number, selected by user
 or identified by a model will be used.
 }
-

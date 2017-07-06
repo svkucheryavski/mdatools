@@ -29,4 +29,3 @@ object of class \code{plsres} with results of cross-validation
 \description{
 Does the cross-validation of a PLS model
 }
-
