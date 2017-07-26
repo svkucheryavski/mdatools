@@ -556,12 +556,12 @@ pca.nipals = function(x, ncomp) {
    }
    
    s = svd(E)
-   
    res = list(
       loadings = loadings,
       scores = scores,
-      eigenvals = c(eigenvals, (s$d[1:(nvar - ncomp + 1)]^2)/(nrow(x) - 1))
+      eigenvals = c(eigenvals, (s$d[1:(min(nvar, nobj - 1) - ncomp + 1)]^2)/(nrow(x) - 1))
    )   
+   res
 }
 
 #' Cross-validation of a PCA model

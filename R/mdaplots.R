@@ -301,41 +301,37 @@ mdaplot.showGrid = function(lwd = 0.5)
 #' @param lab.cex
 #' size for legend labels
 #' 
-mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray', lab.cex = 0.65)
-{
+mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray', lab.cex = 0.65) {
    # get number of levels for the cgroup
-   cfactor = factor(cgroup)
-   nlevels = length(attr(cfactor, 'levels'))
+   if (!is.factor(cgroup) && length(unique(cgroup)) > 12) {
+         # get colors for 8 groups based on colormap
+         col = mdaplot.getColors(ngroups = 12, colmap = colmap)
+         ncol = length(unique(col))
+      
+         # split values to intervals
+         cgroupl = levels(cut(as.vector(cgroup), ncol))
+      
+         # get left and right values for the intervals
+         lvals = as.numeric( sub("\\((.+),.*", "\\1", cgroupl) ) 
+         rvals = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", cgroupl) ) 
+      
+         # correct issue with first element
+         if (min(cgroup) != lvals[1])
+            lvals[1] = min(cgroup)
+      
+         # combine values and define matrix for labels
+         vals = c(lvals, rvals[ncol])
+         labels = matrix(0, ncol = 2, nrow = ncol + 1)
+   } else {
+      if (!is.factor(cgroup))
+         cgroup = factor(cgroup)
    
-   if (nlevels > 8)
-   {
-      # more than 8 levels, treat cgroup as non factor variable
+      nlevels = length(attr(cgroup, 'levels'))
       
-      # get colors for 8 groups based on colormap
-      col = mdaplot.getColors(ngroups = 8, colmap = colmap)
-      ncol = length(unique(col))
-      
-      # split values to intervals
-      cgroupl = levels(cut(as.vector(cgroup), ncol))
-      
-      # get left and right values for the intervals
-      lvals = as.numeric( sub("\\((.+),.*", "\\1", cgroupl) ) 
-      rvals = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", cgroupl) ) 
-      
-      # correct issue with first element
-      if (min(cgroup) != lvals[1])
-         lvals[1] = min(cgroup)
-      
-      # combine values and define matrix for labels
-      vals = c(lvals, rvals[ncol])
-      labels = matrix(0, ncol = 2, nrow = ncol + 1)
-   }
-   else
-   {      
       # no splitting is needed, just use factors as labels
       col = mdaplot.getColors(ngroups = nlevels, colmap = colmap)
       ncol = length(unique(col))
-      vals = levels(cfactor)
+      vals = levels(cgroup)
       labels = matrix(0, ncol = 2, nrow = ncol)
    }  
    
@@ -571,10 +567,13 @@ bars = function(x, y, col = NULL, bwd = 0.8, border = NA)
    
    if (length(bwd) == 1)
       bwd = matrix(bwd, ncol = length(x))
+  
+   if (length(col) != length(y))
+      col = rep(col, length.out = length(y))
    
    for (i in 1:length(x))
    {
-      rect(x[i] - bwd[i]/2, 0, x[i] + bwd[i]/2, y[i], col = col, border = border)      
+      rect(x[i] - bwd[i]/2, 0, x[i] + bwd[i]/2, y[i], col = col[i], border = border)      
    }
 }  
 
@@ -1094,7 +1093,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    }
    
    #  get proper colors     
-   if (density == FALSE && !is.null(cgroup) && !(type == 'h' || type == 'e')) {   
+   if (density == FALSE && !is.null(cgroup) && !(type == 'e')) {   
       # show color groups according to cdata values
       col = mdaplot.getColors(cgroup = cgroup, colmap = colmap)
    } else {

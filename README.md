@@ -28,11 +28,11 @@ The package is available from CRAN by usual installing procedure. However due to
 politics regarding number of submissions (one in 3-4 month) only major releases will be published 
 there (with 2-3 weeks delay after GitHub release as more thorought testing is needed). To get the latest 
 release plase use [GitHub sources](https://github.com/svkucheryavski/mdatools). You can [download](https://github.com/svkucheryavski/mdatools/releases) a zip-file with source package and 
-install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.8.2.tar.gz` 
+install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.8.3.tar.gz` 
 and it is located in a current working directory, just run the following:
 
 ```
-install.packages('mdatools_0.8.2.tar.gz')
+install.packages('mdatools_0.8.3.tar.gz')
 ```
 
 If you have `devtools` package installed, the following command will install the latest release from 
