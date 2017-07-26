@@ -21,3 +21,4 @@ Shows a plot with Q vs. T2 residuals for SIMCAM results
 \details{
 See examples in help for \code{\link{simcamres}} function.
 }
+

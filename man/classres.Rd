@@ -47,3 +47,4 @@ Methods \code{classres} class:
  \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity and sensitivity values.\cr
 }
 }
+

@@ -29,3 +29,4 @@ and reference y-values.
 \details{
 See examples in help for \code{\link{randtest}} function.
 }
+

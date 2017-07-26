@@ -17,3 +17,4 @@ Loadings plot
 \details{
 Generic function for plotting loadings values for data decomposition
 }
+

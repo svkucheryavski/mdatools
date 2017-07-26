@@ -21,3 +21,4 @@ Shows horisontal and vertical lines on a plot.
 \details{
 If it is needed to show only one line, the other coordinate shall be set to NA.
 }
+

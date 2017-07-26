@@ -17,3 +17,4 @@ X cumulative variance plot
 \details{
 Generic function for plotting cumulative explained variance for decomposition of x data
 }
+

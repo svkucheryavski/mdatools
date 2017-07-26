@@ -27,3 +27,4 @@ Shows plot with predicted y values.
 If reference values are available, the function shows a scatter plot with predicted vs. 
 reference values, otherwise predicted values are shown vs. object numbers.
 }
+

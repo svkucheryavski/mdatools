@@ -12,3 +12,4 @@ erfinv(x)
 \description{
 Inverse error function
 }
+

@@ -14,3 +14,4 @@ getRegcoeffs(obj, ...)
 \description{
 Generic function for getting regression coefficients from PLS model
 }
+

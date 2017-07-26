@@ -55,11 +55,12 @@ rdata = pca.mvreplace(mdata, scale = TRUE)
 show(cbind(odata, mdata, round(rdata, 2)))
 
 }
+\author{
+Sergey Kucheryavskiy (svkucheryavski@gmail.com)
+}
 \references{
 Philip R.C. Nelson, Paul A. Taylor, John F. MacGregor. Missing data methods in PCA and PLS: 
 Score calculations with incomplete observations. Chemometrics and Intelligent Laboratory 
 Systems, 35 (1), 1996.
 }
-\author{
-Sergey Kucheryavskiy (svkucheryavski@gmail.com)
-}
+

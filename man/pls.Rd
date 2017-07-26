@@ -194,6 +194,9 @@ plotPredictions(modelsel)
 par(mfrow = c(1, 1))
 
 }
+\author{
+Sergey Kucheryavskiy (svkucheryavski@gmail.com)
+}
 \references{
 1. S. de Jong, Chemometrics and Intelligent Laboratory Systems 18 (1993) 251-263.
 2. Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), 35-48.
@@ -235,6 +238,4 @@ available for PLS results
 (\code{\link{plsres}}) objects. There is also a randomization test for PLS-regression 
 (\code{\link{randtest}}).
 }
-\author{
-Sergey Kucheryavskiy (svkucheryavski@gmail.com)
-}
+

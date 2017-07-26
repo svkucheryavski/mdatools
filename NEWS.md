@@ -1,6 +1,7 @@
 v.0.8.3
 =======
 * fixed a bug in `mdatools` when using factor with more than 8 levels for color grouping led to an error
+* fixed a bug in `pca` with wrong calculation of eigenvalues when in NIPALS algorithm
 * bars on a bar plot now can be color grouped
 
 v.0.8.2

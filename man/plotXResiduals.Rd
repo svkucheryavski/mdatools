@@ -17,3 +17,4 @@ X residuals plot
 \details{
 Generic function for plotting x residuals for classification or regression model or results
 }
+

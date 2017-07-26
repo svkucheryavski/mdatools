@@ -27,3 +27,4 @@ for PLS-DA results.
 \details{
 See examples in help for \code{\link{pls}} function.
 }
+

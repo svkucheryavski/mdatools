@@ -31,3 +31,4 @@
 \description{
 Shows plot with regression coefficient values for every predictor variable (x)
 }
+

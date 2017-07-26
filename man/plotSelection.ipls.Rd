@@ -39,3 +39,4 @@ See examples in help for \code{\link{ipls}} function.
  @seealso 
  \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
 }
+

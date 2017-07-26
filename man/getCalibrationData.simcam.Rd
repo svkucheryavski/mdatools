@@ -17,3 +17,4 @@ Get data, used for calibration of the SIMCAM model.
 \details{
 See examples in help for \code{\link{simcam}} function.
 }
+

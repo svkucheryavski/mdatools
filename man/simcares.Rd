@@ -96,3 +96,4 @@ Methods, inherited from \code{\link{ldecomp}} class:
 }
 Check also \code{\link{simca}} and \code{\link{pcares}}.
 }
+

@@ -23,3 +23,4 @@ and response variable
 \references{
 [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
 }
+

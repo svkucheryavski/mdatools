@@ -22,3 +22,4 @@ errorbars(x, lower, upper, y = NULL, col = NULL, pch = 16)
 \description{
 Shows error bars (errorbar plot) on predefined axes
 }
+

@@ -33,3 +33,4 @@ Shows plot with predicted vs. reference (measured) y values for selected compone
 \details{
 See examples in help for \code{\link{pls}} function.
 }
+

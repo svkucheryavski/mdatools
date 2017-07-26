@@ -22,3 +22,4 @@ matrix with object indices for each segment
 Generates and returns sequence of object indices for each segment in random segmented 
 cross-validation
 }
+

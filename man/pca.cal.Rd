@@ -34,3 +34,4 @@ an object with calibrated PCA model
 \description{
 Calibrates (builds) a PCA model for given data and parameters
 }
+

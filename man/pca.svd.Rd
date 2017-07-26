@@ -17,3 +17,4 @@ a list with scores, loadings and eigencalues for the components
 \description{
 Computes principal component space using Singular Values Decomposition
 }
+

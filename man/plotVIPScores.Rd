@@ -14,3 +14,4 @@ plotVIPScores(obj, ...)
 \description{
 Generic function for plotting VIP scores values for regression model (PCR, PLS, etc)
 }
+

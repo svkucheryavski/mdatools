@@ -27,3 +27,4 @@ last two fields are available if proper values for calculation of the statistics
 class for storing and visualisation of regression coefficients
 for regression models
 }
+

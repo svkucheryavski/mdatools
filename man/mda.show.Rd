@@ -14,3 +14,4 @@ mda.show(x, n = 50)
 \description{
 Wrapper for show() method
 }
+

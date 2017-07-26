@@ -17,3 +17,4 @@ Calibration data
 \details{
 Generic function getting calibration data from a linear decomposition model (e.g. PCA)
 }
+

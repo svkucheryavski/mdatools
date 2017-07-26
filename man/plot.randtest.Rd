@@ -24,3 +24,4 @@ Makes a bar plot with alpha values for each component.
 \details{
 See examples in help for \code{\link{randtest}} function.
 }
+

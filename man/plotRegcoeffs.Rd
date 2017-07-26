@@ -17,3 +17,4 @@ Regression coefficients plot
 \details{
 Generic function for plotting regression coefficients values for a regression model
 }
+

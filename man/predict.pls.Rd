@@ -24,3 +24,4 @@ Applies PLS model to a new data set
 \details{
 See examples in help for \code{\link{pls}} function.
 }
+

@@ -23,3 +23,4 @@ object of class \code{simcares} with results of cross-validation
 \description{
 Does the cross-validation of a SIMCA model
 }
+

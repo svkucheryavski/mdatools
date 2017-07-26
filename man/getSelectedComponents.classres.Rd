@@ -18,3 +18,4 @@ Returns number of components depending on user selection and object properites
 This is a technical function used for selection proper value for number of components in 
 plotting functions.
 }
+

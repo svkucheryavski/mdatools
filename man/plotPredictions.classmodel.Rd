@@ -28,3 +28,4 @@ Makes a plot with class predictions for a classification model.
 \details{
 See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 }
+

@@ -35,3 +35,4 @@ spectral data, e.g. NIR spectra.
  mdaplot(cbind(wavelength, t(spectra)), type = 'l', main = 'Before SNV')
  mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After SNV')
 }
+

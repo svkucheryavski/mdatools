@@ -26,3 +26,4 @@ Shows plot with explained X variance vs. number of components.
 \details{
 See examples in help for \code{\link{pls}} function.
 }
+

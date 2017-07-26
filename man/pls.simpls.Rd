@@ -26,3 +26,4 @@ SIMPLS algorithm for calibration of PLS model
 [1]. S. de Jong. SIMPLS: An Alternative approach to partial least squares regression. 
 Chemometrics and Intelligent Laboratory Systems, 18, 1993 (251-263).
 }
+

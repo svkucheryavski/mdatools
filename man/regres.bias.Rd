@@ -14,3 +14,4 @@ regres.bias(y.ref, y.pred)
 \description{
 Calculates matrix with bias (average prediction error) for every response and components
 }
+

@@ -31,3 +31,4 @@ Shows a plot with explained variance or cumulative explained variance for compon
 \details{
 See examples in help for \code{\link{pca}} function.
 }
+

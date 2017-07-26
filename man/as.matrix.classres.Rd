@@ -19,3 +19,4 @@
 Generic \code{as.matrix} function for classification results. Returns matrix with performance 
 values for specific class.
 }
+

@@ -17,3 +17,4 @@ Shows a plot for iPLS results.
 \details{
 See details for \code{\link{plotSelection.ipls}}.
 }
+

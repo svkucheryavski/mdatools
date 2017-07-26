@@ -24,3 +24,4 @@ Shows plot with X scores values for selected components.
 \details{
 See examples in help for \code{\link{pls}} function.
 }
+

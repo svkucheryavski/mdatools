@@ -30,3 +30,4 @@ a list (object of \code{regres} class) with fields, including:
 \description{
 Class for storing and visualisation of regression predictions
 }
+

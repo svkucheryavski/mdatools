@@ -17,3 +17,4 @@ Scores plot
 \details{
 Generic function for scores values for data decomposition
 }
+

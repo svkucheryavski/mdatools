@@ -132,3 +132,4 @@ Methods, inherited from \code{\link{pca}} class:
  \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
 }
 }
+

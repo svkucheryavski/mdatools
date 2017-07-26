@@ -17,3 +17,4 @@
 Generic \code{print} function for linear decomposition. Prints information about the \code{ldecomp}
 object.
 }
+

@@ -28,3 +28,4 @@ Shows a plot with distance from data objects to a SIMCA model
 \details{
 See examples in help for \code{\link{simcam}} function.
 }
+

@@ -14,3 +14,4 @@ selectCompNum(model, ncomp)
 \description{
 Generic function for selecting number of components for multivariate models (e.g. PCA, PLS, ...)
 }
+

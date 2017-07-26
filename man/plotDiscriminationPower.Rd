@@ -17,3 +17,4 @@ Discrimination power plot
 \details{
 Generic function for plotting discrimination power values for classification model
 }
+

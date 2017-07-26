@@ -16,3 +16,4 @@ pca.run(x, ncomp, method)
 \description{
 Runs one of the selected PCA methods
 }
+

@@ -17,3 +17,4 @@ Predictions
 \details{
 Generic function for showing predicted values for classification or regression model or results
 }
+

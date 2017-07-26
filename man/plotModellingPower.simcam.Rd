@@ -21,3 +21,4 @@ Shows a plot with modelling power values for each predictor of selected SIMCA mo
 \details{
 See examples in help for \code{\link{simcam}} function.
 }
+

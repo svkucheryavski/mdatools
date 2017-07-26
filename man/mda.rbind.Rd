@@ -15,3 +15,4 @@ the merged datasets
 \description{
 A wrapper for rbind() method with proper set of attributes
 }
+

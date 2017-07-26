@@ -15,3 +15,4 @@ a string with the description text
 \description{
 String with description of cross-validation method
 }
+

@@ -27,3 +27,4 @@ predictions) for PLS-DA model.
 \details{
 See examples in help for \code{\link{plsda}} function.
 }
+

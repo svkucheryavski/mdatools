@@ -28,3 +28,4 @@
 \description{
 Shows a plot with explained variance values vs. number of components.
 }
+

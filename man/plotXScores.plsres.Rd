@@ -21,3 +21,4 @@ Shows plot with scores values for PLS decomposition of x data.
 \details{
 See examples in help for \code{\link{plsres}} function.
 }
+

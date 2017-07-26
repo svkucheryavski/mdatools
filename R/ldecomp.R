@@ -281,7 +281,6 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05) {
    Qlim = matrix(0, nrow = 1, ncol = ncomp)
    conflim = 100 - alpha * 100;   
    nvar = length(eigenvals)
-   
    for (i in 1:ncomp)
    {   
       if (i < nvar)

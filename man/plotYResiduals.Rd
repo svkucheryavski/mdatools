@@ -17,3 +17,4 @@ Y residuals plot
 \details{
 Generic function for plotting y residuals for classification or regression model or results
 }
+

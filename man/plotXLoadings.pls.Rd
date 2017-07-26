@@ -26,3 +26,4 @@ Shows plot with X loading values for selected components.
 \details{
 See examples in help for \code{\link{pls}} function.
 }
+

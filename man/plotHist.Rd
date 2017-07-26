@@ -17,3 +17,4 @@ Statistic histogram
 \details{
 Generic function for plotting statistic histogram plot
 }
+

@@ -21,3 +21,4 @@ imshow(data, channels = 1, show.excluded = FALSE, main = NULL,
 \description{
 show image data as an image
 }
+

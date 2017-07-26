@@ -17,3 +17,4 @@ Sensitivity plot
 \details{
 Generic function for plotting sensitivity values for classification model or results
 }
+

@@ -116,9 +116,10 @@ y axis, see Bookdown tutorial for more details.
 # See all examples in the tutorial.
 
 }
-\seealso{
-\code{\link{mdaplotg}} - to make plots for several sets of data objects (groups of objects).
-}
 \author{
 Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }
+\seealso{
+\code{\link{mdaplotg}} - to make plots for several sets of data objects (groups of objects).
+}
+

@@ -27,3 +27,4 @@ show critical value as a vertical line.
 \details{
 See examples in help for \code{\link{randtest}} function.
 }
+

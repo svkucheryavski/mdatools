@@ -17,3 +17,4 @@ data matrix with normalized values
 \description{
 Normalizes signals (rows of data matrix) to unit area or unit length
 }
+

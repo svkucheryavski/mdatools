@@ -19,3 +19,4 @@ Shows plot with cumulative explained X variance vs. number of components.
 \details{
 See examples in help for \code{\link{plsres}} function.
 }
+

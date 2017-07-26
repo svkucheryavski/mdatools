@@ -30,3 +30,4 @@ negatives, false positives, sensitivity, specificity, etc.).
 The function is called automatically when a classification result with reference values is 
 created, for example when applying a \code{plsda} or \code{simca} models.
 }
+

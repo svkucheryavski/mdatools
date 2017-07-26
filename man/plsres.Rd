@@ -139,3 +139,4 @@ Methods for \code{plsres} objects:
 }
 See also \code{\link{pls}} - a class for PLS models.
 }
+

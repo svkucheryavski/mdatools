@@ -15,3 +15,4 @@ the transposed dataset
 \description{
 A wrapper for t() method with proper set of attributes
 }
+

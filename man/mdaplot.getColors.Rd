@@ -20,3 +20,4 @@ Returns vector with generated color values
 Generate vector with color values for plot objects (lines, points, bars), depending
 on number of groups for the objects.
 }
+

@@ -16,3 +16,4 @@ matrix \code{nvar x ny} with VIP score values for selected number of components
 Calculates VIP (Variable Importance in Projection) scores for each component and 
 response variable in the PLS model
 }
+

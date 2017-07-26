@@ -14,3 +14,4 @@
 \description{
 Shows summary for randomization test results.
 }
+

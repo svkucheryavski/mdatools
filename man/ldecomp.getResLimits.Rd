@@ -24,3 +24,4 @@ Computes statisticsl limits for Q and T2 residuals
 \details{
 T2 limits are calculated using Hotelling statistics.
 }
+
