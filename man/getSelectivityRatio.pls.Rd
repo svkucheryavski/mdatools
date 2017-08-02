@@ -26,4 +26,3 @@ and response variable
 \references{
 [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
 }
-

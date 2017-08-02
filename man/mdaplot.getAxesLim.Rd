@@ -41,4 +41,3 @@ Data can be a list with several matrices or just one matrix. The matrices can ha
 configuration, where first column is x values and the others are y values or normal configuration,
 where every odd column is x values and every even is corresponding y values.
 }
-

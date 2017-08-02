@@ -12,4 +12,3 @@ pinv(data)
 \description{
 Computes pseudo-inverse matrix using SVD
 }
-

@@ -24,4 +24,3 @@ Applies PLS-DA model to a new data set
 \details{
 See examples in help for \code{\link{plsda}} function.
 }
-

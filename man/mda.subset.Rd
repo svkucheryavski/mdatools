@@ -28,4 +28,3 @@ and columns are selected it removed all excluded elements first and then makes t
 The parameters \code{subset} and \code{select} may each be a vector with numbers or nanes without excluded 
 elements, or a logical expression.
 }
-

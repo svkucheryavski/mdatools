@@ -26,4 +26,3 @@ Applies SIMCAM model (SIMCA for multiple classes) to a new data set
 \details{
 See examples in help for \code{\link{simcam}} function.
 }
-

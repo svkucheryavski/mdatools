@@ -37,4 +37,3 @@ Shows a scores plot for selected components.
 \details{
 See examples in help for \code{\link{pca}} function.
 }
-

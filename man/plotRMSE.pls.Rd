@@ -30,4 +30,3 @@ Shows plot with root mean squared error values vs. number of components for PLS 
 \details{
 See examples in help for \code{\link{pls}} function.
 }
-

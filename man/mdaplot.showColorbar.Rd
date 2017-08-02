@@ -19,4 +19,3 @@ mdaplot.showColorbar(cgroup, colmap = "default", lab.col = "darkgray",
 \description{
 Shows a colorbar if plot has color grouping of elements (points or lines).
 }
-

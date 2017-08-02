@@ -25,4 +25,3 @@ object of class \code{plsdares} with results of cross-validation
 \description{
 Does the cross-validation of a PLS-DA model
 }
-

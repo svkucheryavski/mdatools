@@ -19,4 +19,3 @@ Makes a plot with specificity values vs. model complexity (e.g. number of compon
 \details{
 See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 }
-

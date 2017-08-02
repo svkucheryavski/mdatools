@@ -23,4 +23,3 @@ an interval was selected or excluded, 'start and 'end' show variable indices for
 'nComp' is a number of components used in a model, 'RMSE' is RMSECV for the model and 'R2' is 
 coefficient of determination for the same model.
 }
-

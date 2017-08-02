@@ -14,4 +14,3 @@ mda.setimbg(data, bgpixels)
 \description{
 Remove background pixels from image data
 }
-

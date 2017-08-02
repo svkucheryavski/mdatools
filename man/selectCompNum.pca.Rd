@@ -17,4 +17,3 @@ the same model with selected number of components
 \description{
 Allows user to select optimal number of components for PCA model
 }
-

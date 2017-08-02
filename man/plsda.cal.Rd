@@ -42,4 +42,3 @@ jack-knifing is availavle: \code{='jk'}).}
 \description{
 Calibrate PLS-DA model
 }
-

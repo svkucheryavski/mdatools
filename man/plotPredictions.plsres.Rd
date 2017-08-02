@@ -27,4 +27,3 @@ See examples in help for \code{\link{plsres}} function.
 \seealso{
 \code{\link{plotPredictions.regres}} - prediction plot for regression results.
 }
-

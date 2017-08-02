@@ -17,4 +17,3 @@ Cooman's plot
 \details{
 Generic function for Cooman's plot
 }
-

@@ -20,4 +20,3 @@ Shows a table with predicted class values for classification result.
 The function prints a matrix where every column is a class and every row is an data object.
 The matrix has either -1 (does not belong to the class) or +1 (belongs to the class) values.
 }
-

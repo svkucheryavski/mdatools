@@ -16,4 +16,3 @@
 \description{
 Shows performance statistics for the results.
 }
-

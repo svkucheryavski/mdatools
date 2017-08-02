@@ -1,3 +1,9 @@
+v.0.8.4
+=======
+* small improvements to calculation of statistics for regression coefficients
+* `pls.getRegCoeffs()` now also returns standard error and confidence intervals calculated for unstandardized variables
+* fixed a bug with double labels on regression coefficients plot with confidence intervals 
+
 v.0.8.3
 =======
 * fixed a bug in `mdatools` when using factor with more than 8 levels for color grouping led to an error

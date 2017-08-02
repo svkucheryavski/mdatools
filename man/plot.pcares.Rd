@@ -18,4 +18,3 @@
 \description{
 Show several plots to give an overview about the PCA results
 }
-

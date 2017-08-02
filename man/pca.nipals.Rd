@@ -22,4 +22,3 @@ Calculates principal component space using non-linear iterative partial least sq
 Geladi, Paul; Kowalski, Bruce (1986), "Partial Least Squares 
 Regression:A Tutorial", Analytica Chimica Acta 185: 1-17
 }
-

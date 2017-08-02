@@ -129,9 +129,6 @@ plotRegcoeffs(model, ny = 2)
 par(mfrow = c(1, 1))
 
 }
-\author{
-Sergey Kucheryavskiy (svkucheryavski@gmail.com)
-}
 \seealso{
 Specific methods for \code{plsda} class:
 \tabular{ll}{
@@ -151,4 +148,6 @@ Methods, inherited from \code{classmodel} class:
 
 See also methods for class \code{\link{pls}}.
 }
-
+\author{
+Sergey Kucheryavskiy (svkucheryavski@gmail.com)
+}

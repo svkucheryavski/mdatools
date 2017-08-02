@@ -14,4 +14,3 @@ regres.r2(y.ref, y.pred)
 \description{
 Calculates matrix with coeffient of determination for every response and components
 }
-

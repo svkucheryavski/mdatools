@@ -38,4 +38,3 @@ particular iteration. The selected intervals are shown with green color.
 \seealso{
 \code{\link{summary.ipls}}, \code{\link{plotSelection.ipls}}
 }
-

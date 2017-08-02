@@ -31,4 +31,3 @@ or \code{'misclassified'})}
 \description{
 Makes a plot with sensitivity values vs. model complexity (e.g. number of components)
 }
-

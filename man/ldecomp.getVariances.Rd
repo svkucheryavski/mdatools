@@ -17,4 +17,3 @@ Returns a list with two vectors.
 \description{
 Computes explained variance and cumulative explained variance for a data decomposition X = TP' + E.
 }
-

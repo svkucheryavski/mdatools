@@ -26,4 +26,3 @@ Shows plot with y residuals for selected components.
 \details{
 See examples in help for \code{\link{pls}} function.
 }
-

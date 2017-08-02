@@ -19,4 +19,3 @@ Shows plot with X vs. Y scores values for PLS results.
 \details{
 See examples in help for \code{\link{plsres}} function.
 }
-

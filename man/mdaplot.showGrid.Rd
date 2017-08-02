@@ -12,4 +12,3 @@ mdaplot.showGrid(lwd = 0.5)
 \description{
 Shows grid for a plot
 }
-

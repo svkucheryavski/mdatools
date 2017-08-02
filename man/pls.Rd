@@ -6,8 +6,8 @@
 \usage{
 pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
   exclcols = NULL, exclrows = NULL, x.test = NULL, y.test = NULL,
-  method = "simpls", alpha = 0.05, coeffs.ci = NULL, coeffs.alpha = 0.1,
-  info = "", light = F, ncomp.selcrit = "min")
+  method = "simpls", alpha = 0.05, coeffs.ci = NULL,
+  coeffs.alpha = 0.05, info = "", light = F, ncomp.selcrit = "min")
 }
 \arguments{
 \item{x}{matrix with predictors.}
@@ -194,9 +194,6 @@ plotPredictions(modelsel)
 par(mfrow = c(1, 1))
 
 }
-\author{
-Sergey Kucheryavskiy (svkucheryavski@gmail.com)
-}
 \references{
 1. S. de Jong, Chemometrics and Intelligent Laboratory Systems 18 (1993) 251-263.
 2. Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), 35-48.
@@ -238,4 +235,6 @@ available for PLS results
 (\code{\link{plsres}}) objects. There is also a randomization test for PLS-regression 
 (\code{\link{randtest}}).
 }
-
+\author{
+Sergey Kucheryavskiy (svkucheryavski@gmail.com)
+}

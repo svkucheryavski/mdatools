@@ -28,4 +28,3 @@
 \description{
 Shows a plot with T2 vs Q values for data objects.
 }
-

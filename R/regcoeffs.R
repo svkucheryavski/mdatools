@@ -21,15 +21,15 @@
 #' }
 #' last two fields are available if proper values for calculation of the statistics were provided.
 #' 
-regcoeffs = function(coeffs, ci.coeffs = NULL, ci.alpha = 0.1) {   
+regcoeffs = function(coeffs, ci.coeffs = NULL) {   
    regcoeffs = list()
    regcoeffs$values = coeffs
    if (!is.null(ci.coeffs)) {
-      stat = regcoeffs.getStat(coeffs, ci.coeffs, ci.alpha)
-      regcoeffs$ci = stat$ci
+      stat = regcoeffs.getStat(coeffs, ci.coeffs)
+      regcoeffs$se = stat$se
       regcoeffs$t.values = stat$t.values
       regcoeffs$p.values = stat$p.values
-      regcoeffs$alpha = ci.alpha
+      regcoeffs$niter = stat$niter
    }   
    
    regcoeffs$call = match.call()
@@ -55,7 +55,7 @@ regcoeffs = function(coeffs, ci.coeffs = NULL, ci.alpha = 0.1) {
 #' a list with statistics (\code{$ci} - array with confidence intervals, 
 #' \code{$p.values} - array with p-values, \code{$t.values} - array with t-values)
 #' 
-regcoeffs.getStat = function(coeffs.values, ci.coeffs, ci.alpha = 0.1) {
+regcoeffs.getStat = function(coeffs.values, ci.coeffs) {
 
    # get attributes   
    attrs = mda.getattr(coeffs.values)
@@ -67,20 +67,18 @@ regcoeffs.getStat = function(coeffs.values, ci.coeffs, ci.alpha = 0.1) {
    ncomp = dim(ci.coeffs)[2]
    ny = dim(ci.coeffs)[3]
    nobj = dim(ci.coeffs)[4]
-   t = qt(1 - ci.alpha/2, nobj - 1)
  
    # set up matrices and calculate statistics 
-   ci = array(0, dim = c(nvar, ncomp, ny, 2))
    t.values = array(0, dim = c(nvar, ncomp, ny))
    p.values = array(0, dim = c(nvar, ncomp, ny))
+   se = array(0, dim = c(nvar, ncomp, ny))
    for (y in 1:ny) {
       for (comp in 1:ncomp) {
          coeffs = ci.coeffs[, comp, y, ]
          m = apply(coeffs, 1, mean)
          ssq = apply(t(scale(t(coeffs), center = m, scale = FALSE))^2, 1, sum)
-         se = sqrt( (nobj - 1)/nobj * ssq )
-         ci[, comp, y, ] = cbind(m - t * se, m + t * se)
-         tvals = m/se
+         se[, comp, y] = sqrt( (nobj - 1)/nobj * ssq )
+         tvals = m/se[, comp, y]
          tmin = apply(cbind(tvals, -tvals), 1, min)
          t.values[, comp, y] = tvals
          p.values[, comp, y] = 2 * pt(tmin, nobj - 1)
@@ -88,31 +86,32 @@ regcoeffs.getStat = function(coeffs.values, ci.coeffs, ci.alpha = 0.1) {
    }   
 
    if (nexclvar > 0) {
-      ci.out = array(0, dim = c(nvar + nexclvar, ncomp, ny, 2))
+      se.out = array(0, dim = c(nvar + nexclvar, ncomp, ny))
       t.values.out = array(0, dim = c(nvar + nexclvar, ncomp, ny))
       p.values.out = array(0, dim = c(nvar + nexclvar, ncomp, ny))
-      ci.out[-exclvars, , ,] = ci
+      se.out[-exclvars, , ] = se
       t.values.out[-exclvars, , ] = t.values
       p.values.out[-exclvars, , ] = p.values
    } else {
-      ci.out = ci
+      se.out = se
       t.values.out = t.values
       p.values.out = p.values
    }  
    
    dimnames(t.values.out) = dimnames(p.values.out) = dimnames(coeffs.values)
-   dimnames(ci.out) = c(dimnames(coeffs.values), list(c('Lo', 'Up')))
+   dimnames(se.out) = c(dimnames(coeffs.values))
    t.values.out = mda.setattr(t.values.out, attrs)
    p.values.out = mda.setattr(p.values.out, attrs)
-   ci.out = mda.setattr(ci.out, attrs)
+   se.out = mda.setattr(se.out, attrs)
+   attr(se.out, 'name') = 'Standard error (Jack-knife)'
    attr(t.values.out, 'name') = 't-values (Jack-knife)'
    attr(p.values.out, 'name') = 'p-values (Jack-knife)'
-   attr(t.values.out, 'name') = sprintf('%d%% confidence interval', round((1 - ci.alpha)*100))
-   
+
    stat = list(
-      ci = ci.out,
+      se = se.out,
       t.values = t.values.out,
-      p.values = p.values.out
+      p.values = p.values.out,
+      niter = nobj
    )
    
    stat
@@ -162,11 +161,10 @@ print.regcoeffs = function(x, ncomp = 1, ny = 1, digits = 3, ...) {
    print(obj$call)
    cat('\nMajor fields:\n')
    cat('$values - array with regression coefficients\n')
-   cat('$ci - matrix with confidence intervals\n')
-   cat('$t - vector with t-values\n')
-   cat('$p - vector with p-values\n')
-   cat('$alpha - significance level used to calculate the coefficients\n')
-   cat('\nThe last four fields available only if Jack-Knife was used.\n')
+   cat('$se - matrix with standard errors\n')
+   cat('$t - matrix with t-values\n')
+   cat('$p - matrix with p-values\n')
+   cat('\nThe last three fields available only if Jack-Knife was used.\n')
 }   
 
 #' Regression coefficients plot
@@ -197,7 +195,7 @@ print.regcoeffs = function(x, ncomp = 1, ny = 1, digits = 3, ...) {
 #' 
 #' @export
 plot.regcoeffs = function(x, ncomp = 1, ny = 1, type = NULL, col = NULL, main = NULL, ylab = NULL, 
-                          show.line = T, show.ci = T, ...) {
+                          show.line = T, show.ci = T, alpha = 0.05, ...) {
 
    obj = x
    attrs = mda.getattr(obj$values)
@@ -230,13 +228,12 @@ plot.regcoeffs = function(x, ncomp = 1, ny = 1, type = NULL, col = NULL, main = 
    data = matrix(obj$values[, ncomp, ny, drop = F], ncol = 1)
    data = mda.setattr(data, attrs)
    rownames(data) = rownames(obj$values)
-   if (show.ci == TRUE && !is.null(obj$ci)) {   
+   if (show.ci == TRUE && !is.null(obj$se)) {   
       ci.col = mdaplot.getColors(1)
       main.col   = 'lightgray'
-      err.margin = matrix(obj$ci[, ncomp, ny, 2], ncol = 1) - data
+      err.margin = matrix(obj$se[, ncomp, ny], ncol = 1) * qt(1 - alpha/2, obj$niter)
       err.maring = mda.setattr(err.margin, attrs)
       attr(data, 'name') = 'Regression coefficients'      
-      
       if (type == 'l')
          mdaplotg(list(data, data + err.margin, data - err.margin), type = c('l', 'l', 'l'), 
                   main = main, ylab = ylab, show.legend = F, colmap = c(main.col, ci.col, ci.col), 
@@ -252,3 +249,4 @@ plot.regcoeffs = function(x, ncomp = 1, ny = 1, type = NULL, col = NULL, main = 
               col = main.col, ...)
    }
 }   
+

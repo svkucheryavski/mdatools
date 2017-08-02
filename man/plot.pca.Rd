@@ -24,4 +24,3 @@ Shows a set of plots (scores, loadings, residuals and explained variance) for PC
 \details{
 See examples in help for \code{\link{pca}} function.
 }
-

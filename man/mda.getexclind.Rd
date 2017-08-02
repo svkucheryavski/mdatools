@@ -16,4 +16,3 @@ mda.getexclind(excl, names, n)
 \description{
 Get indices of excluded rows or columns
 }
-

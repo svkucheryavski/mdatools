@@ -102,9 +102,6 @@ plotResiduals(model, ncomp = 2, show.labels = TRUE)
 par(mfrow = c(1, 1))
 
 }
-\author{
-Sergey Kucheryavskiy (svkucheryavski@gmail.com)
-}
 \seealso{
 Methods for \code{pca} objects:
 \tabular{ll}{
@@ -122,4 +119,6 @@ Methods for \code{pca} objects:
  objects. Also check \code{\link{pca.mvreplace}}, which replaces missing values in a data matrix 
  with approximated using iterative PCA decomposition.
 }
-
+\author{
+Sergey Kucheryavskiy (svkucheryavski@gmail.com)
+}

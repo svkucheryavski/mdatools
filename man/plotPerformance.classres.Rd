@@ -37,4 +37,3 @@ components) for classification results.
 \details{
 See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 }
-

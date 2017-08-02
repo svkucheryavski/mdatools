@@ -33,4 +33,3 @@ Shows a plot with Q vs. T2 residuals for SIMCA results
 \details{
 See examples in help for \code{\link{simcares}} function.
 }
-

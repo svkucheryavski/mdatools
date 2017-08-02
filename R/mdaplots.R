@@ -1414,7 +1414,8 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    # get plot data for each group 
    pd = list()
    for (i in 1:ngroups) {
-      pd[[i]] = prepare.plot.data(data[[i]], type[i], xlim, ylim, bwd, show.excluded, show.colorbar = FALSE, show.labels, 
+      pd[[i]] = prepare.plot.data(data[[i]], type[i], xlim, ylim, bwd, show.excluded, 
+                                  show.colorbar = FALSE, show.labels, 
                                   show.lines, show.axes = TRUE)
    }
    
@@ -1486,6 +1487,10 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
          force.x.values = c(i, nbarplots)
       else
          force.x.values = NA
+      
+      if (i > 1)
+         show.labels = F
+      
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
               lwd = lwd[i], force.x.values = force.x.values, bwd = bwd,
               labels = labels, show.grid = F, show.labels = show.labels,

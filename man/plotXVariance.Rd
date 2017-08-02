@@ -17,4 +17,3 @@ X variance plot
 \details{
 Generic function for plotting explained variance for decomposition of x data
 }
-

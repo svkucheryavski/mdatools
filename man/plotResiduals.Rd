@@ -17,4 +17,3 @@ Residuals plot
 \details{
 Generic function for plotting residual values for data decomposition
 }
-

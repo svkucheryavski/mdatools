@@ -20,4 +20,3 @@ Make classification based on calculated T2 and Q values and corresponding limits
 \details{
 This is a service function for SIMCA class, do not use it manually.
 }
-

@@ -17,4 +17,3 @@ X loadings plot
 \details{
 Generic function for plotting loadings values for decomposition of x and y data
 }
-

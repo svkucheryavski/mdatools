@@ -28,4 +28,3 @@ Shows a plot with discrimination power of predictors for a pair of SIMCA models
 \details{
 See examples in help for \code{\link{simcam}} function.
 }
-
