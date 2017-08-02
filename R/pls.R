@@ -652,8 +652,8 @@ pls.simpls = function(x, y, ncomp, cv = FALSE) {
 #'  
 pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) {
    # get attributes
-   x.attrs = mda.getattr(x)
-   y.attrs = mda.getattr(y)
+   x.attrs = attributes(x)
+   y.attrs = attributes(y)
    
    # remove excluded rows 
    if (length(x.attrs$exclrows) > 0){
@@ -772,6 +772,8 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
    x.attrs$exclcols = NULL
    y.attrs$exclrows = NULL
    y.attrs$exclcols = NULL
+   x.attrs$dimnames = dimnames(x)
+   y.attrs$dimnames = dimnames(y)
    
    # make pls results and return
    res = plsres(yp.cv, y.ref = y, ncomp.selected = model$ncomp.selected,

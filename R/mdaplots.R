@@ -1488,7 +1488,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       else
          force.x.values = NA
       
-      if (i > 1)
+      if (i > 1 && type[i] == 'e')
          show.labels = F
       
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
