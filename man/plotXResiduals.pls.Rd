@@ -26,4 +26,3 @@ Shows a plot with Q residuals vs. Hotelling T2 values for PLS decomposition of x
 \details{
 See examples in help for \code{\link{pls}} function.
 }
-

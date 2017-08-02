@@ -114,4 +114,3 @@ Since SIMCAM objects and results are calculated only for optimal number of compo
 sense to show such plots like sensitivity or specificity vs. number of components. However they
 are available as for any other classification model.
 }
-

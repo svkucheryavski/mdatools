@@ -14,4 +14,3 @@ regres.rmse(y.ref, y.pred)
 \description{
 Calculates matrix with root mean squared error of prediction for every response and components.
 }
-

@@ -17,4 +17,3 @@ X scores plot
 \details{
 Generic function for plotting scores values for decomposition of x data
 }
-

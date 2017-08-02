@@ -15,4 +15,3 @@
 Generic \code{as.matrix} function for linear decomposition. Returns a matrix with information 
 about the decomposition.
 }
-

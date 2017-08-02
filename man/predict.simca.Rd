@@ -26,4 +26,3 @@ Applies SIMCA model to a new data set
 \details{
 See examples in help for \code{\link{simca}} function.
 }
-

@@ -12,4 +12,3 @@ simcam.getPerformanceStatistics(model)
 \description{
 Calculates discrimination power and distance between models for SIMCAM model.
 }
-

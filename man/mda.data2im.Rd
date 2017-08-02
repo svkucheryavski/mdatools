@@ -12,4 +12,3 @@ mda.data2im(data)
 \description{
 Convert data matrix to an image
 }
-

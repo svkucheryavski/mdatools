@@ -4,7 +4,7 @@
 \alias{regcoeffs}
 \title{Regression coefficients}
 \usage{
-regcoeffs(coeffs, ci.coeffs = NULL, ci.alpha = 0.1)
+regcoeffs(coeffs, ci.coeffs = NULL)
 }
 \arguments{
 \item{coeffs}{vector or matrix with regression coefficients}
@@ -27,4 +27,3 @@ last two fields are available if proper values for calculation of the statistics
 class for storing and visualisation of regression coefficients
 for regression models
 }
-

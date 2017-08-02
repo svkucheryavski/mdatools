@@ -21,4 +21,3 @@ Allows user to select optimal number of components for PLS model
 If number of components is not specified, the Wold's R criterion is used.
 See examples in help for \code{\link{pls}} function.
 }
-

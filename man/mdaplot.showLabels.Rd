@@ -31,4 +31,3 @@ Shows labels for data elements (points, bars) on a plot.
 Rownames of matrix \code{data} are used as labels. If matrix has no rownames, row numbers
 will be used instead.
 }
-

@@ -27,4 +27,3 @@ mdaplot.showLegend(legend, col, pch = NULL, lty = NULL, lwd = NULL,
 \description{
 Shows a legend for plot elements or their groups.
 }
-

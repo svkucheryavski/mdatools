@@ -12,4 +12,3 @@ mdaplot.areColors(palette)
 \description{
 Checks if elements of argument are valid color values
 }
-

@@ -17,4 +17,3 @@ Specificity plot
 \details{
 Generic function for plotting specificity values for classification model or results
 }
-

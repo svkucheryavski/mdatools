@@ -17,4 +17,3 @@ Modelling power plot
 \details{
 Generic function for plotting modelling power values for classification model
 }
-

@@ -31,4 +31,3 @@ Makes a plot with predicted class values for classification results.
 \details{
 See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 }
-

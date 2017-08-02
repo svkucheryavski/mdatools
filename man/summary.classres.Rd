@@ -20,4 +20,3 @@ separate values for each, if NULL - model selected number will be used).}
 Generic \code{summary} function for classification results. Prints performance values for the 
 results.
 }
-

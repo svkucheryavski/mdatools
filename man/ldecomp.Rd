@@ -54,4 +54,3 @@ There is no need to use the \code{ldecomp} manually. For example, when build PCA
 with \code{\link{pca}} or apply it to a new data, the results will automatically inherit 
 all methods of \code{ldecomp}.
 }
-

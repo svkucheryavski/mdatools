@@ -22,4 +22,3 @@ The method assign attribute 'exclrows', which contains number of rows, which sho
 from calculations and plots (without removing them physically). The argument \code{ind} should contain 
 rows numbers (excluding already hidden), names or logical values.
 }
-

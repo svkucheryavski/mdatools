@@ -14,4 +14,3 @@ getSelectivityRatio(obj, ...)
 \description{
 Generic function for returning selectivity ratio values for regression model (PCR, PLS, etc)
 }
-

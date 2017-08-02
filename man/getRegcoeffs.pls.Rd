@@ -5,7 +5,7 @@
 \title{Regression coefficients for PLS model'}
 \usage{
 \method{getRegcoeffs}{pls}(obj, ncomp = NULL, ny = NULL, full = FALSE,
-  ...)
+  alpha = obj$coeffs.alpha, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -33,4 +33,3 @@ matrix with coefficients can be applied directly to original data (yp = Xb).
 If number of components is not specified, the optimal number, selected by user
 or identified by a model will be used.
 }
-

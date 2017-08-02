@@ -25,4 +25,3 @@ there are factors among the hidden columns, the corresponding dummy variables wi
 
 All other attributes (names, axis names, etc.) will be inherited.
 }
-

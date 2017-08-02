@@ -47,4 +47,3 @@ an object with calibrated PLS model
 \description{
 Calibrates (builds) a PLS model for given data and parameters
 }
-

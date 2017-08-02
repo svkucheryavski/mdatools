@@ -33,4 +33,3 @@ Shows a Cooman's plot for a pair of SIMCA models
 \details{
 See examples in help for \code{\link{simcamres}} function.
 }
-

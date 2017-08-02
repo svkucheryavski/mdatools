@@ -18,4 +18,3 @@ prep.savgol(data, width = 3, porder = 1, dorder = 0)
 \description{
 Applies Savytzky-Golay filter to the rows of data matrix
 }
-

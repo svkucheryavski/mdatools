@@ -20,4 +20,3 @@ bars(x, y, col = NULL, bwd = 0.8, border = NA)
 \description{
 Shows bars (bar plot) on predefined axes
 }
-

@@ -109,4 +109,3 @@ Methods, inherited from \code{\link{classres}} class:
 
 Check also \code{\link{simcam}}.
 }
-

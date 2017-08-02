@@ -17,4 +17,3 @@ Model distance plot
 \details{
 Generic function for plotting distance from object to a multivariate model
 }
-

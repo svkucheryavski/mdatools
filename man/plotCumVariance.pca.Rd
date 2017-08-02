@@ -24,4 +24,3 @@ Shows a plot with cumulative explained variance for components.
 \details{
 See examples in help for \code{\link{pca}} function.
 }
-

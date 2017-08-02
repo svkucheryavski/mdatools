@@ -14,4 +14,3 @@ regres.slope(y.ref, y.pred)
 \description{
 Calculates matrix with slope of predicted and measured values for every response and components.
 }
-

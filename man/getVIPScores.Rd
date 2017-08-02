@@ -14,4 +14,3 @@ getVIPScores(obj, ...)
 \description{
 Generic function for returning VIP scores values for regression model (PCR, PLS, etc)
 }
-

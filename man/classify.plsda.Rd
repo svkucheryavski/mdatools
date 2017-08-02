@@ -20,4 +20,3 @@ Converts PLS predictions of y values to predictions of classes
 \details{
 This is a service function for PLS-DA class, do not use it manually.
 }
-

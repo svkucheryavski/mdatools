@@ -37,4 +37,3 @@
 \description{
 Shows a biplot for selected components.
 }
-

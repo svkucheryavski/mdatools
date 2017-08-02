@@ -14,4 +14,3 @@
 \description{
 Shows some statistics (explained variance, eigenvalues) for the model.
 }
-
