@@ -27,6 +27,8 @@
 
 \item{show.ci}{logical, show or not confidence intervals if they are available}
 
+\item{alpha}{significance level for confidence intervals (a number between 0 and 1, e.g. for 95\% alpha = 0.05)}
+
 \item{...}{other arguments}
 }
 \description{

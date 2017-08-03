@@ -1221,7 +1221,9 @@ getVIPScores.pls = function(obj, ny = 1, ...) {
 #' @param ny
 #' if y is multivariate which variables you want to see the coefficients for
 #' @param full
-#' if TRUE the method also shows p-values for the coefficients (if available)
+#' if TRUE the method also shows p-values and t-values as well as confidence intervals for the coefficients (if available)
+#' @param alpha
+#' significance level for confidence intervals (a number between 0 and 1, e.g. for 95\% alpha = 0.05)
 #' @param ...
 #' other parameters
 #'
@@ -1232,9 +1234,14 @@ getVIPScores.pls = function(obj, ny = 1, ...) {
 #' 
 #' If number of components is not specified, the optimal number, selected by user
 #' or identified by a model will be used.
-#'  
+#' 
+#' If Jack-knifing method was used to get statistics for the coefficient the method 
+#' returns all statistics as well (p-value, t-value, confidence interval). In this case user
+#' has to specified a number of y-variable (if there are many) to get the statistics and 
+#' the coefficients for. The confidence interval is computed for unstandardized coefficients.
+#' 
 #' @return 
-#' A matrix (n of predictors x n of responses) with regression coefficients.
+#' A matrix  with regression coefficients and (optinally) statistics.
 #'  
 #' @export
 getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = FALSE, alpha = obj$coeffs.alpha, ...) {
@@ -1252,8 +1259,10 @@ getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = FALSE, alpha = 
    if (alpha <= 0 || alpha >= 1)
       stop('Wrong value for alpha (must be between 0 and 1)')
    
+   attrs = mda.getattr(obj$coeffs$values)
    coeffs = obj$coeffs$values[, ncomp, ny, drop = F]
    coeffs = matrix(coeffs, nrow = dim(coeffs)[1], ncol = dim(coeffs)[3])
+   
    xscale = obj$xscale
    if (is.logical(xscale))
       xscale = matrix(1, nrow = nrow(coeffs))
@@ -1265,10 +1274,14 @@ getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = FALSE, alpha = 
    yscale = obj$yscale
    if (is.logical(yscale))
       yscale = matrix(1, nrow = ncol(coeffs))
+   else
+      yscale = yscale[ny]
    
    ycenter = obj$ycenter 
    if (is.logical(ycenter))
       ycenter = matrix(0, nrow = ncol(coeffs))
+   else
+      ycenter = ycenter[ny]
    
    # calculate intercept
    b0 = sweep(coeffs,  1, xcenter, '*')
@@ -1285,16 +1298,16 @@ getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = FALSE, alpha = 
    
    if (full == TRUE && !is.null(obj$coeffs$p.values)) {
       
-      if (length(ny) != 1)
+      if (ncol(coeffs) != 1)
          stop('Full table can be shown only for selected response variable (ny)!')
       
       ci.CL = (1 - alpha) * 100
       t = qt(1 - alpha/2, obj$coeffs$niter - 1)
       
+            
       se = matrix(obj$coeffs$se[, ncomp, ny], ncol = 1)
       se = sweep(se, 1, xscale, '/');
-      se = se * yscale[ny];
-      
+      se = sweep(se, 2, yscale, '*');
       ci.lo = coeffs[-1, ] - t * se
       ci.up = coeffs[-1, ] + t * se
       
@@ -1305,7 +1318,7 @@ getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = FALSE, alpha = 
                      c(NA, ci.lo),
                      c(NA, ci.up)
       )
-      colnames(coeffs) = c(dimnames(obj$coeffs$values)[[3]][ny], 't-value', 'SE', 'p-value', 
+      colnames(coeffs) = c('Estimated coefficients', 't-value', 'SE', 'p-value', 
                            sprintf('%d%% CI (lo)', ci.CL),
                            sprintf('%d%% CI (up)', ci.CL)
       )
@@ -1314,6 +1327,9 @@ getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = FALSE, alpha = 
    }
    
    rownames(coeffs) = c('Intercept', dimnames(obj$coeffs$values)[[1]])
+   attr(coeffs, 'exclrows') = attrs$exclrows
+   attr(coeffs, 'name') = paste('Regression coefficients for ', dimnames(obj$coeffs$values)[[3]][ny])
+   
    coeffs
 }   
 
