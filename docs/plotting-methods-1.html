@@ -259,7 +259,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotPredictions</span>(m1)
 <span class="kw">plotPredictions</span>(m1, <span class="dt">ncomp =</span> <span class="dv">1</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-76-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-77-1.png" width="864" /></p>
 <p>The plots for variables are available only for a model object and include:</p>
 <table>
 <colgroup>
@@ -301,7 +301,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </table>
 <p>And, of course, both model and result objects have method <code>plot()</code> for giving an overview.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(m1)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-77-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-78-1.png" width="864" /></p>
 <div id="excluding-rows-and-columns-1" class="section level3 unnumbered">
 <h3>Excluding rows and columns</h3>
 <p>From v. 0.8.0 PCA implementation as well as any other method in <code>mdatools</code> can exclude rows and columns from calculations. The implementation works similar to what was described for PCA. For example it can be useful if you have some candidates for outliers or do variable selection and do not want to remove rows and columns physically from the data matrix. In this case you can just specify two additional parameters, <code>exclcols</code> and <code>exclrows</code>, using either numbers or names of rows/columns to be excluded. You can also specify a vector with logical values (all <code>TRUE</code>s will be excluded).</p>

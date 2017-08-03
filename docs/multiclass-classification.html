@@ -231,7 +231,7 @@ m.ver =<span class="st"> </span><span class="kw">selectCompNum</span>(m.ver, <sp
 <p>Now we apply the combined model to the test set and look at the predictions.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t, c.t)
 <span class="kw">plotPredictions</span>(res)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-97-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-98-1.png" width="864" /></p>
 <p>In this case the predictions are shown only for the number of components each model found optimal. The names of classes along y-axis are the individual models. Similarly we can show the predicted values.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(res$c.pred[<span class="dv">20</span>:<span class="dv">30</span>, <span class="dv">1</span>, <span class="dv">1</span>:<span class="dv">3</span>])</code></pre></div>
 <pre><code>##    setosa virginica versicola
@@ -250,17 +250,17 @@ m.ver =<span class="st"> </span><span class="kw">selectCompNum</span>(m.ver, <sp
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotModelDistance</span>(m, <span class="dv">1</span>)
 <span class="kw">plotModelDistance</span>(m, <span class="dv">2</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-99-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-100-1.png" width="864" /></p>
 <p>The second plot is a discrimination power, mentioned in the beginning of the section.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotDiscriminationPower</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)
 <span class="kw">plotDiscriminationPower</span>(m, <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-100-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-101-1.png" width="864" /></p>
 <p>And, finally, a Cooman’s plot showing an orthogonal distance from objects to two selected classes/models.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotCooman</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)
 <span class="kw">plotCooman</span>(m, <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-101-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-102-1.png" width="864" /></p>
 
 </div>
 <!-- </div> -->

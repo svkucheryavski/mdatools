@@ -220,7 +220,7 @@ m =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st
 ## Comp 3   8.45     98.82       0.92       12.24      0.84</code></pre>
 <p>Let’s look at plots and start with summary plot.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(m)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-90-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-91-1.png" width="864" /></p>
 <p>The plot is very similar to what we seen for PCA model, the only difference is that it shows <em>modelling power</em> instead of loadings. Modelling power is a measure of contribution of each variable to the model and varies from 0 to 1. Usually variables with modelling power below 0.1 are considered as irrelevant.</p>
 <p>Let’s give a closer look at the residuals plot with different values for alpha (we will keep number of components equal to three in all cases).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.01</span>)
@@ -233,7 +233,7 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 <span class="kw">plotResiduals</span>(m2)
 <span class="kw">plotResiduals</span>(m3)
 <span class="kw">plotResiduals</span>(m4)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-91-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-92-1.png" width="864" /></p>
 <p>As you can see, using alpha = 0.01 reduced number of false negatives to zero, as the acceptance limits became larger, while alpha = 0.15 gives a lot of incorrectly rejected class members. It must be noted, that decreasing alpha will also lead to a larger number of false positives, which we can not see in this case.</p>
 <div id="predictions-and-validation-with-a-test-set" class="section level3 unnumbered">
 <h3>Predictions and validation with a test set</h3>
@@ -262,12 +262,12 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 <span class="kw">plotSensitivity</span>(res)
 <span class="kw">plotMisclassified</span>(res)
 <span class="kw">plotPerformance</span>(res)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-93-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-94-1.png" width="864" /></p>
 <p>The classification results can be shown both graphically and numerically. Here is a prediction plot for the results.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
 <span class="kw">plotPredictions</span>(res)
 <span class="kw">plotPredictions</span>(res, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-94-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-95-1.png" width="864" /></p>
 <p>So we can see that for the model with three components we have no false positives (specificity = 1) and one false negative (sensitivity = 24/25 = 0.96). You can also show the predictions as a matrix with -1 and +1 using method <code>showPredictions()</code> or get the array with predicted class values directly as it is shown in the example below (for first 10 rows, different number of components and the first classification variable).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(res$c.pred[<span class="dv">31</span>:<span class="dv">40</span>, <span class="dv">1</span>:<span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
 <pre><code>##    Comp 1 Comp 2 Comp 3

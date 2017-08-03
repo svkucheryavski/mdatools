@@ -232,6 +232,24 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 ##           IQ 
 ## -0.088658626</code></pre>
 <p>You can see a summary for the regression coefficients object by calling function <code>summary()</code> for the object <code>m$coeffs</code> like it is show below. By default it shows only estimated regression coefficients for the selected y-variable and number of components. However, if you employ Jack-Knifing (see section <em>Variable selection</em> below), the object with regression coefficients will also contain some statistics, including standard error, p-value (for test if the coefficient is equal to zero in populatio) and confidence interval. All statistics in this case will be shown automatically with <code>summary()</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m$coeffs)</code></pre></div>
+<pre><code>## Regression coefficients for Shoesize
+## ------------------------------------
+##       Height       Weight     Hairleng          Age       Income 
+##  0.176077659  0.175803980 -0.164627444  0.046606027  0.059998121 
+##         Beer         Wine          Sex         Swim       Region 
+##  0.133136867  0.002751573 -0.164627444  0.173739533 -0.031357608 
+##           IQ 
+## -0.003353428</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m$coeffs, <span class="dt">ncomp =</span> <span class="dv">3</span>)</code></pre></div>
+<pre><code>## Regression coefficients for Shoesize
+## ------------------------------------
+##       Height       Weight     Hairleng          Age       Income 
+##  0.210411676  0.197646483 -0.138824482  0.026613035 -0.000590693 
+##         Beer         Wine          Sex         Swim       Region 
+##  0.148917913  0.138138095 -0.138824482  0.223962000  0.010392542 
+##           IQ 
+## -0.088658626</code></pre>
 <p>You can also get the corrected coefficients, which can be applied directly to the raw data (without centering and standardization), by using method <code>getRegcoeffs()</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(m, <span class="dt">ncomp =</span> <span class="dv">3</span>))</code></pre></div>
 <pre><code>##                Shoesize
@@ -321,7 +339,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotRMSE</span>(m1)
 <span class="kw">plotRMSE</span>(m2)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-73-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-74-1.png" width="864" /></p>
 <p>Parameter <code>cv</code> has the same format as for PCA. If it is a number, it will be used as number of segments for random cross-validation, e.g. if <code>cv = 2</code> cross-validation with two segments will be carried out. For full cross-validation use <code>cv = 1</code> like we did in the example above. For more advanced option you can provide a list with name of cross-validation method, number of segments and number of iterations, e.g. <code>cv = list('rand', 4, 4)</code> for running random cross-validation with four segments and four repetitions or <code>cv = list('ven', 8)</code> for systematic split into eight segments (<em>venetian blinds</em>).</p>
 <p>Method <code>summary()</code> for model shows performance statistics calculated using optimal number of components for each of the results.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1)</code></pre></div>
