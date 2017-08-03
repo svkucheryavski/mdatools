@@ -6,9 +6,8 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
-  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.1 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -25,13 +24,8 @@
 
 <meta name="author" content="Sergey Kucheryavskiy">
 
-<meta name="date" content="2016-10-30">
 
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  TeX: { equationNumbers: { autoNumber: "AMS" } }
-});
-</script>
+<meta name="date" content="2017-08-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -40,7 +34,6 @@ MathJax.Hub.Config({
   
 <link rel="prev" href="partial-least-squares-regression.html">
 <link rel="next" href="plotting-methods-1.html">
-
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -97,6 +90,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </head>
 
 <body>
+
 
 
   <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
@@ -221,7 +215,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 ## $calres - results for calibration set
 ## 
 ## Try summary(model) and plot(model) to see the model performance.</code></pre>
-<p>As expected, we see loadings for predictors and responses, matrix with weights, and a special object (<code>regcoeffs</code>) for regression coefficients. The values for regression coefficients are available in <code>m.regcoeffs.values</code>, it is an array with dimension <em>nVariables x nComponents x nPredictors</em>. The reason to use the object instead of just an array is mainly for being able to get and plot regression coefficients for different methods. Besides that, it is possible to calculate confidence intervals and other statistics for the coefficients using Jack-Knife method (will be shown later), which produces extra entities.</p>
+<p>As expected, we see loadings for predictors and responses, matrix with weights, and a special object (<code>regcoeffs</code>) for regression coefficients. The values for regression coefficients are available in <code>m.coeffs.values</code>, it is an array with dimension <em>nVariables x nComponents x nPredictors</em>. The reason to use the object instead of just an array is mainly for being able to get and plot regression coefficients for different methods. Besides that, it is possible to calculate confidence intervals and other statistics for the coefficients using Jack-Knife method (will be shown later), which produces extra entities.</p>
 <p>The regression coefficients can be shown as plot using either function <code>plotRegcoeffs()</code> for the PLS model object or function <code>plot()</code> for the object with regression coefficients. You need to specify for which predictor (if you have more than one y-variable) and which number of components you want to see the coefficients for. By default it shows values for the optimal number of components and first y-variable as it is shown on example below.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
 <span class="kw">plotRegcoeffs</span>(m)
@@ -237,7 +231,8 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 ##  0.148917913  0.138138095 -0.138824482  0.223962000  0.010392542 
 ##           IQ 
 ## -0.088658626</code></pre>
-<p>You can get the corrected coefficients, which can be applied directly to the raw data, by using method <code>getRegcoeffs()</code>:</p>
+<p>You can see a summary for the regression coefficients object by calling function <code>summary()</code> for the object <code>m$coeffs</code> like it is show below. By default it shows only estimated regression coefficients for the selected y-variable and number of components. However, if you employ Jack-Knifing (see section <em>Variable selection</em> below), the object with regression coefficients will also contain some statistics, including standard error, p-value (for test if the coefficient is equal to zero in populatio) and confidence interval. All statistics in this case will be shown automatically with <code>summary()</code>.</p>
+<p>You can also get the corrected coefficients, which can be applied directly to the raw data (without centering and standardization), by using method <code>getRegcoeffs()</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(m, <span class="dt">ncomp =</span> <span class="dv">3</span>))</code></pre></div>
 <pre><code>##                Shoesize
 ## Intercept  1.251537e+01
@@ -251,7 +246,10 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 ## Sex       -5.375404e-01
 ## Swim       1.164947e-01
 ## Region     4.024083e-02
-## IQ        -2.742712e-02</code></pre>
+## IQ        -2.742712e-02
+## attr(,&quot;name&quot;)
+## [1] &quot;Regression coefficients for  Shoesize&quot;</code></pre>
+<p>It also returns all statistics in case if Jack-Knifing was applied.</p>
 <p>Similar to PCA, model object may contain three fields for results obtained using calibration set (<code>calres</code>), cross-validation (<code>cvres</code>) and test set validation (<code>testres</code>). All three have class <code>plsres</code>, here is how <code>calres</code> looks like:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m$calres)</code></pre></div>
 <pre><code>## 
@@ -358,8 +356,9 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
         </div>
       </div>
 <a href="partial-least-squares-regression.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="plotting-methods-1.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
-
+<a href="plotting-methods-1.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/lunr.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
@@ -371,6 +370,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
+"github": false,
 "facebook": true,
 "twitter": true,
 "google": false,
@@ -401,7 +401,7 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:" && /^https?:/.test(script.src))
       script.src  = script.src.replace(/^https?:/, '');
     document.getElementsByTagName("head")[0].appendChild(script);
