@@ -685,6 +685,11 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
 prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, 
                              show.lines, show.axes) {
    
+   # convert data frame to a matrix
+   if (is.data.frame(data)) {
+      data = mda.df2mat(data)
+   }
+   
    # check plot type 
    valid.types = c('p', 'l', 'b', 'h', 'e', 'd')
    if (!(type %in% valid.types))
@@ -963,8 +968,15 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #'   
 #' The function makes a plot of one set of objects. It can be a set of points (scatter plot), 
 #' bars, lines, scatter-lines, errorbars og an image. The data is organized as a data frame, matrix or vector. 
-#' For scatter and only first two columns will be used, for bar plot only values from the first row.
-#' 
+#' For scatter and only first two columns will be used, for bar plot only values from the first row. It is
+#' recommended to use \link{\code{mda.subset}} method if plot should be made only for a subset of the
+#' data, especially if you have any excluded rows or columns or other special attributed, described
+#' in the Bookdown tutorial.
+#'
+#' If data is a data frame and contains one or more factors, they will be converted to a dummy
+#' variables (using function \link{\code{mda.df2mat}}) and appears at the end (last columns) if line or
+#' bar plot is selected.
+#'  
 #' The function allows to colorize lines and points according to values of a parameter 
 #' \code{cgroup}. The parameter must be a vector with the same elements as number of objects (rows)
 #' in the data. The values are divided into up to eight intervals and for each interval a 

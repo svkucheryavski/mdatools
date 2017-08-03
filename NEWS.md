@@ -5,6 +5,7 @@ v.0.8.4
 * new method `summary()` for object with regression coefficients (`regcoeffs`)
 * fixed a bug with double labels on regression coefficients plot with confidence intervals 
 * fixed a bug in some PLS plots where labels for cross-validated results forced to be numbers 
+* when using `mdaplot` for data frame with one or more factor columns, the factors are now transofrmed to dummy variables (befor it led to an error) 
 
 v.0.8.3
 =======
