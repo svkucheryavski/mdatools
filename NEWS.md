@@ -2,6 +2,7 @@ v.0.8.4
 =======
 * small improvements to calculation of statistics for regression coefficients
 * `pls.getRegCoeffs()` now also returns standard error and confidence intervals calculated for unstandardized variables
+* new method `summary()` for object with regression coefficients (`regcoeffs`)
 * fixed a bug with double labels on regression coefficients plot with confidence intervals 
 * fixed a bug in some PLS plots where labels for cross-validated results forced to be numbers 
 
