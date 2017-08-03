@@ -11,8 +11,6 @@ regcoeffs(coeffs, ci.coeffs = NULL)
 
 \item{ci.coeffs}{array (nobj x ncomp x ny x cv) with regression coefficients for 
 computing confidence intervals (e.g. from jack-knifing)}
-
-\item{ci.alpha}{significance level for computing of the confidence intervals}
 }
 \value{
 a list (object of \code{regcoeffs} class) with fields, including:

@@ -916,7 +916,6 @@ plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
       data$cv = mda.cbind(mda.subset(obj$cvres$T2, select = ncomp), mda.subset(obj$cvres$Q, select = ncomp))
       colnames(data$cv) = c(xlab, ylab)
    }      
-   
    if (!is.null(obj$testres)) {
       data$test = mda.cbind(mda.subset(obj$testres$T2, select = ncomp), mda.subset(obj$testres$Q, select = ncomp))
       colnames(data$test) = c(xlab, ylab)

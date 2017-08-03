@@ -2,12 +2,15 @@ v.0.8.4
 =======
 * small improvements to calculation of statistics for regression coefficients
 * `pls.getRegCoeffs()` now also returns standard error and confidence intervals calculated for unstandardized variables
+* new method `summary()` for object with regression coefficients (`regcoeffs`)
 * fixed a bug with double labels on regression coefficients plot with confidence intervals 
+* fixed a bug in some PLS plots where labels for cross-validated results forced to be numbers 
+* when using `mdaplot` for data frame with one or more factor columns, the factors are now transofrmed to dummy variables (befor it led to an error) 
 
 v.0.8.3
 =======
-* fixed a bug in `mdatools` when using factor with more than 8 levels for color grouping led to an error
-* fixed a bug in `pca` with wrong calculation of eigenvalues when in NIPALS algorithm
+* fixed a bug in `mdaplots` when using factor with more than 8 levels for color grouping led to an error
+* fixed a bug in `pca` with wrong calculation of eigenvalues in NIPALS algorithm
 * bars on a bar plot now can be color grouped
 
 v.0.8.2

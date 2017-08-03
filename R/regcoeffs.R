@@ -9,8 +9,6 @@
 #' @param ci.coeffs
 #' array (nobj x ncomp x ny x cv) with regression coefficients for 
 #' computing confidence intervals (e.g. from jack-knifing)
-#' @param ci.alpha
-#' significance level for computing of the confidence intervals 
 #' 
 #' @return
 #' a list (object of \code{regcoeffs} class) with fields, including:
@@ -48,8 +46,6 @@ regcoeffs = function(coeffs, ci.coeffs = NULL) {
 #' regression coefficients array for a model
 #' @param ci.coeffs
 #' array with regression coefficients for calculation of condifence intervals
-#' @param ci.alpha
-#' significance level to calculate the confidence intervals
 #' 
 #' @return
 #' a list with statistics (\code{$ci} - array with confidence intervals, 
@@ -88,7 +84,7 @@ regcoeffs.getStat = function(coeffs.values, ci.coeffs) {
    if (nexclvar > 0) {
       se.out = array(0, dim = c(nvar + nexclvar, ncomp, ny))
       t.values.out = array(0, dim = c(nvar + nexclvar, ncomp, ny))
-      p.values.out = array(0, dim = c(nvar + nexclvar, ncomp, ny))
+      p.values.out = array(1, dim = c(nvar + nexclvar, ncomp, ny))
       se.out[-exclvars, , ] = se
       t.values.out[-exclvars, , ] = t.values
       p.values.out[-exclvars, , ] = p.values
@@ -190,6 +186,8 @@ print.regcoeffs = function(x, ncomp = 1, ny = 1, digits = 3, ...) {
 #' logical, show or not line for 0 value
 #' @param show.ci
 #' logical, show or not confidence intervals if they are available
+#' @param alpha
+#' significance level for confidence intervals (a number between 0 and 1, e.g. for 95\% alpha = 0.05)
 #' @param ...
 #' other arguments
 #' 
@@ -250,3 +248,74 @@ plot.regcoeffs = function(x, ncomp = 1, ny = 1, type = NULL, col = NULL, main = 
    }
 }   
 
+#' Summary method for regcoeffs object
+#' 
+#' @description
+#' Shows estimated coefficients and statistics (if available).
+#' 
+#' @param object
+#' object of class \code{regcoeffs}
+#' @param ncomp
+#' how many components to use 
+#' @param ny
+#' which y variable to show the summary for 
+#' @param alpha
+#' significance level for confidence interval (if statistics available) 
+#' @param ...
+#' other arguments
+#' 
+#' @details 
+#' Statistcs are shown if Jack-Knifing was used when model is calibrated.
+#' 
+#' @export
+summary.regcoeffs = function(object, ncomp = 1, ny = 1, alpha = 0.05, ...) {
+   obj = object
+   nxvar = dim(obj$values)[1]
+   nyvar = dim(obj$values)[3]
+   
+   if (!is.numeric(ncomp) || length(ncomp) != 1 || ncomp <= 0 || ncomp > dim(obj$values)[2]) 
+      stop('Wrong value for number of components!')
+   
+   if (!is.numeric(ny) || length(ny) != 1 || ny <= 0 || ny > nyvar) 
+      stop('Wrong value for number of components!')
+
+   if (alpha <= 0 || alpha >= 1)
+      stop('Wrong value for alpha (must be between 0 and 1)')
+   
+   attrs = mda.getattr(obj$values)
+   coeffs = obj$values[, ncomp, ny, drop = F]
+   dim(coeffs) = c(nxvar, 1)
+   
+   if (!is.null(obj$p.values)) {
+      
+      ci.CL = (1 - alpha) * 100
+      t = qt(1 - alpha/2, obj$niter - 1)
+      
+      se = matrix(obj$se[, ncomp, ny], ncol = 1)
+      ci.lo = coeffs - t * se
+      ci.up = coeffs + t * se
+      
+      coeffs = data.frame(coeffs, 
+                     round(obj$t.values[, ncomp, ny], 1),
+                     se,
+                     round(obj$p.values[, ncomp, ny], 3),
+                     ci.lo,
+                     ci.up
+      )
+      colnames(coeffs) = c('Estimated coefficients', 't-value', 'SE', 'p-value', 
+                           sprintf('%d%% CI (lo)', ci.CL),
+                           sprintf('%d%% CI (up)', ci.CL)
+      )
+   } else {
+      colnames(coeffs) = 'Estimated coefficients'
+   }
+   
+   rownames(coeffs) = dimnames(obj$values)[[1]]
+   attr(coeffs, 'exclrows') = attrs$exclrows
+   attr(coeffs, 'name') = paste('Regression coefficients for', dimnames(obj$values)[[3]][ny])
+   
+   mda.show(coeffs)
+   if (ncol(coeffs) > 1)
+      cat(sprintf('\nDegrees of freedom: %d, t-value: %.2f\n', obj$niter - 1, t))
+   cat('\n\n')
+}

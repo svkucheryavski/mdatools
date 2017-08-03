@@ -10,8 +10,6 @@ regcoeffs.getStat(coeffs.values, ci.coeffs)
 \item{coeffs.values}{regression coefficients array for a model}
 
 \item{ci.coeffs}{array with regression coefficients for calculation of condifence intervals}
-
-\item{ci.alpha}{significance level to calculate the confidence intervals}
 }
 \value{
 a list with statistics (\code{$ci} - array with confidence intervals, 
