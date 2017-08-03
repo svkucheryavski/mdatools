@@ -95,8 +95,15 @@ differences are described below.
   
 The function makes a plot of one set of objects. It can be a set of points (scatter plot), 
 bars, lines, scatter-lines, errorbars og an image. The data is organized as a data frame, matrix or vector. 
-For scatter and only first two columns will be used, for bar plot only values from the first row.
+For scatter and only first two columns will be used, for bar plot only values from the first row. It is
+recommended to use \code{\link{mda.subset}} method if plot should be made only for a subset of the
+data, especially if you have any excluded rows or columns or other special attributed, described
+in the Bookdown tutorial.
 
+If data is a data frame and contains one or more factors, they will be converted to a dummy
+variables (using function \code{\link{mda.df2mat}}) and appears at the end (last columns) if line or
+bar plot is selected.
+ 
 The function allows to colorize lines and points according to values of a parameter 
 \code{cgroup}. The parameter must be a vector with the same elements as number of objects (rows)
 in the data. The values are divided into up to eight intervals and for each interval a 
