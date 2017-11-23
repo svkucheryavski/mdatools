@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -194,15 +194,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 idx =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, <span class="kw">nrow</span>(iris), <span class="dt">by =</span> <span class="dv">2</span>)
 
 <span class="co"># split the values</span>
-X.c =<span class="st"> </span>iris[idx, <span class="dv">1</span>:<span class="dv">4</span>]
+X.c =<span class="st"> </span>iris[idx, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]
 c.c =<span class="st"> </span>iris[idx, <span class="dv">5</span>, drop =<span class="st"> </span>F]
 
-X.t =<span class="st"> </span>iris[-idx, <span class="dv">1</span>:<span class="dv">4</span>]
-c.t =<span class="st"> </span>iris[-idx, <span class="dv">5</span>, drop =<span class="st"> </span>F]</code></pre></div>
+X.t =<span class="st"> </span>iris[<span class="op">-</span>idx, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]
+c.t =<span class="st"> </span>iris[<span class="op">-</span>idx, <span class="dv">5</span>, drop =<span class="st"> </span>F]</code></pre></div>
 <p>Now, because for calibration we need only objects belonging to a class, we will split the <code>X.c</code> into three matrices — one for each species. The data is ordered by the species, so it can be done relatively easy by taking every 25 rows.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">X.set =<span class="st"> </span>X.c[<span class="dv">1</span>:<span class="dv">25</span>, ]
-X.ver =<span class="st"> </span>X.c[<span class="dv">26</span>:<span class="dv">50</span>, ]
-X.vir =<span class="st"> </span>X.c[<span class="dv">51</span>:<span class="dv">75</span>, ]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">X.set =<span class="st"> </span>X.c[<span class="dv">1</span><span class="op">:</span><span class="dv">25</span>, ]
+X.ver =<span class="st"> </span>X.c[<span class="dv">26</span><span class="op">:</span><span class="dv">50</span>, ]
+X.vir =<span class="st"> </span>X.c[<span class="dv">51</span><span class="op">:</span><span class="dv">75</span>, ]</code></pre></div>
 <p>Let’s start with creating a model for class <em>Versicolor</em> and exploring available statistics and plots. We will use full cross-validation to validate the results.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mdatools)
 m =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>)
@@ -265,11 +265,11 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 <p><img src="_main_files/figure-html/unnamed-chunk-94-1.png" width="864" /></p>
 <p>The classification results can be shown both graphically and numerically. Here is a prediction plot for the results.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
-<span class="kw">plotPredictions</span>(res)
-<span class="kw">plotPredictions</span>(res, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
+<span class="kw">plotPredictions</span>(res, <span class="dt">show.legend =</span> F)
+<span class="kw">plotPredictions</span>(res, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">show.legend =</span> F)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-95-1.png" width="864" /></p>
-<p>So we can see that for the model with three components we have no false positives (specificity = 1) and one false negative (sensitivity = 24/25 = 0.96). You can also show the predictions as a matrix with -1 and +1 using method <code>showPredictions()</code> or get the array with predicted class values directly as it is shown in the example below (for first 10 rows, different number of components and the first classification variable).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(res$c.pred[<span class="dv">31</span>:<span class="dv">40</span>, <span class="dv">1</span>:<span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
+<p>So we can see (the legend has been hidden in order to see all points clearly) that for the model with three components we have three false positives (specificity = 47/50 = 0.94) and three false negatives (sensitivity = 22/25 = 0.88). You can also show the predictions as a matrix with -1 and +1 using method <code>showPredictions()</code> or get the array with predicted class values directly as it is shown in the example below (for first 10 rows, different number of components and the first classification variable).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(res<span class="op">$</span>c.pred[<span class="dv">31</span><span class="op">:</span><span class="dv">40</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
 <pre><code>##    Comp 1 Comp 2 Comp 3
 ## 62      1      1      1
 ## 64      1      1      1
@@ -300,7 +300,7 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-require(["gitbook"], function(gitbook) {
+gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": false,
@@ -342,4 +342,4 @@ gitbook.start({
 </script>
 </body>
 
-</html>
+<!-- </html> -->

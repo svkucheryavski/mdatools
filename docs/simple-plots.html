@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -293,7 +293,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">mdaplot</span>(people, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">mdaplot</span>(people, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;indices&#39;</span>)
 <span class="kw">mdaplot</span>(people, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;names&#39;</span>, <span class="dt">lab.col =</span> <span class="st">&#39;black&#39;</span>, <span class="dt">lab.cex =</span> <span class="dv">1</span>)
-<span class="kw">mdaplot</span>(people, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="kw">paste</span>(<span class="st">&#39;obj&#39;</span>, <span class="dv">1</span>:<span class="kw">nrow</span>(people)))</code></pre></div>
+<span class="kw">mdaplot</span>(people, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="kw">paste</span>(<span class="st">&#39;obj&#39;</span>, <span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(people)))</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-13-1.png" width="864" /></p>
 <p>The plots work well with the data attributes (names, axis names, etc.).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">attr</span>(people, <span class="st">&#39;name&#39;</span>) =<span class="st"> &#39;People&#39;</span>
@@ -306,10 +306,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>To avoid any problems with arguments when you make a subset, use <code>mda.subset()</code> instead of the traditional ways. As you can see in the example below, if we take first 16 rows, information about excluded objects (as well as all other uder defined arguments, e.g. <code>'name'</code>) disappear and they are show in the plot as normal. But if we use <code>mda.subset()</code> it will take the subset without excluded rows as it is shown below. The subset can be created using logical expressions as well as indices or names of the rows.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">weight =<span class="st"> </span>people[, <span class="st">&#39;Weight&#39;</span>]
 <span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">mdaplot</span>(people[<span class="dv">1</span>:<span class="dv">16</span>, ], <span class="dt">show.labels =</span> T, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)
-<span class="kw">mdaplot</span>(<span class="kw">mda.subset</span>(people, <span class="dt">subset =</span> <span class="dv">1</span>:<span class="dv">16</span>), <span class="dt">show.labels =</span> T, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)
+<span class="kw">mdaplot</span>(people[<span class="dv">1</span><span class="op">:</span><span class="dv">16</span>, ], <span class="dt">show.labels =</span> T, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)
+<span class="kw">mdaplot</span>(<span class="kw">mda.subset</span>(people, <span class="dt">subset =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">16</span>), <span class="dt">show.labels =</span> T, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)
 <span class="kw">mdaplot</span>(<span class="kw">mda.subset</span>(people, <span class="dt">subset =</span> <span class="kw">c</span>(<span class="st">&#39;Lisa&#39;</span>, <span class="st">&#39;Benito&#39;</span>, <span class="st">&#39;Federico&#39;</span>)), <span class="dt">show.labels =</span> T, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)
-<span class="kw">mdaplot</span>(<span class="kw">mda.subset</span>(people, <span class="dt">subset =</span> weight &gt;<span class="st"> </span><span class="dv">70</span>), <span class="dt">show.labels =</span> T, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)</code></pre></div>
+<span class="kw">mdaplot</span>(<span class="kw">mda.subset</span>(people, <span class="dt">subset =</span> weight <span class="op">&gt;</span><span class="st"> </span><span class="dv">70</span>), <span class="dt">show.labels =</span> T, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-15-1.png" width="864" /></p>
 <p>You can also manually specify axis ticks and tick labels. The labels can be rotated using parameters <code>xlas</code> and <code>ylas</code>, see the examples below.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
@@ -324,13 +324,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 
 <span class="co"># change margin for bottom part</span>
-<span class="kw">par</span>(<span class="dt">mar =</span> <span class="kw">c</span>(<span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>) +<span class="st"> </span><span class="fl">0.1</span>)
+<span class="kw">par</span>(<span class="dt">mar =</span> <span class="kw">c</span>(<span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>) <span class="op">+</span><span class="st"> </span><span class="fl">0.1</span>)
 <span class="kw">mdaplot</span>(people, <span class="dt">xticks =</span> <span class="kw">c</span>(<span class="dv">165</span>, <span class="dv">175</span>, <span class="dv">185</span>), <span class="dt">xticklabels =</span> <span class="kw">c</span>(<span class="st">&#39;Small&#39;</span>, <span class="st">&#39;Medium&#39;</span>, <span class="st">&#39;Hight&#39;</span>), 
         <span class="dt">xlas =</span> <span class="dv">2</span>, <span class="dt">xlab =</span> <span class="st">&#39;&#39;</span>)
 <span class="kw">mtext</span>(<span class="st">&#39;Height&#39;</span>, <span class="dt">side =</span> <span class="dv">1</span>, <span class="dt">line =</span> <span class="dv">5</span>)
 
 <span class="co"># change margin for left part</span>
-<span class="kw">par</span>(<span class="dt">mar =</span> <span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">1</span>) +<span class="st"> </span><span class="fl">0.1</span>)
+<span class="kw">par</span>(<span class="dt">mar =</span> <span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">1</span>) <span class="op">+</span><span class="st"> </span><span class="fl">0.1</span>)
 <span class="kw">mdaplot</span>(people, <span class="dt">yticks =</span> <span class="kw">c</span>(<span class="dv">55</span>, <span class="dv">70</span>, <span class="dv">85</span>), <span class="dt">yticklabels =</span> <span class="kw">c</span>(<span class="st">&#39;Light&#39;</span>, <span class="st">&#39;Medium&#39;</span>, <span class="st">&#39;Heavy&#39;</span>), 
         <span class="dt">ylas =</span> <span class="dv">2</span>, <span class="dt">ylab =</span> <span class="st">&#39;&#39;</span>)
 <span class="kw">mtext</span>(<span class="st">&#39;Weight&#39;</span>, <span class="dt">side =</span> <span class="dv">2</span>, <span class="dt">line =</span> <span class="dv">5</span>)</code></pre></div>
@@ -345,9 +345,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h3>Line plots</h3>
 <p>When line plot is created, the <code>mdatools()</code> shows a line plot for every row. So if data set has more than one row, the plot will show a banch of lines having same properties (color, type, etc). This is particularly useful when working with signals and spectroscopic data. In this subsection we will use simulated UV/Vis spectra from <code>simdata</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(simdata)
-spectra =<span class="st"> </span>simdata$spectra.c
-conc =<span class="st"> </span>simdata$conc.c[, <span class="dv">1</span>]
-wavelength =<span class="st"> </span>simdata$wavelength
+spectra =<span class="st"> </span>simdata<span class="op">$</span>spectra.c
+conc =<span class="st"> </span>simdata<span class="op">$</span>conc.c[, <span class="dv">1</span>]
+wavelength =<span class="st"> </span>simdata<span class="op">$</span>wavelength
 
 <span class="kw">attr</span>(spectra, <span class="st">&#39;name&#39;</span>) =<span class="st"> &#39;UV/Vis spectra&#39;</span>
 <span class="kw">attr</span>(spectra, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> &#39;Band index&#39;</span></code></pre></div>
@@ -363,8 +363,8 @@ wavelength =<span class="st"> </span>simdata$wavelength
 <p>One of the new features, appeared first in version 0.8.0, is a special attribute, allowing to provide manual x-values — <code>'xaxis.values'</code> (similar parameter for y-values is <code>'yaxis.values'</code>). In the example below we show the spectra using wavelength in nm and wavenumbers in inverse cm.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
 
-<span class="kw">attr</span>(spectra, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> </span><span class="kw">expression</span>(<span class="st">&#39;Wavenumbers, cm&#39;</span>^-<span class="dv">1</span>)
-<span class="kw">attr</span>(spectra, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span><span class="dv">10</span>^<span class="dv">7</span>/wavelength
+<span class="kw">attr</span>(spectra, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> </span><span class="kw">expression</span>(<span class="st">&#39;Wavenumbers, cm&#39;</span><span class="op">^-</span><span class="dv">1</span>)
+<span class="kw">attr</span>(spectra, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span><span class="dv">10</span><span class="op">^</span><span class="dv">7</span><span class="op">/</span>wavelength
 <span class="kw">mdaplot</span>(spectra, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)
 
 <span class="kw">attr</span>(spectra, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> &#39;Wavelength, nm&#39;</span>
@@ -426,7 +426,7 @@ d =<span class="st"> </span><span class="kw">mda.exclcols</span>(d, <span class=
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-require(["gitbook"], function(gitbook) {
+gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": false,
@@ -468,4 +468,4 @@ gitbook.start({
 </script>
 </body>
 
-</html>
+<!-- </html> -->

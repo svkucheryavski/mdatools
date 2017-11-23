@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -215,8 +215,8 @@ data4 =<span class="st"> </span><span class="kw">prep.autoscale</span>(data4, <s
 <p>Baseline correction methods so far include Standard Normal Variate (SNV) and Multiplicative Scatter Correction (MSC). You can find more methods in the package <a href="">baseline</a>. SNV is a very simple procedure aiming first of all at remove additive and multiplicative scatter effects from Vis/NIR spectra. It is applied to every individual spectrum by subtracting its average and dividing its standard deviation from all spectral values. Here is an example:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load UV/Vis spectra from Simdata</span>
 <span class="kw">data</span>(simdata)
-ospectra =<span class="st"> </span>simdata$spectra.c
-<span class="kw">attr</span>(ospectra, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span>simdata$wavelength
+ospectra =<span class="st"> </span>simdata<span class="op">$</span>spectra.c
+<span class="kw">attr</span>(ospectra, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span>simdata<span class="op">$</span>wavelength
 <span class="kw">attr</span>(ospectra, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> &#39;Wavelength, nm&#39;</span>
 
 <span class="co"># apply SNV and show the spectra</span>
@@ -241,7 +241,7 @@ pspectra =<span class="st"> </span><span class="kw">prep.msc</span>(ospectra)
 <h3>Smoothing and derivatives</h3>
 <p>Savitzky-Golay filter is used to smooth signals and calculate derivatives. The filter has three arguments: a width of the filter (<code>width</code>), a polynomial order (<code>porder</code>) and the derivative order (<code>dorder</code>). If the derivative order is zero (default value) only smoothing will be performed.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># add random noise to the spectra</span>
-nspectra =<span class="st"> </span>ospectra +<span class="st"> </span><span class="fl">0.025</span> *<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="kw">length</span>(ospectra)), <span class="kw">dim</span>(ospectra))
+nspectra =<span class="st"> </span>ospectra <span class="op">+</span><span class="st"> </span><span class="fl">0.025</span> <span class="op">*</span><span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="kw">length</span>(ospectra)), <span class="kw">dim</span>(ospectra))
 
 <span class="co"># apply SG filter for smoothing</span>
 pspectra =<span class="st"> </span><span class="kw">prep.savgol</span>(nspectra, <span class="dt">width =</span> <span class="dv">15</span>, <span class="dt">porder =</span> <span class="dv">1</span>)
@@ -277,7 +277,7 @@ dpspectra =<span class="st"> </span><span class="kw">prep.savgol</span>(nspectra
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-require(["gitbook"], function(gitbook) {
+gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": false,
@@ -319,4 +319,4 @@ gitbook.start({
 </script>
 </body>
 
-</html>
+<!-- </html> -->

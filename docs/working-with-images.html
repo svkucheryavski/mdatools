@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -206,7 +206,7 @@ d =<span class="st"> </span><span class="kw">mda.im2data</span>(pellets)
 <span class="kw">imshow</span>(d, <span class="dv">1</span>)
 <span class="kw">imshow</span>(d, <span class="dv">2</span>)
 <span class="kw">imshow</span>(d, <span class="dv">3</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>:<span class="dv">3</span>)</code></pre></div>
+<span class="kw">imshow</span>(d, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-35-1.png" width="864" /></p>
 <p>By default image for one channels is shown using jet color palette for intensities, but you can also use gray colors, palette from colorbrewer2 as well as your own.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
@@ -230,13 +230,13 @@ d =<span class="st"> </span><span class="kw">mda.im2data</span>(pellets)
 <span class="kw">show</span>(<span class="kw">dim</span>(d))</code></pre></div>
 <pre><code>## [1] 114000      3</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># set red epixels as background and show new size</span>
-d =<span class="st"> </span><span class="kw">mda.setimbg</span>(d, d[, <span class="st">&#39;Red&#39;</span>] &gt;<span class="st"> </span><span class="dv">100</span>)
+d =<span class="st"> </span><span class="kw">mda.setimbg</span>(d, d[, <span class="st">&#39;Red&#39;</span>] <span class="op">&gt;</span><span class="st"> </span><span class="dv">100</span>)
 <span class="kw">show</span>(<span class="kw">dim</span>(d))</code></pre></div>
 <pre><code>## [1] 66471     3</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># show image with background pixels</span>
 <span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">imshow</span>(d, <span class="dv">1</span>)
-<span class="kw">imshow</span>(d, <span class="dv">1</span>:<span class="dv">3</span>)</code></pre></div>
+<span class="kw">imshow</span>(d, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-39-1.png" width="864" /></p>
 <p>All image related attributes are inherited by all object/rows related results, e.g. scores, residuals, predicted values and classes, etc. This means if you provide an image to any modelling method, you can visualise the corresponding results also as an image. Some examples will be shown in <a href="principal-component-analysis.html#principal-component-analysis">chapter about PCA</a></p>
 
@@ -258,7 +258,7 @@ d =<span class="st"> </span><span class="kw">mda.setimbg</span>(d, d[, <span cla
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-require(["gitbook"], function(gitbook) {
+gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": false,
@@ -300,4 +300,4 @@ gitbook.start({
 </script>
 </body>
 
-</html>
+<!-- </html> -->
