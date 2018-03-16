@@ -74,7 +74,7 @@ regres.r2 = function(y.ref, y.pred) {
    ncomp = ncol(y.pred)
    r2 = matrix(0, nrow = nresp, ncol = ncomp)
   
-   ytot = colSums(y.ref^2)
+   ytot = colSums((y.ref - mean(y.ref))^2)
    for (i in 1:nresp){
       yp = y.pred[, , i, drop = F]
       dim(yp) = dim(y.pred)[1:2]
@@ -223,6 +223,10 @@ plotRMSE.regres = function(obj, ny = 1, type = 'b', labels = 'values', ...) {
 #' complexity of model (e.g. number of components) to show the plot for
 #' @param show.line
 #' logical, show or not line fit for the plot points
+#' @param show.stat 
+#' logical, show or not legend with statistics on the plot
+#' @param axes.equal
+#' logical, make limits for x and y axes equal or not
 #' @param col
 #' color for the plot objects.
 #' @param ...
@@ -233,7 +237,8 @@ plotRMSE.regres = function(obj, ny = 1, type = 'b', labels = 'values', ...) {
 #' reference values, otherwise predicted values are shown vs. object numbers.
 #' 
 #' @export
-plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T, col = mdaplot.getColors(1), ...) {
+plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T, 
+                                  show.stat = F, axes.equal = T, col = mdaplot.getColors(1), ...) {
    
    if (length(ny) != 1)
       stop('You can show prediction plot only for one selected response variable!')
@@ -261,12 +266,26 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T, col 
       data = cbind(obj$y.ref[, ny], obj$y.pred[, ncomp, ny])
    }
    
+   lim = c(min(data), max(data))
    data = mda.setattr(data, attrs)
    colnames(data) = c(xaxis.name, yaxis.name)
    rownames(data) = rownames(obj$y.pred)
    attr(data, 'name') = 'Predictions'
-   mdaplot(data, type = 'p', ...)
    
+   if (axes.equal && !is.null(lim))
+      p = mdaplot(data, type = 'p', xlim = lim, ylim = lim, ...)
+   else
+      p = mdaplot(data, type = 'p', ...)
+   
+   if (show.stat && !is.null(obj$y.ref)) {
+      stat.text = paste(
+         'nLV = ', obj$ncomp.selected, '\n',
+         'RMSE = ', obj$rmse[obj$ncomp.selected], '\n',
+         'R2 = ', round(obj$ydecomp$cumexpvar[obj$ncomp.selected]/100, 3)
+      )
+      
+      text(lim[1], lim[2], stat.text, pos = 4, col = '#303030')
+   }
    if (show.line == T && ncol(data) == 2)
       mdaplot.showRegressionLine(data, colmap = 'default', col = col)
 }
