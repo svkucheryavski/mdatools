@@ -364,7 +364,8 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray'
       labels[, 1] = labels[, 1] + w/2
    
    # show labels for colorbar regions
-   mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col, cex = lab.cex)
+   mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col, 
+                      cex = lab.cex)
 }
 
 
@@ -710,10 +711,12 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    if (!is.null(dim(data))) {
       if (nrow(data) == 1 && ncol(data) > 2 && type == 'p') {
          data = mda.t(data)
-         attr(data, 'xaxis.name') = ifelse(is.null(attr(data, 'xaxis.name')), 'Variables', attr(data, 'xaxis.name'))      
+         attr(data, 'xaxis.name') = 
+            ifelse(is.null(attr(data, 'xaxis.name')), 'Variables', attr(data, 'xaxis.name'))      
       } else if (ncol(data) == 1 && !(type == 'p' || type == 'e')) {
          data = mda.t(data)
-         attr(data, 'xaxis.name') = ifelse(is.null(attr(data, 'xaxis.name')), 'Objects', attr(data, 'xaxis.name'))      
+         attr(data, 'xaxis.name') = 
+            ifelse(is.null(attr(data, 'xaxis.name')), 'Objects', attr(data, 'xaxis.name'))      
       }
    }
    
@@ -755,7 +758,8 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    }
 
 
-   # process excluded columns, broken.lines is needed to show line plots with excluded columns correctly
+   # process excluded columns, broken.lines is needed to show line plots with 
+   # excluded columns correctly
    #broken.lines = FALSE
    
    # process excluded rows
@@ -787,7 +791,8 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
          y.values = data[, 1, drop = F]
          attr(y.values, 'name') = colnames(data)[1]
          x.values = 1:length(y.values)
-         attr(x.values, 'name') = ifelse(is.null(data.attr$yaxis.name), 'Objects', data.attr$yaxis.name)
+         attr(x.values, 'name') = 
+            ifelse(is.null(data.attr$yaxis.name), 'Objects', data.attr$yaxis.name)
       }
    } else {
       # the x.values have been defined earlier     
@@ -954,7 +959,8 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' @param col.excluded
 #' color for the excluded objects (rows)
 #' @param nbins
-#' if scatter density plot is shown, number of segments to split the plot area into (see also ?smoothScatter)
+#' if scatter density plot is shown, number of segments to split the plot area into 
+#' (see also ?smoothScatter)
 #' @param colramp
 #' Colramp function for density scatter plot
 #' @param force.x.values
@@ -967,15 +973,15 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' differences are described below.
 #'   
 #' The function makes a plot of one set of objects. It can be a set of points (scatter plot), 
-#' bars, lines, scatter-lines, errorbars og an image. The data is organized as a data frame, matrix or vector. 
-#' For scatter and only first two columns will be used, for bar plot only values from the first row. It is
-#' recommended to use \code{\link{mda.subset}} method if plot should be made only for a subset of the
-#' data, especially if you have any excluded rows or columns or other special attributed, described
-#' in the Bookdown tutorial.
+#' bars, lines, scatter-lines, errorbars og an image. The data is organized as a data frame, 
+#' matrix or vector. For scatter and only first two columns will be used, for bar plot only 
+#' values from the first row. It is recommended to use \code{\link{mda.subset}} method if plot 
+#' should be made only for a subset of the data, especially if you have any excluded rows or 
+#' columns or other special attributed, described in the Bookdown tutorial.
 #'
 #' If data is a data frame and contains one or more factors, they will be converted to a dummy
-#' variables (using function \code{\link{mda.df2mat}}) and appears at the end (last columns) if line or
-#' bar plot is selected.
+#' variables (using function \code{\link{mda.df2mat}}) and appears at the end (last columns) if 
+#' line or bar plot is selected.
 #'  
 #' The function allows to colorize lines and points according to values of a parameter 
 #' \code{cgroup}. The parameter must be a vector with the same elements as number of objects (rows)
@@ -1002,7 +1008,8 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' # See all examples in the tutorial.
 #' 
 #' @export
-mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NULL, lty = 1, lwd = 1, bwd = 0.8,
+mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NULL, lty = 1, 
+                   lwd = 1, bwd = 0.8,
                    cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
                    main = NULL, xlab = NULL, ylab = NULL, show.labels = F, 
                    show.colorbar = T, show.lines = F, show.grid = T, show.axes = T, 
@@ -1012,8 +1019,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
                    colramp = mdaplot.getColors, force.x.values = NA, ...)
 {   
    if (is.null(plot.data)) {
-      plot.data = prepare.plot.data(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, 
-                                    show.lines, show.axes)
+      plot.data = prepare.plot.data(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, 
+                                    show.labels, show.lines, show.axes)
    }
    
    plot.data$lower -> lower
@@ -1036,7 +1043,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    # processs labels and ticklabels
    if (show.axes == T)
    {  
-      # if some columns are excluded and xticklabels is provided for all columns - exclude some of the values
+      # if some columns are excluded and xticklabels is provided for all columns - exclude some of 
+      # the values
       if (!is.null(excluded.cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data))
          xticklabels = xticklabels[-excluded.cols]
       
@@ -1141,9 +1149,11 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    # show excluded rows
    if (show.excluded) {
       if (type == 'p')
-         points(x.values.excludedrows, y.values.excludedrows, type = type, col = col.excluded, pch = pch, lwd = lwd, ...)
+         points(x.values.excludedrows, y.values.excludedrows, type = type, col = col.excluded, 
+                pch = pch, lwd = lwd, ...)
       else if (type == 'l' || type == 'b')
-         matlines(x.values, t(y.values.excludedrows), type = type, col = col.excluded, pch = pch, lty = lty, lwd = lwd, ...)
+         matlines(x.values, t(y.values.excludedrows), type = type, col = col.excluded, pch = pch, 
+                  lty = lty, lwd = lwd, ...)
    }  
    
    # show lines if needed
@@ -1222,7 +1232,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       mdaplot.showLabels(x.values, y.values, labels.incl, type = type, col = lab.col, cex = lab.cex)   
       
       if (show.excluded && !is.null(labels.excl) && type == 'p') {
-         mdaplot.showLabels(x.values.excludedrows, y.values.excludedrows, labels.excl, type = type, col = lab.col, cex = lab.cex)   
+         mdaplot.showLabels(x.values.excludedrows, y.values.excludedrows, labels.excl, 
+                            type = type, col = lab.col, cex = lab.cex)   
       }        
    }      
    
