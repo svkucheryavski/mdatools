@@ -237,7 +237,7 @@ simca.classify = function(model, res) {
    
    for (i in 1:ncomp) {
       c.pred[, i, 1] = 
-         res$T2[, i] <= model$T2lim[1, i] & res$Q[, i] <= model$Qlim[1, i]
+         res$T2[, i] <= model$T2lim[i] & res$Q[, i] <= model$Qlim[i]
    }   
    c.pred = c.pred * 2 - 1
    c.pred

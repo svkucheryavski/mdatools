@@ -529,22 +529,18 @@ pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL, exclrows = 
    model$info = info
    model$alpha = alpha
    
-   # compute statistical limits for the distances
-   if (is.null(rand)) {
-      lim = ldecomp.getResLimits(res$eigenvals, nobj = nrows, ncomp = ncomp, alpha = alpha)
-      model$Qlim = lim$Qlim
-      model$T2lim = lim$T2lim
-   } else {
-      model$Qlim = NULL
-      model$T2lim = NULL
-   }
+   # save excluded columns and rows
    model$exclcols = attrs$exclcols
    model$exclrows = attrs$exclrows
-   
    class(model) = "pca"
    
    # get calibration results
    model$calres = predict(model, x, cal = TRUE)
+   
+   # compute statistical limits for the distances
+   lim = ldecomp.getResLimits(model$calres$Q, ncols, alpha = alpha)
+   model$Qlim = lim$Qlim
+   model$T2lim = lim$T2lim
    model$calres$Qlim = model$Qlim
    model$calres$T2lim = model$T2lim
    model$modpower = model$calres$modpower
@@ -983,7 +979,7 @@ plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
       ncomp = obj$ncomp.selected
    
    if (show.limits == T)
-      show.lines = c(obj$T2lim[1, ncomp], obj$Qlim[1, ncomp])
+      show.lines = c(obj$T2lim[ncomp], obj$Qlim[ncomp])
    else
       show.lines = F
    
