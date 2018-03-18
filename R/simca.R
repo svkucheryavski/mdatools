@@ -142,7 +142,8 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, exc
       x = mda.exclrows(x, exclrows)
    
    # calibrate model  
-   model = pca.cal(x, ncomp, center = center, scale = scale, method = method, alpha = alpha, info = info, cv = NULL)
+   model = pca.cal(x, ncomp, center = center, scale = scale, method = method, 
+                   alpha = alpha, info = info, cv = NULL)
    model$nclasses = 1
    model$classname = classname
    model$call = match.call()   
@@ -163,7 +164,6 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, exc
       model$testres = predict.simca(model, x.test, c.ref = c.test)
    }
       
-   
    model
 }
 
@@ -313,7 +313,8 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
             m = pca.run(x.cal, ncomp, model$method)               
             
             # apply autoscaling to the validation set
-            x.val = prep.autoscale(x.val, center = attr(x.cal, 'prep:center'), scale = attr(x.cal, 'prep:scale'))
+            x.val = prep.autoscale(x.val, center = attr(x.cal, 'prep:center'), 
+                                   scale = attr(x.cal, 'prep:scale'))
             
             # get scores
             scores = x.val %*% m$loadings
@@ -438,8 +439,7 @@ plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL, 
 #' See examples in help for \code{\link{simcam}} function.
 #' 
 #' @export
-plot.simca = function(x, ncomp = NULL, ...)
-{
+plot.simca = function(x, ncomp = NULL, ...) {
    obj = x
    
    par(mfrow = c(2, 2))
@@ -463,8 +463,7 @@ plot.simca = function(x, ncomp = NULL, ...)
 #' other arguments
 #' 
 #' @export
-summary.simca = function(object, ...)
-{
+summary.simca = function(object, ...) {
    obj = object
    
    cat(sprintf('\nSIMCA model for class "%s" summary\n\n', obj$classname))
@@ -487,7 +486,12 @@ summary.simca = function(object, ...)
    if (!is.null(obj$testres)) {
       cnames = colnames(data)
       if (!is.null(obj$testres$c.ref) && !any(is.nan(obj$testres$specificity))) {
-         data = cbind(data, obj$testres$expvar, obj$testres$specificity[1, ], obj$testres$sensitivity[1, ])
+         data = cbind(
+            data, 
+            obj$testres$expvar, 
+            obj$testres$specificity[1, ], 
+            obj$testres$sensitivity[1, ]
+         )
          colnames(data) = c(cnames, 'Expvar (test)', 'Spec (test)', 'Sens (test)')
       } else {
          data = cbind(data, obj$testres$expvar, obj$testres$sensitivity[1, ])
@@ -509,8 +513,7 @@ summary.simca = function(object, ...)
 #' other arguments
 #' 
 #' @export
-print.simca = function(x, ...)
-{
+print.simca = function(x, ...) {
    obj = x
    
    cat('\nSIMCA one class model (class simca)\n')
