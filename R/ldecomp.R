@@ -52,8 +52,9 @@
 #' @importFrom stats convolve cor lm na.exclude predict pt qf qnorm qt sd var
 #'
 #' @export
-ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selected = NULL, attrs = NULL,
-                   tnorm = NULL, dist = NULL, var = NULL, cal = FALSE, totvar = NULL){
+ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selected = NULL, 
+                   attrs = NULL, tnorm = NULL, dist = NULL, var = NULL, cal = FALSE, 
+                   totvar = NULL) {
   
    if (!is.null(scores) && !is.null(loadings)) {
       # there are scores and loadings, calculate the rest and add attributes
@@ -222,7 +223,8 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
 #' Explained variance for linear decomposition
 #' 
 #' @description
-#' Computes explained variance and cumulative explained variance for a data decomposition X = TP' + E.
+#' Computes explained variance and cumulative explained variance for a data decomposition 
+#' X = TP' + E.
 #'
 #' @param Q
 #' Q values (squared residuals distance from object to component space).
@@ -267,44 +269,22 @@ ldecomp.getVariances = function(Q, totvar) {
 #' @return
 #' Returns a list with two vectors:  \code{T2lim} and \code{Qlim}.
 #' 
-ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05) {   
-   T2lim = matrix(0, nrow = 1, ncol = ncomp)
-   for (i in 1:ncomp)
-   {
+ldecomp.getResLimits = function(Q, nvar, alpha = 0.05) {   
+   ncomp = ncol(Q)
+   nobj = nrow(Q)
+
+   T2lim = rep(0, ncomp)
+   Qlim = rep(0, ncomp)
+   for (i in 1:ncomp) {
       if (nobj == i)
-         T2lim[1, i] = 0
+         T2lim[i] = 0
       else
-         T2lim[1, i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - alpha, i, nobj - i);  
+         T2lim[i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - alpha, i, nobj - i);  
+      
+      Qlim[i] = sum(Q[, i]) * qf(1 - alpha, (nvar - i), (nvar - i) * (nobj - i - 1)) / nobj
    }
-   
-   # calculate Q limit using F statistics
-   Qlim = matrix(0, nrow = 1, ncol = ncomp)
-   conflim = 100 - alpha * 100;   
-   nvar = length(eigenvals)
-   for (i in 1:ncomp)
-   {   
-      if (i < nvar)
-      {         
-         evals = eigenvals[(i + 1):nvar]   
-         cl = 2 * conflim - 100
-         t1 = sum(evals)
-         t2 = sum(evals^2)
-         t3 = sum(evals^3)
-         h0 = 1 - 2 * t1 * t3/3/(t2^2);
-         
-         if (h0 < 0.001)
-            h0 = 0.001
-         
-         ca = sqrt(2) * erfinv(cl/100)
-         h1 = ca * sqrt(2 * t2 * h0^2)/t1
-         h2 = t2 * h0 * (h0 - 1)/(t1^2)
-         Qlim[1, i] = t1 * (1 + h1 + h2)^(1/h0)
-      }
-      else
-         Qlim[1, i] = 0
-   }
-   
-   colnames(T2lim) = colnames(Qlim) = paste('Comp', 1:ncomp)
+
+   names(T2lim) = names(Qlim) = paste('Comp', 1:ncomp)
    res = list(
       T2lim = T2lim,
       Qlim = Qlim
@@ -336,8 +316,7 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05) {
 #' @export
 plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance',
                                    xlab = 'Components', ylab = 'Explained variance, %',
-                                   show.labels = F, labels = 'values', ...)
-{
+                                   show.labels = F, labels = 'values', ...) {
    mdaplot(obj$cumexpvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, type = type, 
            show.labels = show.labels, labels = labels, ...)
 }
@@ -368,8 +347,8 @@ plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance'
 plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
                                 xlab = 'Components', ylab = 'Explained variance, %',
                                 show.labels = F, labels = 'values', ...) {
-   mdaplot(obj$expvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, show.labels = show.labels, 
-           labels = labels, type = type, ...)
+   mdaplot(obj$expvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, 
+           show.labels = show.labels, labels = labels, type = type, ...)
 }
 
 
@@ -435,14 +414,15 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
          if (nrow(data) == 1) {
             if (is.null(ylab))
                ylab = rownames(data)[1]
-            mdaplot(data, main = main, type = type, show.labels = show.labels, show.lines = show.lines, 
-                    xlab = xlab, ylab = ylab, ...)
+            mdaplot(data, main = main, type = type, show.labels = show.labels, 
+                    show.lines = show.lines, xlab = xlab, ylab = ylab, ...)
          } else {
             if (is.null(show.legend))
                show.legend = TRUE
             
-            mdaplotg(data, main = main, type = type, show.labels = show.labels, show.lines = show.lines, 
-                     xlab = xlab, ylab = ylab, show.legend = show.legend, ...)
+            mdaplotg(data, main = main, type = type, show.labels = show.labels, 
+                     show.lines = show.lines, xlab = xlab, ylab = ylab, 
+                     show.legend = show.legend, ...)
          }
       } else {
          mdaplot(data, main = main, type = type, show.labels = show.labels, show.lines = show.lines, 
@@ -473,9 +453,9 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
 #' @export
-plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', ylab = 'Squared residual distance (Q)', 
-                                 show.labels = F, show.limits = T, ...)
-{
+plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', 
+                                 ylab = 'Squared residual distance (Q)', 
+                                 show.labels = F, show.limits = T, ...) {
    if (is.null(main))
    {
       if (is.null(ncomp))
@@ -488,7 +468,7 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
       ncomp = obj$ncomp.selected
       
    if (show.limits == T)
-      show.lines = c(obj$T2lim[1, ncomp], obj$Qlim[1, ncomp])
+      show.lines = c(obj$T2lim[ncomp], obj$Qlim[ncomp])
    else
       show.lines = F
 
@@ -501,8 +481,8 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
 #' Print method for linear decomposition
 #'
 #' @description
-#' Generic \code{print} function for linear decomposition. Prints information about the \code{ldecomp}
-#' object.
+#' Generic \code{print} function for linear decomposition. Prints information about 
+#' the \code{ldecomp} object.
 #' 
 #' @param x
 #' object of class \code{ldecomp}
@@ -512,8 +492,7 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
 #' other arguments
 #' 
 #' @export
-print.ldecomp = function(x, str = NULL, ...)
-{   
+print.ldecomp = function(x, str = NULL, ...) {   
    if (is.null(str))
       str ='Results of data decomposition (class ldecomp)'
    
@@ -541,8 +520,7 @@ print.ldecomp = function(x, str = NULL, ...)
 #' other arguments
 #' 
 #' @export
-as.matrix.ldecomp = function(x, ...)
-{
+as.matrix.ldecomp = function(x, ...) {
    data = cbind(x$expvar, x$cumexpvar)   
    rownames(data) = colnames(x$Q)
    colnames(data) = c('Expvar', 'Cumexpvar')   
@@ -552,7 +530,8 @@ as.matrix.ldecomp = function(x, ...)
 #' Summary statistics for linear decomposition
 #'
 #' @description
-#' Generic \code{summary} function for linear decomposition. Prints statistic about the decomposition.
+#' Generic \code{summary} function for linear decomposition. Prints statistic about 
+#' the decomposition.
 #' 
 #' @param object
 #' object of class \code{ldecomp}
