@@ -249,10 +249,177 @@ ldecomp.getVariances = function(Q, totvar) {
    res
 }
 
+#' Calculates critical limits for T2-residuals using Hotteling T2 distribution
+#' 
+#' @description 
+#' The method is based on n
+#' 
+#' @param T2
+#' vector with T2-residuals for selected component
+#' @param ncomp 
+#' number of components
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#' 
+#' @export
+reslim.hotteling = function(T2, ncomp, alpha, gamma) {
+   lim = rep(0, 4)
+   nobj = length(T2)
+   if (nobj > ncomp) {
+      lim[1:2] = 
+         (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(c(1 - alpha, 1 - gamma), ncomp, nobj - ncomp)
+   } else {
+      lim[1:2] = 0
+   }
+   lim[3] = mean(T2)
+   lim[4] = nobj - ncomp
+   
+   lim
+}
+
+#' Calculates critical limits for Q-residuals using classic approach
+#' 
+#' @description 
+#' The method is based on paper by Wold, etc (1977) and utilizes F-distribution
+#' 
+#' @param Q
+#' vector with Q-residuals for selected component
+#' @param nvar 
+#' number of variables in data
+#' @param ncomp 
+#' number of components
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#' 
+#' @export
+reslim.classic = function(Q, nvar, ncomp, alpha = 0.05, gamma = 0.01) {
+   lim = rep(0, 4)
+   nobj = length(Q)
+   Q.mean = sum(Q) / ((nvar - ncomp) * (nobj - ncomp - 1))
+   Fcrit = qf(c(1 - alpha, 1 - gamma), (nvar - ncomp), (nvar - ncomp) * (nobj - ncomp - 1))
+   lim[1:2] = Q.mean *  Fcrit * (nvar - ncomp) 
+   lim[3] = Q.mean
+   lim[4] = (nvar - ncomp)
+
+   lim      
+}
+
+#' Calculates critical limits for Q-residuals using classic JM approach
+#' 
+#' @description 
+#' The method is based on 
+#' 
+#' @param eigenvalues
+#' vector with eigenvalues for all variables
+#' @param ncomp 
+#' number of components
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#' 
+#' @export
+reslim.jm = function(eigenvals, ncomp, alpha = 0.05, gamma = 0.01) {
+   lim = rep(0, 4)
+   
+   # inverse error function 
+   erfinv = function (x) qnorm((1 + x)/2)/sqrt(2)
+   
+   evals = eigenvals[(ncomp + 1):length(eigenvals)]   
+   t1 = sum(evals)
+   t2 = sum(evals^2)
+   t3 = sum(evals^3)
+   h0 = 1 - 2 * t1 * t3/3/(t2^2);
+   if (h0 < 0.001)
+      h0 = 0.001
+   
+   ca = sqrt(2) * erfinv(c(1 - 2 * alpha, 1 - 2 * gamma))
+   h1 = ca * sqrt(2 * t2 * h0^2)/t1
+   h2 = t2 * h0 * (h0 - 1)/(t1^2)
+   lim[1:2] = t1 * (1 + h1 + h2)^(1/h0)
+   lim[3] = h0
+   lim[4] = 0
+   
+   lim
+}
+
+#' Statistical limits for Q and T2 residuals using Data Driven approach
+#' 
+#' @description 
+#' Method is based on paper by Pomerantsev, Rodionova (JChem, 2014)
+#' 
+#' @param Q
+#' vector with Q-residuals for selected component
+#' @param T2
+#' vector with T2-residuals for selected component
+#' @param ncomp 
+#' number of components
+#' @param type
+#' which estimator to use: 'moments' or 'robust'
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#' 
+reslim.dd = function(Q, T2, ncomp, type, alpha, gamma) {
+   
+   # classic estimator of u0 and DF for DD method
+   ddclassic = function(u) {
+      u0 = mean(u)
+      DF = round( 2 * (u0 / sd(u))^2)
+      res = c(u0, ifelse(DF > 250, 250, DF))
+      res
+   }
+
+   # robust estimator of u0 and DF for DD method
+   ddrobust = function(u) {
+      M = median(u)
+      R = quantile(u, 0.75) - quantile(u, 0.25)
+      DF = R/M
+      if (DF > 2.685592117) {
+         DF = 1
+      } else if (DF < 0.194565995) {
+         DF = 100
+      } else {
+         DF = round(exp(1.380948 * log(2.68631 / DF))^1.185785)
+      }
+      u0 = 0.5 * DF * (M/qchisq(0.5, DF) + R/(qchisq(0.75, DF) - qchisq(0.25, DF)))
+      res = c(u0, ifelse(DF > 250, 250, DF))
+      res
+   }
+
+   if (type == 'moments') {
+      T2.res = ddclassic(T2)
+      Q.res = ddclassic(Q)
+   } else if (type == "robust"){
+      T2.res = ddrobust(T2)
+      Q.res = ddrobust(Q)
+   } else {
+      stop('Wrong value for "type" parameter!')
+   }
+   
+   nobj = length(Q)
+   T2.mean = T2.res[1]; T2.DF = T2.res[2]
+   Q.mean = Q.res[1]; Q.DF = Q.res[2]
+
+   Ocrit = qchisq((1 - gamma)^(1/nobj), T2.DF + Q.DF)
+   Dcrit = qchisq(1 - alpha, T2.DF + Q.DF)
+
+   Qlim = c(Dcrit * Q.mean / Q.DF, Ocrit * Q.mean / Q.DF, Q.mean, Q.DF)
+   T2lim = c(rep(-(Q.mean / T2.mean) * (T2.DF / Q.DF), 2), T2.mean, T2.DF)  
+   res = list(Qlim = Qlim, T2lim = T2lim)
+   
+   res
+}
+
 #' Statistical limits for Q and T2 residuals
 #' 
 #' @description
-#' Computes statisticsl limits for Q and T2 residuals
+#' Computes statisticsl limits for Q and T2 residuals for PCA model
 #' 
 #' @param model
 #' object with PCA model 
@@ -264,14 +431,23 @@ ldecomp.getVariances = function(Q, totvar) {
 #' significance level for detection of outliers (for data driven approach)
 #'
 #' @details
-#' See help for \code{\link{pca}} for details. 
+#' If data driven method is used, first two rows of Qlim and T2lim will contain slope and intercept 
+#' of line defined by the method, otherwise they contain the critical values (first row for extreme
+#' values and second for outliers) for each of the residuals. 
+#' 
+#' Third row containes average values and fourth row contains degrees of freedom.
+#' 
+#' See help for \code{\link{pca}} for more details. 
 #' 
 #' @return
-#' Returns a list with two vectors:  \code{T2lim} and \code{Qlim}.
+#' Returns a list with two matrices:  \code{T2lim} and \code{Qlim}. Each matrix contains limits 
+#' for extreme objects and outliers (first two rows), mean residual and degrees of freedom, 
+#' calculated for each number of components included to the model 
 #' 
 #' @export
-ldecomp.getResLimits = function(model, lim.type = 'classic', alpha = 0.05, gamma = 0.01) {   
+ldecomp.getResLimits = function(model, alpha = 0.05, gamma = 0.01) {   
    # get the values and parameters
+   lim.type = model$lim.type
    ncomp = ncol(model$calres$Q)
    nobj = nrow(model$calres$Q)
    nvar = nrow(model$loadings)
@@ -281,111 +457,33 @@ ldecomp.getResLimits = function(model, lim.type = 'classic', alpha = 0.05, gamma
    Qlim  = matrix(0, ncol = ncomp, nrow = 4)
 
    for (i in 1:ncomp) {
-      Q = model$calres$Q[, i]
-      T2 = model$calres$T2[, i]
+      if (i < nvar) {
+         Q = model$calres$Q[, i]
+         T2 = model$calres$T2[, i]
       
-      # if data driven method is used, Qlim and T2lim contains slope and intercept of line
-      # defined by the method, otherwise they contain the critical values for each statistic
-      if (substr(lim.type, 1, 2) != 'dd') {
-         # critical limit for T2
-         if (nobj == i) {
-            T2lim[1, i] = 0
-            T2lim[2, i] = 0
-         } else {
-            T2lim[1, i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - alpha, i, nobj - i);  
-            T2lim[2, i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - gamma, i, nobj - i);  
-         }
-         
-         # total variance and DF for Q and T2
-         T2.mean = sum(T2) / (nobj - i)
-         T2.DF = (nobj - i)
-         Q.mean = sum(Q) / ((nvar - i) * (nobj - i - 1))
-         Q.DF = (nobj - i - 1)
-         
-         # critical limits for Q
          if (lim.type == 'classic') {
-            Fcrit = qf(c(1 - alpha, 1 - gamma), (nvar - i), (nvar - i) * (nobj - i - 1))
-            Qlim[1:2, i] = Q.mean * (nvar - ncomp) *  Fcrit * (nobj - i - 1) / nobj
-         } else if (lim.type == 'corrected') {
-            Fcrit = qf(c(1 - alpha, 1 - gamma), (nvar - i), (nvar - i) * (nobj - i - 1) / 2)
-            Qlim[1:2, i] = Q.mean * (nvar - ncomp) *  Fcrit * (nobj - i - 1) / nobj
-         } else if (lim.type == 'gemp') {
-            Fcrit = qf(c(1 - alpha, 1 - gamma), 1, (nobj - i - 1))
-            Qlim[1:2, i] = Q.mean * (nvar - ncomp) *  Fcrit * (nobj - i - 1) / nobj
-         } else if (lim.type == 'chisq') {
-            Fcrit = qchisq(c(1 - alpha, 1 - gamma), nvar - ncomp) / (nvar - ncomp) 
-            Qlim[1:2, i] = Q.mean * (nvar - ncomp) *  Fcrit * (nobj - i - 1) / nobj
+            T2lim[, i] = reslim.hotteling(T2, i, alpha, gamma)                        
+            Qlim[, i] = reslim.classic(Q, nvar, i, alpha, gamma)
+         } else if (lim.type == 'jm') {
+            T2lim[, i] = reslim.hotteling(T2, i, alpha, gamma)                        
+            Qlim[, i] = reslim.jm(model$eigenvals, i, alpha, gamma)
+         } else if (lim.type == 'ddmoments') {
+            lim = reslim.dd(Q, T2, ncomp, 'moments', alpha, gamma)
+            T2lim[, i] = lim$T2lim
+            Qlim[, i] = lim$Qlim
+         } else if (lim.type == 'ddrobust') {
+            lim = reslim.dd(Q, T2, ncomp, 'robust', alpha, gamma)
+            T2lim[, i] = lim$T2lim
+            Qlim[, i] = lim$Qlim
          } else {
-            error('Wrong value for "lim.type" parameter!')
+            stop('Wrong value for "lim.type" parameter!')
          }
       } else {
-         # classic estimator of u0 and DF for DD method
-         ddclassic = function(u) {
-            u0 = mean(u)
-            R = sd(u)
-            DF = round( 2 * (u0 / R)^2)
-            
-            if (DF > 250) {
-               DF = 250
-            }
-            
-            res = c(u0, DF)
-            res
-         }
-         
-         # robust estimator of u0 and DF for DD method
-         ddrobust = function(u) {
-            M = median(u)
-            R = quantile(u, 0.75) - quantile(u, 0.25)
-            DF = R/M
-            if (DF > 2.685592117) {
-               DF = 1
-            } else if (DF < 0.194565995) {
-               DF = 100
-            } else {
-               DF = round(exp(1.380948 * log(2.68631 / DF))^1.185785)
-            }
-            
-            chi_irq = qchisq(0.75, DF) - qchisq(0.25, DF)
-            chi_med = qchisq(0.5, DF)
-            
-            u0 = 0.5 * DF * (M/chi_med + R/chi_irq)
-            
-            if (DF > 250) {
-               DF = 250
-            }
-            
-            res = c(u0, DF)
-            res
-         }
-         
-         if (lim.type == 'ddmoments') {
-            T2.res = ddclassic(T2)
-            Q.res = ddclassic(Q)
-         } else if (lim.type == "ddrobust"){
-            T2.res = ddrobust(T2)
-            Q.res = ddrobust(Q)
-         } else {
-            error('Wrong value for "lim.type" parameter!')
-         }
-         T2.mean = T2.res[1]
-         T2.DF = T2.res[2]
-         Q.mean = Q.res[1]
-         Q.DF = Q.res[2]
-         
-         Ocrit = qchisq((1 - gamma)^(1/nobj), T2.DF + Q.DF)
-         Dcrit = qchisq(1 - alpha, T2.DF + Q.DF)
-         
-         Qlim[1, i] = Dcrit * Q.mean / Q.DF
-         Qlim[2, i] = Ocrit * Q.mean / Q.DF
-         T2lim[1, i] = - (Q.mean / T2.mean) * (T2.DF / Q.DF)      
-         T2lim[2, i] = - (Q.mean / T2.mean) * (T2.DF / Q.DF)  
+         T2lim[, i] = lim$T2lim
+         Qlim[, i] = c(0, 0, 0, 0)     
       }
-      
-      T2lim[3:4, i] = c(T2.mean, T2.DF)
-      Qlim[3:4, i] = c(Q.mean, Q.DF)
    }
-
+   
    colnames(T2lim) = colnames(Qlim) = paste('Comp', 1:ncomp)
    rownames(T2lim) = rownames(Qlim) = c(
       paste('Critical limit (alpha = ', alpha, ')', sep = ''),

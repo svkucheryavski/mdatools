@@ -66,20 +66,20 @@
 #'   
 #' There are several ways to calculate critical limits for Q and T2 residuals. You can specify one
 #' of the following five methods via parameter \code{lim.type}: \code{'classic'} - for classic 
-#' method based on F-distribution, described in [1]; \code{'corrected'} - corrected version of the 
-#' first method with less degrees of freedom [2]; \code{'chisq'} - method based on Chi-square 
-#' distribution, \code{'gemp'} - method proposed by Paul Gemperline et al [3], \code{'ddrobust'} and 
-#' \code{'ddmoments'} - both related to data driven method proposed by Pomerantsev and Rodionova 
-#' [4]. The \code{'ddmoments'} uses classic method of moments for estimation of distribution 
-#' parameters while \code{'ddrobust'} is based in robust estimation.
+#' method based on F-distribution, described in [1]; \code{'jm'} - method based on Jackson-Mudholkar 
+#' approach [3], \code{'ddrobust'} and \code{'ddmoments'} - both related to data driven method 
+#' proposed by Pomerantsev and Rodionova [3]. The \code{'ddmoments'} uses classic method of moments 
+#' for estimation of distribution parameters while \code{'ddrobust'} is based in robust estimation.
 #' 
 #' The critical limits are calculated for a significance level defined by parameter \code{'alpha'}. 
-#' For data driven methods, it is also possible to provide parameter \code{'gamma'}, which is used
-#' to calculate acceptance limit for outliers (shown as dashed line on residuals plot).
+#' You can also specify another parameter, \code{'gamma'}, which is used to calculate acceptance 
+#' limit for outliers (shown as dashed line on residuals plot). More details can be found in the
+#' Bookdown tutorial.
 #' 
-#' You can also recalculate the limits for existent model, in this case use the following code
-#' (it is assumed that you current PCA/SIMCA model is stored in variable \code{m}): 
-#' \code{m = setResLimits(m, lim.type, alpha, gamma)}.     
+#' You can also recalculate the limits for existent model by using different values for alpha and
+#' gamme, without recomputing the model itself. In this case use the following code (it is assumed 
+#' that you current PCA/SIMCA model is stored in variable \code{m}): 
+#' \code{m = setResLimits(m, alpha, gamma)}.     
 #' 
 #' In case of PCA the critical limits are just shown on residual plot as lines and can be used for 
 #' detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for 
@@ -106,11 +106,8 @@
 #' @references 
 #' 1. S. Wold, M. Sjostrom, SIMCA: a method for analysing chemical data in terms of similarity and 
 #' analogy, ACS Symposium Series 52 (1977).
-#' 2. S. Wold, M. Sjostrom, Letter to the editor—comments on a recent evaluation of the SIMCA 
-#' method, Journal of Chemometrics, 1 (1987) pp. 243-245.
-#' 3. P.J. Gemperline, L.D. Webber, Raw Materials Testing Using Soft Independent Modeling of Class 
-#' Analogy Analysis of Near-Infrared Reflectance Spectra, Analytical Chemistry, 61(1989) pp.138-144.
-#' 4. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
+#' 2. J.E. Jackson, A User's Guide to Principal Components, John Wiley & Sons, New York, NY (1991).
+#' 3. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
 #' Journal of Chemometrics, 28 (2014) pp. 429-438.
 #' 
 #' @author 
@@ -164,16 +161,16 @@
 #'
 #' @export   
 pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
-               exclcols = NULL, x.test = NULL, method = 'svd', rand = NULL, lim.type = 'classic', 
+               exclcols = NULL, x.test = NULL, method = 'svd', rand = NULL, lim.type = 'jm', 
                alpha = 0.05, gamma = 0.01, info = '') {
    
    # calibrate and cross-validate model  
    model = pca.cal(x, ncomp, center = center, scale = scale, method = method, exclcols = exclcols, 
-                   exclrows = exclrows, cv = cv, rand = rand, info = info)
+                   exclrows = exclrows, cv = cv, rand = rand, lim.type = lim.type, info = info)
    model$call = match.call()   
    
    # compute and set residual limits
-   model = setResLimits.pca(model, lim.type, alpha, gamma)
+   model = setResLimits.pca(model, alpha, gamma)
    
    # apply model to test set if provided
    if (!is.null(x.test))
@@ -214,8 +211,6 @@ getCalibrationData.pca = function(obj, ...) {
 #' 
 #' @param model
 #' PCA model (object of class \code{pca})
-#' @param lim.type
-#' which type of limits to use (see help for \code{pca} class for details)
 #' @param alpha
 #' significance level for critical limites (extreme objects)
 #' @param gamma
@@ -225,24 +220,21 @@ getCalibrationData.pca = function(obj, ...) {
 #' object with PCA model and recalculated limits
 #' 
 #' @export
-setResLimits.pca = function(model, lim.type = 'classic', alpha = 0.05, gamma = 0.01) {
-   lim = ldecomp.getResLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
+setResLimits.pca = function(model, alpha = 0.05, gamma = 0.01) {
+   lim = ldecomp.getResLimits(model, alpha = alpha, gamma = gamma)
    model$Qlim = lim$Qlim
    model$T2lim = lim$T2lim
-   model$lim.type = lim.type
    model$alpha = alpha
    model$gamma = gamma
    
    model$calres$Qlim = lim$Qlim
    model$calres$T2lim = lim$T2lim
-   model$calres$lim.type = lim.type
    model$calres$alpha = alpha
    model$calres$gamma = gamma
    
    if (!is.null(model$testres)) {
       model$testres$Qlim = lim$Qlim
       model$testres$T2lim = lim$T2lim
-      model$testres$lim.type = lim.type
       model$testres$alpha = alpha
       model$testres$gamma = gamma
    }
@@ -250,7 +242,6 @@ setResLimits.pca = function(model, lim.type = 'classic', alpha = 0.05, gamma = 0
    if (!is.null(model$cvres)) {
       model$cvres$Qlim = lim$Qlim
       model$cvres$T2lim = lim$T2lim
-      model$cvres$lim.type = lim.type
       model$cvres$alpha = alpha
       model$cvres$gamma = gamma
    }
@@ -353,8 +344,7 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
    
    # calculate number of missing values for every variable
    # and make initial estimates with mean values
-   for (i in 1:ncol(x))
-   {
+   for (i in 1:ncol(x)) {
       mv = is.na(x[, i])
       
       if (sum(mv)/length(x[, i]) > 0.2)
@@ -378,8 +368,7 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
    scoresp = 0
    scores = 1
    cond = 1
-   while (cond > covlim && n < maxiter)
-   {    
+   while (cond > covlim && n < maxiter) {    
       n = n + 1
       
       # rescale data on every iteration
@@ -408,8 +397,7 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
       x.rep = x
       x.rep[mvidx] = x.new[mvidx]
       
-      if (n > 2)
-      {
+      if (n > 2) {
          # calculate difference between scores for convergence 
          ncompcond = min(ncol(scores), ncol(scoresp))
          cond = sum((scores[, 1:ncompcond] - scoresp[, 1:ncompcond])^2)
@@ -532,7 +520,7 @@ pca.run = function(x, ncomp, method, rand = NULL) {
 #' an object with calibrated PCA model
 #' 
 pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL, 
-                   exclrows = NULL, cv, rand, info) {
+                   exclrows = NULL, cv, rand, lim.type, info) {
    # prepare empty list for model object
    model = list()
    
@@ -584,6 +572,14 @@ pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL,
       res$scores = x.cal %*% res$loadings
    }
    
+   # calculate eigenvalues 
+   model$eigenvals = apply(res$scores, 2, function(x) sd(x)^2)
+   if (lim.type == 'jm') {
+      # in this case we need a vector with all eigenvalues
+      model$eigenvals = 
+         c(model$eigenvals, svd(x.cal - tcrossprod(res$scores, res$loadings))$d^2/(nrows - 1))
+   } 
+   
    # correct loadings for missing columns in x 
    # corresponding rows in loadings will be set to 0 and excluded
    loadings = matrix(0, nrow = x.ncols, ncol = ncomp)
@@ -602,15 +598,15 @@ pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL,
    attr(loadings, 'xaxis.name') = 'Components'
    attr(loadings, 'yaxis.name') = attrs$xaxis.name
    attr(loadings, 'yaxis.values') = attrs$xaxis.values
-   
-   # add calculated loadings and eigenvalues to the model object
    model$loadings = loadings
-   model$eigenvals = apply(res$scores, 2, function(x) sd(x)^2)
+   
+   # finalize model
+   model$lim.type = lim.type
    model$method = method
    model$rand = rand
    
    # calculate tnorm using data without excluded values
-   model$tnorm = sqrt(colSums(res$scores ^ 2)/(nrow(res$scores) - 1));   
+   model$tnorm = sqrt(colSums(res$scores ^ 2)/(nrows - 1));   
    
    # setup other fields and return the model   
    model$ncomp = ncomp
