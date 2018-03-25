@@ -254,40 +254,150 @@ ldecomp.getVariances = function(Q, totvar) {
 #' @description
 #' Computes statisticsl limits for Q and T2 residuals
 #' 
-#' @param eigenvals
-#' vector with eigenvalues 
-#' @param nobj
-#' number of objects in data
-#' @param ncomp
-#' number of calculated components
+#' @param model
+#' object with PCA model 
+#' @param lim.type
+#' which method to use for calculation of the limits (see \code{pca} for details)
 #' @param alpha
-#' significance level
+#' significance level for detection of extreme objects
+#' @param gamma
+#' significance level for detection of outliers (for data driven approach)
 #'
 #' @details
-#' T2 limits are calculated using Hotelling statistics. 
+#' See help for \code{\link{pca}} for details. 
 #' 
 #' @return
 #' Returns a list with two vectors:  \code{T2lim} and \code{Qlim}.
 #' 
-ldecomp.getResLimits = function(Q, nvar, alpha = 0.05) {   
-   ncomp = ncol(Q)
-   nobj = nrow(Q)
+#' @export
+ldecomp.getResLimits = function(model, lim.type = 'classic', alpha = 0.05, gamma = 0.01) {   
+   # get the values and parameters
+   ncomp = ncol(model$calres$Q)
+   nobj = nrow(model$calres$Q)
+   nvar = nrow(model$loadings)
+   
+   # we need four rows to keep limit for extremes and outliers, u0 and DF for each type of residual
+   T2lim = matrix(0, ncol = ncomp, nrow = 4)
+   Qlim  = matrix(0, ncol = ncomp, nrow = 4)
 
-   T2lim = rep(0, ncomp)
-   Qlim = rep(0, ncomp)
    for (i in 1:ncomp) {
-      if (nobj == i)
-         T2lim[i] = 0
-      else
-         T2lim[i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - alpha, i, nobj - i);  
+      Q = model$calres$Q[, i]
+      T2 = model$calres$T2[, i]
       
-      Qlim[i] = sum(Q[, i]) * qf(1 - alpha, (nvar - i), (nvar - i) * (nobj - i - 1)) / nobj
+      # if data driven method is used, Qlim and T2lim contains slope and intercept of line
+      # defined by the method, otherwise they contain the critical values for each statistic
+      if (substr(lim.type, 1, 2) != 'dd') {
+         # critical limit for T2
+         if (nobj == i) {
+            T2lim[1, i] = 0
+            T2lim[2, i] = 0
+         } else {
+            T2lim[1, i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - alpha, i, nobj - i);  
+            T2lim[2, i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - gamma, i, nobj - i);  
+         }
+         
+         # total variance and DF for Q and T2
+         T2.mean = sum(T2) / (nobj - i)
+         T2.DF = (nobj - i)
+         Q.mean = sum(Q) / ((nvar - i) * (nobj - i - 1))
+         Q.DF = (nobj - i - 1)
+         
+         # critical limits for Q
+         if (lim.type == 'classic') {
+            Fcrit = qf(c(1 - alpha, 1 - gamma), (nvar - i), (nvar - i) * (nobj - i - 1))
+            Qlim[1:2, i] = Q.mean * (nvar - ncomp) *  Fcrit * (nobj - i - 1) / nobj
+         } else if (lim.type == 'corrected') {
+            Fcrit = qf(c(1 - alpha, 1 - gamma), (nvar - i), (nvar - i) * (nobj - i - 1) / 2)
+            Qlim[1:2, i] = Q.mean * (nvar - ncomp) *  Fcrit * (nobj - i - 1) / nobj
+         } else if (lim.type == 'gemp') {
+            Fcrit = qf(c(1 - alpha, 1 - gamma), 1, (nobj - i - 1))
+            Qlim[1:2, i] = Q.mean * (nvar - ncomp) *  Fcrit * (nobj - i - 1) / nobj
+         } else if (lim.type == 'chisq') {
+            Fcrit = qchisq(c(1 - alpha, 1 - gamma), nvar - ncomp) / (nvar - ncomp) 
+            Qlim[1:2, i] = Q.mean * (nvar - ncomp) *  Fcrit * (nobj - i - 1) / nobj
+         } else {
+            error('Wrong value for "lim.type" parameter!')
+         }
+      } else {
+         # classic estimator of u0 and DF for DD method
+         ddclassic = function(u) {
+            u0 = mean(u)
+            R = sd(u)
+            DF = round( 2 * (u0 / R)^2)
+            
+            if (DF > 250) {
+               DF = 250
+            }
+            
+            res = c(u0, DF)
+            res
+         }
+         
+         # robust estimator of u0 and DF for DD method
+         ddrobust = function(u) {
+            M = median(u)
+            R = quantile(u, 0.75) - quantile(u, 0.25)
+            DF = R/M
+            if (DF > 2.685592117) {
+               DF = 1
+            } else if (DF < 0.194565995) {
+               DF = 100
+            } else {
+               DF = round(exp(1.380948 * log(2.68631 / DF))^1.185785)
+            }
+            
+            chi_irq = qchisq(0.75, DF) - qchisq(0.25, DF)
+            chi_med = qchisq(0.5, DF)
+            
+            u0 = 0.5 * DF * (M/chi_med + R/chi_irq)
+            
+            if (DF > 250) {
+               DF = 250
+            }
+            
+            res = c(u0, DF)
+            res
+         }
+         
+         if (lim.type == 'ddmoments') {
+            T2.res = ddclassic(T2)
+            Q.res = ddclassic(Q)
+         } else if (lim.type == "ddrobust"){
+            T2.res = ddrobust(T2)
+            Q.res = ddrobust(Q)
+         } else {
+            error('Wrong value for "lim.type" parameter!')
+         }
+         T2.mean = T2.res[1]
+         T2.DF = T2.res[2]
+         Q.mean = Q.res[1]
+         Q.DF = Q.res[2]
+         
+         Ocrit = qchisq((1 - gamma)^(1/nobj), T2.DF + Q.DF)
+         Dcrit = qchisq(1 - alpha, T2.DF + Q.DF)
+         
+         Qlim[1, i] = Dcrit * Q.mean / Q.DF
+         Qlim[2, i] = Ocrit * Q.mean / Q.DF
+         T2lim[1, i] = - (Q.mean / T2.mean) * (T2.DF / Q.DF)      
+         T2lim[2, i] = - (Q.mean / T2.mean) * (T2.DF / Q.DF)  
+      }
+      
+      T2lim[3:4, i] = c(T2.mean, T2.DF)
+      Qlim[3:4, i] = c(Q.mean, Q.DF)
    }
 
-   names(T2lim) = names(Qlim) = paste('Comp', 1:ncomp)
+   colnames(T2lim) = colnames(Qlim) = paste('Comp', 1:ncomp)
+   rownames(T2lim) = rownames(Qlim) = c(
+      paste('Critical limit (alpha = ', alpha, ')', sep = ''),
+      paste('Outliers limit (gamma = ', gamma, ')', sep = ''),
+      'Mean (u0)',
+      'DoF'
+   )
+
    res = list(
       T2lim = T2lim,
-      Qlim = Qlim
+      Qlim = Qlim,
+      lim.type = lim.type
    )   
 }   
 

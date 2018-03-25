@@ -510,8 +510,7 @@ mdaplot.showLines = function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2
 #' @param col
 #' color of lines
 #' 
-mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default', col = NULL)
-{   
+mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default', col = NULL) {   
    if (is.list(data))
    {   
       ngroups = length(data)
@@ -556,8 +555,7 @@ mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default'
 #' @param border
 #' color of bar edges 
 #'  
-bars = function(x, y, col = NULL, bwd = 0.8, border = NA)
-{
+bars = function(x, y, col = NULL, bwd = 0.8, border = NA) {
    # Show bars on a plot area
    #
    # Arguments:
@@ -1328,7 +1326,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' @author 
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
 #' 
-#' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text image plot.new rasterImage smoothScatter
+#' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text 
+#' image plot.new rasterImage smoothScatter
 #' @importFrom grDevices axisTicks dev.cur 
 #' 
 #' @export

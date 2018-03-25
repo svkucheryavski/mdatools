@@ -15,5 +15,6 @@ ldecomp.getVariances(Q, totvar)
 Returns a list with two vectors.
 }
 \description{
-Computes explained variance and cumulative explained variance for a data decomposition X = TP' + E.
+Computes explained variance and cumulative explained variance for a data decomposition 
+X = TP' + E.
 }

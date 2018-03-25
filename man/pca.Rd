@@ -5,8 +5,8 @@
 \title{Principal Component Analysis}
 \usage{
 pca(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
-  exclcols = NULL, x.test = NULL, alpha = 0.05, method = "svd",
-  info = "")
+  exclcols = NULL, x.test = NULL, method = "svd", rand = NULL,
+  lim.type = "classic", alpha = 0.05, gamma = 0.01, info = "")
 }
 \arguments{
 \item{x}{a numerical matrix with calibration data.}
@@ -25,9 +25,15 @@ pca(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
 
 \item{x.test}{a numerical matrix with test data.}
 
-\item{alpha}{significance level for calculating limit for Q residuals.}
-
 \item{method}{method to compute principal components ('svd', 'nipals').}
+
+\item{rand}{vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)}
+
+\item{lim.type}{which method to use for calculation of critical limits for residuals (see details)}
+
+\item{alpha}{significance level for calculating critical limits for T2 and Q residuals.}
+
+\item{gamma}{significance level for calculating outlier limits for T2 and Q residuals.}
 
 \item{info}{a short text line with model description.}
 }
@@ -63,14 +69,47 @@ validation of PCA model. In this case the outcome, e.g. scores and loadings will
 the original size of the data, but:
 
 \enumerate{
-  \item Loadings (and all performance statistics) will be computed without excluded objects and variables
-  \item Matrix with loadings will have zero values for the excluded variables and the corresponding columns will be hidden.
-  \item Matrix with scores will have score values calculated for the hidden objects but the rows will be hidden.
+  \item Loadings (and all performance statistics) will be computed without excluded objects and 
+  variables
+  \item Matrix with loadings will have zero values for the excluded variables and the 
+  corresponding columns will be hidden.
+  \item Matrix with scores will have score values calculated for the hidden objects but 
+  the rows will be hidden.
 }
 
-You can see scores and loadings for hidden rows and columns by using parameter 'show.excluded = T'
-in plots. If you see other packages to make plots (e.g. ggplot2) you will not be able to distinguish
-between hidden and normal objects.
+You can see scores and loadings for hidden rows and columns by using parameter 
+'show.excluded = T' in plots. If you see other packages to make plots (e.g. ggplot2) you will 
+not be able to distinguish between hidden and normal objects. 
+
+By default loadings are computed for the original dataset using either SVD or NIPALS algorithm.
+However, for datasets with large number of rows (e.g. hyperspectral images), there is a 
+possibility to run algorithms based on random permutations [1, 2]. In this case you have
+to define parameter \code{rand} as a vector with two values: p - oversampling parameter and
+k - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)} are good 
+option, which give quite precise solution using several times less computational time. It must 
+be noted that statistical limits for residuals will not be computed in this case.
+  
+There are several ways to calculate critical limits for Q and T2 residuals. You can specify one
+of the following five methods via parameter \code{lim.type}: \code{'classic'} - for classic method 
+based on F-distribution, described in [1]; \code{'corrected'} - corrected version of the first 
+method with less degrees of freedom [2]; \code{'chisq'} - method based on Chi-square 
+distribution, \code{'gemp'} - method proposed by Paul Gemperline et al [3], \code{'ddrob'} and 
+\code{'ddmom'} - both related to data driven method proposed by Pomerantsev and Rodionova [4]. 
+The \code{'ddmom'} uses classic method of moments for estimation of distribution parameters while
+\code{'ddrob'} is based in robust estimation.
+
+The critical limits are calculated for a significance level defined by parameter \code{'alpha'}. 
+For data driven methods, it is also possible to provide parameter \code{'gamma'}, which is used
+to calculate acceptance limit for outliers (shown as dashed line on residuals plot).
+
+You can also recalculate the limits for existent model, in this case use the following code
+(it is assumed that you current PCA/SIMCA model is stored in variable \code{m}): 
+\code{m = setResLimits(m, lim.type, alpha, gamma)}.     
+
+In case of PCA the critical limits are just shown on residual plot as lines and can be used for 
+detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for 
+classification in SIMCA (see \code{\link{simca}}) the limits are utilized for classification of 
+objects.
 }
 \examples{
 library(mdatools)
@@ -101,6 +140,16 @@ plotResiduals(model, show.labels = TRUE)
 plotResiduals(model, ncomp = 2, show.labels = TRUE)
 par(mfrow = c(1, 1))
 
+}
+\references{
+1. S. Wold, M. Sjostrom, SIMCA: a method for analysing chemical data in terms of similarity and 
+analogy, ACS Symposium Series 52 (1977).
+2. S. Wold, M. Sjostrom, Letter to the editor—comments on a recent evaluation of the SIMCA 
+method, Journal of Chemometrics, 1 (1987) pp. 243-245.
+3. P.J. Gemperline, L.D. Webber, Raw Materials Testing Using Soft Independent Modeling of Class 
+Analogy Analysis of Near-Infrared Reflectance Spectra, Analytical Chemistry, 61 (1989) pp. 138-144.
+4. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
+Journal of Chemometrics, 28 (2014) pp. 429-438.
 }
 \seealso{
 Methods for \code{pca} objects:

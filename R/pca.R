@@ -19,12 +19,16 @@
 #' columns to be excluded from calculations (numbers, names or vector with logical values)
 #' @param x.test
 #' a numerical matrix with test data.
-#' @param alpha
-#' significance level for calculating limit for Q residuals.
 #' @param method
 #' method to compute principal components ('svd', 'nipals').
 #' @param rand
 #' vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)
+#' @param lim.type
+#' which method to use for calculation of critical limits for residuals (see details)
+#' @param alpha
+#' significance level for calculating critical limits for T2 and Q residuals.
+#' @param gamma
+#' significance level for calculating outlier limits for T2 and Q residuals.
 #' @param info
 #' a short text line with model description.
 #'
@@ -52,13 +56,35 @@
 #' 'show.excluded = T' in plots. If you see other packages to make plots (e.g. ggplot2) you will 
 #' not be able to distinguish between hidden and normal objects. 
 #' 
-#' By default loadings are computed for the original dataset using either SVD or NIPALS algorithms.
+#' By default loadings are computed for the original dataset using either SVD or NIPALS algorithm.
 #' However, for datasets with large number of rows (e.g. hyperspectral images), there is a 
 #' possibility to run algorithms based on random permutations [1, 2]. In this case you have
-#' to define parameter \code(rand) as a vector with two values: p - oversampling parameter and
-#' k - number of iterations. Usually \code(rand = c(15, 0)) or  \code(rand = c(5, 1)) are good 
+#' to define parameter \code{rand} as a vector with two values: p - oversampling parameter and
+#' k - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)} are good 
 #' option, which give quite precise solution using several times less computational time. It must 
 #' be noted that statistical limits for residuals will not be computed in this case.
+#'   
+#' There are several ways to calculate critical limits for Q and T2 residuals. You can specify one
+#' of the following five methods via parameter \code{lim.type}: \code{'classic'} - for classic 
+#' method based on F-distribution, described in [1]; \code{'corrected'} - corrected version of the 
+#' first method with less degrees of freedom [2]; \code{'chisq'} - method based on Chi-square 
+#' distribution, \code{'gemp'} - method proposed by Paul Gemperline et al [3], \code{'ddrobust'} and 
+#' \code{'ddmoments'} - both related to data driven method proposed by Pomerantsev and Rodionova 
+#' [4]. The \code{'ddmoments'} uses classic method of moments for estimation of distribution 
+#' parameters while \code{'ddrobust'} is based in robust estimation.
+#' 
+#' The critical limits are calculated for a significance level defined by parameter \code{'alpha'}. 
+#' For data driven methods, it is also possible to provide parameter \code{'gamma'}, which is used
+#' to calculate acceptance limit for outliers (shown as dashed line on residuals plot).
+#' 
+#' You can also recalculate the limits for existent model, in this case use the following code
+#' (it is assumed that you current PCA/SIMCA model is stored in variable \code{m}): 
+#' \code{m = setResLimits(m, lim.type, alpha, gamma)}.     
+#' 
+#' In case of PCA the critical limits are just shown on residual plot as lines and can be used for 
+#' detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for 
+#' classification in SIMCA (see \code{\link{simca}}) the limits are utilized for classification of 
+#' objects.
 #'   
 #' @return 
 #' Returns an object of \code{pca} class with following fields:
@@ -76,6 +102,16 @@
 #' was provided.} 
 #' \item{cvres }{an object of class \code{\link{pcares}} with PCA results for cross-validation, 
 #' if this option was chosen.} 
+#' 
+#' @references 
+#' 1. S. Wold, M. Sjostrom, SIMCA: a method for analysing chemical data in terms of similarity and 
+#' analogy, ACS Symposium Series 52 (1977).
+#' 2. S. Wold, M. Sjostrom, Letter to the editor—comments on a recent evaluation of the SIMCA 
+#' method, Journal of Chemometrics, 1 (1987) pp. 243-245.
+#' 3. P.J. Gemperline, L.D. Webber, Raw Materials Testing Using Soft Independent Modeling of Class 
+#' Analogy Analysis of Near-Infrared Reflectance Spectra, Analytical Chemistry, 61(1989) pp.138-144.
+#' 4. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
+#' Journal of Chemometrics, 28 (2014) pp. 429-438.
 #' 
 #' @author 
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
@@ -128,13 +164,16 @@
 #'
 #' @export   
 pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
-               exclcols = NULL, x.test = NULL, alpha = 0.05, method = 'svd', 
-               rand = NULL, info = '') {
+               exclcols = NULL, x.test = NULL, method = 'svd', rand = NULL, lim.type = 'classic', 
+               alpha = 0.05, gamma = 0.01, info = '') {
    
    # calibrate and cross-validate model  
    model = pca.cal(x, ncomp, center = center, scale = scale, method = method, exclcols = exclcols, 
-                   exclrows = exclrows, cv = cv, alpha = alpha, rand = rand, info = info)
+                   exclrows = exclrows, cv = cv, rand = rand, info = info)
    model$call = match.call()   
+   
+   # compute and set residual limits
+   model = setResLimits.pca(model, lim.type, alpha, gamma)
    
    # apply model to test set if provided
    if (!is.null(x.test))
@@ -165,6 +204,58 @@ getCalibrationData.pca = function(obj, ...) {
    
    x = mda.setattr(x, mda.getattr(obj$calres$residuals)) 
    x
+}
+
+
+#' Recalculate and set critical limits for residuals
+#' 
+#' @description
+#' Allows to recompute new critical limits for existing PCA/SIMCA model
+#' 
+#' @param model
+#' PCA model (object of class \code{pca})
+#' @param lim.type
+#' which type of limits to use (see help for \code{pca} class for details)
+#' @param alpha
+#' significance level for critical limites (extreme objects)
+#' @param gamma
+#' significance level for outliers
+#' 
+#' @return
+#' object with PCA model and recalculated limits
+#' 
+#' @export
+setResLimits.pca = function(model, lim.type = 'classic', alpha = 0.05, gamma = 0.01) {
+   lim = ldecomp.getResLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
+   model$Qlim = lim$Qlim
+   model$T2lim = lim$T2lim
+   model$lim.type = lim.type
+   model$alpha = alpha
+   model$gamma = gamma
+   
+   model$calres$Qlim = lim$Qlim
+   model$calres$T2lim = lim$T2lim
+   model$calres$lim.type = lim.type
+   model$calres$alpha = alpha
+   model$calres$gamma = gamma
+   
+   if (!is.null(model$testres)) {
+      model$testres$Qlim = lim$Qlim
+      model$testres$T2lim = lim$T2lim
+      model$testres$lim.type = lim.type
+      model$testres$alpha = alpha
+      model$testres$gamma = gamma
+   }
+   
+   if (!is.null(model$cvres)) {
+      model$cvres$Qlim = lim$Qlim
+      model$cvres$T2lim = lim$T2lim
+      model$cvres$lim.type = lim.type
+      model$cvres$alpha = alpha
+      model$cvres$gamma = gamma
+   }
+   
+   model
 }
 
 #' Select optimal number of components for PCA model
@@ -341,10 +432,8 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
 #' data matrix X
 #' @param k
 #' effective rank of k
-#' @param q
-#' number of iterations
-#' @param p
-#' oversampling parameter
+#' @param rand
+#' a vector with two values - number of iterations (q) and oversmapling parameter (p)
 #' @param dist
 #' distribution for generating random numbers, 'unif' or 'norm'
 #' 
@@ -442,8 +531,8 @@ pca.run = function(x, ncomp, method, rand = NULL) {
 #' @return
 #' an object with calibrated PCA model
 #' 
-pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL, exclrows = NULL, cv, alpha, 
-                   rand, info) {
+pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL, 
+                   exclrows = NULL, cv, rand, info) {
    # prepare empty list for model object
    model = list()
    
@@ -527,8 +616,7 @@ pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL, exclrows = 
    model$ncomp = ncomp
    model$ncomp.selected = model$ncomp
    model$info = info
-   model$alpha = alpha
-   
+
    # save excluded columns and rows
    model$exclcols = attrs$exclcols
    model$exclrows = attrs$exclrows
@@ -536,13 +624,6 @@ pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL, exclrows = 
    
    # get calibration results
    model$calres = predict(model, x, cal = TRUE)
-   
-   # compute statistical limits for the distances
-   lim = ldecomp.getResLimits(model$calres$Q, ncols, alpha = alpha)
-   model$Qlim = lim$Qlim
-   model$T2lim = lim$T2lim
-   model$calres$Qlim = model$Qlim
-   model$calres$T2lim = model$T2lim
    model$modpower = model$calres$modpower
    
    # do cross-validation if needed
@@ -782,7 +863,9 @@ predict.pca = function(object, x, cal = FALSE, ...) {
                 cal = TRUE)
    res$Qlim = object$Qlim
    res$T2lim = object$T2lim
-   
+   res$lim.type = object$lim.type
+   res$alpha = object$alpha
+   res$gamma = object$gamma
    res
 }  
 
@@ -943,6 +1026,8 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' a PCA model (object of class \code{pca})
 #' @param ncomp
 #' how many components to use (if NULL - user selected optimal value will be used)
+#' @param norm
+#' logical, show normalized Q vs T2 (\code{norm = T}) values or original ones (\code{norm = F})
 #' @param main
 #' main title for the plot
 #' @param xlab
@@ -955,8 +1040,12 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' logical, show or not a legend on the plot
 #' @param show.limits
 #' logical, show or not lines with statistical limits for the residuals
-#' @param cgroup
-#' a vector with numeric values or a factor for color grouping of plot points.
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier borders 
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier borders 
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier borders 
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #' 
@@ -964,10 +1053,14 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' See examples in help for \code{\link{pca}} function.
 #' 
 #' @export
-plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
-                             ylab = 'Squared residual distance (Q)', show.labels = F, 
-                             show.legend = T, show.limits = T, cgroup = NULL, ...)
-{
+plotResiduals.pca = function(obj, ncomp = NULL, norm = F, main = NULL, 
+                             xlab = 'Hotteling T2 distance',
+                             ylab = 'Squared residual distance, Q', 
+                             show.labels = F,  show.legend = T, show.limits = T, 
+                             xlim = NULL, ylim = NULL, 
+                             lim.col = c('#c0a0a0', '#906060'), 
+                             lim.lwd = c(1, 1), lim.lty = c(2, 1),
+                             ...) {
    if (is.null(main)) {
       if (is.null(ncomp))
          main = 'Residuals'
@@ -978,44 +1071,95 @@ plotResiduals.pca = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
    
-   if (show.limits == T)
-      show.lines = c(obj$T2lim[ncomp], obj$Qlim[ncomp])
-   else
-      show.lines = F
-   
    if (ncomp > obj$ncomp || ncomp < 1)
       stop('Wrong number of components!')
    
    data = list()
-   
    data$cal = mda.cbind(
       mda.subset(obj$calres$T2, select = ncomp), 
       mda.subset(obj$calres$Q, select = ncomp)
-      )
-   colnames(data$cal) = c(xlab, ylab)
+   )
    
+   # set values for normalization of residuals if necessary
+   if (norm) {
+      T2.mean = obj$T2lim[3, ncomp]
+      Q.mean = obj$Qlim[3, ncomp]
+      xlab = paste(xlab, '(norm)')
+      ylab = paste(ylab, '(norm)')
+   } else {
+      T2.mean = 1
+      Q.mean = 1
+   }
+   
+   data$cal[, 1] = data$cal[, 1] / T2.mean
+   data$cal[, 2] = data$cal[, 2] / Q.mean
+   x.max = max(data$cal[, 1])
+   y.max = max(data$cal[, 2])
    
    if (!is.null(obj$cvres)) {
       data$cv = mda.cbind(
-         mda.subset(obj$cvres$T2, select = ncomp), 
-         mda.subset(obj$cvres$Q, select = ncomp)
-         )
-      colnames(data$cv) = c(xlab, ylab)
-   }      
+         obj$cvres$T2[, ncomp]/T2.mean, 
+         obj$cvres$Q[ , ncomp]/Q.mean
+      )
+      x.max = max(x.max, data$cv[, 1])
+      y.max = max(y.max, data$cv[, 2])
+   }   
+   
    if (!is.null(obj$testres)) {
       data$test = mda.cbind(
-         mda.subset(obj$testres$T2, select = ncomp), 
-         mda.subset(obj$testres$Q, select = ncomp)
-         )
-      colnames(data$test) = c(xlab, ylab)
+         obj$testres$T2[, ncomp]/T20, 
+         obj$testres$Q[ , ncomp]/Q0
+      )
+      x.max = max(x.max, data$test[, 1])
+      y.max = max(y.max, data$test[, 2])
    }      
    
+   if (show.limits == T) {
+      # get residual limits, correct if necessary and recalculate axes maximum limit
+      lim = cbind(obj$T2lim[1:2, ncomp], obj$Qlim[1:2, ncomp])
+      if (substr(obj$lim.type, 1, 2) != 'dd') {
+         lim[, 1] = lim[, 1] / T2.mean
+         lim[, 2] = lim[, 2] / Q.mean
+         x.max = max(x.max, lim[, 1])
+         y.max = max(y.max, lim[, 2])
+      } else {
+         lim[, 1] = lim[, 1] * T2.mean / Q.mean
+         lim[, 2] = lim[, 2] / Q.mean
+         x.max = 1.5 * x.max
+         y.max = 1.5 * y.max
+      }
+   }
+
+   # use computed max values for axes limits if user did not specify anything
+   if (is.null(xlim))
+      xlim = c(0, 1.2 * x.max)
+   if (is.null(ylim))
+      ylim = c(0, 1.2 * y.max)
+   
+   # show plot
    if (length(data) == 1) {
-      mdaplot(data[[1]], main = main, xlab = xlab, ylab = ylab, cgroup = cgroup,
-              show.labels = show.labels, show.lines = show.lines, ...)
+      mdaplot(data[[1]], main = main, xlab = xlab, ylab = ylab,
+              show.labels = show.labels, xlim = xlim, ylim = ylim, ...)
    } else {
-      mdaplotg(data, main = main, xlab = xlab, ylab = ylab,
-               show.labels = show.labels, show.legend = show.legend, show.lines = show.lines, ...)
+      mdaplotg(data, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+               show.labels = show.labels, show.legend = show.legend, ...)
+   }
+   
+   # show limits
+   if (show.limits == T) {
+      if (substr(obj$lim.type, 1, 2) != 'dd') {
+         lines(c(0, lim[1, 1]), c(lim[1, 2], lim[1, 2]), lty = lim.lty[1], lwd = lim.lwd[1], 
+               col = lim.col[1])
+         lines(c(lim[1, 1], lim[1, 1]), c(0, lim[1, 2]), lty = lim.lty[1], lwd = lim.lwd[1], 
+               col = lim.col[1])
+         lines(c(0, lim[2, 1]), c(lim[2, 2], lim[2, 2]), lty = lim.lty[2], lwd = lim.lwd[2], 
+               col = lim.col[2])
+         lines(c(lim[2, 1], lim[2, 1]), c(0, lim[2, 2]), lty = lim.lty[2], lwd = lim.lwd[2], 
+               col = lim.col[2])
+      } else {
+         abline(a = lim[1, 2], b = lim[1, 1], lty = lim.lty[1], lwd = lim.lwd[1], col = lim.col[1])
+         abline(a = lim[2, 2], b = lim[2, 1], lty = lim.lty[2], lwd = lim.lwd[2], col = lim.col[2])
+      }
    }
    
 }  
@@ -1190,8 +1334,7 @@ plotBiplot.pca = function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.ge
 #' See examples in help for \code{\link{pca}} function.
 #' 
 #' @export
-plot.pca = function(x, comp = c(1, 2), show.labels = FALSE, show.legend = TRUE, ...)
-{   
+plot.pca = function(x, comp = c(1, 2), show.labels = FALSE, show.legend = TRUE, ...) {   
    obj = x
    
    par(mfrow = c(2, 2))
@@ -1214,8 +1357,7 @@ plot.pca = function(x, comp = c(1, 2), show.labels = FALSE, show.legend = TRUE, 
 #' other arguments
 #' 
 #' @export
-print.pca = function(x, ...)
-{
+print.pca = function(x, ...) {
    obj = x
    
    cat('\nPCA model (class pca)\n')

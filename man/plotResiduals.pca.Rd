@@ -6,7 +6,8 @@
 \usage{
 \method{plotResiduals}{pca}(obj, ncomp = NULL, main = NULL, xlab = "T2",
   ylab = "Squared residual distance (Q)", show.labels = F,
-  show.legend = T, show.limits = T, cgroup = NULL, ...)
+  show.legend = T, show.limits = T, cgroup = NULL, mode = "normal",
+  xlim = NULL, ylim = NULL, ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
@@ -26,6 +27,8 @@
 \item{show.limits}{logical, show or not lines with statistical limits for the residuals}
 
 \item{cgroup}{a vector with numeric values or a factor for color grouping of plot points.}
+
+\item{mode}{\code{'normal'} for original Q vs T2 values, \code{'scaled'} for normalised residuals}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

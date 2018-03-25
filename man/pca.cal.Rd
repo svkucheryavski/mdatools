@@ -5,7 +5,7 @@
 \title{PCA model calibration}
 \usage{
 pca.cal(x, ncomp, center, scale, method, exclcols = NULL, exclrows = NULL,
-  cv, alpha, info)
+  cv, rand, info)
 }
 \arguments{
 \item{x}{matrix with data values}
@@ -24,9 +24,9 @@ pca.cal(x, ncomp, center, scale, method, exclcols = NULL, exclrows = NULL,
 
 \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
 
-\item{alpha}{significance level for calculating limit for Q residuals.}
-
 \item{info}{a short text line with model description.}
+
+\item{alpha}{significance level for calculating limit for Q residuals.}
 }
 \value{
 an object with calibrated PCA model

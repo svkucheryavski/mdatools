@@ -4,16 +4,17 @@
 \alias{ldecomp.getResLimits}
 \title{Statistical limits for Q and T2 residuals}
 \usage{
-ldecomp.getResLimits(eigenvals, nobj, ncomp, alpha = 0.05)
+ldecomp.getResLimits(model, lim.type = "classic", alpha = 0.05,
+  gamma = 0.01)
 }
 \arguments{
-\item{eigenvals}{vector with eigenvalues}
+\item{model}{object with PCA model}
 
-\item{nobj}{number of objects in data}
+\item{lim.type}{which method to use for calculation of the limits (see \code{pca} for details)}
 
-\item{ncomp}{number of calculated components}
+\item{alpha}{significance level for detection of extreme objects}
 
-\item{alpha}{significance level}
+\item{gamma}{significance level for detection of outliers (for data driven approach)}
 }
 \value{
 Returns a list with two vectors:  \code{T2lim} and \code{Qlim}.
@@ -22,5 +23,5 @@ Returns a list with two vectors:  \code{T2lim} and \code{Qlim}.
 Computes statisticsl limits for Q and T2 residuals
 }
 \details{
-T2 limits are calculated using Hotelling statistics.
+See help for \code{\link{pca}} for details.
 }
