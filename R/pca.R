@@ -806,6 +806,9 @@ pca.crossval = function(model, x, cv, center = T, scale = F) {
                 var = var, attrs = attrs, loadings = model$loadings)
    res$Qlim = model$Qlim
    res$T2lim = model$T2lim
+   res$lim.type = model$lim.type
+   res$alpha = model$alpha
+   res$gamma = model$gamma
    
    res
 }  
@@ -1083,12 +1086,12 @@ plotResiduals.pca = function(obj, ncomp = NULL, norm = F, main = NULL, xlab = NU
       if (is.null(ylab))
          ylab = 'Squared residual distance, Q (norm)'      
    } else {
+      T2.mean = 1
+      Q.mean = 1
       if (is.null(xlab))
          xlab = expression(paste('Hotelling ', T^2, ' distance'))
       if (is.null(ylab))
          ylab = 'Squared residual distance, Q'      
-      T2.mean = 1
-      Q.mean = 1
    }
    
    data$cal[, 1] = data$cal[, 1] / T2.mean

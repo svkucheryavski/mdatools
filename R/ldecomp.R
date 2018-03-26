@@ -318,6 +318,8 @@ reslim.classic = function(Q, nvar, ncomp, alpha = 0.05, gamma = 0.01) {
 #' 
 #' @param eigenvals
 #' vector with eigenvalues for all variables
+#' @param Q
+#' vector with Q-residuals for selected component
 #' @param ncomp 
 #' number of components
 #' @param alpha
@@ -326,7 +328,7 @@ reslim.classic = function(Q, nvar, ncomp, alpha = 0.05, gamma = 0.01) {
 #' significance level for outliers
 #' 
 #' @export
-reslim.jm = function(eigenvals, ncomp, alpha = 0.05, gamma = 0.01) {
+reslim.jm = function(eigenvals, Q, ncomp, alpha = 0.05, gamma = 0.01) {
    lim = rep(0, 4)
    
    # inverse error function 
@@ -344,7 +346,7 @@ reslim.jm = function(eigenvals, ncomp, alpha = 0.05, gamma = 0.01) {
    h1 = ca * sqrt(2 * t2 * h0^2)/t1
    h2 = t2 * h0 * (h0 - 1)/(t1^2)
    lim[1:2] = t1 * (1 + h1 + h2)^(1/h0)
-   lim[3] = h0
+   lim[3] = mean(Q)
    lim[4] = 0
    
    lim
@@ -468,7 +470,7 @@ ldecomp.getResLimits = function(model, alpha = 0.05, gamma = 0.01) {
             Qlim[, i] = reslim.classic(Q, nvar, i, alpha, gamma)
          } else if (lim.type == 'jm') {
             T2lim[, i] = reslim.hotteling(T2, i, alpha, gamma)                        
-            Qlim[, i] = reslim.jm(model$eigenvals, i, alpha, gamma)
+            Qlim[, i] = reslim.jm(model$eigenvals, Q, i, alpha, gamma)
          } else if (lim.type == 'ddmoments') {
             lim = reslim.dd(Q, T2, ncomp, 'moments', alpha, gamma)
             T2lim[, i] = lim$T2lim
@@ -703,9 +705,7 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
 #' @export
-plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, 
-                                 xlab = expression(paste('Hotelling ', T^2, ' distance')), 
-                                 ylab = 'Squared residual distance (Q)', 
+plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = NULL, ylab = NULL, 
                                  show.labels = F, show.limits = T, norm = F, 
                                  xlim = NULL, ylim = NULL, 
                                  lim.col = c('#c0a0a0', '#906060'), 
@@ -729,11 +729,17 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL,
    if (norm) {
       T2.mean = obj$T2lim[3, ncomp]
       Q.mean = obj$Qlim[3, ncomp]
-      xlab = paste(xlab, '(norm)')
-      ylab = paste(ylab, '(norm)')
+      if (is.null(xlab))
+         xlab = expression(paste('Hotelling ', T^2, ' distance (norm)'))
+      if (is.null(ylab))
+         ylab = 'Squared residual distance, Q (norm)'      
    } else {
       T2.mean = 1
       Q.mean = 1
+      if (is.null(xlab))
+         xlab = expression(paste('Hotelling ', T^2, ' distance'))
+      if (is.null(ylab))
+         ylab = 'Squared residual distance, Q'      
    }
    
    data[, 1] = data[, 1] / T2.mean
