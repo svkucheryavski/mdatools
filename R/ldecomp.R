@@ -461,7 +461,8 @@ ldecomp.getResLimits = function(model, alpha = 0.05, gamma = 0.01) {
    }
    
    # get parameters
-   nvar = nrow(model$loadings)
+   attrs = mda.getattr(model$loadings)
+   nvar = nrow(model$loadings) - length(attrs$exclrows) 
    lim.type = model$lim.type
    ncomp = ncol(mQ)
    nobj = nrow(mQ)
