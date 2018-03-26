@@ -12,3 +12,4 @@ Imports:
     graphics,
     grDevices
 RoxygenNote: 6.0.1
+Suggests: testthat
