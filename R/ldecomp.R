@@ -451,11 +451,20 @@ reslim.dd = function(Q, T2, ncomp, type, alpha, gamma) {
 #' 
 #' @export
 ldecomp.getResLimits = function(model, alpha = 0.05, gamma = 0.01) {   
-   # get the values and parameters
-   lim.type = model$lim.type
-   ncomp = ncol(model$calres$Q)
-   nobj = nrow(model$calres$Q)
+   # get residuals and exclude hidden rows
+   mQ = model$calres$Q
+   mT2 = model$calres$T2
+   attrs = mda.getattr(model$calres$Q)
+   if (length(attrs$exclrows) > 0) {
+      mQ = mQ[-attrs$exclrows, , drop = F]
+      mT2 = mT2[-attrs$exclrows, , drop = F]
+   }
+   
+   # get parameters
    nvar = nrow(model$loadings)
+   lim.type = model$lim.type
+   ncomp = ncol(mQ)
+   nobj = nrow(mQ)
    
    # we need four rows to keep limit for extremes and outliers, u0 and DF for each type of residual
    T2lim = matrix(0, ncol = ncomp, nrow = 4)
@@ -463,8 +472,8 @@ ldecomp.getResLimits = function(model, alpha = 0.05, gamma = 0.01) {
 
    for (i in 1:ncomp) {
       if (i < nvar) {
-         Q = model$calres$Q[, i]
-         T2 = model$calres$T2[, i]
+         Q = mQ[, i]
+         T2 = mT2[, i]
          if (lim.type == 'classic') {
             T2lim[, i] = reslim.hotteling(T2, i, alpha, gamma)                        
             Qlim[, i] = reslim.classic(Q, nvar, i, alpha, gamma)
