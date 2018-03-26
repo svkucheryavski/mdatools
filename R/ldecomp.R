@@ -116,7 +116,10 @@ ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selec
       modpower = dist$modpower,
       cumexpvar = var$cumexpvar,
       expvar = var$expvar,
-      totvar = totvar
+      totvar = totvar,
+      Qlim = NULL,
+      T2lim = NULL,
+      lim.type = NULL
    )
    
    if (is.null(ncomp.selected))
@@ -460,7 +463,6 @@ ldecomp.getResLimits = function(model, alpha = 0.05, gamma = 0.01) {
       if (i < nvar) {
          Q = model$calres$Q[, i]
          T2 = model$calres$T2[, i]
-      
          if (lim.type == 'classic') {
             T2lim[, i] = reslim.hotteling(T2, i, alpha, gamma)                        
             Qlim[, i] = reslim.classic(Q, nvar, i, alpha, gamma)
@@ -479,7 +481,7 @@ ldecomp.getResLimits = function(model, alpha = 0.05, gamma = 0.01) {
             stop('Wrong value for "lim.type" parameter!')
          }
       } else {
-         T2lim[, i] = lim$T2lim
+         T2lim[, i] = reslim.hotteling(T2, i, alpha, gamma)  
          Qlim[, i] = c(0, 0, 0, 0)     
       }
    }
@@ -498,6 +500,41 @@ ldecomp.getResLimits = function(model, alpha = 0.05, gamma = 0.01) {
       lim.type = lim.type
    )   
 }   
+
+#' Shows lines with critical limits on residuals plot
+#' 
+#' @description 
+#' Shows lines with critical limits on residuals plot
+#' 
+#' @param lim
+#' matrix with residual limits (2x2)
+#' @param lim.type
+#' type of limits
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier borders 
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier borders 
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier borders 
+#' 
+#' @export
+ldecomp.plotLimits = function(lim, lim.type, lim.col, lim.lwd, lim.lty) {
+   if (substr(lim.type, 1, 2) != 'dd') {
+      # rectangular limits
+      lines(c(0, lim[1, 1]), c(lim[1, 2], lim[1, 2]), lty = lim.lty[1], lwd = lim.lwd[1], 
+            col = lim.col[1])
+      lines(c(lim[1, 1], lim[1, 1]), c(0, lim[1, 2]), lty = lim.lty[1], lwd = lim.lwd[1], 
+            col = lim.col[1])
+      lines(c(0, lim[2, 1]), c(lim[2, 2], lim[2, 2]), lty = lim.lty[2], lwd = lim.lwd[2], 
+            col = lim.col[2])
+      lines(c(lim[2, 1], lim[2, 1]), c(0, lim[2, 2]), lty = lim.lty[2], lwd = lim.lwd[2], 
+            col = lim.col[2])
+   } else {
+      # triangular limits
+      abline(a = lim[1, 2], b = lim[1, 1], lty = lim.lty[1], lwd = lim.lwd[1], col = lim.col[1])
+      abline(a = lim[2, 2], b = lim[2, 1], lty = lim.lty[2], lwd = lim.lwd[2], col = lim.col[2])
+   }
+}
 
 #' Cumulative explained variance plot for linear decomposition
 #' 
@@ -590,8 +627,7 @@ plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
 plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores', 
                               type = 'p', xlab = NULL, ylab = NULL,
                               show.labels = FALSE, show.legend = TRUE, 
-                              show.axes = TRUE, ...)
-{
+                              show.axes = TRUE, ...) {
    if (is.null(obj$scores)) {
       warning('Scores values are not specified!')
    } else {   
@@ -657,15 +693,24 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
 #' logical, show or not labels for the plot objects
 #' @param show.limits
 #' logical, show or not lines for statistical limits of the residuals
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier borders 
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier borders 
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier borders 
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
 #' @export
-plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', 
+plotResiduals.ldecomp = function(obj, ncomp = NULL, 
+                                 main = NULL, xlab = 'T2', 
                                  ylab = 'Squared residual distance (Q)', 
-                                 show.labels = F, show.limits = T, ...) {
-   if (is.null(main))
-   {
+                                 show.labels = F, show.limits = T, norm = F, 
+                                 xlim = NULL, ylim = NULL, 
+                                 lim.col = c('#c0a0a0', '#906060'), 
+                                 lim.lwd = c(1, 1), lim.lty = c(2, 1), ...) {
+   if (is.null(main)) {
       if (is.null(ncomp))
          main = 'Residuals'
       else
@@ -675,15 +720,57 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
       
-   if (show.limits == T)
-      show.lines = c(obj$T2lim[ncomp], obj$Qlim[ncomp])
-   else
-      show.lines = F
-
-   data = mda.cbind(mda.subset(obj$T2, select = ncomp), mda.subset(obj$Q, select = ncomp))
-   colnames(data) = c(xlab, ylab)
+   data = mda.cbind(
+      mda.subset(obj$T2, select = ncomp), 
+      mda.subset(obj$Q, select = ncomp)
+   )
+   
+   # set values for normalization of residuals if necessary
+   if (norm) {
+      T2.mean = obj$T2lim[3, ncomp]
+      Q.mean = obj$Qlim[3, ncomp]
+      xlab = paste(xlab, '(norm)')
+      ylab = paste(ylab, '(norm)')
+   } else {
+      T2.mean = 1
+      Q.mean = 1
+   }
+   
+   data[, 1] = data[, 1] / T2.mean
+   data[, 2] = data[, 2] / Q.mean
+   x.max = max(data[, 1])
+   y.max = max(data[, 2])
+   
+   if (show.limits == T) {
+      # get residual limits, correct if necessary and recalculate axes maximum limit
+      lim = cbind(obj$T2lim[1:2, ncomp], obj$Qlim[1:2, ncomp])
+      if (substr(obj$lim.type, 1, 2) != 'dd') {
+         lim[, 1] = lim[, 1] / T2.mean
+         lim[, 2] = lim[, 2] / Q.mean
+         x.max = max(x.max, lim[, 1])
+         y.max = max(y.max, lim[, 2])
+      } else {
+         lim[, 1] = lim[, 1] * T2.mean / Q.mean
+         lim[, 2] = lim[, 2] / Q.mean
+         x.max = 1.5 * x.max
+         y.max = 1.5 * y.max
+      }
+   }
+   
+   # use computed max values for axes limits if user did not specify anything
+   if (is.null(xlim))
+      xlim = c(0, 1.2 * x.max)
+   if (is.null(ylim))
+      ylim = c(0, 1.2 * y.max)
+   
+   # show plot
    mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, 
-           show.lines = show.lines, ...)
+           xlim = xlim, ylim = ylim, ...)
+   
+   # show limits
+   if (show.limits) {
+      ldecomp.plotLimits(lim, obj$lim.type, lim.col, lim.lwd, lim.lty)   
+   }   
 }  
 
 #' Print method for linear decomposition
