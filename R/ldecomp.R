@@ -316,7 +316,7 @@ reslim.classic = function(Q, nvar, ncomp, alpha = 0.05, gamma = 0.01) {
 #' @description 
 #' The method is based on 
 #' 
-#' @param eigenvalues
+#' @param eigenvals
 #' vector with eigenvalues for all variables
 #' @param ncomp 
 #' number of components
@@ -703,8 +703,8 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
 #' @export
-plotResiduals.ldecomp = function(obj, ncomp = NULL, 
-                                 main = NULL, xlab = 'T2', 
+plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, 
+                                 xlab = expression(paste('Hotelling ', T^2, ' distance')), 
                                  ylab = 'Squared residual distance (Q)', 
                                  show.labels = F, show.limits = T, norm = F, 
                                  xlim = NULL, ylim = NULL, 

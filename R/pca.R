@@ -694,7 +694,7 @@ pca.nipals = function(x, ncomp) {
       tau = 99999
       th = 9999
       
-      while (th > 0.000001)
+      while (th > 0.0000001)
       {      
          p = crossprod(E, t) / as.vector(crossprod(t))
          p = p / as.vector(crossprod(p)) ^ 0.5
@@ -1049,9 +1049,7 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' See examples in help for \code{\link{pca}} function.
 #' 
 #' @export
-plotResiduals.pca = function(obj, ncomp = NULL, norm = F, main = NULL, 
-                             xlab = 'Hotteling T2 distance',
-                             ylab = 'Squared residual distance, Q', 
+plotResiduals.pca = function(obj, ncomp = NULL, norm = F, main = NULL, xlab = NULL, ylab = NULL,
                              show.labels = F,  show.legend = T, show.limits = T, 
                              xlim = NULL, ylim = NULL, 
                              lim.col = c('#c0a0a0', '#906060'), 
@@ -1080,9 +1078,15 @@ plotResiduals.pca = function(obj, ncomp = NULL, norm = F, main = NULL,
    if (norm) {
       T2.mean = obj$T2lim[3, ncomp]
       Q.mean = obj$Qlim[3, ncomp]
-      xlab = paste(xlab, '(norm)')
-      ylab = paste(ylab, '(norm)')
+      if (is.null(xlab))
+         xlab = expression(paste('Hotelling ', T^2, ' distance (norm)'))
+      if (is.null(ylab))
+         ylab = 'Squared residual distance, Q (norm)'      
    } else {
+      if (is.null(xlab))
+         xlab = expression(paste('Hotelling ', T^2, ' distance'))
+      if (is.null(ylab))
+         ylab = 'Squared residual distance, Q'      
       T2.mean = 1
       Q.mean = 1
    }
