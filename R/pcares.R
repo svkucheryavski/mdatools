@@ -90,8 +90,7 @@
 #' par(mfrow = c(1, 1))
 #'
 #' @export 
-pcares = function(...)
-{
+pcares = function(...) {
    # Creates an object of pcares class. In fact the class is a wrapper for ldecomp and
    # uses its methods and attributes.
    
@@ -117,8 +116,7 @@ pcares = function(...)
 #' other arguments
 #'
 #' @export 
-plot.pcares = function(x, comp = c(1, 2), show.labels = T, ...)
-{   
+plot.pcares = function(x, comp = c(1, 2), show.labels = T, ...) {   
    par(mfrow = c(2, 2))
    plotScores(x, comp = comp, show.labels = show.labels, ...)
    plotResiduals(x, show.labels = show.labels, ...)
@@ -139,8 +137,7 @@ plot.pcares = function(x, comp = c(1, 2), show.labels = T, ...)
 #' other arguments
 #' 
 #' @export
-summary.pcares = function(object, ...)
-{
+summary.pcares = function(object, ...) {
    summary.ldecomp(object, 'Summary for PCA results', ...)
 }
 
@@ -156,8 +153,7 @@ summary.pcares = function(object, ...)
 #' other arguments
 #'
 #' @export 
-print.pcares = function(x, ...)
-{   
+print.pcares = function(x, ...) {   
    print.ldecomp(x, 'Results for PCA decomposition (class pcares)', ...)
    cat('\n')
 }

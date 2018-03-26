@@ -1142,22 +1142,9 @@ plotResiduals.pca = function(obj, ncomp = NULL, norm = F, main = NULL,
    }
    
    # show limits
-   if (show.limits == T) {
-      if (substr(obj$lim.type, 1, 2) != 'dd') {
-         lines(c(0, lim[1, 1]), c(lim[1, 2], lim[1, 2]), lty = lim.lty[1], lwd = lim.lwd[1], 
-               col = lim.col[1])
-         lines(c(lim[1, 1], lim[1, 1]), c(0, lim[1, 2]), lty = lim.lty[1], lwd = lim.lwd[1], 
-               col = lim.col[1])
-         lines(c(0, lim[2, 1]), c(lim[2, 2], lim[2, 2]), lty = lim.lty[2], lwd = lim.lwd[2], 
-               col = lim.col[2])
-         lines(c(lim[2, 1], lim[2, 1]), c(0, lim[2, 2]), lty = lim.lty[2], lwd = lim.lwd[2], 
-               col = lim.col[2])
-      } else {
-         abline(a = lim[1, 2], b = lim[1, 1], lty = lim.lty[1], lwd = lim.lwd[1], col = lim.col[1])
-         abline(a = lim[2, 2], b = lim[2, 1], lty = lim.lty[2], lwd = lim.lwd[2], col = lim.col[2])
-      }
+   if (show.limits) {
+      ldecomp.plotLimits(lim, obj$lim.type, lim.col, lim.lwd, lim.lty)   
    }
-   
 }  
 
 #' Loadings plot for PCA
