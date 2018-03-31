@@ -1,3 +1,80 @@
+#' Plot for class belonging probability
+#' 
+#' @description
+#' Makes a plot with class belonging probabilities for each object of the classification results. 
+#' Works only with classification methods, which compute this probability (e.g. SIMCA). 
+#' 
+#' @param obj
+#' an object with classification results (e.g. SIMCA)
+#' @param ...
+#' other parameters
+#' 
+#' @export
+plotProbabilities = function(obj, ...) {
+   UseMethod("plotProbabilities")
+}  
+
+
+#' Set residual limits for PCA model
+#' 
+#' @description
+#' Calculates and set critical limits for residuals of PCA model
+#' 
+#' @param obj
+#' a SIMCA model
+#' @param ...
+#' other parameters
+#' 
+#' @export
+setResLimits = function(obj, ...) {
+   UseMethod("setResLimits")
+}  
+
+#' Class belongings probability for SIMCA results
+#' 
+#' @description
+#' Calculates probability of class belongings for each object from SIMCA results
+#' 
+#' @param obj
+#' a SIMCA model
+#' @param ...
+#' other parameters
+#' 
+#' @export
+getProbabilities = function(obj, ...) {
+   UseMethod("getProbabilities")
+}  
+
+#' Plot with class belongings probability for SIMCA results
+#' 
+#' @description
+#' Shows a barplot with probability of class belongings for each object from SIMCA results
+#' 
+#' @param obj
+#' a SIMCA model
+#' @param ...
+#' other parameters
+#' 
+#' @export
+plotProbabilities = function(obj, ...) {
+   UseMethod("plotProbabilities")
+}  
+
+#' Shows extreme plot for SIMCA model
+#' 
+#' @description
+#' Generic function for creating extreme plot for SIMCA model
+#' 
+#' @param obj
+#' a SIMCA model
+#' @param ...
+#' other parameters
+#' 
+#' @export
+plotExtreme = function(obj, ...) {
+   UseMethod("plotExtreme")
+}  
+
 #' Get regression coefficients
 #' 
 #' @description
@@ -9,8 +86,7 @@
 #' other parameters
 #' 
 #' @export
-getRegcoeffs = function(obj, ...)
-{
+getRegcoeffs = function(obj, ...) {
    UseMethod("getRegcoeffs")
 }  
 
@@ -25,8 +101,7 @@ getRegcoeffs = function(obj, ...)
 #' other parameters
 #' 
 #' @export
-plotVIPScores = function(obj, ...)
-{
+plotVIPScores = function(obj, ...) {
    UseMethod("plotVIPScores")
 }  
 
@@ -41,8 +116,7 @@ plotVIPScores = function(obj, ...)
 #' other parameters
 #' 
 #' @export
-getVIPScores = function(obj, ...)
-{
+getVIPScores = function(obj, ...) {
    UseMethod("getVIPScores")
 }  
 
@@ -57,8 +131,7 @@ getVIPScores = function(obj, ...)
 #' other parameters
 #' 
 #' @export
-plotSelectivityRatio = function(obj, ...)
-{
+plotSelectivityRatio = function(obj, ...) {
    UseMethod("plotSelectivityRatio")
 }  
 
@@ -73,8 +146,7 @@ plotSelectivityRatio = function(obj, ...)
 #' other parameters
 #' 
 #' @export
-getSelectivityRatio = function(obj, ...)
-{
+getSelectivityRatio = function(obj, ...) {
    UseMethod("getSelectivityRatio")
 }  
 
@@ -89,8 +161,7 @@ getSelectivityRatio = function(obj, ...)
 #' number of components to select
 #' 
 #' @export
-selectCompNum = function(model, ncomp)
-{   
+selectCompNum = function(model, ncomp) {   
    UseMethod("selectCompNum")
 }   
 
