@@ -2,22 +2,32 @@
 % Please edit documentation in R/pca.R
 \name{setResLimits.pca}
 \alias{setResLimits.pca}
-\title{Recalculate and set critical limits for residuals}
+\title{Set statistical limits for Q and T2 residuals for PCA model}
 \usage{
-setResLimits.pca(model, lim.type, alpha, gamma)
+\method{setResLimits}{pca}(obj, alpha = obj$alpha, gamma = obj$gamma)
 }
 \arguments{
-\item{model}{PCA model (object of class \code{pca})}
+\item{obj}{object with PCA model}
 
-\item{lim.type}{which type of limits to use (see help for \code{pca} class for details)}
+\item{alpha}{significance level for detection of extreme objects}
 
-\item{alpha}{significance level for critical limites (extreme objects)}
-
-\item{gamma}{significance level for outliers}
+\item{gamma}{significance level for detection of outliers (for data driven approach)}
 }
 \value{
-object with PCA model and recalculated limits
+Returns a list with two matrices:  \code{T2lim} and \code{Qlim}. Each matrix contains limits 
+for extreme objects and outliers (first two rows), mean residual and degrees of freedom, 
+calculated for each number of components included to the model
 }
 \description{
-Allows to recompute new critical limits for existing PCA/SIMCA model
+Computes statisticsl limits for Q and T2 residuals for a PCA model and assing the calculated
+values as corresponding model properties
+}
+\details{
+If data driven method is used, first two rows of Qlim and T2lim will contain slope and intercept 
+of line defined by the method, otherwise they contain the critical values (first row for extreme
+values and second for outliers) for each of the residuals. 
+
+Third row containes average values and fourth row contains degrees of freedom.
+
+See help for \code{\link{pca}} for more details.
 }

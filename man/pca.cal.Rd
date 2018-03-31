@@ -5,7 +5,7 @@
 \title{PCA model calibration}
 \usage{
 pca.cal(x, ncomp, center, scale, method, exclcols = NULL, exclrows = NULL,
-  cv, rand, info)
+  cv, rand, lim.type, alpha, gamma, info)
 }
 \arguments{
 \item{x}{matrix with data values}
@@ -24,9 +24,13 @@ pca.cal(x, ncomp, center, scale, method, exclcols = NULL, exclrows = NULL,
 
 \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
 
-\item{info}{a short text line with model description.}
+\item{lim.type}{which method to use for calculation of critical limits for residuals (see details for \code{pca})}
 
-\item{alpha}{significance level for calculating limit for Q residuals.}
+\item{alpha}{significance level for calculating critical limits for T2 and Q residuals.}
+
+\item{gamma}{significance level for calculating outlier limits for T2 and Q residuals.}
+
+\item{info}{a short text line with model description.}
 }
 \value{
 an object with calibrated PCA model

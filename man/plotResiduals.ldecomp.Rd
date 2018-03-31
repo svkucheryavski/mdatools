@@ -5,8 +5,9 @@
 \title{Residuals plot for linear decomposition}
 \usage{
 \method{plotResiduals}{ldecomp}(obj, ncomp = NULL, main = NULL,
-  xlab = "T2", ylab = "Squared residual distance (Q)", show.labels = F,
-  show.limits = T, ...)
+  xlab = NULL, ylab = NULL, show.labels = F, show.limits = T,
+  norm = F, xlim = NULL, ylim = NULL, lim.col = c("#c0a0a0", "#906060"),
+  lim.lwd = c(1, 1), lim.lty = c(2, 1), ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
@@ -22,6 +23,12 @@
 \item{show.labels}{logical, show or not labels for the plot objects}
 
 \item{show.limits}{logical, show or not lines for statistical limits of the residuals}
+
+\item{lim.col}{vector with two values - line color for extreme and outlier borders}
+
+\item{lim.lwd}{vector with two values - line width for extreme and outlier borders}
+
+\item{lim.lty}{vector with two values - line type for extreme and outlier borders}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
 }

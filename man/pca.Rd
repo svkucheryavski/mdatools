@@ -6,7 +6,7 @@
 \usage{
 pca(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
   exclcols = NULL, x.test = NULL, method = "svd", rand = NULL,
-  lim.type = "classic", alpha = 0.05, gamma = 0.01, info = "")
+  lim.type = "jm", alpha = 0.05, gamma = 0.01, info = "")
 }
 \arguments{
 \item{x}{a numerical matrix with calibration data.}
@@ -52,7 +52,9 @@ Returns an object of \code{pca} class with following fields:
 \item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it 
 was provided.} 
 \item{cvres }{an object of class \code{\link{pcares}} with PCA results for cross-validation, 
-if this option was chosen.}
+if this option was chosen.} 
+
+More details and examples can be found in the Bookdown tutorial.
 }
 \description{
 \code{pca} is used to build and explore a principal component analysis (PCA) model.
@@ -89,22 +91,26 @@ k - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1
 option, which give quite precise solution using several times less computational time. It must 
 be noted that statistical limits for residuals will not be computed in this case.
   
-There are several ways to calculate critical limits for Q and T2 residuals. You can specify one
-of the following five methods via parameter \code{lim.type}: \code{'classic'} - for classic method 
-based on F-distribution, described in [1]; \code{'corrected'} - corrected version of the first 
-method with less degrees of freedom [2]; \code{'chisq'} - method based on Chi-square 
-distribution, \code{'gemp'} - method proposed by Paul Gemperline et al [3], \code{'ddrob'} and 
-\code{'ddmom'} - both related to data driven method proposed by Pomerantsev and Rodionova [4]. 
-The \code{'ddmom'} uses classic method of moments for estimation of distribution parameters while
-\code{'ddrob'} is based in robust estimation.
+There are several ways to calculate critical limits for Q and T2 residuals. In \code{mdatools} 
+you can specify one of the following methods via parameter \code{lim.type}: \code{'jm'} - method 
+based on Jackson-Mudholkar approach [3], \code{'chisq'} - method based on chi-square distribution 
+[4] and \code{'ddrobust'} and \code{'ddmoments'} - both related to data driven method proposed 
+by Pomerantsev and Rodionova [5]. The \code{'ddmoments'} is based on method of moments for 
+estimation of distribution parameters while \code{'ddrobust'} is based in robust estimation.
+ 
+It must be noted that the first two methods calculate limits for Q-residuals only, assuming, 
+that limits for T2 residuals must be computed using Hotelling's T-squared distribution. The 
+methods based on the data driven approach calculate limits for both Q and T2 residuals based on 
+chi-square distribution and parameters estimated from the calibration data.
 
 The critical limits are calculated for a significance level defined by parameter \code{'alpha'}. 
-For data driven methods, it is also possible to provide parameter \code{'gamma'}, which is used
-to calculate acceptance limit for outliers (shown as dashed line on residuals plot).
+You can also specify another parameter, \code{'gamma'}, which is used to calculate acceptance 
+limit for outliers (shown as dashed line on residuals plot).
 
-You can also recalculate the limits for existent model, in this case use the following code
-(it is assumed that you current PCA/SIMCA model is stored in variable \code{m}): 
-\code{m = setResLimits(m, lim.type, alpha, gamma)}.     
+You can also recalculate the limits for existent model by using different values for alpha and
+gamme, without recomputing the model itself. In this case use the following code (it is assumed 
+that you current PCA/SIMCA model is stored in variable \code{m}): 
+\code{m = setResLimits(m, alpha, gamma)}.     
 
 In case of PCA the critical limits are just shown on residual plot as lines and can be used for 
 detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for 
@@ -142,13 +148,14 @@ par(mfrow = c(1, 1))
 
 }
 \references{
-1. S. Wold, M. Sjostrom, SIMCA: a method for analysing chemical data in terms of similarity and 
-analogy, ACS Symposium Series 52 (1977).
-2. S. Wold, M. Sjostrom, Letter to the editor—comments on a recent evaluation of the SIMCA 
-method, Journal of Chemometrics, 1 (1987) pp. 243-245.
-3. P.J. Gemperline, L.D. Webber, Raw Materials Testing Using Soft Independent Modeling of Class 
-Analogy Analysis of Near-Infrared Reflectance Spectra, Analytical Chemistry, 61 (1989) pp. 138-144.
-4. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
+1. N. Halko, P.G. Martinsson, J.A. Tropp. Finding structure with randomness: probabilistic 
+algorithms for constructing approximate matrix decompositions. SIAM Review, 53 (2010) pp. 217‐288.
+2. S. Kucheryavskiy, Blessing of randomness against the curse of dimensionality, 
+Journal of Chemometrics, 32 (2018), pp. 
+3. J.E. Jackson, A User's Guide to Principal Components, John Wiley & Sons, New York, NY (1991).
+4. A.L. Pomerantsev, Acceptance areas for multivariate classification derived by projection 
+methods, Journal of Chemometrics, 22 (2008) pp. 601-609.
+5. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
 Journal of Chemometrics, 28 (2014) pp. 429-438.
 }
 \seealso{
@@ -157,6 +164,7 @@ Methods for \code{pca} objects:
    \code{plot.pca} \tab makes an overview of PCA model with four plots.\cr
    \code{summary.pca} \tab shows some statistics for the model.\cr
    \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
+   \code{\link{setResLimits.pca}} \tab set critical limits for residuals\cr
    \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr
    \code{\link{plotScores.pca}} \tab shows scores plot.\cr
    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
@@ -164,9 +172,10 @@ Methods for \code{pca} objects:
    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
    \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
 }
- Most of the methods for plotting data are also available for PCA results (\code{\link{pcares}})
- objects. Also check \code{\link{pca.mvreplace}}, which replaces missing values in a data matrix 
- with approximated using iterative PCA decomposition.
+
+Most of the methods for plotting data are also available for PCA results (\code{\link{pcares}})
+objects. Also check \code{\link{pca.mvreplace}}, which replaces missing values in a data matrix 
+with approximated using iterative PCA decomposition.
 }
 \author{
 Sergey Kucheryavskiy (svkucheryavski@gmail.com)

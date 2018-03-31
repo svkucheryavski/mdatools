@@ -4,15 +4,17 @@
 \alias{plotResiduals.pca}
 \title{Residuals plot for PCA}
 \usage{
-\method{plotResiduals}{pca}(obj, ncomp = NULL, main = NULL, xlab = "T2",
-  ylab = "Squared residual distance (Q)", show.labels = F,
-  show.legend = T, show.limits = T, cgroup = NULL, mode = "normal",
-  xlim = NULL, ylim = NULL, ...)
+\method{plotResiduals}{pca}(obj, ncomp = NULL, norm = F, main = NULL,
+  xlab = NULL, ylab = NULL, show.labels = F, show.legend = T,
+  show.limits = T, xlim = NULL, ylim = NULL, lim.col = c("#c0a0a0",
+  "#906060"), lim.lwd = c(1, 1), lim.lty = c(2, 1), ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
 
 \item{ncomp}{how many components to use (if NULL - user selected optimal value will be used)}
+
+\item{norm}{logical, show normalized Q vs T2 (\code{norm = T}) values or original ones (\code{norm = F})}
 
 \item{main}{main title for the plot}
 
@@ -26,9 +28,11 @@
 
 \item{show.limits}{logical, show or not lines with statistical limits for the residuals}
 
-\item{cgroup}{a vector with numeric values or a factor for color grouping of plot points.}
+\item{lim.col}{vector with two values - line color for extreme and outlier borders}
 
-\item{mode}{\code{'normal'} for original Q vs T2 values, \code{'scaled'} for normalised residuals}
+\item{lim.lwd}{vector with two values - line width for extreme and outlier borders}
+
+\item{lim.lty}{vector with two values - line type for extreme and outlier borders}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
