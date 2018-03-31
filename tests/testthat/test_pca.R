@@ -1,52 +1,79 @@
 data(iris)
 
 # compute SVD decomposition for Setosa samples of Iris dataset
-x.cal = iris[1:50, 1:4]
-x.cal = scale(x.cal, center = T, scale = F)
-loads = svd(x.cal)$v
+x.cal1 = scale(iris[1:50, 1:4], center = T, scale = F)
+x.cal2 = scale(iris[1:50, 1:4], center = T, scale = T)
+loads1 = svd(x.cal1)$v
+loads2 = svd(x.cal2)$v
 
 # check loadings obtained using conventional algorithms
 
 context('Conventional algorithms (max nPCs)')
 
-m0 = pca(x.cal)
-m1 = pca(x.cal, method = 'svd')
-m2 = pca(x.cal, method = 'nipals')
+scores1 = x.cal1 %*% loads1
+scores2 = x.cal2 %*% loads2
 
-test_that("Loadings have correct size (auto)", {
-   expect_equal(nrow(m0$loadings), 4)
-   expect_equal(nrow(m1$loadings), 4)
-   expect_equal(nrow(m2$loadings), 4)
-   expect_equal(ncol(m0$loadings), 4)
-   expect_equal(ncol(m1$loadings), 4)
-   expect_equal(ncol(m2$loadings), 4)
+# centered only
+m01 = pca(x.cal1)
+m11 = pca(x.cal1, method = 'svd')
+m21 = pca(x.cal1, method = 'nipals')
+
+# scaled
+m02 = pca(x.cal2, scale = T)
+m12 = pca(x.cal2, scale = T, method = 'svd')
+m22 = pca(x.cal2, scale = T, method = 'nipals')
+
+# test for loading size
+test_that("Loadings have correct size (centered)", {
+   expect_equal(nrow(m01$loadings), 4)
+   expect_equal(nrow(m11$loadings), 4)
+   expect_equal(nrow(m21$loadings), 4)
+   expect_equal(ncol(m01$loadings), 4)
+   expect_equal(ncol(m11$loadings), 4)
+   expect_equal(ncol(m21$loadings), 4)
 })
 
-test_that("Loadings are computed correctly", {
-   expect_equal(sum(m0$loadings - loads), 0)
-   expect_equal(sum(m1$loadings - loads), 0)
-   expect_equal(sum(m2$loadings - loads), 0)
+test_that("Loadings have correct size (autoscaled)", {
+   expect_equal(nrow(m02$loadings), 4)
+   expect_equal(nrow(m12$loadings), 4)
+   expect_equal(nrow(m22$loadings), 4)
+   expect_equal(ncol(m02$loadings), 4)
+   expect_equal(ncol(m12$loadings), 4)
+   expect_equal(ncol(m22$loadings), 4)
+})
+
+# test for loading values
+test_that("Loadings are computed correctly (centered)", {
+   expect_lt(sum(abs(m01$loadings) - abs(loads1)), 0.001)
+   expect_lt(sum(abs(m11$loadings) - abs(loads1)), 0.001)
+   expect_lt(sum(abs(m21$loadings) - abs(loads1)), 0.001)
+})
+
+test_that("Loadings are computed correctly (autoscaled)", {
+   expect_lt(sum(abs(m02$loadings) - abs(loads2)), 0.001)
+   expect_lt(sum(abs(m12$loadings) - abs(loads2)), 0.001)
+   expect_lt(sum(abs(m22$loadings) - abs(loads2)), 0.001)
 })
 
 context('Conventional algorithms (2 PCs)')
 
 ncomp = 2
-m0 = pca(x.cal, ncomp)
-m1 = pca(x.cal, ncomp, method = 'svd')
-m2 = pca(x.cal, ncomp, method = 'nipals')
+m01 = pca(x.cal1, ncomp)
+m11 = pca(x.cal1, ncomp, method = 'svd')
+m21 = pca(x.cal1, ncomp, method = 'nipals')
 
 test_that("Loadings have correct size", {
-   expect_equal(nrow(m0$loadings), 4)
-   expect_equal(nrow(m1$loadings), 4)
-   expect_equal(nrow(m2$loadings), 4)
-   expect_equal(ncol(m0$loadings), 2)
-   expect_equal(ncol(m1$loadings), 2)
-   expect_equal(ncol(m2$loadings), 2)
+   expect_equal(nrow(m01$loadings), 4)
+   expect_equal(nrow(m11$loadings), 4)
+   expect_equal(nrow(m21$loadings), 4)
+   expect_equal(ncol(m01$loadings), 2)
+   expect_equal(ncol(m11$loadings), 2)
+   expect_equal(ncol(m21$loadings), 2)
 })
 
 test_that("Loadings are computed correctly", {
-   expect_equal(sum(m0$loadings - loads[, 1:2]), 0)
-   expect_equal(sum(m1$loadings - loads[, 1:2]), 0)
-   expect_equal(sum(m2$loadings - loads[, 1:2]), 0)
+   expect_lt(sum(abs(m01$loadings) - abs(loads1[, 1:2])), 0.001)
+   expect_lt(sum(abs(m11$loadings) - abs(loads1[, 1:2])), 0.001)
+   expect_lt(sum(abs(m21$loadings) - abs(loads1[, 1:2])), 0.001)
 })
 
