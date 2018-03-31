@@ -92,11 +92,11 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
    xmin = min(x.values)
    xmax = max(x.values)
    if (is.null(lower) || is.null(upper)) {
-      ymin = min(y.values, y.values)
-      ymax = max(y.values, y.values)
+      ymin = min(y.values, y.values, na.rm = TRUE)
+      ymax = max(y.values, y.values, na.rm = TRUE)
    } else {
-      ymin = min(y.values, y.values - lower)
-      ymax = max(y.values, y.values + upper)
+      ymin = min(y.values, y.values - lower, na.rm = TRUE)
+      ymax = max(y.values, y.values + upper, na.rm = TRUE)
    }
    
    if (xmin == xmax) {
@@ -114,14 +114,14 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
    {
       if (!is.na(show.lines[1])) 
       {   
-         xmax = max(xmax, show.lines[1])
-         xmin = min(xmin, show.lines[1])
+         xmax = max(xmax, show.lines[1], na.rm = TRUE)
+         xmin = min(xmin, show.lines[1], na.rm = TRUE)
       }
       
       if (!is.na(show.lines[2])) 
       {   
-         ymax = max(ymax, show.lines[2])
-         ymax = max(ymax, show.lines[2])
+         ymax = max(ymax, show.lines[2], na.rm = TRUE)
+         ymax = max(ymax, show.lines[2], na.rm = TRUE)
       }   
    }
    
