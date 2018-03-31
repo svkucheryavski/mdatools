@@ -1,3 +1,17 @@
+v.0.9.0
+=======
+* added randomized PCA algorithm (efficient for datasets with large number of rows)
+* added option to inherit and show critical limits on residuals plot for PCA/SIMCA results
+* added support for data driven approach to PCA/SIMCA (DD-SIMCA)
+* added calculation of class belongings probability for SIMCA results
+* added `plotExtreme()` method for SIMCA models
+* added `setResLimits()` method for PCA/SIMCA models
+* added `plotProbabilities()` method for SIMCA results
+* added `getConfusionMatrix()` method for Multiclass SIMCA models 
+* added option to show prediction statistics using `plotPrediction()` for PLS results
+* added option to use equal axes limits in `plotPrediction()` for PLS results
+* the tutorial has been amended and extended correspondingly
+
 v.0.8.4
 =======
 * small improvements to calculation of statistics for regression coefficients
@@ -103,7 +117,7 @@ v. 0.5.0
 * all documentation has been rewritten using `roxygen2` package
 * added extra preprocessing methods
 * added VIP scores calculation and plot for PLS and PLS-DA models
-* addec Selectivity ratio calculation and plot for PLS and PLS-DA models
+* added Selectivity ratio calculation and plot for PLS and PLS-DA models
 * added calculation of confidence intervals for PLS regression coefficient using jack-knife
 * bug fixes and small improvements
 * the first release available in CRAN
