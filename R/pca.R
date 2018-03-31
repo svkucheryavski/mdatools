@@ -1,5 +1,5 @@
 #' Principal Component Analysis
-#'
+#' 
 #' @description 
 #' \code{pca} is used to build and explore a principal component analysis (PCA) model.
 #'
@@ -64,17 +64,21 @@
 #' option, which give quite precise solution using several times less computational time. It must 
 #' be noted that statistical limits for residuals will not be computed in this case.
 #'   
-#' There are several ways to calculate critical limits for Q and T2 residuals. You can specify one
-#' of the following five methods via parameter \code{lim.type}: \code{'classic'} - for classic 
-#' method based on F-distribution, described in [1]; \code{'jm'} - method based on Jackson-Mudholkar 
-#' approach [3], \code{'ddrobust'} and \code{'ddmoments'} - both related to data driven method 
-#' proposed by Pomerantsev and Rodionova [3]. The \code{'ddmoments'} uses classic method of moments 
-#' for estimation of distribution parameters while \code{'ddrobust'} is based in robust estimation.
+#' There are several ways to calculate critical limits for Q and T2 residuals. In \code{mdatools} 
+#' you can specify one of the following methods via parameter \code{lim.type}: \code{'jm'} - method 
+#' based on Jackson-Mudholkar approach [3], \code{'chisq'} - method based on chi-square distribution 
+#' [4] and \code{'ddrobust'} and \code{'ddmoments'} - both related to data driven method proposed 
+#' by Pomerantsev and Rodionova [5]. The \code{'ddmoments'} is based on method of moments for 
+#' estimation of distribution parameters while \code{'ddrobust'} is based in robust estimation.
+#'  
+#' It must be noted that the first two methods calculate limits for Q-residuals only, assuming, 
+#' that limits for T2 residuals must be computed using Hotelling's T-squared distribution. The 
+#' methods based on the data driven approach calculate limits for both Q and T2 residuals based on 
+#' chi-square distribution and parameters estimated from the calibration data.
 #' 
 #' The critical limits are calculated for a significance level defined by parameter \code{'alpha'}. 
 #' You can also specify another parameter, \code{'gamma'}, which is used to calculate acceptance 
-#' limit for outliers (shown as dashed line on residuals plot). More details can be found in the
-#' Bookdown tutorial.
+#' limit for outliers (shown as dashed line on residuals plot).
 #' 
 #' You can also recalculate the limits for existent model by using different values for alpha and
 #' gamme, without recomputing the model itself. In this case use the following code (it is assumed 
@@ -103,11 +107,17 @@
 #' \item{cvres }{an object of class \code{\link{pcares}} with PCA results for cross-validation, 
 #' if this option was chosen.} 
 #' 
+#' More details and examples can be found in the Bookdown tutorial.
+#' 
 #' @references 
-#' 1. S. Wold, M. Sjostrom, SIMCA: a method for analysing chemical data in terms of similarity and 
-#' analogy, ACS Symposium Series 52 (1977).
-#' 2. J.E. Jackson, A User's Guide to Principal Components, John Wiley & Sons, New York, NY (1991).
-#' 3. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
+#' 1. N. Halko, P.G. Martinsson, J.A. Tropp. Finding structure with randomness: probabilistic 
+#' algorithms for constructing approximate matrix decompositions. SIAM Review, 53 (2010) pp. 217‐288.
+#' 2. S. Kucheryavskiy, Blessing of randomness against the curse of dimensionality, 
+#' Journal of Chemometrics, 32 (2018), pp. 
+#' 3. J.E. Jackson, A User's Guide to Principal Components, John Wiley & Sons, New York, NY (1991).
+#' 4. A.L. Pomerantsev, Acceptance areas for multivariate classification derived by projection 
+#' methods, Journal of Chemometrics, 22 (2008) pp. 601-609.
+#' 5. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
 #' Journal of Chemometrics, 28 (2014) pp. 429-438.
 #' 
 #' @author 
@@ -119,6 +129,7 @@
 #'    \code{plot.pca} \tab makes an overview of PCA model with four plots.\cr
 #'    \code{summary.pca} \tab shows some statistics for the model.\cr
 #'    \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
+#'    \code{\link{setResLimits.pca}} \tab set critical limits for residuals\cr
 #'    \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr
 #'    \code{\link{plotScores.pca}} \tab shows scores plot.\cr
 #'    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
@@ -126,9 +137,10 @@
 #'    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
 #'    \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
 #' }
-#'  Most of the methods for plotting data are also available for PCA results (\code{\link{pcares}})
-#'  objects. Also check \code{\link{pca.mvreplace}}, which replaces missing values in a data matrix 
-#'  with approximated using iterative PCA decomposition.
+#' 
+#' Most of the methods for plotting data are also available for PCA results (\code{\link{pcares}})
+#' objects. Also check \code{\link{pca.mvreplace}}, which replaces missing values in a data matrix 
+#' with approximated using iterative PCA decomposition.
 #'  
 #' @examples 
 #' library(mdatools)
@@ -166,11 +178,9 @@ pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
    
    # calibrate and cross-validate model  
    model = pca.cal(x, ncomp, center = center, scale = scale, method = method, exclcols = exclcols, 
-                   exclrows = exclrows, cv = cv, rand = rand, lim.type = lim.type, info = info)
+                   exclrows = exclrows, cv = cv, rand = rand, lim.type = lim.type, alpha = alpha,
+                   gamma = gamma, info = info)
    model$call = match.call()   
-   
-   # compute and set residual limits
-   model = setResLimits.pca(model, alpha, gamma)
    
    # apply model to test set if provided
    if (!is.null(x.test))
@@ -201,52 +211,6 @@ getCalibrationData.pca = function(obj, ...) {
    
    x = mda.setattr(x, mda.getattr(obj$calres$residuals)) 
    x
-}
-
-
-#' Recalculate and set critical limits for residuals
-#' 
-#' @description
-#' Allows to recompute new critical limits for existing PCA/SIMCA model
-#' 
-#' @param model
-#' PCA model (object of class \code{pca})
-#' @param alpha
-#' significance level for critical limites (extreme objects)
-#' @param gamma
-#' significance level for outliers
-#' 
-#' @return
-#' object with PCA model and recalculated limits
-#' 
-#' @export
-setResLimits.pca = function(model, alpha = 0.05, gamma = 0.01) {
-   lim = ldecomp.getResLimits(model, alpha = alpha, gamma = gamma)
-   model$Qlim = lim$Qlim
-   model$T2lim = lim$T2lim
-   model$alpha = alpha
-   model$gamma = gamma
-   
-   model$calres$Qlim = lim$Qlim
-   model$calres$T2lim = lim$T2lim
-   model$calres$alpha = alpha
-   model$calres$gamma = gamma
-   
-   if (!is.null(model$testres)) {
-      model$testres$Qlim = lim$Qlim
-      model$testres$T2lim = lim$T2lim
-      model$testres$alpha = alpha
-      model$testres$gamma = gamma
-   }
-   
-   if (!is.null(model$cvres)) {
-      model$cvres$Qlim = lim$Qlim
-      model$cvres$T2lim = lim$T2lim
-      model$cvres$alpha = alpha
-      model$cvres$gamma = gamma
-   }
-   
-   model
 }
 
 #' Select optimal number of components for PCA model
@@ -282,6 +246,7 @@ selectCompNum.pca = function(model, ncomp) {
 
 #' Replace missing values in data
 #' 
+#' @description 
 #' \code{pca.mvreplace} is used to replace missing values in a data matrix with 
 #' approximated by iterative PCA decomposition.
 #'
@@ -414,8 +379,11 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
    x.rep
 }
 
-#´ Computes low-dimensional approximation of data matrix X
+#´ Low-dimensional approximation of data matrix X
 #'
+#' @description 
+#' Computes low-dimensional approximation of data martrix X using probabilistic algorithms
+#' 
 #' @param X
 #' data matrix X
 #' @param k
@@ -424,6 +392,9 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
 #' a vector with two values - number of iterations (q) and oversmapling parameter (p)
 #' @param dist
 #' distribution for generating random numbers, 'unif' or 'norm'
+#' 
+#' @details 
+#' See \code{\link{pca}} (randomized methods) for details.
 #' 
 #' @export
 pca.getB = function(X, k = NULL, rand = c(1, 5), dist = 'unif') {
@@ -511,8 +482,12 @@ pca.run = function(x, ncomp, method, rand = NULL) {
 #' columns to be excluded from calculations (numbers, names or vector with logical values)
 #' @param cv
 #' number of segments for random cross-validation (1 for full cross-validation).
+#' @param lim.type
+#' which method to use for calculation of critical limits for residuals (see details for \code{pca})
 #' @param alpha
-#' significance level for calculating limit for Q residuals.
+#' significance level for calculating critical limits for T2 and Q residuals.
+#' @param gamma
+#' significance level for calculating outlier limits for T2 and Q residuals.
 #' @param info
 #' a short text line with model description.
 #' 
@@ -520,7 +495,7 @@ pca.run = function(x, ncomp, method, rand = NULL) {
 #' an object with calibrated PCA model
 #' 
 pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL, 
-                   exclrows = NULL, cv, rand, lim.type, info) {
+                   exclrows = NULL, cv, rand, lim.type, alpha, gamma, info) {
    # prepare empty list for model object
    model = list()
    
@@ -621,6 +596,9 @@ pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL,
    # get calibration results
    model$calres = predict(model, x, cal = TRUE)
    model$modpower = model$calres$modpower
+   
+   # compute and set residual limits
+   model = setResLimits(model, alpha, gamma)
    
    # do cross-validation if needed
    if (!is.null(cv))
@@ -809,7 +787,6 @@ pca.crossval = function(model, x, cv, center = T, scale = F) {
    res$lim.type = model$lim.type
    res$alpha = model$alpha
    res$gamma = model$gamma
-   
    res
 }  
 
@@ -860,6 +837,7 @@ predict.pca = function(object, x, cal = FALSE, ...) {
    res = pcares(scores = scores, loadings = object$loadings, residuals = residuals, attrs = attrs,
                 ncomp.selected = object$ncomp.selected, tnorm = object$tnorm, totvar = totvar, 
                 cal = TRUE)
+   
    res$Qlim = object$Qlim
    res$T2lim = object$T2lim
    res$lim.type = object$lim.type
@@ -867,6 +845,120 @@ predict.pca = function(object, x, cal = FALSE, ...) {
    res$gamma = object$gamma
    res
 }  
+
+#' Set statistical limits for Q and T2 residuals for PCA model
+#' 
+#' @description
+#' Computes statisticsl limits for Q and T2 residuals for a PCA model and assing the calculated
+#' values as corresponding model properties
+#' 
+#' @param obj
+#' object with PCA model 
+#' @param alpha
+#' significance level for detection of extreme objects
+#' @param gamma
+#' significance level for detection of outliers (for data driven approach)
+#'
+#' @details
+#' If data driven method is used, first two rows of Qlim and T2lim will contain slope and intercept 
+#' of line defined by the method, otherwise they contain the critical values (first row for extreme
+#' values and second for outliers) for each of the residuals. 
+#' 
+#' Third row containes average values and fourth row contains degrees of freedom.
+#' 
+#' See help for \code{\link{pca}} for more details. 
+#' 
+#' @return
+#' Returns a list with two matrices:  \code{T2lim} and \code{Qlim}. Each matrix contains limits 
+#' for extreme objects and outliers (first two rows), mean residual and degrees of freedom, 
+#' calculated for each number of components included to the model 
+#' 
+#' @export
+setResLimits.pca = function(obj, alpha = obj$alpha, gamma = obj$gamma) {   
+   # get residuals and exclude hidden rows
+   mQ = obj$calres$Q
+   mT2 = obj$calres$T2
+   attrs = mda.getattr(obj$calres$Q)
+   if (length(attrs$exclrows) > 0) {
+      mQ = mQ[-attrs$exclrows, , drop = F]
+      mT2 = mT2[-attrs$exclrows, , drop = F]
+   }
+   
+   # get parameters
+   attrs = mda.getattr(obj$loadings)
+   nvar = nrow(obj$loadings) - length(attrs$exclrows) 
+   lim.type = obj$lim.type
+   ncomp = ncol(mQ)
+   nobj = nrow(mQ)
+   
+   # we need four rows to keep limit for extremes and outliers, u0 and DF for each type of residual
+   T2lim = matrix(0, ncol = ncomp, nrow = 4)
+   Qlim  = matrix(0, ncol = ncomp, nrow = 4)
+   for (i in 1:ncomp) {
+      Q = mQ[, i]
+      T2 = mT2[, i]
+      T2lim[, i] = reslim.hotelling(T2 = T2, ncomp = i, alpha = alpha, gamma = gamma)                        
+      if (i < nvar) {
+         if (lim.type == 'chisq') {
+            Qlim[, i] = reslim.chisq(Q = Q, alpha = alpha, gamma = gamma)
+         } else if (lim.type == 'jm') {
+            Qlim[, i] = reslim.jm(eigenvals = obj$eigenvals, Q = Q, ncomp = i, alpha = alpha, 
+                                  gamma = gamma)
+         } else if (lim.type == 'ddmoments') {
+            lim = reslim.dd(Q = Q, T2 = T2, type = 'ddmoments', alpha = alpha, gamma = gamma)
+            T2lim[, i] = lim$T2lim
+            Qlim[, i] = lim$Qlim
+         } else if (lim.type == 'ddrobust') {
+            lim = reslim.dd(Q = Q, T2 = T2, type = 'ddrobust', alpha = alpha, gamma = gamma)
+            T2lim[, i] = lim$T2lim
+            Qlim[, i] = lim$Qlim
+         } else {
+            stop('Wrong value for "lim.type" parameter!')
+         }
+      } else {
+         Qlim[, i] = c(0, 0, 0, 1)     
+      }
+   }
+   
+   colnames(T2lim) = colnames(Qlim) = paste('Comp', 1:ncomp)
+   rownames(T2lim) = rownames(Qlim) = c(
+      paste('Critical limit (alpha = ', alpha, ')', sep = ''),
+      paste('Outliers limit (gamma = ', gamma, ')', sep = ''),
+      'Mean (u0)',
+      'DoF'
+   )
+
+   # set limits for the obj   
+   obj$Qlim = Qlim
+   obj$T2lim = T2lim
+   obj$alpha = alpha
+   obj$gamma = gamma
+   
+   # set limits for the calibration set 
+   obj$calres$Qlim = Qlim
+   obj$calres$T2lim = T2lim
+   obj$calres$alpha = alpha
+   obj$calres$gamma = gamma
+   
+   # set limits for the test set (if exists)
+   if (!is.null(obj$testres)) {
+      obj$testres$Qlim = Qlim
+      obj$testres$T2lim = T2lim
+      obj$testres$alpha = alpha
+      obj$testres$gamma = gamma
+   }
+   
+   # set limits for the cross-validation set (if exists)
+   if (!is.null(obj$cvres)) {
+      obj$cvres$Qlim = Qlim
+      obj$cvres$T2lim = T2lim
+      obj$cvres$alpha = alpha
+      obj$cvres$gamma = gamma
+   }
+   
+   obj   
+}   
+
 
 #' Explained variance plot for PCA
 #' 
@@ -1056,7 +1148,7 @@ plotResiduals.pca = function(obj, ncomp = NULL, norm = F, main = NULL, xlab = NU
                              show.labels = F,  show.legend = T, show.limits = T, 
                              xlim = NULL, ylim = NULL, 
                              lim.col = c('#c0a0a0', '#906060'), 
-                             lim.lwd = c(1, 1), lim.lty = c(2, 1),
+                             lim.lwd = c(1, 1), lim.lty = c(2, 3),
                              ...) {
    if (is.null(main)) {
       if (is.null(ncomp))
