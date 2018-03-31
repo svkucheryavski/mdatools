@@ -252,63 +252,85 @@ ldecomp.getVariances = function(Q, totvar) {
    res
 }
 
-#' Calculates critical limits for T2-residuals using Hotteling T2 distribution
+#' Calculates critical limits for T2-residuals using Hotelling T2 distribution
 #' 
 #' @description 
 #' The method is based on n
 #' 
-#' @param T2
-#' vector with T2-residuals for selected component
 #' @param ncomp 
 #' number of components
+#' @param T2
+#' vector with T2-residuals for selected component
 #' @param alpha
 #' significance level for extreme objects
 #' @param gamma
 #' significance level for outliers
+#' @param return
+#' what to return: \code{'limits'} or \code{'probability'}
 #' 
 #' @export
-reslim.hotteling = function(T2, ncomp, alpha, gamma) {
-   lim = rep(0, 4)
-   nobj = length(T2)
-   if (nobj > ncomp) {
-      lim[1:2] = 
-         (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(c(1 - alpha, 1 - gamma), ncomp, nobj - ncomp)
+reslim.hotelling = function(ncomp, T2 = NULL, alpha = 0.05, gamma = 0.01, 
+                            T2lim = NULL, return = 'limits') {
+   if (return == 'limits') {
+      nobj = length(T2)
+      out = rep(0, 4)
+      if (nobj > ncomp) {
+         out[1:2] = 
+            (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(c(1 - alpha, 1 - gamma), ncomp, nobj - ncomp)
+      } else {
+         out[1:2] = 0
+      }
+      out[3] = mean(T2)
+      out[4] = nobj - ncomp
    } else {
-      lim[1:2] = 0
+      nobj = T2lim[4] + ncomp
+      out = pf(T2 * (nobj - ncomp) / (ncomp * (nobj - 1)), ncomp, nobj - ncomp)
    }
-   lim[3] = mean(T2)
-   lim[4] = nobj - ncomp
    
-   lim
+   out
 }
 
-#' Calculates critical limits for Q-residuals using classic approach
+#' Calculates critical limits or statistic values for Q-residuals using Chi-squared distribution
 #' 
 #' @description 
-#' The method is based on paper by Wold, etc (1977) and utilizes F-distribution
+#' The method is based on Chi-squared distribution with DF = 2 * (m(Q)/s(Q)^2
 #' 
 #' @param Q
 #' vector with Q-residuals for selected component
-#' @param nvar 
-#' number of variables in data
-#' @param ncomp 
-#' number of components
 #' @param alpha
 #' significance level for extreme objects
 #' @param gamma
 #' significance level for outliers
+#' @param return
+#' what to return: \code{'limits'} or \code{'probability'}
 #' 
 #' @export
-reslim.classic = function(Q, nvar, ncomp, alpha = 0.05, gamma = 0.01) {
-   lim = rep(0, 4)
+reslim.chisq = function(Q, alpha = 0.05, gamma = 0.01, Qlim = NULL, return = 'limits') {
    nobj = length(Q)
-   Q.mean = sum(Q) / ((nvar - ncomp) * (nobj - ncomp - 1))
-   Fcrit = qf(c(1 - alpha, 1 - gamma), (nvar - ncomp), (nvar - ncomp) * (nobj - ncomp - 1))
-   lim[1:2] = Q.mean *  Fcrit * (nvar - ncomp) 
-   lim[3] = Q.mean
-   lim[4] = (nvar - ncomp)
+   if (return == 'limits') {
+      
+      # calculate mean and DF for Q
+      Q.mean = mean(Q)
+      Q.DF = 2 * (Q.mean/sd(Q))^2      
+      
+      out = rep(0, 4)
+      if (Q.mean == 0) {
+         out = c(0, 0, 0, 1)
+      } else {
+         out[1:2] = qchisq(c(1 - alpha, 1 - gamma), round(Q.DF)) * Q.mean / Q.DF
+         out[3] = Q.mean
+         out[4] = round(Q.DF)
+      }
+   } else {
+      # get mean and DF from model
+      Q.mean = Qlim[3]
+      Q.DF = Qlim[4]
+      show(Qlim)
+      show(Q.DF)
+      out = pchisq(Q.DF * Q / Q.mean, round(Q.DF))
+   }
 
-   lim      
+   out      
 }
 
 #' Calculates critical limits for Q-residuals using classic JM approach
@@ -326,30 +348,40 @@ reslim.classic = function(Q, nvar, ncomp, alpha = 0.05, gamma = 0.01) {
 #' significance level for extreme objects
 #' @param gamma
 #' significance level for outliers
+#' @param return
+#' what to return: \code{'limits'} or \code{'probability'}
 #' 
 #' @export
-reslim.jm = function(eigenvals, Q, ncomp, alpha = 0.05, gamma = 0.01) {
-   lim = rep(0, 4)
-   
-   # inverse error function 
-   erfinv = function (x) qnorm((1 + x)/2)/sqrt(2)
-   
+reslim.jm = function(eigenvals, Q, ncomp, alpha = 0.05, gamma = 0.01, return = 'limits') {
    evals = eigenvals[(ncomp + 1):length(eigenvals)]   
    t1 = sum(evals)
    t2 = sum(evals^2)
    t3 = sum(evals^3)
    h0 = 1 - 2 * t1 * t3/3/(t2^2);
-   if (h0 < 0.001)
-      h0 = 0.001
+   if (h0 < 0.001) h0 = 0.001
    
-   ca = sqrt(2) * erfinv(c(1 - 2 * alpha, 1 - 2 * gamma))
-   h1 = ca * sqrt(2 * t2 * h0^2)/t1
-   h2 = t2 * h0 * (h0 - 1)/(t1^2)
-   lim[1:2] = t1 * (1 + h1 + h2)^(1/h0)
-   lim[3] = mean(Q)
-   lim[4] = 0
+   if (return == 'limits') {
+      # inverse error function 
+      erfinv = function (x) qnorm((1 + x)/2)/sqrt(2)
+      
+      out = rep(0, 4)
+      ca = sqrt(2) * erfinv(c(1 - 2 * alpha, 1 - 2 * gamma))
+      h1 = ca * sqrt(2 * t2 * h0^2)/t1
+      h2 = t2 * h0 * (h0 - 1)/(t1^2)
+      out[1:2] = t1 * (1 + h1 + h2)^(1/h0)
+      out[3] = mean(Q)
+      out[4] = 1
+   } else {
+      # error function 
+      erf = function (x) 1 - pnorm(-x * sqrt(2)) * 2
+      
+      h1 = (Q/t1)^h0
+      h2 = t2 * h0 * (h0 - 1)/t1^2
+      d = t1 * (h1 - 1 - h2)/(sqrt(2 * t2) * h0)
+      out = 0.5 * (1+erf(d/sqrt(2)))
+   }
    
-   lim
+   out
 }
 
 #' Statistical limits for Q and T2 residuals using Data Driven approach
@@ -361,21 +393,28 @@ reslim.jm = function(eigenvals, Q, ncomp, alpha = 0.05, gamma = 0.01) {
 #' vector with Q-residuals for selected component
 #' @param T2
 #' vector with T2-residuals for selected component
-#' @param ncomp 
-#' number of components
 #' @param type
 #' which estimator to use: 'moments' or 'robust'
 #' @param alpha
 #' significance level for extreme objects
 #' @param gamma
 #' significance level for outliers
+#' @param Qlim
+#' vector with Q limits for selected number of components (from model)
+#' @param T2lim
+#' vector with T2 limits for selected number of components (from model)
+#' @param return
+#' what to return: \code{'limits'} or \code{'probability'}
 #' 
-reslim.dd = function(Q, T2, ncomp, type, alpha, gamma) {
+#' @export
+reslim.dd = function(Q, T2, type = 'ddmoments', alpha = 0.05, gamma = 0.01, Qlim = NULL, 
+                     T2lim = NULL, return = 'limits') {
    
    # classic estimator of u0 and DF for DD method
    ddclassic = function(u) {
       u0 = mean(u)
-      DF = round( 2 * (u0 / sd(u))^2)
+      DF = round(2 * (u0/sd(u))^2)
+      if (DF == 1) DF = 1
       res = c(u0, ifelse(DF > 250, 250, DF))
       res
    }
@@ -390,128 +429,49 @@ reslim.dd = function(Q, T2, ncomp, type, alpha, gamma) {
       } else if (DF < 0.194565995) {
          DF = 100
       } else {
-         DF = round(exp(1.380948 * log(2.68631 / DF))^1.185785)
+         DF = exp(1.380948 * log(2.68631 / DF))^1.185785
       }
       u0 = 0.5 * DF * (M/qchisq(0.5, DF) + R/(qchisq(0.75, DF) - qchisq(0.25, DF)))
       res = c(u0, ifelse(DF > 250, 250, DF))
       res
    }
 
-   if (type == 'moments') {
-      T2.res = ddclassic(T2)
-      Q.res = ddclassic(Q)
-   } else if (type == "robust"){
-      T2.res = ddrobust(T2)
-      Q.res = ddrobust(Q)
-   } else {
-      stop('Wrong value for "type" parameter!')
-   }
    
-   nobj = length(Q)
-   T2.mean = T2.res[1]; T2.DF = T2.res[2]
-   Q.mean = Q.res[1]; Q.DF = Q.res[2]
-
-   Ocrit = qchisq((1 - gamma)^(1/nobj), T2.DF + Q.DF)
-   Dcrit = qchisq(1 - alpha, T2.DF + Q.DF)
-
-   Qlim = c(Dcrit * Q.mean / Q.DF, Ocrit * Q.mean / Q.DF, Q.mean, Q.DF)
-   T2lim = c(rep(-(Q.mean / T2.mean) * (T2.DF / Q.DF), 2), T2.mean, T2.DF)  
-   res = list(Qlim = Qlim, T2lim = T2lim)
-   
-   res
-}
-
-#' Statistical limits for Q and T2 residuals
-#' 
-#' @description
-#' Computes statisticsl limits for Q and T2 residuals for PCA model
-#' 
-#' @param model
-#' object with PCA model 
-#' @param lim.type
-#' which method to use for calculation of the limits (see \code{pca} for details)
-#' @param alpha
-#' significance level for detection of extreme objects
-#' @param gamma
-#' significance level for detection of outliers (for data driven approach)
-#'
-#' @details
-#' If data driven method is used, first two rows of Qlim and T2lim will contain slope and intercept 
-#' of line defined by the method, otherwise they contain the critical values (first row for extreme
-#' values and second for outliers) for each of the residuals. 
-#' 
-#' Third row containes average values and fourth row contains degrees of freedom.
-#' 
-#' See help for \code{\link{pca}} for more details. 
-#' 
-#' @return
-#' Returns a list with two matrices:  \code{T2lim} and \code{Qlim}. Each matrix contains limits 
-#' for extreme objects and outliers (first two rows), mean residual and degrees of freedom, 
-#' calculated for each number of components included to the model 
-#' 
-#' @export
-ldecomp.getResLimits = function(model, alpha = 0.05, gamma = 0.01) {   
-   # get residuals and exclude hidden rows
-   mQ = model$calres$Q
-   mT2 = model$calres$T2
-   attrs = mda.getattr(model$calres$Q)
-   if (length(attrs$exclrows) > 0) {
-      mQ = mQ[-attrs$exclrows, , drop = F]
-      mT2 = mT2[-attrs$exclrows, , drop = F]
-   }
-   
-   # get parameters
-   attrs = mda.getattr(model$loadings)
-   nvar = nrow(model$loadings) - length(attrs$exclrows) 
-   lim.type = model$lim.type
-   ncomp = ncol(mQ)
-   nobj = nrow(mQ)
-   
-   # we need four rows to keep limit for extremes and outliers, u0 and DF for each type of residual
-   T2lim = matrix(0, ncol = ncomp, nrow = 4)
-   Qlim  = matrix(0, ncol = ncomp, nrow = 4)
-
-   for (i in 1:ncomp) {
-      if (i < nvar) {
-         Q = mQ[, i]
-         T2 = mT2[, i]
-         if (lim.type == 'classic') {
-            T2lim[, i] = reslim.hotteling(T2, i, alpha, gamma)                        
-            Qlim[, i] = reslim.classic(Q, nvar, i, alpha, gamma)
-         } else if (lim.type == 'jm') {
-            T2lim[, i] = reslim.hotteling(T2, i, alpha, gamma)                        
-            Qlim[, i] = reslim.jm(model$eigenvals, Q, i, alpha, gamma)
-         } else if (lim.type == 'ddmoments') {
-            lim = reslim.dd(Q, T2, ncomp, 'moments', alpha, gamma)
-            T2lim[, i] = lim$T2lim
-            Qlim[, i] = lim$Qlim
-         } else if (lim.type == 'ddrobust') {
-            lim = reslim.dd(Q, T2, ncomp, 'robust', alpha, gamma)
-            T2lim[, i] = lim$T2lim
-            Qlim[, i] = lim$Qlim
-         } else {
-            stop('Wrong value for "lim.type" parameter!')
-         }
+   if (return == 'limits') {
+      
+      # estimate mean and DF
+      if (type == 'ddmoments') {
+         T2.res = ddclassic(T2)
+         Q.res = ddclassic(Q)
+      } else if (type == "ddrobust"){
+         T2.res = ddrobust(T2)
+         Q.res = ddrobust(Q)
       } else {
-         T2lim[, i] = reslim.hotteling(T2, i, alpha, gamma)  
-         Qlim[, i] = c(0, 0, 0, 0)     
+         stop('Wrong value for "type" parameter!')
       }
+      
+      T2.mean = T2.res[1]; T2.DF = T2.res[2]
+      Q.mean = Q.res[1]; Q.DF = Q.res[2]
+      
+      nobj = length(Q)
+
+      # calculate critical values
+      Ocrit = qchisq((1 - gamma)^(1/nobj), T2.DF + Q.DF)
+      Dcrit = qchisq(1 - alpha, T2.DF + Q.DF)
+   
+      # calculate critical limits
+      Qlim = c(Dcrit * Q.mean / Q.DF, Ocrit * Q.mean / Q.DF, Q.mean, round(Q.DF))
+      T2lim = c(rep(-(Q.mean / T2.mean) * (T2.DF / Q.DF), 2), T2.mean, round(T2.DF))
+      out = list(Qlim = Qlim, T2lim = T2lim)
+   } else {
+      # get mean and DF from matrix with limits from model      
+      Q.mean = Qlim[3]; Q.DF = Qlim[4]
+      T2.mean = T2lim[3]; T2.DF = T2lim[4]
+      out = pchisq(Q / Q.mean * Q.DF + T2 / T2.mean * T2.DF, round(Q.DF) + round(T2.DF))
    }
    
-   colnames(T2lim) = colnames(Qlim) = paste('Comp', 1:ncomp)
-   rownames(T2lim) = rownames(Qlim) = c(
-      paste('Critical limit (alpha = ', alpha, ')', sep = ''),
-      paste('Outliers limit (gamma = ', gamma, ')', sep = ''),
-      'Mean (u0)',
-      'DoF'
-   )
-
-   res = list(
-      T2lim = T2lim,
-      Qlim = Qlim,
-      lim.type = lim.type
-   )   
-}   
+   out
+}
 
 #' Shows lines with critical limits on residuals plot
 #' 
@@ -719,7 +679,7 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = NULL, yl
                                  show.labels = F, show.limits = T, norm = F, 
                                  xlim = NULL, ylim = NULL, 
                                  lim.col = c('#c0a0a0', '#906060'), 
-                                 lim.lwd = c(1, 1), lim.lty = c(2, 1), ...) {
+                                 lim.lwd = c(1, 1), lim.lty = c(2, 3), ...) {
    if (is.null(main)) {
       if (is.null(ncomp))
          main = 'Residuals'
