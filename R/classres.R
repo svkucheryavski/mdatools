@@ -173,6 +173,55 @@ getSelectedComponents.classres = function(obj, ncomp = NULL) {
    ncomp
 }
 
+#' Confusion matrix for classification results
+#' 
+#' @details 
+#' Returns confusion matrix for classification results represented by the object.
+#' 
+#' @param obj
+#' classification results (object of class \code{simcares}, \code{simcamres}, etc)
+#' @param ncomp
+#' number of components to make the matrix for (NULL - use selected for a model).
+#' 
+#' @description 
+#' The columns of the matrix correspond to classification results, rows — to the real classes. In
+#' case of soft classification with multiple classes (e.g. SIMCAM) sum of values for every row 
+#' will not correspond to the total number of class members as the same object can be classified
+#' as a member of several classes or non of them.
+#' 
+#' @export
+getConfusionMatrix.classres = function(obj, ncomp = NULL) {
+   if (is.null(obj$c.ref)) {
+      stop('Reference classes are not available!')
+   }
+   
+   ncomp = getSelectedComponents.classres(obj, ncomp)
+   if (dim(obj$c.pred)[2] == 1) {
+      ncomp = 1
+   }
+
+   # get class names and numbers
+   classes = dimnames(obj$c.pred)[[3]]
+   nclasses = length(classes)
+   ref.classes = unique(obj$c.ref)
+   ref.nclasses = length(ref.classes)
+   
+   # compute the confusion matrix
+   out = matrix(0, nrow = ref.nclasses, ncol = nclasses + 1)
+   for (i in 1:ref.nclasses) {
+      ind = obj$c.ref == ref.classes[i]
+      v = obj$c.pred[ind, ncomp, ]
+      dim(v) = c(sum(ind), nclasses)
+      out[i, 1:nclasses] = apply(v == 1, 2, sum)
+      out[i, (nclasses + 1)] = sum(apply(v == -1, 1, all)) 
+   }
+   
+   rownames(out) = ref.classes
+   colnames(out) = c(classes, 'None')
+
+   out
+}
+
 #' Show predicted class values
 #' 
 #' @description

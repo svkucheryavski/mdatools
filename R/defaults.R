@@ -1,3 +1,18 @@
+#' Confusion matrix for classification results
+#' 
+#' @details 
+#' Returns confusion matrix for classification results represented by the object.
+#' 
+#' @param obj
+#' classification results (object of class \code{simcares}, \code{simcamres}, etc)
+#' @param ...
+#' other parameters.
+#' 
+#' @export
+getConfusionMatrix = function(obj, ...) {
+   UseMethod("getConfusionMatrix")
+}  
+
 #' Plot for class belonging probability
 #' 
 #' @description

@@ -7,7 +7,7 @@ v.0.9.0
 * added `plotExtreme()` method for SIMCA models
 * added `setResLimits()` method for PCA/SIMCA models
 * added `plotProbabilities()` method for SIMCA results
-* added `getConfusionMatrix()` method for Multiclass SIMCA models 
+* added `getConfusionMatrix()` method for classification results  
 * added option to show prediction statistics using `plotPrediction()` for PLS results
 * added option to use equal axes limits in `plotPrediction()` for PLS results
 * the tutorial has been amended and extended correspondingly
