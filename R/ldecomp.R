@@ -325,8 +325,6 @@ reslim.chisq = function(Q, alpha = 0.05, gamma = 0.01, Qlim = NULL, return = 'li
       # get mean and DF from model
       Q.mean = Qlim[3]
       Q.DF = Qlim[4]
-      show(Qlim)
-      show(Q.DF)
       out = pchisq(Q.DF * Q / Q.mean, round(Q.DF))
    }
 
