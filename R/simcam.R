@@ -189,8 +189,7 @@ predict.simcam = function(object, x, c.ref = NULL, cv = F, ...) {
 #' See examples in help for \code{\link{simcam}} function.
 #' 
 #' @export
-getCalibrationData.simcam = function(obj, ...)
-{
+getCalibrationData.simcam = function(obj, ...) {
    x = getCalibrationData(obj$models[[1]])
    c.ref = matrix(obj$models[[1]]$classname, nrow = nrow(x), ncol = 1)            
    for (i in 2:obj$nclasses) {
