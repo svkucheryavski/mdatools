@@ -561,10 +561,10 @@ pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL,
       loadings = res$loadings
    }
    
-   if (dim(loadings) == NULL) {
+   if (is.null(dim(loadings))) {
       loadings = matrix(loadings, ncol = ncomp)
    }
-   
+
    # set names and attributes for the loadings
    rownames(loadings) = colnames(x)
    colnames(loadings) = paste('Comp', 1:ncol(loadings))
