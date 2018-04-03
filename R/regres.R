@@ -285,9 +285,9 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T,
    if (show.stat && !is.null(obj$y.ref)) {
       dl = (lim[2] - lim[1])/20
       stat.text = paste(
-         'nLV = ', obj$ncomp.selected, '\n',
-         'RMSE = ', format(obj$rmse[obj$ncomp.selected], digits = 3), '\n',
-         'R2 = ', round(obj$ydecomp$cumexpvar[obj$ncomp.selected]/100, 3),
+         'nLV = ', ncomp, '\n',
+         'RMSE = ', format(obj$rmse[ncomp], digits = 3), '\n',
+         'R2 = ', round(obj$ydecomp$cumexpvar[ncomp]/100, 3),
          sep = ''
       )
       
