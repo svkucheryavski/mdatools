@@ -265,6 +265,8 @@ ldecomp.getVariances = function(Q, totvar) {
 #' significance level for extreme objects
 #' @param gamma
 #' significance level for outliers
+#' @param T2lim
+#' T2 limits from a PCA model (needed for probabilities)
 #' @param return
 #' what to return: \code{'limits'} or \code{'probability'}
 #' 
@@ -301,6 +303,8 @@ reslim.hotelling = function(ncomp, T2 = NULL, alpha = 0.05, gamma = 0.01,
 #' significance level for extreme objects
 #' @param gamma
 #' significance level for outliers
+#' @param Qlim
+#' vector with Q limits for selected number of components (from model)
 #' @param return
 #' what to return: \code{'limits'} or \code{'probability'}
 #' 
@@ -317,15 +321,15 @@ reslim.chisq = function(Q, alpha = 0.05, gamma = 0.01, Qlim = NULL, return = 'li
       if (Q.mean == 0) {
          out = c(0, 0, 0, 1)
       } else {
-         out[1:2] = qchisq(c(1 - alpha, 1 - gamma), round(Q.DF)) * Q.mean / Q.DF
+         out[1:2] = qchisq(c(1 - alpha, 1 - gamma), floor(Q.DF)) * Q.mean / Q.DF
          out[3] = Q.mean
-         out[4] = round(Q.DF)
+         out[4] = Q.DF
       }
    } else {
       # get mean and DF from model
       Q.mean = Qlim[3]
       Q.DF = Qlim[4]
-      out = pchisq(Q.DF * Q / Q.mean, round(Q.DF))
+      out = pchisq(Q.DF * Q / Q.mean, floor(Q.DF))
    }
 
    out      
@@ -403,6 +407,8 @@ reslim.jm = function(eigenvals, Q, ncomp, alpha = 0.05, gamma = 0.01, return = '
 #' vector with T2 limits for selected number of components (from model)
 #' @param return
 #' what to return: \code{'limits'} or \code{'probability'}
+#' 
+#' @import stats
 #' 
 #' @export
 reslim.dd = function(Q, T2, type = 'ddmoments', alpha = 0.05, gamma = 0.01, Qlim = NULL, 
@@ -661,23 +667,12 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
 #' label for y axis
 #' @param show.labels
 #' logical, show or not labels for the plot objects
-#' @param show.limits
-#' logical, show or not lines for statistical limits of the residuals
-#' @param lim.col
-#' vector with two values - line color for extreme and outlier borders 
-#' @param lim.lwd
-#' vector with two values - line width for extreme and outlier borders 
-#' @param lim.lty
-#' vector with two values - line type for extreme and outlier borders 
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
 #' @export
 plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = NULL, ylab = NULL, 
-                                 show.labels = F, show.limits = T, norm = F, 
-                                 xlim = NULL, ylim = NULL, 
-                                 lim.col = c('#c0a0a0', '#906060'), 
-                                 lim.lwd = c(1, 1), lim.lty = c(2, 3), ...) {
+                                 show.labels = F, ...) {
    if (is.null(main)) {
       if (is.null(ncomp))
          main = 'Residuals'
@@ -687,64 +682,19 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = NULL, yl
    
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
-      
+   
+   if (is.null(xlab))
+      xlab = expression(paste('Hotelling ', T^2, ' distance'))
+   if (is.null(ylab))
+      ylab = 'Squared residual distance, Q'      
+   
    data = mda.cbind(
       mda.subset(obj$T2, select = ncomp), 
       mda.subset(obj$Q, select = ncomp)
    )
    
-   # set values for normalization of residuals if necessary
-   if (norm) {
-      T2.mean = obj$T2lim[3, ncomp]
-      Q.mean = obj$Qlim[3, ncomp]
-      if (is.null(xlab))
-         xlab = expression(paste('Hotelling ', T^2, ' distance (norm)'))
-      if (is.null(ylab))
-         ylab = 'Squared residual distance, Q (norm)'      
-   } else {
-      T2.mean = 1
-      Q.mean = 1
-      if (is.null(xlab))
-         xlab = expression(paste('Hotelling ', T^2, ' distance'))
-      if (is.null(ylab))
-         ylab = 'Squared residual distance, Q'      
-   }
-   
-   data[, 1] = data[, 1] / T2.mean
-   data[, 2] = data[, 2] / Q.mean
-   x.max = max(data[, 1])
-   y.max = max(data[, 2])
-   
-   if (show.limits == T) {
-      # get residual limits, correct if necessary and recalculate axes maximum limit
-      lim = cbind(obj$T2lim[1:2, ncomp], obj$Qlim[1:2, ncomp])
-      if (substr(obj$lim.type, 1, 2) != 'dd') {
-         lim[, 1] = lim[, 1] / T2.mean
-         lim[, 2] = lim[, 2] / Q.mean
-         x.max = max(x.max, lim[, 1])
-         y.max = max(y.max, lim[, 2])
-      } else {
-         lim[, 1] = lim[, 1] * T2.mean / Q.mean
-         lim[, 2] = lim[, 2] / Q.mean
-         x.max = 1.5 * x.max
-         y.max = 1.5 * y.max
-      }
-   }
-   
-   # use computed max values for axes limits if user did not specify anything
-   if (is.null(xlim))
-      xlim = c(0, 1.2 * x.max)
-   if (is.null(ylim))
-      ylim = c(0, 1.2 * y.max)
-   
    # show plot
-   mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, 
-           xlim = xlim, ylim = ylim, ...)
-   
-   # show limits
-   if (show.limits) {
-      ldecomp.plotLimits(lim, obj$lim.type, lim.col, lim.lwd, lim.lty)   
-   }   
+   mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, ...)
 }  
 
 #' Print method for linear decomposition
