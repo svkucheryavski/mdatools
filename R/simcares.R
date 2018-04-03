@@ -83,8 +83,7 @@
 #' # show predictions table
 #' showPredictions(model$calres)
 #' @export
-simcares = function(pres, cres)
-{
+simcares = function(pres, cres) {
    res = c(pres, cres)
    res$classname = dimnames(cres$c.pred)[[3]][1]
    class(res) = c('simcares', 'classres', 'pcares', 'ldecomp')   
@@ -101,18 +100,24 @@ simcares = function(pres, cres)
 #' SIMCA results (object of class \code{simcares})
 #' @param ncomp
 #' which principal components to show the plot for
-#' @param show.limits
-#' logical, show or not lines with statistical limits for the residuals
-#' @param type
-#' type of the plot
 #' @param main
 #' main plot title
 #' @param xlab
 #' label for x axis
 #' @param ylab
 #' label for y axis
+#' @param norm
+#' logical, show normalized Q vs T2 (\code{norm = T}) values or original ones (\code{norm = F})
+#' @param show.limits
+#' logical, show or not lines with statistical limits for the residuals
 #' @param legend
 #' vector with legend items
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier borders 
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier borders 
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier borders 
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #' 
@@ -160,7 +165,7 @@ plotResiduals.simcares = function(obj, ncomp = NULL, main = NULL, xlab = NULL, y
       }
       
       if (sum(c.ref == obj$classname) == length(c.ref)) {
-         plotResiduals.ldecomp(obj, ncomp, main = main, xlab = xlab, ylab = ylab, norm = norm,
+         plotResiduals.pcares(obj, ncomp, main = main, xlab = xlab, ylab = ylab, norm = norm,
                                show.limits = show.limits, lim.col = lim.col, lim.lty = lim.lty,
                                lim.lwd = lim.lwd, ...)
       } else {

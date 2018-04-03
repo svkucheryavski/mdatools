@@ -409,13 +409,17 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
 #' 
 #' @param obj
 #' object with SIMCA model
+#' @param ncomp
+#' number of components to compute the probabilities for.
 #' @param Q
 #' vector with Q values for selected component
 #' @param T2
 #' vector with T2 values for selected component
+#' @param ...
+#' other arguments
 #'  
 #' @export
-getProbabilities.simca = function(obj, ncomp, Q, T2) {
+getProbabilities.simca = function(obj, ncomp, Q, T2, ...) {
    p = NULL
    Qlim = obj$Qlim[, ncomp]
    T2lim = obj$T2lim[, ncomp]
@@ -491,6 +495,14 @@ plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL, 
 #' SIMCA model
 #' @param ncomp
 #' Number of components to show the plot for
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ...
+#' other arguments
 #'  
 #' @description 
 #' The plot shows the number of extreme objects rejected by the model vs. the expected number, 
@@ -502,7 +514,8 @@ plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL, 
 #' Journal of Chemometrics, 28 (2014) pp. 429-438.
 #' 
 #' @export   
-plotExtreme.simca = function(obj, ncomp = NULL, main = NULL, xlab = 'Expected', ylab = 'Observed') {
+plotExtreme.simca = function(obj, ncomp = NULL, main = NULL, xlab = 'Expected', 
+                             ylab = 'Observed', ...) {
    
    ncomp = getSelectedComponents(obj, ncomp)
    
