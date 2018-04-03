@@ -38,7 +38,7 @@
 #' a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal 
 #' number of components is used to build a residuals plot (with Q residuals vs. Hotelling T2 
 #' values), calculate confidence limits for Q residuals, as well as for SIMCA classification. 
-#'   
+#' 
 #' You can provde number, names or logical values to exclode rows or columns from calibration and
 #' validation of PCA model. In this case the outcome, e.g. scores and loadings will correspond to 
 #' the original size of the data, but:
@@ -61,12 +61,12 @@
 #' possibility to run algorithms based on random permutations [1, 2]. In this case you have
 #' to define parameter \code{rand} as a vector with two values: p - oversampling parameter and
 #' k - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)} are good 
-#' option, which give quite precise solution using several times less computational time. It must 
+#' options, which give quite precise solution using several times less computational time. It must 
 #' be noted that statistical limits for residuals will not be computed in this case.
 #'   
 #' There are several ways to calculate critical limits for Q and T2 residuals. In \code{mdatools} 
 #' you can specify one of the following methods via parameter \code{lim.type}: \code{'jm'} - method 
-#' based on Jackson-Mudholkar approach [3], \code{'chisq'} - method based on chi-square distribution 
+#' based on Jackson-Mudholkar approach [3], \code{'chisq'} - method based on chi-square distribution
 #' [4] and \code{'ddrobust'} and \code{'ddmoments'} - both related to data driven method proposed 
 #' by Pomerantsev and Rodionova [5]. The \code{'ddmoments'} is based on method of moments for 
 #' estimation of distribution parameters while \code{'ddrobust'} is based in robust estimation.
@@ -83,7 +83,7 @@
 #' You can also recalculate the limits for existent model by using different values for alpha and
 #' gamme, without recomputing the model itself. In this case use the following code (it is assumed 
 #' that you current PCA/SIMCA model is stored in variable \code{m}): 
-#' \code{m = setResLimits(m, alpha, gamma)}.     
+#' \code{m = setResLimits(m, alpha, gamma)}.
 #' 
 #' In case of PCA the critical limits are just shown on residual plot as lines and can be used for 
 #' detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for 
@@ -111,7 +111,7 @@
 #' 
 #' @references 
 #' 1. N. Halko, P.G. Martinsson, J.A. Tropp. Finding structure with randomness: probabilistic 
-#' algorithms for constructing approximate matrix decompositions. SIAM Review, 53 (2010) pp. 217‐288.
+#' algorithms for constructing approximate matrix decompositions. SIAM Review, 53 (2010) pp. 217-288.
 #' 2. S. Kucheryavskiy, Blessing of randomness against the curse of dimensionality, 
 #' Journal of Chemometrics, 32 (2018), pp. 
 #' 3. J.E. Jackson, A User's Guide to Principal Components, John Wiley & Sons, New York, NY (1991).
@@ -171,7 +171,7 @@
 #' plotResiduals(model, ncomp = 2, show.labels = TRUE)
 #' par(mfrow = c(1, 1))
 #'
-#' @export   
+#' @export
 pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
                exclcols = NULL, x.test = NULL, method = 'svd', rand = NULL, lim.type = 'jm', 
                alpha = 0.05, gamma = 0.01, info = '') {
@@ -259,7 +259,7 @@ selectCompNum.pca = function(model, ncomp) {
 #' @param maxncomp
 #' maximum number of components in PCA model.
 #' @param expvarlim
-#' minimum amount of variance, explained by chosen components (used for selection of optimal number 
+#' minimum amount of variance, explained by chosen components (used for selection of optimal number
 #' of components in PCA models).
 #' @param covlim
 #' convergence criterion.
@@ -267,7 +267,7 @@ selectCompNum.pca = function(model, ncomp) {
 #' maximum number of iterations if convergence criterion is not met.
 #'
 #' @details 
-#' The function uses iterative PCA modeling of the data to approximate and impute missing values.  
+#' The function uses iterative PCA modeling of the data to approximate and impute missing values. 
 #' The result is most optimal for data sets with low or moderate level of noise and with number of
 #' missing values less than 10\% for small dataset and up to 20\% for large data.
 #'
@@ -333,6 +333,7 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
    scoresp = 0
    scores = 1
    cond = 1
+   maxncomp = min(maxncomp, nrow(x.rep) - 1, ncol(x.rep))
    while (cond > covlim && n < maxiter) {    
       n = n + 1
       
@@ -341,14 +342,13 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
       lmean = attr(x.rep, 'scaled:center')
       
       res = pca.svd(x.rep, maxncomp)
-      
       expvar = cumsum(res$eigenvals/sum(res$eigenvals))
       ncomp = min(which(expvar >= expvarlim), maxncomp)
       
-      if (ncomp == 0)
-         ncomp = 1
       if (ncomp == length(expvar))
          ncomp = ncomp - 1
+      if (ncomp == 0)
+         ncomp = 1
       
       # get and trancate scores and loadings and reestimate the values
       scoresp = scores
@@ -379,25 +379,19 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
    x.rep
 }
 
-#´ Low-dimensional approximation of data matrix X
-#'
-#' @description 
-#' Computes low-dimensional approximation of data martrix X using probabilistic algorithms
+#' Low-dimensional approximation of data matrix X
 #' 
 #' @param X
-#' data matrix X
-#' @param k
-#' effective rank of k
+#' data matrix
+#' @param k 
+#' rank of X (number of components)
 #' @param rand
 #' a vector with two values - number of iterations (q) and oversmapling parameter (p)
 #' @param dist
 #' distribution for generating random numbers, 'unif' or 'norm'
 #' 
-#' @details 
-#' See \code{\link{pca}} (randomized methods) for details.
-#' 
-#' @export
-pca.getB = function(X, k = NULL, rand = c(1, 5), dist = 'unif') {
+#' @import stats
+getB = function(X, k = NULL, rand = c(1, 5), dist = 'unif') {
    nrows = nrow(X)
    ncols = ncol(X)
    
@@ -447,7 +441,7 @@ pca.run = function(x, ncomp, method, rand = NULL) {
    
    isRand = FALSE
    if (!is.null(rand) && length(rand) == 2) {
-      x = pca.getB(x, k = ncomp, rand = rand)
+      x = getB(x, k = ncomp, rand = rand)
       isRand = TRUE
    }
    
@@ -482,6 +476,8 @@ pca.run = function(x, ncomp, method, rand = NULL) {
 #' columns to be excluded from calculations (numbers, names or vector with logical values)
 #' @param cv
 #' number of segments for random cross-validation (1 for full cross-validation).
+#' @param rand
+#' vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)
 #' @param lim.type
 #' which method to use for calculation of critical limits for residuals (see details for \code{pca})
 #' @param alpha
@@ -557,13 +553,16 @@ pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL,
    
    # correct loadings for missing columns in x 
    # corresponding rows in loadings will be set to 0 and excluded
-   loadings = matrix(0, nrow = x.ncols, ncol = ncomp)
-   
    if (length(attrs$exclcols) > 0) {
+      loadings = matrix(0, nrow = x.ncols, ncol = ncomp)
       loadings[-attrs$exclcols, ] = res$loadings
       loadings = mda.exclrows(loadings, attrs$exclcols)      
    } else {
       loadings = res$loadings
+   }
+   
+   if (dim(loadings) == NULL) {
+      loadings = matrix(loadings, ncol = ncomp)
    }
    
    # set names and attributes for the loadings
@@ -858,6 +857,8 @@ predict.pca = function(object, x, cal = FALSE, ...) {
 #' significance level for detection of extreme objects
 #' @param gamma
 #' significance level for detection of outliers (for data driven approach)
+#' @param ...
+#' other arguments
 #'
 #' @details
 #' If data driven method is used, first two rows of Qlim and T2lim will contain slope and intercept 
@@ -874,7 +875,7 @@ predict.pca = function(object, x, cal = FALSE, ...) {
 #' calculated for each number of components included to the model 
 #' 
 #' @export
-setResLimits.pca = function(obj, alpha = obj$alpha, gamma = obj$gamma) {   
+setResLimits.pca = function(obj, alpha = obj$alpha, gamma = obj$gamma, ...) {
    # get residuals and exclude hidden rows
    mQ = obj$calres$Q
    mT2 = obj$calres$T2
@@ -897,7 +898,7 @@ setResLimits.pca = function(obj, alpha = obj$alpha, gamma = obj$gamma) {
    for (i in 1:ncomp) {
       Q = mQ[, i]
       T2 = mT2[, i]
-      T2lim[, i] = reslim.hotelling(T2 = T2, ncomp = i, alpha = alpha, gamma = gamma)                        
+      T2lim[, i] = reslim.hotelling(T2 = T2, ncomp = i, alpha = alpha, gamma = gamma)
       if (i < nvar) {
          if (lim.type == 'chisq') {
             Qlim[, i] = reslim.chisq(Q = Q, alpha = alpha, gamma = gamma)
@@ -1131,6 +1132,10 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 #' logical, show or not a legend on the plot
 #' @param show.limits
 #' logical, show or not lines with statistical limits for the residuals
+#' @param xlim
+#' limits for x-axis
+#' @param ylim
+#' limits for y-axis
 #' @param lim.col
 #' vector with two values - line color for extreme and outlier borders 
 #' @param lim.lwd
@@ -1147,7 +1152,7 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
 plotResiduals.pca = function(obj, ncomp = NULL, norm = F, main = NULL, xlab = NULL, ylab = NULL,
                              show.labels = F,  show.legend = T, show.limits = T, 
                              xlim = NULL, ylim = NULL, 
-                             lim.col = c('#c0a0a0', '#906060'), 
+                             lim.col = c('#333333', '#333333'), 
                              lim.lwd = c(1, 1), lim.lty = c(2, 3),
                              ...) {
    if (is.null(main)) {
@@ -1202,8 +1207,8 @@ plotResiduals.pca = function(obj, ncomp = NULL, norm = F, main = NULL, xlab = NU
    
    if (!is.null(obj$testres)) {
       data$test = mda.cbind(
-         obj$testres$T2[, ncomp]/T20, 
-         obj$testres$Q[ , ncomp]/Q0
+         obj$testres$T2[, ncomp]/T2.mean, 
+         obj$testres$Q[ , ncomp]/Q.mean
       )
       x.max = max(x.max, data$test[, 1])
       y.max = max(y.max, data$test[, 2])
