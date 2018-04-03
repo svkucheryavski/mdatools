@@ -80,8 +80,7 @@ mdaplot.formatValues = function(data, round.only = F, digits = 3)
 mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
                               show.colorbar = F, show.lines = F, 
                               legend = NULL, show.legend = F, legend.position = 'topright', 
-                              show.labels = F)
-{   
+                              show.labels = F) {
    if (is.null(x.values) || is.null(y.values))
       return(NULL)
    
@@ -110,16 +109,13 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
    }
    
    # correct limits if some lines that have to be shown are outside the data points cloud
-   if (is.numeric(show.lines))
-   {
-      if (!is.na(show.lines[1])) 
-      {   
+   if (is.numeric(show.lines)) {
+      if (!is.na(show.lines[1])) {   
          xmax = max(xmax, show.lines[1], na.rm = TRUE)
          xmin = min(xmin, show.lines[1], na.rm = TRUE)
       }
       
-      if (!is.na(show.lines[2])) 
-      {   
+      if (!is.na(show.lines[2])) {   
          ymax = max(ymax, show.lines[2], na.rm = TRUE)
          ymax = max(ymax, show.lines[2], na.rm = TRUE)
       }   
@@ -138,45 +134,32 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
       ylim[2] = ylim[2] + dy * 3
    
    # add extra margins if legend must be shown
-   if (show.legend == T && !is.null(legend))
-   {
+   if (show.legend == T && !is.null(legend)) {
       legend.size = mdaplot.showLegend(legend, position = legend.position, plot = F)
       w = legend.size$rect$w
       h = legend.size$rect$h
       
-      if (legend.position == 'topleft')
-      {
+      if (legend.position == 'topleft') {
          xlim[1] = xlim[1] - dx * 0.2
          ylim[2] = ylim[2] + dy * 0.2     
-      }   
-      else if (legend.position == 'top')
-      {
+      } else if (legend.position == 'top') {
          ylim[2] = ylim[2] + h + 0.2 * dy  
-      }   
-      else if (legend.position == 'topright')
-      {
+      } else if (legend.position == 'topright') {
          xlim[2] = xlim[2] + dx * 0.2
          ylim[2] = ylim[2] + dy * 0.2     
-      }   
-      else if (legend.position == 'bottomleft')
-      {
+      } else if (legend.position == 'bottomleft') {
          xlim[1] = xlim[1] - dx * 0.2
          ylim[1] = ylim[1] - dy * 0.2   
-      }   
-      else if (legend.position == 'bottom')
-      {
+      } else if (legend.position == 'bottom') {
          ylim[1] = ylim[1] - h - 0.2 * dy
-      }   
-      else if (legend.position == 'bottomright')
-      {
+      } else if (legend.position == 'bottomright') {
          xlim[2] = xlim[2] + dx * 0.2
          ylim[1] = ylim[1] - dy * 0.2
       }   
    }  
    
    # add extra margins if labels must be shown
-   if (show.labels == T)
-   {
+   if (show.labels == T) {
       ylim[1] = ylim[1] - dy 
       ylim[2] = ylim[2] + dy
    }   
@@ -209,10 +192,8 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
 #' Returns vector with generated color values
 #' 
 #' @export
-mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
-{   
-   if (length(colmap) == 1)
-   {   
+mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default') {   
+   if (length(colmap) == 1) {   
       # colormap is a name      
       if (colmap == 'gray') {   
          # use grayscale colormap
@@ -230,9 +211,7 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
          palette = c("#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FEE08B", "#FDAE61", "#F46D43", 
                      "#D53E4F")
       }   
-   }
-   else
-   {
+   } else {
       # assuming that user colormap has been provided
       if (sum(mdaplot.areColors(colmap) == F) == 0)
          palette = colmap
@@ -242,17 +221,13 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
    
    colfunc = colorRampPalette(palette, space = 'Lab')
    
-   if (!is.null(cgroup))
-   {   
-      if (is.factor(cgroup))
-      {
+   if (!is.null(cgroup)) {   
+      if (is.factor(cgroup)) {
          nlevels = length(attr(cgroup, 'levels'))
          ngroups = nlevels
          col = colfunc(ngroups)      
          colvals = col[as.numeric(cgroup)]
-      }   
-      else
-      { 
+      } else { 
          cfactor = factor(cgroup)
          nlevels = length(attr(cfactor, 'levels'))
          if (nlevels < 8)
@@ -264,9 +239,7 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default')
          cgroup = cut(as.vector(as.numeric(cgroup)), ngroups, labels = 1:ngroups)
          colvals = col[cgroup]
       }
-   }
-   else
-   {
+   } else {
       colvals = colfunc(ngroups)      
    }   
    
