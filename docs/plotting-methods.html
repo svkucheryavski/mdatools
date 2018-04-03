@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -25,7 +25,6 @@
 <meta name="author" content="Sergey Kucheryavskiy">
 
 
-<meta name="date" content="2017-08-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,7 +32,7 @@
   
   
 <link rel="prev" href="models-and-results.html">
-<link rel="next" href="partial-least-squares-regression.html">
+<link rel="next" href="residuals-and-critical-limits.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -142,6 +141,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluding-rows-and-columns"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html"><i class="fa fa-check"></i>Residuals and critical limits</a><ul>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#distance-to-model-and-score-distance"><i class="fa fa-check"></i>Distance to model and score distance</a></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#critical-limits"><i class="fa fa-check"></i>Critical limits</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="randomized-pca-algorithms.html"><a href="randomized-pca-algorithms.html"><i class="fa fa-check"></i>Randomized PCA algorithms</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="partial-least-squares-regression.html"><a href="partial-least-squares-regression.html"><i class="fa fa-check"></i>Partial least squares regression</a><ul>
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html"><i class="fa fa-check"></i>Models and results</a><ul>
@@ -156,6 +160,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="simca-classification.html"><a href="simca-classification.html"><i class="fa fa-check"></i>SIMCA classification</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html"><i class="fa fa-check"></i>Calibration and validation</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#predictions-and-validation-with-a-test-set"><i class="fa fa-check"></i>Predictions and validation with a test set</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#class-belonging-probabilities"><i class="fa fa-check"></i>Class belonging probabilities</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#extreme-plot"><i class="fa fa-check"></i>Extreme plot</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="multiclass-classification.html"><a href="multiclass-classification.html"><i class="fa fa-check"></i>Multiclass classification</a></li>
 </ul></li>
@@ -180,19 +186,19 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2>Plotting methods</h2>
 <p>First of all you can use the methods <code>mdaplot()</code> and <code>mdaplotg()</code> (or any others, e.g. <code>ggplot2</code>) for easy visualisation the results as they all available as matrices with proper names, attributes, etc. In the example below we create several scores and loadings plots. Here I assume that the last model you have created was the one with test set and cross-validation.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">mdaplot</span>(m$calres$scores, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.lines =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))
-<span class="kw">mdaplot</span>(m$loadings, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.lines =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))</code></pre></div>
+<span class="kw">mdaplot</span>(m<span class="op">$</span>calres<span class="op">$</span>scores, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.lines =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))
+<span class="kw">mdaplot</span>(m<span class="op">$</span>loadings, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.lines =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-55-1.png" width="864" /></p>
 <p>To simplify this routine, every model and result class also has a number of functions for visualization. Thus for PCA the function list includes scores and loadings plots, explained variance and cumulative explained variance plots, T<sup>2</sup> vs. Q residuals and many others.</p>
-<p>A function that does the same for different models and results has always the same name. For example <code>plotPredictions</code> will show predicted vs. measured plot for PLS model and PLS result, MLR model and MLR result, PCR model and PCR result and so on. The first argument must always be either a model or a result object.</p>
-<p>The major difference between plots for model and plots for result is following. A plot for result always shows one set of data objects — one set of points, lines or bars. For example predicted vs. measured values for calibration set or scores values for test set and so on. For such plots method <code>mdaplot()</code> is used and you can provide any arguments, available for this method (e.g. color group scores for calibration results).</p>
-<p>And a plot for a model in most cases shows several sets of data objects, e.g. predicted values for calibration and validation. In this case, a corresponding method uses <code>mdaplotg()</code> and therefore you can adjust the plot using arguments described for this method.</p>
+<p>A function that does the same for different models and results has always the same name. For example, <code>plotPredictions</code> will show predicted vs. measured plot for PLS model and PLS result, MLR model and MLR result, PCR model and PCR result and so on. The first argument must always be either a model or a result object.</p>
+<p>The major difference between plots for model and plots for result is following. A plot for result always shows one set of data objects — one set of points, lines or bars. For example, predicted vs. measured values for calibration set or scores values for test set and so on. For such plots method <code>mdaplot()</code> is used and you can provide any arguments, available for this method (e.g. color group scores for calibration results).</p>
+<p>And a plot for a model in most cases shows several sets of data objects, e.g. predicted values for calibration and validation. In this case, a corresponding method uses <code>mdaplotg()</code> and, therefore, you can adjust the plot using arguments described for this method.</p>
 <p>Here are some examples for results:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotScores</span>(m$calres, <span class="dt">show.labels =</span> T)
-<span class="kw">plotScores</span>(m$calres, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">pch =</span> <span class="dv">18</span>, <span class="dt">cgroup =</span> X.c[, <span class="st">&#39;Income&#39;</span>], <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;indices&#39;</span>)
-<span class="kw">plotResiduals</span>(m$calres, <span class="dt">show.labels =</span> T, <span class="dt">cgroup =</span> X.c[, <span class="st">&#39;Weight&#39;</span>])
-<span class="kw">plotVariance</span>(m$calres, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)</code></pre></div>
+<span class="kw">plotScores</span>(m<span class="op">$</span>calres, <span class="dt">show.labels =</span> T)
+<span class="kw">plotScores</span>(m<span class="op">$</span>calres, <span class="dt">pch =</span> <span class="dv">18</span>, <span class="dt">cgroup =</span> X.c[, <span class="st">&#39;Income&#39;</span>], <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;indices&#39;</span>)
+<span class="kw">plotResiduals</span>(m<span class="op">$</span>calres, <span class="dt">show.labels =</span> T, <span class="dt">cgroup =</span> X.c[, <span class="st">&#39;Weight&#39;</span>])
+<span class="kw">plotVariance</span>(m<span class="op">$</span>calres, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-56-1.png" width="864" /></p>
 <p>The color grouping option is not available for the group (model) plots as colors are used there to underline the groups.</p>
 <p>Now let’s look at similar plots (plus loadings) for a model.</p>
@@ -214,10 +220,10 @@ X =<span class="st"> </span><span class="kw">mda.im2data</span>(pellets)
 m =<span class="st"> </span><span class="kw">pca</span>(X)
 
 <span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">imshow</span>(m$calres$scores)
-<span class="kw">imshow</span>(m$calres$Q)
-<span class="kw">imshow</span>(m$calres$scores, <span class="dv">2</span>)
-<span class="kw">imshow</span>(m$calres$Q, <span class="dv">2</span>)</code></pre></div>
+<span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>scores)
+<span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>Q)
+<span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>scores, <span class="dv">2</span>)
+<span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>Q, <span class="dv">2</span>)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-59-1.png" width="864" /></p>
 </div>
 <div id="manual-x-values-for-loading-line-plot" class="section level3 unnumbered">
@@ -225,12 +231,12 @@ m =<span class="st"> </span><span class="kw">pca</span>(X)
 <p>As it was discussed in the previous chapter, you can specify a special attribute, <code>'xaxis.values'</code> to a dataset, which will be used as manual x-values in bar and line plots. When we create any model and/or results the most important attributes, including this one, are inherited. For example when you make a loading line plot it will be shown using the attribute values.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(simdata)
 
-X =<span class="st"> </span>simdata$spectra.c
+X =<span class="st"> </span>simdata<span class="op">$</span>spectra.c
 <span class="kw">attr</span>(X, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> &#39;Wavelength, nm&#39;</span>
-<span class="kw">attr</span>(X, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span>simdata$wavelength
+<span class="kw">attr</span>(X, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span>simdata<span class="op">$</span>wavelength
 
 m =<span class="st"> </span><span class="kw">pca</span>(X, <span class="dv">3</span>)
-<span class="kw">plotLoadings</span>(m, <span class="dv">1</span>:<span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)</code></pre></div>
+<span class="kw">plotLoadings</span>(m, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-60-1.png" width="864" /></p>
 </div>
 <div id="excluding-rows-and-columns" class="section level3 unnumbered">
@@ -249,7 +255,7 @@ m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv"
 <span class="kw">plotLoadings</span>(m, <span class="dt">show.excluded =</span> T, <span class="dt">show.labels =</span> T)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-61-1.png" width="864" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># show matrix with loadings (look at row Income and attribute &quot;exclrows&quot;)</span>
-<span class="kw">show</span>(m$loadings)</code></pre></div>
+<span class="kw">show</span>(m<span class="op">$</span>loadings)</code></pre></div>
 <pre><code>##                Comp 1      Comp 2       Comp 3      Comp 4      Comp 5
 ## Height   -0.386393327  0.10697019 -0.004829174  0.12693029 -0.13128331
 ## Weight   -0.391013398  0.07820097  0.051916032  0.04049593 -0.14757465
@@ -270,17 +276,15 @@ m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv"
 ## attr(,&quot;xaxis.name&quot;)
 ## [1] &quot;Components&quot;</code></pre>
 <p>Such behavior will help to exclude and include rows and columns interactively, when GUI add-in for <code>mdatools()</code> is available.</p>
-
 </div>
 </div>
-<!-- </div> -->
             </section>
 
           </div>
         </div>
       </div>
 <a href="models-and-results.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="partial-least-squares-regression.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="residuals-and-critical-limits.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -291,17 +295,18 @@ m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv"
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-require(["gitbook"], function(gitbook) {
+gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": false,
 "facebook": true,
 "twitter": true,
 "google": false,
+"linkedin": false,
 "weibo": false,
 "instapper": false,
 "vk": false,
-"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",
@@ -325,9 +330,11 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

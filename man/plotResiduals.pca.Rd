@@ -6,8 +6,8 @@
 \usage{
 \method{plotResiduals}{pca}(obj, ncomp = NULL, norm = F, main = NULL,
   xlab = NULL, ylab = NULL, show.labels = F, show.legend = T,
-  show.limits = T, xlim = NULL, ylim = NULL, lim.col = c("#c0a0a0",
-  "#906060"), lim.lwd = c(1, 1), lim.lty = c(2, 1), ...)
+  show.limits = T, xlim = NULL, ylim = NULL, lim.col = c("#333333",
+  "#333333"), lim.lwd = c(1, 1), lim.lty = c(2, 3), ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
@@ -27,6 +27,10 @@
 \item{show.legend}{logical, show or not a legend on the plot}
 
 \item{show.limits}{logical, show or not lines with statistical limits for the residuals}
+
+\item{xlim}{limits for x-axis}
+
+\item{ylim}{limits for y-axis}
 
 \item{lim.col}{vector with two values - line color for extreme and outlier borders}
 

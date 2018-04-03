@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -25,7 +25,6 @@
 <meta name="author" content="Sergey Kucheryavskiy">
 
 
-<meta name="date" content="2017-08-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -142,6 +141,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluding-rows-and-columns"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html"><i class="fa fa-check"></i>Residuals and critical limits</a><ul>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#distance-to-model-and-score-distance"><i class="fa fa-check"></i>Distance to model and score distance</a></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#critical-limits"><i class="fa fa-check"></i>Critical limits</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="randomized-pca-algorithms.html"><a href="randomized-pca-algorithms.html"><i class="fa fa-check"></i>Randomized PCA algorithms</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="partial-least-squares-regression.html"><a href="partial-least-squares-regression.html"><i class="fa fa-check"></i>Partial least squares regression</a><ul>
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html"><i class="fa fa-check"></i>Models and results</a><ul>
@@ -156,6 +160,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="simca-classification.html"><a href="simca-classification.html"><i class="fa fa-check"></i>SIMCA classification</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html"><i class="fa fa-check"></i>Calibration and validation</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#predictions-and-validation-with-a-test-set"><i class="fa fa-check"></i>Predictions and validation with a test set</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#class-belonging-probabilities"><i class="fa fa-check"></i>Class belonging probabilities</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#extreme-plot"><i class="fa fa-check"></i>Extreme plot</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="multiclass-classification.html"><a href="multiclass-classification.html"><i class="fa fa-check"></i>Multiclass classification</a></li>
 </ul></li>
@@ -178,9 +184,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="simca-classification" class="section level1 unnumbered">
 <h1>SIMCA classification</h1>
-<p>SIMCA (Soft Independent Modelling of Class Analogy) is a simple one-class classification method mainly based on PCA. The general idea is to create a PCA model using data for samples/objects belonging to a class and classify new objects based on how good the model can fit them. The decision is made using two residual distances — <span class="math inline">\(Q\)</span> (squared residual distance from an object to its projection to PCA space) and <span class="math inline">\(T^2\)</span> - distance between the projection of the object and origin of PC space. The <span class="math inline">\(T^2\)</span> distance is calculated for normalized scores.</p>
-<p>The first distance (also known as “orthogonal distance”) shows how good the new object following the same trend as the other objects from the class used to create the model, while the second (also known as “score distance”) tells how extreme is it. Both distances may have certain statistical limits, which can be used to cut-off the strangers and accept class members with a pre-define expected ratio of false negatives (<span class="math inline">\(\alpha\)</span>). There are several ways to calculate the limits, for example, see <a href="http://onlinelibrary.wiley.com/doi/10.1002/cem.1147/abstract">this paper</a>. In <em>mdatools</em> so far we use a simplest way, suggested by Svante Wold, where the limit for orthogonal distance is calculated using F-distribution and the score distance is computed using Hotelling T<sup>2</sup> distribution. More methods will be available in future releases.</p>
-<p>The classification performance is assessed using true/false positives and negatives and statistics, showing the ability of a classification model to recognize class members (<em>sensitivity</em> or true positive rate) and how good the model is for identifying strangers (<em>specificity</em> or true negative rate). In addition to that, model also calculates a percent of misclassified objects. All statistics are calculated for calibration and validation (if any) results, but one must be aware that specificity can not be computed without objects not belonging to the class and, therefore, calibration and cross-validation results in SIMCA do not have specificity values.</p>
+<p>SIMCA (Soft Independent Modelling of Class Analogy) is a simple but efficient one-class classification method mainly based on PCA. The general idea is to create a PCA model using data for samples/objects belonging to a class and classify new objects based on how good the model can fit them. The decision is made using two residual distances — <span class="math inline">\(Q\)</span> and <span class="math inline">\(T^2\)</span> - distance between. Critical limits computed for both distances (or their combination) are used to cut-off the strangers and accept class members with a pre-define expected ratio of false negatives (<span class="math inline">\(\alpha\)</span>). All details about which method for critical limits implemented in this package can be found <a href="residuals-and-critical-limits.html#residuals-and-critical-limits">here</a>. It must be noted that version <em>0.9.0</em> brings a lot if improvements and new features related to the critical limits calculation and SIMCA classification, so it can be a good idea to read this chapter first.</p>
+<p>The classification performance can be assessed using true/false positives and negatives and statistics, showing the ability of a classification model to recognize class members (<em>sensitivity</em> or true positive rate) and how good the model is for identifying strangers (<em>specificity</em> or true negative rate). In addition to that, model also calculates a percent of misclassified objects. All statistics are calculated for calibration and validation (if any) results, but one must be aware that specificity can not be computed without objects not belonging to the class and, therefore, calibration and cross-validation results in SIMCA do not have specificity values.</p>
 <p>It must be also noted that any SIMCA model or result is also a PCA object and all plots, methods, statistics, available for PCA, can be used for SIMCA objects as well.</p> 
 </div>
             </section>
@@ -200,17 +205,18 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-require(["gitbook"], function(gitbook) {
+gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": false,
 "facebook": true,
 "twitter": true,
 "google": false,
+"linkedin": false,
 "weibo": false,
 "instapper": false,
 "vk": false,
-"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",
@@ -234,9 +240,11 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

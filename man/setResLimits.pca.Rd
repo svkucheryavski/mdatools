@@ -4,7 +4,7 @@
 \alias{setResLimits.pca}
 \title{Set statistical limits for Q and T2 residuals for PCA model}
 \usage{
-\method{setResLimits}{pca}(obj, alpha = obj$alpha, gamma = obj$gamma)
+\method{setResLimits}{pca}(obj, alpha = obj$alpha, gamma = obj$gamma, ...)
 }
 \arguments{
 \item{obj}{object with PCA model}
@@ -12,6 +12,8 @@
 \item{alpha}{significance level for detection of extreme objects}
 
 \item{gamma}{significance level for detection of outliers (for data driven approach)}
+
+\item{...}{other arguments}
 }
 \value{
 Returns a list with two matrices:  \code{T2lim} and \code{Qlim}. Each matrix contains limits 

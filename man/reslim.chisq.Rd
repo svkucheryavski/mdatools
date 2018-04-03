@@ -4,7 +4,8 @@
 \alias{reslim.chisq}
 \title{Calculates critical limits or statistic values for Q-residuals using Chi-squared distribution}
 \usage{
-reslim.chisq(Q, alpha = 0.05, gamma = 0.01, return = "limits")
+reslim.chisq(Q, alpha = 0.05, gamma = 0.01, Qlim = NULL,
+  return = "limits")
 }
 \arguments{
 \item{Q}{vector with Q-residuals for selected component}
@@ -12,6 +13,8 @@ reslim.chisq(Q, alpha = 0.05, gamma = 0.01, return = "limits")
 \item{alpha}{significance level for extreme objects}
 
 \item{gamma}{significance level for outliers}
+
+\item{Qlim}{vector with Q limits for selected number of components (from model)}
 
 \item{return}{what to return: \code{'limits'} or \code{'probability'}}
 }

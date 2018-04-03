@@ -5,12 +5,20 @@
 \title{Shows extreme plot for SIMCA model}
 \usage{
 \method{plotExtreme}{simca}(obj, ncomp = NULL, main = NULL,
-  xlab = "Expected", ylab = "Observed")
+  xlab = "Expected", ylab = "Observed", ...)
 }
 \arguments{
 \item{obj}{SIMCA model}
 
 \item{ncomp}{Number of components to show the plot for}
+
+\item{main}{main title for the plot}
+
+\item{xlab}{label for x axis}
+
+\item{ylab}{label for y axis}
+
+\item{...}{other arguments}
 }
 \description{
 The plot shows the number of extreme objects rejected by the model vs. the expected number, 

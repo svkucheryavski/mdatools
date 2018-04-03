@@ -5,7 +5,7 @@
 \title{Statistical limits for Q and T2 residuals using Data Driven approach}
 \usage{
 reslim.dd(Q, T2, type = "ddmoments", alpha = 0.05, gamma = 0.01,
-  return = "limits")
+  Qlim = NULL, T2lim = NULL, return = "limits")
 }
 \arguments{
 \item{Q}{vector with Q-residuals for selected component}
@@ -17,6 +17,10 @@ reslim.dd(Q, T2, type = "ddmoments", alpha = 0.05, gamma = 0.01,
 \item{alpha}{significance level for extreme objects}
 
 \item{gamma}{significance level for outliers}
+
+\item{Qlim}{vector with Q limits for selected number of components (from model)}
+
+\item{T2lim}{vector with T2 limits for selected number of components (from model)}
 
 \item{return}{what to return: \code{'limits'} or \code{'probability'}}
 }

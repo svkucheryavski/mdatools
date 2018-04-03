@@ -6,7 +6,7 @@
 \usage{
 \method{plotResiduals}{simcares}(obj, ncomp = NULL, main = NULL,
   xlab = NULL, ylab = NULL, norm = F, show.limits = T, legend = NULL,
-  lim.col = c("#c0a0a0", "#906060"), lim.lwd = c(1, 1), lim.lty = c(2, 1),
+  lim.col = c("#c0a0a0", "#906060"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
   ...)
 }
 \arguments{
@@ -20,13 +20,19 @@
 
 \item{ylab}{label for y axis}
 
+\item{norm}{logical, show normalized Q vs T2 (\code{norm = T}) values or original ones (\code{norm = F})}
+
 \item{show.limits}{logical, show or not lines with statistical limits for the residuals}
 
 \item{legend}{vector with legend items}
 
-\item{...}{other plot parameters (see \code{mdaplot} for details)}
+\item{lim.col}{vector with two values - line color for extreme and outlier borders}
 
-\item{type}{type of the plot}
+\item{lim.lwd}{vector with two values - line width for extreme and outlier borders}
+
+\item{lim.lty}{vector with two values - line type for extreme and outlier borders}
+
+\item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
 \description{
 Shows a plot with Q vs. T2 residuals for SIMCA results

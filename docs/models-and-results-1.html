@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -25,7 +25,6 @@
 <meta name="author" content="Sergey Kucheryavskiy">
 
 
-<meta name="date" content="2017-08-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -142,6 +141,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluding-rows-and-columns"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html"><i class="fa fa-check"></i>Residuals and critical limits</a><ul>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#distance-to-model-and-score-distance"><i class="fa fa-check"></i>Distance to model and score distance</a></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#critical-limits"><i class="fa fa-check"></i>Critical limits</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="randomized-pca-algorithms.html"><a href="randomized-pca-algorithms.html"><i class="fa fa-check"></i>Randomized PCA algorithms</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="partial-least-squares-regression.html"><a href="partial-least-squares-regression.html"><i class="fa fa-check"></i>Partial least squares regression</a><ul>
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html"><i class="fa fa-check"></i>Models and results</a><ul>
@@ -156,6 +160,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="simca-classification.html"><a href="simca-classification.html"><i class="fa fa-check"></i>SIMCA classification</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html"><i class="fa fa-check"></i>Calibration and validation</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#predictions-and-validation-with-a-test-set"><i class="fa fa-check"></i>Predictions and validation with a test set</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#class-belonging-probabilities"><i class="fa fa-check"></i>Class belonging probabilities</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#extreme-plot"><i class="fa fa-check"></i>Extreme plot</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="multiclass-classification.html"><a href="multiclass-classification.html"><i class="fa fa-check"></i>Multiclass classification</a></li>
 </ul></li>
@@ -186,9 +192,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">data</span>(people)
 
 idx =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">4</span>, <span class="dv">32</span>, <span class="dv">4</span>)
-X.c =<span class="st"> </span>people[-idx, -<span class="dv">4</span>]
-y.c =<span class="st"> </span>people[-idx, <span class="dv">4</span>, drop =<span class="st"> </span>F]
-X.t =<span class="st"> </span>people[idx, -<span class="dv">4</span>]
+X.c =<span class="st"> </span>people[<span class="op">-</span>idx, <span class="op">-</span><span class="dv">4</span>]
+y.c =<span class="st"> </span>people[<span class="op">-</span>idx, <span class="dv">4</span>, drop =<span class="st"> </span>F]
+X.t =<span class="st"> </span>people[idx, <span class="op">-</span><span class="dv">4</span>]
 y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span class="st"> </span>F]</code></pre></div>
 <p>So <code>X.c</code> and <code>y.c</code> are predictors and response values for calibration subset. Now let’s calibrate the model and show an information about the model object:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">info =</span> <span class="st">&quot;Shoesize prediction model&quot;</span>)</code></pre></div>
@@ -220,11 +226,11 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
 <span class="kw">plotRegcoeffs</span>(m)
 <span class="kw">plotRegcoeffs</span>(m, <span class="dt">ncomp =</span> <span class="dv">2</span>)
-<span class="kw">plot</span>(m$coeffs, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
-<span class="kw">plot</span>(m$coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-65-1.png" width="864" /></p>
+<span class="kw">plot</span>(m<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
+<span class="kw">plot</span>(m<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-75-1.png" width="864" /></p>
 <p>The model keeps regression coefficients, calculated for centered and standardized data, without intercept, etc. Here are the values for three PLS components.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m$coeffs$values[, <span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m<span class="op">$</span>coeffs<span class="op">$</span>values[, <span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
 <pre><code>##       Height       Weight     Hairleng          Age       Income 
 ##  0.210411676  0.197646483 -0.138824482  0.026613035 -0.000590693 
 ##         Beer         Wine          Sex         Swim       Region 
@@ -232,7 +238,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 ##           IQ 
 ## -0.088658626</code></pre>
 <p>You can see a summary for the regression coefficients object by calling function <code>summary()</code> for the object <code>m$coeffs</code> like it is show below. By default it shows only estimated regression coefficients for the selected y-variable and number of components. However, if you employ Jack-Knifing (see section <em>Variable selection</em> below), the object with regression coefficients will also contain some statistics, including standard error, p-value (for test if the coefficient is equal to zero in populatio) and confidence interval. All statistics in this case will be shown automatically with <code>summary()</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m$coeffs)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m<span class="op">$</span>coeffs)</code></pre></div>
 <pre><code>## Regression coefficients for Shoesize
 ## ------------------------------------
 ##       Height       Weight     Hairleng          Age       Income 
@@ -241,7 +247,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 ##  0.133136867  0.002751573 -0.164627444  0.173739533 -0.031357608 
 ##           IQ 
 ## -0.003353428</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m$coeffs, <span class="dt">ncomp =</span> <span class="dv">3</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">3</span>)</code></pre></div>
 <pre><code>## Regression coefficients for Shoesize
 ## ------------------------------------
 ##       Height       Weight     Hairleng          Age       Income 
@@ -269,7 +275,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 ## [1] &quot;Regression coefficients for  Shoesize&quot;</code></pre>
 <p>It also returns all statistics in case if Jack-Knifing was applied.</p>
 <p>Similar to PCA, model object may contain three fields for results obtained using calibration set (<code>calres</code>), cross-validation (<code>cvres</code>) and test set validation (<code>testres</code>). All three have class <code>plsres</code>, here is how <code>calres</code> looks like:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m$calres)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m<span class="op">$</span>calres)</code></pre></div>
 <pre><code>## 
 ## PLS results (class plsres)
 ## 
@@ -288,7 +294,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 ## $ydecomp - decomposition of y values (ldecomp object)
 ## $xdecomp - decomposition of x values (ldecomp object)</code></pre>
 <p>The <code>xdecomp</code> and <code>ydecomp</code> are objects similar to <code>pcares</code>, they contain scores, residuals and variances for decomposition of X and Y correspondingly.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m$calres$xdecomp)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m<span class="op">$</span>calres<span class="op">$</span>xdecomp)</code></pre></div>
 <pre><code>## 
 ## Results of data decomposition (class ldecomp)
 ## 
@@ -330,16 +336,16 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 <p>When you create a model, it tries to select optimal number of components automatically (which, of course, you can always change later). To do that, the method uses RMSE values, calculated for different number of components and cross-validation predictions. So, if we do not use cross-validation, it warns use about this.</p>
 <p>There are two different ways/criteria for automatic selection. One is using first local minimum on the RMSE plot and second is so called Wold criterion, based on a ratio between PRESS values for current and next component. You can select which criterion to use by specifying parameter <code>ncomp.selcrit</code> (either <code>'min'</code> or <code>'wold'</code>) as it is shown below.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">ncomp.selcrit =</span> <span class="st">&#39;min&#39;</span>)
-<span class="kw">show</span>(m1$ncomp.selected)</code></pre></div>
+<span class="kw">show</span>(m1<span class="op">$</span>ncomp.selected)</code></pre></div>
 <pre><code>## [1] 5</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">ncomp.selcrit =</span> <span class="st">&#39;wold&#39;</span>)
-<span class="kw">show</span>(m2$ncomp.selected)</code></pre></div>
+<span class="kw">show</span>(m2<span class="op">$</span>ncomp.selected)</code></pre></div>
 <pre><code>## [1] 4</code></pre>
 <p>And here are the RMSE plots (they are identical of course):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotRMSE</span>(m1)
 <span class="kw">plotRMSE</span>(m2)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-74-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-84-1.png" width="864" /></p>
 <p>Parameter <code>cv</code> has the same format as for PCA. If it is a number, it will be used as number of segments for random cross-validation, e.g. if <code>cv = 2</code> cross-validation with two segments will be carried out. For full cross-validation use <code>cv = 1</code> like we did in the example above. For more advanced option you can provide a list with name of cross-validation method, number of segments and number of iterations, e.g. <code>cv = list('rand', 4, 4)</code> for running random cross-validation with four segments and four repetitions or <code>cv = list('ven', 8)</code> for systematic split into eight segments (<em>venetian blinds</em>).</p>
 <p>Method <code>summary()</code> for model shows performance statistics calculated using optimal number of components for each of the results.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1)</code></pre></div>
@@ -352,7 +358,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 ## Cal       97.64       98.19 0.521  0.98  0e+00 7.59
 ## CV        92.90       96.22 0.753  0.98 -2e-04 5.26</code></pre>
 <p>If you want more details run <code>summary()</code> for one of the result objects.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1$calres)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1<span class="op">$</span>calres)</code></pre></div>
 <pre><code>## 
 ## PLS regression results (class plsres) summary
 ## 
@@ -385,17 +391,18 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-require(["gitbook"], function(gitbook) {
+gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": false,
 "facebook": true,
 "twitter": true,
 "google": false,
+"linkedin": false,
 "weibo": false,
 "instapper": false,
 "vk": false,
-"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",
@@ -419,9 +426,11 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

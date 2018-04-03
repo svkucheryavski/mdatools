@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Getting started with mdatools for R</title>
+  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Getting started with mdatools for R" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  <meta name="github-repo" content="svkucheryavski/mdatools.bookdown" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Getting started with mdatools for R" />
+  
+  <meta name="twitter:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  
+
+<meta name="author" content="Sergey Kucheryavskiy">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="plotting-methods.html">
+<link rel="next" href="randomized-pca-algorithms.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html"><i class="fa fa-check"></i>What is new</a><ul>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#what-expect-from-future-releases"><i class="fa fa-check"></i>What expect from future releases</a></li>
+<li class="chapter" data-level="" data-path="what-is-new.html"><a href="what-is-new.html#last-changes-and-improvements-to-book-and-package"><i class="fa fa-check"></i>Last changes and improvements to book and package</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i>Overview</a><ul>
+<li class="chapter" data-level="" data-path="what-mdatools-can-do.html"><a href="what-mdatools-can-do.html"><i class="fa fa-check"></i>What mdatools can do?</a></li>
+<li class="chapter" data-level="" data-path="how-to-install.html"><a href="how-to-install.html"><i class="fa fa-check"></i>How to install</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="datasets-and-plots.html"><a href="datasets-and-plots.html"><i class="fa fa-check"></i>Datasets and plots</a><ul>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html"><i class="fa fa-check"></i>Attributes and factors</a><ul>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#package-specific-attributes"><i class="fa fa-check"></i>Package specific attributes</a></li>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#attributes-for-plots"><i class="fa fa-check"></i>Attributes for plots</a></li>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#special-methods-for-data-transformations"><i class="fa fa-check"></i>Special methods for data transformations</a></li>
+<li class="chapter" data-level="" data-path="attributes-and-factors.html"><a href="attributes-and-factors.html#data-frames-with-factors"><i class="fa fa-check"></i>Data frames with factors</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html"><i class="fa fa-check"></i>Simple plots</a><ul>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html#scatter-plots"><i class="fa fa-check"></i>Scatter plots</a></li>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html#line-plots"><i class="fa fa-check"></i>Line plots</a></li>
+<li class="chapter" data-level="" data-path="simple-plots.html"><a href="simple-plots.html#bar-and-errorbar-plots"><i class="fa fa-check"></i>Bar and errorbar plots</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html"><i class="fa fa-check"></i>Plots for groups of objects</a><ul>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html#one-matrix-or-data-frame"><i class="fa fa-check"></i>One matrix or data frame</a></li>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html#list-with-matrices-or-data-frames"><i class="fa fa-check"></i>List with matrices or data frames</a></li>
+<li class="chapter" data-level="" data-path="plots-for-groups-of-objects.html"><a href="plots-for-groups-of-objects.html#use-factors-to-split-a-dataset-into-groups"><i class="fa fa-check"></i>Use factors to split a dataset into groups</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="working-with-images.html"><a href="working-with-images.html"><i class="fa fa-check"></i>Working with images</a></li>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html"><i class="fa fa-check"></i>Preprocessing</a><ul>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html#autoscaling"><i class="fa fa-check"></i>Autoscaling</a></li>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html#correction-of-spectral-baseline"><i class="fa fa-check"></i>Correction of spectral baseline</a></li>
+<li class="chapter" data-level="" data-path="preprocessing.html"><a href="preprocessing.html#smoothing-and-derivatives"><i class="fa fa-check"></i>Smoothing and derivatives</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="principal-component-analysis.html"><a href="principal-component-analysis.html"><i class="fa fa-check"></i>Principal component analysis</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results.html"><a href="models-and-results.html"><i class="fa fa-check"></i>Models and results</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results.html"><a href="models-and-results.html#model-calibration"><i class="fa fa-check"></i>Model calibration</a></li>
+<li class="chapter" data-level="" data-path="models-and-results.html"><a href="models-and-results.html#model-validation"><i class="fa fa-check"></i>Model validation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#support-for-images"><i class="fa fa-check"></i>Support for images</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
+<li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluding-rows-and-columns"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html"><i class="fa fa-check"></i>Residuals and critical limits</a><ul>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#distance-to-model-and-score-distance"><i class="fa fa-check"></i>Distance to model and score distance</a></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#critical-limits"><i class="fa fa-check"></i>Critical limits</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="randomized-pca-algorithms.html"><a href="randomized-pca-algorithms.html"><i class="fa fa-check"></i>Randomized PCA algorithms</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="partial-least-squares-regression.html"><a href="partial-least-squares-regression.html"><i class="fa fa-check"></i>Partial least squares regression</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html"><i class="fa fa-check"></i>Models and results</a><ul>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-calibration-1"><i class="fa fa-check"></i>Model calibration</a></li>
+<li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html#model-validation-1"><i class="fa fa-check"></i>Model validation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html"><i class="fa fa-check"></i>Plotting methods</a><ul>
+<li class="chapter" data-level="" data-path="plotting-methods-1.html"><a href="plotting-methods-1.html#excluding-rows-and-columns-1"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i>Variable selection</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="simca-classification.html"><a href="simca-classification.html"><i class="fa fa-check"></i>SIMCA classification</a><ul>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html"><i class="fa fa-check"></i>Calibration and validation</a><ul>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#predictions-and-validation-with-a-test-set"><i class="fa fa-check"></i>Predictions and validation with a test set</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#class-belonging-probabilities"><i class="fa fa-check"></i>Class belonging probabilities</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#extreme-plot"><i class="fa fa-check"></i>Extreme plot</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="multiclass-classification.html"><a href="multiclass-classification.html"><i class="fa fa-check"></i>Multiclass classification</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Getting started with mdatools for R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="residuals-and-critical-limits" class="section level2 unnumbered">
+<h2>Residuals and critical limits</h2>
+<div id="distance-to-model-and-score-distance" class="section level3 unnumbered">
+<h3>Distance to model and score distance</h3>
+<p>When data objects are being projected to a principal component space, two distances (also known as <em>residual distances</em> or just <em>resudals</em>) are calculated and stored as a part of PCA results (<code>pcares</code> object). The first is a squared orthogonal Euclidean distance from original position of an object to the PC space, also known as <em>Q-distance</em> or <em>Q-residual</em>. The distance shows how well the object is fitted by the PCA model and allows to detect objects that do not follow a commond trend, captured by the PCs.</p>
+<p>The second distance shows how far a projection of the object to the PC space is from the origin. This distance is also known as Hotelling T<sup>2</sup> distance or a <em>score distance</em>. To compute T<sup>2</sup> distance scores should be first normalized by dividing them to corresponding singular values. The T<sup>2</sup> distance allows to see extreme objects — which are far from the origin.</p>
+<p>If, for example, we use PCA for making decomposition of height and weight of people, then PC1 will oriented along a linear trend between the height and weight values common for most of the people. If a person has height and weight within the data range but e.g. is overweighted or underweighted, the corresponding object will have large Q-distance, which indicates that this person does not share the common trend. And, if a person has a ratio between height and weight common for the most of people from the dataset, but, e.g. is too tall, then the corresponding object will have large T<sup>2</sup> distance.</p>
+<p>In <em>mdatools</em> both distances are calculated for all objects of dataset and all possible components. So every distance is represented by <em>nObj x nComp</em> matrix, the first column contains distances for a model with only one component, second — for model with two components, and so on. The residual distances can be visialised using method <code>plotResiduals()</code> which is available both for PCA results as well as for PCA model. In the case of model the plot shows distances for calibration set, cross-validation and test set (if they were used of course).</p>
+<p>Here is an example.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(people)
+m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">4</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>)
+
+<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">plotResiduals</span>(m, <span class="dt">main =</span> <span class="st">&#39;Residuals for model&#39;</span>)
+<span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">main =</span> <span class="st">&#39;Residuals for model (2 Comp)&#39;</span>)
+<span class="kw">plotResiduals</span>(m<span class="op">$</span>calres, <span class="dt">main =</span> <span class="st">&#39;Residuals for calibration&#39;</span>)
+<span class="kw">plotResiduals</span>(m<span class="op">$</span>cvres, <span class="dt">main =</span> <span class="st">&#39;Residuals for cross-validated results&#39;</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-62-1.png" width="864" /></p>
+<p>The dashed and dotted lines on the plots are critical limits for extreme objects and for outliers, explained in the next section. They can be hidden/removed from the plots by using additional parameter <code>show.limits = F</code>. You can also change the color, line type and width for the lines by using options <code>lim.col</code>, <code>lim.lty</code> and <code>lim.lwd</code> as it is shown below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotResiduals</span>(m)
+<span class="kw">plotResiduals</span>(m, <span class="dt">lim.col =</span> <span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;orange&#39;</span>), <span class="dt">lim.lwd =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), <span class="dt">lim.lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-63-1.png" width="864" /></p>
+<p>It is necessary to provide a vector with two values for each of the argument (first for extreme objects and second for outliers border).</p>
+</div>
+<div id="critical-limits" class="section level3 unnumbered">
+<h3>Critical limits</h3>
+<p>If PCA model is made for dataset taken from the same poulation, Q and T<sup>2</sup> residuals can be used to find outliers and extreme objects. One of the ways to do it is to use critical limits for the residuals assuming that they follow certain theoretical distribution.</p>
+<p>Critical limits are also important for SIMCA classification as they directly used for making decision on class belongings. This package implements several methods to compute the limits, which are explained in this section.</p>
+<div id="critical-limits-for-score-distance-t2-residuals" class="section level4 unnumbered">
+<h4>Critical limits for score distance (T<sup>2</sup>-residuals)</h4>
+<p>The distribution of T<sup>2</sup>-residuals can be well described using <a href="https://en.wikipedia.org/wiki/Hotelling%27s_T-squared_distribution">Hotelling’s T<sup>2</sup> distribution</a>, which, it its turn is based on <em>F</em>-distribution.</p>
+<p>For given T<sup>2</sup> values computed for <em>N</em> objects using <em>A</em> principal components, the critical limit, <em>T2lim</em> can be computed as follows:</p>
+<p><span class="math display">\[T2lim = \frac{A (N - 1)}{(N - A)} F^{-1}_{1-\alpha}(A, N-A)\]</span> Here <span class="math inline">\(F^{-1}_{1-\alpha}(A, N-A)\)</span> is inverse cumulative distribution function (ICDF) for F-distribution with <span class="math inline">\(A\)</span> and <span class="math inline">\(N-A\)</span> degrees of freedom and <span class="math inline">\(\alpha\)</span> is a significance level (for example if <span class="math inline">\(\alpha = 0.05\)</span> we can expect 5% of objects that will have T<sup>2</sup>-distance larger than this limit).</p>
+<p>In <em>mdatools</em> the limits are computed based on calibration results and for all possible number of components. The limits are represented as a matrix with four rows and <span class="math inline">\(A\)</span> columns, where the first row contains the limits computed for given <code>alpha</code> parameter (by default <code>alpha = 0.05</code>), second row has similar limits but calculated using another significance level, <code>gamma</code> (by default <code>gamma = 0.01</code>), third row contains mean value for the T<sup>2</sup> distances and last row contains degrees of freedom, in this case <span class="math inline">\(N-A\)</span>. The limits calculated for <code>gamma</code> are used to detect outliers and shown on residuals plot with dotted line.</p>
+<p>Here is the limits shown for PCA model computed in the previous example.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m<span class="op">$</span>T2lim)</code></pre></div>
+<pre><code>##                                  Comp 1    Comp 2   Comp 3   Comp 4
+## Critical limit (alpha = 0.05)  4.159615  6.852714  9.40913 12.01948
+## Outliers limit (gamma = 0.01)  7.529766 11.140048 14.55224 18.04214
+## Mean (u0)                      0.968750  1.937500  2.90625  3.87500
+## DoF                           31.000000 30.000000 29.00000 28.00000</code></pre>
+<p>So, you can see that the critical limit for model with 2 PCs is 6.85 and for model with 4 PCs is 12.02. This is exactly what can be seen as vertical dashed line on the two top residual plots shown in the figure above (left for 4 PCs and right for 2 PCs).</p>
+</div>
+<div id="critical-limits-for-orthogonal-distance-q-residuals" class="section level4 unnumbered">
+<h4>Critical limits for orthogonal distance (Q-residuals)</h4>
+<p>The calculation of critical limits for Q-residuals can be done in many different ways. Thus, Swante Wold and Michael Sjöström in the <a href="http://pubs.acs.org/doi/abs/10.1021/bk-1977-0052.ch012">original paper</a> about SIMCA classification suggested that the ratio between Q-distance for a particular object from dataset with <span class="math inline">\(M\)</span>-variables (divided to the corresponding degrees of freedon, <span class="math inline">\(M-A\)</span>) and the variance of all Q-residuals follows F-distribution with <span class="math inline">\(N-A\)</span> and <span class="math inline">\((N-A-1)(M-A)\)</span> degrees of freedon. And, therefore, the limit can be found using ICDF for F-distribution.</p>
+<p>This method tends to reveal more extreme values than expected, first of all because of <span class="math inline">\((N-A-1)(M-A)\)</span>, which is a very big number for modern datasets with hundreds of objects and variables. Several corrections have been proposed since that, most of them are based on using different ways to estimate the degrees of freedom.</p>
+<div id="using-chi-squared-distribution" class="section level5 unnumbered">
+<h5>Using chi-squared distribution</h5>
+<p>On the other hand, several researchers, have found that normalized Q-residuals can be well described by chi-squared distribution. The tricky part here is to find proper degrees of freedom as it requires rank of original data matrix, which most of the time is not known. One of the ways to solve this issue is to compute the DF based on the particular Q-values, for example as follows:</p>
+<p><span class="math display">\[ DF = 2\left(\frac{m(Q)}{s(Q)}\right)^2\]</span> Here <span class="math inline">\(m(Q)\)</span> and <span class="math inline">\(s(Q)\)</span> are mean and standard deviation for Q-values. In this case, the critical limit for given significance level, <span class="math inline">\(\alpha\)</span>, can be calculated as: <span class="math display">\[Qlim = F^{-1}_{1-\alpha}(DF) m(Q)/DF\]</span></p>
+<p>where <span class="math inline">\(F^{-1}_{1-\alpha}(DF)\)</span> is ICDF for chi-squared distribution with <span class="math inline">\(DF\)</span> degrees of freedom. Starting from version <em>0.9.0</em> this method is implemented in <code>pca</code> class and can be chosen by specifying argument <code>lim.type = 'chisq'</code> as shown in the example below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">4</span>, <span class="dt">scale =</span> T, <span class="dt">lim.type =</span> <span class="st">&#39;chisq&#39;</span>)
+<span class="kw">show</span>(m<span class="op">$</span>Qlim)</code></pre></div>
+<pre><code>##                                  Comp 1    Comp 2   Comp 3    Comp 4
+## Critical limit (alpha = 0.05)  9.255125  7.374318 3.648798 1.5596846
+## Outliers limit (gamma = 0.01) 11.851868 10.319291 5.105964 2.3976151
+## Mean (u0)                      5.396236  3.223765 1.656619 0.6898182
+## DoF                            9.864674  4.147666 4.307598 2.6499084</code></pre>
+<p>The matrix with limits for Q-resodials has the same structure as similar matrix for T<sup>2</sup>-residuals. The third row contains mean values for Q and the fourth row — degrees of freedom calculated as shown above.</p>
+</div>
+<div id="jackson-mudholkar-method" class="section level5 unnumbered">
+<h5>Jackson-Mudholkar method</h5>
+<p>Another method <a href="https://www.jstor.org/stable/1267757">has been proposed</a> by Jackson and Mudholkar and is based on using eigenvalues of the residual components thus requires a full decomposition of the data matrix, which makes it computationally heavy if the data is large.</p>
+<p>Before the version <em>0.9.0</em> this method was the only one available for Q limits in <em>mdatools</em> and therefore still remains the default method (although you can specify it explicitly by using option <code>lim.type = 'jm'</code>). Here is an example.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">4</span>, <span class="dt">scale =</span> T) <span class="co"># default value for lim.type</span>
+m2 =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">4</span>, <span class="dt">scale =</span> T, <span class="dt">lim.type =</span> <span class="st">&#39;jm&#39;</span>) <span class="co"># specify JM as selected method</span>
+
+<span class="co"># the calculated limits are the same</span>
+<span class="kw">show</span>(m1<span class="op">$</span>Qlim)</code></pre></div>
+<pre><code>##                                  Comp 1    Comp 2   Comp 3    Comp 4
+## Critical limit (alpha = 0.05) 13.982084  8.915238 4.866821 1.8112567
+## Outliers limit (gamma = 0.01) 21.018106 14.057968 8.284831 2.8278312
+## Mean (u0)                      5.396236  3.223765 1.656619 0.6898182
+## DoF                            1.000000  1.000000 1.000000 1.0000000</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m2<span class="op">$</span>Qlim)</code></pre></div>
+<pre><code>##                                  Comp 1    Comp 2   Comp 3    Comp 4
+## Critical limit (alpha = 0.05) 13.982084  8.915238 4.866821 1.8112567
+## Outliers limit (gamma = 0.01) 21.018106 14.057968 8.284831 2.8278312
+## Mean (u0)                      5.396236  3.223765 1.656619 0.6898182
+## DoF                            1.000000  1.000000 1.000000 1.0000000</code></pre>
+</div>
+</div>
+<div id="data-driven-approach-for-critical-limits" class="section level4 unnumbered">
+<h4>Data driven approach for critical limits</h4>
+<p>Later, it was realized (see for example <a href="https://pubs.acs.org/doi/abs/10.1021/ie000141+">this</a> and <a href="https://www.sciencedirect.com/science/article/abs/pii/S0169743905000365">this</a>) that chi-squared distribution can be used for both Q- and T<sup>2</sup>-residuals and it is possible to constract a combined limit for both.</p>
+<p>A. Pomerantsev <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.1147">proposed</a> and then <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.2506">extended</a> an approach, based on the same idea but another calculation of a combined index, which is now called Data Driven SIMCA (DD-SIMCA). Although the method was developed for SIMCA classification, it is based on calculation of critical limits and therefore can be also used in PCA for similar purposes — detection of extreme objects and outliers based on the residual distances.</p>
+<p>In this method it is assumed that Q- and T<sup>2</sup>-residuals are not independent and there is a combined statistic: <span class="math inline">\(DF_Q Q/m(Q) + DF_{T^2} T^2 / m(T^2)\)</span> which follows chi-squared distribution with <span class="math inline">\(DF_Q + DF_{T^2}\)</span> degrees of freedom. The <span class="math inline">\(DF_Q\)</span> and <span class="math inline">\(DF_{T2}\)</span> as well as the center estimates, <span class="math inline">\(m(Q)\)</span> and <span class="math inline">\(m(T^2)\)</span> are derived from the <span class="math inline">\(Q\)</span> and <span class="math inline">\(T^2\)</span> values computed for the calibration set.</p>
+<p>There are two ways to estimate them. First is by using classical method of moments, already mentioned:</p>
+<p><span class="math display">\[ DF_Q = 2\left(\frac{m(Q)}{s(Q)}\right)^2\]</span> <span class="math display">\[ DF_{T^2} = 2\left(\frac{m(T^2)}{s(T^2)}\right)^2\]</span></p>
+<p>And the second is based on robust approach utilizing median and inter-quartile range instead of mean and standard deviation (see <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.2506">the paper</a> for details).</p>
+<p>Both ways are implemented in the package (starting from version <em>0.9.0</em>) and can be selected by using option <code>lim.type = 'ddmoments'</code> or <code>lim.type = 'ddrobust'</code> correspondigly. Since the acceptance area in this case is not rectangular but triangular, the matrices with calculated limits contain slope (<code>T2lim</code>) and intercept (<code>Qlim</code>) of the border line for the acceptance area instead of individual limits.</p>
+<p>For example, if we compute the limits as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">4</span>, <span class="dt">scale =</span> T, <span class="dt">lim.type =</span> <span class="st">&#39;ddmoments&#39;</span>)
+<span class="kw">show</span>(m<span class="op">$</span>Qlim)</code></pre></div>
+<pre><code>##                                  Comp 1    Comp 2    Comp 3     Comp 4
+## Critical limit (alpha = 0.05) 11.346164 19.088550 11.425334  6.3433641
+## Outliers limit (gamma = 0.01) 19.472004 31.770167 18.328590 10.1760634
+## Mean (u0)                      5.396236  3.223765  1.656619  0.6898182
+## DoF                           10.000000  4.000000  4.000000  3.0000000</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m<span class="op">$</span>T2lim)</code></pre></div>
+<pre><code>##                                  Comp 1    Comp 2    Comp 3     Comp 4
+## Critical limit (alpha = 0.05) -1.114062 -4.159697 -1.852563 -0.8307488
+## Outliers limit (gamma = 0.01) -1.114062 -4.159697 -1.852563 -0.8307488
+## Mean (u0)                      0.968750  1.937500  2.906250  3.8750000
+## DoF                            2.000000 10.000000 13.000000 14.0000000</code></pre>
+<p>This means that, for example, for two components the line is defined as: <span class="math display">\[Q = -4.16 T^2 + 19.1\]</span> and for four components as: <span class="math display">\[Q = -0.83 T^2 + 6.34\]</span> And will look on the residuals plot as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">2</span>)
+<span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">4</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-68-1.png" width="864" /></p>
+<p>More details about DD-SIMCA method can be also found in chapter, devoted to SIMCA classification.</p>
+<p>The residuals plot can be also shown for normalized values (<span class="math inline">\(Q/m(Q)\)</span> vs. <span class="math inline">\(T^2/m(T^2)\)</span>) by using option <code>norm = T</code> in the <code>plotResiduals()</code> method.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">norm =</span> T)
+<span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">4</span>, <span class="dt">norm =</span> T)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-69-1.png" width="864" /></p>
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="plotting-methods.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="randomized-pca-algorithms.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 1
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

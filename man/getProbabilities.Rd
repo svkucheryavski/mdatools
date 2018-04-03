@@ -2,15 +2,15 @@
 % Please edit documentation in R/defaults.R
 \name{getProbabilities}
 \alias{getProbabilities}
-\title{Class belongings probability for SIMCA results}
+\title{Get class belonging probability}
 \usage{
 getProbabilities(obj, ...)
 }
 \arguments{
-\item{obj}{a SIMCA model}
+\item{obj}{an object with classification results (e.g. SIMCA)}
 
 \item{...}{other parameters}
 }
 \description{
-Calculates probability of class belongings for each object from SIMCA results
+Compute class belonging probabilities for classification results.
 }

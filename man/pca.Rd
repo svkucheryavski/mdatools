@@ -65,7 +65,7 @@ objects - 1, number of variables and default or provided value. Besides that, th
 a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal 
 number of components is used to build a residuals plot (with Q residuals vs. Hotelling T2 
 values), calculate confidence limits for Q residuals, as well as for SIMCA classification. 
-  
+
 You can provde number, names or logical values to exclode rows or columns from calibration and
 validation of PCA model. In this case the outcome, e.g. scores and loadings will correspond to 
 the original size of the data, but:
@@ -88,12 +88,12 @@ However, for datasets with large number of rows (e.g. hyperspectral images), the
 possibility to run algorithms based on random permutations [1, 2]. In this case you have
 to define parameter \code{rand} as a vector with two values: p - oversampling parameter and
 k - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)} are good 
-option, which give quite precise solution using several times less computational time. It must 
+options, which give quite precise solution using several times less computational time. It must 
 be noted that statistical limits for residuals will not be computed in this case.
   
 There are several ways to calculate critical limits for Q and T2 residuals. In \code{mdatools} 
 you can specify one of the following methods via parameter \code{lim.type}: \code{'jm'} - method 
-based on Jackson-Mudholkar approach [3], \code{'chisq'} - method based on chi-square distribution 
+based on Jackson-Mudholkar approach [3], \code{'chisq'} - method based on chi-square distribution
 [4] and \code{'ddrobust'} and \code{'ddmoments'} - both related to data driven method proposed 
 by Pomerantsev and Rodionova [5]. The \code{'ddmoments'} is based on method of moments for 
 estimation of distribution parameters while \code{'ddrobust'} is based in robust estimation.
@@ -110,7 +110,7 @@ limit for outliers (shown as dashed line on residuals plot).
 You can also recalculate the limits for existent model by using different values for alpha and
 gamme, without recomputing the model itself. In this case use the following code (it is assumed 
 that you current PCA/SIMCA model is stored in variable \code{m}): 
-\code{m = setResLimits(m, alpha, gamma)}.     
+\code{m = setResLimits(m, alpha, gamma)}.
 
 In case of PCA the critical limits are just shown on residual plot as lines and can be used for 
 detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for 
@@ -149,7 +149,7 @@ par(mfrow = c(1, 1))
 }
 \references{
 1. N. Halko, P.G. Martinsson, J.A. Tropp. Finding structure with randomness: probabilistic 
-algorithms for constructing approximate matrix decompositions. SIAM Review, 53 (2010) pp. 217‐288.
+algorithms for constructing approximate matrix decompositions. SIAM Review, 53 (2010) pp. 217-288.
 2. S. Kucheryavskiy, Blessing of randomness against the curse of dimensionality, 
 Journal of Chemometrics, 32 (2018), pp. 
 3. J.E. Jackson, A User's Guide to Principal Components, John Wiley & Sons, New York, NY (1991).

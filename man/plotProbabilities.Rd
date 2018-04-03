@@ -2,25 +2,16 @@
 % Please edit documentation in R/defaults.R
 \name{plotProbabilities}
 \alias{plotProbabilities}
-\alias{plotProbabilities}
 \title{Plot for class belonging probability}
 \usage{
-plotProbabilities(obj, ...)
-
 plotProbabilities(obj, ...)
 }
 \arguments{
 \item{obj}{an object with classification results (e.g. SIMCA)}
 
 \item{...}{other parameters}
-
-\item{obj}{a SIMCA model}
-
-\item{...}{other parameters}
 }
 \description{
 Makes a plot with class belonging probabilities for each object of the classification results. 
 Works only with classification methods, which compute this probability (e.g. SIMCA).
-
-Shows a barplot with probability of class belongings for each object from SIMCA results
 }

@@ -24,6 +24,8 @@ pca.cal(x, ncomp, center, scale, method, exclcols = NULL, exclrows = NULL,
 
 \item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
 
+\item{rand}{vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)}
+
 \item{lim.type}{which method to use for calculation of critical limits for residuals (see details for \code{pca})}
 
 \item{alpha}{significance level for calculating critical limits for T2 and Q residuals.}

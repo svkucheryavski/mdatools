@@ -5,7 +5,7 @@
 \title{Calculates critical limits for T2-residuals using Hotelling T2 distribution}
 \usage{
 reslim.hotelling(ncomp, T2 = NULL, alpha = 0.05, gamma = 0.01,
-  return = "limits")
+  T2lim = NULL, return = "limits")
 }
 \arguments{
 \item{ncomp}{number of components}
@@ -15,6 +15,8 @@ reslim.hotelling(ncomp, T2 = NULL, alpha = 0.05, gamma = 0.01,
 \item{alpha}{significance level for extreme objects}
 
 \item{gamma}{significance level for outliers}
+
+\item{T2lim}{T2 limits from a PCA model (needed for probabilities)}
 
 \item{return}{what to return: \code{'limits'} or \code{'probability'}}
 }

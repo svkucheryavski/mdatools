@@ -5,7 +5,8 @@
 \title{Plot for class belonging probability}
 \usage{
 \method{plotProbabilities}{classres}(obj, ncomp = obj$ncomp.selected,
-  nc = 1, type = "h", show.lines = c(0.5, NA), ...)
+  nc = 1, type = "h", xlab = "Objects", ylab = "Probability",
+  main = NULL, ylim = c(0, 1.1), show.lines = c(NA, 0.5), ...)
 }
 \arguments{
 \item{obj}{classification results (e.g. object of class \code{simcamres}).}
@@ -15,6 +16,14 @@
 \item{nc}{if there are several classes, which class to make the plot for.}
 
 \item{type}{type of the plot}
+
+\item{xlab}{label for x axis}
+
+\item{ylab}{label for y axis}
+
+\item{main}{main plot title}
+
+\item{ylim}{vector with limits for y-axis}
 
 \item{show.lines}{shows a horizontal line at p = 0.5}
 

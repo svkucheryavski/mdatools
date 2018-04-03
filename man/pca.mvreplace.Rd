@@ -16,7 +16,7 @@ pca.mvreplace(x, center = T, scale = F, maxncomp = 7, expvarlim = 0.95,
 
 \item{maxncomp}{maximum number of components in PCA model.}
 
-\item{expvarlim}{minimum amount of variance, explained by chosen components (used for selection of optimal number 
+\item{expvarlim}{minimum amount of variance, explained by chosen components (used for selection of optimal number
 of components in PCA models).}
 
 \item{covlim}{convergence criterion.}
@@ -31,7 +31,7 @@ Returns the same matrix \code{x} where missing values are replaced with approxim
 approximated by iterative PCA decomposition.
 }
 \details{
-The function uses iterative PCA modeling of the data to approximate and impute missing values.  
+The function uses iterative PCA modeling of the data to approximate and impute missing values. 
 The result is most optimal for data sets with low or moderate level of noise and with number of
 missing values less than 10\% for small dataset and up to 20\% for large data.
 }
