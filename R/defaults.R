@@ -29,6 +29,20 @@ plotProbabilities = function(obj, ...) {
    UseMethod("plotProbabilities")
 }  
 
+#' Get class belonging probability
+#' 
+#' @description
+#' Compute class belonging probabilities for classification results.
+#' 
+#' @param obj
+#' an object with classification results (e.g. SIMCA)
+#' @param ...
+#' other parameters
+#' 
+#' @export
+getProbabilities = function(obj, ...) {
+   UseMethod("getProbabilities")
+}  
 
 #' Set residual limits for PCA model
 #' 
@@ -45,35 +59,6 @@ setResLimits = function(obj, ...) {
    UseMethod("setResLimits")
 }  
 
-#' Class belongings probability for SIMCA results
-#' 
-#' @description
-#' Calculates probability of class belongings for each object from SIMCA results
-#' 
-#' @param obj
-#' a SIMCA model
-#' @param ...
-#' other parameters
-#' 
-#' @export
-getProbabilities = function(obj, ...) {
-   UseMethod("getProbabilities")
-}  
-
-#' Plot with class belongings probability for SIMCA results
-#' 
-#' @description
-#' Shows a barplot with probability of class belongings for each object from SIMCA results
-#' 
-#' @param obj
-#' a SIMCA model
-#' @param ...
-#' other parameters
-#' 
-#' @export
-plotProbabilities = function(obj, ...) {
-   UseMethod("plotProbabilities")
-}  
 
 #' Shows extreme plot for SIMCA model
 #' 
