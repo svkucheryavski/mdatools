@@ -5,8 +5,8 @@ data = iris[1:50, 1:4]
 
 context('Test limits for standardized data (Iris, Setosa)')
 
-# limits for T2-residuals by Hotteling's T2 distribution
-Qlim.chisq = matrix(
+# limits for T2-residuals by Hotelling's T2 distribution
+T2lim.hotelling = matrix(
    c(
       4.4036, 7.6057, 1.9026, 1.0000,
       1.9659, 3.3955, 0.9009, 1.0000,

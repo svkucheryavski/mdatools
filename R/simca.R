@@ -542,8 +542,8 @@ plotExtreme.simca = function(obj, ncomp = NULL, main = NULL, xlab = 'Expected',
       Q.p = reslim.jm(obj$eigenvals, Q, ncomp, return = 'prob')
       p = pmax(Q.p, T2.p)
    } else if (substr(obj$lim.type, 1, 2) == 'dd') {
-      p = reslim.dd(Q, T2, type = obj$lim.type, Qlim = obj$Qlim[, ncomp], T2lim = obj$T2lim[, ncomp],
-                    return = 'prob')
+      p = reslim.dd(Q, T2, type = obj$lim.type, Qlim = obj$Qlim[, ncomp], 
+                    T2lim = obj$T2lim[, ncomp], return = 'prob')
    } else {
       stop('Wrong value for "type" parameter!')
    }
