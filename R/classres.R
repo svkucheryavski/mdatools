@@ -1,4 +1,5 @@
 #' Results of classification
+#' 
 #' @description 
 #' \code{classres} is used to store results classification for one or multiple classes.
 #'
@@ -182,15 +183,17 @@ getSelectedComponents.classres = function(obj, ncomp = NULL) {
 #' classification results (object of class \code{simcares}, \code{simcamres}, etc)
 #' @param ncomp
 #' number of components to make the matrix for (NULL - use selected for a model).
+#' @param ...
+#' other arguments
 #' 
 #' @description 
-#' The columns of the matrix correspond to classification results, rows — to the real classes. In
+#' The columns of the matrix correspond to classification results, rows - to the real classes. In
 #' case of soft classification with multiple classes (e.g. SIMCAM) sum of values for every row 
 #' will not correspond to the total number of class members as the same object can be classified
 #' as a member of several classes or non of them.
 #' 
 #' @export
-getConfusionMatrix.classres = function(obj, ncomp = NULL) {
+getConfusionMatrix.classres = function(obj, ncomp = NULL, ...) {
    if (is.null(obj$c.ref)) {
       stop('Reference classes are not available!')
    }
@@ -274,6 +277,14 @@ showPredictions.classres = function(obj, ncomp = NULL, ...) {
 #' if there are several classes, which class to make the plot for.
 #' @param type
 #' type of the plot
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ylim
+#' vector with limits for y-axis
 #' @param show.lines
 #' shows a horizontal line at p = 0.5
 #' @param ...
