@@ -12,8 +12,10 @@
 
 \item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
 
-\item{ncomp}{which number of components to make the plot for (one value, if NULL - model selected number will be used).
-This parameter shal not be used for multiclass models or results as predictions in this case are made only
+\item{ncomp}{which number of components to make the plot for (one value, if NULL - model selected number will 
+be used).
+This parameter shal not be used for multiclass models or results as predictions in this case are 
+ only
 for optimal number of components}
 
 \item{type}{type of the plot}

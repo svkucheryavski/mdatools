@@ -7,7 +7,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
+<<<<<<< HEAD
   <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+=======
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+>>>>>>> develop
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -25,14 +29,17 @@
 <meta name="author" content="Sergey Kucheryavskiy">
 
 
+<<<<<<< HEAD
 <meta name="date" content="2018-11-24">
+=======
+>>>>>>> develop
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="plotting-methods.html">
+<link rel="prev" href="randomized-pca-algorithms.html">
 <link rel="next" href="models-and-results-1.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -142,6 +149,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluding-rows-and-columns"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html"><i class="fa fa-check"></i>Residuals and critical limits</a><ul>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#distance-to-model-and-score-distance"><i class="fa fa-check"></i>Distance to model and score distance</a></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#critical-limits"><i class="fa fa-check"></i>Critical limits</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="randomized-pca-algorithms.html"><a href="randomized-pca-algorithms.html"><i class="fa fa-check"></i>Randomized PCA algorithms</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="partial-least-squares-regression.html"><a href="partial-least-squares-regression.html"><i class="fa fa-check"></i>Partial least squares regression</a><ul>
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html"><i class="fa fa-check"></i>Models and results</a><ul>
@@ -156,6 +168,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="simca-classification.html"><a href="simca-classification.html"><i class="fa fa-check"></i>SIMCA classification</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html"><i class="fa fa-check"></i>Calibration and validation</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#predictions-and-validation-with-a-test-set"><i class="fa fa-check"></i>Predictions and validation with a test set</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#class-belonging-probabilities"><i class="fa fa-check"></i>Class belonging probabilities</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#extreme-plot"><i class="fa fa-check"></i>Extreme plot</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="multiclass-classification.html"><a href="multiclass-classification.html"><i class="fa fa-check"></i>Multiclass classification</a></li>
 </ul></li>
@@ -178,7 +192,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="partial-least-squares-regression" class="section level1 unnumbered">
 <h1>Partial least squares regression</h1>
-<p>Partial least squares regression is a linear regression method, which uses principles similar to PCA: data is decomposed using latent variables. Because in this case we have two datasets, predictors (<span class="math inline">\(X\)</span>) and responses (<span class="math inline">\(Y\)</span>) we do decomposition for both, computing scores, loadings and residuals: <span class="math inline">\(X = TP^T + E_x\)</span>, <span class="math inline">\(Y = UQ^T + E_y\)</span>. In addition to that, orientation of latent variables in PLS is selected to maximize the covariance between the X-scores, <span class="math inline">\(T\)</span>, and Y-scores <span class="math inline">\(U\)</span>. This approach makes possible to work with datasets where more traditional Multiple Linear Regression fails — when number of variables exceeds number of observations and when X-variables are mutually correlated. But at the end PLS-model is a linear model, where response value is a linear combination of predictors, so the main outcome is a vector with regression coefficients.</p>
+<p>Partial least squares regression is a linear regression method, which uses principles similar to PCA: data is decomposed using latent variables. Because in this case we have two datasets, predictors (<span class="math inline">\(X\)</span>) and responses (<span class="math inline">\(Y\)</span>) we do decomposition for both, computing scores, loadings and residuals: <span class="math inline">\(X = TP^T + E_x\)</span>, <span class="math inline">\(Y = UQ^T + E_y\)</span>. In addition to that, orientation of latent variables in PLS is selected to maximize the covariance between the X-scores, <span class="math inline">\(T\)</span>, and Y-scores <span class="math inline">\(U\)</span>. This approach makes possible to work with datasets where more traditional Multiple Linear Regression fails — when number of variables exceeds number of observations and when X-variables are mutually correlated. But at the end PLS-model is a linear model, where response value is a linear combination of predictors, so the main outcome is a vector with regression coefficients.</p>
 <p>There are two main algorithms for PLS, <em>NIPALS</em> and <em>SIMPLS</em>, in the <em>mdatools</em> only the last one is implemented. PLS model and PLS results objects have a lot of components and performance statistics, which can be visualised via plots. Besides that the implemented <code>pls()</code> method calculates selectivity ratio and VIP scores, which can be used for selection of most important variables. We will discuss most of the methods in this chapter and you can get the full list using <code>?pls</code>.</p> 
 </div>
             </section>
@@ -186,7 +200,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           </div>
         </div>
       </div>
-<a href="plotting-methods.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="randomized-pca-algorithms.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 <a href="models-and-results-1.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
@@ -205,10 +219,11 @@ gitbook.start({
 "facebook": true,
 "twitter": true,
 "google": false,
+"linkedin": false,
 "weibo": false,
 "instapper": false,
 "vk": false,
-"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",
@@ -221,7 +236,7 @@ gitbook.start({
 },
 "download": null,
 "toc": {
-"collapse": "subsection"
+"collapse": "section"
 }
 });
 });
@@ -232,9 +247,11 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

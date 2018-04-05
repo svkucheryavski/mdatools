@@ -6,7 +6,8 @@
 \usage{
 simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL,
   exclcols = NULL, exclrows = NULL, x.test = NULL, c.test = NULL,
-  alpha = 0.05, method = "svd", info = "")
+  method = "svd", rand = NULL, lim.type = "jm", alpha = 0.05,
+  gamma = 0.01, info = "")
 }
 \arguments{
 \item{x}{a numerical matrix with data values.}
@@ -29,9 +30,15 @@ simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL,
 
 \item{c.test}{a vector with classes of test data objects (can be text with names of classes or logical).}
 
-\item{alpha}{significance level for calculating limit for T2 and Q residuals.}
-
 \item{method}{method to compute principal components.}
+
+\item{rand}{vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)}
+
+\item{lim.type}{which method to use for calculation of critical limits for residuals (see details)}
+
+\item{alpha}{significance level for calculating critical limits for T2 and Q residuals.}
+
+\item{gamma}{significance level for calculating outlier limits for T2 and Q residuals.}
 
 \item{info}{text with information about the model.}
 }
@@ -63,7 +70,8 @@ one-class classification.
 }
 \details{
 SIMCA is in fact PCA model with additional functionality, so \code{simca} class inherits most 
-of the functionality of \code{\link{pca}} class.
+of the functionality of \code{\link{pca}} class. It uses critical limits calculated for Q and T2 
+residuals calculated for PCA model for making classification decistion.
 }
 \examples{
 ## make a SIMCA model for Iris setosa class with full cross-validation

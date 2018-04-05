@@ -83,8 +83,7 @@
 #' # show predictions table
 #' showPredictions(model$calres)
 #' @export
-simcares = function(pres, cres)
-{
+simcares = function(pres, cres) {
    res = c(pres, cres)
    res$classname = dimnames(cres$c.pred)[[3]][1]
    class(res) = c('simcares', 'classres', 'pcares', 'ldecomp')   
@@ -101,18 +100,24 @@ simcares = function(pres, cres)
 #' SIMCA results (object of class \code{simcares})
 #' @param ncomp
 #' which principal components to show the plot for
-#' @param show.limits
-#' logical, show or not lines with statistical limits for the residuals
-#' @param type
-#' type of the plot
 #' @param main
 #' main plot title
 #' @param xlab
 #' label for x axis
 #' @param ylab
 #' label for y axis
+#' @param norm
+#' logical, show normalized Q vs T2 (\code{norm = T}) values or original ones (\code{norm = F})
+#' @param show.limits
+#' logical, show or not lines with statistical limits for the residuals
 #' @param legend
 #' vector with legend items
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier borders 
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier borders 
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier borders 
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #' 
@@ -120,10 +125,10 @@ simcares = function(pres, cres)
 #' See examples in help for \code{\link{simcares}} function.
 #' 
 #' @export
-plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p', main = NULL, 
-                                  xlab = 'T2', ylab = 'Squared residual distance (Q)', 
-                                  legend = NULL, ...)
-{
+plotResiduals.simcares = function(obj, ncomp = NULL, main = NULL, xlab = NULL, ylab = NULL,
+                                  norm = F, show.limits = T, legend = NULL, 
+                                  lim.col = c('#c0a0a0', '#906060'), 
+                                  lim.lwd = c(1, 1), lim.lty = c(2, 3), ...) {
    # Shows residuals plot (T2 vs Q) 
    #
    # Arguments:
@@ -133,8 +138,7 @@ plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p'
    #  ...: standard arguments for plots
 
    # set main title
-   if (is.null(main))
-   {
+   if (is.null(main)) {
       if (is.null(ncomp))
          main = 'Residuals'
       else
@@ -144,43 +148,54 @@ plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p'
    # get selected components and ncomp is NULL
    ncomp = getSelectedComponents(obj, ncomp)
 
-   if (is.null(obj$c.ref)) 
-   {
+   if (is.null(obj$c.ref)) {
       # if no reference values or all objects are from the same class 
       # show standard plot for PCA
-      plotResiduals.ldecomp(obj, ncomp, main = main, ...)
-   }   
-   else
-   {   
+      plotResiduals.ldecomp(obj, ncomp, main = main, xlab = xlab, ylab = ylab, norm = norm,
+                            show.limits = show.limits, lim.col = lim.col, lim.lty = lim.lty,
+                            lim.lwd = lim.lwd, ...)
+   } else {   
       # if objects include members and non-members show plot with
       # color differentiation and legend
       
       c.ref = obj$c.ref     
-      if (!is.character(c.ref))
-      {   
+      if (!is.character(c.ref)) {   
          c.ref[obj$c.ref == 1] = obj$classname
          c.ref[obj$c.ref != 1] = 'Others'
       }
       
-      if (sum(c.ref == obj$classname) == length(c.ref))
-      {
-         plotResiduals.ldecomp(obj, ncomp, main = main, ...)
-      }
-      else
-      {
+      if (sum(c.ref == obj$classname) == length(c.ref)) {
+         plotResiduals.pcares(obj, ncomp, main = main, xlab = xlab, ylab = ylab, norm = norm,
+                               show.limits = show.limits, lim.col = lim.col, lim.lty = lim.lty,
+                               lim.lwd = lim.lwd, ...)
+      } else {
          classes = unique(c.ref)
          nclasses = length(classes)
 
          pdata = list()
          legend.str = NULL
-
-         for (i in 1:nclasses)
-         {   
+         
+         # set values for normalization of residuals if necessary
+         if (norm) {
+            T2.mean = obj$T2lim[3, ncomp]
+            Q.mean = obj$Qlim[3, ncomp]
+            if (is.null(xlab))
+               xlab = expression(paste('Hotelling ', T^2, ' distance (norm)'))
+            if (is.null(ylab))
+               ylab = 'Squared residual distance, Q (norm)'      
+         } else {
+            T2.mean = 1
+            Q.mean = 1
+            if (is.null(xlab))
+               xlab = expression(paste('Hotelling ', T^2, ' distance'))
+            if (is.null(ylab))
+               ylab = 'Squared residual distance, Q'      
+         }
+         
+         for (i in 1:nclasses) {   
             idx = c.ref == classes[i]
-            data = cbind(obj$T2[idx, ncomp, drop = F], obj$Q[idx, ncomp, drop = F])
-            colnames(data) = c('T2', 'Q')
+            data = cbind(obj$T2[idx, ncomp]/T2.mean, obj$Q[idx, ncomp]/Q.mean)
             rownames(data) = rownames(obj$c.ref[idx])
-           
             legend.str = c(legend.str, classes[i])
             pdata[[i]] = data
          }
@@ -188,14 +203,20 @@ plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p'
          if (is.null(legend))
             legend = legend.str
          
-            
-         if (show.limits == T)
-            show.lines = c(obj$T2lim[1, ncomp], obj$Qlim[1, ncomp])
-         else
-            show.lines = F
+         mdaplotg(pdata, type = 'p', xlab = xlab, ylab = ylab, main = main, legend = legend, ...)
          
-         mdaplotg(pdata, type = type, xlab = xlab, ylab = ylab, main = main,
-                  legend = legend, show.lines = show.lines, ...)
+         if (show.limits) {
+            # get residual limits, correct if necessary and recalculate axes maximum limit
+            lim = cbind(obj$T2lim[1:2, ncomp], obj$Qlim[1:2, ncomp])
+            if (substr(obj$lim.type, 1, 2) != 'dd') {
+               lim[, 1] = lim[, 1] / T2.mean
+               lim[, 2] = lim[, 2] / Q.mean
+            } else {
+               lim[, 1] = lim[, 1] * T2.mean / Q.mean
+               lim[, 2] = lim[, 2] / Q.mean
+            }
+            ldecomp.plotLimits(lim, obj$lim.type, lim.col, lim.lwd, lim.lty)   
+         }
       }
    }   
 }
@@ -212,8 +233,7 @@ plotResiduals.simcares = function(obj, ncomp = NULL, show.limits = T, type = 'p'
 #' other arguments
 #' 
 #' @export
-summary.simcares = function(object, ...)
-{
+summary.simcares = function(object, ...) {
    # Show summary for simcares object
    
    obj = object
@@ -238,12 +258,12 @@ summary.simcares = function(object, ...)
 #' other arguments
 #'
 #' @export 
-print.simcares = function(x, ...)
-{   
+print.simcares = function(x, ...) {   
    # Print information on simcares object
    obj = x
    
    cat('Result for SIMCA one-class classification (class simcares)\n')
+   cat(sprintf('Method for critical limits: %s\n', obj$lim.type))
    print.ldecomp(obj, '')
    print.classres(obj, '')
    cat('\n')

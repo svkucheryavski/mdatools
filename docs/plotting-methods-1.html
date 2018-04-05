@@ -7,7 +7,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
+<<<<<<< HEAD
   <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+=======
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+>>>>>>> develop
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -25,7 +29,10 @@
 <meta name="author" content="Sergey Kucheryavskiy">
 
 
+<<<<<<< HEAD
 <meta name="date" content="2018-11-24">
+=======
+>>>>>>> develop
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -142,6 +149,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluding-rows-and-columns"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html"><i class="fa fa-check"></i>Residuals and critical limits</a><ul>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#distance-to-model-and-score-distance"><i class="fa fa-check"></i>Distance to model and score distance</a></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#critical-limits"><i class="fa fa-check"></i>Critical limits</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="randomized-pca-algorithms.html"><a href="randomized-pca-algorithms.html"><i class="fa fa-check"></i>Randomized PCA algorithms</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="partial-least-squares-regression.html"><a href="partial-least-squares-regression.html"><i class="fa fa-check"></i>Partial least squares regression</a><ul>
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html"><i class="fa fa-check"></i>Models and results</a><ul>
@@ -156,6 +168,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="simca-classification.html"><a href="simca-classification.html"><i class="fa fa-check"></i>SIMCA classification</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html"><i class="fa fa-check"></i>Calibration and validation</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#predictions-and-validation-with-a-test-set"><i class="fa fa-check"></i>Predictions and validation with a test set</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#class-belonging-probabilities"><i class="fa fa-check"></i>Class belonging probabilities</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#extreme-plot"><i class="fa fa-check"></i>Extreme plot</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="multiclass-classification.html"><a href="multiclass-classification.html"><i class="fa fa-check"></i>Multiclass classification</a></li>
 </ul></li>
@@ -182,8 +196,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Methods for summary statistics.</p>
 <table>
 <colgroup>
-<col width="43%" />
-<col width="56%" />
+<col width="36%" />
+<col width="63%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -218,8 +232,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Methods for objects.</p>
 <table>
 <colgroup>
-<col width="43%" />
-<col width="56%" />
+<col width="44%" />
+<col width="55%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -230,23 +244,23 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <tbody>
 <tr class="odd">
 <td align="left"><code>plotPredictions(obj, ny = 1, ncomp)</code></td>
-<td align="left">Plot with predicted vs. measured (reference) y-values</td>
+<td align="left">plot with predicted vs. measured (reference) y-values</td>
 </tr>
 <tr class="even">
 <td align="left"><code>plotXScores(obj, comp)</code></td>
-<td align="left">Scores for decompositon of X (similar to PCA scores plot)</td>
+<td align="left">scores for decompositon of X (similar to PCA)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code>plotYScores(obj, comp)</code></td>
-<td align="left">Scores for decompositon of y (similar to PCA scores plot)</td>
+<td align="left">scores for decompositon of y (similar to PCA)</td>
 </tr>
 <tr class="even">
 <td align="left"><code>plotXResiduals(obj, ncomp)</code></td>
-<td align="left">Residuals for decompositon of X (similar to PCA residuals plot)</td>
+<td align="left">residuals for decompositon of X (similar to PCA)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code>plotYResiduals(obj, ncomp)</code></td>
-<td align="left">Residuals for y vs. real (reference) y-values</td>
+<td align="left">residuals for y vs. real (reference) y-values</td>
 </tr>
 <tr class="even">
 <td align="left"><code>plotXScores(obj, ncomp)</code></td>
@@ -259,12 +273,19 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotPredictions</span>(m1)
 <span class="kw">plotPredictions</span>(m1, <span class="dt">ncomp =</span> <span class="dv">1</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-77-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-88-1.png" width="864" /></p>
+<p>By the way, when <code>plotPredictions()</code> is made for results object, you can show performance statistics on the plot (implemented in <em>0.9.0</em>):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres)
+<span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres, <span class="dt">ncomp =</span> <span class="dv">2</span>)
+<span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres, <span class="dt">show.stat =</span> T)
+<span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">show.stat =</span> T)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-89-1.png" width="864" /></p>
 <p>The plots for variables are available only for a model object and include:</p>
 <table>
 <colgroup>
-<col width="43%" />
-<col width="56%" />
+<col width="47%" />
+<col width="52%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -275,33 +296,33 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <tbody>
 <tr class="odd">
 <td align="left"><code>plotXLoadings(obj, comp)</code></td>
-<td align="left">Loadings for decompositon of X (similar to PCA loadings plot)</td>
+<td align="left">loadings plot for decompositon of X</td>
 </tr>
 <tr class="even">
 <td align="left"><code>plotYLoadings(obj, comp)</code></td>
-<td align="left">Loadings for decompositon of y (similar to PCA loadings plot)</td>
+<td align="left">loadings plot for decompositon of y</td>
 </tr>
 <tr class="odd">
 <td align="left"><code>plotWeights(obj, comp)</code></td>
-<td align="left">Weights (<em>W</em>) for PLS decomposition</td>
+<td align="left">plot with weights (<em>W</em>) for PLS decomposition</td>
 </tr>
 <tr class="even">
 <td align="left"><code>plotRegcoeffs(obj, ny, ncomp)</code></td>
-<td align="left">Plot with regression coefficients</td>
+<td align="left">plot with regression coefficients</td>
 </tr>
 <tr class="odd">
 <td align="left"><code>plotVIPScores(obj, ny)</code></td>
-<td align="left">VIP scores for the predictors</td>
+<td align="left">VIP scores plot</td>
 </tr>
 <tr class="even">
-<td align="left"><code>plotSelectivityRation(obj, ny, ncomp)</code></td>
-<td align="left">Selectivity ratio of the predictors</td>
+<td align="left"><code>plotSelectivityRatio(obj, ny, ncomp)</code></td>
+<td align="left">Selectivity ratio plot</td>
 </tr>
 </tbody>
 </table>
 <p>And, of course, both model and result objects have method <code>plot()</code> for giving an overview.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(m1)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-78-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-90-1.png" width="864" /></p>
 <div id="excluding-rows-and-columns-1" class="section level3 unnumbered">
 <h3>Excluding rows and columns</h3>
 <p>From v. 0.8.0 PCA implementation as well as any other method in <code>mdatools</code> can exclude rows and columns from calculations. The implementation works similar to what was described for PCA. For example it can be useful if you have some candidates for outliers or do variable selection and do not want to remove rows and columns physically from the data matrix. In this case you can just specify two additional parameters, <code>exclcols</code> and <code>exclrows</code>, using either numbers or names of rows/columns to be excluded. You can also specify a vector with logical values (all <code>TRUE</code>s will be excluded).</p>
@@ -333,10 +354,11 @@ gitbook.start({
 "facebook": true,
 "twitter": true,
 "google": false,
+"linkedin": false,
 "weibo": false,
 "instapper": false,
 "vk": false,
-"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",
@@ -349,7 +371,7 @@ gitbook.start({
 },
 "download": null,
 "toc": {
-"collapse": "subsection"
+"collapse": "section"
 }
 });
 });
@@ -360,9 +382,11 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

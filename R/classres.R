@@ -1,4 +1,5 @@
 #' Results of classification
+#' 
 #' @description 
 #' \code{classres} is used to store results classification for one or multiple classes.
 #'
@@ -21,6 +22,7 @@
 #'
 #' @return
 #' \item{c.pred}{predicted class values (+1 or -1).}
+#' \item{p.pred}{predicted class probabilities.}
 #' \item{c.ref}{reference (true) class values if provided.}
 #' 
 #' The following fields are available only if reference values were provided.
@@ -38,7 +40,8 @@
 #'  \code{\link{plotSensitivity.classres}} \tab makes plot with sensitivity vs. components values.\cr
 #'  \code{\link{plotSpecificity.classres}} \tab makes plot with specificity vs. components values.\cr
 #'  \code{\link{plotMisclassified.classres}} \tab makes plot with misclassified ratio values.\cr
-#'  \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity and sensitivity values.\cr
+#'  \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity 
+#'  and sensitivity values.\cr
 #' }
 classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL) {
    if (!is.null(c.ref)) {
@@ -90,8 +93,7 @@ classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL) 
 #' The function is called automatically when a classification result with reference values is 
 #' created, for example when applying a \code{plsda} or \code{simca} models.
 #' 
-getClassificationPerformance = function(c.ref, c.pred)
-{
+getClassificationPerformance = function(c.ref, c.pred) {
    # remove excluded rows for correct calculation of performance
    attrs = mda.getattr(c.pred)
    if (length(attrs$exclrows) > 0) {
@@ -114,8 +116,7 @@ getClassificationPerformance = function(c.ref, c.pred)
    misclassified = matrix(0, nrow = nclasses + 1, ncol = ncomp)
 
    classnames = dimnames(c.pred)[[3]]
-   for (i in 1:nclasses)         
-   {   
+   for (i in 1:nclasses) {   
       fn[i, ] = colSums((c.ref[, 1] == classnames[i]) & (c.pred[, , i, drop = F] == -1))
       fp[i, ] = colSums((c.ref[, 1] != classnames[i]) & (c.pred[, , i, drop = F] == 1))
       tp[i, ] = colSums((c.ref[, 1] == classnames[i]) & (c.pred[, , i, drop = F] == 1))
@@ -131,8 +132,10 @@ getClassificationPerformance = function(c.ref, c.pred)
    misclassified[nclasses + 1, ] = (colSums(fp) + colSums(fn)) / (nclasses * nobj)
 
    rownames(fn) = rownames(fp) = rownames(tp) = dimnames(c.pred)[[3]]
-   rownames(sensitivity) = rownames(specificity) = rownames(misclassified) = c(dimnames(c.pred)[[3]], 'Total')
-   colnames(fn) = colnames(fp) = colnames(tp) =  colnames(sensitivity) = colnames(specificity) = dimnames(c.pred)[[2]]
+   rownames(sensitivity) = rownames(specificity) = rownames(misclassified) = 
+      c(dimnames(c.pred)[[3]], 'Total')
+   colnames(fn) = colnames(fp) = colnames(tp) =  colnames(sensitivity) = colnames(specificity) = 
+      dimnames(c.pred)[[2]]
 
    obj = list()
    obj$fn = fn
@@ -171,6 +174,57 @@ getSelectedComponents.classres = function(obj, ncomp = NULL) {
    ncomp
 }
 
+#' Confusion matrix for classification results
+#' 
+#' @details 
+#' Returns confusion matrix for classification results represented by the object.
+#' 
+#' @param obj
+#' classification results (object of class \code{simcares}, \code{simcamres}, etc)
+#' @param ncomp
+#' number of components to make the matrix for (NULL - use selected for a model).
+#' @param ...
+#' other arguments
+#' 
+#' @description 
+#' The columns of the matrix correspond to classification results, rows - to the real classes. In
+#' case of soft classification with multiple classes (e.g. SIMCAM) sum of values for every row 
+#' will not correspond to the total number of class members as the same object can be classified
+#' as a member of several classes or non of them.
+#' 
+#' @export
+getConfusionMatrix.classres = function(obj, ncomp = NULL, ...) {
+   if (is.null(obj$c.ref)) {
+      stop('Reference classes are not available!')
+   }
+   
+   ncomp = getSelectedComponents.classres(obj, ncomp)
+   if (dim(obj$c.pred)[2] == 1) {
+      ncomp = 1
+   }
+
+   # get class names and numbers
+   classes = dimnames(obj$c.pred)[[3]]
+   nclasses = length(classes)
+   ref.classes = unique(obj$c.ref)
+   ref.nclasses = length(ref.classes)
+   
+   # compute the confusion matrix
+   out = matrix(0, nrow = ref.nclasses, ncol = nclasses + 1)
+   for (i in 1:ref.nclasses) {
+      ind = obj$c.ref == ref.classes[i]
+      v = obj$c.pred[ind, ncomp, ]
+      dim(v) = c(sum(ind), nclasses)
+      out[i, 1:nclasses] = apply(v == 1, 2, sum)
+      out[i, (nclasses + 1)] = sum(apply(v == -1, 1, all)) 
+   }
+   
+   rownames(out) = ref.classes
+   colnames(out) = c(classes, 'None')
+
+   out
+}
+
 #' Show predicted class values
 #' 
 #' @description
@@ -188,20 +242,19 @@ getSelectedComponents.classres = function(obj, ncomp = NULL) {
 #' The matrix has either -1 (does not belong to the class) or +1 (belongs to the class) values.
 #' 
 #' @export
-showPredictions.classres = function(obj, ncomp = NULL, ...)
-{
+showPredictions.classres = function(obj, ncomp = NULL, ...) {
    ncomp = getSelectedComponents.classres(obj, ncomp)
 
-   if (obj$nclasses == 1)
+   if (obj$nclasses == 1) {
       pred = obj$c.pred[ , ncomp[1], , drop = F]
-   else
-   {  
+   } else {  
       if (length(ncomp) == 1)
          ncomp = matrix(ncomp, nrow = 1, ncol = obj$nclasses)
 
-   pred = NULL
-   for (i in 1:obj$nclasses)
-      pred = cbind(pred, obj$c.pred[, ncomp[i], i, drop = F])
+      pred = NULL
+      for (i in 1:obj$nclasses) {
+         pred = cbind(pred, obj$c.pred[, ncomp[i], i, drop = F])
+      }
    }
 
    dim(pred) = c(nrow(pred), obj$nclasses)
@@ -209,6 +262,55 @@ showPredictions.classres = function(obj, ncomp = NULL, ...)
 
    print(pred)
 }  
+
+#' Plot for class belonging probability
+#' 
+#' @description
+#' Makes a plot with class belonging probabilities for each object of the classification results. 
+#' Works only with classification methods, which compute this probability (e.g. SIMCA). 
+#' 
+#' @param obj
+#' classification results (e.g. object of class \code{simcamres}).
+#' @param ncomp
+#' number of components to use the probabilities for.
+#' @param nc
+#' if there are several classes, which class to make the plot for.
+#' @param type
+#' type of the plot
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ylim
+#' vector with limits for y-axis
+#' @param show.lines
+#' shows a horizontal line at p = 0.5
+#' @param ...
+#' most of the graphical parameters from \code{\link{mdaplot}} function can be used.
+#' 
+#' @export
+plotProbabilities.classres = function(obj, ncomp = obj$ncomp.selected, nc = 1, type = 'h', 
+                                      xlab = 'Objects', ylab = 'Probability', main = NULL,
+                                      ylim = c(0, 1.1), show.lines = c(NA, 0.5), ...) {
+   if (is.null(obj$p.pred)) {
+      stop('No probability values are available!')
+   }
+   
+   if (nc > obj$nclasses || nc < 1) {
+      stop('Wrong value for argument "nc"!')
+   }
+
+   classname = dimnames(obj$p.pred)[[3]][nc]
+
+   if (is.null(main)) {
+      main = sprintf('Class probabilities, %s (ncomp = %d)', classname, ncomp);
+   }
+      
+   mdaplot(obj$p.pred[, ncomp, nc], show.lines = show.lines, type = type, 
+           ylim = ylim, xlab = xlab, ylab = ylab, main = main, ...)
+}   
 
 
 #' Sensitivity plot for classification results
@@ -228,8 +330,7 @@ showPredictions.classres = function(obj, ncomp = NULL, ...)
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 #' 
 #' @export
-plotSensitivity.classres = function(obj, nc = NULL, ...)
-{
+plotSensitivity.classres = function(obj, nc = NULL, ...) {
    plotPerformance(obj, nc = nc, param = 'sensitivity', ...)
 }   
 
@@ -250,8 +351,7 @@ plotSensitivity.classres = function(obj, nc = NULL, ...)
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 #' 
 #' @export
-plotSpecificity.classres = function(obj, nc = NULL, ...)
-{
+plotSpecificity.classres = function(obj, nc = NULL, ...) {
    plotPerformance(obj, nc = nc, param = 'specificity', ...)
 }   
 
@@ -272,8 +372,7 @@ plotSpecificity.classres = function(obj, nc = NULL, ...)
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 #' 
 #' @export
-plotMisclassified.classres = function(obj, nc = NULL, ...)
-{
+plotMisclassified.classres = function(obj, nc = NULL, ...) {
    plotPerformance(obj, nc = nc, param = 'misclassified', ...)
 }   
 
@@ -312,8 +411,7 @@ plotMisclassified.classres = function(obj, nc = NULL, ...)
 #' @export
 plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', legend = NULL, 
                                     main = NULL, xlab = 'Components', 
-                                    ylab = '', ylim = c(0, 1.1), ...)
-{
+                                    ylab = '', ylim = c(0, 1.1), ...) {
    if (is.null(nc)) {
       nc =  obj$nclasses + 1
       
@@ -350,7 +448,8 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
       if (any(is.na(data)))
          stop('This performance parameter has NA values!')
       
-      mdaplot(data, type = type, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, ylim = ylim, ...)
+      mdaplot(data, type = type, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, 
+              ylim = ylim, ...)
    }
 }
 
@@ -364,8 +463,10 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
 #' @param nc
 #' if there are several classes, which class to make the plot for (NULL - summary for all classes).
 #' @param ncomp
-#' which number of components to make the plot for (one value, if NULL - model selected number will be used).
-#' This parameter shal not be used for multiclass models or results as predictions in this case are made only
+#' which number of components to make the plot for (one value, if NULL - model selected number will 
+#' be used).
+#' This parameter shal not be used for multiclass models or results as predictions in this case are 
+#'  only
 #' for optimal number of components
 #' @param type
 #' type of the plot
@@ -381,7 +482,8 @@ plotPerformance.classres = function(obj, nc = NULL, param = 'all', type = 'h', l
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 #' 
 #' @export
-plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', main = NULL, ylab = '', ...) {
+plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', 
+                                    main = NULL, ylab = '', ...) {
   
    if (is.null(obj))
       stop('No classification results were provided!')
@@ -453,7 +555,8 @@ plotPredictions.classres = function(obj, nc = NULL, ncomp = NULL, type = 'p', ma
               yticklabels = c('None', classnames[nc]), ylim = c(0.8, nclasses + 1.2), ...)
    } else {
       pdata.g = as.factor(obj$c.ref[pdata[, 1]])
-      mdaplotg(pdata, type = 'p', main = main, ylab = ylab, yticks = c(1:(nclasses + 1)), groupby = pdata.g,
+      mdaplotg(pdata, type = 'p', main = main, ylab = ylab, yticks = c(1:(nclasses + 1)), 
+               groupby = pdata.g,
               yticklabels = c('None', classnames[nc]), ylim = c(0.8, nclasses + 1.2), ...)
    }
 }
@@ -491,8 +594,7 @@ plot.classres = function(x, nc = NULL, ...){
 #' other arguments
 #' 
 #' @export
-as.matrix.classres = function(x, ncomp = NULL, nc = 1, ...)
-{
+as.matrix.classres = function(x, ncomp = NULL, nc = 1, ...) {
    obj = x
 
    if (is.null(obj$c.ref))
@@ -565,27 +667,19 @@ print.classres = function(x, str = NULL, ...)
 #' other arguments
 #' 
 #' @export
-summary.classres = function(object, ncomp = NULL, nc = NULL, ...)
-{
+summary.classres = function(object, ncomp = NULL, nc = NULL, ...) {
    cat('\nClassiciation results (class classres) summary\n')
-   if (!is.null(object$c.ref))
-   {         
+   if (!is.null(object$c.ref)) {         
 
       if (is.null(nc))
          nc = 1:dim(object$c.pred)[3]
-      show(nc)
-      if (!is.null(ncomp))
-      {   
+      
+      if (!is.null(ncomp)) {   
          cat(sprintf('\nNumber of selected components: %d', ncomp))
-      }   
-      else
-      {   
-         if (is.null(object$ncomp.selected))
-         {   
+      } else {   
+         if (is.null(object$ncomp.selected)) {   
             ncomp = 1
-         }   
-         else
-         {   
+         } else {   
             ncomp = object$ncomp.selected
             cat(sprintf('\nNumber of selected components: %d', ncomp))
          }   
@@ -593,15 +687,12 @@ summary.classres = function(object, ncomp = NULL, nc = NULL, ...)
 
       cat(sprintf('\nNumber of classes: %d\n', ncol(object$c.ref)))
 
-      for (i in nc)
-      {   
+      for (i in nc) {   
          cat(sprintf('\nClass "%s":\n', colnames(object$c.ref)[i]))
          res = as.matrix.classres(object, nc = i)    
          print(res)
       }      
-   }      
-   else
-   {
+   } else {
       cat('No reference data provided to calculate prediction performance.')
    }   
 }   

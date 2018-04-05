@@ -4,7 +4,7 @@
 \alias{pca.run}
 \title{Runs one of the selected PCA methods}
 \usage{
-pca.run(x, ncomp, method)
+pca.run(x, ncomp, method, rand = NULL)
 }
 \arguments{
 \item{x}{data matrix}
@@ -12,6 +12,8 @@ pca.run(x, ncomp, method)
 \item{ncomp}{number of components}
 
 \item{method}{name of PCA methods ('svd', 'nipals')}
+
+\item{rand}{parameters for randomized algorithm (if not NULL)}
 }
 \description{
 Runs one of the selected PCA methods

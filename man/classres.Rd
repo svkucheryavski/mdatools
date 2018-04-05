@@ -17,6 +17,7 @@ classres(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL)
 }
 \value{
 \item{c.pred}{predicted class values (+1 or -1).}
+\item{p.pred}{predicted class probabilities.}
 \item{c.ref}{reference (true) class values if provided.}
 
 The following fields are available only if reference values were provided.
@@ -44,6 +45,7 @@ Methods \code{classres} class:
  \code{\link{plotSensitivity.classres}} \tab makes plot with sensitivity vs. components values.\cr
  \code{\link{plotSpecificity.classres}} \tab makes plot with specificity vs. components values.\cr
  \code{\link{plotMisclassified.classres}} \tab makes plot with misclassified ratio values.\cr
- \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity and sensitivity values.\cr
+ \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity 
+ and sensitivity values.\cr
 }
 }

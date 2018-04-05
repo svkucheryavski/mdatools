@@ -52,8 +52,9 @@
 #' @importFrom stats convolve cor lm na.exclude predict pt qf qnorm qt sd var
 #'
 #' @export
-ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selected = NULL, attrs = NULL,
-                   tnorm = NULL, dist = NULL, var = NULL, cal = FALSE, totvar = NULL){
+ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selected = NULL, 
+                   attrs = NULL, tnorm = NULL, dist = NULL, var = NULL, cal = FALSE, 
+                   totvar = NULL) {
   
    if (!is.null(scores) && !is.null(loadings)) {
       # there are scores and loadings, calculate the rest and add attributes
@@ -115,7 +116,10 @@ ldecomp = function(scores = NULL, residuals = NULL, loadings = NULL, ncomp.selec
       modpower = dist$modpower,
       cumexpvar = var$cumexpvar,
       expvar = var$expvar,
-      totvar = totvar
+      totvar = totvar,
+      Qlim = NULL,
+      T2lim = NULL,
+      lim.type = NULL
    )
    
    if (is.null(ncomp.selected))
@@ -222,7 +226,8 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
 #' Explained variance for linear decomposition
 #' 
 #' @description
-#' Computes explained variance and cumulative explained variance for a data decomposition X = TP' + E.
+#' Computes explained variance and cumulative explained variance for a data decomposition 
+#' X = TP' + E.
 #'
 #' @param Q
 #' Q values (squared residuals distance from object to component space).
@@ -247,69 +252,265 @@ ldecomp.getVariances = function(Q, totvar) {
    res
 }
 
-#' Statistical limits for Q and T2 residuals
+#' Calculates critical limits for T2-residuals using Hotelling T2 distribution
 #' 
-#' @description
-#' Computes statisticsl limits for Q and T2 residuals
+#' @description 
+#' The method is based on n
+#' 
+#' @param ncomp 
+#' number of components
+#' @param T2
+#' vector with T2-residuals for selected component
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#' @param T2lim
+#' T2 limits from a PCA model (needed for probabilities)
+#' @param return
+#' what to return: \code{'limits'} or \code{'probability'}
+#' 
+#' @export
+reslim.hotelling = function(ncomp, T2 = NULL, alpha = 0.05, gamma = 0.01, 
+                            T2lim = NULL, return = 'limits') {
+   if (return == 'limits') {
+      nobj = length(T2)
+      out = rep(0, 4)
+      if (nobj > ncomp) {
+         out[1:2] = 
+            (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(c(1 - alpha, 1 - gamma), ncomp, nobj - ncomp)
+      } else {
+         out[1:2] = 0
+      }
+      out[3] = mean(T2)
+      out[4] = nobj - ncomp
+   } else {
+      nobj = T2lim[4] + ncomp
+      out = pf(T2 * (nobj - ncomp) / (ncomp * (nobj - 1)), ncomp, nobj - ncomp)
+   }
+   
+   out
+}
+
+#' Calculates critical limits or statistic values for Q-residuals using Chi-squared distribution
+#' 
+#' @description 
+#' The method is based on Chi-squared distribution with DF = 2 * (m(Q)/s(Q)^2
+#' 
+#' @param Q
+#' vector with Q-residuals for selected component
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#' @param Qlim
+#' vector with Q limits for selected number of components (from model)
+#' @param return
+#' what to return: \code{'limits'} or \code{'probability'}
+#' 
+#' @export
+reslim.chisq = function(Q, alpha = 0.05, gamma = 0.01, Qlim = NULL, return = 'limits') {
+   nobj = length(Q)
+   if (return == 'limits') {
+      
+      # calculate mean and DF for Q
+      Q.mean = mean(Q)
+      Q.DF = 2 * (Q.mean/sd(Q))^2      
+      
+      out = rep(0, 4)
+      if (Q.mean == 0) {
+         out = c(0, 0, 0, 1)
+      } else {
+         out[1:2] = qchisq(c(1 - alpha, 1 - gamma), floor(Q.DF)) * Q.mean / Q.DF
+         out[3] = Q.mean
+         out[4] = Q.DF
+      }
+   } else {
+      # get mean and DF from model
+      Q.mean = Qlim[3]
+      Q.DF = Qlim[4]
+      out = pchisq(Q.DF * Q / Q.mean, floor(Q.DF))
+   }
+
+   out      
+}
+
+#' Calculates critical limits for Q-residuals using classic JM approach
+#' 
+#' @description 
+#' The method is based on 
 #' 
 #' @param eigenvals
-#' vector with eigenvalues 
-#' @param nobj
-#' number of objects in data
-#' @param ncomp
-#' number of calculated components
+#' vector with eigenvalues for all variables
+#' @param Q
+#' vector with Q-residuals for selected component
+#' @param ncomp 
+#' number of components
 #' @param alpha
-#' significance level
-#'
-#' @details
-#' T2 limits are calculated using Hotelling statistics. 
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#' @param return
+#' what to return: \code{'limits'} or \code{'probability'}
 #' 
-#' @return
-#' Returns a list with two vectors:  \code{T2lim} and \code{Qlim}.
-#' 
-ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05) {   
-   T2lim = matrix(0, nrow = 1, ncol = ncomp)
-   for (i in 1:ncomp)
-   {
-      if (nobj == i)
-         T2lim[1, i] = 0
-      else
-         T2lim[1, i] = (i * (nobj - 1) / (nobj - i)) * qf(1 - alpha, i, nobj - i);  
+#' @export
+reslim.jm = function(eigenvals, Q, ncomp, alpha = 0.05, gamma = 0.01, return = 'limits') {
+   evals = eigenvals[(ncomp + 1):length(eigenvals)]   
+   t1 = sum(evals)
+   t2 = sum(evals^2)
+   t3 = sum(evals^3)
+   h0 = 1 - 2 * t1 * t3/3/(t2^2);
+   if (h0 < 0.001) h0 = 0.001
+   
+   if (return == 'limits') {
+      # inverse error function 
+      erfinv = function (x) qnorm((1 + x)/2)/sqrt(2)
+      
+      out = rep(0, 4)
+      ca = sqrt(2) * erfinv(c(1 - 2 * alpha, 1 - 2 * gamma))
+      h1 = ca * sqrt(2 * t2 * h0^2)/t1
+      h2 = t2 * h0 * (h0 - 1)/(t1^2)
+      out[1:2] = t1 * (1 + h1 + h2)^(1/h0)
+      out[3] = mean(Q)
+      out[4] = 1
+   } else {
+      # error function 
+      erf = function (x) 1 - pnorm(-x * sqrt(2)) * 2
+      
+      h1 = (Q/t1)^h0
+      h2 = t2 * h0 * (h0 - 1)/t1^2
+      d = t1 * (h1 - 1 - h2)/(sqrt(2 * t2) * h0)
+      out = 0.5 * (1+erf(d/sqrt(2)))
    }
    
-   # calculate Q limit using F statistics
-   Qlim = matrix(0, nrow = 1, ncol = ncomp)
-   conflim = 100 - alpha * 100;   
-   nvar = length(eigenvals)
-   for (i in 1:ncomp)
-   {   
-      if (i < nvar)
-      {         
-         evals = eigenvals[(i + 1):nvar]   
-         cl = 2 * conflim - 100
-         t1 = sum(evals)
-         t2 = sum(evals^2)
-         t3 = sum(evals^3)
-         h0 = 1 - 2 * t1 * t3/3/(t2^2);
-         
-         if (h0 < 0.001)
-            h0 = 0.001
-         
-         ca = sqrt(2) * erfinv(cl/100)
-         h1 = ca * sqrt(2 * t2 * h0^2)/t1
-         h2 = t2 * h0 * (h0 - 1)/(t1^2)
-         Qlim[1, i] = t1 * (1 + h1 + h2)^(1/h0)
+   out
+}
+
+#' Statistical limits for Q and T2 residuals using Data Driven approach
+#' 
+#' @description 
+#' Method is based on paper by Pomerantsev, Rodionova (JChem, 2014)
+#' 
+#' @param Q
+#' vector with Q-residuals for selected component
+#' @param T2
+#' vector with T2-residuals for selected component
+#' @param type
+#' which estimator to use: 'moments' or 'robust'
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#' @param Qlim
+#' vector with Q limits for selected number of components (from model)
+#' @param T2lim
+#' vector with T2 limits for selected number of components (from model)
+#' @param return
+#' what to return: \code{'limits'} or \code{'probability'}
+#' 
+#' @import stats
+#' 
+#' @export
+reslim.dd = function(Q, T2, type = 'ddmoments', alpha = 0.05, gamma = 0.01, Qlim = NULL, 
+                     T2lim = NULL, return = 'limits') {
+   
+   # classic estimator of u0 and DF for DD method
+   ddclassic = function(u) {
+      u0 = mean(u)
+      DF = round(2 * (u0/sd(u))^2)
+      if (DF == 1) DF = 1
+      res = c(u0, ifelse(DF > 250, 250, DF))
+      res
+   }
+
+   # robust estimator of u0 and DF for DD method
+   ddrobust = function(u) {
+      M = median(u)
+      R = quantile(u, 0.75) - quantile(u, 0.25)
+      DF = R/M
+      if (DF > 2.685592117) {
+         DF = 1
+      } else if (DF < 0.194565995) {
+         DF = 100
+      } else {
+         DF = exp(1.380948 * log(2.68631 / DF))^1.185785
       }
-      else
-         Qlim[1, i] = 0
+      u0 = 0.5 * DF * (M/qchisq(0.5, DF) + R/(qchisq(0.75, DF) - qchisq(0.25, DF)))
+      res = c(u0, ifelse(DF > 250, 250, DF))
+      res
+   }
+
+   
+   if (return == 'limits') {
+      
+      # estimate mean and DF
+      if (type == 'ddmoments') {
+         T2.res = ddclassic(T2)
+         Q.res = ddclassic(Q)
+      } else if (type == "ddrobust"){
+         T2.res = ddrobust(T2)
+         Q.res = ddrobust(Q)
+      } else {
+         stop('Wrong value for "type" parameter!')
+      }
+      
+      T2.mean = T2.res[1]; T2.DF = T2.res[2]
+      Q.mean = Q.res[1]; Q.DF = Q.res[2]
+      
+      nobj = length(Q)
+
+      # calculate critical values
+      Ocrit = qchisq((1 - gamma)^(1/nobj), T2.DF + Q.DF)
+      Dcrit = qchisq(1 - alpha, T2.DF + Q.DF)
+   
+      # calculate critical limits
+      Qlim = c(Dcrit * Q.mean / Q.DF, Ocrit * Q.mean / Q.DF, Q.mean, round(Q.DF))
+      T2lim = c(rep(-(Q.mean / T2.mean) * (T2.DF / Q.DF), 2), T2.mean, round(T2.DF))
+      out = list(Qlim = Qlim, T2lim = T2lim)
+   } else {
+      # get mean and DF from matrix with limits from model      
+      Q.mean = Qlim[3]; Q.DF = Qlim[4]
+      T2.mean = T2lim[3]; T2.DF = T2lim[4]
+      out = pchisq(Q / Q.mean * Q.DF + T2 / T2.mean * T2.DF, round(Q.DF) + round(T2.DF))
    }
    
-   colnames(T2lim) = colnames(Qlim) = paste('Comp', 1:ncomp)
-   res = list(
-      T2lim = T2lim,
-      Qlim = Qlim
-   )   
-}   
+   out
+}
+
+#' Shows lines with critical limits on residuals plot
+#' 
+#' @description 
+#' Shows lines with critical limits on residuals plot
+#' 
+#' @param lim
+#' matrix with residual limits (2x2)
+#' @param lim.type
+#' type of limits
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier borders 
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier borders 
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier borders 
+#' 
+#' @export
+ldecomp.plotLimits = function(lim, lim.type, lim.col, lim.lwd, lim.lty) {
+   if (substr(lim.type, 1, 2) != 'dd') {
+      # rectangular limits
+      lines(c(0, lim[1, 1]), c(lim[1, 2], lim[1, 2]), lty = lim.lty[1], lwd = lim.lwd[1], 
+            col = lim.col[1])
+      lines(c(lim[1, 1], lim[1, 1]), c(0, lim[1, 2]), lty = lim.lty[1], lwd = lim.lwd[1], 
+            col = lim.col[1])
+      lines(c(0, lim[2, 1]), c(lim[2, 2], lim[2, 2]), lty = lim.lty[2], lwd = lim.lwd[2], 
+            col = lim.col[2])
+      lines(c(lim[2, 1], lim[2, 1]), c(0, lim[2, 2]), lty = lim.lty[2], lwd = lim.lwd[2], 
+            col = lim.col[2])
+   } else {
+      # triangular limits
+      abline(a = lim[1, 2], b = lim[1, 1], lty = lim.lty[1], lwd = lim.lwd[1], col = lim.col[1])
+      abline(a = lim[2, 2], b = lim[2, 1], lty = lim.lty[2], lwd = lim.lwd[2], col = lim.col[2])
+   }
+}
 
 #' Cumulative explained variance plot for linear decomposition
 #' 
@@ -336,8 +537,7 @@ ldecomp.getResLimits = function(eigenvals, nobj, ncomp, alpha = 0.05) {
 #' @export
 plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance',
                                    xlab = 'Components', ylab = 'Explained variance, %',
-                                   show.labels = F, labels = 'values', ...)
-{
+                                   show.labels = F, labels = 'values', ...) {
    mdaplot(obj$cumexpvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, type = type, 
            show.labels = show.labels, labels = labels, ...)
 }
@@ -368,8 +568,8 @@ plotCumVariance.ldecomp = function(obj, type = 'b', main = 'Cumulative variance'
 plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
                                 xlab = 'Components', ylab = 'Explained variance, %',
                                 show.labels = F, labels = 'values', ...) {
-   mdaplot(obj$expvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, show.labels = show.labels, 
-           labels = labels, type = type, ...)
+   mdaplot(obj$expvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, 
+           show.labels = show.labels, labels = labels, type = type, ...)
 }
 
 
@@ -403,8 +603,7 @@ plotVariance.ldecomp = function(obj, type = 'b', main = 'Variance',
 plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores', 
                               type = 'p', xlab = NULL, ylab = NULL,
                               show.labels = FALSE, show.legend = TRUE, 
-                              show.axes = TRUE, ...)
-{
+                              show.axes = TRUE, ...) {
    if (is.null(obj$scores)) {
       warning('Scores values are not specified!')
    } else {   
@@ -435,14 +634,15 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
          if (nrow(data) == 1) {
             if (is.null(ylab))
                ylab = rownames(data)[1]
-            mdaplot(data, main = main, type = type, show.labels = show.labels, show.lines = show.lines, 
-                    xlab = xlab, ylab = ylab, ...)
+            mdaplot(data, main = main, type = type, show.labels = show.labels, 
+                    show.lines = show.lines, xlab = xlab, ylab = ylab, ...)
          } else {
             if (is.null(show.legend))
                show.legend = TRUE
             
-            mdaplotg(data, main = main, type = type, show.labels = show.labels, show.lines = show.lines, 
-                     xlab = xlab, ylab = ylab, show.legend = show.legend, ...)
+            mdaplotg(data, main = main, type = type, show.labels = show.labels, 
+                     show.lines = show.lines, xlab = xlab, ylab = ylab, 
+                     show.legend = show.legend, ...)
          }
       } else {
          mdaplot(data, main = main, type = type, show.labels = show.labels, show.lines = show.lines, 
@@ -467,17 +667,13 @@ plotScores.ldecomp = function(obj, comp = c(1, 2), main = 'Scores',
 #' label for y axis
 #' @param show.labels
 #' logical, show or not labels for the plot objects
-#' @param show.limits
-#' logical, show or not lines for statistical limits of the residuals
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #' 
 #' @export
-plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', ylab = 'Squared residual distance (Q)', 
-                                 show.labels = F, show.limits = T, ...)
-{
-   if (is.null(main))
-   {
+plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = NULL, ylab = NULL, 
+                                 show.labels = F, ...) {
+   if (is.null(main)) {
       if (is.null(ncomp))
          main = 'Residuals'
       else
@@ -486,23 +682,26 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
    
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
-      
-   if (show.limits == T)
-      show.lines = c(obj$T2lim[1, ncomp], obj$Qlim[1, ncomp])
-   else
-      show.lines = F
-
-   data = mda.cbind(mda.subset(obj$T2, select = ncomp), mda.subset(obj$Q, select = ncomp))
-   colnames(data) = c(xlab, ylab)
-   mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, 
-           show.lines = show.lines, ...)
+   
+   if (is.null(xlab))
+      xlab = expression(paste('Hotelling ', T^2, ' distance'))
+   if (is.null(ylab))
+      ylab = 'Squared residual distance, Q'      
+   
+   data = mda.cbind(
+      mda.subset(obj$T2, select = ncomp), 
+      mda.subset(obj$Q, select = ncomp)
+   )
+   
+   # show plot
+   mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels, ...)
 }  
 
 #' Print method for linear decomposition
 #'
 #' @description
-#' Generic \code{print} function for linear decomposition. Prints information about the \code{ldecomp}
-#' object.
+#' Generic \code{print} function for linear decomposition. Prints information about 
+#' the \code{ldecomp} object.
 #' 
 #' @param x
 #' object of class \code{ldecomp}
@@ -512,8 +711,7 @@ plotResiduals.ldecomp = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', yl
 #' other arguments
 #' 
 #' @export
-print.ldecomp = function(x, str = NULL, ...)
-{   
+print.ldecomp = function(x, str = NULL, ...) {   
    if (is.null(str))
       str ='Results of data decomposition (class ldecomp)'
    
@@ -541,8 +739,7 @@ print.ldecomp = function(x, str = NULL, ...)
 #' other arguments
 #' 
 #' @export
-as.matrix.ldecomp = function(x, ...)
-{
+as.matrix.ldecomp = function(x, ...) {
    data = cbind(x$expvar, x$cumexpvar)   
    rownames(data) = colnames(x$Q)
    colnames(data) = c('Expvar', 'Cumexpvar')   
@@ -552,7 +749,8 @@ as.matrix.ldecomp = function(x, ...)
 #' Summary statistics for linear decomposition
 #'
 #' @description
-#' Generic \code{summary} function for linear decomposition. Prints statistic about the decomposition.
+#' Generic \code{summary} function for linear decomposition. Prints statistic about 
+#' the decomposition.
 #' 
 #' @param object
 #' object of class \code{ldecomp}

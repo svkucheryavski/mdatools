@@ -4,18 +4,15 @@
 \alias{plotResiduals.simcares}
 \title{Residuals plot for SIMCA results}
 \usage{
-\method{plotResiduals}{simcares}(obj, ncomp = NULL, show.limits = T,
-  type = "p", main = NULL, xlab = "T2",
-  ylab = "Squared residual distance (Q)", legend = NULL, ...)
+\method{plotResiduals}{simcares}(obj, ncomp = NULL, main = NULL,
+  xlab = NULL, ylab = NULL, norm = F, show.limits = T, legend = NULL,
+  lim.col = c("#c0a0a0", "#906060"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
+  ...)
 }
 \arguments{
 \item{obj}{SIMCA results (object of class \code{simcares})}
 
 \item{ncomp}{which principal components to show the plot for}
-
-\item{show.limits}{logical, show or not lines with statistical limits for the residuals}
-
-\item{type}{type of the plot}
 
 \item{main}{main plot title}
 
@@ -23,7 +20,17 @@
 
 \item{ylab}{label for y axis}
 
+\item{norm}{logical, show normalized Q vs T2 (\code{norm = T}) values or original ones (\code{norm = F})}
+
+\item{show.limits}{logical, show or not lines with statistical limits for the residuals}
+
 \item{legend}{vector with legend items}
+
+\item{lim.col}{vector with two values - line color for extreme and outlier borders}
+
+\item{lim.lwd}{vector with two values - line width for extreme and outlier borders}
+
+\item{lim.lty}{vector with two values - line type for extreme and outlier borders}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }

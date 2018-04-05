@@ -7,7 +7,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Getting started with mdatools for R</title>
   <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
+<<<<<<< HEAD
   <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+=======
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+>>>>>>> develop
 
   <meta property="og:title" content="Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
@@ -25,7 +29,10 @@
 <meta name="author" content="Sergey Kucheryavskiy">
 
 
+<<<<<<< HEAD
 <meta name="date" content="2018-11-24">
+=======
+>>>>>>> develop
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -142,6 +149,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#manual-x-values-for-loading-line-plot"><i class="fa fa-check"></i>Manual x-values for loading line plot</a></li>
 <li class="chapter" data-level="" data-path="plotting-methods.html"><a href="plotting-methods.html#excluding-rows-and-columns"><i class="fa fa-check"></i>Excluding rows and columns</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html"><i class="fa fa-check"></i>Residuals and critical limits</a><ul>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#distance-to-model-and-score-distance"><i class="fa fa-check"></i>Distance to model and score distance</a></li>
+<li class="chapter" data-level="" data-path="residuals-and-critical-limits.html"><a href="residuals-and-critical-limits.html#critical-limits"><i class="fa fa-check"></i>Critical limits</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="randomized-pca-algorithms.html"><a href="randomized-pca-algorithms.html"><i class="fa fa-check"></i>Randomized PCA algorithms</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="partial-least-squares-regression.html"><a href="partial-least-squares-regression.html"><i class="fa fa-check"></i>Partial least squares regression</a><ul>
 <li class="chapter" data-level="" data-path="models-and-results-1.html"><a href="models-and-results-1.html"><i class="fa fa-check"></i>Models and results</a><ul>
@@ -156,6 +168,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="" data-path="simca-classification.html"><a href="simca-classification.html"><i class="fa fa-check"></i>SIMCA classification</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html"><i class="fa fa-check"></i>Calibration and validation</a><ul>
 <li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#predictions-and-validation-with-a-test-set"><i class="fa fa-check"></i>Predictions and validation with a test set</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#class-belonging-probabilities"><i class="fa fa-check"></i>Class belonging probabilities</a></li>
+<li class="chapter" data-level="" data-path="calibration-and-validation.html"><a href="calibration-and-validation.html#extreme-plot"><i class="fa fa-check"></i>Extreme plot</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="multiclass-classification.html"><a href="multiclass-classification.html"><i class="fa fa-check"></i>Multiclass classification</a></li>
 </ul></li>
@@ -178,14 +192,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="variable-selection" class="section level2 unnumbered">
 <h2>Variable selection</h2>
-<p>PLS calculates several statistics, which can be used to select most important (or remove least important) variables in order to improve performance and make model simpler. The first two are VIP-scores (variables important for projection) and Selectivity ratio. All details and theory can be found e.g. <a href="http://onlinelibrary.wiley.com/store/10.1002/cem.1360/asset/1360_ftp.pdf?v=1&amp;t=iu9nq00b&amp;s=4341cd7b9266e064a7deb9f760cd5ab5e7b36f5f">here</a>.</p>
+<p>PLS calculates several statistics, which can be used to select most important (or remove least important) variables in order to improve performance and make model simpler. The first two are VIP-scores (variables important for projection) and Selectivity ratio. All details and theory can be found e.g. <a href="http://onlinelibrary.wiley.com/store/10.1002/cem.1360/">here</a>.</p>
 <p>Both parameters can be shown as plots and as vector of values for a selected y-variable. Selectivity ration is calculated for all possible components in a model, but VIP scores (due to computational time) only for selected number of components and are recalculated every time you change number of optimal components using <code>selectCompNum()</code> method. Here are some plots.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
 <span class="kw">plotVIPScores</span>(m1, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">1</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-79-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-91-1.png" width="864" /></p>
 <p>In the example below, I create two other PLS models by excluding variables with VIP score or selectivity ratio below a threshold (I use 0.5 and 1 correspondingly) and show the performance for both.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m3 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> <span class="kw">getVIPScores</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>) <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.5</span>)
 <span class="kw">summary</span>(m3)</code></pre></div>
@@ -216,7 +230,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.ci =</span> F)
 <span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.ci =</span> F)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-82-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-94-1.png" width="864" /></p>
 <p>Calling function <code>summary()</code> for regression coefficients allows to get all calculated statistics.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(mjk<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
 <pre><code>## Regression coefficients for Shoesize
@@ -402,10 +416,11 @@ gitbook.start({
 "facebook": true,
 "twitter": true,
 "google": false,
+"linkedin": false,
 "weibo": false,
 "instapper": false,
 "vk": false,
-"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",
@@ -418,7 +433,7 @@ gitbook.start({
 },
 "download": null,
 "toc": {
-"collapse": "subsection"
+"collapse": "section"
 }
 });
 });
@@ -429,9 +444,11 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(script.src))
-      script.src  = script.src.replace(/^https?:/, '');
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

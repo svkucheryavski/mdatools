@@ -2,7 +2,7 @@
 #' 
 #' @description
 #' \code{simca} is used to make SIMCA (Soft Independent Modelling of Class Analogies) model for 
-#' one-class classification.
+#' one-class classification. 
 #' 
 #' @param x
 #' a numerical matrix with data values.
@@ -24,16 +24,23 @@
 #' a numerical matrix with test data.
 #' @param c.test
 #' a vector with classes of test data objects (can be text with names of classes or logical).
-#' @param alpha
-#' significance level for calculating limit for T2 and Q residuals.
 #' @param method
 #' method to compute principal components.
+#' @param rand
+#' vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)
+#' @param lim.type
+#' which method to use for calculation of critical limits for residuals (see details)
+#' @param alpha
+#' significance level for calculating critical limits for T2 and Q residuals.
+#' @param gamma
+#' significance level for calculating outlier limits for T2 and Q residuals.
 #' @param info
 #' text with information about the model.
 #' 
 #' @details 
 #' SIMCA is in fact PCA model with additional functionality, so \code{simca} class inherits most 
-#' of the functionality of \code{\link{pca}} class. 
+#' of the functionality of \code{\link{pca}} class. It uses critical limits calculated for Q and T2 
+#' residuals calculated for PCA model for making classification decistion.
 #'
 #' @return 
 #' Returns an object of \code{simca} class with following fields:
@@ -125,8 +132,8 @@
 #'
 #' @export
 simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NULL,
-                 exclrows = NULL, x.test = NULL,  c.test = NULL, alpha = 0.05, method = 'svd', 
-                 info = '') {
+                 exclrows = NULL, x.test = NULL,  c.test = NULL, method = 'svd', rand = NULL, 
+                 lim.type = 'jm', alpha = 0.05, gamma = 0.01, info = '') {
    
    if (!is.character(classname))
       stop('Argument "classname" must be a text!')
@@ -142,7 +149,8 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, exc
       x = mda.exclrows(x, exclrows)
    
    # calibrate model  
-   model = pca.cal(x, ncomp, center = center, scale = scale, method = method, alpha = alpha, info = info, cv = NULL)
+   model = pca.cal(x, ncomp, center = center, scale = scale, method = method, rand = rand,
+                   lim.type = lim.type, alpha = alpha, gamma = gamma, info = info, cv = NULL)
    model$nclasses = 1
    model$classname = classname
    model$call = match.call()   
@@ -163,7 +171,6 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, exc
       model$testres = predict.simca(model, x.test, c.ref = c.test)
    }
       
-   
    model
 }
 
@@ -193,8 +200,6 @@ simca = function(x, classname, ncomp = 15, center = T, scale = F, cv = NULL, exc
 predict.simca = function(object, x, c.ref = NULL, cal = FALSE, ...) {
    if (cal == FALSE) {
       pres = predict.pca(object, x, cal = cal)     
-      pres$Qlim = object$Qlim
-      pres$T2lim = object$T2lim
    } else {
       pres = object$calres
    }
@@ -203,13 +208,24 @@ predict.simca = function(object, x, c.ref = NULL, cal = FALSE, ...) {
    c.ref = checkReferenceValues.classmodel(object, c.ref, x)
   
    # do predictions and set attributes
-   c.pred = simca.classify(object, pres)
-   dimnames(c.pred) = list(rownames(x), colnames(object$loadings), object$classname)
-   c.pred = mda.setattr(c.pred, mda.getattr(x), 'row')
-   attr(c.pred, 'name') = 'Class, predicted values'
+   cres = simca.classify(object, pres)
+   dimnames(cres$c.pred) = dimnames(cres$p.pred) = list(
+      rownames(x), 
+      colnames(object$loadings), 
+      object$classname
+   )
+   cres$c.pred = mda.setattr(cres$c.pred, mda.getattr(x), 'row')
+   attr(cres$c.pred, 'name') = 'Class, predicted values'
+   cres$p.pred = mda.setattr(cres$p.pred, mda.getattr(x), 'row')
+   attr(cres$p.pred, 'name') = 'Class, probabilities'
    
    # combine everything to simcares object
-   cres = classres(c.pred, c.ref = c.ref, ncomp.selected = object$ncomp.selected)
+   cres = classres(
+      c.pred = cres$c.pred, 
+      p.pred = cres$p.pred,
+      c.ref = c.ref, 
+      ncomp.selected = object$ncomp.selected
+   )
    res = simcares(pres, cres)
    
    res
@@ -233,14 +249,16 @@ predict.simca = function(object, x, c.ref = NULL, cal = FALSE, ...) {
 #'  
 simca.classify = function(model, res) {
    ncomp = model$ncomp
-   c.pred = array(0, dim = c(nrow(res$Q), ncomp, 1))
+   nobj = nrow(res$Q)
+   c.pred = array(0, dim = c(nobj, ncomp, 1))
+   p.pred = array(0, dim = c(nobj, ncomp, 1))
    
    for (i in 1:ncomp) {
-      c.pred[, i, 1] = 
-         res$T2[, i] <= model$T2lim[1, i] & res$Q[, i] <= model$Qlim[1, i]
+      p.pred[, i, 1] = getProbabilities(model, i, res$Q[, i], res$T2[, i])
+      c.pred[, i, 1] = p.pred[, i, 1] >= 0.5
    }   
    c.pred = c.pred * 2 - 1
-   c.pred
+   res = list(c.pred = c.pred, p.pred = p.pred)
 }  
 
 #' Cross-validation of a SIMCA model
@@ -294,15 +312,11 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
    c.ref = matrix(model$classname, ncol = 1, nrow = nobj)
    
    # loop over segments
-   for (iRep in 1:nrep)
-   {
-      
-      for (iSeg in 1:nseg)
-      {
+   for (iRep in 1:nrep) {
+      for (iSeg in 1:nseg) {
          ind = na.exclude(idx[iSeg, ,iRep])
       
-         if (length(ind) > 0)
-         {   
+         if (length(ind) > 0) {   
             x.cal = x[-ind, , drop = F]
             x.val = x[ind, , drop = F]
             
@@ -313,7 +327,8 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
             m = pca.run(x.cal, ncomp, model$method)               
             
             # apply autoscaling to the validation set
-            x.val = prep.autoscale(x.val, center = attr(x.cal, 'prep:center'), scale = attr(x.cal, 'prep:scale'))
+            x.val = prep.autoscale(x.val, center = attr(x.cal, 'prep:center'), 
+                                   scale = attr(x.cal, 'prep:scale'))
             
             # get scores
             scores = x.val %*% m$loadings
@@ -323,22 +338,22 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
             res = ldecomp.getDistances(scores, m$loadings, residuals, model$tnorm)
             Q[ind, ] = Q[ind, ] + res$Q
             T2[ind, ] = T2[ind, ] + res$T2
-            
          }
       }  
    }
    
    Q = Q / nrep;
    T2 = T2 / nrep;
-   
-   m = list(Qlim = model$Qlim, T2lim = model$T2lim, classname = model$classname, ncomp = model$ncomp)
    r = list(Q = Q, T2 = T2, classname = model$classname)
-   c.pred = simca.classify(m, r)
    
    # classify data
-   dimnames(c.pred) = list(rownames(x), colnames(model$loadings), model$classname)
-  
-
+   cres = simca.classify(model, r)
+   dimnames(cres$c.pred) = dimnames(cres$p.pred) = list(
+      rownames(x), 
+      colnames(model$loadings), 
+      model$classname
+   )
+   
    # add names
    rownames(Q) = rownames(T2) = rownames(c.pred) = rownames(c.ref) = rownames(x)
    colnames(Q) = colnames(T2) = colnames(c.pred) = colnames(model$loadings)
@@ -353,16 +368,21 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
    attr(T2, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
    attr(T2, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
    attr(T2, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
-
-   attr(c.pred, 'name') = 'Class, predicted values'
-   attr(c.pred, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
-   attr(c.pred, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
-   attr(c.pred, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
    
    attr(c.ref, 'name') = 'Class, reference values'
    attr(c.ref, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
    attr(c.ref, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
    attr(c.ref, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
+   
+   attr(cres$c.pred, 'name') = 'Class, predicted values'
+   attr(cres$c.pred, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
+   attr(cres$c.pred, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
+   attr(cres$c.pred, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
+   
+   attr(cres$c.pred, 'name') = 'Class, probabilities'
+   attr(cres$c.pred, 'xaxis.name') = attr(model$calres$scores, 'xaxis.name')
+   attr(cres$c.pred, 'yaxis.name') = attr(model$calres$scores, 'yaxis.name')
+   attr(cres$c.pred, 'yaxis.values') = attr(model$calres$scores, 'yaxis.values')
    
    # compute variance
    var = ldecomp.getVariances(Q, model$calres$totvar)
@@ -371,13 +391,62 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
    pres = pcares(ncomp.selected = model$ncomp.selected, dist = list(T2 = T2, Q = Q), var = var)
    pres$Qlim = model$Qlim
    pres$T2lim = model$T2lim
+   pres$lim.type = model$lim.type
+   pres$alpha = model$alpha
+   pres$gamma = model$gamma
 
    # combine results together   
-   cres = classres(c.pred, c.ref = c.ref)   
+   cres = classres(c.pred = cres$c.pred, p.pred = cres$p.pred, c.ref = c.ref)   
    res = simcares(pres, cres)
    
    res
-}  
+}
+
+#' Probability of class belonging for PCA/SIMCA results
+#' 
+#' @description 
+#' Computes probability of class belonging for each object based on Q and T2 residuls
+#' 
+#' @param obj
+#' object with SIMCA model
+#' @param ncomp
+#' number of components to compute the probabilities for.
+#' @param Q
+#' vector with Q values for selected component
+#' @param T2
+#' vector with T2 values for selected component
+#' @param ...
+#' other arguments
+#'  
+#' @export
+getProbabilities.simca = function(obj, ncomp, Q, T2, ...) {
+   p = NULL
+   Qlim = obj$Qlim[, ncomp]
+   T2lim = obj$T2lim[, ncomp]
+   lim.type = obj$lim.type
+   alpha = obj$alpha
+   
+   # compute class probability based statistic probability
+   p = function(x, alpha){ ifelse((p = (1 - x) / alpha * 0.5) > 1, 1, p) }
+   
+   # probability for T2 by Hotelling
+   T2.p = p(reslim.hotelling(ncomp, T2 = T2, T2lim = T2lim, return = 'prob'), alpha)
+
+   # probability for Q by selected method
+   if (obj$lim.type == 'chisq') {
+      Q.p = p(reslim.chisq(Q = Q, Qlim = Qlim, return = 'prob'), alpha)
+      p = pmin(Q.p, T2.p)
+   } else if (obj$lim.type == 'jm') {
+      Q.p = p(reslim.jm(obj$eigenvals, Q = Q, ncomp = ncomp, return = 'prob'), alpha)
+      p = pmin(Q.p, T2.p)
+   } else if (substr(obj$lim.type, 1, 2) == 'dd') {
+      p = p(reslim.dd(Q, T2, Qlim = Qlim, T2lim = T2lim, type = lim.type, return = 'prob'), alpha)
+   } else {
+      stop('Wrong value for "type" parameter!')
+   }
+   
+   p
+}
 
 #' Modelling power plot for SIMCA model
 #' 
@@ -399,8 +468,7 @@ simca.crossval = function(model, x, cv, center = T, scale = F) {
 #' 
 #' @export
 plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL, ylab = '', ...){
-   if (is.null(main))
-   {
+   if (is.null(main)) {
       if (is.null(ncomp))
          main = 'Modelling power'
       else
@@ -410,8 +478,7 @@ plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL, 
    ncomp = getSelectedComponents(obj, ncomp)
    
    nvar = nrow(obj$modpower)
-   if (is.null(type))
-   {   
+   if (is.null(type)) {   
       if (nvar < 20)
          type = 'h'
       else
@@ -421,6 +488,86 @@ plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL, 
    data = mda.subset(obj$modpower, select = ncomp)
    mdaplot(mda.t(data), type = type, ylab = ylab, main = main, ...)
 }   
+
+#' Shows extreme plot for SIMCA model
+#' 
+#' @param obj
+#' SIMCA model
+#' @param ncomp
+#' Number of components to show the plot for
+#' @param main
+#' main title for the plot
+#' @param xlab
+#' label for x axis
+#' @param ylab
+#' label for y axis
+#' @param ...
+#' other arguments
+#'  
+#' @description 
+#' The plot shows the number of extreme objects rejected by the model vs. the expected number, 
+#' which depends on significance level and total number of objects. The light blue area shows 95% 
+#' tolerance limits. See more details in [1].
+#'  
+#' @references 
+#' 1. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
+#' Journal of Chemometrics, 28 (2014) pp. 429-438.
+#' 
+#' @export   
+plotExtreme.simca = function(obj, ncomp = NULL, main = NULL, xlab = 'Expected', 
+                             ylab = 'Observed', ...) {
+   
+   ncomp = getSelectedComponents(obj, ncomp)
+   
+   if (is.null(main)) {
+      if (is.null(ncomp))
+         main = 'Extreme plot'
+      else
+         main = sprintf('Extreme plot (ncomp = %d)', ncomp)      
+   }   
+   
+   Q = obj$calres$Q[, ncomp]
+   T2 = obj$calres$T2[, ncomp]
+   attrs = mda.getattr(obj$calres$Q)
+   if (length(attrs$exclrows) > 0) {
+      Q = Q[-attrs$exclrows]
+      T2 = T2[-attrs$exclrows]
+   }
+   
+   T2.p = reslim.hotelling(ncomp, T2 = T2, T2lim = obj$T2lim[, ncomp], return = 'prob')
+   if (obj$lim.type == 'chisq') {
+      Q.p = reslim.chisq(Q, Qlim = obj$Qlim[, ncomp], return = 'prob')
+      p = pmax(Q.p, T2.p)
+   } else if (obj$lim.type == 'jm') {
+      Q.p = reslim.jm(obj$eigenvals, Q, ncomp, return = 'prob')
+      p = pmax(Q.p, T2.p)
+   } else if (substr(obj$lim.type, 1, 2) == 'dd') {
+      p = reslim.dd(Q, T2, type = obj$lim.type, Qlim = obj$Qlim[, ncomp], 
+                    T2lim = obj$T2lim[, ncomp], return = 'prob')
+   } else {
+      stop('Wrong value for "type" parameter!')
+   }
+   
+   p = sort(p)
+   nobj = length(p)
+   N = Np = Nm = rep(0, nobj)
+   for (i in 1:nobj) {
+      alpha = i / nobj
+      N[i] = sum((1 - p) < alpha)
+      D = 2 * sqrt(i * (1 - alpha))
+      Np[i] = i + D;
+      Nm[i] = i - D;
+   }
+   
+   expected = 1:nobj
+   plot(expected, expected, type = 'l', col = 'blue', main = main, xlab = xlab, ylab = ylab)
+   for (i in 1:nobj){
+      lines(c(expected[i],expected[i]),c(Nm[i],Np[i]), col = 'lightblue')
+   }
+   lines(expected, Nm, col = 'lightblue')
+   lines(expected, Np, col = 'lightblue')
+   points(expected, N, type = 'p', pch = 16, col = 'red')
+}
 
 #' Model overview plot for SIMCA
 #' 
@@ -438,8 +585,7 @@ plotModellingPower.simca = function(obj, ncomp = NULL, type = 'h', main = NULL, 
 #' See examples in help for \code{\link{simcam}} function.
 #' 
 #' @export
-plot.simca = function(x, ncomp = NULL, ...)
-{
+plot.simca = function(x, ncomp = NULL, ...) {
    obj = x
    
    par(mfrow = c(2, 2))
@@ -463,8 +609,7 @@ plot.simca = function(x, ncomp = NULL, ...)
 #' other arguments
 #' 
 #' @export
-summary.simca = function(object, ...)
-{
+summary.simca = function(object, ...) {
    obj = object
    
    cat(sprintf('\nSIMCA model for class "%s" summary\n\n', obj$classname))
@@ -472,6 +617,8 @@ summary.simca = function(object, ...)
    if (!is.null(obj$info))
       cat(sprintf('Info: %s\n', obj$info))
    
+   
+   cat(sprintf('Method for critical limits: %s\n', obj$lim.type))
    cat(sprintf('Significance level (alpha): %.2f\n', obj$alpha))
    cat(sprintf('Selected number of components: %d\n\n', obj$ncomp.selected))
    
@@ -487,7 +634,12 @@ summary.simca = function(object, ...)
    if (!is.null(obj$testres)) {
       cnames = colnames(data)
       if (!is.null(obj$testres$c.ref) && !any(is.nan(obj$testres$specificity))) {
-         data = cbind(data, obj$testres$expvar, obj$testres$specificity[1, ], obj$testres$sensitivity[1, ])
+         data = cbind(
+            data, 
+            obj$testres$expvar, 
+            obj$testres$specificity[1, ], 
+            obj$testres$sensitivity[1, ]
+         )
          colnames(data) = c(cnames, 'Expvar (test)', 'Spec (test)', 'Sens (test)')
       } else {
          data = cbind(data, obj$testres$expvar, obj$testres$sensitivity[1, ])
@@ -509,8 +661,7 @@ summary.simca = function(object, ...)
 #' other arguments
 #' 
 #' @export
-print.simca = function(x, ...)
-{
+print.simca = function(x, ...) {
    obj = x
    
    cat('\nSIMCA one class model (class simca)\n')

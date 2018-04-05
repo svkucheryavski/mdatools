@@ -103,8 +103,7 @@
 #' par(mfrow = c(1, 1))
 #' 
 #' @export
-simcamres = function(cres, pred.res)
-{
+simcamres = function(cres, pred.res) {
    res = cres
    res$pred.res = pred.res
    res$classnames = dimnames(cres$c.pred)[[3]]
@@ -209,8 +208,7 @@ plotCooman.simcamres = function(obj, nc = c(1, 2), type = 'p', main = "Cooman's 
 #' See examples in help for \code{\link{simcamres}} function.
 #' 
 #' @export
-plot.simcamres = function(x, ...)
-{
+plot.simcamres = function(x, ...) {
    plotPredictions(x)
 }
 
@@ -225,21 +223,17 @@ plot.simcamres = function(x, ...)
 #' other arguments
 #' 
 #' @export
-summary.simcamres = function(object, ...)
-{
+summary.simcamres = function(object, ...) {
    obj = object
    
    cat('\nSummary for SIMCA multiple classes classification result\n')
-   if (!is.null(obj$c.ref))
-   {   
+   if (!is.null(obj$c.ref)) {   
       classres = NULL
       for (i in 1:obj$nclasses)
          classres = rbind(classres, as.matrix.classres(obj, nc = i))
       rownames(classres) = paste(obj$classnames, ' (', obj$ncomp.selected, ' comp)', sep = '')   
       print(classres)
-   }
-   else
-   {
+   } else {
       cat('\nReference values are not provided.\n')
    }
 }  
@@ -255,8 +249,7 @@ summary.simcamres = function(object, ...)
 #' other arguments
 #'
 #' @export 
-print.simcamres = function(x, ...)
-{   
+print.simcamres = function(x, ...) {   
    obj = x
    
    cat('Result for SIMCA multiple classes classification (class simcamres)\n')
