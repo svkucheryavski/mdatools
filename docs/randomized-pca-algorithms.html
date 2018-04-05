@@ -201,12 +201,12 @@ D =<span class="st"> </span>D <span class="op">+</span><span class="st"> </span>
 t1 =<span class="st"> </span><span class="kw">system.time</span>({m1 =<span class="st"> </span><span class="kw">pca</span>(D, <span class="dt">ncomp =</span> <span class="dv">2</span>)})
 <span class="kw">show</span>(t1)</code></pre></div>
 <pre><code>##    user  system elapsed 
-##  58.361   2.982  61.674</code></pre>
+##  60.128   3.217  65.205</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># randomized SVD with p = 5 and q = 1</span>
 t2 =<span class="st"> </span><span class="kw">system.time</span>({m2 =<span class="st"> </span><span class="kw">pca</span>(D, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">rand =</span> <span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">1</span>))})
 <span class="kw">show</span>(t2)</code></pre></div>
 <pre><code>##    user  system elapsed 
-##  34.316   2.844  37.721</code></pre>
+##  34.460   2.758  37.703</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compare variances</span>
 <span class="kw">summary</span>(m1)</code></pre></div>
 <pre><code>## 
@@ -215,8 +215,8 @@ t2 =<span class="st"> </span><span class="kw">system.time</span>({m2 =<span clas
 ## Info:
 ## 
 ##        Eigvals Expvar Cumexpvar
-## Comp 1 111.799  62.00     62.00
-## Comp 2  49.795  27.62     89.62</code></pre>
+## Comp 1 112.915  62.24     62.24
+## Comp 2  49.809  27.45     89.69</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m2)</code></pre></div>
 <pre><code>## 
 ## PCA model (class pca) summary
@@ -226,33 +226,33 @@ t2 =<span class="st"> </span><span class="kw">system.time</span>({m2 =<span clas
 ## 
 ## Parameters for randomized algorithm: q = 5, p = 1
 ##        Eigvals Expvar Cumexpvar
-## Comp 1 111.799  62.00     62.00
-## Comp 2  49.795  27.62     89.62</code></pre>
+## Comp 1 112.915  62.24     62.24
+## Comp 2  49.809  27.45     89.69</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compare loadings</span>
 <span class="kw">show</span>(m1<span class="op">$</span>loadings[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, ])</code></pre></div>
 <pre><code>##              Comp 1        Comp 2
-##  [1,]  2.540549e-05 -8.337369e-06
-##  [2,]  3.903790e-02  6.913822e-02
-##  [3,]  6.857806e-02  7.483070e-02
-##  [4,]  8.144639e-02  1.213801e-02
-##  [5,]  7.442561e-02 -6.138351e-02
-##  [6,]  4.911887e-02 -7.799807e-02
-##  [7,]  1.162372e-02 -2.275859e-02
-##  [8,] -2.863635e-02  5.342582e-02
-##  [9,] -6.168576e-02  8.051321e-02
-## [10,] -7.967933e-02  3.290873e-02</code></pre>
+##  [1,]  7.762112e-05 -3.707775e-05
+##  [2,] -3.841657e-02 -6.945439e-02
+##  [3,] -6.795334e-02 -7.535381e-02
+##  [4,] -8.130303e-02 -1.266311e-02
+##  [5,] -7.489173e-02  6.089847e-02
+##  [6,] -4.978911e-02  7.785385e-02
+##  [7,] -1.180005e-02  2.288940e-02
+##  [8,]  2.907443e-02 -5.289558e-02
+##  [9,]  6.254122e-02 -7.974871e-02
+## [10,]  8.004692e-02 -3.217614e-02</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m2<span class="op">$</span>loadings[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, ])</code></pre></div>
 <pre><code>##              Comp 1        Comp 2
-##  [1,]  2.540549e-05  8.337369e-06
-##  [2,]  3.903790e-02 -6.913822e-02
-##  [3,]  6.857806e-02 -7.483070e-02
-##  [4,]  8.144639e-02 -1.213801e-02
-##  [5,]  7.442561e-02  6.138351e-02
-##  [6,]  4.911887e-02  7.799807e-02
-##  [7,]  1.162372e-02  2.275859e-02
-##  [8,] -2.863635e-02 -5.342582e-02
-##  [9,] -6.168576e-02 -8.051321e-02
-## [10,] -7.967933e-02 -3.290873e-02</code></pre>
+##  [1,]  7.762112e-05  3.707775e-05
+##  [2,] -3.841657e-02  6.945439e-02
+##  [3,] -6.795334e-02  7.535381e-02
+##  [4,] -8.130303e-02  1.266311e-02
+##  [5,] -7.489173e-02 -6.089847e-02
+##  [6,] -4.978911e-02 -7.785385e-02
+##  [7,] -1.180005e-02 -2.288940e-02
+##  [8,]  2.907443e-02  5.289558e-02
+##  [9,]  6.254122e-02  7.974871e-02
+## [10,]  8.004692e-02  3.217614e-02</code></pre>
 <p>As you can see the explained variance values, eigenvalues and loadings are identical in the two models and the second method is about twice faster.</p>
 <p>It is possible to make PCA decomposition even faster if only loadings and scores are needed. In this case you can use method <code>pca.run()</code> and skip other steps, like calculation of residuals, variances, critical limits and so on. But in this case data matrix must be centered (and scaled if necessary) manually prior to the decomposition. Here is an example using the data generated in previous code.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">D =<span class="st"> </span><span class="kw">scale</span>(D, <span class="dt">center =</span> T, <span class="dt">scale =</span> F)
@@ -261,37 +261,37 @@ t2 =<span class="st"> </span><span class="kw">system.time</span>({m2 =<span clas
 t1 =<span class="st"> </span><span class="kw">system.time</span>({P1 =<span class="st"> </span><span class="kw">pca.run</span>(D, <span class="dt">method =</span> <span class="st">&#39;svd&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>)})
 <span class="kw">show</span>(t1)</code></pre></div>
 <pre><code>##    user  system elapsed 
-##  25.886   0.255  26.167</code></pre>
+##  26.856   0.355  27.414</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># randomized SVD with p = 5 and q = 1</span>
 t2 =<span class="st"> </span><span class="kw">system.time</span>({P2 =<span class="st"> </span><span class="kw">pca.run</span>(D, <span class="dt">method =</span> <span class="st">&#39;svd&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">rand =</span> <span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">1</span>))})
 <span class="kw">show</span>(t2)</code></pre></div>
 <pre><code>##    user  system elapsed 
-##   2.084   0.044   2.130</code></pre>
+##   2.199   0.046   2.250</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compare loadings</span>
 <span class="kw">show</span>(P1<span class="op">$</span>loadings[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, ])</code></pre></div>
 <pre><code>##                [,1]          [,2]
-##  [1,]  2.540549e-05 -8.337369e-06
-##  [2,]  3.903790e-02  6.913822e-02
-##  [3,]  6.857806e-02  7.483070e-02
-##  [4,]  8.144639e-02  1.213801e-02
-##  [5,]  7.442561e-02 -6.138351e-02
-##  [6,]  4.911887e-02 -7.799807e-02
-##  [7,]  1.162372e-02 -2.275859e-02
-##  [8,] -2.863635e-02  5.342582e-02
-##  [9,] -6.168576e-02  8.051321e-02
-## [10,] -7.967933e-02  3.290873e-02</code></pre>
+##  [1,]  7.762112e-05 -3.707775e-05
+##  [2,] -3.841657e-02 -6.945439e-02
+##  [3,] -6.795334e-02 -7.535381e-02
+##  [4,] -8.130303e-02 -1.266311e-02
+##  [5,] -7.489173e-02  6.089847e-02
+##  [6,] -4.978911e-02  7.785385e-02
+##  [7,] -1.180005e-02  2.288940e-02
+##  [8,]  2.907443e-02 -5.289558e-02
+##  [9,]  6.254122e-02 -7.974871e-02
+## [10,]  8.004692e-02 -3.217614e-02</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(P2<span class="op">$</span>loadings[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, ])</code></pre></div>
 <pre><code>##                [,1]          [,2]
-##  [1,]  2.540549e-05  8.337369e-06
-##  [2,]  3.903790e-02 -6.913822e-02
-##  [3,]  6.857806e-02 -7.483070e-02
-##  [4,]  8.144639e-02 -1.213801e-02
-##  [5,]  7.442561e-02  6.138351e-02
-##  [6,]  4.911887e-02  7.799807e-02
-##  [7,]  1.162372e-02  2.275859e-02
-##  [8,] -2.863635e-02 -5.342582e-02
-##  [9,] -6.168576e-02 -8.051321e-02
-## [10,] -7.967933e-02 -3.290873e-02</code></pre>
+##  [1,]  7.762112e-05  3.707775e-05
+##  [2,] -3.841657e-02  6.945439e-02
+##  [3,] -6.795334e-02  7.535381e-02
+##  [4,] -8.130303e-02  1.266311e-02
+##  [5,] -7.489173e-02 -6.089847e-02
+##  [6,] -4.978911e-02 -7.785385e-02
+##  [7,] -1.180005e-02 -2.288940e-02
+##  [8,]  2.907443e-02  5.289558e-02
+##  [9,]  6.254122e-02  7.974871e-02
+## [10,]  8.004692e-02  3.217614e-02</code></pre>
 <p>As you can see the loadings are still the same but the probabilistic algorithm is about 15 times faster.</p>
 
 </div>
