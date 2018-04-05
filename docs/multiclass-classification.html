@@ -192,7 +192,7 @@ m.set =<span class="st"> </span><span class="kw">selectCompNum</span>(m.set, <sp
 m.vir =<span class="st"> </span><span class="kw">simca</span>(X.vir, <span class="st">&#39;virginica&#39;</span>, <span class="dv">3</span>)
 m.vir =<span class="st"> </span><span class="kw">selectCompNum</span>(m.vir, <span class="dv">2</span>)
 
-m.ver =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicola&#39;</span>, <span class="dv">3</span>)
+m.ver =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dv">3</span>)
 m.ver =<span class="st"> </span><span class="kw">selectCompNum</span>(m.ver, <span class="dv">1</span>)</code></pre></div>
 <p>Then we combine the models into a SIMCAM model object. Summary will show the performance on calibration set, which is a combination of calibration sets for each of the individual models</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">simcam</span>(<span class="kw">list</span>(m.set, m.vir, m.ver))
@@ -226,7 +226,7 @@ m.ver =<span class="st"> </span><span class="kw">selectCompNum</span>(m.ver, <sp
 ## Comp 2  14.94     91.10       1.00
 ## Comp 3   6.09     97.20       0.96
 ## 
-## SIMCA model for class &quot;versicola&quot; summary
+## SIMCA model for class &quot;versicolor&quot; summary
 ## 
 ## Info: 
 ## Method for critical limits: jm
@@ -240,42 +240,42 @@ m.ver =<span class="st"> </span><span class="kw">selectCompNum</span>(m.ver, <sp
 <p>Now we apply the combined model to the test set and look at the predictions.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t, c.t)
 <span class="kw">plotPredictions</span>(res)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-113-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-114-1.png" width="864" /></p>
 <p>In this case the predictions are shown only for the number of components each model found optimal. The names of classes along y-axis are the individual models. Similarly we can show the predicted values.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(res<span class="op">$</span>c.pred[<span class="dv">20</span><span class="op">:</span><span class="dv">30</span>, <span class="dv">1</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>])</code></pre></div>
-<pre><code>##    setosa virginica versicola
-## 40      1        -1        -1
-## 42     -1        -1        -1
-## 44      1        -1        -1
-## 46      1        -1        -1
-## 48      1        -1        -1
-## 50      1        -1        -1
-## 52     -1        -1         1
-## 54     -1        -1         1
-## 56     -1         1         1
-## 58     -1        -1        -1
-## 60     -1        -1         1</code></pre>
+<pre><code>##    setosa virginica versicolor
+## 40      1        -1         -1
+## 42     -1        -1         -1
+## 44      1        -1         -1
+## 46      1        -1         -1
+## 48      1        -1         -1
+## 50      1        -1         -1
+## 52     -1        -1          1
+## 54     -1        -1          1
+## 56     -1         1          1
+## 58     -1        -1         -1
+## 60     -1        -1          1</code></pre>
 <p>Method <code>getConfusionMatrix()</code> is also available in this case.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getConfusionMatrix</span>(res))</code></pre></div>
-<pre><code>##            setosa virginica versicola None
-## setosa         24         0         0    1
-## versicolor      0         2        23    2
-## virginica       0        21         5    4</code></pre>
+<pre><code>##            setosa virginica versicolor None
+## setosa         24         0          0    1
+## versicolor      0         2         23    2
+## virginica       0        21          5    4</code></pre>
 <p>There are three additional plots available for multiclass SIMCA model. First of all it is a distance between a selected model and the others.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotModelDistance</span>(m, <span class="dv">1</span>)
 <span class="kw">plotModelDistance</span>(m, <span class="dv">2</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-116-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-117-1.png" width="864" /></p>
 <p>The second plot is a discrimination power, mentioned in the beginning of the section.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotDiscriminationPower</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)
 <span class="kw">plotDiscriminationPower</span>(m, <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-117-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-118-1.png" width="864" /></p>
 <p>And, finally, a Cooman’s plot showing an orthogonal distance from objects to two selected classes/models.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotCooman</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)
 <span class="kw">plotCooman</span>(m, <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-118-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-119-1.png" width="864" /></p>
 
 </div>
 <!-- </div> -->
@@ -320,7 +320,7 @@ gitbook.start({
 },
 "download": null,
 "toc": {
-"collapse": "subsection"
+"collapse": "section"
 }
 });
 });

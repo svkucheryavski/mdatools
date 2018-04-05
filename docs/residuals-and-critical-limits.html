@@ -188,7 +188,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h3>Distance to model and score distance</h3>
 <p>When data objects are being projected to a principal component space, two distances (also known as <em>residual distances</em> or just <em>resudals</em>) are calculated and stored as a part of PCA results (<code>pcares</code> object). The first is a squared orthogonal Euclidean distance from original position of an object to the PC space, also known as <em>Q-distance</em> or <em>Q-residual</em>. The distance shows how well the object is fitted by the PCA model and allows to detect objects that do not follow a commond trend, captured by the PCs.</p>
 <p>The second distance shows how far a projection of the object to the PC space is from the origin. This distance is also known as Hotelling T<sup>2</sup> distance or a <em>score distance</em>. To compute T<sup>2</sup> distance scores should be first normalized by dividing them to corresponding singular values. The T<sup>2</sup> distance allows to see extreme objects — which are far from the origin.</p>
-<p>If, for example, we use PCA for making decomposition of height and weight of people, then PC1 will oriented along a linear trend between the height and weight values common for most of the people. If a person has height and weight within the data range but e.g. is overweighted or underweighted, the corresponding object will have large Q-distance, which indicates that this person does not share the common trend. And, if a person has a ratio between height and weight common for the most of people from the dataset, but, e.g. is too tall, then the corresponding object will have large T<sup>2</sup> distance.</p>
+<p>If, for example, we use PCA for making decomposition of height and weight of people, then PC1 will be oriented along a linear trend between the height and weight values common for most of the people. If a person has height and weight within the data range but e.g. is overweighted or underweighted, the corresponding object will have large Q-distance, which indicates that this person does not share the common trend. And, if a person has a ratio between height and weight common for most of the people from the dataset, but, e.g. is too tall, then the corresponding object will have large T<sup>2</sup> distance.</p>
 <p>In <em>mdatools</em> both distances are calculated for all objects of dataset and all possible components. So every distance is represented by <em>nObj x nComp</em> matrix, the first column contains distances for a model with only one component, second — for model with two components, and so on. The residual distances can be visialised using method <code>plotResiduals()</code> which is available both for PCA results as well as for PCA model. In the case of model the plot shows distances for calibration set, cross-validation and test set (if they were used of course).</p>
 <p>Here is an example.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(people)
@@ -202,7 +202,7 @@ m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv"
 <p><img src="_main_files/figure-html/unnamed-chunk-62-1.png" width="864" /></p>
 <p>The dashed and dotted lines on the plots are critical limits for extreme objects and for outliers, explained in the next section. They can be hidden/removed from the plots by using additional parameter <code>show.limits = F</code>. You can also change the color, line type and width for the lines by using options <code>lim.col</code>, <code>lim.lty</code> and <code>lim.lwd</code> as it is shown below.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">plotResiduals</span>(m)
+<span class="kw">plotResiduals</span>(m, <span class="dt">show.limits =</span> F)
 <span class="kw">plotResiduals</span>(m, <span class="dt">lim.col =</span> <span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;orange&#39;</span>), <span class="dt">lim.lwd =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), <span class="dt">lim.lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-63-1.png" width="864" /></p>
 <p>It is necessary to provide a vector with two values for each of the argument (first for extreme objects and second for outliers border).</p>
@@ -213,8 +213,7 @@ m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv"
 <p>Critical limits are also important for SIMCA classification as they directly used for making decision on class belongings. This package implements several methods to compute the limits, which are explained in this section.</p>
 <div id="critical-limits-for-score-distance-t2-residuals" class="section level4 unnumbered">
 <h4>Critical limits for score distance (T<sup>2</sup>-residuals)</h4>
-<p>The distribution of T<sup>2</sup>-residuals can be well described using <a href="https://en.wikipedia.org/wiki/Hotelling%27s_T-squared_distribution">Hotelling’s T<sup>2</sup> distribution</a>, which, it its turn is based on <em>F</em>-distribution.</p>
-<p>For given T<sup>2</sup> values computed for <em>N</em> objects using <em>A</em> principal components, the critical limit, <em>T2lim</em> can be computed as follows:</p>
+<p>The distribution of T<sup>2</sup>-residuals can be well described using <a href="https://en.wikipedia.org/wiki/Hotelling%27s_T-squared_distribution">Hotelling’s T<sup>2</sup> distribution</a>, which, in its turn is based on <em>F</em>-distribution. For given T<sup>2</sup> values obtained for <em>N</em> objects using <em>A</em> principal components, the critical limit, <em>T2lim</em> can be computed as follows:</p>
 <p><span class="math display">\[T2lim = \frac{A (N - 1)}{(N - A)} F^{-1}_{1-\alpha}(A, N-A)\]</span> Here <span class="math inline">\(F^{-1}_{1-\alpha}(A, N-A)\)</span> is inverse cumulative distribution function (ICDF) for F-distribution with <span class="math inline">\(A\)</span> and <span class="math inline">\(N-A\)</span> degrees of freedom and <span class="math inline">\(\alpha\)</span> is a significance level (for example if <span class="math inline">\(\alpha = 0.05\)</span> we can expect 5% of objects that will have T<sup>2</sup>-distance larger than this limit).</p>
 <p>In <em>mdatools</em> the limits are computed based on calibration results and for all possible number of components. The limits are represented as a matrix with four rows and <span class="math inline">\(A\)</span> columns, where the first row contains the limits computed for given <code>alpha</code> parameter (by default <code>alpha = 0.05</code>), second row has similar limits but calculated using another significance level, <code>gamma</code> (by default <code>gamma = 0.01</code>), third row contains mean value for the T<sup>2</sup> distances and last row contains degrees of freedom, in this case <span class="math inline">\(N-A\)</span>. The limits calculated for <code>gamma</code> are used to detect outliers and shown on residuals plot with dotted line.</p>
 <p>Here is the limits shown for PCA model computed in the previous example.</p>
@@ -228,7 +227,7 @@ m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv"
 </div>
 <div id="critical-limits-for-orthogonal-distance-q-residuals" class="section level4 unnumbered">
 <h4>Critical limits for orthogonal distance (Q-residuals)</h4>
-<p>The calculation of critical limits for Q-residuals can be done in many different ways. Thus, Swante Wold and Michael Sjöström in the <a href="http://pubs.acs.org/doi/abs/10.1021/bk-1977-0052.ch012">original paper</a> about SIMCA classification suggested that the ratio between Q-distance for a particular object from dataset with <span class="math inline">\(M\)</span>-variables (divided to the corresponding degrees of freedon, <span class="math inline">\(M-A\)</span>) and the variance of all Q-residuals follows F-distribution with <span class="math inline">\(N-A\)</span> and <span class="math inline">\((N-A-1)(M-A)\)</span> degrees of freedon. And, therefore, the limit can be found using ICDF for F-distribution.</p>
+<p>The calculation of critical limits for Q-residuals can be done in many different ways. Thus, Swante Wold and Michael Sjöström in the <a href="http://pubs.acs.org/doi/abs/10.1021/bk-1977-0052.ch012">original paper</a> about SIMCA classification suggested that the ratio between Q-distance for a particular object from dataset with <span class="math inline">\(M\)</span>-variables (divided to the corresponding degrees of freedon, <span class="math inline">\(M-A\)</span>) and the variance of all Q-residuals follows F-distribution with <span class="math inline">\(M-A\)</span> and <span class="math inline">\((N-A-1)(M-A)\)</span> degrees of freedon. And, therefore, the limit can be found using ICDF for F-distribution.</p>
 <p>This method tends to reveal more extreme values than expected, first of all because of <span class="math inline">\((N-A-1)(M-A)\)</span>, which is a very big number for modern datasets with hundreds of objects and variables. Several corrections have been proposed since that, most of them are based on using different ways to estimate the degrees of freedom.</p>
 <div id="using-chi-squared-distribution" class="section level5 unnumbered">
 <h5>Using chi-squared distribution</h5>
@@ -268,16 +267,17 @@ m2 =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv
 </div>
 <div id="data-driven-approach-for-critical-limits" class="section level4 unnumbered">
 <h4>Data driven approach for critical limits</h4>
-<p>Later, it was realized (see for example <a href="https://pubs.acs.org/doi/abs/10.1021/ie000141+">this</a> and <a href="https://www.sciencedirect.com/science/article/abs/pii/S0169743905000365">this</a>) that chi-squared distribution can be used for both Q- and T<sup>2</sup>-residuals and it is possible to constract a combined limit for both.</p>
-<p>A. Pomerantsev <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.1147">proposed</a> and then <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.2506">extended</a> an approach, based on the same idea but another calculation of a combined index, which is now called Data Driven SIMCA (DD-SIMCA). Although the method was developed for SIMCA classification, it is based on calculation of critical limits and therefore can be also used in PCA for similar purposes — detection of extreme objects and outliers based on the residual distances.</p>
+<p>Later, it was realized (see for example <a href="https://pubs.acs.org/doi/abs/10.1021/ie000141+">this</a> and <a href="https://www.sciencedirect.com/science/article/abs/pii/S0169743905000365">this</a>) that chi-squared distribution can be used for both Q- and T<sup>2</sup>-residuals and it is possible to construct a combined limit for both.</p>
+<p>A. Pomerantsev <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.1147">proposed</a> and then <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.2506">extended</a> an approach, based on similar idea but with a new way for calculation of a combined index, which is now called Data Driven SIMCA (DD-SIMCA). Although the method was developed for SIMCA classification, it is based on calculation of critical limits and therefore can be also used in PCA for similar purposes — detection of extreme objects and outliers based on the residual distances.</p>
 <p>In this method it is assumed that Q- and T<sup>2</sup>-residuals are not independent and there is a combined statistic: <span class="math inline">\(DF_Q Q/m(Q) + DF_{T^2} T^2 / m(T^2)\)</span> which follows chi-squared distribution with <span class="math inline">\(DF_Q + DF_{T^2}\)</span> degrees of freedom. The <span class="math inline">\(DF_Q\)</span> and <span class="math inline">\(DF_{T2}\)</span> as well as the center estimates, <span class="math inline">\(m(Q)\)</span> and <span class="math inline">\(m(T^2)\)</span> are derived from the <span class="math inline">\(Q\)</span> and <span class="math inline">\(T^2\)</span> values computed for the calibration set.</p>
 <p>There are two ways to estimate them. First is by using classical method of moments, already mentioned:</p>
 <p><span class="math display">\[ DF_Q = 2\left(\frac{m(Q)}{s(Q)}\right)^2\]</span> <span class="math display">\[ DF_{T^2} = 2\left(\frac{m(T^2)}{s(T^2)}\right)^2\]</span></p>
 <p>And the second is based on robust approach utilizing median and inter-quartile range instead of mean and standard deviation (see <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.2506">the paper</a> for details).</p>
-<p>Both ways are implemented in the package (starting from version <em>0.9.0</em>) and can be selected by using option <code>lim.type = 'ddmoments'</code> or <code>lim.type = 'ddrobust'</code> correspondigly. Since the acceptance area in this case is not rectangular but triangular, the matrices with calculated limits contain slope (<code>T2lim</code>) and intercept (<code>Qlim</code>) of the border line for the acceptance area instead of individual limits.</p>
+<p>Both ways are implemented in the package (starting from version <em>0.9.0</em>) and can be selected by using option <code>lim.type = 'ddmoments'</code> or <code>lim.type = 'ddrobust'</code> correspondingly. Since the acceptance area in this case is not rectangular but triangular, the matrices with calculated limits contain slope (<code>T2lim</code>) and intercept (<code>Qlim</code>) of the border line for the acceptance area instead of individual limits.</p>
 <p>For example, if we compute the limits as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">4</span>, <span class="dt">scale =</span> T, <span class="dt">lim.type =</span> <span class="st">&#39;ddmoments&#39;</span>)
-<span class="kw">show</span>(m<span class="op">$</span>Qlim)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">4</span>, <span class="dt">scale =</span> T, <span class="dt">lim.type =</span> <span class="st">&#39;ddmoments&#39;</span>)</code></pre></div>
+<p>The matrices will look like this:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m<span class="op">$</span>Qlim)</code></pre></div>
 <pre><code>##                                  Comp 1    Comp 2    Comp 3     Comp 4
 ## Critical limit (alpha = 0.05) 11.346164 19.088550 11.425334  6.3433641
 ## Outliers limit (gamma = 0.01) 19.472004 31.770167 18.328590 10.1760634
@@ -293,13 +293,13 @@ m2 =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">2</span>)
 <span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">4</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-68-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-69-1.png" width="864" /></p>
 <p>More details about DD-SIMCA method can be also found in chapter, devoted to SIMCA classification.</p>
 <p>The residuals plot can be also shown for normalized values (<span class="math inline">\(Q/m(Q)\)</span> vs. <span class="math inline">\(T^2/m(T^2)\)</span>) by using option <code>norm = T</code> in the <code>plotResiduals()</code> method.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">norm =</span> T)
 <span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">4</span>, <span class="dt">norm =</span> T)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-69-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-70-1.png" width="864" /></p>
 </div>
 </div>
 </div>
@@ -344,7 +344,7 @@ gitbook.start({
 },
 "download": null,
 "toc": {
-"collapse": "subsection"
+"collapse": "section"
 }
 });
 });

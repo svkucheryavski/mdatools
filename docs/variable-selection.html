@@ -191,7 +191,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">1</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-90-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-91-1.png" width="864" /></p>
 <p>In the example below, I create two other PLS models by excluding variables with VIP score or selectivity ratio below a threshold (I use 0.5 and 1 correspondingly) and show the performance for both.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m3 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> <span class="kw">getVIPScores</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>) <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.5</span>)
 <span class="kw">summary</span>(m3)</code></pre></div>
@@ -222,7 +222,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.ci =</span> F)
 <span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.ci =</span> F)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-93-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-94-1.png" width="864" /></p>
 <p>Calling function <code>summary()</code> for regression coefficients allows to get all calculated statistics.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(mjk<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
 <pre><code>## Regression coefficients for Shoesize
@@ -425,7 +425,7 @@ gitbook.start({
 },
 "download": null,
 "toc": {
-"collapse": "subsection"
+"collapse": "section"
 }
 });
 });

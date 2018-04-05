@@ -227,7 +227,7 @@ m =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st
 ## Comp 3   8.45     98.82       0.92       12.24      0.84</code></pre>
 <p>Let’s look at plots and start with summary plot.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(m)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-102-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-103-1.png" width="864" /></p>
 <p>The plot is very similar to what we seen for PCA model, the only difference is that it shows <em>modelling power</em> instead of loadings. Modelling power is a measure of contribution of each variable to the model and varies from 0 to 1. Usually variables with modelling power below 0.1 are considered as irrelevant.</p>
 <p>Let’s give a closer look at the residuals plot with different values for alpha (we will keep number of components equal to three in all cases).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.01</span>)
@@ -240,7 +240,7 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 <span class="kw">plotResiduals</span>(m2)
 <span class="kw">plotResiduals</span>(m3)
 <span class="kw">plotResiduals</span>(m4)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-103-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-104-1.png" width="864" /></p>
 <p>As you can see, using alpha = 0.01 reduced number of false negatives to zero, as the acceptance limits became larger, while alpha = 0.15 gives a lot of incorrectly rejected class members. It must be noted, that decreasing alpha will also lead to a larger number of false positives, which we can not see in this case.</p>
 <div id="predictions-and-validation-with-a-test-set" class="section level3 unnumbered">
 <h3>Predictions and validation with a test set</h3>
@@ -269,12 +269,12 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 <span class="kw">plotSensitivity</span>(res)
 <span class="kw">plotMisclassified</span>(res)
 <span class="kw">plotPerformance</span>(res)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-105-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-106-1.png" width="864" /></p>
 <p>The classification results can be shown both graphically and numerically. Here is a prediction plot for the results.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
 <span class="kw">plotPredictions</span>(res, <span class="dt">show.legend =</span> F)
 <span class="kw">plotPredictions</span>(res, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">show.legend =</span> F)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-106-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-107-1.png" width="864" /></p>
 <p>So we can see (the legend has been hidden in order to see all points clearly) that for the model with three components we have three false positives (specificity = 47/50 = 0.94) and three false negatives (sensitivity = 22/25 = 0.88). You can also show the predictions as a matrix with -1 and +1 using method <code>showPredictions()</code> or get the array with predicted class values directly as it is shown in the example below (for first 10 rows, different number of components and the first classification variable).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(res<span class="op">$</span>c.pred[<span class="dv">31</span><span class="op">:</span><span class="dv">40</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
 <pre><code>##    Comp 1 Comp 2 Comp 3
@@ -319,7 +319,7 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
 <span class="kw">plotProbabilities</span>(res, <span class="dt">cgroup =</span> c.t<span class="op">$</span>Species)
 <span class="kw">plotProbabilities</span>(res, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">cgroup =</span> c.t<span class="op">$</span>Species)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-110-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-111-1.png" width="864" /></p>
 <p>The plot can be shown for any SIMCA results (including e.g. calibration set or cross-validated results).</p>
 </div>
 <div id="extreme-plot" class="section level3 unnumbered">
@@ -341,18 +341,7 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">
 <span class="kw">plotExtreme</span>(m2, <span class="dt">main =</span> <span class="st">&#39;Chisq&#39;</span>)
 <span class="kw">plotExtreme</span>(m3, <span class="dt">main =</span> <span class="st">&#39;DD moments&#39;</span>)
 <span class="kw">plotExtreme</span>(m4, <span class="dt">main =</span> <span class="st">&#39;DD robust&#39;</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-111-1.png" width="864" /></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">alpha =<span class="st"> </span><span class="dv">40</span><span class="op">/</span><span class="dv">50</span>
-m1 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">&#39;Versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">lim.type =</span> <span class="st">&#39;jm&#39;</span>, <span class="dt">alpha =</span> alpha)
-m1<span class="op">$</span>calres<span class="op">$</span>fn</code></pre></div>
-<pre><code>##            Comp 1 Comp 2
-## Versicolor     50     49</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m2 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">&#39;Versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">lim.type =</span> <span class="st">&#39;ddmoments&#39;</span>, <span class="dt">alpha =</span> alpha)
-m2<span class="op">$</span>calres<span class="op">$</span>fn</code></pre></div>
-<pre><code>##            Comp 1 Comp 2
-## Versicolor     42     37</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotResiduals</span>(m1)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-111-2.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-112-1.png" width="864" /></p>
 </div>
 </div>
             </section>
@@ -396,7 +385,7 @@ gitbook.start({
 },
 "download": null,
 "toc": {
-"collapse": "subsection"
+"collapse": "section"
 }
 });
 });

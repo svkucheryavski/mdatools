@@ -228,7 +228,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 <span class="kw">plotRegcoeffs</span>(m, <span class="dt">ncomp =</span> <span class="dv">2</span>)
 <span class="kw">plot</span>(m<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
 <span class="kw">plot</span>(m<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-75-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-76-1.png" width="864" /></p>
 <p>The model keeps regression coefficients, calculated for centered and standardized data, without intercept, etc. Here are the values for three PLS components.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(m<span class="op">$</span>coeffs<span class="op">$</span>values[, <span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
 <pre><code>##       Height       Weight     Hairleng          Age       Income 
@@ -345,7 +345,7 @@ y.t =<span class="st"> </span>people[idx, <span class="dv">4</span>, drop =<span
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotRMSE</span>(m1)
 <span class="kw">plotRMSE</span>(m2)</code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-84-1.png" width="864" /></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-85-1.png" width="864" /></p>
 <p>Parameter <code>cv</code> has the same format as for PCA. If it is a number, it will be used as number of segments for random cross-validation, e.g. if <code>cv = 2</code> cross-validation with two segments will be carried out. For full cross-validation use <code>cv = 1</code> like we did in the example above. For more advanced option you can provide a list with name of cross-validation method, number of segments and number of iterations, e.g. <code>cv = list('rand', 4, 4)</code> for running random cross-validation with four segments and four repetitions or <code>cv = list('ven', 8)</code> for systematic split into eight segments (<em>venetian blinds</em>).</p>
 <p>Method <code>summary()</code> for model shows performance statistics calculated using optimal number of components for each of the results.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m1)</code></pre></div>
@@ -415,7 +415,7 @@ gitbook.start({
 },
 "download": null,
 "toc": {
-"collapse": "subsection"
+"collapse": "section"
 }
 });
 });
