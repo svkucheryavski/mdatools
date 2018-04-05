@@ -21,12 +21,7 @@ The last major release (0.9.0) brings a set of new features, including methods f
 How to install
 --------------
 
-The package is available from CRAN by usual installing procedure. However due to restrictions in CRAN 
-politics regarding number of submissions (one in 3-4 month) only major releases will be published 
-there (with 2-3 weeks delay after GitHub release as more thorought testing is needed). To get the latest 
-release plase use [GitHub sources](https://github.com/svkucheryavski/mdatools). You can [download](https://github.com/svkucheryavski/mdatools/releases) a zip-file with source package and 
-install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.9.0.tar.gz` 
-and it is located in a current working directory, just run the following:
+The package is available from CRAN by usual installing procedure. However due to restrictions in CRAN politics regarding number of submissions (one in 3-4 month) only major releases will be published  there (with 2-3 weeks delay after GitHub release as more thorought testing is needed). To get the latest release plase use [GitHub sources](https://github.com/svkucheryavski/mdatools). You can [download](https://github.com/svkucheryavski/mdatools/releases) a zip-file with source package and install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.9.0.tar.gz` and it is located in a current working directory, just run the following:
 
 ```
 install.packages('mdatools_0.9.0.tar.gz')
