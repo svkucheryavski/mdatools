@@ -1,3 +1,7 @@
+c.0.9.1
+=======
+* all plot functions have new `opacity` parameter
+
 v.0.9.0
 =======
 * added randomized PCA algorithm (efficient for datasets with large number of rows)

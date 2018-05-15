@@ -28,8 +28,7 @@ mdaplot.areColors = function(palette) {
 #' @return
 #' matrix with formatted values
 #' 
-mdaplot.formatValues = function(data, round.only = F, digits = 3)
-{   
+mdaplot.formatValues = function(data, round.only = F, digits = 3) {   
    if (round.only == T)
       fdata = round(data, digits)
    else
@@ -185,6 +184,8 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
 #' vector of values, used for color grouping of plot points or lines.
 #' @param colmap
 #' which colormap to use ('default', 'gray', or user defined in form c('color1', 'color2', ...)).
+#' @param alpha
+#' level of transparancy for the colors
 #' 
 #' @importFrom grDevices col2rgb colorRampPalette rgb
 #' 
@@ -192,7 +193,7 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
 #' Returns vector with generated color values
 #' 
 #' @export
-mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default') {   
+mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default', opacity = 1) {   
    if (length(colmap) == 1) {   
       # colormap is a name      
       if (colmap == 'gray') {   
@@ -243,6 +244,10 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default') {
       colvals = colfunc(ngroups)      
    }   
    
+   if (opacity < 1) {
+      opacity = format(as.hexmode(round(255 * opacity)), width = 2);
+      colvals = paste(colvals, opacity, sep = '')
+   }
    colvals
 }
 
@@ -254,8 +259,7 @@ mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default') {
 #' @param lwd
 #' line width for the grid 
 #' 
-mdaplot.showGrid = function(lwd = 0.5)
-{
+mdaplot.showGrid = function(lwd = 0.5) {
    # Shows a grid for plots   
    grid(lwd = lwd)   
 }
@@ -936,6 +940,8 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' Colramp function for density scatter plot
 #' @param force.x.values
 #' vector with corrected x-values for a bar plot (do not specify this manually)
+#' @param opacity
+#' opacity for plot colors (value between 0 and 1)
 #' @param ...  
 #' other plotting arguments.
 #' 
@@ -987,7 +993,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
                    xticks = NULL, yticks = NULL, xticklabels = NULL, yticklabels = NULL, 
                    xlas = 0, ylas = 0, lab.col = 'darkgray', lab.cex = 0.65, 
                    show.excluded = FALSE, col.excluded = '#E0E0E0', nbins = 256,
-                   colramp = mdaplot.getColors, force.x.values = NA, ...)
+                   colramp = mdaplot.getColors, force.x.values = NA, opacity = 1, ...)
 {   
    if (is.null(plot.data)) {
       plot.data = prepare.plot.data(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, 
@@ -1012,8 +1018,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       cgroup = cgroup[-excluded.rows]
    
    # processs labels and ticklabels
-   if (show.axes == T)
-   {  
+   if (show.axes == T) {  
       # if some columns are excluded and xticklabels is provided for all columns - exclude some of 
       # the values
       if (!is.null(excluded.cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data))
@@ -1086,11 +1091,11 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    #  get proper colors     
    if (density == FALSE && !is.null(cgroup) && !(type == 'e')) {   
       # show color groups according to cdata values
-      col = mdaplot.getColors(cgroup = cgroup, colmap = colmap)
+      col = mdaplot.getColors(cgroup = cgroup, colmap = colmap, opacity = opacity)
    } else {
       # show all points with the same color
       if (is.null(col))
-         col = mdaplot.getColors(1, colmap = colmap)
+         col = mdaplot.getColors(1, colmap = colmap, opacity = opacity)
       # set cgroup to NULL so method will not try to show color groups or colorbar legend
       cgroup = NULL
    }
