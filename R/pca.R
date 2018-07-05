@@ -516,9 +516,22 @@ pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL,
    
    # correct maximum number of components
    ncols = x.ncols - length(attrs$exclcols) 
-   nrows = x.nrows - length(attrs$exclrows) 
-   ncomp = min(ncomp, ncols, nrows - 1)
-   
+   nrows = x.nrows - length(attrs$exclrows)
+   if (!is.null(cv)) {
+      if (!is.numeric(cv))
+         nseg = cv[[2]]
+      else
+         nseg = cv
+      
+      if (nseg == 1)
+         nobj.cv = 1
+      else
+         nobj.cv = ceiling(nrow(x)/nseg)  
+   } else {   
+      nobj.cv = 0
+   }
+   ncomp = min(ncomp, ncols, nrows - 1 - nobj.cv)
+
    # prepare data for model calibration and cross-validation
    x.cal = x
    
@@ -626,7 +639,7 @@ pca.svd = function(x, ncomp = NULL) {
       ncomp = min(ncomp, ncol(x), nrow(x) - 1)
    
    s = svd(x)
-   loadings = s$v[, 1:ncomp]
+   loadings = s$v[, 1:ncomp, drop = F]
    
    res = list(
       loadings = loadings,

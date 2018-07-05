@@ -1,29 +1,69 @@
+# new tests on top
+
+# Tests written for 0.9.1
+
+## test that maximum number of components is estimated correctly when
+## number of rows is small and CV is used
+
+data(people)
+x.cal = people[1:5, ]
+
+m01 = pca(x.cal)
+m02 = pca(x.cal, cv = 1)
+m03 = pca(x.cal, cv = 2)
+
+test_that("Estimation of maximum number of components (w/wo CV)", {
+   expect_equal(m01$ncomp, 4)
+   expect_equal(m02$ncomp, 3)
+   expect_equal(m03$ncomp, 1)
+})
+
+m01 = pca(x.cal, ncomp = 5)
+m02 = pca(x.cal, ncomp = 5, cv = 1)
+m03 = pca(x.cal, ncomp = 5, cv = 2)
+
+test_that("Adjustment of number of components (w/wo CV) when proposed value too large", {
+   expect_equal(m01$ncomp, 4)
+   expect_equal(m02$ncomp, 3)
+   expect_equal(m03$ncomp, 1)
+})
+
+m01 = pca(x.cal, ncomp = 1)
+m02 = pca(x.cal, ncomp = 1, cv = 1)
+m03 = pca(x.cal, ncomp = 1, cv = 2)
+
+test_that("No adjustment of number of components (w/wo CV) when it is small enough", {
+   expect_equal(m01$ncomp, 1)
+   expect_equal(m02$ncomp, 1)
+   expect_equal(m03$ncomp, 1)
+})
+
+# Tests written for 0.9.0
 data(iris)
 
-# compute SVD decomposition for Setosa samples of Iris dataset
+## compute SVD decomposition for Setosa samples of Iris dataset
 x.cal1 = scale(iris[1:50, 1:4], center = T, scale = F)
 x.cal2 = scale(iris[1:50, 1:4], center = T, scale = T)
 loads1 = svd(x.cal1)$v
 loads2 = svd(x.cal2)$v
 
-# check loadings obtained using conventional algorithms
-
+## check loadings obtained using conventional algorithms
 context('Conventional algorithms (max nPCs)')
 
 scores1 = x.cal1 %*% loads1
 scores2 = x.cal2 %*% loads2
 
-# centered only
+## centered only
 m01 = pca(x.cal1)
 m11 = pca(x.cal1, method = 'svd')
 m21 = pca(x.cal1, method = 'nipals')
 
-# scaled
+## scaled
 m02 = pca(x.cal2, scale = T)
 m12 = pca(x.cal2, scale = T, method = 'svd')
 m22 = pca(x.cal2, scale = T, method = 'nipals')
 
-# test for loading size
+## test for loading size
 test_that("Loadings have correct size (centered)", {
    expect_equal(nrow(m01$loadings), 4)
    expect_equal(nrow(m11$loadings), 4)

@@ -1,6 +1,7 @@
 c.0.9.1
 =======
-* all plot functions have new `opacity` parameter
+* all plot functions have new `opacity` parameter for semi-transparent colors
+* fixed a bug with wrong estimation of maximum number of components for PCA/SIMCA with cross-validation
 
 v.0.9.0
 =======

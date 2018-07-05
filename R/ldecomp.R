@@ -321,7 +321,8 @@ reslim.chisq = function(Q, alpha = 0.05, gamma = 0.01, Qlim = NULL, return = 'li
       if (Q.mean == 0) {
          out = c(0, 0, 0, 1)
       } else {
-         out[1:2] = qchisq(c(1 - alpha, 1 - gamma), floor(Q.DF)) * Q.mean / Q.DF
+         out[1] = qchisq(1 - alpha, floor(Q.DF)) * Q.mean / Q.DF
+         out[2] = qchisq((1 - gamma)^(1/nobj), floor(Q.DF)) * Q.mean / Q.DF
          out[3] = Q.mean
          out[4] = Q.DF
       }
