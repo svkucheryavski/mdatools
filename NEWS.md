@@ -1,7 +1,9 @@
-c.0.9.1
+v.0.9.1
 =======
 * all plot functions have new `opacity` parameter for semi-transparent colors
+* several improvements to PLS-DA method for one-class discrimination
 * fixed a bug with wrong estimation of maximum number of components for PCA/SIMCA with cross-validation
+* added chapter on PLS-DA to the tutorial (including last improvements)
 
 v.0.9.0
 =======
