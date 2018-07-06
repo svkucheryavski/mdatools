@@ -7,12 +7,13 @@
 plsda(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
   exclcols = NULL, exclrows = NULL, x.test = NULL, c.test = NULL,
   method = "simpls", alpha = 0.05, coeffs.ci = NULL, coeffs.alpha = 0.1,
-  info = "", light = F, ncomp.selcrit = "min")
+  info = "", light = F, ncomp.selcrit = "min", classname = NULL)
 }
 \arguments{
 \item{x}{matrix with predictors.}
 
-\item{c}{vector with class values (should be a factor with either class number or class name for each object).}
+\item{c}{vector with class membership (should be either a factor with class names/numbers in case of 
+multiple classes or a vector with logical values in case of one class model).}
 
 \item{ncomp}{maximum number of components to calculate.}
 
@@ -45,6 +46,9 @@ jack-knifing is availavle: \code{='jk'}).}
 
 \item{ncomp.selcrit}{criterion for selecting optimal number of components (\code{'min'} for first local minimum of 
 RMSECV and \code{'wold'} for Wold's rule.)}
+
+\item{classname}{name (label) of class in case if PLS-DA is used for one-class discrimination model. In this case
+it is expected that parameter `c` will be a vector with logical values.}
 }
 \value{
 Returns an object of \code{plsda} class with following fields (most inherited from class 

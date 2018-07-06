@@ -4,7 +4,8 @@
 \alias{mdaplot.getColors}
 \title{Color values for plot elements}
 \usage{
-mdaplot.getColors(ngroups = 1, cgroup = NULL, colmap = "default")
+mdaplot.getColors(ngroups = 1, cgroup = NULL, colmap = "default",
+  opacity = 1)
 }
 \arguments{
 \item{ngroups}{number of groups.}
@@ -12,6 +13,8 @@ mdaplot.getColors(ngroups = 1, cgroup = NULL, colmap = "default")
 \item{cgroup}{vector of values, used for color grouping of plot points or lines.}
 
 \item{colmap}{which colormap to use ('default', 'gray', or user defined in form c('color1', 'color2', ...)).}
+
+\item{opacity}{opacity for colors (between 0 and 1)}
 }
 \value{
 Returns vector with generated color values

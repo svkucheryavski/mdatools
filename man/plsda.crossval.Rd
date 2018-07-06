@@ -4,7 +4,7 @@
 \alias{plsda.crossval}
 \title{Cross-validation of a PLS-DA model}
 \usage{
-plsda.crossval(model, x, c, center, scale, method)
+plsda.crossval(model, x, c, y, center, scale, method)
 }
 \arguments{
 \item{model}{a PLS-DA model (object of class \code{plsda})}
@@ -12,6 +12,8 @@ plsda.crossval(model, x, c, center, scale, method)
 \item{x}{a matrix with x values (predictors from calibration set)}
 
 \item{c}{a vetor with c values (classes from calibration set)}
+
+\item{y}{a matrix with dummy y-values for PLS regression}
 
 \item{center}{logical, do mean centering or not}
 

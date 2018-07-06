@@ -5,7 +5,8 @@
 \title{Calibrate PLS-DA model}
 \usage{
 plsda.cal(x, c, ncomp, center, scale, cv, method, light, alpha, coeffs.ci,
-  coeffs.alpha, info, exclcols = NULL, exclrows = NULL, ncomp.selcrit)
+  coeffs.alpha, info, exclcols = NULL, exclrows = NULL, ncomp.selcrit,
+  classname = NULL)
 }
 \arguments{
 \item{x}{matrix with predictors.}
@@ -38,6 +39,8 @@ jack-knifing is availavle: \code{='jk'}).}
 \item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
 
 \item{ncomp.selcrit}{criterion for selecting optimal number of components (\code{'min'} for first local minimum of}
+
+\item{classname}{name of class in case of one-class PLS-DA model}
 }
 \description{
 Calibrate PLS-DA model
