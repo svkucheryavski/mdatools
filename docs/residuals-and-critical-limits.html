@@ -165,6 +165,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li class="chapter" data-level="" data-path="multiclass-classification.html"><a href="multiclass-classification.html"><i class="fa fa-check"></i>Multiclass classification</a></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="pls-discriminant-analysis.html"><a href="pls-discriminant-analysis.html"><i class="fa fa-check"></i>PLS Discriminant Analysis</a><ul>
+<li class="chapter" data-level="" data-path="calibration-of-pls-da-model.html"><a href="calibration-of-pls-da-model.html"><i class="fa fa-check"></i>Calibration of PLS-DA model</a></li>
+<li class="chapter" data-level="" data-path="classification-plots.html"><a href="classification-plots.html"><i class="fa fa-check"></i>Classification plots</a></li>
+<li class="chapter" data-level="" data-path="performance-plots.html"><a href="performance-plots.html"><i class="fa fa-check"></i>Performance plots</a></li>
+<li class="chapter" data-level="" data-path="predictions-for-a-new-data.html"><a href="predictions-for-a-new-data.html"><i class="fa fa-check"></i>Predictions for a new data</a></li>
+</ul></li>
 </ul>
 
       </nav>
@@ -232,13 +238,13 @@ m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv"
 <div id="using-chi-squared-distribution" class="section level5 unnumbered">
 <h5>Using chi-squared distribution</h5>
 <p>On the other hand, several researchers, have found that normalized Q-distances can be well described by chi-squared distribution. The tricky part here is to find proper degrees of freedom as it requires rank of original data matrix, which most of the time is not known. One of the ways to solve this issue is to compute the DF based on the particular Q-values, for example as follows:</p>
-<p><span class="math display">\[ DF = 2\left(\frac{m(Q)}{s(Q)}\right)^2\]</span> Here <span class="math inline">\(m(Q)\)</span> and <span class="math inline">\(s(Q)\)</span> are mean and standard deviation for Q-values. In this case, the critical limit for given significance level, <span class="math inline">\(\alpha\)</span>, can be calculated as: <span class="math display">\[Qlim = F^{-1}_{1-\alpha}(DF) m(Q)/DF\]</span></p>
+<p><span class="math display">\[ DF = 2\left(\frac{m_Q}{s_Q}\right)^2\]</span> Here <span class="math inline">\(m_Q\)</span> and <span class="math inline">\(s_Q\)</span> are mean and standard deviation for Q-values. In this case, the critical limit for given significance level, <span class="math inline">\(\alpha\)</span>, can be calculated as: <span class="math display">\[Qlim = F^{-1}_{1-\alpha}(DF) m_Q/DF\]</span></p>
 <p>where <span class="math inline">\(F^{-1}_{1-\alpha}(DF)\)</span> is ICDF for chi-squared distribution with <span class="math inline">\(DF\)</span> degrees of freedom. Starting from version <em>0.9.0</em> this method is implemented in <code>pca</code> class and can be chosen by specifying argument <code>lim.type = 'chisq'</code> as shown in the example below.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">4</span>, <span class="dt">scale =</span> T, <span class="dt">lim.type =</span> <span class="st">&#39;chisq&#39;</span>)
 <span class="kw">show</span>(m<span class="op">$</span>Qlim)</code></pre></div>
 <pre><code>##                                  Comp 1    Comp 2   Comp 3    Comp 4
 ## Critical limit (alpha = 0.05)  9.255125  7.374318 3.648798 1.5596846
-## Outliers limit (gamma = 0.01) 11.851868 10.319291 5.105964 2.3976151
+## Outliers limit (gamma = 0.01) 16.876054 16.336489 8.083262 4.1994680
 ## Mean (u0)                      5.396236  3.223765 1.656619 0.6898182
 ## DoF                            9.864674  4.147666 4.307598 2.6499084</code></pre>
 <p>The matrix with limits for Q-resodials has the same structure as similar matrix for T<sup>2</sup>-distances The third row contains mean values for Q and the fourth row — degrees of freedom calculated as shown above.</p>
@@ -269,9 +275,9 @@ m2 =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv
 <h4>Data driven approach for critical limits</h4>
 <p>Later, it was realized (see for example <a href="https://pubs.acs.org/doi/abs/10.1021/ie000141+">this</a> and <a href="https://www.sciencedirect.com/science/article/abs/pii/S0169743905000365">this</a>) that chi-squared distribution can be used for both Q- and T<sup>2</sup>-distances and it is possible to construct a combined limit for both.</p>
 <p>A. Pomerantsev <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.1147">proposed</a> and then <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.2506">extended</a> an approach, based on similar idea but with a new way for calculation of a combined index, which is now called Data Driven SIMCA (DD-SIMCA). Although the method was developed for SIMCA classification, it is based on calculation of critical limits and therefore can be also used in PCA for similar purposes — detection of extreme objects and outliers based on the residual distances.</p>
-<p>In this method it is assumed that Q- and T<sup>2</sup>-values are not independent and there is a combined statistic: <span class="math inline">\(DF_Q Q/m(Q) + DF_{T^2} T^2 / m(T^2)\)</span> which follows chi-squared distribution with <span class="math inline">\(DF_Q + DF_{T^2}\)</span> degrees of freedom. The <span class="math inline">\(DF_Q\)</span> and <span class="math inline">\(DF_{T2}\)</span> as well as the center estimates, <span class="math inline">\(m(Q)\)</span> and <span class="math inline">\(m(T^2)\)</span> are derived from the <span class="math inline">\(Q\)</span> and <span class="math inline">\(T^2\)</span> values computed for the calibration set.</p>
+<p>In this method it is assumed that Q- and T<sup>2</sup>-values are not independent and there is a combined statistic: <span class="math inline">\(DF_Q Q/m_Q + DF_{T^2} T^2 / m_{T^2}\)</span> which follows chi-squared distribution with <span class="math inline">\(DF_Q + DF_{T^2}\)</span> degrees of freedom. The <span class="math inline">\(DF_Q\)</span> and <span class="math inline">\(DF_{T2}\)</span> as well as the center estimates, <span class="math inline">\(m_Q\)</span> and <span class="math inline">\(m_{T^2}\)</span> are derived from the <span class="math inline">\(Q\)</span> and <span class="math inline">\(T^2\)</span> values computed for the calibration set.</p>
 <p>There are two ways to estimate them. First is by using classical method of moments, already mentioned:</p>
-<p><span class="math display">\[ DF_Q = 2\left(\frac{m(Q)}{s(Q)}\right)^2\]</span> <span class="math display">\[ DF_{T^2} = 2\left(\frac{m(T^2)}{s(T^2)}\right)^2\]</span></p>
+<p><span class="math display">\[ DF_Q = 2\left(\frac{m_Q}{s_Q}\right)^2\]</span> <span class="math display">\[ DF_{T^2} = 2\left(\frac{m_{T^2})}{s_{T^2})}\right)^2\]</span></p>
 <p>And the second is based on robust approach utilizing median and inter-quartile range instead of mean and standard deviation (see <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/cem.2506">the paper</a> for details).</p>
 <p>Both ways are implemented in the package (starting from version <em>0.9.0</em>) and can be selected by using option <code>lim.type = 'ddmoments'</code> or <code>lim.type = 'ddrobust'</code> correspondingly. Since the acceptance area in this case is not rectangular but triangular, the matrices with calculated limits contain slope (<code>T2lim</code>) and intercept (<code>Qlim</code>) of the border line for the acceptance area instead of individual limits.</p>
 <p>For example, if we compute the limits as follows:</p>
@@ -295,7 +301,7 @@ m2 =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv
 <span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">4</span>)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-69-1.png" width="864" /></p>
 <p>More details about DD-SIMCA method can be also found in chapter, devoted to SIMCA classification.</p>
-<p>The residuals plot can be also shown for normalized values (<span class="math inline">\(Q/m(Q)\)</span> vs. <span class="math inline">\(T^2/m(T^2)\)</span>) by using option <code>norm = T</code> in the <code>plotResiduals()</code> method.</p>
+<p>The residuals plot can be also shown for normalized values (<span class="math inline">\(Q/m_Q\)</span> vs. <span class="math inline">\(T^2/m_{T^2}\)</span>) by using option <code>norm = T</code> in the <code>plotResiduals()</code> method.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
 <span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">norm =</span> T)
 <span class="kw">plotResiduals</span>(m, <span class="dt">ncomp =</span> <span class="dv">4</span>, <span class="dt">norm =</span> T)</code></pre></div>

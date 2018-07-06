@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-
-<link rel="next" href="what-is-new.html">
+<link rel="prev" href="calibration-of-pls-da-model.html">
+<link rel="next" href="performance-plots.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -188,24 +188,26 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Getting started with mdatools for R</h1>
-<h4 class="author"><em>Sergey Kucheryavskiy</em></h4>
-<h4 class="date"><em>July 5, 2018</em></h4>
-</div>
-<div id="introduction" class="section level1 unnumbered">
-<h1>Introduction</h1>
-<p>This is a user guide for <em>mdatools</em> — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for <a href="http://en.wikipedia.org/wiki/Chemometrics">Chemometrics</a>. The general idea of the package is to collect the popular chemometric methods and give a similar “user interface” for using them. So if a user knows how to make a model and visualize results for one method, he or she can easily do this for the other methods as well. Usually I update the tutorial when a new version of the package is released, you can track main changes <a href="what-is-new.html#what-is-new">here</a>.</p>
-<p>All methods implemented in the package were tested using well-known datasets. However, there still could be some bugs, in this case please report to <a href="mailto:svkucheryavski@gmail.com">svkucheryavski@gmail.com</a> or use <a href="https://github.com/svkucheryavski/mdatools/issues">Issues tool</a> at GitHub. You are also very welcome to share your comments and suggestions about the package functionality.</p>
-
+<div id="classification-plots" class="section level2 unnumbered">
+<h2>Classification plots</h2>
+<p>Most of the plots for visualisation of classification results described in SIMCA chapter can be also used for PLS-DA models and results. Let’s start with classification plots. By default it is shown for cross-validation results (we change position of the legend so it does not hide the points). You can clearly spot for example three false negatives and one false positive in the one-class PLS-DA model for virginica.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotPredictions</span>(m.all, <span class="dt">legend.position =</span> <span class="st">&#39;top&#39;</span>)
+<span class="kw">plotPredictions</span>(m.vir, <span class="dt">legend.position =</span> <span class="st">&#39;top&#39;</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-130-1.png" width="864" /></p>
+<p>In case of multiple classes model you can select which class to show the predictions for.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotPredictions</span>(m.all, <span class="dt">nc =</span> <span class="dv">1</span>, <span class="dt">legend.position =</span> <span class="st">&#39;top&#39;</span>)
+<span class="kw">plotPredictions</span>(m.all, <span class="dt">nc =</span> <span class="dv">3</span>, <span class="dt">legend.position =</span> <span class="st">&#39;top&#39;</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-131-1.png" width="864" /></p>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="what-is-new.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="calibration-of-pls-da-model.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="performance-plots.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

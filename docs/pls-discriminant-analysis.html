@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-
-<link rel="next" href="what-is-new.html">
+<link rel="prev" href="multiclass-classification.html">
+<link rel="next" href="calibration-of-pls-da-model.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -188,24 +188,19 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Getting started with mdatools for R</h1>
-<h4 class="author"><em>Sergey Kucheryavskiy</em></h4>
-<h4 class="date"><em>July 5, 2018</em></h4>
-</div>
-<div id="introduction" class="section level1 unnumbered">
-<h1>Introduction</h1>
-<p>This is a user guide for <em>mdatools</em> — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for <a href="http://en.wikipedia.org/wiki/Chemometrics">Chemometrics</a>. The general idea of the package is to collect the popular chemometric methods and give a similar “user interface” for using them. So if a user knows how to make a model and visualize results for one method, he or she can easily do this for the other methods as well. Usually I update the tutorial when a new version of the package is released, you can track main changes <a href="what-is-new.html#what-is-new">here</a>.</p>
-<p>All methods implemented in the package were tested using well-known datasets. However, there still could be some bugs, in this case please report to <a href="mailto:svkucheryavski@gmail.com">svkucheryavski@gmail.com</a> or use <a href="https://github.com/svkucheryavski/mdatools/issues">Issues tool</a> at GitHub. You are also very welcome to share your comments and suggestions about the package functionality.</p>
-
+<div id="pls-discriminant-analysis" class="section level1 unnumbered">
+<h1>PLS Discriminant Analysis</h1>
+<p>PLS Discriminant Analysis (PLS-DA) is a discrimination method based on PLS regression. At some point the idea of PLS-DA is similar to logistic regression — we use PLS for a dummy response variable, <em>y</em>, which is equal to +1 for objects belonging to a class, and -1 for those that do not (in some implementations it can also be 1 and 0 correspondingly). Then a conventional PLS regression model is calibrated and validated, which means that all methods and plots, you already used in PLS, can be used for PLS-DA models and results as well.</p>
+<p>The extra step in PLS-DA is, actually, classification, which is based on thresholding of predicted y-values. If the predicted value is above 0, a corresponding object is considered as a member of a class and if not — as a stranger. In <em>mdatools</em> this is done automatically using methods <code>plsda()</code> and <code>plsdares()</code>, which inhertit all <code>pls()</code> and <code>plsres()</code> methods. Plus they have something extra to represent classification results, which you have already read about in the <a href="simca-classification.html#simca-classification">chapter</a> devoted to SIMCA. If you have not, it makes sense to do this first, to make the understanding of PLS-DA implementation easier.</p>
+<p>In this chapter we will describe shortly how PLS-DA implementation works. All examples are based on the well-known Iris dataset, which will be split into two subsets — calibration (75 objects, 25 for each class) and validation (another 75 objects). Two PLS-DA models will be built — one only for <em>virginica</em> class and one for all three classes.</p> 
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="what-is-new.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="multiclass-classification.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="calibration-of-pls-da-model.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
+<link rel="prev" href="performance-plots.html">
 
-<link rel="next" href="what-is-new.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -188,24 +188,83 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Getting started with mdatools for R</h1>
-<h4 class="author"><em>Sergey Kucheryavskiy</em></h4>
-<h4 class="date"><em>July 5, 2018</em></h4>
-</div>
-<div id="introduction" class="section level1 unnumbered">
-<h1>Introduction</h1>
-<p>This is a user guide for <em>mdatools</em> — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for <a href="http://en.wikipedia.org/wiki/Chemometrics">Chemometrics</a>. The general idea of the package is to collect the popular chemometric methods and give a similar “user interface” for using them. So if a user knows how to make a model and visualize results for one method, he or she can easily do this for the other methods as well. Usually I update the tutorial when a new version of the package is released, you can track main changes <a href="what-is-new.html#what-is-new">here</a>.</p>
-<p>All methods implemented in the package were tested using well-known datasets. However, there still could be some bugs, in this case please report to <a href="mailto:svkucheryavski@gmail.com">svkucheryavski@gmail.com</a> or use <a href="https://github.com/svkucheryavski/mdatools/issues">Issues tool</a> at GitHub. You are also very welcome to share your comments and suggestions about the package functionality.</p>
+<div id="predictions-for-a-new-data" class="section level2 unnumbered">
+<h2>Predictions for a new data</h2>
+<p>Again very similar to PLS — just use method <code>predict()</code> and provide at least matrix or data frame with predictors (which should contain the same number of variables/columns). For test set validation you can also provide class reference information similar to what you have used for calibration of PLS-DA models.</p>
+<p>In case of multiple class model, the reference values should be provided as a factor or vector with class names as text values. Here is an example.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res =<span class="st"> </span><span class="kw">predict</span>(m.all, Xv, cv.all)
+<span class="kw">summary</span>(res)</code></pre></div>
+<pre><code>## 
+## PLS-DA results (class plsdares) summary:
+## Number of selected components: 3
+## 
+## Class #1 (setosa)
+##        X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Comp 1    92.92       92.92    47.01       47.01 25  1 49  0 0.98    1
+## Comp 2     4.56       97.48    10.37       57.39 25  0 50  0 1.00    1
+## Comp 3     1.79       99.27     1.59       58.97 25  0 50  0 1.00    1
+## 
+## 
+## Class #2 (versicolor)
+##        X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Comp 1    92.92       92.92    47.01       47.01  0  0 50 25 1.00  0.0
+## Comp 2     4.56       97.48    10.37       57.39 10  4 46 15 0.92  0.4
+## Comp 3     1.79       99.27     1.59       58.97 10  6 44 15 0.88  0.4
+## 
+## 
+## Class #3 (virginica)
+##        X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Comp 1    92.92       92.92    47.01       47.01 25  4 46  0 0.92 1.00
+## Comp 2     4.56       97.48    10.37       57.39 25  4 46  0 0.92 1.00
+## Comp 3     1.79       99.27     1.59       58.97 24  4 46  1 0.92 0.96</code></pre>
+<p>And the corresponding plot with predictions.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))
+<span class="kw">plotPredictions</span>(res, <span class="dt">legend.position =</span> <span class="st">&#39;topleft&#39;</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-135-1.png" width="864" /></p>
+<p>If vector with reference class values contains names of classes model knows nothing about, they will simply be considered as members of non of the known clases (“None”).</p>
+<p>In case of one-class model, the reference values can be either factor/vector with names or logical values, like the ones used for calibration of the model. Here is an example for each of the cases.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res21 =<span class="st"> </span><span class="kw">predict</span>(m.vir, Xv, cv.all)
+<span class="kw">summary</span>(res21)</code></pre></div>
+<pre><code>## 
+## PLS-DA results (class plsdares) summary:
+## Number of selected components: 3
+## 
+## Class #1 (virginica)
+##        X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Comp 1    92.95       92.95    53.96       53.96 25  4 46  0 0.92 1.00
+## Comp 2     1.62       94.57     6.10       60.06 24  4 46  1 0.92 0.96
+## Comp 3     2.70       97.27    -0.15       59.91 22  4 46  3 0.92 0.88</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res22 =<span class="st"> </span><span class="kw">predict</span>(m.vir, Xv, cv.vir)
+<span class="kw">summary</span>(res22)</code></pre></div>
+<pre><code>## 
+## PLS-DA results (class plsdares) summary:
+## Number of selected components: 3
+## 
+## Class #1 (virginica)
+##        X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Comp 1    92.95       92.95    53.96       53.96 25  4 46  0 0.92 1.00
+## Comp 2     1.62       94.57     6.10       60.06 24  4 46  1 0.92 0.96
+## Comp 3     2.70       97.27    -0.15       59.91 22  4 46  3 0.92 0.88</code></pre>
+<p>As you can see, statistically results are identical. However, predictions plot will look a bit different for these two cases, as you can see below.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
+<span class="kw">plotPredictions</span>(res21, <span class="dt">legend.position =</span> <span class="st">&#39;topleft&#39;</span>)
+<span class="kw">plotPredictions</span>(res22, <span class="dt">legend.position =</span> <span class="st">&#39;topleft&#39;</span>)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-137-1.png" width="864" /></p>
+<p>And because <code>predict()</code> returns an object with results you can also use most of the plots available for PLS regression results. In the last example below you will find plots for X-residuals and Y-varaince.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
+<span class="kw">plotXResiduals</span>(res21)
+<span class="kw">plotYVariance</span>(res22)</code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-138-1.png" width="864" /></p>
 
 </div>
+<!-- </div> -->
             </section>
 
           </div>
         </div>
       </div>
+<a href="performance-plots.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 
-<a href="what-is-new.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

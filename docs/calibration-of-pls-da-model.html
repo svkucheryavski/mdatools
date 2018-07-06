@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-
-<link rel="next" href="what-is-new.html">
+<link rel="prev" href="pls-discriminant-analysis.html">
+<link rel="next" href="classification-plots.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -188,24 +188,128 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Getting started with mdatools for R</h1>
-<h4 class="author"><em>Sergey Kucheryavskiy</em></h4>
-<h4 class="date"><em>July 5, 2018</em></h4>
-</div>
-<div id="introduction" class="section level1 unnumbered">
-<h1>Introduction</h1>
-<p>This is a user guide for <em>mdatools</em> — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for <a href="http://en.wikipedia.org/wiki/Chemometrics">Chemometrics</a>. The general idea of the package is to collect the popular chemometric methods and give a similar “user interface” for using them. So if a user knows how to make a model and visualize results for one method, he or she can easily do this for the other methods as well. Usually I update the tutorial when a new version of the package is released, you can track main changes <a href="what-is-new.html#what-is-new">here</a>.</p>
-<p>All methods implemented in the package were tested using well-known datasets. However, there still could be some bugs, in this case please report to <a href="mailto:svkucheryavski@gmail.com">svkucheryavski@gmail.com</a> or use <a href="https://github.com/svkucheryavski/mdatools/issues">Issues tool</a> at GitHub. You are also very welcome to share your comments and suggestions about the package functionality.</p>
+<div id="calibration-of-pls-da-model" class="section level2 unnumbered">
+<h2>Calibration of PLS-DA model</h2>
+<p>Calibration of PLS-DA model is very similar to conventional PLS with one difference — you need to provide information about class membership of each object instead of a matrix or a vector with response values. This can be done in two different ways. If you have multiple classes, it is always recommended to provide your class membering data as a <em>factor</em> with predefined labels or a vector with class names as text values. The labels/values in this case will be used as class names. It is also acceptable to use numbers as labels but it will make interpretation of results less readable and can possible cause problems with performance statistics calculations. So use names!</p>
+<p>It is very important that you use the same labels/names for e.g. calibration and test set, because this is the way model will identify which class an object came from. And if you have e.g. a typo in a label value, model will assume that the corresponding object is a stranger.</p>
+<p>So let’s prepare our data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(iris)
 
+cal.ind =<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">25</span>, <span class="dv">51</span><span class="op">:</span><span class="dv">75</span>, <span class="dv">101</span><span class="op">:</span><span class="dv">125</span>)
+val.ind =<span class="st"> </span><span class="kw">c</span>(<span class="dv">26</span><span class="op">:</span><span class="dv">50</span>, <span class="dv">76</span><span class="op">:</span><span class="dv">100</span>, <span class="dv">126</span><span class="op">:</span><span class="dv">150</span>)
+
+Xc =<span class="st"> </span>iris[cal.ind, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]
+Xv =<span class="st"> </span>iris[val.ind, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]
+
+cc.all =<span class="st"> </span>iris[cal.ind, <span class="dv">5</span>]
+cv.all =<span class="st"> </span>iris[val.ind, <span class="dv">5</span>]</code></pre></div>
+<p>In this case, the fifth column of dataset <em>Iris</em> is already factor, otherwise we have to make it as a factor explicitely. Lets check if it is indeed correct.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(cc.all)</code></pre></div>
+<pre><code>##  [1] setosa     setosa     setosa     setosa     setosa     setosa    
+##  [7] setosa     setosa     setosa     setosa     setosa     setosa    
+## [13] setosa     setosa     setosa     setosa     setosa     setosa    
+## [19] setosa     setosa     setosa     setosa     setosa     setosa    
+## [25] setosa     versicolor versicolor versicolor versicolor versicolor
+## [31] versicolor versicolor versicolor versicolor versicolor versicolor
+## [37] versicolor versicolor versicolor versicolor versicolor versicolor
+## [43] versicolor versicolor versicolor versicolor versicolor versicolor
+## [49] versicolor versicolor virginica  virginica  virginica  virginica 
+## [55] virginica  virginica  virginica  virginica  virginica  virginica 
+## [61] virginica  virginica  virginica  virginica  virginica  virginica 
+## [67] virginica  virginica  virginica  virginica  virginica  virginica 
+## [73] virginica  virginica  virginica 
+## Levels: setosa versicolor virginica</code></pre>
+<p>However, for the model with just one class, <em>virginica</em>, we need to prepare the class variable in a different way. In this case it is enought to provide a vector with logical values, where <code>TRUE</code> will correspond to a member and <code>FALSE</code> to a non-member of the class. Here is an example how to do it (we will make two — one for calibration and one for validation subsets).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cc.vir =<span class="st"> </span>cc.all <span class="op">==</span><span class="st"> &#39;virginica&#39;</span>
+cv.vir =<span class="st"> </span>cv.all <span class="op">==</span><span class="st"> &#39;virginica&#39;</span>
+<span class="kw">show</span>(cc.vir)</code></pre></div>
+<pre><code>##  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+## [12] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+## [23] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+## [34] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+## [45] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+## [56]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+## [67]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE</code></pre>
+<p>Now we can calibrate the models:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m.all =<span class="st"> </span><span class="kw">plsda</span>(Xc, cc.all, <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>)
+m.vir =<span class="st"> </span><span class="kw">plsda</span>(Xc, cc.vir, <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">classname =</span> <span class="st">&#39;virginica&#39;</span>)</code></pre></div>
+<p>You could notice one important difference. In case when parameter <code>c</code> is a vector with logical values you also need to provide a name of the class. If you do not do this, a default name will be used, but it may cause problems when you e.g. validate your model using test set where class membership is a factor as we have in this example.</p>
+<p>Let’s look at the summary for each of the model. As you can see below, summary for multi class PLS-DA simply shows one set of results for each class. The performance statistics include explained X and Y variance (individual for last used component and cumulative for all of them), values for confusion matrix (True Positives, False Positives, True Negatives, False Negatives) as well as specificity and sensitivity values.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m.all)</code></pre></div>
+<pre><code>## 
+## PLS-DA model (class plsda) summary statistics
+## 
+## Number of selected components: 3
+## Info: 
+## 
+## Class #1 (setosa)
+##     X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Cal     2.19       99.65     4.82       58.05 25  0 50  0    1    1
+## CV      2.35       99.61     4.04       53.59 25  0 50  0    1    1
+## 
+## Class #2 (versicolor)
+##     X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Cal     2.19       99.65     4.82       58.05 11  5 45 14 0.90 0.44
+## CV      2.35       99.61     4.04       53.59 10  6 44 15 0.88 0.40
+## 
+## Class #3 (virginica)
+##     X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Cal     2.19       99.65     4.82       58.05 24  3 47  1 0.94 0.96
+## CV      2.35       99.61     4.04       53.59 24  3 47  1 0.94 0.96</code></pre>
+<p>Dealing with the multi-class PLS-DA model is similar to dealing with PLS2 models, when you have several y-variables. Every time you want to show a plot or results for a particular class, just provide the class number using parameter <code>nc</code>. For example this is how to show summary only for the third class (<em>virginica</em>).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="kw">summary</span>(m.all, <span class="dt">nc =</span> <span class="dv">3</span>)</code></pre></div>
+<pre><code>## 
+## PLS-DA model (class plsda) summary statistics
+## 
+## Number of selected components: 3
+## Info: 
+## 
+## Class #3 (virginica)
+##     X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Cal     2.19       99.65     4.82       58.05 24  3 47  1 0.94 0.96
+## CV      2.35       99.61     4.04       53.59 24  3 47  1 0.94 0.96</code></pre>
+<p>You can also show statistics only for calibration or only for cross-validation parts, in this case you will see details about contribution of every component to the model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="kw">summary</span>(m.all<span class="op">$</span>calres, <span class="dt">nc =</span> <span class="dv">3</span>)</code></pre></div>
+<pre><code>## 
+## PLS-DA results (class plsdares) summary:
+## Number of selected components: 3
+## 
+## Class #3 (virginica)
+##        X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Comp 1    91.97       91.97    46.36       46.36 24  5 45  1 0.90 0.96
+## Comp 2     5.50       97.47     6.88       53.23 21  5 45  4 0.90 0.84
+## Comp 3     2.19       99.65     4.82       58.05 24  3 47  1 0.94 0.96</code></pre>
+<p>For one class models, the behaviour is actually similar, but there will be always one set of results — for the corresponding class. Here is the summary.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m.vir)</code></pre></div>
+<pre><code>## 
+## PLS-DA model (class plsda) summary statistics
+## 
+## Number of selected components: 3
+## Info: 
+## 
+## Class #1 (virginica)
+##     X expvar X cumexpvar Y expvar Y cumexpvar TP FP TN FN Spec Sens
+## Cal     4.71       98.53     0.06       61.31 24  3 47  1 0.94 0.96
+## CV      6.13       98.90     2.22       57.15 24  3 47  1 0.94 0.96</code></pre>
+<p>Like in SIMCA you can also get a confusion matrix for particular result. Here is an example for multiple classes model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getConfusionMatrix</span>(m.all<span class="op">$</span>calres)</code></pre></div>
+<pre><code>##            setosa versicolor virginica None
+## setosa         25          0         0    0
+## versicolor      0         11         3   11
+## virginica       0          5        24    0</code></pre>
+<p>And for the one-class model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getConfusionMatrix</span>(m.vir<span class="op">$</span>calres)</code></pre></div>
+<pre><code>##           virginica None
+## None              3   47
+## virginica        24    1</code></pre>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="what-is-new.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="pls-discriminant-analysis.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="classification-plots.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
