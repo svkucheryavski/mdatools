@@ -3,7 +3,7 @@ data = iris[1:50, 1:4]
 
 # limits for T2-residuals by Hotteling method
 
-context('Test limits for standardized data (Iris, Setosa)')
+context('PCA: residual limits for standardized data (Iris, Setosa)')
 
 # limits for T2-residuals by Hotelling's T2 distribution
 T2lim.hotelling = matrix(

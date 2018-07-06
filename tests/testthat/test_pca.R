@@ -5,6 +5,8 @@
 ## test that maximum number of components is estimated correctly when
 ## number of rows is small and CV is used
 
+context('PCA: estimation of maximum number of components')
+
 data(people)
 x.cal = people[1:5, ]
 
@@ -12,7 +14,7 @@ m01 = pca(x.cal)
 m02 = pca(x.cal, cv = 1)
 m03 = pca(x.cal, cv = 2)
 
-test_that("Estimation of maximum number of components (w/wo CV)", {
+test_that("Estimation of maximum number of components (w/wo CV) is correct", {
    expect_equal(m01$ncomp, 4)
    expect_equal(m02$ncomp, 3)
    expect_equal(m03$ncomp, 1)
@@ -22,7 +24,7 @@ m01 = pca(x.cal, ncomp = 5)
 m02 = pca(x.cal, ncomp = 5, cv = 1)
 m03 = pca(x.cal, ncomp = 5, cv = 2)
 
-test_that("Adjustment of number of components (w/wo CV) when proposed value too large", {
+test_that("Adjustment of number of components (w/wo CV) when proposed value too large is correct", {
    expect_equal(m01$ncomp, 4)
    expect_equal(m02$ncomp, 3)
    expect_equal(m03$ncomp, 1)
@@ -48,7 +50,7 @@ loads1 = svd(x.cal1)$v
 loads2 = svd(x.cal2)$v
 
 ## check loadings obtained using conventional algorithms
-context('Conventional algorithms (max nPCs)')
+context('PCA: loadings by conventional algorithms (max nPCs)')
 
 scores1 = x.cal1 %*% loads1
 scores2 = x.cal2 %*% loads2
@@ -95,7 +97,7 @@ test_that("Loadings are computed correctly (autoscaled)", {
    expect_lt(sum(abs(m22$loadings) - abs(loads2)), 0.001)
 })
 
-context('Conventional algorithms (2 PCs)')
+context('PCA: loadings by conventional algorithms (2 PCs)')
 
 ncomp = 2
 m01 = pca(x.cal1, ncomp)
