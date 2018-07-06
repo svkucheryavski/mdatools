@@ -7,7 +7,8 @@
 #' @param x
 #' matrix with predictors.
 #' @param c
-#' vector with class values (should be a factor with either class number or class name for each object).
+#' vector with class membership (should be either a factor with class names/numbers in case of 
+#' multiple classes or a vector with logical values in case of one class model).
 #' @param ncomp 
 #' maximum number of components to calculate.
 #' @param center 
@@ -40,6 +41,9 @@
 #' @param ncomp.selcrit
 #' criterion for selecting optimal number of components (\code{'min'} for first local minimum of 
 #' RMSECV and \code{'wold'} for Wold's rule.)
+#' @param classname
+#' name (label) of class in case if PLS-DA is used for one-class discrimination model. In this case
+#' it is expected that parameter `c` will be a vector with logical values.
 #' 
 #' @return
 #' Returns an object of \code{plsda} class with following fields (most inherited from class 
@@ -145,12 +149,13 @@
 plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NULL, 
                  exclrows = NULL, x.test = NULL, c.test = NULL, method = 'simpls', alpha = 0.05, 
                  coeffs.ci = NULL, coeffs.alpha = 0.1, info = '', light = F, 
-                 ncomp.selcrit = 'min') {
+                 ncomp.selcrit = 'min', classname = NULL) {
    
    # build a model and apply to calibration set
    model = plsda.cal(x, c, ncomp, center = center, scale = scale, method = method, light = light,
                      alpha = alpha, coeffs.ci = coeffs.ci, coeffs.alpha = coeffs.alpha, info = info,
-                     ncomp.selcrit = ncomp.selcrit, cv = cv, exclcols = exclcols, exclrows = exclrows)
+                     ncomp.selcrit = ncomp.selcrit, cv = cv, exclcols = exclcols, exclrows = exclrows,
+                     classname = classname)
    
    # do test set validation if provided
    if (!is.null(x.test) && !is.null(c.test))
@@ -194,14 +199,29 @@ plsda = function(x, c, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = 
 #' rows to be excluded from calculations (numbers, names or vector with logical values)
 #' @param ncomp.selcrit
 #' criterion for selecting optimal number of components (\code{'min'} for first local minimum of 
+#' @param classname
+#' name of class in case of one-class PLS-DA model
 #' 
 #' @export
 plsda.cal = function(x, c, ncomp, center, scale, cv, method, light, alpha, coeffs.ci, coeffs.alpha,
-                     info, exclcols = NULL, exclrows = NULL, ncomp.selcrit) {
+                     info, exclcols = NULL, exclrows = NULL, ncomp.selcrit, classname = NULL) {
    
-   c = checkReferenceValues.classmodel(model, c, x)
-   y = mda.df2mat(as.factor(c), full = TRUE)
+   if (is.null(classname))
+      classname = 'Member'
+   
+   m = list(classname = classname)
+   if (is.logical(c)) {
+      y = matrix(as.numeric(c), ncol = 1)
+      c = checkReferenceValues.classmodel(m, c, x)
+      classnames = classname
+   } else {
+      c = checkReferenceValues.classmodel(m, c, x)
+      y = mda.df2mat(as.factor(c), full = TRUE)
+      classnames = unique(c)
+   }
    y[y == 0] = -1      
+   colnames(y) = classnames
+   rownames(y) = rownames(x)
    
    if (length(exclcols) > 0)
       x = mda.exclcols(x, exclcols)
@@ -216,13 +236,14 @@ plsda.cal = function(x, c, ncomp, center, scale, cv, method, light, alpha, coeff
    model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method, coeffs.ci = coeffs.ci,
                     coeffs.alpha = coeffs.alpha, info = info, light = light, alpha = alpha, cv = cv, 
                     ncomp.selcrit = ncomp.selcrit)
-   model$classnames = unique(c)
+
+   model$classnames = classnames
    model$nclasses = length(model$classnames)
    model$calres = predict.plsda(model, x, c)
-   
+
    # do cross-validation if needed
    if (!is.null(cv)) 
-      model$cvres = plsda.crossval(model, x, c, center, scale, method)    
+      model$cvres = plsda.crossval(model, x, c, y, center, scale, method)    
    
    # combine everything to model object
    class(model) = c("plsda", "classmodel", "pls")
@@ -251,12 +272,28 @@ plsda.cal = function(x, c, ncomp, center, scale, cv, method, light, alpha, coeff
 #'  
 #' @export 
 predict.plsda = function(object, x, c.ref = NULL, ...) {   
-   
+
    y.ref = NULL
+   # prepare matrix with y-reference values according to classes used in the model
    if (!is.null(c.ref)) {
-      c.ref = checkReferenceValues.classmodel(object, c.ref, x)
-      y.ref = mda.df2mat(as.factor(c.ref), full = TRUE)
+      attrs = mda.getattr(c.ref)
+      if (is.logical(c.ref)) {
+         if (length(object$classnames) != 1) {
+            stop('You can not use logical values with multiclass PLS-DA model!')
+         }
+         y.ref = matrix(as.numeric(c.ref), ncol = 1)
+         c.ref = checkReferenceValues.classmodel(object, c.ref, x)
+      } else {
+         c.ref = checkReferenceValues.classmodel(object, c.ref, x)
+         y.ref = matrix(0, nrow = nrow(x), ncol = object$nclasses)
+         for (i in 1:object$nclasses) {
+            y.ref[, i] = c.ref == object$classnames[i]           
+         }
+      }
       y.ref[y.ref == 0] = -1      
+      y.ref = mda.setattr(y.ref, attrs)
+      colnames(y.ref) = object$classnames
+      rownames(y.ref) = rownames(x)
    }
 
    # do PLS predictions
@@ -309,6 +346,8 @@ classify.plsda = function(model, y) {
 #' a matrix with x values (predictors from calibration set)
 #' @param c
 #' a vetor with c values (classes from calibration set)
+#' @param y
+#' a matrix with dummy y-values for PLS regression
 #' @param center
 #' logical, do mean centering or not
 #' @param scale
@@ -319,24 +358,22 @@ classify.plsda = function(model, y) {
 #' @return
 #' object of class \code{plsdares} with results of cross-validation
 #'  
-plsda.crossval = function(model, x, c, center, scale, method) {
-  
-   c = checkReferenceValues.classmodel(model, c, x)
+plsda.crossval = function(model, x, c, y, center, scale, method) {
    attrs = mda.getattr(x)
    if (length(attrs$exclrows) > 0) {
       c = c[-attrs$exclrows, , drop = F]
+      y = y[-attrs$exclrows, , drop = F]
       x = x[-attrs$exclrows, , drop = F]
       attr(c, 'exclrows') = NULL
+      attr(y, 'exclrows') = NULL
       attr(x, 'exclrows') = NULL
    }
-   
-   y = mda.df2mat(as.factor(c), full = TRUE)
-   y[y == 0] = -1      
    
    if (!is.null(model$coeffs$p.values))
       jack.knife = TRUE
    else
       jack.knife = FALSE
+   
    plsres = pls.crossval(model, x, y, model$cv, center, scale, method, jack.knife)
    c.pred = classify.plsda(model, plsres$y.pred)
    cres = classres(c.pred, c.ref = c, p.pred = plsres$y.pred, ncomp.selected = model$ncomp.selected)
