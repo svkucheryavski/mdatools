@@ -184,8 +184,8 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
 #' vector of values, used for color grouping of plot points or lines.
 #' @param colmap
 #' which colormap to use ('default', 'gray', or user defined in form c('color1', 'color2', ...)).
-#' @param alpha
-#' level of transparancy for the colors
+#' @param opacity
+#' opacity for colors (between 0 and 1)
 #' 
 #' @importFrom grDevices col2rgb colorRampPalette rgb
 #' 
