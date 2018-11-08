@@ -43,6 +43,8 @@
 #'  \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity 
 #'  and sensitivity values.\cr
 #' }
+#' 
+#' @export
 classres = function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL) {
    if (!is.null(c.ref)) {
       attrs = mda.getattr(c.ref)
