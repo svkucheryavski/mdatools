@@ -10,13 +10,20 @@
 #' @param scale
 #' a logical value or vector with numbers for weighting
 #' @param max.cov
-#' columns that have coefficient of variation (in percent) below `max.cv` will not be scaled
+#' columns that have coefficient of variation (in percent) below or equal to `max.cov` will not be scaled
 #' 
 #' @return
 #' data matrix with processed values
 #' 
+#' @description 
+#' 
+#' The use of `max.cov` allows to avoid overestimation of inert variables, which vary 
+#' very little. Note, that the `max.cov` value is already in percent, e.g. if `max.cov = 0.1` it 
+#' will compare the coefficient of variation of every variable with 0.1% (not 1%). If you do not 
+#' want to use this option simply keep `max.cov = 0`.
+#' 
 #' @export
-prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1) {   
+prep.autoscale = function(data, center = T, scale = F, max.cov = 0) {   
    
    attrs = mda.getattr(data)
    dimnames = dimnames(data)
@@ -33,16 +40,18 @@ prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1) {
    else if(is.numeric(scale))
       scale = scale         
    
-   # make autoscaling and attach preprocessing attributes
-   
+   # compute coefficient of variation and set scale to 1 if it is below
+   # a user defined threshold
    if(is.numeric(scale)) {
       if (!is.numeric(center))
          m = apply(data, 2, mean)
       else
          m = center
       cv = scale/m * 100
-      scale[is.nan(cv) | cv < 0.1] = 1
+      scale[is.nan(cv) | cv <= max.cov] = 1
    } 
+   
+   # make autoscaling and attach preprocessing attributes
    data = scale(data, center = center, scale = scale)
    
    data = mda.setattr(data, attrs)
@@ -51,6 +60,7 @@ prep.autoscale = function(data, center = T, scale = F, max.cov = 0.1) {
    attr(data, 'prep:center') = center
    attr(data, 'prep:scale') = scale
    dimnames(data) = dimnames
+   
    data
 }
 
