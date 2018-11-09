@@ -10,7 +10,7 @@ For more details and examples read a [Bookdown tutorial](http://svkucheryavski.g
 What is new
 -----------
 
-New minor release (0.9.2) is available both from GitHub and CRAN (from 07.07.2018).
+New minor release (0.9.2) is available both from GitHub and CRAN (from 9.11.2018).
 
 The latest major release (0.9.0) brings a set of new features, including methods for computing of critical limits for PCA/SIMCA residuals, adjuested residuals plot, and randomized algorithms for fast PCA decomposition of dataset with large number of rows. The text of tutorial has been amended correspondingly and now also includes a new chapter with detailed explanation of calculation of the critical limits. 
 
