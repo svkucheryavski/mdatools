@@ -159,9 +159,11 @@ getSelectivityRatio = function(obj, ...) {
 #' a model object
 #' @param ncomp
 #' number of components to select
+#' @param ...
+#' other arguments
 #' 
 #' @export
-selectCompNum = function(model, ncomp) {   
+selectCompNum = function(model, ncomp = NULL, ...) {   
    UseMethod("selectCompNum")
 }   
 
