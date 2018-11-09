@@ -1,3 +1,6 @@
+v.0.9.2
+=======
+
 v.0.9.1
 =======
 * all plot functions have new `opacity` parameter for semi-transparent colors
