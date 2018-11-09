@@ -221,6 +221,7 @@ data4 =<span class="st"> </span><span class="kw">prep.autoscale</span>(data4, <s
 <span class="kw">boxplot</span>(data3, <span class="dt">main =</span> <span class="st">&#39;Mean centered and standardized&#39;</span>)
 <span class="kw">boxplot</span>(data4, <span class="dt">main =</span> <span class="st">&#39;Median centered and standardized&#39;</span>)</code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-40-1.png" width="864" /></p>
+<p>Starting form v. 0.9.0, the method has additional parameter <code>max.cov</code> which allows to avoid scaling of variables with zero or very low variation. The parameter defines a limit for coefficient of variation in percent <code>sd(x) / m(x) * 100</code> and the method will not scale variables with coefficient of variation betlow this limit. Default value for the parameter is 0 which will prevent scaling of constant variables (which is leading to <code>Inf</code> values).</p>
 </div>
 <div id="correction-of-spectral-baseline" class="section level3 unnumbered">
 <h3>Correction of spectral baseline</h3>
