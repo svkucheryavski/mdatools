@@ -50,11 +50,14 @@
 #' \item{weights }{matrix with PLS weights.} 
 #' \item{selratio }{array with selectivity ratio values.} 
 #' \item{vipscores }{matrix with VIP scores values.} 
-#' \item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated for each component.}   
+#' \item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated 
+#' for each component.}   
 #' \item{info }{information about the model, provided by user when build the model.} 
 #' \item{calres }{an object of class \code{\link{plsres}} with PLS results for a calibration data.} 
-#' \item{testres }{an object of class \code{\link{plsres}} with PLS results for a test data, if it was provided.} 
-#' \item{cvres }{an object of class \code{\link{plsres}} with PLS results for cross-validation, if this option was chosen.} 
+#' \item{testres }{an object of class \code{\link{plsres}} with PLS results for a test data, if it 
+#' was provided.} 
+#' \item{cvres }{an object of class \code{\link{plsres}} with PLS results for cross-validation, if 
+#' this option was chosen.} 
 #'
 #' @details 
 #' So far only SIMPLS method [1] is available, more coming soon. Implementation works both with one
@@ -235,9 +238,10 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NU
                ncomp.selcrit = 'min') {
    
    # build a model and apply to calibration set
-   model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method, coeffs.ci = coeffs.ci,
-                   coeffs.alpha = coeffs.alpha, info = info, light = light, alpha = alpha, cv = cv, 
-                   exclcols = exclcols, exclrows = exclrows, ncomp.selcrit = ncomp.selcrit)
+   model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method, 
+                   coeffs.ci = coeffs.ci,coeffs.alpha = coeffs.alpha, info = info, light = light, 
+                   alpha = alpha, cv = cv, exclcols = exclcols, exclrows = exclrows, 
+                   ncomp.selcrit = ncomp.selcrit)
    
    # do test set validation if provided
    if (!is.null(x.test) && !is.null(y.test)){
@@ -246,7 +250,6 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NU
    
    # select optimal number of components
    model = selectCompNum(model)
-   
    model
 }
 
@@ -291,8 +294,8 @@ pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NU
 #' @return model
 #' an object with calibrated PLS model
 #' 
-pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coeffs.alpha, info, light,
-                   exclcols = NULL, exclrows = NULL, ncomp.selcrit) {   
+pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coeffs.alpha, info, 
+                   light, exclcols = NULL, exclrows = NULL, ncomp.selcrit) {   
    # prepare empty list for model object
    model = list()
    
@@ -326,7 +329,6 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    y = mda.df2mat(y)
    x.nrows = nrow(x)
    x.ncols = ncol(x)
-   y.nrows = nrow(y)
    y.ncols = ncol(y)
    
    # check if data has missing values
@@ -355,7 +357,8 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    y.cal = y
    
    # check excluded rows
-   #if (length(x.attrs$exclrows) != length(y.attrs$exclrows) || any(x.attrs$exclrows != y.attrs$exclrows))
+   #if (length(x.attrs$exclrows) != length(y.attrs$exclrows) || 
+   #     any(x.attrs$exclrows != y.attrs$exclrows))
    #   stop('Excluded rows in response and predictors matrices are not the same!')
    
    # remove excluded rows 
@@ -429,9 +432,12 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    rownames(xloadings) = rownames(weights) = colnames(x)
    colnames(xloadings) = colnames(weights) = paste('Comp', 1:ncomp)
    attr(xloadings, 'name') = 'X loadings'
-   attr(xloadings, 'xaxis.name') = attr(weights, 'xaxis.name') = attr(coeffs, 'xaxis.name') = 'Components'
-   attr(xloadings, 'yaxis.name') = attr(weights, 'yaxis.name') = attr(coeffs, 'yaxis.name') = x.attrs$xaxis.name
-   attr(xloadings, 'yaxis.values') = attr(weights, 'yaxis.values') = attr(coeffs, 'yaxis.values') = x.attrs$xaxis.values
+   attr(xloadings, 'xaxis.name') = attr(weights, 'xaxis.name') = 
+      attr(coeffs, 'xaxis.name') = 'Components'
+   attr(xloadings, 'yaxis.name') = attr(weights, 'yaxis.name') = 
+      attr(coeffs, 'yaxis.name') = x.attrs$xaxis.name
+   attr(xloadings, 'yaxis.values') = attr(weights, 'yaxis.values') = 
+      attr(coeffs, 'yaxis.values') = x.attrs$xaxis.values
    
    # do the same for response related results
    yloadings = matrix(0, nrow = y.ncols, ncol = ncomp)
@@ -479,7 +485,8 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    
    # do cross-validation if needed
    if (!is.null(cv)) {   
-      res = pls.crossval(model, x, y, cv, center = center, scale = scale, method = method, jack.knife = jack.knife)    
+      res = pls.crossval(model, x, y, cv, center = center, scale = scale, method = method, 
+                         jack.knife = jack.knife)    
       if (jack.knife == T) {   
          model$coeffs = regcoeffs(model$coeffs$values, res$jkcoeffs)
          res[['jkcoeffs']] = NULL
@@ -513,7 +520,7 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
 #' @export
 pls.run = function(x, y, ncomp, method, cv) {
    if (method == 'simpls')
-      res = pls.simpls(x, y, ncomp, cv = cv)
+      return(pls.simpls(x, y, ncomp, cv = cv))
    else
       stop('Method with this name is not supported!')
 }
@@ -544,12 +551,6 @@ pls.simpls = function(x, y, ncomp, cv = FALSE) {
    x = as.matrix(x)
    y = as.matrix(y)
    
-   # get names for objects, variables and components
-   objnames = rownames(x);
-   prednames = colnames(x);
-   respnames = colnames(y);
-   
-   nobj = nrow(x)
    npred = ncol(x)
    nresp = ncol(y)
    
@@ -673,7 +674,6 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
    
    # get matrix with indices for cv segments
    idx = crossval(nobj, cv)
-   seglen = ncol(idx);
    nseg = nrow(idx);
    nrep = dim(idx)[3]
    
@@ -712,8 +712,7 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
             
             # get scores
             xscores = xt %*% (m$weights %*% solve(crossprod(m$xloadings, m$weights)))  
-            yscores = as.matrix(yt) %*% m$yloadings   
-            
+
             # make predictions 
             yp = apply(m$coeffs, 3, function(x, y)(y %*% x), xt)
             dim(yp) = c(nrow(xt), ncomp, ncol(yt))
@@ -731,10 +730,10 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
                yp = sweep(yp, 3, m$ycenter, '+')
             
             # get distances
-            xdist = ldecomp.getDistances(scores = xscores, loadings = m$xloadings, residuals = xresiduals, 
-                                         tnorm = model$xtnorm)
-            ydist = ldecomp.getDistances(scores = xscores, loadings = m$yloadings, residuals = yresiduals, 
-                                         tnorm = model$ytnorm)
+            xdist = ldecomp.getDistances(scores = xscores, loadings = m$xloadings, 
+                                         residuals = xresiduals, tnorm = model$xtnorm)
+            ydist = ldecomp.getDistances(scores = xscores, loadings = m$yloadings, 
+                                         residuals = yresiduals, tnorm = model$ytnorm)
             
             # correct dimenstion for reg coeffs for JK
             dim(m$coeffs) = c(dim(m$coeffs), 1)
@@ -759,7 +758,8 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
    jkcoeffs = jkcoeffs / nrep
    
    # set up names
-   dimnames(jkcoeffs) = list(colnames(x), colnames(model$coeffs$values), colnames(model$calres$y.ref), 1:nseg)
+   dimnames(jkcoeffs) = list(colnames(x), colnames(model$coeffs$values), 
+                             colnames(model$calres$y.ref), 1:nseg)
    dimnames(yp.cv) = list(rownames(x), colnames(model$coeffs$values), colnames(model$calres$y.ref))         
    
    # compute variance
@@ -776,9 +776,11 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
    
    # make pls results and return
    res = plsres(yp.cv, y.ref = y, ncomp.selected = model$ncomp.selected,
-                xdecomp = ldecomp(ncomp.selected = model$ncomp.selected, dist = list(Q = Qx, T2 = T2x), 
+                xdecomp = ldecomp(ncomp.selected = model$ncomp.selected, 
+                                  dist = list(Q = Qx, T2 = T2x), 
                                   var = varx, loadings = model$xloadings, attrs = x.attrs),
-                ydecomp = ldecomp(ncomp.selected = model$ncomp.selected, dist = list(Q = Qy, T2 = T2y), 
+                ydecomp = ldecomp(ncomp.selected = model$ncomp.selected, 
+                                  dist = list(Q = Qy, T2 = T2y), 
                                   var = vary, loadings = model$yloadings, attrs = y.attrs)
    )
    if (jack.knife == T)
@@ -796,57 +798,57 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
 #' PLS model (object of class \code{pls})
 #' @param ncomp
 #' number of components to select
+#' @param selcrit
+#' criterion for selecting optimal number of components (\code{'min'} for 
+#' first local minimum of RMSECV and \code{'wold'} for Wold's rule.)
 #' 
 #' @return
 #' the same model with selected number of components
 #'
 #' @details
-#' If number of components is not specified, the Wold's R criterion is used.
+#' If number of components is not specified, the cross-validation statistics will be used. It can
+#' be either first local minimum of RMSECV (`selcrit='min'`) or Wold's rule (`selcrit='wold'`)
+#' based on ratio of PRESS values and threshold of 0.95. 
+#' 
 #' See examples in help for \code{\link{pls}} function.
 #' 
 #' @export
-selectCompNum.pls = function(model, ncomp = NULL)
-{
+selectCompNum.pls = function(model, ncomp = NULL, selcrit = model$ncomp.selcrit) {
    if (!is.null(ncomp)) {
       # user defined number of components
       if (ncomp > model$ncomp || ncomp < 0)
          stop('Wrong number of selected components!')
    } else {
       # automatic estimation of the optimal number of components
-      n = dim(model$coeffs$values)[3]
       
+      # calculate PRESS based on RMSE      
       if (!is.null(model$cvres))
-         press = (model$cvres$rmse * n)^2
+         press = model$cvres$rmse^2 * nrow(model$cvres$y.pred)
       else if (!is.null(model$testres))
-         press = (model$testres$rmse * n)^2
+         press = model$testres$rmse^2 * nrow(model$testres$y.pred)
       else {   
-         press = (model$calres$rmse * n)^2
+         press = model$calres$rmse^2 * nrow(model$calres$ypred)
          warning('No validation results were found!')
       }
-      
-      if (model$ncomp.selcrit == 'wold') {   
+
+      ncomp = model$ncomp
+      if (selcrit == 'wold') {   
          # using Wold's criterion
-         ncomp = ncol(press)
-         if (ncomp > 2)
-         {
+         if (ncomp > 2) {
             r = press[, 2:ncomp] / press[, 1:(ncomp - 1)] 
             ind = which(r > 0.95, arr.ind = TRUE)
-            if (length(ind) == 0)
-               ncomp = 1
-            else if (is.null(dim(ind)))
+            if (is.null(dim(ind)))
                ncomp = min(ind)
             else
                ncomp = min(ind[, 2])
          } else {
             ncomp = which.min(press)
          }   
-      } else if (model$ncomp.selcrit == 'min') {
+      } else if (selcrit == 'min') {
          # using first local minimum
          df = diff(as.vector(press)) > 0
          if (any(df))
             ncomp = which(df)[1]
-         else
-            ncomp = length(press)
       } else {
          stop('Wrong value for "ncomp.selcrit" argument!')
       }   
@@ -907,7 +909,6 @@ predict.pls = function(object, x, y = NULL, ...) {
    
    # get dimensions
    nresp = dim(object$coeffs$values)[3]
-   nobj = nrow(x)
    ncomp = object$ncomp
    
    # check dimensions
@@ -916,7 +917,7 @@ predict.pls = function(object, x, y = NULL, ...) {
    
    if (!is.null(y)) {
       if (nrow(x) != nrow(y))
-         stop('Matrices with predictors (x) and response values (y) should have the same number of rows!')
+         stop('Matrices with predictors (x) and response (y) should have the same number of rows!')
       if (ncol(y) != nresp)
          stop('Wrong number of columns in matrix with response values (y)!')
    }
@@ -927,9 +928,7 @@ predict.pls = function(object, x, y = NULL, ...) {
    # compute x scores and residuals
    xscores = x %*% (object$weights %*% solve(crossprod(object$xloadings, object$weights)))  
    xresiduals = x - tcrossprod(xscores, object$xloadings)
-   xdist = ldecomp.getDistances(xscores, object$xloadings, xresiduals, object$xtnorm) 
-   
-   
+
    # make predictions
    yp = apply(object$coeffs$values, 3, function(x, y)(y %*% x), x)
    dim(yp) = c(nrow(x), ncomp, dim(object$coeffs$values)[3])
@@ -973,7 +972,8 @@ predict.pls = function(object, x, y = NULL, ...) {
       yp = sweep(yp, 3, object$ycenter, '+')
    
    # set up all attributes and names
-   dimnames(yp) = list(rownames(x), dimnames(object$coeffs$values)[[2]], dimnames(object$coeffs$values)[[3]])
+   dimnames(yp) = list(rownames(x), dimnames(object$coeffs$values)[[2]], 
+                       dimnames(object$coeffs$values)[[3]])
    yp = mda.setattr(yp, y.attrs)
    attr(yp, 'name') = 'Response values, predicted'
    
@@ -991,8 +991,10 @@ predict.pls = function(object, x, y = NULL, ...) {
    xtotvar = sum(x^2)
    
    # create xdecomp object
-   xdecomp = ldecomp(scores = xscores, residuals = xresiduals, loadings = object$xloadings, attrs = x.attrs,
-                     ncomp.selected = object$ncomp.selected, tnorm = object$xtnorm, totvar = xtotvar)
+   xdecomp = ldecomp(scores = xscores, residuals = xresiduals, loadings = object$xloadings, 
+                     attrs = x.attrs,
+                     ncomp.selected = object$ncomp.selected, 
+                     tnorm = object$xtnorm, totvar = xtotvar)
    xdecomp$totvar = xtotvar
    
    res = plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, 
@@ -1203,7 +1205,7 @@ getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, ...) {
 #' 
 #' @export
 getVIPScores.pls = function(obj, ny = 1, ...) {
-   vipscores = mda.subset(obj$vipscores, select = ny)
+   return(mda.subset(obj$vipscores, select = ny))
 }
 
 
@@ -1220,7 +1222,8 @@ getVIPScores.pls = function(obj, ny = 1, ...) {
 #' @param ny
 #' if y is multivariate which variables you want to see the coefficients for
 #' @param full
-#' if TRUE the method also shows p-values and t-values as well as confidence intervals for the coefficients (if available)
+#' if TRUE the method also shows p-values and t-values as well as confidence intervals for the 
+#' coefficients (if available)
 #' @param alpha
 #' significance level for confidence intervals (a number between 0 and 1, e.g. for 95\% alpha = 0.05)
 #' @param ...
@@ -1243,7 +1246,8 @@ getVIPScores.pls = function(obj, ny = 1, ...) {
 #' A matrix  with regression coefficients and (optinally) statistics.
 #'  
 #' @export
-getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = FALSE, alpha = obj$coeffs.alpha, ...) {
+getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = FALSE, 
+                            alpha = obj$coeffs.alpha, ...) {
    if (is.null(ncomp)) 
       ncomp = obj$ncomp.selected
    else if (length(ncomp) != 1 || ncomp <= 0 || ncomp > obj$ncomp) 
@@ -1425,8 +1429,7 @@ plotSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, type = 'l',
 #' @export
 plotRMSE.pls = function(obj, ny = 1, type = 'b', main = 'RMSE', xlab = 'Components', ylab = NULL, 
                         labels = 'values', ...) {
-   ncomp = obj$ncomp
-   
+
    if (is.null(ylab)) {   
       if (nrow(obj$calres$rmse) == 1)
          ylab = 'RMSE'
@@ -1597,8 +1600,6 @@ plotYCumVariance.pls = function(obj, type = 'b',
 plotVariance.pls = function(obj, decomp = 'xdecomp', variance = 'expvar',
                             type = 'b', main = 'X variance', xlab = 'Components', 
                             ylab = 'Explained variance, %', labels = 'values', ...) {
-   ncomp = obj$ncomp
-   
    data = list()
    data$cal = obj$calres[[decomp]][[variance]]   
    
@@ -1851,7 +1852,8 @@ plotYResiduals.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, show.line 
    
    if (!is.null(obj$testres)) { 
       attr = mda.getattr(obj$testres$y.pred)
-      data$test = cbind(obj$testres$y.ref[, ny], obj$testres$y.ref[, ny] - obj$testres$y.pred[, ncomp, ny])
+      data$test = cbind(obj$testres$y.ref[, ny], 
+                        obj$testres$y.ref[, ny] - obj$testres$y.pred[, ncomp, ny])
       data$test = mda.setattr(data$test, attr)
       colnames(data$test) = c(xaxis.name, 'Residuals')
       rownames(data$test) = rownames(obj$testres$y.pred)
@@ -1908,7 +1910,8 @@ plotRegcoeffs.pls = function(obj, ncomp = NULL, ...) {
 #' See examples in help for \code{\link{pls}} function.
 #' 
 #' @export
-plotXLoadings.pls = function(obj, comp = c(1, 2), type = 'p', main = 'X loadings', show.axes = T, ...) {
+plotXLoadings.pls = function(obj, comp = c(1, 2), type = 'p', main = 'X loadings', 
+                             show.axes = T, ...) {
    ncomp = length(comp)
    
    if (min(comp) < 1 || max(comp) > obj$ncomp)
@@ -1928,7 +1931,8 @@ plotXLoadings.pls = function(obj, comp = c(1, 2), type = 'p', main = 'X loadings
    
    data = mda.subset(obj$xloadings, select = comp)
    if (type == 'p') {
-      colnames(data) = paste('Comp ', comp, ' (', round(obj$calres$xdecomp$expvar[comp], 2) , '%)', sep = '')
+      colnames(data) = paste('Comp ', comp, ' (', round(obj$calres$xdecomp$expvar[comp], 2) , '%)', 
+                             sep = '')
       mdaplot(data, main = main, type = type, show.lines = show.lines, ...)
    } else {
       data = mda.t(data)
@@ -2025,7 +2029,8 @@ plotXResiduals.pls = function(obj, ncomp = NULL, main = NULL, xlab = 'T2',
    
    if (!is.null(obj$testres)) { 
       attr = mda.getattr(obj$testres$xdecomp$Q)
-      data$test = cbind(obj$testres$xdecomp$T2[, ncomp, drop = F], obj$testres$xdecomp$Q[, ncomp, drop = F])
+      data$test = cbind(obj$testres$xdecomp$T2[, ncomp, drop = F], 
+                        obj$testres$xdecomp$Q[, ncomp, drop = F])
       data$test = mda.setattr(data$test, attr)
       rownames(data$test) = rownames(obj$testres$xdecomp$Q)
    }   

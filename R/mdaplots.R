@@ -1216,6 +1216,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    # show colorbar if needed
    if (!is.null(cgroup) && show.colorbar == T)
       mdaplot.showColorbar(cgroup, colmap, lab.col = lab.col, lab.cex = lab.cex)   
+   
 }
 
 #' Plotting function for several sets of objects

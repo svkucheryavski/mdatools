@@ -16,8 +16,8 @@
 #' @return
 #' matrix with object indices for each segment
 #' 
-crossval = function(nobj, cv = NULL)
-{
+#' @export
+crossval = function(nobj, cv = NULL) {
    methods = c('rand', 'ven', 'loo')
    
    if (is.null(cv))

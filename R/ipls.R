@@ -100,9 +100,9 @@
 #'  
 #' @export
 ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
-                exclcols = NULL, exclrows = NULL,  int.ncomp = 10, int.num = NULL, int.width = NULL, 
-                int.limits = NULL, int.niter = NULL, ncomp.selcrit = 'min', method = 'forward',
-                silent = F) {
+                exclcols = NULL, exclrows = NULL,  int.ncomp = glob.ncomp, int.num = NULL, 
+                int.width = NULL, int.limits = NULL, int.niter = NULL, ncomp.selcrit = 'min', 
+                method = 'forward', silent = F) {
    
    # process names and values for xaxis
    xaxis.name = attr(x, 'xaxis.name')
@@ -325,12 +325,12 @@ ipls.forward = function(x, y, obj) {
    
    # do loop for max number of intervals
    selind = NULL 
+   rmse = Inf
    for (i in 1:obj$int.niter) {
       if (!obj$silent)
          cat(sprintf('Iteration %3d/%3d... ', i, obj$int.niter))
       
       sel = NULL
-      rmse = 99999999999999
       for (l in int.nonselected) {
          # combine already selected intervals with the current
          ind = obj$int.limits[l, 1]:obj$int.limits[l, 2]
@@ -361,14 +361,14 @@ ipls.forward = function(x, y, obj) {
          #            obj$int.limits[l, 1],obj$int.limits[l, 2]))
          
          # else check if rmse has been improved
-         if (rmse - m$cvres$rmse[1, m$ncomp.selected] > 0)
-         {
+         if (rmse > m$cvres$rmse[1, m$ncomp.selected]) {
             ncomp = m$ncomp.selected
-            rmse = m$cvres$rmse[1, ncomp]
-            r2 = m$cvres$r2[1, ncomp]
+            rmse = m$cvres$rmse[1, m$ncomp.selected]
+            r2 = m$cvres$r2[1, m$ncomp.selected]
             sel = l
          }
       }
+      
       
       if (!is.null(sel)) {
          selind = c(selind, obj$int.limits[sel, 1]:obj$int.limits[sel, 2])
@@ -379,31 +379,21 @@ ipls.forward = function(x, y, obj) {
             'n' = sel,
             'start' = obj$int.limits[sel, 1],
             'end' = obj$int.limits[sel, 2],
-            'selected' = F,
+            'selected' = T,
             'nComp' = ncomp,
             'RMSE' = rmse,
             'R2' = r2
-         ))
+         )) 
          
          if (!obj$silent)
             cat(sprintf('selected interval %3d (RMSECV = %f)\n', sel, rmse))
-         
       } else {   
          # no improvements, quit the outer loop
+         if (!obj$silent)
+            cat('no improvements, stop.\n')
          break
       }
    }   
-   
-   # find which variables to select using first local minimum
-   df = diff(int.stat$RMSE[2:nrow(int.stat)]) > 0
-   nsel = which(df)[1] + 1
-   
-   if (any(df))
-      isel = 2:nsel
-   else
-      isel = 2:nrow(int.stat)
-   int.selected = int.stat$n[isel]
-   int.stat$selected[isel] = TRUE
    
    # return the selection results
    obj$glob.stat = glob.stat
@@ -452,6 +442,7 @@ ipls.backward = function(x, y, obj) {
    
    # do loop for max number of intervals
    unselind = NULL 
+   rmse = Inf
    for (i in 1:obj$int.niter) {
       if (length(int.selected) == 1)
          break
@@ -460,9 +451,7 @@ ipls.backward = function(x, y, obj) {
          cat(sprintf('Iteration %3d/%3d... ', i, obj$int.niter))
       
       # do loop to select an interval
-      
       unsel = NULL
-      rmse = 99999999999999
       for (l in int.selected) {
          # combine already selected intervals with the current
          ind = obj$int.limits[l, 1]:obj$int.limits[l, 2]
@@ -473,8 +462,7 @@ ipls.backward = function(x, y, obj) {
                  cv = obj$cv, light = TRUE, ncomp.selcrit = obj$ncomp.selcrit)
          
          # if first round, build a data frame with statistics for each interval
-         if (i == 1)
-         {
+         if (i == 1) {
             glob.stat = rbind(glob.stat, 
                              data.frame(
                                 'n' = l,
@@ -505,11 +493,11 @@ ipls.backward = function(x, y, obj) {
                'R2' = m$cvres$r2[1, m$ncomp.selected]
             ))
             unsel = NULL           
-         }  else if (rmse - m$cvres$rmse[1, m$ncomp.selected] > 0) {
+         }  else if (rmse > m$cvres$rmse[1, m$ncomp.selected]) {
             # else check if rmse has been improved
             ncomp = m$ncomp.selected
-            rmse = m$cvres$rmse[1, ncomp]
-            r2 = m$cvres$r2[1, ncomp]
+            rmse = m$cvres$rmse[1, m$ncomp.selected]
+            r2 = m$cvres$r2[1, m$ncomp.selected]
             unsel = l
          }
       }
@@ -534,31 +522,11 @@ ipls.backward = function(x, y, obj) {
          
       } else {   
          # no improvements, quit the outer loop
+         if (!obj$silent)
+            cat('no improvements, stop.\n')
          break
       }
    }   
-   
-   # sort last two rows if all intervals were processed
-   if (obj$int.niter == obj$int.num) {  
-      nr = nrow(int.stat)
-      if (int.stat$RMSE[nr] < int.stat$RMSE[nr - 1]) {
-         a = int.stat[nr, ]
-         int.stat[nr, ] = int.stat[nr - 1, ]
-         int.stat[nr - 1, ] = a
-      }   
-   }
-   
-   # find which variables to select using first local minimum
-   df = diff(int.stat$RMSE[2:nrow(int.stat)]) > 0
-   nsel = which(df)[1] + 2
-   
-   if (any(df))
-      isel = nsel:nrow(int.stat)
-   else
-      isel = 2:nrow(int.stat)
-
-   int.selected = int.stat$n[isel]
-   int.stat$selected[isel] = TRUE
    
    # return the selection results
    obj$glob.stat = glob.stat
@@ -640,20 +608,20 @@ plotSelection.ipls = function(obj, glob.ncomp = NULL, main = 'iPLS results',
    bars(mids, rmse, col = rgb(0.9, 0.9, 0.9), bwd = bwd, border = rgb(0.8, 0.8, 0.8)) 
    bars(mids[obj$int.selected], rmse[obj$int.selected], col = rgb(0.5, 1.0, 0.6), 
       bwd = bwd[obj$int.selected], border = rgb(0.4, 0.9, 0.5))
-   
+
    # mean signal
    lines(xlabels, xmean, col = rgb(1.0, 0.7, 0.7), lwd = 2)
-   
+
    # number of components for each interval
    text(mids,  matrix(0.05 * ylim[2], ncol = length(mids)), ncomp, 
         col = rgb(0.4, 0.4, 0.4), cex = 0.85) 
-   
+
    # global model   
    if (is.null(glob.ncomp))
       glob.ncomp = obj$gm$ncomp.selected
    else if (glob.ncomp < 1 || glob.ncomp > obj$gm$ncomp)
       stop('Wrong value for number of components!')
-   
+
    dx = (xlim[2] - xlim[1])/50
    abline(h = obj$gm$cvres$rmse[1, glob.ncomp], lty = 2, col = rgb(0.5, 0.5, 0.5))
    text(xlim[2] + dx, obj$gm$cvres$rmse[1, glob.ncomp], glob.ncomp, cex = 0.85, 
@@ -684,11 +652,10 @@ plotSelection.ipls = function(obj, glob.ncomp = NULL, main = 'iPLS results',
 #' other arguments
 #'
 #' @details
-#' The plot shows RMSE values obtained at each iteration of the iPLS selection
-#' algorithm as bars. The first bar correspond to the global model with all variables
-#' included, second - to the model obtained at the first iteration and so on. Number
-#' at the bottom of each bar corresponds to the interval included or excluded at the
-#' particular iteration. The selected intervals are shown with green color.
+#' The plot shows RMSE values obtained at each iteration of the iPLS algorithm as bars. The first 
+#' bar correspond to the global model with all variables included, second - to the model obtained 
+#' at the first iteration and so on. Number at the bottom of each bar corresponds to the interval 
+#' included or excluded at the particular iteration. 
 #' 
 #' @seealso 
 #' \code{\link{summary.ipls}}, \code{\link{plotSelection.ipls}}
@@ -704,23 +671,21 @@ plotRMSE.ipls = function(obj, glob.ncomp = NULL, main = 'RMSE development', xlab
    
    rmse = obj$int.stat$RMSE
    n = obj$int.stat$n
-   i = obj$int.stat$selected
    mids = 0:(length(n) - 1)
-      
+
    if (is.null(xlim))
       xlim = c(min(mids) - 0.5, max(mids) + 0.5)
    if (is.null(ylim))
       ylim = c(0, max(rmse) * 1.1)
-   
+
    # make plot
    plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, ...)
-   
+
    # gray and green bars
-   bars(mids, rmse, col = rgb(0.9, 0.9, 0.9), bwd = 1, border = rgb(0.8, 0.8, 0.8)) 
+   bars(mids, rmse, col = rgb(0.5, 1.0, 0.6), bwd = 1, border = rgb(0.4, 0.9, 0.5)) 
    bars(mids[1], rmse[1], col = rgb(0.98, 0.98, 0.98), bwd = 1, border = rgb(0.85, 0.85, 0.85)) 
-   bars(mids[i], rmse[i], col = rgb(0.5, 1.0, 0.6), bwd = 1, border = rgb(0.4, 0.9, 0.5)) 
-   
-   # number of components for each interval
+
+   # interval numbers 
    text(mids[-1],  ylim[1] + (ylim[2] - ylim[1])/25, n[-1], col = rgb(0.4, 0.4, 0.4), cex = 0.80) 
 }
 

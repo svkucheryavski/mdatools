@@ -1,3 +1,12 @@
+v.0.9.2
+=======
+* improvements to `ipls()` method plus fixed a bug preventing breaking the selection loop (#56)
+* fixed a bug in `selectCompNum()` related to use of Wold criterion (#57)
+* fixed a bug with using of `max.cov` parameter in `prep.autoscale()` (#58)
+* default `max.cov` value in `prep.autoscale()` is set to 0 (to avoid scaling only of constant variables)
+* code refactoring and small improvements
+* added tests for `prep.autoscale()`
+
 v.0.9.1
 =======
 * all plot functions have new `opacity` parameter for semi-transparent colors
