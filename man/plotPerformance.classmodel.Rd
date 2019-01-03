@@ -4,9 +4,9 @@
 \alias{plotPerformance.classmodel}
 \title{Performance plot for classification model}
 \usage{
-\method{plotPerformance}{classmodel}(obj, nc = NULL, param = "specificity",
-  type = "h", main = NULL, xlab = "Components", ylab = "", ylim = c(0,
-  1.15), ...)
+\method{plotPerformance}{classmodel}(obj, nc = NULL,
+  param = "specificity", type = "h", main = NULL,
+  xlab = "Components", ylab = "", ylim = c(0, 1.15), ...)
 }
 \arguments{
 \item{obj}{classification model (object of class \code{plsda}, \code{simca}, etc.).}

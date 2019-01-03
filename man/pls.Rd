@@ -55,11 +55,14 @@ Returns an object of \code{pls} class with following fields:
 \item{weights }{matrix with PLS weights.} 
 \item{selratio }{array with selectivity ratio values.} 
 \item{vipscores }{matrix with VIP scores values.} 
-\item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated for each component.}   
+\item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated 
+for each component.}   
 \item{info }{information about the model, provided by user when build the model.} 
 \item{calres }{an object of class \code{\link{plsres}} with PLS results for a calibration data.} 
-\item{testres }{an object of class \code{\link{plsres}} with PLS results for a test data, if it was provided.} 
-\item{cvres }{an object of class \code{\link{plsres}} with PLS results for cross-validation, if this option was chosen.}
+\item{testres }{an object of class \code{\link{plsres}} with PLS results for a test data, if it 
+was provided.} 
+\item{cvres }{an object of class \code{\link{plsres}} with PLS results for cross-validation, if 
+this option was chosen.}
 }
 \description{
 \code{pls} is used to calibrate, validate and use of partial least squares (PLS) 

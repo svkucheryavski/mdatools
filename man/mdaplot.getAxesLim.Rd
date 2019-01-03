@@ -5,8 +5,8 @@
 \title{Calculate axes limits}
 \usage{
 mdaplot.getAxesLim(x.values, y.values, lower = NULL, upper = NULL,
-  show.colorbar = F, show.lines = F, legend = NULL, show.legend = F,
-  legend.position = "topright", show.labels = F)
+  show.colorbar = F, show.lines = F, legend = NULL,
+  show.legend = F, legend.position = "topright", show.labels = F)
 }
 \arguments{
 \item{x.values}{a vector with x values.}

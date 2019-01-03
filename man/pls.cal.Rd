@@ -4,8 +4,9 @@
 \alias{pls.cal}
 \title{PLS model calibration}
 \usage{
-pls.cal(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coeffs.alpha,
-  info, light, exclcols = NULL, exclrows = NULL, ncomp.selcrit)
+pls.cal(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci,
+  coeffs.alpha, info, light, exclcols = NULL, exclrows = NULL,
+  ncomp.selcrit)
 }
 \arguments{
 \item{x}{a matrix with x values (predictors)}

@@ -4,9 +4,9 @@
 \alias{plotScores.pca}
 \title{Scores plot for PCA}
 \usage{
-\method{plotScores}{pca}(obj, comp = c(1, 2), type = "p", main = "Scores",
-  xlab = NULL, ylab = NULL, show.labels = F, show.legend = NULL,
-  cgroup = NULL, show.axes = TRUE, ...)
+\method{plotScores}{pca}(obj, comp = c(1, 2), type = "p",
+  main = "Scores", xlab = NULL, ylab = NULL, show.labels = F,
+  show.legend = NULL, cgroup = NULL, show.axes = TRUE, ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}

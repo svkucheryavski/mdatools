@@ -4,8 +4,8 @@
 \alias{plot.randtest}
 \title{Plot for randomization test results}
 \usage{
-\method{plot}{randtest}(x, main = "Alpha", xlab = "Components", ylab = "",
-  ...)
+\method{plot}{randtest}(x, main = "Alpha", xlab = "Components",
+  ylab = "", ...)
 }
 \arguments{
 \item{x}{results of randomization test (object of class `randtest`)}

@@ -4,8 +4,9 @@
 \alias{plotRMSE.ipls}
 \title{RMSE development plot}
 \usage{
-\method{plotRMSE}{ipls}(obj, glob.ncomp = NULL, main = "RMSE development",
-  xlab = "Iterations", ylab = "RMSECV", xlim = NULL, ylim = NULL, ...)
+\method{plotRMSE}{ipls}(obj, glob.ncomp = NULL,
+  main = "RMSE development", xlab = "Iterations", ylab = "RMSECV",
+  xlim = NULL, ylim = NULL, ...)
 }
 \arguments{
 \item{obj}{iPLS results (object of class ipls)}
@@ -29,11 +30,10 @@ Shows how RMSE develops for each iteration of iPLS selection
 algorithm
 }
 \details{
-The plot shows RMSE values obtained at each iteration of the iPLS selection
-algorithm as bars. The first bar correspond to the global model with all variables
-included, second - to the model obtained at the first iteration and so on. Number
-at the bottom of each bar corresponds to the interval included or excluded at the
-particular iteration. The selected intervals are shown with green color.
+The plot shows RMSE values obtained at each iteration of the iPLS algorithm as bars. The first 
+bar correspond to the global model with all variables included, second - to the model obtained 
+at the first iteration and so on. Number at the bottom of each bar corresponds to the interval 
+included or excluded at the particular iteration.
 }
 \seealso{
 \code{\link{summary.ipls}}, \code{\link{plotSelection.ipls}}

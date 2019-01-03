@@ -4,9 +4,9 @@
 \alias{mdaplot.plotAxes}
 \title{Create axes plane}
 \usage{
-mdaplot.plotAxes(xticklabels = NULL, yticklabels = NULL, xticks = NULL,
-  yticks = NULL, lim = NULL, main = NULL, xlab = NULL, ylab = NULL,
-  xlas = 0, ylas = 0)
+mdaplot.plotAxes(xticklabels = NULL, yticklabels = NULL,
+  xticks = NULL, yticks = NULL, lim = NULL, main = NULL,
+  xlab = NULL, ylab = NULL, xlas = 0, ylas = 0)
 }
 \arguments{
 \item{xticklabels}{labels for x ticks}

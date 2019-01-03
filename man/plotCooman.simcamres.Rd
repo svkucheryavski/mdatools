@@ -5,8 +5,8 @@
 \title{Cooman's plot for SIMCAM results}
 \usage{
 \method{plotCooman}{simcamres}(obj, nc = c(1, 2), type = "p",
-  main = "Cooman's plot", xlab = NULL, ylab = NULL, show.limits = T,
-  legend = NULL, ...)
+  main = "Cooman's plot", xlab = NULL, ylab = NULL,
+  show.limits = T, legend = NULL, ...)
 }
 \arguments{
 \item{obj}{SIMCAM results (object of class \code{simcamres})}

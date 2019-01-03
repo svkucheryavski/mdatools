@@ -6,8 +6,9 @@
 \usage{
 plsda(x, c, ncomp = 15, center = T, scale = F, cv = NULL,
   exclcols = NULL, exclrows = NULL, x.test = NULL, c.test = NULL,
-  method = "simpls", alpha = 0.05, coeffs.ci = NULL, coeffs.alpha = 0.1,
-  info = "", light = F, ncomp.selcrit = "min", classname = NULL)
+  method = "simpls", alpha = 0.05, coeffs.ci = NULL,
+  coeffs.alpha = 0.1, info = "", light = F, ncomp.selcrit = "min",
+  classname = NULL)
 }
 \arguments{
 \item{x}{matrix with predictors.}

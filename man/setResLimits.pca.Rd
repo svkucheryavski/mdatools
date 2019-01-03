@@ -4,7 +4,8 @@
 \alias{setResLimits.pca}
 \title{Set statistical limits for Q and T2 residuals for PCA model}
 \usage{
-\method{setResLimits}{pca}(obj, alpha = obj$alpha, gamma = obj$gamma, ...)
+\method{setResLimits}{pca}(obj, alpha = obj$alpha, gamma = obj$gamma,
+  ...)
 }
 \arguments{
 \item{obj}{object with PCA model}
