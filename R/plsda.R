@@ -217,8 +217,9 @@ plsda.cal = function(x, c, ncomp, center, scale, cv, method, light, alpha, coeff
    } else {
       c = checkReferenceValues.classmodel(m, c, x)
       y = mda.df2mat(as.factor(c), full = TRUE)
-      classnames = unique(c)
+      classnames = levels(as.factor(c))
    }
+   
    y[y == 0] = -1      
    colnames(y) = classnames
    rownames(y) = rownames(x)
