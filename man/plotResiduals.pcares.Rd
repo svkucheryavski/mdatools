@@ -6,8 +6,8 @@
 \usage{
 \method{plotResiduals}{pcares}(obj, ncomp = NULL, main = NULL,
   xlab = NULL, ylab = NULL, show.labels = F, show.limits = T,
-  norm = F, xlim = NULL, ylim = NULL, lim.col = c("#333333", "#333333"),
-  lim.lwd = c(1, 1), lim.lty = c(2, 3), ...)
+  norm = F, xlim = NULL, ylim = NULL, lim.col = c("#333333",
+  "#333333"), lim.lwd = c(1, 1), lim.lty = c(2, 3), ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}

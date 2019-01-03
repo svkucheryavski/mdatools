@@ -4,7 +4,8 @@
 \alias{plotRMSE.regres}
 \title{RMSE plot for regression results}
 \usage{
-\method{plotRMSE}{regres}(obj, ny = 1, type = "b", labels = "values", ...)
+\method{plotRMSE}{regres}(obj, ny = 1, type = "b", labels = "values",
+  ...)
 }
 \arguments{
 \item{obj}{regression results (object of class \code{regres})}

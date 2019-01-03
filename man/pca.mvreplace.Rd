@@ -4,8 +4,8 @@
 \alias{pca.mvreplace}
 \title{Replace missing values in data}
 \usage{
-pca.mvreplace(x, center = T, scale = F, maxncomp = 7, expvarlim = 0.95,
-  covlim = 10^-6, maxiter = 100)
+pca.mvreplace(x, center = T, scale = F, maxncomp = 7,
+  expvarlim = 0.95, covlim = 10^-6, maxiter = 100)
 }
 \arguments{
 \item{x}{a matrix with data, containing missing values.}

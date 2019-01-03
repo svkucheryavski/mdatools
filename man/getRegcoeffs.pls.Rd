@@ -4,8 +4,8 @@
 \alias{getRegcoeffs.pls}
 \title{Regression coefficients for PLS model'}
 \usage{
-\method{getRegcoeffs}{pls}(obj, ncomp = NULL, ny = NULL, full = FALSE,
-  alpha = obj$coeffs.alpha, ...)
+\method{getRegcoeffs}{pls}(obj, ncomp = NULL, ny = NULL,
+  full = FALSE, alpha = obj$coeffs.alpha, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -14,7 +14,8 @@
 
 \item{ny}{if y is multivariate which variables you want to see the coefficients for}
 
-\item{full}{if TRUE the method also shows p-values and t-values as well as confidence intervals for the coefficients (if available)}
+\item{full}{if TRUE the method also shows p-values and t-values as well as confidence intervals for the 
+coefficients (if available)}
 
 \item{alpha}{significance level for confidence intervals (a number between 0 and 1, e.g. for 95\% alpha = 0.05)}
 

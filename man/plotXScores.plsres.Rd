@@ -4,7 +4,8 @@
 \alias{plotXScores.plsres}
 \title{X scores plot for PLS results}
 \usage{
-\method{plotXScores}{plsres}(obj, comp = c(1, 2), main = "X scores", ...)
+\method{plotXScores}{plsres}(obj, comp = c(1, 2), main = "X scores",
+  ...)
 }
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}

@@ -801,6 +801,8 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
 #' @param selcrit
 #' criterion for selecting optimal number of components (\code{'min'} for 
 #' first local minimum of RMSECV and \code{'wold'} for Wold's rule.)
+#' @param ...
+#' other parameters if any
 #' 
 #' @return
 #' the same model with selected number of components
@@ -813,7 +815,7 @@ pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) 
 #' See examples in help for \code{\link{pls}} function.
 #' 
 #' @export
-selectCompNum.pls = function(model, ncomp = NULL, selcrit = model$ncomp.selcrit) {
+selectCompNum.pls = function(model, ncomp = NULL, selcrit = model$ncomp.selcrit, ...) {
    if (!is.null(ncomp)) {
       # user defined number of components
       if (ncomp > model$ncomp || ncomp < 0)

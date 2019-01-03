@@ -4,7 +4,7 @@
 \alias{prep.autoscale}
 \title{Autoscale values}
 \usage{
-prep.autoscale(data, center = T, scale = F, max.cov = 0.1)
+prep.autoscale(data, center = T, scale = F, max.cov = 0)
 }
 \arguments{
 \item{data}{a matrix with data values}
@@ -13,11 +13,16 @@ prep.autoscale(data, center = T, scale = F, max.cov = 0.1)
 
 \item{scale}{a logical value or vector with numbers for weighting}
 
-\item{max.cov}{columns that have coefficient of variation (in percent) below `max.cv` will not be scaled}
+\item{max.cov}{columns that have coefficient of variation (in percent) below or equal to `max.cov` will not be scaled}
 }
 \value{
 data matrix with processed values
 }
 \description{
 Autoscale (mean center and standardize) values in columns of data matrix.
+
+The use of `max.cov` allows to avoid overestimation of inert variables, which vary 
+very little. Note, that the `max.cov` value is already in percent, e.g. if `max.cov = 0.1` it 
+will compare the coefficient of variation of every variable with 0.1% (not 1%). If you do not 
+want to use this option simply keep `max.cov = 0`.
 }

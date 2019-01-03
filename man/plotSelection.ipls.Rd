@@ -4,8 +4,9 @@
 \alias{plotSelection.ipls}
 \title{iPLS performance plot}
 \usage{
-\method{plotSelection}{ipls}(obj, glob.ncomp = NULL, main = "iPLS results",
-  xlab = obj$xaxis.name, ylab = "RMSECV", xlim = NULL, ylim = NULL, ...)
+\method{plotSelection}{ipls}(obj, glob.ncomp = NULL,
+  main = "iPLS results", xlab = obj$xaxis.name, ylab = "RMSECV",
+  xlim = NULL, ylim = NULL, ...)
 }
 \arguments{
 \item{obj}{iPLS results (object of class ipls)}

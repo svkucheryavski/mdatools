@@ -4,8 +4,8 @@
 \alias{pca.cal}
 \title{PCA model calibration}
 \usage{
-pca.cal(x, ncomp, center, scale, method, exclcols = NULL, exclrows = NULL,
-  cv, rand, lim.type, alpha, gamma, info)
+pca.cal(x, ncomp, center, scale, method, exclcols = NULL,
+  exclrows = NULL, cv, rand, lim.type, alpha, gamma, info)
 }
 \arguments{
 \item{x}{matrix with data values}

@@ -4,9 +4,9 @@
 \alias{plot.regcoeffs}
 \title{Regression coefficients plot}
 \usage{
-\method{plot}{regcoeffs}(x, ncomp = 1, ny = 1, type = NULL, col = NULL,
-  main = NULL, ylab = NULL, show.line = T, show.ci = T, alpha = 0.05,
-  ...)
+\method{plot}{regcoeffs}(x, ncomp = 1, ny = 1, type = NULL,
+  col = NULL, main = NULL, ylab = NULL, show.line = T,
+  show.ci = T, alpha = 0.05, ...)
 }
 \arguments{
 \item{x}{regression coefficients object (class \code{regcoeffs})}

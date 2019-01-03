@@ -4,9 +4,9 @@
 \alias{plotPredictions.regres}
 \title{Predictions plot for regression results}
 \usage{
-\method{plotPredictions}{regres}(obj, ny = 1, ncomp = NULL, show.line = T,
-  show.stat = F, stat.col = "#606060", stat.cex = 0.85, axes.equal = T,
-  col = mdaplot.getColors(1), ...)
+\method{plotPredictions}{regres}(obj, ny = 1, ncomp = NULL,
+  show.line = T, show.stat = F, stat.col = "#606060",
+  stat.cex = 0.85, axes.equal = T, col = mdaplot.getColors(1), ...)
 }
 \arguments{
 \item{obj}{regression results (object of class \code{regres})}

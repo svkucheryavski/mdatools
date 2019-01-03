@@ -4,9 +4,10 @@
 \alias{plotVariance.pls}
 \title{Variance plot for PLS}
 \usage{
-\method{plotVariance}{pls}(obj, decomp = "xdecomp", variance = "expvar",
-  type = "b", main = "X variance", xlab = "Components",
-  ylab = "Explained variance, \%", labels = "values", ...)
+\method{plotVariance}{pls}(obj, decomp = "xdecomp",
+  variance = "expvar", type = "b", main = "X variance",
+  xlab = "Components", ylab = "Explained variance, \%",
+  labels = "values", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

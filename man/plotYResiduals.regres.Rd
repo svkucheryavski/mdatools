@@ -4,8 +4,8 @@
 \alias{plotYResiduals.regres}
 \title{Residuals plot for regression results}
 \usage{
-\method{plotYResiduals}{regres}(obj, ny = 1, ncomp = NULL, show.line = T,
-  ...)
+\method{plotYResiduals}{regres}(obj, ny = 1, ncomp = NULL,
+  show.line = T, ...)
 }
 \arguments{
 \item{obj}{regression results (object of class \code{regres})}

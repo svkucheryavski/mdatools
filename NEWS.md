@@ -1,3 +1,7 @@
+v.0.9.3
+=======
+* fixed a bug leading to wrong results in multiclass PLS-DA if class labels in reference class variable (factor) were not in alphabetical order
+
 v.0.9.2
 =======
 * improvements to `ipls()` method plus fixed a bug preventing breaking the selection loop (#56)

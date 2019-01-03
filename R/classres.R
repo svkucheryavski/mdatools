@@ -208,7 +208,7 @@ getConfusionMatrix.classres = function(obj, ncomp = NULL, ...) {
    # get class names and numbers
    classes = dimnames(obj$c.pred)[[3]]
    nclasses = length(classes)
-   ref.classes = unique(obj$c.ref)
+   ref.classes = levels(as.factor(obj$c.ref))
    ref.nclasses = length(ref.classes)
    
    # compute the confusion matrix

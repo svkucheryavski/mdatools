@@ -222,12 +222,14 @@ getCalibrationData.pca = function(obj, ...) {
 #' PCA model (object of class \code{pca})
 #' @param ncomp
 #' number of components to select
+#' @param ...
+#' other parameters if any
 #' 
 #' @return
 #' the same model with selected number of components
 #' 
 #' @export
-selectCompNum.pca = function(model, ncomp) {
+selectCompNum.pca = function(model, ncomp, ...) {
    if (ncomp < 1 || ncomp > model$ncomp)
       stop('Wrong number of selected components!')
    

@@ -4,8 +4,8 @@
 \alias{plotXResiduals.pls}
 \title{X residuals plot for PLS}
 \usage{
-\method{plotXResiduals}{pls}(obj, ncomp = NULL, main = NULL, xlab = "T2",
-  ylab = "Squared residual distance (Q)", ...)
+\method{plotXResiduals}{pls}(obj, ncomp = NULL, main = NULL,
+  xlab = "T2", ylab = "Squared residual distance (Q)", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

@@ -4,9 +4,10 @@
 \alias{pca}
 \title{Principal Component Analysis}
 \usage{
-pca(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
-  exclcols = NULL, x.test = NULL, method = "svd", rand = NULL,
-  lim.type = "jm", alpha = 0.05, gamma = 0.01, info = "")
+pca(x, ncomp = 15, center = T, scale = F, cv = NULL,
+  exclrows = NULL, exclcols = NULL, x.test = NULL, method = "svd",
+  rand = NULL, lim.type = "jm", alpha = 0.05, gamma = 0.01,
+  info = "")
 }
 \arguments{
 \item{x}{a numerical matrix with calibration data.}

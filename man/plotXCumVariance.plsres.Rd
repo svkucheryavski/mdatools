@@ -4,7 +4,8 @@
 \alias{plotXCumVariance.plsres}
 \title{Explained cumulative X variance plot for PLS results}
 \usage{
-\method{plotXCumVariance}{plsres}(obj, main = "X cumulative variance", ...)
+\method{plotXCumVariance}{plsres}(obj, main = "X cumulative variance",
+  ...)
 }
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}

@@ -4,7 +4,8 @@
 \alias{mdaplot.showLines}
 \title{Plot lines}
 \usage{
-mdaplot.showLines(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2))
+mdaplot.showLines(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2,
+  0.2))
 }
 \arguments{
 \item{point}{vector with two values: x coordinate for vertical point y for horizontal}
