@@ -596,7 +596,7 @@ pls.simpls = function(x, y, ncomp, cv = FALSE) {
       M = M - tcrossprod(p)
       A = C %*% A      
       
-      if (cv == FALSE && e$value < 10^-12) {
+      if (cv == FALSE && max(e$values) < 10^-12) {
          # stop cycle is egienvalue is almost zero
          break
       }
