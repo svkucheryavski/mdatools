@@ -1,3 +1,7 @@
+v.0.9.4
+=======
+* fixed a bug leading to wrong results when using parameter `max.cov` in `prep.autoscale()`
+
 v.0.9.3
 =======
 * fixed a bug leading to wrong results in multiclass PLS-DA if class labels in reference class variable (factor) were not in alphabetical order
