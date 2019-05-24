@@ -18,6 +18,7 @@ p21 = prep.autoscale(X2)
 p22 = prep.autoscale(X2, center = T, scale = F)
 p23 = prep.autoscale(X2, center = T, scale = T)
 p24 = prep.autoscale(X2, center = T, scale = T, max.cov = 0.2)
+p25 = prep.autoscale(-X2, center = T, scale = T, max.cov = 0.2)
 
 test_that("Default autoscaling is correct", {
    expect_equal(attr(p11, 'prep:center'), apply(X1, 2, mean))
@@ -48,4 +49,9 @@ test_that("Full autoscaling for data with constant variables is correct", {
 test_that("Full autoscaling with limits for max.cov is correct", {
    expect_equal(attr(p24, 'prep:scale')[-(20:60)], apply(X2, 2, sd)[-(20:60)])
    expect_equal(attr(p24, 'prep:scale')[(20:60)], rep(1, 41), check.attributes = FALSE)
+})
+
+test_that("Full autoscaling with limits for max.cov is correct for negative data", {
+   expect_equal(attr(p25, 'prep:scale')[-(20:60)], apply(-X2, 2, sd)[-(20:60)])
+   expect_equal(attr(p25, 'prep:scale')[(20:60)], rep(1, 41), check.attributes = FALSE)
 })

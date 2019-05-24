@@ -47,7 +47,7 @@ prep.autoscale = function(data, center = T, scale = F, max.cov = 0) {
          m = apply(data, 2, mean)
       else
          m = center
-      cv = scale/m * 100
+      cv = scale/abs(m) * 100
       scale[is.nan(cv) | cv <= max.cov] = 1
    } 
    
