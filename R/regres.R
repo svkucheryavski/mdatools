@@ -78,7 +78,7 @@ regres.r2 = function(y.ref, y.pred) {
    for (i in 1:nresp){
       yp = y.pred[, , i, drop = F]
       dim(yp) = dim(y.pred)[1:2]
-      r2[i, ] = (1 - colSums(apply(yp, 2, '-', y.ref[, i])^2)/ytot[i]) * 100   
+      r2[i, ] = (1 - colSums(apply(yp, 2, '-', y.ref[, i])^2)/ytot[i])    
    }
    
    rownames(r2) = colnames(y.ref)
@@ -287,7 +287,7 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T,
       stat.text = paste(
          'nLV = ', ncomp, '\n',
          'RMSE = ', format(obj$rmse[ncomp], digits = 3), '\n',
-         'R2 = ', round(obj$ydecomp$cumexpvar[ncomp]/100, 3),
+         'R2 = ', round(obj$r2[ncomp], 3),
          sep = ''
       )
       
@@ -391,12 +391,12 @@ as.matrix.regres = function(x, ncomp = NULL, ny = 1, ...) {
    
    if (!is.null(obj$y.ref)) {  
       if (is.null(ncomp))
-         res = cbind(obj$rmse[ny, ], obj$r2[ny, ], obj$slope[ny, ], obj$bias[ny, ], obj$rpd[ny, ])   
+         res = cbind(obj$r2[ny, ], obj$rmse[ny, ], obj$slope[ny, ], obj$bias[ny, ], obj$rpd[ny, ])   
       else
-         res = cbind(obj$rmse[ny, ncomp], obj$r2[ny, ncomp], obj$slope[ny, ncomp], 
+         res = cbind(obj$r2[ny, ncomp], obj$rmse[ny, ncomp], obj$slope[ny, ncomp], 
                      obj$bias[ny, ncomp], obj$rpd[ny, ncomp])   
       
-      colnames(res) = c('RMSE', 'R^2', 'Slope', 'Bias', 'RPD')
+      colnames(res) = c('R2', 'RMSE', 'Slope', 'Bias', 'RPD')
    } else {
       res = NULL
    }   
