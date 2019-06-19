@@ -1,6 +1,13 @@
+v.0.9.5
+=======
+* better description of cross-validation settings in help text (parameter `cv`)
+* added column R2 (coefficient of determination) to PLS summary as it is not always identical to `Y cumexpvar`
+* better use of `cex` parameter for group plots (can be specified differently for each group)
+* if `cex` is specified it will be also applied for legend items
+
 v.0.9.4
 =======
-* fixed a bug leading to wrong results when using parameter `max.cov` in `prep.autoscale()`
+* fixed a bug leading to wrong results when using parameter `max.cov` in `prep.autoscale()` (#59)
 
 v.0.9.3
 =======
