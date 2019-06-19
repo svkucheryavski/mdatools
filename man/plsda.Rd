@@ -22,7 +22,7 @@ multiple classes or a vector with logical values in case of one class model).}
 
 \item{scale}{logical, scale (standardize) or not predictors and response values.}
 
-\item{cv}{number of segments for cross-validation (if cv = 1, full cross-validation will be used).}
+\item{cv}{cross-validation settings (see details).}
 
 \item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values)}
 
@@ -77,6 +77,13 @@ The \code{plsda} class is based on \code{pls} with extra functions and plots cov
 classification functionality. All plots for \code{pls} can be used. E.g. of you want to see the 
 real predicted values (y in PLS) instead of classes use \code{plotPredictions.pls(model)} instead
 of \code{plotPredictions(model)}.
+
+Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
+will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
+cross-validation will be preformed). If it is a list, the following syntax can be used: 
+\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
+segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
+to \code{nseg} segments ('venetian blinds').  
 
 Calculation of confidence intervals and p-values for regression coefficients are available
 only by jack-knifing so far. See help for \code{\link{regcoeffs}} objects for details.

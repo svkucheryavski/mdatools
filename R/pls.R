@@ -15,7 +15,7 @@
 #' @param scale   
 #' logical, scale (standardize) or not predictors and response values.
 #' @param cv  
-#' number of segments for cross-validation (if cv = 1, full cross-validation will be used).
+#' cross-validation settings (see details).
 #' @param exclcols
 #' columns of x to be excluded from calculations (numbers, names or vector with logical values)
 #' @param exclrows
@@ -70,6 +70,13 @@
 #' is found using Wold's R criterion, but can be adjusted by user using function
 #' (\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all 
 #' default operations - predictions, plots, etc. 
+#'
+#' Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
+#' will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
+#' cross-validation will be preformed). If it is a list, the following syntax can be used: 
+#' \code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
+#' segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
+#' to \code{nseg} segments ('venetian blinds').  
 #'
 #' Selectivity ratio [2] and VIP scores [3] are calculated for any PLS model authomatically, however
 #' while selectivity ratio values are calculated for all computed components, the VIP scores are 
@@ -2113,24 +2120,23 @@ summary.pls = function(object, ncomp = NULL, ny = NULL, ...) {
       data = as.matrix(obj$calres, ncomp = ncomp, ny = y)
       rownames(data) = 'Cal'
       
-      if (!is.null(obj$cvres))
-      {
+      if (!is.null(obj$cvres)) {
          data = rbind(data, as.matrix(obj$cvres, ncomp = ncomp, ny = y))      
          rownames(data)[nrow(data)] = 'CV'
       }
       
-      if (!is.null(obj$testres))
-      {
+      if (!is.null(obj$testres)) {
          data = rbind(data, as.matrix(obj$testres, ncomp = ncomp, ny = y))
          rownames(data)[nrow(data)] = 'Test'
       }   
       
       data = data[, -c(1, 3), drop = F]
       data[, 1:2] = round(data[, 1:2], 2)      
-      data[, 3] = mdaplot.formatValues(data[, 3], round.only = T)
-      data[, 4] = round(data[, 4], 2)  
-      data[, 5] = round(data[, 5], 4)      
-      data[, 6] = round(data[, 6], 2)      
+      data[, 3] = round(data[, 3], 3)  
+      data[, 4] = mdaplot.formatValues(data[, 4], round.only = T)
+      data[, 5] = round(data[, 5], 3)  
+      data[, 6] = round(data[, 6], 4)      
+      data[, 7] = round(data[, 7], 1)      
       
       print(data)
    }   
@@ -2162,13 +2168,14 @@ print.pls = function(x, ...) {
    cat('$yloadings - vector with y loadings\n')
    cat('$weights - vector with weights\n')
    cat('$calres - results for calibration set\n')
-   if (!is.null(obj$cvres))
-   {
+   
+   if (!is.null(obj$cvres)) {
       cat('$cvres - results for cross-validation\n')      
    }   
-   if (!is.null(obj$testres))
-   {
+   
+   if (!is.null(obj$testres)) {
       cat('$testres - results for test set\n')      
    }   
+   
    cat('\nTry summary(model) and plot(model) to see the model performance.\n')   
 }

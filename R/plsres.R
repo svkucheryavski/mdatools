@@ -389,11 +389,8 @@ plotPredictions.plsres = function(obj, ny = 1, ncomp = NULL, main = NULL, ...) {
 #' See examples in help for \code{\link{plsres}} function.
 #' 
 #' @export
-plot.plsres = function(x, ncomp = NULL, ny = 1, show.labels = F, ...) {
+plot.plsres = function(x, ncomp = obj$ncomp.selected, ny = 1, show.labels = F, ...) {
    obj = x
-   
-   if (is.null(ncomp))
-      ncomp = obj$ncomp.selected 
    
    if (is.null(obj$y.ref)) {
       par(mfrow = c(1, 2))
@@ -447,7 +444,6 @@ as.matrix.plsres = function(x, ncomp = NULL, ny = 1, ...) {
       rownames(res) = colnames(obj$y.pred)[ncomp]
    }
    colnames(res)[1:4] = c('X expvar', 'X cumexpvar', 'Y expvar', 'Y cumexpvar')
-   res = res[, -6, drop = FALSE] 
    res
 }
 
@@ -475,8 +471,9 @@ summary.plsres = function(object, ny = NULL, ncomp = NULL, ...) {
       #if (is.null(ncomp))
       #   ncomp = obj$ncomp.selected
       
-      if (is.null(ny))
+      if (is.null(ny)) {
          ny = 1:ncol(obj$y.ref)
+      }
       
       if (length(ncomp) == 1)
          cat(sprintf('\nNumber of selected components: %d\n', ncomp))
@@ -485,9 +482,11 @@ summary.plsres = function(object, ny = NULL, ncomp = NULL, ...) {
          cat(sprintf('\nResponse variable %s:\n', colnames(obj$y.ref)[i]))
          res = as.matrix.plsres(obj, ny = i, ncomp = ncomp)
          res[, 1:4] = round(res[, 1:4], 3)      
-         res[, 5:6] = round(res[, 5:6], 3)
-         res[, 7] = round(res[, 7], 4)      
-         res[, 8] = round(res[, 8], 1)      
+         res[, 5] = round(res[, 5], 3)
+         res[, 6] = mdaplot.formatValues(res[, 6], round.only = T)
+         res[, 7] = round(res[, 7], 3)
+         res[, 8] = round(res[, 8], 4)      
+         res[, 9] = round(res[, 9], 1)      
          print(res)
       }
       

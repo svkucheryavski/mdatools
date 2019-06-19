@@ -20,7 +20,7 @@ simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL,
 
 \item{scale}{logical, do sdandardization of data or not.}
 
-\item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
+\item{cv}{cross-validation settings (see details).}
 
 \item{exclcols}{columns to be excluded from calculations (numbers, names or vector with logical values)}
 
@@ -72,6 +72,13 @@ one-class classification.
 SIMCA is in fact PCA model with additional functionality, so \code{simca} class inherits most 
 of the functionality of \code{\link{pca}} class. It uses critical limits calculated for Q and T2 
 residuals calculated for PCA model for making classification decistion.
+
+Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
+will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
+cross-validation will be preformed). If it is a list, the following syntax can be used: 
+\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
+segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
+to \code{nseg} segments ('venetian blinds').
 }
 \examples{
 ## make a SIMCA model for Iris setosa class with full cross-validation

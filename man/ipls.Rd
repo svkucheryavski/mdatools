@@ -21,7 +21,7 @@ ipls(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
 
 \item{scale}{logical, standardize or not the data values}
 
-\item{cv}{number of segments for cross-validation (1 - full CV)}
+\item{cv}{cross-validation settings (see details)}
 
 \item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values)}
 
@@ -72,6 +72,13 @@ There are several ways to specify the intervals. First of all either number of i
 (\code{int.num}) or width of the intervals (\code{int.width}) can be provided. Alternatively
 one can specify the limits (first and last variable number) of the intervals manually 
 with \code{int.limits}.
+
+Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
+will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
+cross-validation will be preformed). If it is a list, the following syntax can be used: 
+\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
+segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
+to \code{nseg} segments ('venetian blinds').
 }
 \examples{
 library(mdatools)

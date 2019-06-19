@@ -12,7 +12,7 @@
 #' @param scale
 #' logical, do sdandardization of data or not.
 #' @param cv
-#' number of segments for random cross-validation (1 for full cross-validation).
+#' cross-validation settings (see details).
 #' @param exclrows
 #' rows to be excluded from calculations (numbers, names or vector with logical values)
 #' @param exclcols
@@ -39,7 +39,14 @@
 #' number of components is used to build a residuals plot (with Q residuals vs. Hotelling T2 
 #' values), calculate confidence limits for Q residuals, as well as for SIMCA classification. 
 #' 
-#' You can provde number, names or logical values to exclode rows or columns from calibration and
+#' Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
+#' will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
+#' cross-validation will be preformed). If it is a list, the following syntax can be used: 
+#' \code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
+#' segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
+#' to \code{nseg} segments ('venetian blinds').  
+#' 
+#' You can provde number, names or logical values to exclude rows or columns from calibration and
 #' validation of PCA model. In this case the outcome, e.g. scores and loadings will correspond to 
 #' the original size of the data, but:
 #' 
@@ -106,7 +113,7 @@
 #' was provided.} 
 #' \item{cvres }{an object of class \code{\link{pcares}} with PCA results for cross-validation, 
 #' if this option was chosen.} 
-#' 
+#'
 #' More details and examples can be found in the Bookdown tutorial.
 #' 
 #' @references 
@@ -202,7 +209,7 @@ pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
 #' @export
 getCalibrationData.pca = function(obj, ...) {
    x = tcrossprod(obj$calres$scores, obj$loadings) + obj$calres$residuals
-   
+      
    if (is.numeric(attr(x, 'prep:scale')))
       x = sweep(x, 2L, attr(x, 'prep:scale'), '*', check.margin = F)
    

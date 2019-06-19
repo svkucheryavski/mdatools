@@ -5,15 +5,15 @@
 \title{Plotting function for a single set of objects}
 \usage{
 mdaplot(data = NULL, plot.data = NULL, type = "p", pch = 16,
-  col = NULL, lty = 1, lwd = 1, bwd = 0.8, cgroup = NULL,
-  xlim = NULL, ylim = NULL, colmap = "default", labels = NULL,
-  main = NULL, xlab = NULL, ylab = NULL, show.labels = F,
-  show.colorbar = T, show.lines = F, show.grid = T, show.axes = T,
-  xticks = NULL, yticks = NULL, xticklabels = NULL,
-  yticklabels = NULL, xlas = 0, ylas = 0, lab.col = "darkgray",
-  lab.cex = 0.65, show.excluded = FALSE, col.excluded = "#E0E0E0",
-  nbins = 256, colramp = mdaplot.getColors, force.x.values = NA,
-  opacity = 1, ...)
+  col = NULL, lty = 1, lwd = 1, cex = 1, bwd = 0.8,
+  cgroup = NULL, xlim = NULL, ylim = NULL, colmap = "default",
+  labels = NULL, main = NULL, xlab = NULL, ylab = NULL,
+  show.labels = F, show.colorbar = T, show.lines = F,
+  show.grid = T, show.axes = T, xticks = NULL, yticks = NULL,
+  xticklabels = NULL, yticklabels = NULL, xlas = 0, ylas = 0,
+  lab.col = "darkgray", lab.cex = 0.65, show.excluded = FALSE,
+  col.excluded = "#E0E0E0", nbins = 256, colramp = mdaplot.getColors,
+  force.x.values = NA, opacity = 1, ...)
 }
 \arguments{
 \item{data}{a vector, matrix or a data.frame with data values.}
@@ -30,6 +30,8 @@ by a user (if NULL it will be created automatically)}
 \item{lty}{the line type (same as \code{plot} parameter).}
 
 \item{lwd}{the line width (thickness) (same as \code{plot} parameter).}
+
+\item{cex}{the cex factor for markers (same as \code{plot} parameter).}
 
 \item{bwd}{a width of a bar as a percent of a maximum space available for each bar.}
 

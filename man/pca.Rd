@@ -18,7 +18,7 @@ pca(x, ncomp = 15, center = T, scale = F, cv = NULL,
 
 \item{scale}{logical, do sdandardization of data or not.}
 
-\item{cv}{number of segments for random cross-validation (1 for full cross-validation).}
+\item{cv}{cross-validation settings (see details).}
 
 \item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
 
@@ -67,7 +67,14 @@ a parameter for selecting an optimal number of components (\code{ncomp.selected}
 number of components is used to build a residuals plot (with Q residuals vs. Hotelling T2 
 values), calculate confidence limits for Q residuals, as well as for SIMCA classification. 
 
-You can provde number, names or logical values to exclode rows or columns from calibration and
+Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
+will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
+cross-validation will be preformed). If it is a list, the following syntax can be used: 
+\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
+segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
+to \code{nseg} segments ('venetian blinds').  
+
+You can provde number, names or logical values to exclude rows or columns from calibration and
 validation of PCA model. In this case the outcome, e.g. scores and loadings will correspond to 
 the original size of the data, but:
 

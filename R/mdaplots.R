@@ -361,6 +361,8 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray'
 #' vector with line types for the legend items
 #' @param lwd
 #' vector with line width values for the legend items
+#' @param cex
+#' vector with cex factor for the points
 #' @param bty
 #' border type for the legend
 #' @param position
@@ -368,8 +370,8 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray'
 #' @param plot
 #' logical, show legend or just calculate and return its size
 #'
-mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, bty = 'o', 
-                              position = 'topright', plot = T)
+mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, cex = 1, 
+                              bty = 'o', position = 'topright', plot = T)
 {
    # which positions need multiple columns
    onecolpos = c('topright', 'topleft', 'bottomright', 'bottomleft')
@@ -389,8 +391,8 @@ mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, b
    inset = c(0.02, 0.02 * (dx/dy))
    
    # show legend
-   legend(position, legend, col = col,  pch = pch, lty = lty, lwd = lwd, plot = plot, 
-          cex = 0.8, inset = inset, bg = 'white', box.lwd = 0.75, box.col = 'gray',
+   legend(position, legend, col = col,  pch = pch, lty = lty, pt.cex = cex, lwd = lwd, 
+          cex = 0.85, plot = plot, inset = inset, bg = 'white', box.lwd = 0.75, box.col = 'gray',
           ncol = ncol)   
 }
 
@@ -569,9 +571,10 @@ bars = function(x, y, col = NULL, bwd = 0.8, border = NA) {
 #' color for the error bars
 #' @param pch
 #' marker symbol for the plot
+#' @param cex
+#' cex factor for the marker
 #' 
-errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16)
-{
+errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16, cex = 1) {
    e2 = (max(x) - min(x)) / 50
    e1 = (max(x) - min(x)) / (length(x) * 5)
    e = min(e1, e2)
@@ -581,7 +584,7 @@ errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16)
    segments(x - e, y + upper, x + e, y + upper, col = col)
    
    if (!is.null(y))
-      points(x, y, col = col, pch = pch)
+      points(x, y, col = col, pch = pch, cex = cex)
 }  
 
 #' Create axes plane
@@ -888,6 +891,8 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' the line type (same as \code{plot} parameter).
 #' @param lwd  
 #' the line width (thickness) (same as \code{plot} parameter).
+#' @param cex  
+#' the cex factor for markers (same as \code{plot} parameter).
 #' @param bwd  
 #' a width of a bar as a percent of a maximum space available for each bar.
 #' @param xlim  
@@ -985,7 +990,7 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' 
 #' @export
 mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NULL, lty = 1, 
-                   lwd = 1, bwd = 0.8,
+                   lwd = 1, cex = 1, bwd = 0.8,
                    cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
                    main = NULL, xlab = NULL, ylab = NULL, show.labels = F, 
                    show.colorbar = T, show.lines = F, show.grid = T, show.axes = T, 
@@ -1111,24 +1116,24 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    
    # make plot for the data 
    if (type == 'p' && density == FALSE)
-      points(x.values, y.values, col = col, pch = pch, lwd = lwd, ...)
+      points(x.values, y.values, col = col, pch = pch, lwd = lwd, cex = cex, ...)
    if (type == 'd' && density == TRUE)
-      {par(new = T);smoothScatter(x.values, y.values, nbin = nbins, colramp = colramp, axes = F, ann = F,...)}
+      {par(new = T);smoothScatter(x.values, y.values, nbin = nbins, cex = cex, colramp = colramp, axes = F, ann = F,...)}
    else if (type == 'l' || type == 'b')
-      matlines(x.values, t(y.values), type = type, col = col, pch = pch, lty = lty, lwd = lwd, ...)
+      matlines(x.values, t(y.values), type = type, col = col, pch = pch, cex = cex, lty = lty, lwd = lwd, ...)
    else if (type == 'h')
       bars(x.values, y.values, col = col, bwd = bwd)
    else if (type == 'e')
-      errorbars(x.values, lower, upper, y = y.values, col = col, pch = pch)
+      errorbars(x.values, lower, upper, y = y.values, col = col, cex = cex, pch = pch)
    
    # show excluded rows
    if (show.excluded) {
       if (type == 'p')
          points(x.values.excludedrows, y.values.excludedrows, type = type, col = col.excluded, 
-                pch = pch, lwd = lwd, ...)
+                pch = pch, lwd = lwd, cex = cex, ...)
       else if (type == 'l' || type == 'b')
          matlines(x.values, t(y.values.excludedrows), type = type, col = col.excluded, pch = pch, 
-                  lty = lty, lwd = lwd, ...)
+                  lty = lty, lwd = lwd, cex = cex, ...)
    }  
    
    # show lines if needed
@@ -1234,6 +1239,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' the line type (same as \code{plot} parameter).
 #' @param lwd  
 #' the line width (thickness) (same as \code{plot} parameter).
+#' @param cex  
+#' the cex factor for the markers (same as \code{plot} parameter).
 #' @param bwd  
 #' a width of a bar as a percent of a maximum space available for each bar.
 #' @param legend  
@@ -1309,12 +1316,13 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' @importFrom grDevices axisTicks dev.cur 
 #' 
 #' @export
-mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 1, bwd = 0.8,
-                    legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
+mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 1, cex = 1, 
+                    bwd = 0.8, legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', 
                     show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
-                    show.excluded = FALSE, lab.col = 'darkgray', lab.cex = 0.65, xlas = 1, ylas = 1, ...) {   
+                    show.excluded = FALSE, lab.col = 'darkgray', lab.cex = 0.65, xlas = 1, 
+                    ylas = 1, ...) {   
 
    # name for the plot (mdain)
    name = NULL
@@ -1405,6 +1413,14 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    else if (length(lwd) != ngroups)
       stop('Parameter "lwd" hould be specified for each group or be common for all!')
    
+   # if cex factor is not specified for each group multply default value
+   if (!is.numeric(cex))
+      stop('Parameter "cex" mush be numeric!')   
+   else if (length(cex) == 1)
+      cex = rep(cex, ngroups)
+   else if (length(cex) != ngroups)
+      stop('Parameter "cex" hould be specified for each group or be common for all!')
+   
    # if label color is not specified for each group multply default value
    if (length(lab.col) == 1)
       lab.col = rep(lab.col, ngroups)
@@ -1492,7 +1508,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
          show.labels = F
       
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
-              lwd = lwd[i], force.x.values = force.x.values, bwd = bwd,
+              lwd = lwd[i], cex = cex[i], force.x.values = force.x.values, bwd = bwd,
               labels = labels, show.grid = F, show.labels = show.labels,
               lab.col = lab.col[i], lab.cex = lab.cex, show.axes = FALSE, ...
       )
@@ -1500,11 +1516,11 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    
    
    # show legend if needed
-   if (!is.null(legend) && length(legend) > 0 && show.legend == T)
-   {
+   if (!is.null(legend) && length(legend) > 0 && show.legend == T) {
       lty[type == 'p' | type == 'h'] = 0
       pch[type == 'l'] = NA_integer_
       pch[type == 'h'] = 15
-      mdaplot.showLegend(legend, col, pch = pch, lty = lty, lwd = lwd, position = legend.position)      
+      mdaplot.showLegend(legend, col, pch = pch, lty = lty, lwd = lwd, cex = cex, 
+                         position = legend.position)      
    }   
 }
