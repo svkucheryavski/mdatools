@@ -4,7 +4,7 @@
 \alias{errorbars}
 \title{Show error bars on a plot}
 \usage{
-errorbars(x, lower, upper, y = NULL, col = NULL, pch = 16)
+errorbars(x, lower, upper, y = NULL, col = NULL, pch = 16, cex = 1)
 }
 \arguments{
 \item{x}{vector with x values}
@@ -18,6 +18,8 @@ errorbars(x, lower, upper, y = NULL, col = NULL, pch = 16)
 \item{col}{color for the error bars}
 
 \item{pch}{marker symbol for the plot}
+
+\item{cex}{cex factor for the marker}
 }
 \description{
 Shows error bars (errorbar plot) on predefined axes

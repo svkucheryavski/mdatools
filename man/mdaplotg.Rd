@@ -5,13 +5,13 @@
 \title{Plotting function for several sets of objects}
 \usage{
 mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
-  lwd = 1, bwd = 0.8, legend = NULL, xlab = NULL, ylab = NULL,
-  main = NULL, labels = NULL, ylim = NULL, xlim = NULL,
-  colmap = "default", legend.position = "topright", show.legend = T,
-  show.labels = F, show.lines = F, show.grid = T, xticks = NULL,
-  xticklabels = NULL, yticks = NULL, yticklabels = NULL,
-  show.excluded = FALSE, lab.col = "darkgray", lab.cex = 0.65,
-  xlas = 1, ylas = 1, ...)
+  lwd = 1, cex = 1, bwd = 0.8, legend = NULL, xlab = NULL,
+  ylab = NULL, main = NULL, labels = NULL, ylim = NULL,
+  xlim = NULL, colmap = "default", legend.position = "topright",
+  show.legend = T, show.labels = F, show.lines = F, show.grid = T,
+  xticks = NULL, xticklabels = NULL, yticks = NULL,
+  yticklabels = NULL, show.excluded = FALSE, lab.col = "darkgray",
+  lab.cex = 0.65, xlas = 1, ylas = 1, ...)
 }
 \arguments{
 \item{data}{a matrix, data frame or a list with data values (see details below).}
@@ -25,6 +25,8 @@ mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
 \item{lty}{the line type (same as \code{plot} parameter).}
 
 \item{lwd}{the line width (thickness) (same as \code{plot} parameter).}
+
+\item{cex}{the cex factor for the markers (same as \code{plot} parameter).}
 
 \item{bwd}{a width of a bar as a percent of a maximum space available for each bar.}
 

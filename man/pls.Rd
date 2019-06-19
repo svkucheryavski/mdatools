@@ -20,7 +20,7 @@ pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
 
 \item{scale}{logical, scale (standardize) or not predictors and response values.}
 
-\item{cv}{number of segments for cross-validation (if cv = 1, full cross-validation will be used).}
+\item{cv}{cross-validation settings (see details).}
 
 \item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values)}
 
@@ -79,6 +79,13 @@ to \code{ncomp}: 1, 1:2, 1:3, etc. The optimal number of components, (\code{ncom
 is found using Wold's R criterion, but can be adjusted by user using function
 (\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all 
 default operations - predictions, plots, etc. 
+
+Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
+will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
+cross-validation will be preformed). If it is a list, the following syntax can be used: 
+\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
+segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
+to \code{nseg} segments ('venetian blinds').  
 
 Selectivity ratio [2] and VIP scores [3] are calculated for any PLS model authomatically, however
 while selectivity ratio values are calculated for all computed components, the VIP scores are 
