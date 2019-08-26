@@ -4,7 +4,7 @@
 \alias{regres.rmse}
 \title{RMSE}
 \usage{
-regres.rmse(y.ref, y.pred)
+regres.rmse(err)
 }
 \arguments{
 \item{y.ref}{vector with reference values}

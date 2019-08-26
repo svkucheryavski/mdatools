@@ -45,10 +45,15 @@ regres = function(y.pred, y.ref = NULL, ncomp.selected = 1) {
             y.ref = y.ref[-attrs$exclrows, , drop = F]
       }
       
-      obj$rmse = regres.rmse(y.ref, y.pred)
+      # residuals (errors) based statistics
+      err = regres.err(y.ref, y.pred)
+      ytot = apply(y.ref, 2, function(y) { sum((y - mean(y))^2) })
+      obj$r2 = regres.r2(err, ytot)
+      obj$bias = regres.bias(err)
+      obj$rmse = regres.rmse(err)
+      
+      # other statistics      
       obj$slope = regres.slope(y.ref, y.pred)
-      obj$r2 = regres.r2(y.ref, y.pred)
-      obj$bias = regres.bias(y.ref, y.pred)
       obj$sep = sqrt(obj$rmse^2 - obj$bias^2)
       obj$rpd = apply(y.ref, 2, sd)/obj$sep
    }
@@ -58,6 +63,31 @@ regres = function(y.pred, y.ref = NULL, ncomp.selected = 1) {
    
    obj
 }
+
+#' Error of prediction
+#' 
+#' @description
+#' Calculates array of differences between predicted and reference values.
+#'
+#' @param y.ref
+#' vector with reference values
+#' @param y.pred
+#' matrix with predicted values
+#'
+regres.err = function(y.ref, y.pred) {
+   err = array(0, dim = dim(y.pred))
+   
+   for (i in 1:ncol(y.ref)) {
+      # minus because in computing err we use y.pred - y.ref 
+      err[, , i] = -apply(y.pred[, , i, drop = F], 2, "-", y.ref[, i, drop = F])
+   }
+   
+   dimnames(err) = dimnames(y.pred)
+   attr(err, 'name') = 'Errors'
+   attr(err, 'xaxis.name') = 'Components'
+   attr(err, 'yaxis.name') = 'Predictors'
+   err
+} 
 
 #' Determination coefficient
 #' 
@@ -69,23 +99,16 @@ regres = function(y.pred, y.ref = NULL, ncomp.selected = 1) {
 #' @param y.pred
 #' matrix with predicted values
 #'
-regres.r2 = function(y.ref, y.pred) {
-   nresp = ncol(y.ref)
-   ncomp = ncol(y.pred)
-   r2 = matrix(0, nrow = nresp, ncol = ncomp)
-  
-   ytot = colSums((y.ref - mean(y.ref))^2)
-   for (i in 1:nresp){
-      yp = y.pred[, , i, drop = F]
-      dim(yp) = dim(y.pred)[1:2]
-      r2[i, ] = (1 - colSums(apply(yp, 2, '-', y.ref[, i])^2)/ytot[i])    
-   }
+regres.r2 = function(err, ytot) {
+
+   r2 = t(1 - scale(colSums(err^2), center = F, scale = ytot))
    
-   rownames(r2) = colnames(y.ref)
-   colnames(r2) = dimnames(y.pred)[[2]]
+   rownames(r2) = dimnames(err)[[3]]
+   colnames(r2) = dimnames(err)[[2]]
    attr(r2, 'name') = 'Coefficient of determination'
    attr(r2, 'xaxis.name') = 'Components'
    attr(r2, 'yaxis.name') = 'Predictors'
+   
    r2
 }  
 
@@ -99,16 +122,12 @@ regres.r2 = function(y.ref, y.pred) {
 #' @param y.pred
 #' matrix with predicted values
 #'
-regres.bias = function(y.ref, y.pred) {
-   nresp = ncol(y.ref)
-   ncomp = ncol(y.pred)
-   bias = matrix(0, nrow = nresp, ncol = ncomp)
+regres.bias = function(err) {
    
-   for (i in 1:nresp)
-      bias[i, ] = as.vector(apply(y.ref[, i] - y.pred[, , i, drop = F], 2, mean))
-
-   rownames(bias) = colnames(y.ref)
-   colnames(bias) = dimnames(y.pred)[[2]]
+   bias = t(colSums(err) / nrow(err))
+   
+   rownames(bias) = dimnames(err)[[3]]
+   colnames(bias) = dimnames(err)[[2]]
    attr(bias, 'name') = 'Bias'
    attr(bias, 'xaxis.name') = 'Components'
    attr(bias, 'yaxis.name') = 'Predictors'
@@ -126,16 +145,12 @@ regres.bias = function(y.ref, y.pred) {
 #' @param y.pred
 #' matrix with predicted values
 #'
-regres.rmse = function(y.ref, y.pred) {
-   nresp = ncol(y.ref)
-   ncomp = ncol(y.pred)
-   rmse = matrix(0, nrow = nresp, ncol = ncomp)
+regres.rmse = function(err) {
+
+   rmse = t(sqrt(colSums(err^2) / nrow(err)))
    
-   for (i in 1:nresp)
-      rmse[i, ] = sqrt(colSums((y.ref[, i] - y.pred[, , i, drop = F])^2)/length(y.ref[, i]))      
-   
-   rownames(rmse) = colnames(y.ref)
-   colnames(rmse) = dimnames(y.pred)[[2]]
+   rownames(rmse) = dimnames(err)[[3]]
+   colnames(rmse) = dimnames(err)[[2]]
    attr(rmse, 'name') = 'RMSE'
    attr(rmse, 'xaxis.name') = 'Components'
    attr(rmse, 'yaxis.name') = 'Predictors'
