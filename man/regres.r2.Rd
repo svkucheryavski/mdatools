@@ -4,7 +4,7 @@
 \alias{regres.r2}
 \title{Determination coefficient}
 \usage{
-regres.r2(y.ref, y.pred)
+regres.r2(err, ytot)
 }
 \arguments{
 \item{y.ref}{vector with reference values}

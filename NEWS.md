@@ -1,3 +1,9 @@
+v.0.9.6
+=======
+* fixed a bug related to wrong calculation of R2 in case of multiple response variables (PLS2)
+* refactoring of `regres` methods
+* added tests for some of the `regres` methods
+
 v.0.9.5
 =======
 * better description of cross-validation settings in help text (parameter `cv`)
