@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Getting started with mdatools for R</title>
-  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Calibration and validation | Getting started with mdatools for R</title>
+  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  <meta name="generator" content="bookdown 0.12 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Getting started with mdatools for R" />
+  <meta property="og:title" content="Calibration and validation | Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
   
   
@@ -17,24 +16,26 @@
   <meta name="github-repo" content="svkucheryavski/mdatools.bookdown" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Getting started with mdatools for R" />
+  <meta name="twitter:title" content="Calibration and validation | Getting started with mdatools for R" />
   
   <meta name="twitter:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
   
 
-<meta name="author" content="Sergey Kucheryavskiy">
+<meta name="author" content="Sergey Kucheryavskiy" />
 
 
+<meta name="date" content="2018-11-09" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
 <link rel="prev" href="simca-classification.html">
 <link rel="next" href="multiclass-classification.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
@@ -49,41 +50,66 @@
 
 
 <style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 </head>
@@ -193,8 +219,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>The model calibration is similar to PCA, but there are several additional arguments, which are important for classification. First of all it is a class name. Class name is a string, which can be used later e.g. for identifying class members for testing. The second important argument is a level of significance, <code>alpha</code>. This parameter is used for calculation of statistical limits and can be considered as probability for false negatives. The default value is 0.05. Finally the parameter <code>lim.type</code> allows to select the method for compuring critical limits for the distances, as it is described in the PCA chapter.</p>
 <p>In this chapter as well as for describing other classification methods we will use a famous Iris dataset, available in R. The dataset includes 150 measurements of three Iris species: <em>Setosa</em>, <em>Virginica</em> and <em>Versicola</em>. The measurements are length and width of petals and sepals in cm. Use <code>?iris</code> for more details.</p>
 <p>Let’s get the data and split it to calibration and test sets.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(iris)
-<span class="kw">head</span>(iris)</code></pre></div>
+<div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb176-1" title="1"><span class="kw">data</span>(iris)</a>
+<a class="sourceLine" id="cb176-2" title="2"><span class="kw">head</span>(iris)</a></code></pre></div>
 <pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
 ## 1          5.1         3.5          1.4         0.2  setosa
 ## 2          4.9         3.0          1.4         0.2  setosa
@@ -202,23 +228,23 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 ## 4          4.6         3.1          1.5         0.2  setosa
 ## 5          5.0         3.6          1.4         0.2  setosa
 ## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># generate indices for calibration set</span>
-idx =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, <span class="kw">nrow</span>(iris), <span class="dt">by =</span> <span class="dv">2</span>)
-
-<span class="co"># split the values</span>
-X.c =<span class="st"> </span>iris[idx, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]
-c.c =<span class="st"> </span>iris[idx, <span class="dv">5</span>, drop =<span class="st"> </span>F]
-
-X.t =<span class="st"> </span>iris[<span class="op">-</span>idx, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]
-c.t =<span class="st"> </span>iris[<span class="op">-</span>idx, <span class="dv">5</span>, drop =<span class="st"> </span>F]</code></pre></div>
+<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb178-1" title="1"><span class="co"># generate indices for calibration set</span></a>
+<a class="sourceLine" id="cb178-2" title="2">idx =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, <span class="kw">nrow</span>(iris), <span class="dt">by =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb178-3" title="3"></a>
+<a class="sourceLine" id="cb178-4" title="4"><span class="co"># split the values</span></a>
+<a class="sourceLine" id="cb178-5" title="5">X.c =<span class="st"> </span>iris[idx, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb178-6" title="6">c.c =<span class="st"> </span>iris[idx, <span class="dv">5</span>, drop =<span class="st"> </span>F]</a>
+<a class="sourceLine" id="cb178-7" title="7"></a>
+<a class="sourceLine" id="cb178-8" title="8">X.t =<span class="st"> </span>iris[<span class="op">-</span>idx, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb178-9" title="9">c.t =<span class="st"> </span>iris[<span class="op">-</span>idx, <span class="dv">5</span>, drop =<span class="st"> </span>F]</a></code></pre></div>
 <p>Now, because for calibration we need only objects belonging to a class, we will split the <code>X.c</code> into three matrices — one for each species. The data is ordered by the species, so it can be done relatively easy by taking every 25 rows.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">X.set =<span class="st"> </span>X.c[<span class="dv">1</span><span class="op">:</span><span class="dv">25</span>, ]
-X.ver =<span class="st"> </span>X.c[<span class="dv">26</span><span class="op">:</span><span class="dv">50</span>, ]
-X.vir =<span class="st"> </span>X.c[<span class="dv">51</span><span class="op">:</span><span class="dv">75</span>, ]</code></pre></div>
+<div class="sourceCode" id="cb179"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb179-1" title="1">X.set =<span class="st"> </span>X.c[<span class="dv">1</span><span class="op">:</span><span class="dv">25</span>, ]</a>
+<a class="sourceLine" id="cb179-2" title="2">X.ver =<span class="st"> </span>X.c[<span class="dv">26</span><span class="op">:</span><span class="dv">50</span>, ]</a>
+<a class="sourceLine" id="cb179-3" title="3">X.vir =<span class="st"> </span>X.c[<span class="dv">51</span><span class="op">:</span><span class="dv">75</span>, ]</a></code></pre></div>
 <p>Let’s start with creating a model for class <em>Versicolor</em> and exploring available statistics and plots. We will use full cross-validation to validate the results. In this case we do not change method for critical limits, so the default option (<code>jm</code>) is used.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mdatools)
-m =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>)
-<span class="kw">summary</span>(m)</code></pre></div>
+<div class="sourceCode" id="cb180"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb180-1" title="1"><span class="kw">library</span>(mdatools)</a>
+<a class="sourceLine" id="cb180-2" title="2">m =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb180-3" title="3"><span class="kw">summary</span>(m)</a></code></pre></div>
 <pre><code>## 
 ## SIMCA model for class &quot;versicolor&quot; summary
 ## 
@@ -232,20 +258,20 @@ m =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st
 ## Comp 2  13.93     90.37       0.92       13.91      0.84
 ## Comp 3   8.45     98.82       0.92       12.24      0.84</code></pre>
 <p>Let’s look at plots and start with summary plot.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(m)</code></pre></div>
+<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb182-1" title="1"><span class="kw">plot</span>(m)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-103-1.png" width="864" /></p>
 <p>The plot is very similar to what we seen for PCA model, the only difference is that it shows <em>modelling power</em> instead of loadings. Modelling power is a measure of contribution of each variable to the model and varies from 0 to 1. Usually variables with modelling power below 0.1 are considered as irrelevant.</p>
 <p>Let’s give a closer look at the residuals plot with different values for alpha (we will keep number of components equal to three in all cases).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.01</span>)
-m2 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.05</span>)
-m3 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.10</span>)
-m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.15</span>)
-
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotResiduals</span>(m1)
-<span class="kw">plotResiduals</span>(m2)
-<span class="kw">plotResiduals</span>(m3)
-<span class="kw">plotResiduals</span>(m4)</code></pre></div>
+<div class="sourceCode" id="cb183"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb183-1" title="1">m1 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.01</span>)</a>
+<a class="sourceLine" id="cb183-2" title="2">m2 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.05</span>)</a>
+<a class="sourceLine" id="cb183-3" title="3">m3 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.10</span>)</a>
+<a class="sourceLine" id="cb183-4" title="4">m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="st">&#39;versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">3</span>, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.15</span>)</a>
+<a class="sourceLine" id="cb183-5" title="5"></a>
+<a class="sourceLine" id="cb183-6" title="6"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb183-7" title="7"><span class="kw">plotResiduals</span>(m1)</a>
+<a class="sourceLine" id="cb183-8" title="8"><span class="kw">plotResiduals</span>(m2)</a>
+<a class="sourceLine" id="cb183-9" title="9"><span class="kw">plotResiduals</span>(m3)</a>
+<a class="sourceLine" id="cb183-10" title="10"><span class="kw">plotResiduals</span>(m4)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-104-1.png" width="864" /></p>
 <p>As you can see, using alpha = 0.01 reduced number of false negatives to zero, as the acceptance limits became larger, while alpha = 0.15 gives a lot of incorrectly rejected class members. It must be noted, that decreasing alpha will also lead to a larger number of false positives, which we can not see in this case.</p>
 <div id="predictions-and-validation-with-a-test-set" class="section level3 unnumbered">
@@ -257,8 +283,8 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 <li>a vector with logical values (<code>TRUE</code> for class members and <code>FALSE</code> for strangers)</li>
 </ul>
 <p>In our case we have a factor. Instead of creating a new model and providing the values as test set we will make predictions instead.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t, c.t)
-<span class="kw">summary</span>(res)</code></pre></div>
+<div class="sourceCode" id="cb184"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb184-1" title="1">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t, c.t)</a>
+<a class="sourceLine" id="cb184-2" title="2"><span class="kw">summary</span>(res)</a></code></pre></div>
 <pre><code>## 
 ## Summary for SIMCA one-class classification result
 ## 
@@ -270,19 +296,20 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 ## Comp 2   1.67     65.95 24  3 47  1 0.94 0.96
 ## Comp 3  32.45     98.40 22  3 47  3 0.94 0.88</code></pre>
 <p>In this case we see a more detailed statistics with true/false positives and negatives, specificity and sensitivity. The performance statistics can be also shown as plots.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotSpecificity</span>(res)
-<span class="kw">plotSensitivity</span>(res)
-<span class="kw">plotMisclassified</span>(res)
-<span class="kw">plotPerformance</span>(res)</code></pre></div>
+<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb186-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb186-2" title="2"><span class="kw">plotSpecificity</span>(res)</a>
+<a class="sourceLine" id="cb186-3" title="3"><span class="kw">plotSensitivity</span>(res)</a>
+<a class="sourceLine" id="cb186-4" title="4"><span class="kw">plotMisclassified</span>(res)</a>
+<a class="sourceLine" id="cb186-5" title="5"><span class="kw">plotPerformance</span>(res)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-106-1.png" width="864" /></p>
 <p>The classification results can be shown both graphically and numerically. Here is a prediction plot for the results.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
-<span class="kw">plotPredictions</span>(res, <span class="dt">show.legend =</span> F)
-<span class="kw">plotPredictions</span>(res, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">show.legend =</span> F)</code></pre></div>
+<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb187-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb187-2" title="2"><span class="kw">plotPredictions</span>(res, <span class="dt">show.legend =</span> F)</a>
+<a class="sourceLine" id="cb187-3" title="3"><span class="kw">plotPredictions</span>(res, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">show.legend =</span> F)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-107-1.png" width="864" /></p>
-<p>So we can see (the legend has been hidden in order to see all points clearly) that for the model with three components we have three false positives (specificity = 47/50 = 0.94) and three false negatives (sensitivity = 22/25 = 0.88). You can also show the predictions as a matrix with -1 and +1 using method <code>showPredictions()</code> or get the array with predicted class values directly as it is shown in the example below (for first 10 rows, different number of components and the first classification variable).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(res<span class="op">$</span>c.pred[<span class="dv">31</span><span class="op">:</span><span class="dv">40</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
+<p>So we can see (the legend has been hidden in order to see all points clearly) that for the model with three components we have three false positives (specificity = 47/50 = 0.94) and three false negatives (sensitivity = 22/25 = 0.88). You can also show the predictions as a matrix with -1 and +1 using method <code>showPredictions()</code> or get the array with predicted class values directly as it is shown in the example below (for first 10 rows, different number of components and the first
+classification variable).</p>
+<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb188-1" title="1"><span class="kw">show</span>(res<span class="op">$</span>c.pred[<span class="dv">31</span><span class="op">:</span><span class="dv">40</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">1</span>])</a></code></pre></div>
 <pre><code>##    Comp 1 Comp 2 Comp 3
 ## 62      1      1      1
 ## 64      1      1      1
@@ -295,7 +322,7 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 ## 78      1      1      1
 ## 80      1      1      1</code></pre>
 <p>You can also get and show the confusion matrix (rows correspond to real classes and columns to the predicted class) for an object with SIMCA results (as well as results obtained with any other classification method, e.g. PLS-DA). In this example the matrix also shows 3 false negatives and 3 false positives we have mentioned before.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getConfusionMatrix</span>(res))</code></pre></div>
+<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb190-1" title="1"><span class="kw">show</span>(<span class="kw">getConfusionMatrix</span>(res))</a></code></pre></div>
 <pre><code>##            versicolor None
 ## setosa              0   25
 ## versicolor         22    3
@@ -309,7 +336,7 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 <p>So if p-value is the same as significance level (which happens when object is lying exactly on the acceptance line) the probability is 0.5. If p-value is e.g. 0.04, <span class="math inline">\(\pi = 0.4\)</span>, or 40%, and the object will be rejected as a stranger (here we assume that the <span class="math inline">\(\alpha = 0.05\)</span>). If the p-value is e.g. 0.06, <span class="math inline">\(\pi = 0.6\)</span>, or 60%, and the object will be accepted as a member of the class. If p-value is larger than <span class="math inline">\(2\times\alpha\)</span> the probability is set to 1.</p>
 <p>In case of rectangular acceptance area (<code>lim.type = 'jm'</code> or <code>'chisq'</code>) the probability is computed separately for Q and T<sup>2</sup> values and the smallest of the two is taken. In case of triangular acceptance area (<code>lim.type = 'ddmoments'</code> or <code>'ddrobust'</code>) the probability is calculated for a combination of the distances.</p>
 <p>Here is how to show the probability values, that correspond to the predictions shown in the previous code chunk.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(res<span class="op">$</span>p.pred[<span class="dv">31</span><span class="op">:</span><span class="dv">40</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">1</span>])</code></pre></div>
+<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb192-1" title="1"><span class="kw">show</span>(res<span class="op">$</span>p.pred[<span class="dv">31</span><span class="op">:</span><span class="dv">40</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">1</span>])</a></code></pre></div>
 <pre><code>##    Comp 1 Comp 2     Comp 3
 ## 62      1      1 1.00000000
 ## 64      1      1 1.00000000
@@ -322,9 +349,9 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 ## 78      1      1 1.00000000
 ## 80      1      1 1.00000000</code></pre>
 <p>It is also possible to show the probability values as a plot with method <code>plotProbabilities()</code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))
-<span class="kw">plotProbabilities</span>(res, <span class="dt">cgroup =</span> c.t<span class="op">$</span>Species)
-<span class="kw">plotProbabilities</span>(res, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">cgroup =</span> c.t<span class="op">$</span>Species)</code></pre></div>
+<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb194-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb194-2" title="2"><span class="kw">plotProbabilities</span>(res, <span class="dt">cgroup =</span> c.t<span class="op">$</span>Species)</a>
+<a class="sourceLine" id="cb194-3" title="3"><span class="kw">plotProbabilities</span>(res, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">cgroup =</span> c.t<span class="op">$</span>Species)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-111-1.png" width="864" /></p>
 <p>The plot can be shown for any SIMCA results (including e.g. calibration set or cross-validated results).</p>
 </div>
@@ -334,19 +361,19 @@ m4 =<span class="st"> </span><span class="kw">simca</span>(X.ver, <span class="s
 <p>In ideal case <span class="math inline">\(m = i\)</span>, but in fact there will be some small random variation of the <span class="math inline">\(m\)</span> around <span class="math inline">\(i\)</span>. This variation can be computed as <span class="math inline">\(±2\sqrt{i (1 - \alpha)}\)</span>. For example, if the expected number of extreme objects <span class="math inline">\(i = 5\)</span> and <span class="math inline">\(n = 50\)</span>, like in our last model, <span class="math inline">\(\alpha = 5/50 = 0.1\)</span>. So we can expect <span class="math inline">\(5±2\sqrt{5 \times 0.9} ≈ 5 ± 4\)</span> objects may have the p-value smaller than <span class="math inline">\(0.1\)</span>.</p>
 <p>The <code>plotExtreme()</code> method counts the number of objects from calibration set rejected by the model for <span class="math inline">\(i = 1, 2,...,n\)</span> (and corresponding alpha values) and shows the values vs the <span class="math inline">\(i\)</span>. Besides that, the statistical limits. If all points are lying within the limits, the classification model works as expected.</p>
 <p>Below you will find an example with four extreme plots made for four Versicolor SIMCA models with different methods for estimation of critical limits.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Ve =<span class="st"> </span>iris[<span class="dv">51</span><span class="op">:</span><span class="dv">100</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]
-
-m1 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">&#39;Versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">lim.type =</span> <span class="st">&#39;jm&#39;</span>)
-m2 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">&#39;Versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">lim.type =</span> <span class="st">&#39;chisq&#39;</span>)
-m3 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">&#39;Versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">lim.type =</span> <span class="st">&#39;ddmoments&#39;</span>)
-m4 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">&#39;Versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">lim.type =</span> <span class="st">&#39;ddrobust&#39;</span>)
-
-
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotExtreme</span>(m1, <span class="dt">main =</span> <span class="st">&#39;JM&#39;</span>)
-<span class="kw">plotExtreme</span>(m2, <span class="dt">main =</span> <span class="st">&#39;Chisq&#39;</span>)
-<span class="kw">plotExtreme</span>(m3, <span class="dt">main =</span> <span class="st">&#39;DD moments&#39;</span>)
-<span class="kw">plotExtreme</span>(m4, <span class="dt">main =</span> <span class="st">&#39;DD robust&#39;</span>)</code></pre></div>
+<div class="sourceCode" id="cb195"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb195-1" title="1">Ve =<span class="st"> </span>iris[<span class="dv">51</span><span class="op">:</span><span class="dv">100</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb195-2" title="2"></a>
+<a class="sourceLine" id="cb195-3" title="3">m1 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">&#39;Versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">lim.type =</span> <span class="st">&#39;jm&#39;</span>)</a>
+<a class="sourceLine" id="cb195-4" title="4">m2 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">&#39;Versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">lim.type =</span> <span class="st">&#39;chisq&#39;</span>)</a>
+<a class="sourceLine" id="cb195-5" title="5">m3 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">&#39;Versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">lim.type =</span> <span class="st">&#39;ddmoments&#39;</span>)</a>
+<a class="sourceLine" id="cb195-6" title="6">m4 =<span class="st"> </span><span class="kw">simca</span>(Ve, <span class="st">&#39;Versicolor&#39;</span>, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">lim.type =</span> <span class="st">&#39;ddrobust&#39;</span>)</a>
+<a class="sourceLine" id="cb195-7" title="7"></a>
+<a class="sourceLine" id="cb195-8" title="8"></a>
+<a class="sourceLine" id="cb195-9" title="9"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb195-10" title="10"><span class="kw">plotExtreme</span>(m1, <span class="dt">main =</span> <span class="st">&#39;JM&#39;</span>)</a>
+<a class="sourceLine" id="cb195-11" title="11"><span class="kw">plotExtreme</span>(m2, <span class="dt">main =</span> <span class="st">&#39;Chisq&#39;</span>)</a>
+<a class="sourceLine" id="cb195-12" title="12"><span class="kw">plotExtreme</span>(m3, <span class="dt">main =</span> <span class="st">&#39;DD moments&#39;</span>)</a>
+<a class="sourceLine" id="cb195-13" title="13"><span class="kw">plotExtreme</span>(m4, <span class="dt">main =</span> <span class="st">&#39;DD robust&#39;</span>)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-112-1.png" width="864" /></p>
 </div>
 </div>
@@ -376,7 +403,7 @@ gitbook.start({
 "google": false,
 "linkedin": false,
 "weibo": false,
-"instapper": false,
+"instapaper": false,
 "vk": false,
 "all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
@@ -386,6 +413,10 @@ gitbook.start({
 "size": 1
 },
 "edit": {
+"link": null,
+"text": null
+},
+"history": {
 "link": null,
 "text": null
 },
@@ -402,8 +433,8 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    var src = "";
-    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:" && /^https?:/.test(src))
       src = src.replace(/^https?:/, '');
     script.src = src;

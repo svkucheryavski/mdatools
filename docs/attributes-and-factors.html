@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Getting started with mdatools for R</title>
-  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Attributes and factors | Getting started with mdatools for R</title>
+  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  <meta name="generator" content="bookdown 0.12 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Getting started with mdatools for R" />
+  <meta property="og:title" content="Attributes and factors | Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
   
   
@@ -17,24 +16,26 @@
   <meta name="github-repo" content="svkucheryavski/mdatools.bookdown" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Getting started with mdatools for R" />
+  <meta name="twitter:title" content="Attributes and factors | Getting started with mdatools for R" />
   
   <meta name="twitter:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
   
 
-<meta name="author" content="Sergey Kucheryavskiy">
+<meta name="author" content="Sergey Kucheryavskiy" />
 
 
+<meta name="date" content="2018-11-09" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
 <link rel="prev" href="datasets-and-plots.html">
 <link rel="next" href="simple-plots.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
@@ -49,41 +50,66 @@
 
 
 <style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 </head>
@@ -190,15 +216,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="attributes-and-factors" class="section level2 unnumbered">
 <h2>Attributes and factors</h2>
-<p>This section tells how to extend the functionality of the package by using attributes assigned to datasets and how the implemented methods deal with factors.</p>
+<p>This section tells how to extend the functionality of the package by using attributes assigned to datasets
+and how the implemented methods deal with factors.</p>
 <div id="package-specific-attributes" class="section level3 unnumbered">
 <h3>Package specific attributes</h3>
 <p>There are several groups of attributes, which allow to assign names and manual x-values to the datasets, exclude columns and rows from calculations without removing them physically as well as working with images. We will illustrate how to work with most of the attributes by using a simple dataset defined below. It consists of three variables <code>Height</code>, <code>Weight</code>, <code>Shoesize</code> and four records/objects/rows.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">190</span>, <span class="dv">180</span>, <span class="dv">170</span>, <span class="dv">175</span>, <span class="dv">85</span>, <span class="dv">88</span>, <span class="dv">70</span>, <span class="dv">75</span>, <span class="dv">44</span>, <span class="dv">45</span>, <span class="dv">38</span>, <span class="dv">40</span>), <span class="dt">ncol =</span> <span class="dv">3</span>)
-<span class="kw">colnames</span>(d) =<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;Height&#39;</span>, <span class="st">&#39;Weight&#39;</span>, <span class="st">&#39;Shoesize&#39;</span>)
-<span class="kw">rownames</span>(d) =<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;Bob&#39;</span>, <span class="st">&#39;Peter&#39;</span>, <span class="st">&#39;Lisa&#39;</span>, <span class="st">&#39;Lena&#39;</span>)
-d =<span class="st"> </span><span class="kw">as.data.frame</span>(d)
-<span class="kw">show</span>(d)</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">d =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">190</span>, <span class="dv">180</span>, <span class="dv">170</span>, <span class="dv">175</span>, <span class="dv">85</span>, <span class="dv">88</span>, <span class="dv">70</span>, <span class="dv">75</span>, <span class="dv">44</span>, <span class="dv">45</span>, <span class="dv">38</span>, <span class="dv">40</span>), <span class="dt">ncol =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="kw">colnames</span>(d) =<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;Height&#39;</span>, <span class="st">&#39;Weight&#39;</span>, <span class="st">&#39;Shoesize&#39;</span>)</a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="kw">rownames</span>(d) =<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;Bob&#39;</span>, <span class="st">&#39;Peter&#39;</span>, <span class="st">&#39;Lisa&#39;</span>, <span class="st">&#39;Lena&#39;</span>)</a>
+<a class="sourceLine" id="cb4-4" title="4">d =<span class="st"> </span><span class="kw">as.data.frame</span>(d)</a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="kw">show</span>(d)</a></code></pre></div>
 <pre><code>##       Height Weight Shoesize
 ## Bob      190     85       44
 ## Peter    180     88       45
@@ -244,13 +271,13 @@ d =<span class="st"> </span><span class="kw">as.data.frame</span>(d)
 </tbody>
 </table>
 <p>Here is a very simple example.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">attr</span>(d, <span class="st">&#39;name&#39;</span>) =<span class="st"> &#39;People&#39;</span>
-<span class="kw">attr</span>(d, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> &#39;Parameters&#39;</span>
-<span class="kw">attr</span>(d, <span class="st">&#39;yaxis.name&#39;</span>) =<span class="st"> &#39;Persons&#39;</span>
-
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)
-<span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)</code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">attr</span>(d, <span class="st">&#39;name&#39;</span>) =<span class="st"> &#39;People&#39;</span></a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="kw">attr</span>(d, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> &#39;Parameters&#39;</span></a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="kw">attr</span>(d, <span class="st">&#39;yaxis.name&#39;</span>) =<span class="st"> &#39;Persons&#39;</span></a>
+<a class="sourceLine" id="cb6-4" title="4"></a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb6-6" title="6"><span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>)</a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="kw">mdaplot</span>(d, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-4-1.png" width="576" /></p>
 <p>See more details in the <a href="simple-plots.html#simple-plots">section</a> about plots.</p>
 </div>
@@ -304,10 +331,10 @@ d =<span class="st"> </span><span class="kw">as.data.frame</span>(d)
 <h3>Data frames with factors</h3>
 <p>All methods, implemented in the package, work with matrices, therefore, if a user provides data values as data frame, it is converted to matrix. From version <em>0.8.0</em> it is also possible to provide data frames with one or several factor columns. In this case all factors will be converted to dummy variables with values –1 and +1. You can also do it manually, by using function <code>prep.df2mat()</code> as this is shown in an example below.</p>
 <p>Let us first crate a simple data with a factor column.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">h =<span class="st"> </span><span class="kw">c</span>(<span class="dv">180</span>, <span class="dv">175</span>, <span class="dv">165</span>, <span class="dv">190</span>, <span class="dv">188</span>)
-c =<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;Gray&#39;</span>, <span class="st">&#39;Green&#39;</span>, <span class="st">&#39;Gray&#39;</span>, <span class="st">&#39;Green&#39;</span>, <span class="st">&#39;Blue&#39;</span>)
-d =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">Height =</span> h, <span class="dt">Eye.color =</span> c)
-<span class="kw">show</span>(d)</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">h =<span class="st"> </span><span class="kw">c</span>(<span class="dv">180</span>, <span class="dv">175</span>, <span class="dv">165</span>, <span class="dv">190</span>, <span class="dv">188</span>)</a>
+<a class="sourceLine" id="cb7-2" title="2">c =<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;Gray&#39;</span>, <span class="st">&#39;Green&#39;</span>, <span class="st">&#39;Gray&#39;</span>, <span class="st">&#39;Green&#39;</span>, <span class="st">&#39;Blue&#39;</span>)</a>
+<a class="sourceLine" id="cb7-3" title="3">d =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">Height =</span> h, <span class="dt">Eye.color =</span> c)</a>
+<a class="sourceLine" id="cb7-4" title="4"><span class="kw">show</span>(d)</a></code></pre></div>
 <pre><code>##   Height Eye.color
 ## 1    180      Gray
 ## 2    175     Green
@@ -315,8 +342,8 @@ d =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">
 ## 4    190     Green
 ## 5    188      Blue</code></pre>
 <p>And this is the result of converting it to a matrix.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d.mat =<span class="st"> </span><span class="kw">mda.df2mat</span>(d)
-<span class="kw">show</span>(d.mat)</code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">d.mat =<span class="st"> </span><span class="kw">mda.df2mat</span>(d)</a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="kw">show</span>(d.mat)</a></code></pre></div>
 <pre><code>##      Height Blue Gray
 ## [1,]    180    0    1
 ## [2,]    175    0    0
@@ -324,8 +351,8 @@ d =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">
 ## [4,]    190    0    0
 ## [5,]    188    1    0</code></pre>
 <p>The number of dummy variables by default is the number of levels minus one. You can change this by using argument <code>full = TRUE</code> is it is shown in the example below.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d.mat =<span class="st"> </span><span class="kw">mda.df2mat</span>(d, <span class="dt">full =</span> <span class="ot">TRUE</span>)
-<span class="kw">show</span>(d.mat)</code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">d.mat =<span class="st"> </span><span class="kw">mda.df2mat</span>(d, <span class="dt">full =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="kw">show</span>(d.mat)</a></code></pre></div>
 <pre><code>##      Height Blue Gray Green
 ## [1,]    180    0    1     0
 ## [2,]    175    0    0     1
@@ -362,7 +389,7 @@ gitbook.start({
 "google": false,
 "linkedin": false,
 "weibo": false,
-"instapper": false,
+"instapaper": false,
 "vk": false,
 "all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
@@ -372,6 +399,10 @@ gitbook.start({
 "size": 1
 },
 "edit": {
+"link": null,
+"text": null
+},
+"history": {
 "link": null,
 "text": null
 },
@@ -388,8 +419,8 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    var src = "";
-    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:" && /^https?:/.test(src))
       src = src.replace(/^https?:/, '');
     script.src = src;

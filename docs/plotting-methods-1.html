@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Getting started with mdatools for R</title>
-  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Plotting methods | Getting started with mdatools for R</title>
+  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  <meta name="generator" content="bookdown 0.12 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Getting started with mdatools for R" />
+  <meta property="og:title" content="Plotting methods | Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
   
   
@@ -17,24 +16,26 @@
   <meta name="github-repo" content="svkucheryavski/mdatools.bookdown" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Getting started with mdatools for R" />
+  <meta name="twitter:title" content="Plotting methods | Getting started with mdatools for R" />
   
   <meta name="twitter:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
   
 
-<meta name="author" content="Sergey Kucheryavskiy">
+<meta name="author" content="Sergey Kucheryavskiy" />
 
 
+<meta name="date" content="2018-11-09" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
 <link rel="prev" href="models-and-results-1.html">
 <link rel="next" href="variable-selection.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
@@ -49,41 +50,66 @@
 
 
 <style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 </head>
@@ -226,12 +252,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tr>
 </tbody>
 </table>
-<p>Here and in some other methods parameter <code>ny</code> is used to specify which y-variable you want to see a plot for (if <em>y</em> is multivariate).</p>
+<p>Here and in some other methods parameter <code>ny</code> is used to specify which y-variable you want to
+see a plot for (if <em>y</em> is multivariate).</p>
 <p>Methods for objects.</p>
 <table>
 <colgroup>
-<col width="44%" />
-<col width="55%" />
+<col width="43%" />
+<col width="56%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -266,24 +293,25 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tr>
 </tbody>
 </table>
-<p>Parameter <code>comp</code> allows to provide a number of selected components (one or several) to show the plot for, while parameter <code>ncomp</code> assume that only one number is expected (number of components in a model or individual component). So if e.g. you created model for five components and selected three, you can also see, for example, prediction plot if you use only one or four components.</p>
+<p>Parameter <code>comp</code> allows to provide a number of selected components (one or several) to show the plot
+for, while parameter <code>ncomp</code> assume that only one number is expected (number of components in a model or individual component). So if e.g. you created model for five components and selected three, you can also see, for example, prediction plot if you use only one or four components.</p>
 <p>Here is an example for <code>m1</code> model:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">plotPredictions</span>(m1)
-<span class="kw">plotPredictions</span>(m1, <span class="dt">ncomp =</span> <span class="dv">1</span>)</code></pre></div>
+<div class="sourceCode" id="cb152"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb152-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb152-2" title="2"><span class="kw">plotPredictions</span>(m1)</a>
+<a class="sourceLine" id="cb152-3" title="3"><span class="kw">plotPredictions</span>(m1, <span class="dt">ncomp =</span> <span class="dv">1</span>)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-88-1.png" width="864" /></p>
 <p>By the way, when <code>plotPredictions()</code> is made for results object, you can show performance statistics on the plot (implemented in <em>0.9.0</em>):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres)
-<span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres, <span class="dt">ncomp =</span> <span class="dv">2</span>)
-<span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres, <span class="dt">show.stat =</span> T)
-<span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">show.stat =</span> T)</code></pre></div>
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb153-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb153-2" title="2"><span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres)</a>
+<a class="sourceLine" id="cb153-3" title="3"><span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres, <span class="dt">ncomp =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb153-4" title="4"><span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres, <span class="dt">show.stat =</span> T)</a>
+<a class="sourceLine" id="cb153-5" title="5"><span class="kw">plotPredictions</span>(m1<span class="op">$</span>calres, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">show.stat =</span> T)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-89-1.png" width="864" /></p>
 <p>The plots for variables are available only for a model object and include:</p>
 <table>
 <colgroup>
-<col width="47%" />
-<col width="52%" />
+<col width="46%" />
+<col width="53%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -319,12 +347,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tbody>
 </table>
 <p>And, of course, both model and result objects have method <code>plot()</code> for giving an overview.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(m1)</code></pre></div>
+<div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb154-1" title="1"><span class="kw">plot</span>(m1)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-90-1.png" width="864" /></p>
 <div id="excluding-rows-and-columns-1" class="section level3 unnumbered">
 <h3>Excluding rows and columns</h3>
 <p>From v. 0.8.0 PCA implementation as well as any other method in <code>mdatools</code> can exclude rows and columns from calculations. The implementation works similar to what was described for PCA. For example it can be useful if you have some candidates for outliers or do variable selection and do not want to remove rows and columns physically from the data matrix. In this case you can just specify two additional parameters, <code>exclcols</code> and <code>exclrows</code>, using either numbers or names of rows/columns to be excluded. You can also specify a vector with logical values (all <code>TRUE</code>s will be excluded).</p>
-<p>The excluded rows are not used for creating a model and calculation of model’s and results’ performance (e.g. explained variance). However main results (for PLS — scores, predictions, residuals) are calculated for these rows as well and set hidden, so you will not see them on plots. You can always e.g. show scores for excluded objects by using <code>show.excluded = TRUE</code>. It is implemented via attributes “known” for plotting methods from <em>mdatools</em> so if you use e.g. <em>ggplot2</em> you will see all points.</p>
+<p>The excluded rows are not used for creating a model and calculation of model’s and results’ performance (e.g. explained variance). However main results (for PLS — scores, predictions, residuals) are calculated for these rows as well and set hidden, so you will not see them on plots. You can always e.g. show scores for excluded objects by using <code>show.excluded = TRUE</code>. It is implemented via attributes “known” for plotting methods from <em>mdatools</em> so if you use e.g. <em>ggplot2</em> you will see all points.</p>
 <p>The excluded columns are not used for any calculations either, the corresponding results (e.g. loadings, weights or regression coefficients) will have zero values for such columns and be also hidden on plots.</p>
 </div>
 </div>
@@ -354,7 +382,7 @@ gitbook.start({
 "google": false,
 "linkedin": false,
 "weibo": false,
-"instapper": false,
+"instapaper": false,
 "vk": false,
 "all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
@@ -364,6 +392,10 @@ gitbook.start({
 "size": 1
 },
 "edit": {
+"link": null,
+"text": null
+},
+"history": {
 "link": null,
 "text": null
 },
@@ -380,8 +412,8 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    var src = "";
-    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:" && /^https?:/.test(src))
       src = src.replace(/^https?:/, '');
     script.src = src;

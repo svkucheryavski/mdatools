@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Getting started with mdatools for R</title>
-  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Plotting methods | Getting started with mdatools for R</title>
+  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  <meta name="generator" content="bookdown 0.12 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Getting started with mdatools for R" />
+  <meta property="og:title" content="Plotting methods | Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
   
   
@@ -17,24 +16,26 @@
   <meta name="github-repo" content="svkucheryavski/mdatools.bookdown" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Getting started with mdatools for R" />
+  <meta name="twitter:title" content="Plotting methods | Getting started with mdatools for R" />
   
   <meta name="twitter:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
   
 
-<meta name="author" content="Sergey Kucheryavskiy">
+<meta name="author" content="Sergey Kucheryavskiy" />
 
 
+<meta name="date" content="2018-11-09" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
 <link rel="prev" href="models-and-results.html">
 <link rel="next" href="residuals-and-critical-limits.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
@@ -49,41 +50,66 @@
 
 
 <style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 </head>
@@ -190,78 +216,78 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="plotting-methods" class="section level2 unnumbered">
 <h2>Plotting methods</h2>
-<p>First of all you can use the methods <code>mdaplot()</code> and <code>mdaplotg()</code> (or any others, e.g. <code>ggplot2</code>) for easy visualisation the results as they all available as matrices with proper names, attributes, etc. In the example below we create several scores and loadings plots. Here I assume that the last model you have created was the one with test set and cross-validation.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))
-<span class="kw">mdaplot</span>(m<span class="op">$</span>calres<span class="op">$</span>scores, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.lines =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))
-<span class="kw">mdaplot</span>(m<span class="op">$</span>loadings, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.lines =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))</code></pre></div>
+<p>First of all you can use the methods <code>mdaplot()</code> and <code>mdaplotg()</code> (or any others, e.g. <code>ggplot2</code>) for easy visualisation the results as they all available as matrices with proper names, attributes, etc. In the example below we create several scores and loadings plots. Here I assume that the last model you have created was the one with test set and cross-validation.</p>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb72-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb72-2" title="2"><span class="kw">mdaplot</span>(m<span class="op">$</span>calres<span class="op">$</span>scores, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.lines =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))</a>
+<a class="sourceLine" id="cb72-3" title="3"><span class="kw">mdaplot</span>(m<span class="op">$</span>loadings, <span class="dt">type =</span> <span class="st">&#39;p&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.lines =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-55-1.png" width="864" /></p>
 <p>To simplify this routine, every model and result class also has a number of functions for visualization. Thus for PCA the function list includes scores and loadings plots, explained variance and cumulative explained variance plots, T<sup>2</sup> distances vs. Q residuals and many others.</p>
 <p>A function that does the same for different models and results has always the same name. For example, <code>plotPredictions</code> will show predicted vs. measured plot for PLS model and PLS result, MLR model and MLR result, PCR model and PCR result and so on. The first argument must always be either a model or a result object.</p>
 <p>The major difference between plots for model and plots for result is following. A plot for result always shows one set of data objects — one set of points, lines or bars. For example, predicted vs. measured values for calibration set or scores values for test set and so on. For such plots method <code>mdaplot()</code> is used and you can provide any arguments, available for this method (e.g. color group scores for calibration results).</p>
 <p>And a plot for a model in most cases shows several sets of data objects, e.g. predicted values for calibration and validation. In this case, a corresponding method uses <code>mdaplotg()</code> and, therefore, you can adjust the plot using arguments described for this method.</p>
 <p>Here are some examples for results:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotScores</span>(m<span class="op">$</span>calres, <span class="dt">show.labels =</span> T)
-<span class="kw">plotScores</span>(m<span class="op">$</span>calres, <span class="dt">pch =</span> <span class="dv">18</span>, <span class="dt">cgroup =</span> X.c[, <span class="st">&#39;Income&#39;</span>], <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;indices&#39;</span>)
-<span class="kw">plotResiduals</span>(m<span class="op">$</span>calres, <span class="dt">show.labels =</span> T, <span class="dt">cgroup =</span> X.c[, <span class="st">&#39;Weight&#39;</span>])
-<span class="kw">plotVariance</span>(m<span class="op">$</span>calres, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)</code></pre></div>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb73-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb73-2" title="2"><span class="kw">plotScores</span>(m<span class="op">$</span>calres, <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb73-3" title="3"><span class="kw">plotScores</span>(m<span class="op">$</span>calres, <span class="dt">pch =</span> <span class="dv">18</span>, <span class="dt">cgroup =</span> X.c[, <span class="st">&#39;Income&#39;</span>], <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;indices&#39;</span>)</a>
+<a class="sourceLine" id="cb73-4" title="4"><span class="kw">plotResiduals</span>(m<span class="op">$</span>calres, <span class="dt">show.labels =</span> T, <span class="dt">cgroup =</span> X.c[, <span class="st">&#39;Weight&#39;</span>])</a>
+<a class="sourceLine" id="cb73-5" title="5"><span class="kw">plotVariance</span>(m<span class="op">$</span>calres, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-56-1.png" width="864" /></p>
 <p>The color grouping option is not available for the group (model) plots as colors are used there to underline the groups.</p>
 <p>Now let’s look at similar plots (plus loadings) for a model.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotScores</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)
-<span class="kw">plotLoadings</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)
-<span class="kw">plotResiduals</span>(m, <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;green&#39;</span>, <span class="st">&#39;blue&#39;</span>))
-<span class="kw">plotVariance</span>(m, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)</code></pre></div>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb74-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb74-2" title="2"><span class="kw">plotScores</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb74-3" title="3"><span class="kw">plotLoadings</span>(m, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb74-4" title="4"><span class="kw">plotResiduals</span>(m, <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;green&#39;</span>, <span class="st">&#39;blue&#39;</span>))</a>
+<a class="sourceLine" id="cb74-5" title="5"><span class="kw">plotVariance</span>(m, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">labels =</span> <span class="st">&#39;values&#39;</span>)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-57-1.png" width="864" /></p>
 <p>Method <code>plot()</code> shows the main four PCA plots as a model (or results) overview.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(m, <span class="dt">show.labels =</span> T)</code></pre></div>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb75-1" title="1"><span class="kw">plot</span>(m, <span class="dt">show.labels =</span> T)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-58-1.png" width="864" /></p>
 <p>You do not have to care about labels, names, legend and so on, however if necessary you can always change almost anything. See full list of methods available for PCA by <code>?pca</code> and <code>?pcares</code>.</p>
 <div id="support-for-images" class="section level3 unnumbered">
 <h3>Support for images</h3>
 <p>As it was described before, images can be used as a source of data for any methods. In this case the results, related to objects/pixels will inherit all necessary attributes and can be show as images as well. In the example below we make a PCA model for the image data from the package and show scores and residuals.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(pellets)
-X =<span class="st"> </span><span class="kw">mda.im2data</span>(pellets)
-m =<span class="st"> </span><span class="kw">pca</span>(X)
-
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>scores)
-<span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>Q)
-<span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>scores, <span class="dv">2</span>)
-<span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>Q, <span class="dv">2</span>)</code></pre></div>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb76-1" title="1"><span class="kw">data</span>(pellets)</a>
+<a class="sourceLine" id="cb76-2" title="2">X =<span class="st"> </span><span class="kw">mda.im2data</span>(pellets)</a>
+<a class="sourceLine" id="cb76-3" title="3">m =<span class="st"> </span><span class="kw">pca</span>(X)</a>
+<a class="sourceLine" id="cb76-4" title="4"></a>
+<a class="sourceLine" id="cb76-5" title="5"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb76-6" title="6"><span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>scores)</a>
+<a class="sourceLine" id="cb76-7" title="7"><span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>Q)</a>
+<a class="sourceLine" id="cb76-8" title="8"><span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>scores, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb76-9" title="9"><span class="kw">imshow</span>(m<span class="op">$</span>calres<span class="op">$</span>Q, <span class="dv">2</span>)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-59-1.png" width="864" /></p>
 </div>
 <div id="manual-x-values-for-loading-line-plot" class="section level3 unnumbered">
 <h3>Manual x-values for loading line plot</h3>
 <p>As it was discussed in the previous chapter, you can specify a special attribute, <code>'xaxis.values'</code> to a dataset, which will be used as manual x-values in bar and line plots. When we create any model and/or results the most important attributes, including this one, are inherited. For example when you make a loading line plot it will be shown using the attribute values.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(simdata)
-
-X =<span class="st"> </span>simdata<span class="op">$</span>spectra.c
-<span class="kw">attr</span>(X, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> &#39;Wavelength, nm&#39;</span>
-<span class="kw">attr</span>(X, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span>simdata<span class="op">$</span>wavelength
-
-m =<span class="st"> </span><span class="kw">pca</span>(X, <span class="dv">3</span>)
-<span class="kw">plotLoadings</span>(m, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)</code></pre></div>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb77-1" title="1"><span class="kw">data</span>(simdata)</a>
+<a class="sourceLine" id="cb77-2" title="2"></a>
+<a class="sourceLine" id="cb77-3" title="3">X =<span class="st"> </span>simdata<span class="op">$</span>spectra.c</a>
+<a class="sourceLine" id="cb77-4" title="4"><span class="kw">attr</span>(X, <span class="st">&#39;xaxis.name&#39;</span>) =<span class="st"> &#39;Wavelength, nm&#39;</span></a>
+<a class="sourceLine" id="cb77-5" title="5"><span class="kw">attr</span>(X, <span class="st">&#39;xaxis.values&#39;</span>) =<span class="st"> </span>simdata<span class="op">$</span>wavelength</a>
+<a class="sourceLine" id="cb77-6" title="6"></a>
+<a class="sourceLine" id="cb77-7" title="7">m =<span class="st"> </span><span class="kw">pca</span>(X, <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb77-8" title="8"><span class="kw">plotLoadings</span>(m, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&#39;l&#39;</span>)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-60-1.png" width="864" /></p>
 </div>
 <div id="excluding-rows-and-columns" class="section level3 unnumbered">
 <h3>Excluding rows and columns</h3>
 <p>From v. 0.8.0 PCA implementation as well as any other method in <code>mdatools</code> can exclude rows and columns from calculations. For example it can be useful if you have some candidates for outliers or do variable selection and do not want to remove rows and columns physically from the data matrix. In this case you can just specify two additional parameters, <code>exclcols</code> and <code>exclrows</code>, using either numbers or names of rows/columns to be excluded. You can also specify a vector with logical values (all <code>TRUE</code>s will be excluded).</p>
-<p>The excluded rows are not used for creating a model and calculaiton of model’s and results’ performance (e.g. explained variance). However main results (for PCA — scores and residuals) are calculated for these rows as well and set hidden, so you will not see them on plots. You can always e.g. show scores for excluded objects by using <code>show.excluded = TRUE</code>. It is implemented via attributes “known” for plotting methods from <em>mdatools</em> so if you use e.g. <em>ggplot2</em> you will see all points.</p>
+<p>The excluded rows are not used for creating a model and calculaiton of model’s and results’ performance (e.g. explained variance). However main results (for PCA — scores and residuals) are calculated for these rows as well and set hidden, so you will not see them on plots. You can always e.g. show scores for excluded objects by using <code>show.excluded = TRUE</code>. It is implemented via attributes “known” for plotting methods from <em>mdatools</em> so if you use e.g. <em>ggplot2</em> you will see all points.</p>
 <p>The excluded columns are not used for any calculations either, the corresponding results (e.g. loadings or regression coefficients) will have zero values for such columns and be also hidden on plots. Here is a simple example.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(people)
-
-m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">exclrows =</span> <span class="kw">c</span>(<span class="st">&#39;Lars&#39;</span>, <span class="st">&#39;Federico&#39;</span>), <span class="dt">exclcols =</span> <span class="st">&#39;Income&#39;</span>)
-
-<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotScores</span>(m, <span class="dt">show.labels =</span> T)
-<span class="kw">plotScores</span>(m, <span class="dt">show.excluded =</span> T, <span class="dt">show.labels =</span> T)
-<span class="kw">plotResiduals</span>(m, <span class="dt">show.excluded =</span> T, <span class="dt">show.labels =</span> T)
-<span class="kw">plotLoadings</span>(m, <span class="dt">show.excluded =</span> T, <span class="dt">show.labels =</span> T)</code></pre></div>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb78-1" title="1"><span class="kw">data</span>(people)</a>
+<a class="sourceLine" id="cb78-2" title="2"></a>
+<a class="sourceLine" id="cb78-3" title="3">m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">exclrows =</span> <span class="kw">c</span>(<span class="st">&#39;Lars&#39;</span>, <span class="st">&#39;Federico&#39;</span>), <span class="dt">exclcols =</span> <span class="st">&#39;Income&#39;</span>)</a>
+<a class="sourceLine" id="cb78-4" title="4"></a>
+<a class="sourceLine" id="cb78-5" title="5"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb78-6" title="6"><span class="kw">plotScores</span>(m, <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb78-7" title="7"><span class="kw">plotScores</span>(m, <span class="dt">show.excluded =</span> T, <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb78-8" title="8"><span class="kw">plotResiduals</span>(m, <span class="dt">show.excluded =</span> T, <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb78-9" title="9"><span class="kw">plotLoadings</span>(m, <span class="dt">show.excluded =</span> T, <span class="dt">show.labels =</span> T)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-61-1.png" width="864" /></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># show matrix with loadings (look at row Income and attribute &quot;exclrows&quot;)</span>
-<span class="kw">show</span>(m<span class="op">$</span>loadings)</code></pre></div>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb79-1" title="1"><span class="co"># show matrix with loadings (look at row Income and attribute &quot;exclrows&quot;)</span></a>
+<a class="sourceLine" id="cb79-2" title="2"><span class="kw">show</span>(m<span class="op">$</span>loadings)</a></code></pre></div>
 <pre><code>##                Comp 1      Comp 2       Comp 3      Comp 4      Comp 5
 ## Height   -0.386393327  0.10697019 -0.004829174  0.12693029 -0.13128331
 ## Weight   -0.391013398  0.07820097  0.051916032  0.04049593 -0.14757465
@@ -281,7 +307,8 @@ m =<span class="st"> </span><span class="kw">pca</span>(people, <span class="dv"
 ## [1] &quot;Loadings&quot;
 ## attr(,&quot;xaxis.name&quot;)
 ## [1] &quot;Components&quot;</code></pre>
-<p>Such behavior will help to exclude and include rows and columns interactively, when GUI add-in for <code>mdatools()</code> is available.</p>
+<p>Such behavior will help to exclude and include rows and columns interactively, when GUI add-in for
+<code>mdatools()</code> is available.</p>
 </div>
 </div>
             </section>
@@ -310,7 +337,7 @@ gitbook.start({
 "google": false,
 "linkedin": false,
 "weibo": false,
-"instapper": false,
+"instapaper": false,
 "vk": false,
 "all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
@@ -320,6 +347,10 @@ gitbook.start({
 "size": 1
 },
 "edit": {
+"link": null,
+"text": null
+},
+"history": {
 "link": null,
 "text": null
 },
@@ -336,8 +367,8 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    var src = "";
-    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:" && /^https?:/.test(src))
       src = src.replace(/^https?:/, '');
     script.src = src;

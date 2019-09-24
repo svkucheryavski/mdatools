@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Getting started with mdatools for R</title>
-  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Variable selection | Getting started with mdatools for R</title>
+  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  <meta name="generator" content="bookdown 0.12 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Getting started with mdatools for R" />
+  <meta property="og:title" content="Variable selection | Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
   
   
@@ -17,24 +16,26 @@
   <meta name="github-repo" content="svkucheryavski/mdatools.bookdown" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Getting started with mdatools for R" />
+  <meta name="twitter:title" content="Variable selection | Getting started with mdatools for R" />
   
   <meta name="twitter:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
   
 
-<meta name="author" content="Sergey Kucheryavskiy">
+<meta name="author" content="Sergey Kucheryavskiy" />
 
 
+<meta name="date" content="2018-11-09" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
 <link rel="prev" href="plotting-methods-1.html">
 <link rel="next" href="simca-classification.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
@@ -49,41 +50,66 @@
 
 
 <style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 </head>
@@ -190,183 +216,183 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="variable-selection" class="section level2 unnumbered">
 <h2>Variable selection</h2>
-<p>PLS calculates several statistics, which can be used to select most important (or remove least important) variables in order to improve performance and make model simpler. The first two are VIP-scores (variables important for projection) and Selectivity ratio. All details and theory can be found e.g. <a href="http://onlinelibrary.wiley.com/store/10.1002/cem.1360/">here</a>.</p>
+<p>PLS calculates several statistics, which can be used to select most important (or remove least important) variables in order to improve performance and make model simpler. The first two are VIP-scores (variables important for projection) and Selectivity ratio. All details and theory can be found e.g. <a href="http://onlinelibrary.wiley.com/store/10.1002/cem.1360/">here</a>.</p>
 <p>Both parameters can be shown as plots and as vector of values for a selected y-variable. Selectivity ration is calculated for all possible components in a model, but VIP scores (due to computational time) only for selected number of components and are recalculated every time you change number of optimal components using <code>selectCompNum()</code> method. Here are some plots.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotVIPScores</span>(m1, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
-<span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.labels =</span> T)
-<span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">1</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
-<span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)</code></pre></div>
+<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb155-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb155-2" title="2"><span class="kw">plotVIPScores</span>(m1, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb155-3" title="3"><span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">type =</span> <span class="st">&#39;b&#39;</span>, <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb155-4" title="4"><span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">1</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb155-5" title="5"><span class="kw">plotSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-91-1.png" width="864" /></p>
 <p>In the example below, I create two other PLS models by excluding variables with VIP score or selectivity ratio below a threshold (I use 0.5 and 1 correspondingly) and show the performance for both.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m3 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> <span class="kw">getVIPScores</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>) <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.5</span>)
-<span class="kw">summary</span>(m3)</code></pre></div>
+<div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb156-1" title="1">m3 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> <span class="kw">getVIPScores</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>) <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.5</span>)</a>
+<a class="sourceLine" id="cb156-2" title="2"><span class="kw">summary</span>(m3)</a></code></pre></div>
 <pre><code>## 
 ## PLS model (class pls) summary
 ## 
 ## Performance and validation:
 ## Number of selected components: 4
-##     X cumexpvar Y cumexpvar  RMSE Slope    Bias  RPD
-## Cal       85.29       98.15 0.527  0.98  0.0000 7.50
-## CV        80.53       96.34 0.741  0.97 -0.0382 5.34</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m4 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> <span class="kw">getSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>) <span class="op">&lt;</span><span class="st"> </span><span class="dv">1</span>)
-<span class="kw">summary</span>(m4)</code></pre></div>
+##     X cumexpvar Y cumexpvar    R2  RMSE Slope    Bias RPD
+## Cal       85.29       98.15 0.981 0.527 0.981  0.0000 7.5
+## CV        80.56       96.34 0.963 0.741 0.972 -0.0375 5.3</code></pre>
+<div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb158-1" title="1">m4 =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">5</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> <span class="kw">getSelectivityRatio</span>(m1, <span class="dt">ncomp =</span> <span class="dv">2</span>) <span class="op">&lt;</span><span class="st"> </span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb158-2" title="2"><span class="kw">summary</span>(m4)</a></code></pre></div>
 <pre><code>## 
 ## PLS model (class pls) summary
 ## 
 ## Performance and validation:
 ## Number of selected components: 1
-##     X cumexpvar Y cumexpvar  RMSE Slope   Bias  RPD
-## Cal       86.80       94.97 0.868  0.95 0.0000 4.56
-## CV        84.37       93.91 0.955  0.94 0.0034 4.14</code></pre>
+##     X cumexpvar Y cumexpvar    R2  RMSE Slope   Bias RPD
+## Cal       86.80       94.97 0.950 0.868 0.950  0e+00 4.6
+## CV        84.45       93.92 0.939 0.955 0.944 -3e-04 4.1</code></pre>
 <p>Another way is make an inference about regression coefficients and calculate confidence intervals and p-values for each variable. This can be done usine Jack-Knife approach, when model is cross-validated using efficient number of segments (at least ten) and statistics are calculated using the distribution of regression coefficient values obtained for each step. There are two parameters, <code>coeffs.ci</code> and <code>coeffs.alpha</code>, first is to select the method (so far only Jack-Knife is available, the value is <code>'jk'</code>) and second is a level of significance for computing confidence intervals (by default is 0.1). Here is an example.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mjk =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">coeffs.ci =</span> <span class="st">&#39;jk&#39;</span>, <span class="dt">coeffs.alpha =</span> <span class="fl">0.05</span>)</code></pre></div>
+<div class="sourceCode" id="cb160"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb160-1" title="1">mjk =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">coeffs.ci =</span> <span class="st">&#39;jk&#39;</span>, <span class="dt">coeffs.alpha =</span> <span class="fl">0.05</span>)</a></code></pre></div>
 <p>If number of segments is not specified as in the example above, full cross-validation will be used.</p>
 <p>The statistics are calculated for each y-variable and each available number of components. When you show a plot for regression coefficients, confidence interval will be shown automatically. You can changes this by using parameter <code>show.ci = FALSE</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))
-<span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
-<span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)
-<span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.ci =</span> F)
-<span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.ci =</span> F)</code></pre></div>
+<div class="sourceCode" id="cb161"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb161-1" title="1"><span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb161-2" title="2"><span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb161-3" title="3"><span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T)</a>
+<a class="sourceLine" id="cb161-4" title="4"><span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.ci =</span> F)</a>
+<a class="sourceLine" id="cb161-5" title="5"><span class="kw">plotRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&#39;h&#39;</span>, <span class="dt">show.labels =</span> T, <span class="dt">show.ci =</span> F)</a></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-94-1.png" width="864" /></p>
 <p>Calling function <code>summary()</code> for regression coefficients allows to get all calculated statistics.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(mjk<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>)</code></pre></div>
+<div class="sourceCode" id="cb162"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb162-1" title="1"><span class="kw">summary</span>(mjk<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>)</a></code></pre></div>
 <pre><code>## Regression coefficients for Shoesize
 ## ------------------------------------
 ##          Estimated coefficients t-value          SE p-value 95% CI (lo)
-## Height               0.19357436    25.6 0.007507308   0.000  0.17804431
-## Weight               0.18935489    24.6 0.007629829   0.000  0.17357139
-## Hairleng            -0.17730737   -17.3 0.010263098   0.000 -0.19853820
-## Age                  0.02508113     0.9 0.026825735   0.358 -0.03041213
-## Income               0.01291497     0.4 0.034034881   0.703 -0.05749155
-## Beer                 0.11441573     6.3 0.018145181   0.000  0.07687956
-## Wine                 0.08278735     2.7 0.030127820   0.012  0.02046321
-## Sex                 -0.17730737   -17.3 0.010263098   0.000 -0.19853820
-## Swim                 0.19426871    14.6 0.013195834   0.000  0.16697105
-## Region               0.02673161     1.1 0.023419425   0.271 -0.02171516
-## IQ                  -0.01705852    -0.5 0.032839748   0.603 -0.08499272
+## Height               0.19357436    23.4 0.008270469   0.000  0.17646559
+## Weight               0.18935489    35.1 0.005386414   0.000  0.17821224
+## Hairleng            -0.17730737   -17.1 0.010368912   0.000 -0.19875710
+## Age                  0.02508113     1.0 0.026525148   0.351 -0.02979032
+## Income               0.01291497     0.4 0.033491494   0.702 -0.05636746
+## Beer                 0.11441573     6.4 0.017851922   0.000  0.07748621
+## Wine                 0.08278735     2.7 0.030960265   0.013  0.01874117
+## Sex                 -0.17730737   -17.1 0.010368912   0.000 -0.19875710
+## Swim                 0.19426871    14.2 0.013654151   0.000  0.16602295
+## Region               0.02673161     1.1 0.023989628   0.275 -0.02289471
+## IQ                  -0.01705852    -0.5 0.032399035   0.602 -0.08408103
 ##          95% CI (up)
-## Height    0.20910441
-## Weight    0.20513839
-## Hairleng -0.15607653
-## Age       0.08057439
-## Income    0.08332148
-## Beer      0.15195189
-## Wine      0.14511150
-## Sex      -0.15607653
-## Swim      0.22156638
-## Region    0.07517838
-## IQ        0.05087567
+## Height    0.21068313
+## Weight    0.20049754
+## Hairleng -0.15585764
+## Age       0.07995258
+## Income    0.08219740
+## Beer      0.15134524
+## Wine      0.14683354
+## Sex      -0.15585764
+## Swim      0.22251448
+## Region    0.07635794
+## IQ        0.04996399
 ## 
 ## Degrees of freedom: 23, t-value: 2.07</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(mjk<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">alpha =</span> <span class="fl">0.01</span>)</code></pre></div>
+<div class="sourceCode" id="cb164"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb164-1" title="1"><span class="kw">summary</span>(mjk<span class="op">$</span>coeffs, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">alpha =</span> <span class="fl">0.01</span>)</a></code></pre></div>
 <pre><code>## Regression coefficients for Shoesize
 ## ------------------------------------
 ##          Estimated coefficients t-value          SE p-value  99% CI (lo)
-## Height               0.19357436    25.6 0.007507308   0.000  0.172498826
-## Weight               0.18935489    24.6 0.007629829   0.000  0.167935399
-## Hairleng            -0.17730737   -17.3 0.010263098   0.000 -0.206119327
-## Age                  0.02508113     0.9 0.026825735   0.358 -0.050227714
-## Income               0.01291497     0.4 0.034034881   0.703 -0.082632366
-## Beer                 0.11441573     6.3 0.018145181   0.000  0.063476112
-## Wine                 0.08278735     2.7 0.030127820   0.012 -0.001791551
-## Sex                 -0.17730737   -17.3 0.010263098   0.000 -0.206119327
-## Swim                 0.19426871    14.6 0.013195834   0.000  0.157223579
-## Region               0.02673161     1.1 0.023419425   0.271 -0.039014575
-## IQ                  -0.01705852    -0.5 0.032839748   0.603 -0.109250717
+## Height               0.19357436    23.4 0.008270469   0.000  0.170356376
+## Weight               0.18935489    35.1 0.005386414   0.000  0.174233417
+## Hairleng            -0.17730737   -17.1 0.010368912   0.000 -0.206416384
+## Age                  0.02508113     1.0 0.026525148   0.351 -0.049383866
+## Income               0.01291497     0.4 0.033491494   0.702 -0.081106896
+## Beer                 0.11441573     6.4 0.017851922   0.000  0.064299387
+## Wine                 0.08278735     2.7 0.030960265   0.013 -0.004128502
+## Sex                 -0.17730737   -17.1 0.010368912   0.000 -0.206416384
+## Swim                 0.19426871    14.2 0.013654151   0.000  0.155936928
+## Region               0.02673161     1.1 0.023989628   0.275 -0.040615325
+## IQ                  -0.01705852    -0.5 0.032399035   0.602 -0.108013488
 ##          99% CI (up)
-## Height    0.21464989
-## Weight    0.21077438
-## Hairleng -0.14849541
-## Age       0.10038997
-## Income    0.10846230
-## Beer      0.16535534
-## Wine      0.16736626
-## Sex      -0.14849541
-## Swim      0.23131385
-## Region    0.09247780
-## IQ        0.07513367
+## Height    0.21679234
+## Weight    0.20447636
+## Hairleng -0.14819835
+## Age       0.09954612
+## Income    0.10693683
+## Beer      0.16453206
+## Wine      0.16970321
+## Sex      -0.14819835
+## Swim      0.23260050
+## Region    0.09407855
+## IQ        0.07389645
 ## 
 ## Degrees of freedom: 23, t-value: 2.81</code></pre>
 <p>Function <code>getRegcoeffs()</code> in this case may also return corresponding t-value, standard error, p-value, and confidence interval for each of the coefficient (except intercept) if user specifies a parameter <code>full</code>. The standard error and confidence intervals are also computed for raw, undstandardized, variables (similar to coefficients).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">full =</span> T))</code></pre></div>
+<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb166-1" title="1"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">full =</span> T))</a></code></pre></div>
 <pre><code>##           Estimated coefficients     t-value           SE      p-value
 ## Intercept           1.342626e+01          NA           NA           NA
-## Height              7.456695e-02  25.5886755 2.891897e-03 2.116375e-18
-## Weight              4.896328e-02  24.6148053 1.972917e-03 5.012592e-18
-## Hairleng           -6.865495e-01 -17.2818695 3.973960e-02 1.137354e-14
-## Age                 1.081716e-02   0.9380153 1.156959e-02 3.579832e-01
-## Income              5.642220e-06   0.3857258 1.486897e-05 7.032445e-01
-## Beer                5.010542e-03   6.2692224 7.946214e-04 2.136646e-06
-## Wine                7.511377e-03   2.7258935 2.733526e-03 1.204856e-02
-## Sex                -6.865495e-01 -17.2818695 3.973960e-02 1.137354e-14
-## Swim                1.010496e-01  14.6146811 6.863861e-03 3.941369e-13
-## Region              1.035071e-01   1.1283478 9.068204e-02 2.708059e-01
-## IQ                 -5.277164e-03  -0.5268369 1.015919e-02 6.033516e-01
+## Height              7.456695e-02  23.3854388 3.185875e-03 1.559361e-17
+## Weight              4.896328e-02  35.1242970 1.392816e-03 1.732554e-21
+## Hairleng           -6.865495e-01 -17.0926429 4.014933e-02 1.439599e-14
+## Age                 1.081716e-02   0.9524214 1.143995e-02 3.507861e-01
+## Income              5.642220e-06   0.3875343 1.463158e-05 7.019238e-01
+## Beer                5.010542e-03   6.3971862 7.817789e-04 1.579903e-06
+## Wine                7.511377e-03   2.6802915 2.809055e-03 1.336266e-02
+## Sex                -6.865495e-01 -17.0926429 4.014933e-02 1.439599e-14
+## Swim                1.010496e-01  14.2147650 7.102257e-03 7.018728e-13
+## Region              1.035071e-01   1.1174095 9.288992e-02 2.753561e-01
+## IQ                 -5.277164e-03  -0.5285419 1.002285e-02 6.021868e-01
 ##             95% CI (lo)   95% CI (up)
 ## Intercept            NA            NA
-## Height     6.858461e-02  8.054929e-02
-## Weight     4.488199e-02  5.304457e-02
-## Hairleng  -7.687571e-01 -6.043419e-01
-## Age       -1.311636e-02  3.475068e-02
-## Income    -2.511659e-05  3.640103e-05
-## Beer       3.366742e-03  6.654342e-03
-## Wine       1.856647e-03  1.316611e-02
-## Sex       -7.687571e-01 -6.043419e-01
-## Swim       8.685061e-02  1.152486e-01
-## Region    -8.408298e-02  2.910972e-01
-## IQ        -2.629305e-02  1.573872e-02
+## Height     0.0679764667  8.115743e-02
+## Weight     0.0460820210  5.184454e-02
+## Hairleng  -0.7696047104 -6.034943e-01
+## Age       -0.0128481769  3.448250e-02
+## Income    -0.0000246255  3.590994e-05
+## Beer       0.0033933089  6.627775e-03
+## Wine       0.0017004042  1.332235e-02
+## Sex       -0.7696047104 -6.034943e-01
+## Swim       0.0863574493  1.157417e-01
+## Region    -0.0886503166  2.956646e-01
+## IQ        -0.0260110098  1.545668e-02
 ## attr(,&quot;name&quot;)
 ## [1] &quot;Regression coefficients for  Shoesize&quot;</code></pre>
 <p>It is also possible to change significance level for confidence intervals.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">full =</span> T, <span class="dt">alpha =</span> <span class="fl">0.01</span>))</code></pre></div>
+<div class="sourceCode" id="cb168"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb168-1" title="1"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(mjk, <span class="dt">ncomp =</span> <span class="dv">2</span>, <span class="dt">full =</span> T, <span class="dt">alpha =</span> <span class="fl">0.01</span>))</a></code></pre></div>
 <pre><code>##           Estimated coefficients     t-value           SE      p-value
 ## Intercept           1.342626e+01          NA           NA           NA
-## Height              7.456695e-02  25.5886755 2.891897e-03 2.116375e-18
-## Weight              4.896328e-02  24.6148053 1.972917e-03 5.012592e-18
-## Hairleng           -6.865495e-01 -17.2818695 3.973960e-02 1.137354e-14
-## Age                 1.081716e-02   0.9380153 1.156959e-02 3.579832e-01
-## Income              5.642220e-06   0.3857258 1.486897e-05 7.032445e-01
-## Beer                5.010542e-03   6.2692224 7.946214e-04 2.136646e-06
-## Wine                7.511377e-03   2.7258935 2.733526e-03 1.204856e-02
-## Sex                -6.865495e-01 -17.2818695 3.973960e-02 1.137354e-14
-## Swim                1.010496e-01  14.6146811 6.863861e-03 3.941369e-13
-## Region              1.035071e-01   1.1283478 9.068204e-02 2.708059e-01
-## IQ                 -5.277164e-03  -0.5268369 1.015919e-02 6.033516e-01
+## Height              7.456695e-02  23.3854388 3.185875e-03 1.559361e-17
+## Weight              4.896328e-02  35.1242970 1.392816e-03 1.732554e-21
+## Hairleng           -6.865495e-01 -17.0926429 4.014933e-02 1.439599e-14
+## Age                 1.081716e-02   0.9524214 1.143995e-02 3.507861e-01
+## Income              5.642220e-06   0.3875343 1.463158e-05 7.019238e-01
+## Beer                5.010542e-03   6.3971862 7.817789e-04 1.579903e-06
+## Wine                7.511377e-03   2.6802915 2.809055e-03 1.336266e-02
+## Sex                -6.865495e-01 -17.0926429 4.014933e-02 1.439599e-14
+## Swim                1.010496e-01  14.2147650 7.102257e-03 7.018728e-13
+## Region              1.035071e-01   1.1174095 9.288992e-02 2.753561e-01
+## IQ                 -5.277164e-03  -0.5285419 1.002285e-02 6.021868e-01
 ##             99% CI (lo)   99% CI (up)
 ## Intercept            NA            NA
-## Height     6.644843e-02  8.268548e-02
-## Weight     4.342464e-02  5.450192e-02
-## Hairleng  -7.981119e-01 -5.749871e-01
-## Age       -2.166256e-02  4.329689e-02
-## Income    -3.609997e-05  4.738441e-05
-## Beer       2.779773e-03  7.241311e-03
-## Wine      -1.625491e-04  1.518530e-02
-## Sex       -7.981119e-01 -5.749871e-01
-## Swim       8.178042e-02  1.203188e-01
-## Region    -1.510678e-01  3.580821e-01
-## IQ        -3.379741e-02  2.324309e-02
+## Height     6.562313e-02  8.351077e-02
+## Weight     4.505318e-02  5.287338e-02
+## Hairleng  -7.992621e-01 -5.738369e-01
+## Age       -2.129862e-02  4.293295e-02
+## Income    -3.543353e-05  4.671797e-05
+## Beer       2.815826e-03  7.205258e-03
+## Wine      -3.745830e-04  1.539734e-02
+## Sex       -7.992621e-01 -5.738369e-01
+## Swim       8.111117e-02  1.209880e-01
+## Region    -1.572661e-01  3.642803e-01
+## IQ        -3.341467e-02  2.286034e-02
 ## attr(,&quot;name&quot;)
 ## [1] &quot;Regression coefficients for  Shoesize&quot;</code></pre>
 <p>The p-values, t-values and standard errors are stored each as a 3-way array similar to regression coefficients. The selection can be made by comparing e.g. p-values with a threshold similar to what we have done with VIP-scores and selectivity ratio.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">exclcols =<span class="st"> </span>mjk<span class="op">$</span>coeffs<span class="op">$</span>p.values[, <span class="dv">2</span>, <span class="dv">1</span>] <span class="op">&gt;</span><span class="st"> </span><span class="fl">0.05</span>
-<span class="kw">show</span>(exclcols)</code></pre></div>
+<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb170-1" title="1">exclcols =<span class="st"> </span>mjk<span class="op">$</span>coeffs<span class="op">$</span>p.values[, <span class="dv">2</span>, <span class="dv">1</span>] <span class="op">&gt;</span><span class="st"> </span><span class="fl">0.05</span></a>
+<a class="sourceLine" id="cb170-2" title="2"><span class="kw">show</span>(exclcols)</a></code></pre></div>
 <pre><code>##   Height   Weight Hairleng      Age   Income     Beer     Wine      Sex 
 ##    FALSE    FALSE    FALSE     TRUE     TRUE    FALSE    FALSE    FALSE 
 ##     Swim   Region       IQ 
 ##    FALSE     TRUE     TRUE</code></pre>
 <p>Here <code>p.values[, 2, 1]</code> means values for all predictors, model with two components, first y-variable.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">newm =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">3</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> exclcols)
-<span class="kw">summary</span>(newm)</code></pre></div>
+<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb172-1" title="1">newm =<span class="st"> </span><span class="kw">pls</span>(X.c, y.c, <span class="dv">3</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">exclcols =</span> exclcols)</a>
+<a class="sourceLine" id="cb172-2" title="2"><span class="kw">summary</span>(newm)</a></code></pre></div>
 <pre><code>## 
 ## PLS model (class pls) summary
 ## 
 ## Performance and validation:
 ## Number of selected components: 3
-##     X cumexpvar Y cumexpvar  RMSE Slope    Bias  RPD
-## Cal       97.85       97.79 0.575  0.98  0.0000 6.87
-## CV        96.64       96.49 0.727  0.97 -0.0161 5.44</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(newm))</code></pre></div>
+##     X cumexpvar Y cumexpvar    R2  RMSE Slope    Bias RPD
+## Cal       97.85       97.79 0.978 0.575 0.978  0.0000 6.9
+## CV        96.65       96.49 0.965 0.727 0.972 -0.0161 5.4</code></pre>
+<div class="sourceCode" id="cb174"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb174-1" title="1"><span class="kw">show</span>(<span class="kw">getRegcoeffs</span>(newm))</a></code></pre></div>
 <pre><code>##               Shoesize
 ## Intercept  4.952691046
 ## Height     0.091079963
@@ -416,7 +442,7 @@ gitbook.start({
 "google": false,
 "linkedin": false,
 "weibo": false,
-"instapper": false,
+"instapaper": false,
 "vk": false,
 "all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
@@ -426,6 +452,10 @@ gitbook.start({
 "size": 1
 },
 "edit": {
+"link": null,
+"text": null
+},
+"history": {
 "link": null,
 "text": null
 },
@@ -442,8 +472,8 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    var src = "";
-    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:" && /^https?:/.test(src))
       src = src.replace(/^https?:/, '');
     script.src = src;

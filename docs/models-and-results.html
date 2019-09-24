@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Getting started with mdatools for R</title>
-  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others.">
-  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Models and results | Getting started with mdatools for R</title>
+  <meta name="description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
+  <meta name="generator" content="bookdown 0.12 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Getting started with mdatools for R" />
+  <meta property="og:title" content="Models and results | Getting started with mdatools for R" />
   <meta property="og:type" content="book" />
   
   
@@ -17,24 +16,26 @@
   <meta name="github-repo" content="svkucheryavski/mdatools.bookdown" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Getting started with mdatools for R" />
+  <meta name="twitter:title" content="Models and results | Getting started with mdatools for R" />
   
   <meta name="twitter:description" content="This is a user guide for mdatools — R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for Chemometrics. The general idea of the package is to collect most of the common chemometric methods and give a similar user interface for using them. So if a user knows how to make a model and visualise results for one method, he or she can easily do this for the others." />
   
 
-<meta name="author" content="Sergey Kucheryavskiy">
+<meta name="author" content="Sergey Kucheryavskiy" />
 
 
+<meta name="date" content="2018-11-09" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
 <link rel="prev" href="principal-component-analysis.html">
 <link rel="next" href="plotting-methods.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
@@ -49,41 +50,66 @@
 
 
 <style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 </head>
@@ -195,19 +221,19 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="model-calibration" class="section level3 unnumbered">
 <h3>Model calibration</h3>
 <p>Let’s see how this works using a simple example — <em>People</em> data. We already used this data when was playing with plots, it consists of 32 objects (persons from Scandinavian and Mediterranean countries, 16 male and 16 female) and 12 variables (height, weight, shoesize, annual income, beer and wine consumption and so on.). More information about the data can be found using <code>?people</code>. We will first load the data matrix and split it into two subsets as following:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mdatools)
-<span class="kw">data</span>(people)
-
-idx =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">4</span>, <span class="dv">32</span>, <span class="dv">4</span>)
-X.c =<span class="st"> </span>people[<span class="op">-</span>idx, ]
-X.t =<span class="st"> </span>people[idx, ]</code></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" title="1"><span class="kw">library</span>(mdatools)</a>
+<a class="sourceLine" id="cb51-2" title="2"><span class="kw">data</span>(people)</a>
+<a class="sourceLine" id="cb51-3" title="3"></a>
+<a class="sourceLine" id="cb51-4" title="4">idx =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">4</span>, <span class="dv">32</span>, <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb51-5" title="5">X.c =<span class="st"> </span>people[<span class="op">-</span>idx, ]</a>
+<a class="sourceLine" id="cb51-6" title="6">X.t =<span class="st"> </span>people[idx, ]</a></code></pre></div>
 <p>So <code>X.c</code> is our calibration subset we are going to use for creating a PCA model and <code>X.t</code> is a subset we will apply the calibrated model to. Now let’s calibrate the model and show an information about the model object:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pca</span>(X.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">info =</span> <span class="st">&quot;People PCA model&quot;</span>)
-m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class="dv">5</span>)</code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" title="1">m =<span class="st"> </span><span class="kw">pca</span>(X.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">info =</span> <span class="st">&quot;People PCA model&quot;</span>)</a>
+<a class="sourceLine" id="cb52-2" title="2">m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class="dv">5</span>)</a></code></pre></div>
 <p>Here <code>pca</code> is a function that builds (calibrates) a PCA model and returns the model object.</p>
 <p>Function <code>selectCompNum</code> allows to select an “optimal” number of components for the model. In our case we calibrate model with 7 principal components (second argument for the function <code>pca()</code>) however, e.g. after investigation of explained variance, we found out that 5 components is optimal. In this case we have two choices. Either recalibrate the model using 5 components or use the model that is calibrated already but “tell” the model that 5 components is the optimal number. In this case the model will keep all results calculated for 7 components but will use optimal number of components when necessary. For example, when showing residuals plot for the model. Or when PCA model is used in SIMCA classification.</p>
 <p>Finally, function <code>print</code> prints the model object info:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m)</code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" title="1"><span class="kw">print</span>(m)</a></code></pre></div>
 <pre><code>## 
 ## PCA model (class pca)
 ## 
@@ -226,14 +252,15 @@ m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class
 ## $alpha - significance level for Q residuals
 ## $calres - results (scores, etc) for calibration set</code></pre>
 <p>As you can see, there are no scores, explained variance values, residuals and so on. Because they actually are not part of a PCA model, they are results of applying the model to a calibration set. But loadings, eigenvalues, number of calculated and selected principal components, vectors for centering and scaling the data, number of segments for cross-validation (if used) and significance levels are the model fields:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m<span class="op">$</span>loadings[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]  </code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1">m<span class="op">$</span>loadings[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]  </a></code></pre></div>
 <pre><code>##              Comp 1      Comp 2      Comp 3      Comp 4
 ## Height   -0.3792846  0.08004057 -0.06676611  0.04512380
 ## Weight   -0.3817929  0.08533809 -0.08527883 -0.04051629
 ## Hairleng  0.3513874 -0.22676635 -0.02273504  0.01575716
 ## Shoesize -0.3776985  0.12503739 -0.02117369  0.09929010</code></pre>
-<p>One can also notice that the model object has a particular field — <code>calres</code>, which is in fact a PCA <em>result object</em> containing results of applying the model to the calibration set. If we look at the object description we will get the following:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m<span class="op">$</span>calres)</code></pre></div>
+<p>One can also notice that the model object has a particular field — <code>calres</code>, which is in fact a
+PCA <em>result object</em> containing results of applying the model to the calibration set. If we look at the object description we will get the following:</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" title="1"><span class="kw">print</span>(m<span class="op">$</span>calres)</a></code></pre></div>
 <pre><code>## 
 ## Results for PCA decomposition (class pcares)
 ## 
@@ -245,7 +272,7 @@ m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class
 ## $expvar - explained variance for each component
 ## $cumexpvar - cumulative explained variance</code></pre>
 <p>And if we want to look at scores, here is the way:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m<span class="op">$</span>calres<span class="op">$</span>scores[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]</code></pre></div>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" title="1">m<span class="op">$</span>calres<span class="op">$</span>scores[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]</a></code></pre></div>
 <pre><code>##           Comp 1     Comp 2     Comp 3      Comp 4
 ## Lars   -5.108742 -1.2714943  1.0765871  1.08910438
 ## Peter  -3.021811 -0.3163758 -0.2958259 -1.36053121
@@ -253,8 +280,8 @@ m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class
 ## Mette   1.116457 -1.3716444 -1.6344512 -0.03803356</code></pre>
 <p>Both model and result objects also have related functions (methods), first of all for visualizing various values (e.g. scores plot, loadings plot, etc.). Some of the functions will be discussed later in this chapter, a full list can be found in help for a proper method.</p>
 <p>The <em>result object</em> is also created every time you apply a model to a new data. Like in many built-in R methods, method <code>predict()</code> is used in this case. The first argument of the method is always a model object. Here is a PCA example (assuming we have already built the model):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t)
-<span class="kw">print</span>(res)</code></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" title="1">res =<span class="st"> </span><span class="kw">predict</span>(m, X.t)</a>
+<a class="sourceLine" id="cb61-2" title="2"><span class="kw">print</span>(res)</a></code></pre></div>
 <pre><code>## 
 ## Results for PCA decomposition (class pcares)
 ## 
@@ -270,11 +297,11 @@ m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class
 <h3>Model validation</h3>
 <p>Any model can be validated with cross-validation or/and test set validation. The validation results are, of course, represented by <em>result objects</em>, which are fields of a <em>model object</em> similar to <code>calres</code>, but with names <code>cvres</code> and <code>testres</code> correspondingly.</p>
 <p>Here is how to build a PCA model with full cross-validation and test set validation (we will use <code>X.t</code> as test data) at the same time:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m =<span class="st"> </span><span class="kw">pca</span>(X.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">x.test =</span> X.t, <span class="dt">info =</span> <span class="st">&quot;PCA model&quot;</span>)
-m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class="dv">5</span>)</code></pre></div>
-<p>Parameter <code>cv</code> specifies options for cross-validation. If a numeric value is provided then it will be used as number of segments for random cross-validation, e.g. if <code>cv = 2</code> cross-validation with two segments will be used. For full cross-validation use <code>cv = 1</code> like we did in the example above (this is perhaps a bit misleading, but I keep this option for compatability). For more advanced option you can provide a list with name of cross-validation method, number of segments and number of iterations, e.g. <code>cv = list('rand', 4, 4)</code> for running random cross-validation with four segments and four repetitions.</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" title="1">m =<span class="st"> </span><span class="kw">pca</span>(X.c, <span class="dv">7</span>, <span class="dt">scale =</span> T, <span class="dt">cv =</span> <span class="dv">1</span>, <span class="dt">x.test =</span> X.t, <span class="dt">info =</span> <span class="st">&quot;PCA model&quot;</span>)</a>
+<a class="sourceLine" id="cb63-2" title="2">m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class="dv">5</span>)</a></code></pre></div>
+<p>Parameter <code>cv</code> specifies options for cross-validation. If a numeric value is provided then it will be used as number of segments for random cross-validation, e.g. if <code>cv = 2</code> cross-validation with two segments will be used. For full cross-validation use <code>cv = 1</code> like we did in the example above (this is perhaps a bit misleading, but I keep this option for compatability). For more advanced option you can provide a list with name of cross-validation method, number of segments and number of iterations, e.g. <code>cv = list('rand', 4, 4)</code> for running random cross-validation with four segments and four repetitions.</p>
 <p>And here is the model object info:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(m)</code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb64-1" title="1"><span class="kw">print</span>(m)</a></code></pre></div>
 <pre><code>## 
 ## PCA model (class pca)
 ## 
@@ -295,18 +322,18 @@ m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class
 ## $cvres - results for cross-validation
 ## $testres - results for test set</code></pre>
 <p>As you can see we have all three types of results now — calibration (<code>calres</code>), cross-validation (<code>cvres</code>) and test set validation (<code>testres</code>). Let us compare, for example, the explained variance values for the results:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">var =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">cal =</span> m<span class="op">$</span>calres<span class="op">$</span>expvar, <span class="dt">cv =</span> m<span class="op">$</span>cvres<span class="op">$</span>expvar, <span class="dt">test =</span> m<span class="op">$</span>testres<span class="op">$</span>expvar)
-<span class="kw">show</span>(<span class="kw">round</span>(var, <span class="dv">1</span>))</code></pre></div>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb66-1" title="1">var =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">cal =</span> m<span class="op">$</span>calres<span class="op">$</span>expvar, <span class="dt">cv =</span> m<span class="op">$</span>cvres<span class="op">$</span>expvar, <span class="dt">test =</span> m<span class="op">$</span>testres<span class="op">$</span>expvar)</a>
+<a class="sourceLine" id="cb66-2" title="2"><span class="kw">show</span>(<span class="kw">round</span>(var, <span class="dv">1</span>))</a></code></pre></div>
 <pre><code>##         cal   cv test
-## Comp 1 54.2 43.1 44.8
-## Comp 2 20.3 21.2 17.2
+## Comp 1 54.2 43.3 44.8
+## Comp 2 20.3 21.0 17.2
 ## Comp 3 13.1 14.7 17.0
 ## Comp 4  7.9 13.0  8.0
 ## Comp 5  2.3  3.6  4.4
 ## Comp 6  1.1  2.0  2.4
 ## Comp 7  0.5  0.8  0.7</code></pre>
 <p>Every model and every result has a method <code>summary()</code>, which shows some statistics for evaluation of a model performance. Here are some examples.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m)</code></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" title="1"><span class="kw">summary</span>(m)</a></code></pre></div>
 <pre><code>## 
 ## PCA model (class pca) summary
 ## 
@@ -320,7 +347,7 @@ m =<span class="st"> </span><span class="kw">selectCompNum</span>(m, <span class
 ## Comp 5   0.272   2.27     97.77
 ## Comp 6   0.137   1.14     98.92
 ## Comp 7   0.058   0.48     99.39</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(m<span class="op">$</span>calres)</code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb70-1" title="1"><span class="kw">summary</span>(m<span class="op">$</span>calres)</a></code></pre></div>
 <pre><code>## 
 ## Summary for PCA results 
 ## 
@@ -363,7 +390,7 @@ gitbook.start({
 "google": false,
 "linkedin": false,
 "weibo": false,
-"instapper": false,
+"instapaper": false,
 "vk": false,
 "all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
@@ -373,6 +400,10 @@ gitbook.start({
 "size": 1
 },
 "edit": {
+"link": null,
+"text": null
+},
+"history": {
 "link": null,
 "text": null
 },
@@ -389,8 +420,8 @@ gitbook.start({
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    var src = "";
-    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:" && /^https?:/.test(src))
       src = src.replace(/^https?:/, '');
     script.src = src;
