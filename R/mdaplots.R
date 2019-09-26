@@ -83,6 +83,7 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
    if (is.null(x.values) || is.null(y.values))
       return(NULL)
    
+   
    if (is.null(show.labels))
       show.labels = FALSE
    
@@ -186,69 +187,88 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
 #' which colormap to use ('default', 'gray', or user defined in form c('color1', 'color2', ...)).
 #' @param opacity
 #' opacity for colors (between 0 and 1)
-#' 
+#' @param maxsplits
+#' if contenuous values are used for color gruping - how many groups to create?
+#'
 #' @importFrom grDevices col2rgb colorRampPalette rgb
 #' 
 #' @return
 #' Returns vector with generated color values
 #' 
 #' @export
-mdaplot.getColors = function(ngroups = 1, cgroup = NULL, colmap = 'default', opacity = 1) {   
-   if (length(colmap) == 1) {   
-      # colormap is a name      
-      if (colmap == 'gray') {   
-         # use grayscale colormap
-         palette = c("#E8E8E8", "#D6D6D6", "#C4C4C4", "#B2B2B2", "#9A9A9A", "#808080", "#484848", 
-                     "#101010")
-         
-         # if only one color is needed reorder pallete so the black is first
-         if (is.null(cgroup) && ngroups == 1)
-            palette = palette[length(palette):1]      
-      } else if (colmap == 'jet') {
-         palette = c("#00007F", "blue", "#007FFF", "cyan",
-           "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000")
-      } else {   
-         # use default colormap for colorbrew
-         palette = c("#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FEE08B", "#FDAE61", "#F46D43", 
-                     "#D53E4F")
-      }   
-   } else {
-      # assuming that user colormap has been provided
-      if (sum(mdaplot.areColors(colmap) == F) == 0)
-         palette = colmap
-      else
-         stop("Parameter 'colmap' must contains valid color values or name of palette!")
-   }   
+mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', opacity = 1, maxsplits = 64) { 
    
-   colfunc = colorRampPalette(palette, space = 'Lab')
-   
-   if (!is.null(cgroup)) {   
-      if (is.factor(cgroup)) {
-         nlevels = length(attr(cgroup, 'levels'))
-         ngroups = nlevels
-         col = colfunc(ngroups)      
-         colvals = col[as.numeric(cgroup)]
-      } else { 
-         cfactor = factor(cgroup)
-         nlevels = length(attr(cfactor, 'levels'))
-         if (nlevels < 8)
-            ngroups = nlevels
-         else
-            ngroups = 8
-         
-         col = colfunc(ngroups)      
-         cgroup = cut(as.vector(as.numeric(cgroup)), ngroups, labels = 1:ngroups)
-         colvals = col[cgroup]
-      }
-   } else {
-      colvals = colfunc(ngroups)      
-   }   
-   
-   if (opacity < 1) {
-      opacity = format(as.hexmode(round(255 * opacity)), width = 2);
-      colvals = paste(colvals, opacity, sep = '')
+   # if non of the main arguments defined assume only one color is needed
+   if (is.null(ngroups) && is.null(cgroup)) {
+      ngroups = 1
    }
-   colvals
+
+   # returns palette for given colormap
+   getPalette <- function(colmap) {
+      
+      if (length(colmap) > 1) {
+         return(colmap)
+      }
+      
+      if (colmap == 'gray') {
+         # grayscale
+         return(c("#E8E8E8", "#D6D6D6", "#C4C4C4", "#B2B2B2", "#9A9A9A", "#808080", "#484848", "#101010"))
+      }
+
+      if (colmap == 'jet') {
+         # jet colors
+         return(c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"))
+      }
+
+      if (colmap == 'old') {
+         # color brewer colormap used as default in versions < 0.10.0
+         return(c("#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F"))
+      }
+
+      # the current default colormap 
+      return(c("#2679B2", "#1C9AA8", "#379531", "#EED524", "#FB7F28", "#D22C2F"))
+   }
+
+   # get palette
+   palette = getPalette(colmap)
+   if (!all(mdaplot.areColors(palette))) {
+      stop("Parameter 'colmap' must contains valid color values or name of palette!")
+   }   
+
+   # if grayscale palette and only one color is needed reorder pallete so the black is first
+   if (colmap == 'gray' && is.null(cgroup) && ngroups == 1) {
+      palette = rev(palette)      
+   }
+   
+   # add opacity 
+   palette = adjustcolor(palette, opacity)
+
+   # define color function based on the palette
+   colfunc = colorRampPalette(palette, alpha = opacity < 1)
+
+   # if cgroup is not provided just return the colors
+   if (is.null(cgroup)) {
+      return(colfunc(ngroups))
+   }
+
+   # if cgroup is factor return vector with corresponding values
+   if (is.factor(cgroup)) {
+      ngroups = length(attr(cgroup, 'levels'))
+      return (colfunc(ngroups)[as.numeric(cgroup)])
+   }
+   
+   # if not split it into groups
+   if (is.null(ngroups)) {
+      ngroups = length(unique(cgroup))
+      ngroups = ifelse(ngroups > maxsplits, maxsplits, ngroups)
+   }
+
+   cgroup = cut(as.numeric(cgroup), ngroups, include.lowest = TRUE)
+   out.palette = colfunc(ngroups)
+   colors = out.palette[as.numeric(cgroup)]
+   attr(colors, 'palette') = out.palette
+
+   return(colors)
 }
 
 #' Plot grid
@@ -494,7 +514,7 @@ mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default'
       ngroups = length(data)
       
       if (is.null(col))         
-         col = mdaplot.getColors(ngroups, colmap = colmap)
+         col = mdaplot.getColors(ngroups = ngroups, colmap = colmap)
       else if (length(col) == 1)
          col = rep(col, ngroups)
       
@@ -508,7 +528,7 @@ mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default'
    else
    {
       if (is.null(col))         
-         col = mdaplot.getColors(1, colmap = colmap)
+         col = mdaplot.getColors(ngroups = 1, colmap = colmap)
       
       x = data[, 1]
       y = data[, 2]
@@ -826,22 +846,26 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
    if (show.axes) {
       # calculate limits       
       if (show.excluded) {
-         lim = mdaplot.getAxesLim(c(x.values, x.values.excludedrows), 
-                                  rbind(y.values, y.values.excludedrows),  
-                                  lower = lower,
-                                  upper = upper,
-                                  show.colorbar = show.colorbar, 
-                                  show.labels = show.labels,
-                                  show.lines = show.lines)
+         lim = mdaplot.getAxesLim(
+            c(x.values, x.values.excludedrows), 
+            rbind(y.values, y.values.excludedrows),  
+            lower = lower,
+            upper = upper,
+            show.colorbar = show.colorbar, 
+            show.labels = show.labels,
+            show.lines = show.lines
+         )
          
       } else {
-         lim = mdaplot.getAxesLim(x.values, 
-                                  y.values,  
-                                  lower = lower,
-                                  upper = upper,
-                                  show.colorbar = show.colorbar, 
-                                  show.labels = show.labels,
-                                  show.lines = show.lines)
+         lim = mdaplot.getAxesLim(
+            x.values, 
+            y.values,  
+            lower = lower,
+            upper = upper,
+            show.colorbar = show.colorbar, 
+            show.labels = show.labels,
+            show.lines = show.lines
+         )
       }
    } else {
       lim = NULL
