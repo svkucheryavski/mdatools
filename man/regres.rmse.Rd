@@ -7,9 +7,7 @@
 regres.rmse(err)
 }
 \arguments{
-\item{y.ref}{vector with reference values}
-
-\item{y.pred}{matrix with predicted values}
+\item{err}{vector with difference between reference and predicted y-values}
 }
 \description{
 Calculates matrix with root mean squared error of prediction for every response and components.

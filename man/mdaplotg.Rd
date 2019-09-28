@@ -5,13 +5,14 @@
 \title{Plotting function for several sets of objects}
 \usage{
 mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
-  lwd = 1, cex = 1, bwd = 0.8, legend = NULL, xlab = NULL,
-  ylab = NULL, main = NULL, labels = NULL, ylim = NULL,
-  xlim = NULL, colmap = "default", legend.position = "topright",
-  show.legend = T, show.labels = F, show.lines = F, show.grid = T,
-  xticks = NULL, xticklabels = NULL, yticks = NULL,
-  yticklabels = NULL, show.excluded = FALSE, lab.col = "darkgray",
-  lab.cex = 0.65, xlas = 1, ylas = 1, ...)
+  lwd = 1, cex = 1, col = NULL, bwd = 0.8, legend = NULL,
+  xlab = NULL, ylab = NULL, main = NULL, labels = NULL,
+  ylim = NULL, xlim = NULL, colmap = "default",
+  legend.position = "topright", show.legend = T, show.labels = F,
+  show.lines = F, show.grid = T, xticks = NULL, xticklabels = NULL,
+  yticks = NULL, yticklabels = NULL, show.excluded = FALSE,
+  lab.col = "darkgray", lab.cex = 0.65, xlas = 1, ylas = 1,
+  opacity = 1, ...)
 }
 \arguments{
 \item{data}{a matrix, data frame or a list with data values (see details below).}
@@ -27,6 +28,8 @@ mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
 \item{lwd}{the line width (thickness) (same as \code{plot} parameter).}
 
 \item{cex}{the cex factor for the markers (same as \code{plot} parameter).}
+
+\item{col}{colors for the plot series}
 
 \item{bwd}{a width of a bar as a percent of a maximum space available for each bar.}
 
@@ -44,7 +47,7 @@ mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
 
 \item{xlim}{limits for the x axis (if NULL, will be calculated automatically).}
 
-\item{colmap}{a colormap to use for coloring the plot items.}
+\item{colmap}{a colormap to generate colors if \code{col} is not provided}
 
 \item{legend.position}{position of the legend ('topleft', 'topright', 'top', 'bottomleft', 'bottomright', 'bottom').}
 
@@ -73,6 +76,8 @@ mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
 \item{xlas}{orientation of xticklabels}
 
 \item{ylas}{orientation of yticklabels}
+
+\item{opacity}{opacity for plot colors (value between 0 and 1)}
 
 \item{...}{other plotting arguments.}
 }

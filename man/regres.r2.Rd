@@ -7,9 +7,9 @@
 regres.r2(err, ytot)
 }
 \arguments{
-\item{y.ref}{vector with reference values}
+\item{err}{vector with difference between reference and predicted y-values}
 
-\item{y.pred}{matrix with predicted values}
+\item{ytot}{total variance for y-values}
 }
 \description{
 Calculates matrix with coeffient of determination for every response and components

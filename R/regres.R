@@ -94,10 +94,10 @@ regres.err = function(y.ref, y.pred) {
 #' @description
 #' Calculates matrix with coeffient of determination for every response and components 
 #'
-#' @param y.ref
-#' vector with reference values
-#' @param y.pred
-#' matrix with predicted values
+#' @param err
+#' vector with difference between reference and predicted y-values
+#' @param ytot
+#' total variance for y-values
 #'
 regres.r2 = function(err, ytot) {
 
@@ -117,10 +117,8 @@ regres.r2 = function(err, ytot) {
 #' @description
 #' Calculates matrix with bias (average prediction error) for every response and components 
 #'
-#' @param y.ref
-#' vector with reference values
-#' @param y.pred
-#' matrix with predicted values
+#' @param err
+#' vector with difference between reference and predicted y-values
 #'
 regres.bias = function(err) {
    
@@ -140,10 +138,8 @@ regres.bias = function(err) {
 #' @description
 #' Calculates matrix with root mean squared error of prediction for every response and components.
 #'
-#' @param y.ref
-#' vector with reference values
-#' @param y.pred
-#' matrix with predicted values
+#' @param err
+#' vector with difference between reference and predicted y-values
 #'
 regres.rmse = function(err) {
 
