@@ -1402,25 +1402,21 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
          }
       }
    } 
-   
-   # check if plot.new() should be called first
-   if (dev.cur() == 1)
-      plot.new()
-   
+
    ngroups = length(data)
    
+   # check if plot.new() should be called first
+   if (dev.cur() == 1) plot.new()
+   
    # check numeric parameters and multiply them if necessary
-
    processParam = function(param, name, is.type, ngroups) {
-      if (!is.type(param)) {
+
+      param = if (length(param) == 1) rep(param, ngroups) else param
+      
+      if (!all(is.type(param))) {
          stop(paste0('Parameter "', name, '" mush be numeric!'))
       }
 
-      print(param)
-      print(ngroups)
-      param = ifelse(length(param) == 1, rep(param, ngroups), param)
-      print(param)
-      
       if (length(param) != ngroups)
          stop(paste0('Parameter "', name, '" should be specified for each group or one for all!'))
 
@@ -1436,10 +1432,9 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    lab.col = processParam(lab.col, "lab.col", mdaplot.areColors, ngroups)
    
    # check and define colors if necessary
-   col = ifelse(
-      is.null(col),
-      processParam(col, "col", mdaplot.areColors, ngroups)
-   )
+   
+   if (is.null(col)) col = mdaplot.getColors(ngroups = ngroups, colmap = colmap)
+   col = processParam(col, "col", mdaplot.areColors, ngroups)
       
    # get plot data for each group 
    pd = list()
@@ -1467,7 +1462,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       xlim = matrix(unlist(lapply(pd, function(x) {x$lim$xlim})), ncol = 2, byrow = TRUE)
       xlim = c(min(xlim[, 1]), max(xlim[, 2]))
       # stretch limits if bar plot should be shown
-      xlim = ifelse(type == "h", xlim + c(-0.35, 0.35), xlim)
+      xlim = if (any(type == "h")) xlim + c(-0.35, 0.35) else xlim
    }
 
    # compute y-limits   
@@ -1497,9 +1492,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    }
    
    # show greed if needed
-   if (show.grid == T) {
-      mdaplot.showGrid()
-   }
+   if (show.grid == T) mdaplot.showGrid()
    
    # count how many plots are bar plots
    nbarplots = sum(type == 'h')
@@ -1508,7 +1501,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    for (i in 1:ngroups) {
 
       # decide if x values should be forced as group index
-      force.x.values = ifelse(type[i] == 'h', c(i, nbarplots), NA)
+      force.x.values = if (type[i] == 'h') c(i, nbarplots) else NA
 
       # if error bars are shown and i > 1 do not show labels 
       show.labels = ifelse(i > 1 && type[i] == 'e', FALSE, show.labels)
