@@ -232,7 +232,7 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
    prepareColors <- function(colfunc, ncolors, opacity) {
       colors = colfunc(ncolors)
       
-      if (is.null(opacity) || all(opacity == 1)) {
+      if (is.null(opacity) || all(opacity == 1)) {
          return (colors)
       }
 
