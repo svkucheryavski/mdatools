@@ -1475,13 +1475,12 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    lim = list(xlim = xlim, ylim = ylim)   
    
    # define main title if not provided (either as "name" or as "name" attr of first dataset)
-   if (is.null(main)) {      
-      main = ifelse(!is.null(name), name, pd[[1]]$data.attr[['name']])
-   } 
+   main = if (is.null(main)) name
+   main = if (is.null(main)) pd[[1]]$data.attr[['name']]
    
    # define labels for axes
-   xlab = ifelse(!is.null(xlab), xlab, attr(pd[[1]]$x.values, 'name', exact = TRUE))
-   ylab = ifelse(!is.null(ylab), ylab, attr(pd[[1]]$y.values, 'name', exact = TRUE))
+   xlab = if (is.null(xlab)) attr(pd[[1]]$x.values, 'name', exact = TRUE)
+   ylab = if (is.null(ylab)) attr(pd[[1]]$y.values, 'name', exact = TRUE)
    
    # make an empty plot with proper limits and axis labels
    mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas)
