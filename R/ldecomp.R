@@ -171,7 +171,7 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
    
    # calculate normalized scores
    if (is.null(tnorm) && nrow(scores) > 0)
-      tnorm = sqrt(colSums(scores^2)/(nrow(scores) - 1));   
+      tnorm = sqrt(colSums(scores^2)/(nrow(scores) - 1));
    
    scoresn = sweep(scores, 2L, tnorm, '/', check.margin = F);  
 

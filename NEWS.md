@@ -1,8 +1,10 @@
 v.0.10.0
 ========
 * code has been refactored and improved
-* `mdaplotg()` works better with grid now (it is placed before plot series)
-* small improvements to plots (e.g. more contrast colors in case of three groups of plot series)
+* improved code coverage with tests
+* added Travis CI integration so you can see how safe it is to install latest GitHub version (pre-release)
+* parameter `opacity` can now be used with `mdaplotg()` plots and be different for each group
+* new more contrast default colormap for plots (use `colmap="old"`if you do not like it)
 * 
 
 v.0.9.6
