@@ -184,20 +184,19 @@ mdaplot.getAxesLim = function(x.values, y.values, lower = NULL, upper = NULL,
 #' @param cgroup
 #' vector of values, used for color grouping of plot points or lines.
 #' @param colmap
-#' which colormap to use ('default', 'gray', or user defined in form c('color1', 'color2', ...)).
+#' which colormap to use ('default', 'gray', 'old', or user defined in form c('color1', 'color2', ...)).
 #' @param opacity
 #' opacity for colors (between 0 and 1)
 #' @param maxsplits
 #' if contenuous values are used for color gruping - how many groups to create?
 #'
-#' @importFrom grDevices col2rgb colorRampPalette rgb
+#' @importFrom grDevices col2rgb colorRampPalette rgb adjustcolor
 #' 
 #' @return
 #' Returns vector with generated color values
 #' 
 #' @export
 mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', opacity = 1, maxsplits = 64) { 
-   
    # if non of the main arguments defined assume only one color is needed
    if (is.null(ngroups) && is.null(cgroup)) {
       ngroups = 1
@@ -221,12 +220,35 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
       }
 
       if (colmap == 'old') {
-         # color brewer colormap used as default in versions < 0.10.0
+         # color brewer colormap used as default in versions before 0.10.0
          return(c("#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F"))
       }
 
       # the current default colormap 
       return(c("#2679B2", "#1C9AA8", "#379531", "#EED524", "#FB7F28", "#D22C2F"))
+   }
+
+   # returns vector with colors
+   prepareColors <- function(colfunc, ncolors, opacity) {
+      colors = colfunc(ncolors)
+      
+      if (is.null(opacity) || all(opacity == 1)) {
+         return (colors)
+      }
+
+      if (length(opacity) == 1){
+         opacity = rep(opacity, ncolors)
+      } 
+
+      if (length(opacity) != ncolors) {
+         stop('Wrong number of values for "opacity" parameter!')
+      }
+
+      for (i in 1:ncolors) {
+         colors[i] = adjustcolor(colors[i], alpha.f = opacity[i])
+      }
+
+      return (colors)
    }
 
    # get palette
@@ -236,25 +258,24 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
    }   
 
    # if grayscale palette and only one color is needed reorder pallete so the black is first
-   if (colmap == 'gray' && is.null(cgroup) && ngroups == 1) {
+   if (all(colmap == 'gray') && is.null(cgroup) && ngroups == 1) {
       palette = rev(palette)      
    }
    
-   # add opacity 
-   palette = adjustcolor(palette, opacity)
-
    # define color function based on the palette
-   colfunc = colorRampPalette(palette, alpha = opacity < 1)
+   colfunc = colorRampPalette(palette)
 
    # if cgroup is not provided just return the colors
+
    if (is.null(cgroup)) {
-      return(colfunc(ngroups))
+
+      return (prepareColors(colfunc, ngroups, opacity))
    }
 
    # if cgroup is factor return vector with corresponding values
    if (is.factor(cgroup)) {
       ngroups = length(attr(cgroup, 'levels'))
-      return (colfunc(ngroups)[as.numeric(cgroup)])
+      return (prepareColors(colfunc, ngroups, opacity)[as.numeric(cgroup)])
    }
    
    # if not split it into groups
@@ -264,7 +285,7 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
    }
 
    cgroup = cut(as.numeric(cgroup), ngroups, include.lowest = TRUE)
-   out.palette = colfunc(ngroups)
+   out.palette = prepareColors(colfunc, ngroups, opacity)
    colors = out.palette[as.numeric(cgroup)]
    attr(colors, 'palette') = out.palette
 
@@ -1021,8 +1042,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
                    xticks = NULL, yticks = NULL, xticklabels = NULL, yticklabels = NULL, 
                    xlas = 0, ylas = 0, lab.col = 'darkgray', lab.cex = 0.65, 
                    show.excluded = FALSE, col.excluded = '#E0E0E0', nbins = 256,
-                   colramp = mdaplot.getColors, force.x.values = NA, opacity = 1, ...)
-{   
+                   colramp = mdaplot.getColors, force.x.values = NA, opacity = 1, ...) {   
    if (is.null(plot.data)) {
       plot.data = prepare.plot.data(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, 
                                     show.labels, show.lines, show.axes)
