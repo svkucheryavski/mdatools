@@ -1,3 +1,10 @@
+v.0.10.0
+========
+* code has been refactored and improved
+* `mdaplotg()` works better with grid now (it is placed before plot series)
+* small improvements to plots (e.g. more contrast colors in case of three groups of plot series)
+* 
+
 v.0.9.6
 =======
 * fixed a bug related to wrong calculation of R2 in case of multiple response variables (PLS2)
