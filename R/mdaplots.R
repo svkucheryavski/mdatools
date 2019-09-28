@@ -1281,8 +1281,10 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' limits for the y axis (if NULL, will be calculated automatically).
 #' @param xlim  
 #' limits for the x axis (if NULL, will be calculated automatically).
+#' @param col
+#' colors for the plot series 
 #' @param colmap  
-#' a colormap to use for coloring the plot items.
+#' a colormap to generate colors if \code{col} is not provided
 #' @param legend.position  
 #' position of the legend ('topleft', 'topright', 'top', 'bottomleft', 'bottomright', 'bottom').
 #' @param show.legend  
@@ -1313,6 +1315,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' logical, show or hide rows marked as excluded (attribute `exclrows`)
 #' @param groupby
 #' one or several factors used to create groups of data matrix rows (works if data is a matrix)
+#' @param opacity
+#' opacity for plot colors (value between 0 and 1)
 #' @param ...  
 #' other plotting arguments.
 #' 
@@ -1340,13 +1344,13 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' @importFrom grDevices axisTicks dev.cur 
 #' 
 #' @export
-mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 1, cex = 1, 
+mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 1, cex = 1, col = NULL,
                     bwd = 0.8, legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', 
                     show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
                     xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
                     show.excluded = FALSE, lab.col = 'darkgray', lab.cex = 0.65, xlas = 1, 
-                    ylas = 1, ...) {   
+                    ylas = 1, opacity = 1, ...) {   
 
    # name for the plot (mdain)
    name = NULL
@@ -1405,58 +1409,46 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    
    ngroups = length(data)
    
-   # if plot type is not specified for each group multply default value
-   if (length(type) == 1)
-      type = rep(type, ngroups)
-   else if (length(type) != ngroups)
-      stop('Parameter "type" should be specified for each group or be common for all!')
-   #else if (!(sum(type == 'h') == 0 | sum(type == 'h') == length(pch)))
-   #   stop('Barplot (type = "h") for groups can not be combined with other plots!');
+   # check numeric parameters and multiply them if necessary
+
+   processParam = function(param, name, is.type, ngroups) {
+      if (!is.type(param)) {
+         stop(paste0('Parameter "', name, '" mush be numeric!'))
+      }
+
+      print(param)
+      print(ngroups)
+      param = ifelse(length(param) == 1, rep(param, ngroups), param)
+      print(param)
+      
+      if (length(param) != ngroups)
+         stop(paste0('Parameter "', name, '" should be specified for each group or one for all!'))
+
+      return(param)
+   }
+
+   type = processParam(type, "type", is.character, ngroups)
+   pch = processParam(pch, "pch", is.numeric, ngroups)
+   lty = processParam(lty, "lty", is.numeric, ngroups)
+   lwd = processParam(lwd, "lwd", is.numeric, ngroups)
+   cex = processParam(cex, "cex", is.numeric, ngroups)
+   opacity = processParam(opacity, "opacity", is.numeric, ngroups)
+   lab.col = processParam(lab.col, "lab.col", mdaplot.areColors, ngroups)
    
-   # if marker symbol is not specified for each group multply default value
-   if (!is.numeric(pch))
-      stop('Parameter "pch" mush be numeric!')   
-   else if (length(pch) == 1)
-      pch = rep(pch, ngroups)
-   else if (length(pch) != ngroups)
-      stop('Parameter "pch" should be specified for each group or be common for all!')
-   
-   # if line type is not specified for each group multply default value
-   if (!is.numeric(lty))
-      stop('Parameter "lty" mush be numeric!')   
-   else if (length(lty) == 1)
-      lty = rep(lty, ngroups)
-   else if (length(lty) != ngroups)
-      stop('Parameter "lty" should be specified for each group or be common for all!')
-   
-   # if line width is not specified for each group multply default value
-   if (!is.numeric(lwd))
-      stop('Parameter "lwd" mush be numeric!')   
-   else if (length(lwd) == 1)
-      lwd = rep(lwd, ngroups)
-   else if (length(lwd) != ngroups)
-      stop('Parameter "lwd" hould be specified for each group or be common for all!')
-   
-   # if cex factor is not specified for each group multply default value
-   if (!is.numeric(cex))
-      stop('Parameter "cex" mush be numeric!')   
-   else if (length(cex) == 1)
-      cex = rep(cex, ngroups)
-   else if (length(cex) != ngroups)
-      stop('Parameter "cex" hould be specified for each group or be common for all!')
-   
-   # if label color is not specified for each group multply default value
-   if (length(lab.col) == 1)
-      lab.col = rep(lab.col, ngroups)
-   else if (length(lab.col) != ngroups)
-      stop('Parameter "lab.col" should be specified for each group or be common for all!')
-   
+   # check and define colors if necessary
+   col = ifelse(
+      is.null(col),
+      processParam(col, "col", mdaplot.areColors, ngroups)
+   )
+      
    # get plot data for each group 
    pd = list()
    for (i in 1:ngroups) {
-      pd[[i]] = prepare.plot.data(data[[i]], type[i], xlim, ylim, bwd, show.excluded, 
-                                  show.colorbar = FALSE, show.labels, 
-                                  show.lines, show.axes = TRUE)
+      pd[[i]] = prepare.plot.data(
+         data[[i]], type[i], xlim, ylim, bwd, show.excluded, 
+         show.colorbar = FALSE, show.labels, 
+         show.lines, show.axes = TRUE
+      )
    }
    
    # process legend
@@ -1470,76 +1462,66 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       }
    }
    
-   # compute limits   
-   loc.xlim = matrix(unlist(lapply(pd, function(x) {x$lim$xlim})), ncol = 2, byrow = TRUE)
-   loc.ylim = matrix(unlist(lapply(pd, function(y) {y$lim$ylim})), ncol = 2, byrow = TRUE)
-   
-   loc.xlim = c(min(loc.xlim[, 1]), max(loc.xlim[, 2]))
-   loc.ylim = c(min(loc.ylim[, 1]), max(loc.ylim[, 2]))
-   lim = list(xlim = loc.xlim, ylim = loc.ylim)
-
-   # change limits to user defined if any
-   if (!is.null(ylim))
-      lim$ylim = ylim
-   
-   # correct x limits if bar plot should be shown
-   if (any(type == 'h')) {
-      dx = 0.35
-      lim$xlim = lim$xlim + c(-dx, dx)
+   # compute x-limits   
+   if (is.null(xlim)) {
+      xlim = matrix(unlist(lapply(pd, function(x) {x$lim$xlim})), ncol = 2, byrow = TRUE)
+      xlim = c(min(xlim[, 1]), max(xlim[, 2]))
+      # stretch limits if bar plot should be shown
+      xlim = ifelse(type == "h", xlim + c(-0.35, 0.35), xlim)
    }
-   
-   if (!is.null(xlim))
-      lim$xlim = xlim
-   
-   col = mdaplot.getColors(ngroups, colmap = colmap)
-   
-   if (is.null(main) && !is.null(name))
-      main = name
 
-   # define main label
-   if (is.null(main))
-      main = pd[[1]]$data.attr[['name']]
+   # compute y-limits   
+   if (is.null(ylim)) {
+      ylim = matrix(unlist(lapply(pd, function(y) {y$lim$ylim})), ncol = 2, byrow = TRUE)
+      ylim = c(min(ylim[, 1]), max(ylim[, 2]))
+   }
+
+   # combine limits to list
+   lim = list(xlim = xlim, ylim = ylim)   
    
-   # define label for x-axis
-   if (is.null(xlab))
-      xlab = attr(pd[[1]]$x.values, 'name', exact = TRUE)         
+   # define main title if not provided (either as "name" or as "name" attr of first dataset)
+   if (is.null(main)) {      
+      main = ifelse(!is.null(name), name, pd[[1]]$data.attr[['name']])
+   } 
    
-   # define label for y-axis
-   if (is.null(ylab))
-      ylab = attr(pd[[1]]$y.values, 'name', exact = TRUE)
+   # define labels for axes
+   xlab = ifelse(!is.null(xlab), xlab, attr(pd[[1]]$x.values, 'name', exact = TRUE))
+   ylab = ifelse(!is.null(ylab), ylab, attr(pd[[1]]$y.values, 'name', exact = TRUE))
    
    # make an empty plot with proper limits and axis labels
    mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas)
    
    # show lines if needed
-   if (is.numeric(show.lines) && length(show.lines) == 2 )
+   if (is.numeric(show.lines) && length(show.lines) == 2 ) {
       mdaplot.showLines(show.lines)
+   }
    
-   # show initial exes
-   if (show.grid == T)
+   # show greed if needed
+   if (show.grid == T) {
       mdaplot.showGrid()
+   }
    
-   nbarplots =  sum(type == 'h')
+   # count how many plots are bar plots
+   nbarplots = sum(type == 'h')
    
    # make a plot for each group   
    for (i in 1:ngroups) {
-      if (type[i] == 'h')
-         force.x.values = c(i, nbarplots)
-      else
-         force.x.values = NA
-      
-      if (i > 1 && type[i] == 'e')
-         show.labels = F
-      
+
+      # decide if x values should be forced as group index
+      force.x.values = ifelse(type[i] == 'h', c(i, nbarplots), NA)
+
+      # if error bars are shown and i > 1 do not show labels 
+      show.labels = ifelse(i > 1 && type[i] == 'e', FALSE, show.labels)
+
+      # use mdaplot with show.axes = FALSE to create the plot      
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
               lwd = lwd[i], cex = cex[i], force.x.values = force.x.values, bwd = bwd,
               labels = labels, show.grid = F, show.labels = show.labels,
               lab.col = lab.col[i], lab.cex = lab.cex, show.axes = FALSE, ...
       )
    }  
-   
-   
-   # show legend if needed
+      
+   # add legend if required
    if (!is.null(legend) && length(legend) > 0 && show.legend == T) {
       lty[type == 'p' | type == 'h'] = 0
       pch[type == 'l'] = NA_integer_
