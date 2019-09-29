@@ -1,4 +1,8 @@
 language: r
+
 r:
   - release
   - devel
+
+after_success:
+  - Rscript -e 'library(covr); codecov()'  
