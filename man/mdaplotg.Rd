@@ -9,10 +9,10 @@ mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
   xlab = NULL, ylab = NULL, main = NULL, labels = NULL,
   ylim = NULL, xlim = NULL, colmap = "default",
   legend.position = "topright", show.legend = T, show.labels = F,
-  show.lines = F, show.grid = T, xticks = NULL, xticklabels = NULL,
-  yticks = NULL, yticklabels = NULL, show.excluded = FALSE,
-  lab.col = "darkgray", lab.cex = 0.65, xlas = 1, ylas = 1,
-  opacity = 1, ...)
+  show.lines = F, show.grid = T, grid.lwd = 0.5, grid.col = "gray",
+  xticks = NULL, xticklabels = NULL, yticks = NULL,
+  yticklabels = NULL, show.excluded = FALSE, lab.col = "darkgray",
+  lab.cex = 0.65, xlas = 1, ylas = 1, opacity = 1, ...)
 }
 \arguments{
 \item{data}{a matrix, data frame or a list with data values (see details below).}
@@ -58,6 +58,10 @@ mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
 \item{show.lines}{vector with two coordinates (x, y) to show horizontal and vertical line cross the point.}
 
 \item{show.grid}{logical, show or not a grid for the plot.}
+
+\item{grid.lwd}{line thinckness (width) for the grid}
+
+\item{grid.col}{line color for the grid}
 
 \item{xticks}{tick values for x axis.}
 

@@ -9,11 +9,12 @@ mdaplot(data = NULL, plot.data = NULL, type = "p", pch = 16,
   cgroup = NULL, xlim = NULL, ylim = NULL, colmap = "default",
   labels = NULL, main = NULL, xlab = NULL, ylab = NULL,
   show.labels = F, show.colorbar = T, show.lines = F,
-  show.grid = T, show.axes = T, xticks = NULL, yticks = NULL,
-  xticklabels = NULL, yticklabels = NULL, xlas = 0, ylas = 0,
-  lab.col = "darkgray", lab.cex = 0.65, show.excluded = FALSE,
-  col.excluded = "#E0E0E0", nbins = 256, colramp = mdaplot.getColors,
-  force.x.values = NA, opacity = 1, ...)
+  show.grid = T, grid.lwd = 0.5, grid.col = "gray", show.axes = T,
+  xticks = NULL, yticks = NULL, xticklabels = NULL,
+  yticklabels = NULL, xlas = 0, ylas = 0, lab.col = "darkgray",
+  lab.cex = 0.65, show.excluded = FALSE, col.excluded = "#E0E0E0",
+  nbins = 256, colramp = mdaplot.getColors, force.x.values = NA,
+  opacity = 1, ...)
 }
 \arguments{
 \item{data}{a vector, matrix or a data.frame with data values.}
@@ -58,6 +59,10 @@ by a user (if NULL it will be created automatically)}
 \item{show.lines}{vector with two coordinates (x, y) to show horizontal and vertical line cross the point.}
 
 \item{show.grid}{logical, show or not a grid for the plot.}
+
+\item{grid.lwd}{line thinckness (width) for the grid}
+
+\item{grid.col}{line color for the grid}
 
 \item{show.axes}{logical, make a normal plot or show only elements (markers, lines, bars) without axes.}
 

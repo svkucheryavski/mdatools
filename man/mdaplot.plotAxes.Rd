@@ -6,7 +6,8 @@
 \usage{
 mdaplot.plotAxes(xticklabels = NULL, yticklabels = NULL,
   xticks = NULL, yticks = NULL, lim = NULL, main = NULL,
-  xlab = NULL, ylab = NULL, xlas = 0, ylas = 0)
+  xlab = NULL, ylab = NULL, xlas = 0, ylas = 0, show.grid = TRUE,
+  grid.lwd = 0.5, grid.col = "gray")
 }
 \arguments{
 \item{xticklabels}{labels for x ticks}
@@ -28,6 +29,12 @@ mdaplot.plotAxes(xticklabels = NULL, yticklabels = NULL,
 \item{xlas}{orientation of xticklabels}
 
 \item{ylas}{orientation of yticklabels}
+
+\item{show.grid}{logical, show or not axes grid}
+
+\item{grid.lwd}{line thinckness (width) for the grid}
+
+\item{grid.col}{line color for the grid}
 }
 \description{
 Creates an empty axes plane for given parameters
