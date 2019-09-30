@@ -59,17 +59,17 @@ res = regres(yp, y, 2)
 ## run tests
 test_that("R2 is computed correctly", {
    expect_equal(dim(res$r2), c(nresp, ncomp))
-   expect_lte(sum(abs(res$r2 - r2)), 2 * .Machine$double.eps)
+   expect_lte(sum(abs(res$r2 - r2)), 10 * .Machine$double.eps)
 })
 
 test_that("RMSE is computed correctly", {
    expect_equal(dim(res$rmse), c(nresp, ncomp))
-   expect_lte(sum(abs(res$rmse - rmse)), 2 * .Machine$double.eps)
+   expect_lte(sum(abs(res$rmse - rmse)), 10 * .Machine$double.eps)
 })
 
 test_that("Bias is computed correctly", {
    expect_equal(dim(res$bias), c(nresp, ncomp))
-   expect_lte(sum(abs(res$bias - bias)), 2 * .Machine$double.eps)
+   expect_lte(sum(abs(res$bias - bias)), 10 * .Machine$double.eps)
 })
 
 
@@ -159,15 +159,15 @@ res = regres(yp, y, 2)
 ## run tests
 test_that("R2 is computed correctly", {
    expect_equal(dim(res$r2), c(nresp, ncomp))
-   expect_lte(sum(abs(res$r2 - r2)), 2 * .Machine$double.eps)
+   expect_lte(sum(abs(res$r2 - r2)), 10 * .Machine$double.eps)
 })
 
 test_that("RMSE is computed correctly", {
    expect_equal(dim(res$rmse), c(nresp, ncomp))
-   expect_lte(sum(abs(res$rmse - rmse)), 2 * .Machine$double.eps)
+   expect_lte(sum(abs(res$rmse - rmse)), 10 * .Machine$double.eps)
 })
 
 test_that("Bias is computed correctly", {
    expect_equal(dim(res$bias), c(nresp, ncomp))
-   expect_lte(sum(abs(res$bias - bias)), 2 * .Machine$double.eps)
+   expect_lte(sum(abs(res$bias - bias)), 10 * .Machine$double.eps)
 })
