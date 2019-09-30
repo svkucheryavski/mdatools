@@ -292,19 +292,6 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
    return(colors)
 }
 
-#' Plot grid
-#' 
-#' @description
-#' Shows grid for a plot
-#' 
-#' @param lwd
-#' line width for the grid 
-#' 
-mdaplot.showGrid = function(lwd = 0.5) {
-   # Shows a grid for plots   
-   grid(lwd = lwd)   
-}
-
 #' Plot colorbar
 #' 
 #' @description
@@ -653,33 +640,53 @@ errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16, cex = 1) {
 #' orientation of xticklabels
 #' @param ylas
 #' orientation of yticklabels
+#' @param show.grid
+#' logical, show or not axes grid
 #' 
 mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NULL, yticks = NULL, 
-                            lim = NULL, main = NULL, xlab = NULL, ylab = NULL, xlas = 0, ylas = 0) {
+                            lim = NULL, main = NULL, xlab = NULL, ylab = NULL, xlas = 0, ylas = 0,
+                            show.grid = TRUE, grid.lwd = 0.5, grid.col = 'gray') {
    
+
+   # check xticklabels and xticks
+   if (!is.null(xticklabels)) {
+
+      if (is.null(xticks)) {
+         stop('Please, specify "xticks" vector for corresponding "xticklabels".')
+      }
+
+      if (length(xticks) != length(xticklabels)) {
+         stop('Number of elements in "xticks" and "xticklabels" should be the same')
+      }
+   }
+
+   # check yticklabels and yticks
+   if (!is.null(yticklabels)) {
+
+      if (is.null(yticks)) {
+         stop('Please, specify "yticks" vector for corresponding "yticklabels".')
+      }
+
+      if (length(yticklabels) != length(yticks)) {
+         stop('Number of elements in "yticks" and "yticklabels" should be the same')
+      }      
+   }
+
    # make plot without ticks
    plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
         xaxt = 'n', yaxt = 'n')
 
+
    # generate x ticks
    if (is.null(xticks)) {
       xticks = axisTicks(lim$xlim, log = FALSE)
-      # if xticklabels were provided it is expected that xticks should be integers
-      if (!is.null(xticklabels)) 
-         xticks = unique(round(xticks[xticks > 0 & xticks <= length(xticklabels)]))
    }
    
-   # check if xtikclabels are provided and show x-axis
+   # show x-axis
    if (is.null(xticklabels)) {
       axis(1, at = xticks, las = xlas)
    } else {
-      lxtl = length(xticklabels)
-      if (lxtl == length(xticks))
-         axis(1, at = xticks, labels = xticklabels, las = xlas)
-      else if (lxtl > length(xticks) && lxtl >= max(xticks) && min(xticks) > 0)
-         axis(1, at = xticks, labels = xticklabels[xticks], las = xlas)
-      else
-         axis(1, at = xticks, las = xlas)
+      axis(1, at = xticks, labels = xticklabels, las = xlas)
    }
    
    # generate y ticks
@@ -687,18 +694,16 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
       yticks = axisTicks(lim$ylim, log = FALSE)
    }
    
-   # check if yticklabels are provided and show y-axis
+   # show y-axis
    if (is.null(yticklabels)) {
       axis(2, at = yticks, las = ylas)
    } else {
-      lytl = length(yticklabels)
-      if (lytl == length(yticks))
-         axis(2, at = yticks, labels = yticklabels, las = ylas)
-      else if (lytl > length(yticks) && lytl >= max(xticks) && min(yticks) > 0)
-         axis(2, at = yticks, labels = yticklabels[xticks], las = ylas)
-      else
-         axis(2, at = yticks, las = ylas)
+      axis(2, at = yticks, labels = yticklabels, las = ylas)
    }
+   
+   # show grid if needed
+   grid(lwd = grid.lwd, col = grid.col)
+
 }
 
 prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, 
@@ -960,6 +965,10 @@ prepare.plot.data = function(data, type, xlim, ylim, bwd, show.excluded, show.co
 #' vector with two coordinates (x, y) to show horizontal and vertical line cross the point.
 #' @param show.grid  
 #' logical, show or not a grid for the plot.
+#' @param grid.lwd
+#' line thinckness (width) for the grid
+#' @param grid.col
+#' line color for the grid
 #' @param show.axes  
 #' logical, make a normal plot or show only elements (markers, lines, bars) without axes.
 #' @param xticks
@@ -1038,14 +1047,15 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
                    lwd = 1, cex = 1, bwd = 0.8,
                    cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
                    main = NULL, xlab = NULL, ylab = NULL, show.labels = F, 
-                   show.colorbar = T, show.lines = F, show.grid = T, show.axes = T, 
-                   xticks = NULL, yticks = NULL, xticklabels = NULL, yticklabels = NULL, 
+                   show.colorbar = T, show.lines = F, show.grid = T, grid.lwd = 0.5, grid.col = 'gray',
+                   show.axes = T, xticks = NULL, yticks = NULL, xticklabels = NULL, yticklabels = NULL, 
                    xlas = 0, ylas = 0, lab.col = 'darkgray', lab.cex = 0.65, 
                    show.excluded = FALSE, col.excluded = '#E0E0E0', nbins = 256,
                    colramp = mdaplot.getColors, force.x.values = NA, opacity = 1, ...) {   
    if (is.null(plot.data)) {
-      plot.data = prepare.plot.data(data, type, xlim, ylim, bwd, show.excluded, show.colorbar, 
-                                    show.labels, show.lines, show.axes)
+      plot.data = prepare.plot.data(
+         data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, show.lines, show.axes, 
+         show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col)
    }
    
    plot.data$lower -> lower
@@ -1133,7 +1143,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       }
          
       # make an empty plot with proper limits and axis labels
-      mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas) 
+      mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas, show.grid) 
    }
    
    #  get proper colors     
@@ -1147,11 +1157,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       # set cgroup to NULL so method will not try to show color groups or colorbar legend
       cgroup = NULL
    }
-   
-   # show grid if needed
-   if (show.grid == T)
-      mdaplot.showGrid()
-   
+      
    # correct x.values if they were forced by bwd
    if (is.numeric(force.x.values)) {
       x.values = x.values - bwd/2 + (force.x.values[1] - 0.5) * bwd/force.x.values[2]
@@ -1315,6 +1321,10 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 #' vector with two coordinates (x, y) to show horizontal and vertical line cross the point.
 #' @param show.grid  
 #' logical, show or not a grid for the plot.
+#' @param grid.lwd
+#' line thinckness (width) for the grid
+#' @param grid.col
+#' line color for the grid
 #' @param xticks  
 #' tick values for x axis.
 #' @param xticklabels  
@@ -1367,8 +1377,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 1, cex = 1, col = NULL,
                     bwd = 0.8, legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
                     ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', 
-                    show.legend = T, show.labels = F, show.lines = F, show.grid = T, 
-                    xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
+                    show.legend = T, show.labels = F, show.lines = F, show.grid = T, grid.lwd = 0.5,
+                    grid.col = 'gray', xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
                     show.excluded = FALSE, lab.col = 'darkgray', lab.cex = 0.65, xlas = 1, 
                     ylas = 1, opacity = 1, ...) {   
 
@@ -1381,8 +1391,9 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
          # take every line as a group
          name = attr(data, 'name', exact = TRUE)
          
-         if (!all(type %in% c('h', 'l', 'b')))
+         if (!all(type %in% c('h', 'l', 'b'))) {
             stop('Group plot with just one matrix or dataframe is available only for types "h", "l" and "b"!')
+         }
          
          # split data into a list of subsets for each group
          data.list = list()
@@ -1391,21 +1402,20 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
          }
          
          # get rownames as legend values
-         if (is.null(legend))
+         if (is.null(legend)) {
             legend = rownames(data)
+         }
          
          # redefine the data with list
          data = data.list
       } else {
          # split rows into groups using data frame with factors
-         
-         if (is.data.frame(groupby))
-            is.groupby.factor = all(unlist(lapply(groupby, is.factor)))
-         else
-            is.groupby.factor = is.factor(groupby)
-         
-         if (is.groupby.factor == FALSE)
+
+         # check that groupby is a factor or data frame with factor columns         
+         is_groupby_factor = (is.data.frame(groupby) && all(unlist(lapply(groupby, is.factor)))) || is.factor(groupby)
+         if (!is_groupby_factor) {
             stop('Parameter "groupby" should be a factor or data frame with several factors')
+         }
          
          attrs = mda.getattr(data)
          data = as.data.frame(data)
@@ -1467,13 +1477,38 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    }
    
    # process legend
-   if (is.null(legend)) {
-      legend = names(data)
+   getLegend <- function(legend, data, pd, show.legend) {
+
+      if (!show.legend) {
+         return (NULL)
+      }
+
+      if (!is.null(legend)) {
+         return(legend)
+      }      
+
+      if (!is.null(names(data))) {
+         return(names(data))
+      }
+
+      if (all(type == 'h')) {
+         return(unlist(lapply(pd, function(x) {rownames(x$y.values)[1]})))
+      }
+
+      return(unlist(lapply(pd, function(x) {x$data.attr$name})))
+   }
+
+   legend = getLegend(legend, data, pd, show.legend)
+
+   # check legend if required
+   if (show.legend) {
+      
       if (is.null(legend)) {
-         if (all(type == 'h'))
-            legend = unlist(lapply(pd, function(x) {rownames(x$y.values)[1]}))
-         else
-            legend = unlist(lapply(pd, function(x) {x$data.attr$name}))
+         stop('Can not find values for the legend items.')
+      } 
+
+      if (length(legend) != ngroups) {
+         stop('Number of values for "legend" is not the same as number of plot series.')
       }
    }
    
@@ -1495,27 +1530,26 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
    lim = list(xlim = xlim, ylim = ylim)   
    
    # define main title if not provided (either as "name" or as "name" attr of first dataset)
-   main = if (is.null(main)) name
-   main = if (is.null(main)) pd[[1]]$data.attr[['name']]
+   main = if (is.null(main)) name else main
+   main = if (is.null(main)) pd[[1]]$data.attr[['name']] else main
    
    # define labels for axes
-   xlab = if (is.null(xlab)) attr(pd[[1]]$x.values, 'name', exact = TRUE)
-   ylab = if (is.null(ylab)) attr(pd[[1]]$y.values, 'name', exact = TRUE)
+   xlab = if (is.null(xlab)) attr(pd[[1]]$x.values, 'name', exact = TRUE) else xlab
+   ylab = if (is.null(ylab)) attr(pd[[1]]$y.values, 'name', exact = TRUE) else ylab
    
    # make an empty plot with proper limits and axis labels
-   mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas)
+   mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas,
+      show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col)
    
    # show lines if needed
    if (is.numeric(show.lines) && length(show.lines) == 2 ) {
       mdaplot.showLines(show.lines)
    }
-   
-   # show greed if needed
-   if (show.grid == T) mdaplot.showGrid()
-   
+      
    # count how many plots are bar plots
    nbarplots = sum(type == 'h')
-   
+
+
    # make a plot for each group   
    for (i in 1:ngroups) {
 
@@ -1533,11 +1567,11 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       )
    }  
       
-   # add legend if required
-   if (!is.null(legend) && length(legend) > 0 && show.legend == T) {
+   # show legend if required
+   if (show.legend == TRUE) {
       lty[type == 'p' | type == 'h'] = 0
       pch[type == 'l'] = NA_integer_
-      pch[type == 'h'] = 15
+      pch[type == 'h'] = 15      
       mdaplot.showLegend(legend, col, pch = pch, lty = lty, lwd = lwd, cex = cex, 
                          position = legend.position)      
    }   
