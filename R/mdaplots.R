@@ -642,6 +642,10 @@ errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16, cex = 1) {
 #' orientation of yticklabels
 #' @param show.grid
 #' logical, show or not axes grid
+#' @param grid.lwd
+#' line thinckness (width) for the grid
+#' @param grid.col
+#' line color for the grid
 #' 
 mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NULL, yticks = NULL, 
                             lim = NULL, main = NULL, xlab = NULL, ylab = NULL, xlas = 0, ylas = 0,
@@ -1143,7 +1147,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
          
       # make an empty plot with proper limits and axis labels
       mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas, 
-         show.grid = show.gird, grid.lwd = grid.lwd, grid.col = grid.col) 
+         show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col) 
    }
    
    #  get proper colors     
