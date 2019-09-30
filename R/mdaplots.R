@@ -1054,8 +1054,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
                    colramp = mdaplot.getColors, force.x.values = NA, opacity = 1, ...) {   
    if (is.null(plot.data)) {
       plot.data = prepare.plot.data(
-         data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, show.lines, show.axes, 
-         show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col)
+         data, type, xlim, ylim, bwd, show.excluded, show.colorbar, show.labels, show.lines, show.axes)
    }
    
    plot.data$lower -> lower
@@ -1143,7 +1142,8 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       }
          
       # make an empty plot with proper limits and axis labels
-      mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas, show.grid) 
+      mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas, 
+         show.grid = show.gird, grid.lwd = grid.lwd, grid.col = grid.col) 
    }
    
    #  get proper colors     
@@ -1152,8 +1152,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
       col = mdaplot.getColors(cgroup = cgroup, colmap = colmap, opacity = opacity)
    } else {
       # show all points with the same color
-      if (is.null(col))
-         col = mdaplot.getColors(1, colmap = colmap, opacity = opacity)
+      col = if (!is.null(col)) adjustcolor(col, opacity) else mdaplot.getColors(1, colmap = colmap, opacity = opacity)
       # set cgroup to NULL so method will not try to show color groups or colorbar legend
       cgroup = NULL
    }
@@ -1166,10 +1165,10 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    
    # make plot for the data 
    if (type == 'p' && density == FALSE)
-      points(x.values, y.values, col = col, pch = pch, lwd = lwd, cex = cex, ...)
-   if (type == 'd' && density == TRUE)
-      {par(new = T);smoothScatter(x.values, y.values, nbin = nbins, cex = cex, colramp = colramp, axes = F, ann = F,...)}
-   else if (type == 'l' || type == 'b')
+      points(x.values, y.values, col = col, pch = pch, lwd = lwd, cex = cex, ...)   
+   if (type == 'd' && density == TRUE) {
+      par(new = T);smoothScatter(x.values, y.values, nbin = nbins, cex = cex, colramp = colramp, axes = F, ann = F,...)
+   } else if (type == 'l' || type == 'b')
       matlines(x.values, t(y.values), type = type, col = col, pch = pch, cex = cex, lty = lty, lwd = lwd, ...)
    else if (type == 'h')
       bars(x.values, y.values, col = col, bwd = bwd)
@@ -1562,7 +1561,7 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       # use mdaplot with show.axes = FALSE to create the plot      
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
               lwd = lwd[i], cex = cex[i], force.x.values = force.x.values, bwd = bwd,
-              labels = labels, show.grid = F, show.labels = show.labels,
+              labels = labels, show.grid = F, show.labels = show.labels, opacity = opacity[i],
               lab.col = lab.col[i], lab.cex = lab.cex, show.axes = FALSE, ...
       )
    }  
