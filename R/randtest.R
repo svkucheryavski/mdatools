@@ -235,7 +235,10 @@ plotCorr.randtest = function(obj, comp = NULL, main = NULL, xlab = expression(r^
    if (is.null(comp))
       comp = obj$ncomp.selected
 
-   data = list(cbind(obj$corrperm[, comp]^2, obj$statperm[, comp]), cbind(1, obj$stat[, comp]))   
+   data = list(
+      'perm' = cbind(obj$corrperm[, comp]^2, obj$statperm[, comp]), 
+      'est' = cbind(1, obj$stat[, comp])
+   )   
    
    if (is.null(main))
       main = sprintf('Permutations (ncomp = %d)', comp)
