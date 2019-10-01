@@ -209,6 +209,29 @@ test_that('different colormaps can be used with individual opacity values', {
    expect_silent(mdaplotg(data, groupby = groupby_df, opacity = c(0.2, 0.4, 0.6, 0.8), type = 'p', colmap = 'jet'))
 })
 
+## test grid parameters
+test_that('grid can be shown', {
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'p', show.grid = TRUE))
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'l', show.grid = TRUE))
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'h', show.grid = TRUE))
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'b', show.grid = TRUE))
+})
+
+test_that('grid can be hidden', {
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'p', show.grid = FALSE))
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'l', show.grid = FALSE))
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'h', show.grid = FALSE))
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'b', show.grid = FALSE))
+})
+
+test_that('grid color and thickness can be changed', {
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'p', show.grid = TRUE, grid.col = 'red', grid.lwd = '2'))
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'l', show.grid = TRUE, grid.col = 'red', grid.lwd = '2'))
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'h', show.grid = TRUE, grid.col = 'red', grid.lwd = '2'))
+   expect_silent(mdaplotg(data, groupby = groupby, type = 'b', show.grid = TRUE, grid.col = 'red', grid.lwd = '2'))
+})
+
+
 ## handling hidden data
 
 data = mda.exclrows(data, data[, 'Beer'] > 300)
