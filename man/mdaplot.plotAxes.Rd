@@ -7,7 +7,7 @@
 mdaplot.plotAxes(xticklabels = NULL, yticklabels = NULL,
   xticks = NULL, yticks = NULL, lim = NULL, main = NULL,
   xlab = NULL, ylab = NULL, xlas = 0, ylas = 0, show.grid = TRUE,
-  grid.lwd = 0.5, grid.col = "gray")
+  grid.lwd = 0.5, grid.col = "lightgray")
 }
 \arguments{
 \item{xticklabels}{labels for x ticks}
