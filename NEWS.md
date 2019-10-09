@@ -5,7 +5,7 @@ v.0.10.0
 * added Travis CI integration so you can see how safe it is to install latest GitHub version (pre-release)
 * parameter `opacity` can now be used with `mdaplotg()` plots and be different for each group
 * new more contrast default colormap for plots (use `colmap="old"`if you do not like it)
-* 
+* both `mdaplot()` and `mdaplotg()` based plots now can take parameters `grid.col` and `grid.lwd`
 
 v.0.9.6
 =======
