@@ -263,10 +263,10 @@ test_that("hidden data is shown as gray if needed and labels are produced correc
 })
 
 test_that("hidden data can be used with labels as values", {
-   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels= "values"))
-   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels= "values"))
-   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels= "values"))
-   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels= "values"))
+   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "values"))
 })
 
 test_that("hidden data can be used with labels as names", {
@@ -277,10 +277,10 @@ test_that("hidden data can be used with labels as names", {
 })
 
 test_that("hidden data can be used with labels as indices", {
-   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels="indices"))
-   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels="indices"))
-   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels="indices"))
-   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels="indices"))
+   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "indices"))
 })
 
 context("mdaplotg: plots with list as data")
