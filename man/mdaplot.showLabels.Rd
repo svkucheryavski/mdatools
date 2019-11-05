@@ -5,13 +5,13 @@
 \title{Plot labels
 Shows labels for data elements (points, bars) on a plot.}
 \usage{
-mdaplot.showLabels(x.values, y.values, labels, pos = 3, cex = 0.65,
+mdaplot.showLabels(x_values, y_values, labels, pos = 3, cex = 0.65,
   col = "darkgray", type = NULL)
 }
 \arguments{
-\item{x.values}{a vector with x-values}
+\item{x_values}{a vector with x-values}
 
-\item{y.values}{a vector with y-values}
+\item{y_values}{a vector with y-values}
 
 \item{labels}{a vector with labels}
 

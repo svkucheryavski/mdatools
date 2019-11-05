@@ -4,19 +4,11 @@
 \alias{mdaplot.getAxesLim}
 \title{Calculate axes limits}
 \usage{
-mdaplot.getAxesLim(x.values, y.values, lower = NULL, upper = NULL,
-  show.colorbar = F, show.lines = F, legend = NULL,
-  show.legend = F, legend.position = "topright", show.labels = F)
+mdaplot.getAxesLim(plot_data, show.colorbar = F, show.lines = F,
+  legend = NULL, show.legend = F, legend.position = "topright",
+  show.labels = F)
 }
 \arguments{
-\item{x.values}{a vector with x values.}
-
-\item{y.values}{a vector or a matrix with y values.}
-
-\item{lower}{a lower margin for y limits.}
-
-\item{upper}{an upper margin for y limits.}
-
 \item{show.colorbar}{logical, show or not the colorbar on the plot.}
 
 \item{show.lines}{logical or numeric with line coordinates to be shown on the plot.}
@@ -28,6 +20,14 @@ mdaplot.getAxesLim(x.values, y.values, lower = NULL, upper = NULL,
 \item{legend.position}{position of the legend (see \code{\link{mdaplotg}} for details).}
 
 \item{show.labels}{logical, show or not labels for the data objects}
+
+\item{x_values}{a vector with x values.}
+
+\item{y_values}{a vector or a matrix with y values.}
+
+\item{lower}{a lower margin for y limits.}
+
+\item{upper}{an upper margin for y limits.}
 }
 \value{
 Returns a list with four limits for the x and y axes.

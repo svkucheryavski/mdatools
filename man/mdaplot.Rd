@@ -14,7 +14,7 @@ mdaplot(data = NULL, plot.data = NULL, type = "p", pch = 16,
   xticklabels = NULL, yticklabels = NULL, xlas = 0, ylas = 0,
   lab.col = "darkgray", lab.cex = 0.65, show.excluded = FALSE,
   col.excluded = "#E0E0E0", nbins = 256, colramp = mdaplot.getColors,
-  force.x.values = NA, opacity = 1, ...)
+  force.x_values = NA, opacity = 1, ...)
 }
 \arguments{
 \item{data}{a vector, matrix or a data.frame with data values.}
@@ -91,7 +91,7 @@ by a user (if NULL it will be created automatically)}
 
 \item{colramp}{Colramp function for density scatter plot}
 
-\item{force.x.values}{vector with corrected x-values for a bar plot (do not specify this manually)}
+\item{force.x_values}{vector with corrected x-values for a bar plot (do not specify this manually)}
 
 \item{opacity}{opacity for plot colors (value between 0 and 1)}
 
