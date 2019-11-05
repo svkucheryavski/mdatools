@@ -1,11 +1,16 @@
 v.0.10.0
 ========
+
+## General 
 * code has been refactored and improved
 * improved code coverage with tests
-* added Travis CI integration so you can see how safe it is to install latest GitHub version (pre-release)
+* added Travis CI integration so you can see how safe it is to install the latest GitHub version (pre-release)
+## Plotting functions
 * parameter `opacity` can now be used with `mdaplotg()` plots and be different for each group
-* new more contrast default colormap for plots (use `colmap="old"`if you do not like it)
+* new more contrast default colormap for plots (use `colmap="old"` if you do not like it)
 * both `mdaplot()` and `mdaplotg()` based plots now can take parameters `grid.col` and `grid.lwd`
+* better handling of scatter plots with `pch=21...25` using `col` and `bg` parameters
+
 
 v.0.9.6
 =======
