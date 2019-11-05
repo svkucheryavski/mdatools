@@ -1,5 +1,8 @@
-context("mdaplotg: plots with matrix as data and groupby parameter")
+################################################################
+# Block 1: using matrix as data source plus groupby parameter  #
+################################################################
 
+context("mdaplotg: plots with matrix as data and groupby parameter")
 par(mfrow = c(2, 2))
 data(people)
 data <- people[, -6]
@@ -283,5 +286,48 @@ test_that("hidden data can be used with labels as indices", {
    expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "indices"))
 })
 
+
+#######################################
+# Block 2: using list as data source  #
+#######################################
+
+# TODO: extend the tests for block 2
+
 context("mdaplotg: plots with list as data")
+
+par(mfrow = c(2, 2))
+data(people)
+males <- people[people[, 'Sex'] == -1, -6]
+females <- people[people[, 'Sex'] == 1, -6]
+data <- list('males' = males, 'females' = females)
+
+## shortcut for plotting function
+tf <- function(...) mdaplotg(data, ...)
+
+# simple plots with groupby parameter
+
+test_that("providing data as list works for any plot", {
+   expect_silent(tf(type = "p"))
+   expect_silent(tf(type = "l"))
+   expect_silent(tf(type = "b"))
+   expect_silent(tf(type = "h"))
+})
+
+
+#######################""################
+# Block 3: using matrix as data source  #
+#########################""##############
+
+# TODO: extend the tests for block 3
+
 context("mdaplotg: plots with matrix as data without groupby")
+
+## shortcut for plotting function
+tf <- function(...) mdaplotg(people[1:4, -6], ...)
+
+test_that("providing data as matrix works for line and bar plots only", {
+   expect_silent(tf(type = "l"))
+   expect_silent(tf(type = "b"))
+   expect_silent(tf(type = "h"))
+   expect_error(tf(type = "p"))
+})
