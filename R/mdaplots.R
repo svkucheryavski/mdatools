@@ -68,31 +68,38 @@ mdaplot.formatValues <- function(data, round.only = F, digits = 3) {
 #' position of the legend (see \code{\link{mdaplotg}} for details).
 #' @param show.labels
 #' logical, show or not labels for the data objects
-#' 
+#'
 #' @details
 #' Data can be a list with several matrices or just one matrix. The matrices can have single.x
-#' configuration, where first column is x values and the others are y values or normal configuration,
-#' where every odd column is x values and every even is corresponding y values.
+#' configuration, where first column is x values and the others are y values or normal 
+#' configuration, where every odd column is x values and every even is corresponding y values.
 #'
 #' @return
 #' Returns a list with four limits for the x and y axes.
-#'  
+#'
 mdaplot.getAxesLim <- function(plot_data, show.colorbar = F, show.lines = F, legend = NULL, 
-   show.legend = F, legend.position = 'topright', show.labels = F) {
+   show.legend = F, legend.position = "topright", show.labels = F, show.excluded = F) {
 
    if (is.null(plot_data))
       return(NULL)
-    
-   if (is.null(show.labels))
+
+   if (is.null(show.labels)) {
       show.labels <- FALSE
+   }
 
    x_values <- plot_data$x_values
    y_values <- plot_data$y_values
+
+   if (show.excluded) {
+      x_values <- c(x_values, plot_data$x_values_excluded)
+      y_values <- rbind(y_values, plot_data$y_values_excluded)
+   }
+
    lower <- plot_data$lower
    upper <- plot_data$upper
-   
+
    # scale for margins - 7.5% of plot width or height
-   scale <- 0.075 
+   scale <- 0.075
 
    # find range for x values
    xmin <- min(x_values)
@@ -101,19 +108,19 @@ mdaplot.getAxesLim <- function(plot_data, show.colorbar = F, show.lines = F, leg
    # find range for y values
    ymin <- min(y_values, if (is.null(lower)) y_values else y_values - lower, na.rm = TRUE)
    ymax <- max(y_values, if (is.null(lower)) y_values else y_values + upper, na.rm = TRUE)
-   
+
    # if min and max are equal add 5% on each side (or just 0.05 if they are zero)
    if (xmin == xmax) {
       xmin <- xmin - 0.05 * ifelse(xmin == 0, 1, xmin)
       xmax <- xmax + 0.05 * ifelse(xmax == 0, 1, xmax)
    }
-   
+
    # if min and max are equal add 5% on each side (or just 0.05 if they are zero)
    if (ymin == ymax) {
       ymin <- ymin - 0.05 * ifelse(ymin == 0, 1, ymin)
       ymax <- ymax + 0.05 * ifelse(ymax == 0, 1, ymax)
    }
-   
+
    # correct limits if some lines that have to be shown are outside the data points cloud
    if (is.numeric(show.lines)) {
       xmax <- max(xmax, show.lines[1], na.rm = TRUE)
@@ -121,46 +128,46 @@ mdaplot.getAxesLim <- function(plot_data, show.colorbar = F, show.lines = F, leg
       ymax <- max(ymax, show.lines[2], na.rm = TRUE)
       ymax <- max(ymax, show.lines[2], na.rm = TRUE)
    }
-   
+
    # calculate margins: dx and dy
    dx <- (xmax - xmin) * scale
    dy <- (ymax - ymin) * scale
-   
+
    # define limits with margins
    xlim <- c(xmin - dx, xmax + dx)
    ylim <- c(ymin - dy, ymax + dy)
-   
+
    # add an extra margin to y limit if colorbar must be shown
    if (show.colorbar == T) ylim[2] <- ylim[2] + dy * 3
-   
+
    # add extra margins if legend must be shown
    if (show.legend == T && !is.null(legend)) {
       legend.size <- mdaplot.showLegend(legend, position = legend.position, plot = F)
       w <- legend.size$rect$w
       h <- legend.size$rect$h
-      
-      if (legend.position == 'topleft') {
+
+      if (legend.position == "topleft") {
          xlim[1] <- xlim[1] - dx * 0.2
-         ylim[2] <- ylim[2] + dy * 0.2     
-      } else if (legend.position == 'top') {
-         ylim[2] = ylim[2] + h + 0.2 * dy  
-      } else if (legend.position == 'topright') {
+         ylim[2] <- ylim[2] + dy * 0.2
+      } else if (legend.position == "top") {
+         ylim[2] = ylim[2] + h + 0.2 * dy
+      } else if (legend.position == "topright") {
          xlim[2] <- xlim[2] + dx * 0.2
-         ylim[2] <- ylim[2] + dy * 0.2     
-      } else if (legend.position == 'bottomleft') {
+         ylim[2] <- ylim[2] + dy * 0.2
+      } else if (legend.position == "bottomleft") {
          xlim[1] <- xlim[1] - dx * 0.2
-         ylim[1] <- ylim[1] - dy * 0.2   
-      } else if (legend.position == 'bottom') {
+         ylim[1] <- ylim[1] - dy * 0.2
+      } else if (legend.position == "bottom") {
          ylim[1] = ylim[1] - h - 0.2 * dy
-      } else if (legend.position == 'bottomright') {
+      } else if (legend.position == "bottomright") {
          xlim[2] <- xlim[2] + dx * 0.2
          ylim[1] <- ylim[1] - dy * 0.2
-      }   
-   }  
-   
+      }
+   }
+
    # add extra margins if labels must be shown
    if (show.labels == T) {
-      ylim[1] <- ylim[1] - dy 
+      ylim[1] <- ylim[1] - dy
       ylim[2] <- ylim[2] + dy
    }   
    
@@ -538,10 +545,10 @@ mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default'
 }
 
 #' Show bars on axes
-#' 
+#'
 #' @description
 #' Shows bars (bar plot) on predefined axes
-#' 
+#'
 #' @param x
 #' vector with x values (centers of bars)
 #' @param y
@@ -551,20 +558,18 @@ mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default'
 #' @param bwd
 #' width of the bars (as a ratio for max width)
 #' @param border
-#' color of bar edges 
-#'  
-bars = function(x, y, col = NULL, bwd = 0.8, border = NA) {
-   
+#' color of bar edges
+#'
+bars <- function(x, y, col = NULL, bwd = 0.8, border = NA) {
+
    if (length(bwd) == 1)
-      bwd = matrix(bwd, ncol = length(x))
-  
+      bwd <- matrix(bwd, ncol = length(x))
+
    if (length(col) != length(y))
-      col = rep(col, length.out = length(y))
-   
-   for (i in 1:length(x)) {
-      rect(x[i] - bwd[i]/2, 0, x[i] + bwd[i]/2, y[i], col = col[i], border = border)      
-   }
-}  
+      col <- rep(col, length.out = length(y))
+
+   rect(x - bwd / 2, 0, x + bwd / 2, y, col = col, border = border)
+}
 
 #' Show error bars on a plot
 #' 
@@ -847,7 +852,7 @@ split_plot_data <- function(plot_data, type) {
    # for errobar plot first row is y-values the other one or two rows are limits for error bars
    if (type == "e") {
       plot_data$y_values <- data[1, , drop = F]
-      attr(plot_data$y_values, "name") <- rownames(data)[1]        
+      attr(plot_data$y_values, "name") <- rownames(data)[1]
       plot_data$lower <- data[2, ]
       plot_data$upper <- if (nrow(data) > 2) data[3, ] else plot_data$lower
 
@@ -871,7 +876,7 @@ process_excluded_rows <- function(plot_data, type) {
    excluded_data <- plot_data$excluded_data
 
    # if nothing to show - return
-   if (is.null(excluded_data) || nrow(excluded_data) == 0) {
+   if (is.null(excluded_data) || (nrow(excluded_data) == 0)) {
       return(plot_data)
    }
 
@@ -881,11 +886,11 @@ process_excluded_rows <- function(plot_data, type) {
 
    if (type == "p") {
       plot_data$x_values_excluded <- excluded_data[, 1]
-      plot_data$y_values_excluded <- excluded_data[, 2]
+      plot_data$y_values_excluded <- excluded_data[, 2, drop = F]
 
       return(plot_data)
    }
-   
+
    if (type == "l" || type == "b") {
       plot_data$x_values_excluded <- plot_data$x_values
       plot_data$y_values_excluded <- excluded_data
@@ -1020,10 +1025,10 @@ prepare_plot_data_labels <- function(plot_data, type, labels) {
 #' @param show.axes
 #' logical, show or not axes
 #' @param labels
-#' vector with labels 
-#' 
+#' vector with labels
+#'
 #' @export
-create_plot_data = function(data, type, xlim, ylim, bwd, show.excluded, 
+create_plot_data <- function(data, type, xlim, ylim, bwd, show.excluded,
    show.colorbar, show.labels, show.lines, show.axes, labels) {
 
    # check plot type 
@@ -1043,10 +1048,10 @@ create_plot_data = function(data, type, xlim, ylim, bwd, show.excluded,
       type <- "p"
       plot_data$density <- TRUE
    }
-         
-   # split plot data to x and y values      
+
+   # split plot data to x and y values
    plot_data <- split_plot_data(plot_data, type)
-  
+
    # process excluded rows if they have to be shown
    if (show.excluded) {
       plot_data <- process_excluded_rows(plot_data, type)
@@ -1065,19 +1070,17 @@ create_plot_data = function(data, type, xlim, ylim, bwd, show.excluded,
    # TODO: limits should take into account presence of excluded values (see last test)
    # TODO: labels for l/b should take into presence of excluded values (see last tests)
    # TODO: labels = "values" in case of l/b show double labels - why?
-   # TODO: make boxplot faster
-   
+
    plot_data$lim <- mdaplot.getAxesLim(
       plot_data,
-      show.colorbar = show.colorbar, 
+      show.colorbar = show.colorbar,
       show.labels = show.labels,
-      show.lines = show.lines
-   )         
+      show.lines = show.lines,
+      show.excluded = show.excluded
+   )
 
    return(plot_data)
 }
-
-
 
 
 #' Plotting function for a single set of objects
@@ -1206,7 +1209,7 @@ create_plot_data = function(data, type, xlim, ylim, bwd, show.excluded,
 #' # See all examples in the tutorial.
 #' 
 #' @export
-mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NULL, lty = 1, 
+mdaplot <- function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NULL, lty = 1, 
                    lwd = 1, cex = 1, bwd = 0.8,
                    cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
                    main = NULL, xlab = NULL, ylab = NULL, show.labels = F, 
@@ -1215,16 +1218,16 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
                    xticklabels = NULL, yticklabels = NULL, 
                    xlas = 0, ylas = 0, lab.col = 'darkgray', lab.cex = 0.65, 
                    show.excluded = FALSE, col.excluded = '#E0E0E0', nbins = 256,
-                   colramp = mdaplot.getColors, force.x_values = NA, opacity = 1, ...) {   
-   
+                   colramp = mdaplot.getColors, force.x_values = NA, opacity = 1, ...) {
+
    if (is.null(plot.data)) {
       # get the data for plot
-      plot.data = create_plot_data(
+      plot.data <- create_plot_data(
          data, type, xlim, ylim, bwd, show.excluded, show.colorbar, 
          show.labels, show.lines, show.axes, labels
       )
    }
-   
+
    plot.data$lower -> lower
    plot.data$upper -> upper
    plot.data$x_values -> x_values
@@ -1243,7 +1246,7 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
    if (length(excluded_rows) > 0 && !is.null(cgroup) && length(cgroup) > 1) {
       cgroup <- cgroup[-excluded_rows]
    }
-   
+
    # processs labels and ticklabels
    if (show.axes == T) {  
       # if some columns are excluded and xticklabels provided for all - exclude hidden values
@@ -1253,114 +1256,125 @@ mdaplot = function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NU
 
       # number of x-values      
       nxvals <- length(x_values)
-      
+
       # define title and axis labels
       if (is.null(main)) main <- plot.data$name
       if (is.null(xlab)) xlab = attr(x_values, "name")         
       if (is.null(ylab)) ylab = attr(y_values, "name")
-      
-      # correct xticklabels and xticks if only one variable is provided for line or bar plot      
+
+      # correct xticklabels and xticks if only one variable is provided for line or bar plot
       if (type != "p" && nxvals == 1) {
-         xticks = 1
-         if (is.null(xticklabels)) xticklabels = x_values
+         xticks <- 1
+         if (is.null(xticklabels)) xticklabels <- x_values
       }
-      
+
       # correct x axis limits and bar width if it is a bar plot
       if (type == "h") {
          if (nxvals == 1) {
             lim$xlim <- c(x_values - bwd, x_values + bwd)
          } else {
             bwd <- bwd * min(diff(x_values))
-            lim$xlim <- c(min(x_values) - bwd/2, max(x_values) + bwd/2)
+            lim$xlim <- c(min(x_values) - bwd / 2, max(x_values) + bwd / 2)
          }
       }
-      
+
       # redefine x axis limits if user specified values
       if (!is.null(xlim)) {
          lim$xlim <- xlim
       }
-      
+
       # redefine y axis limits if user specified values
       if (!is.null(ylim)) {
          lim$ylim <- ylim
       }
-      
+
       # if no x-values were provided to line or bar plot we generate them as integer numbers
       if ( (type %in% c("h", "l", "b")) && is.null(xticks) && is.null(data_attrs$xaxis.values)) {
          xticks <- axisTicks(lim$xlim, log = FALSE)
          xticks <- unique(round(xticks[xticks > 0 & xticks <= max(x_values)]))
       }
-         
+
       # make an empty plot with proper limits and axis labels
-      mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas, 
-         show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col) 
+      mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas,
+         show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col)
    }
-   
-   #  get proper colors     
-   if (density == FALSE && !is.null(cgroup) && !(type == "e")) {   
+
+   #  get proper colors
+   if (density == FALSE && !is.null(cgroup) && !(type == "e")) {
       # show color groups according to cdata values
       col <- mdaplot.getColors(cgroup = cgroup, colmap = colmap, opacity = opacity)
    } else {
       # show all points with the same color
-      col <- if (!is.null(col)) adjustcolor(col, opacity) else mdaplot.getColors(1, colmap = colmap, opacity = opacity)
+      if (!is.null(col)) {
+         col <- adjustcolor(col, opacity)
+      }  else {
+         col <- mdaplot.getColors(1, colmap = colmap, opacity = opacity)
+      }
       # set cgroup to NULL so method will not try to show color groups or colorbar legend
       cgroup <- NULL
    }
-      
+
    # correct x_values if they were forced by bwd
    if (is.numeric(force.x_values)) {
-      x_values <- x_values - bwd/2 + (force.x_values[1] - 0.5) * bwd/force.x_values[2]
-      bwd <- bwd/force.x_values[2]
+      x_values <- x_values - bwd / 2 + (force.x_values[1] - 0.5) * bwd / force.x_values[2]
+      bwd <- bwd / force.x_values[2]
    }
-   
+
    # make plot for the data 
    if (type == "p" && density == FALSE) {
-      points(x_values, y_values, col = col, pch = pch, lwd = lwd, cex = cex, ...)   
+      points(x_values, y_values, col = col, pch = pch, lwd = lwd, cex = cex, ...)
    } else if (type == "d" && density == TRUE) {
       par(new = T)
-      smoothScatter(x_values, y_values, nbin = nbins, cex = cex, colramp = colramp, axes = F, ann = F,...)
+      smoothScatter(
+         x_values, y_values, nbin = nbins, cex = cex, 
+         colramp = colramp, axes = F, ann = F,
+         ...
+      )
    } else if (type == "l" || type == "b") {
-      matlines(x_values, t(y_values), type = type, col = col, pch = pch, cex = cex, lty = lty, lwd = lwd, ...)
+      matlines(
+         x_values, t(y_values), type = type, col = col, 
+         pch = pch, cex = cex, lty = lty, lwd = lwd, 
+         ...
+      )
    } else if (type == "h") {
       bars(x_values, y_values, col = col, bwd = bwd)
    } else if (type == "e") {
       errorbars(x_values, lower, upper, y = y_values, col = col, cex = cex, pch = pch)
    }
-   
+
    # show excluded rows
    if (!is.null(x_values_excluded) && !is.null(y_values_excluded)) {
       if (type == "p") {
-         points(x_values_excluded, y_values_excluded, type = type, col = col.excluded, 
+         points(x_values_excluded, y_values_excluded, type = type, col = col.excluded,
             pch = pch, lwd = lwd, cex = cex, ...)
       } else if (type == "l" || type == "b") {
-         matlines(x_values_excluded, t(y_values_excluded), type = type, col = col.excluded, 
+         matlines(x_values_excluded, t(y_values_excluded), type = type, col = col.excluded,
             pch = pch, lty = lty, lwd = lwd, cex = cex, ...)
       }
-   }  
-   
+   }
+
    # show lines if needed
    if (is.numeric(show.lines) && length(show.lines) == 2 ) {
       mdaplot.showLines(show.lines)
    }
-   
 
    # show lables 
    if (show.labels && !is.null(labels)) {
-      mdaplot.showLabels(x_values, y_values, labels, type = type, col = lab.col, cex = lab.cex)   
-   }      
-      
+      mdaplot.showLabels(x_values, y_values, labels, type = type, col = lab.col, cex = lab.cex)
+   }
+
    # show lables for excluded rows
    if (show.labels && !is.null(labels_excluded)) {
       mdaplot.showLabels(
-         x_values_excluded, y_values_excluded, labels_excluded, 
+         x_values_excluded, y_values_excluded, labels_excluded,
          type = type, col = lab.col, cex = lab.cex
-      )   
-   }      
-   
+      )
+   }
+
    # show colorbar if needed
    if (!is.null(cgroup) && show.colorbar) {
-      mdaplot.showColorbar(cgroup, colmap, lab.col = lab.col, lab.cex = lab.cex)   
-   }   
+      mdaplot.showColorbar(cgroup, colmap, lab.col = lab.col, lab.cex = lab.cex)
+   }
 }
 
 #' Plotting function for several sets of objects
