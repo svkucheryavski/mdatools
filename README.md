@@ -14,10 +14,11 @@ For more details and examples read a [Bookdown tutorial](http://svkucheryavski.g
 What is new
 -----------
 
-Latest release (0.10.0) is available from GitHub and CRAN (from 1.12.2019). It contains improved plotting tools and additional instruments for assessing PCA model complexity. A lot of code was refactored and new tests have been added to ensure correctness and stability. Badges with current build status can be seen on top of this page, which makes the use of Git Hub hosted developer version more secure. The Bookdown tutorial has been also revised significantly. 
+Latest release (0.10.0) is available from GitHub and CRAN (from 1.12.2019). It contains improved plotting tools and additional instruments for assessing PCA model complexity. A lot of code was refactored and new tests have been added to ensure correctness and stability. The Bookdown tutorial has been also revised significantly. 
+
+Starting from this release, several badges added to the top of this file. The first shows current build status, which makes the use of Git Hub hosted developer version more secure. If build is passing it means that the code currently available in master branch passes all CRAN checks and internal tests. Other badges show number of downloads from CRAN and GitHub as well as how much of code is currently covered with tests. 
 
 A full list of changes is available [here](NEWS.md)
-
 
 How to install
 --------------
