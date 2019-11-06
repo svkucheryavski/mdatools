@@ -10,6 +10,7 @@ v.0.10.0
 * new more contrast default colormap for plots (use `colmap="old"` if you do not like it)
 * both `mdaplot()` and `mdaplotg()` based plots now can take parameters `grid.col` and `grid.lwd`
 * better handling of scatter plots with `pch=21...25` using `col` and `bg` parameters
+* faster bar plot in case of many variables
 
 
 v.0.9.6

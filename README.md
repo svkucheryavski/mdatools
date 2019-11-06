@@ -3,6 +3,7 @@ Multivariate Data Analysis Tools
 ![Travis (build status)](https://img.shields.io/travis/svkucheryavski/mdatools?color=blue&style=flat-square "Travis CI build status")
 ![Downloads (CRAN)](https://cranlogs.r-pkg.org/badges/grand-total/mdatools?color=blue&logo=R&style=flat-square "Downloads from CRAN")
 ![GitHub All Releases](https://img.shields.io/github/downloads/svkucheryavski/mdatools/total?color=blue&logo=Github&style=flat-square "Downloads from GitHub")
+[![codecov](https://codecov.io/gh/svkucheryavski/mdatools/branch/0.10.0/graph/badge.svg?style=flat-square)](https://codecov.io/gh/svkucheryavski/mdatools)
 
 *mdatools* is an R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for [Chemometrics](http://en.wikipedia.org/wiki/Chemometrics). It was created for an introductory PhD course on Chemometrics given at Section of Chemical Engineering, Aalborg University. 
 
@@ -13,7 +14,7 @@ For more details and examples read a [Bookdown tutorial](http://svkucheryavski.g
 What is new
 -----------
 
-Latest release (0.10.0) is available from GitHub and CRAN (from 1.11.2019). It contains improved plotting tools and additional instruments for assessing PCA model complexity. A lot of code was refactored and new tests have been added to ensure correctness and stability. Badges with current build status can be seen on top of this page, which makes the use of Git Hub hosted developer version more secure. The Bookdown tutorial has been also revised significantly. 
+Latest release (0.10.0) is available from GitHub and CRAN (from 1.12.2019). It contains improved plotting tools and additional instruments for assessing PCA model complexity. A lot of code was refactored and new tests have been added to ensure correctness and stability. Badges with current build status can be seen on top of this page, which makes the use of Git Hub hosted developer version more secure. The Bookdown tutorial has been also revised significantly. 
 
 A full list of changes is available [here](NEWS.md)
 
