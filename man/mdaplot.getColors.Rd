@@ -12,7 +12,7 @@ mdaplot.getColors(ngroups = NULL, cgroup = NULL, colmap = "default",
 
 \item{cgroup}{vector of values, used for color grouping of plot points or lines.}
 
-\item{colmap}{which colormap to use ('default', 'gray', 'old', or user defined in form c('color1', 'color2', ...)).}
+\item{colmap}{which colormap to use ('default', 'gray', 'old', or user defined in form c('col1', 'col2', ...)).}
 
 \item{opacity}{opacity for colors (between 0 and 1)}
 

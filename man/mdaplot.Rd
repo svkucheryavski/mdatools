@@ -86,7 +86,7 @@ by a user (if NULL it will be created automatically)}
 
 \item{col.excluded}{color for the excluded objects (rows)}
 
-\item{nbins}{if scatter density plot is shown, number of segments to split the plot area into 
+\item{nbins}{if scatter density plot is shown, number of segments to split the plot area into
 (see also ?smoothScatter)}
 
 \item{colramp}{Colramp function for density scatter plot}
@@ -101,33 +101,33 @@ by a user (if NULL it will be created automatically)}
 \code{mdaplot} is used to make different kinds of plot for one set of data objects.
 }
 \details{
-Most of the parameters are similar to what are used with standard \code{plot} function. The 
+Most of the parameters are similar to what are used with standard \code{plot} function. The
 differences are described below.
-  
-The function makes a plot of one set of objects. It can be a set of points (scatter plot), 
-bars, lines, scatter-lines, errorbars og an image. The data is organized as a data frame, 
-matrix or vector. For scatter and only first two columns will be used, for bar plot only 
-values from the first row. It is recommended to use \code{\link{mda.subset}} method if plot 
-should be made only for a subset of the data, especially if you have any excluded rows or 
+
+The function makes a plot of one set of objects. It can be a set of points (scatter plot),
+bars, lines, scatter-lines, errorbars og an image. The data is organized as a data frame,
+matrix or vector. For scatter and only first two columns will be used, for bar plot only
+values from the first row. It is recommended to use \code{\link{mda.subset}} method if plot
+should be made only for a subset of the data, especially if you have any excluded rows or
 columns or other special attributed, described in the Bookdown tutorial.
 
 If data is a data frame and contains one or more factors, they will be converted to a dummy
-variables (using function \code{\link{mda.df2mat}}) and appears at the end (last columns) if 
+variables (using function \code{\link{mda.df2mat}}) and appears at the end (last columns) if
 line or bar plot is selected.
- 
-The function allows to colorize lines and points according to values of a parameter 
+
+The function allows to colorize lines and points according to values of a parameter
 \code{cgroup}. The parameter must be a vector with the same elements as number of objects (rows)
-in the data. The values are divided into up to eight intervals and for each interval a 
-particular color from a selected color scheme is assigned. Parameter \code{show.colorbar} 
+in the data. The values are divided into up to eight intervals and for each interval a
+particular color from a selected color scheme is assigned. Parameter \code{show.colorbar}
 allows to turn off and on a color bar legend for this option.
 
 The used color scheme is defined by the \code{colmap} parameter. The default scheme is based
-on color brewer (colorbrewer2.org) diverging scheme with eight colors. There is also a gray 
-scheme (\code{colmap = 'gray'}) and user can define its own just by specifing the needed 
-sequence of colors (e.g. \code{colmap = c('red', 'yellow', 'green')}, two colors is minimum). 
-The scheme will then be generated automatically as a gradient among the colors.  
+on color brewer (colorbrewer2.org) diverging scheme with eight colors. There is also a gray
+scheme (\code{colmap = 'gray'}) and user can define its own just by specifing the needed
+sequence of colors (e.g. \code{colmap = c('red', 'yellow', 'green')}, two colors is minimum).
+The scheme will then be generated automatically as a gradient among the colors.
 
-Besides that the function allows to change tick values and corresponding tick labels for x and 
+Besides that the function allows to change tick values and corresponding tick labels for x and
 y axis, see Bookdown tutorial for more details.
 }
 \examples{

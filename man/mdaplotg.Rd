@@ -87,23 +87,23 @@ mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
 \item{...}{other plotting arguments.}
 }
 \description{
-\code{mdaplotg} is used to make different kinds of plots or their combination for several sets 
+\code{mdaplotg} is used to make different kinds of plots or their combination for several sets
 of objects.
 }
 \details{
-The \code{mdaplotg} function is used to make a plot with several sets of objects. Simply 
-speaking, use it when you need a plot with legend. For example to show line plot with spectra 
-from calibration and test set, scatter plot for height and weight values for women and men, and 
+The \code{mdaplotg} function is used to make a plot with several sets of objects. Simply
+speaking, use it when you need a plot with legend. For example to show line plot with spectra
+from calibration and test set, scatter plot for height and weight values for women and men, and
 so on.
 
 Most of the parameters are similar to \code{\link{mdaplot}}, the difference is described below.
 
 The data should be organized as a list, every item is a matrix with data for one set of objects.
 Alternatively you can provide data as a matrix and use parameter \code{groupby} to create groups.
-See tutorial for more details. 
+See tutorial for more details.
 
-There is no color grouping option, because color is used to separate the sets. Marker symbol, 
-line style and type, etc. can be defined as a single value (one for all sets) and as a vector 
+There is no color grouping option, because color is used to separate the sets. Marker symbol,
+line style and type, etc. can be defined as a single value (one for all sets) and as a vector
 with one value for each set.
 }
 \author{

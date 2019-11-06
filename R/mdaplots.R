@@ -60,14 +60,8 @@ mdaplot.formatValues <- function(data, round.only = F, digits = 3) {
 
 #'
 
-#' @param x_values
-#' a vector with x values.
-#' @param y_values
-#' a vector or a matrix with y values.
-#' @param lower
-#' a lower margin for y limits.
-#' @param upper
-#' an upper margin for y limits.
+#' @param plot_data
+#' a list with plot data and related parameters returned by `create_plot_data()`.
 #' @param show.colorbar
 #' logical, show or not the colorbar on the plot.
 #' @param show.lines
@@ -80,6 +74,8 @@ mdaplot.formatValues <- function(data, round.only = F, digits = 3) {
 #' position of the legend (see \code{\link{mdaplotg}} for details).
 #' @param show.labels
 #' logical, show or not labels for the data objects
+#' @param show.excluded
+#' logical, show or not excluded values
 #'
 #' @details
 #' Data can be a list with several matrices or just one matrix. The matrices can have single.x
@@ -91,11 +87,9 @@ mdaplot.formatValues <- function(data, round.only = F, digits = 3) {
 #' Returns a list with four limits for the x and y axes.
 #'
 mdaplot.getAxesLim <- function(plot_data, show.colorbar = F, show.lines = F, legend = NULL,
-
    show.legend = F, legend.position = "topright", show.labels = F, show.excluded = F) {
 
-   if (is.null(plot_data))
-      return(NULL)
+   if (is.null(plot_data)) return(NULL)
 
    if (is.null(show.labels)) {
       show.labels <- FALSE
@@ -191,18 +185,16 @@ mdaplot.getAxesLim <- function(plot_data, show.colorbar = F, show.lines = F, leg
 
 #' Color values for plot elements
 #'
-
 #' @description
 #' Generate vector with color values for plot objects (lines, points, bars), depending
 #' on number of groups for the objects.
 #'
-
 #' @param ngroups
 #' number of groups.
 #' @param cgroup
 #' vector of values, used for color grouping of plot points or lines.
 #' @param colmap
-#' which colormap to use ('default', 'gray', 'old', or user defined in form c('color1', 'color2', ...)).
+#' which colormap to use ('default', 'gray', 'old', or user defined in form c('col1', 'col2', ...)).
 #' @param opacity
 #' opacity for colors (between 0 and 1)
 #' @param maxsplits
@@ -210,11 +202,9 @@ mdaplot.getAxesLim <- function(plot_data, show.colorbar = F, show.lines = F, leg
 #'
 #' @importFrom grDevices col2rgb colorRampPalette rgb adjustcolor
 #'
-
 #' @return
 #' Returns vector with generated color values
 #'
-
 #' @export
 mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', opacity = 1, maxsplits = 64) {
 
@@ -924,11 +914,11 @@ process_excluded_rows <- function(plot_data, type) {
    excluded_data <- plot_data$excluded_data
 
    # if nothing to show - return
-   if (is.null(excluded_data) || (nrow(excluded_data) == 0)) {
+   if (is.null(excluded_data) || (nrow(excluded_data) == 0)) {
       return(plot_data)
    }
 
-   if (type == "e" || type == "h") {
+   if (type == "e" || type == "h") {
       stop("Bar plor and errorbar plot can not be made for matrix with excluded rows.")
    }
 
@@ -1033,7 +1023,7 @@ prepare_plot_data_labels <- function(plot_data, type, labels) {
       labels <- y_values
       labels_excluded <- y_values_excluded
 
-      if (type == "l" || type == "b") {
+      if (type == "l" || type == "b") {
          labels <- apply(labels, 2, max)
          labels_excluded <- if (!is.null(labels_excluded)) apply(labels_excluded, 2, max)
       }

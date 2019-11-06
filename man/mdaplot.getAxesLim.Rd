@@ -6,9 +6,11 @@
 \usage{
 mdaplot.getAxesLim(plot_data, show.colorbar = F, show.lines = F,
   legend = NULL, show.legend = F, legend.position = "topright",
-  show.labels = F)
+  show.labels = F, show.excluded = F)
 }
 \arguments{
+\item{plot_data}{a list with plot data and related parameters returned by `create_plot_data()`.}
+
 \item{show.colorbar}{logical, show or not the colorbar on the plot.}
 
 \item{show.lines}{logical or numeric with line coordinates to be shown on the plot.}
@@ -21,23 +23,17 @@ mdaplot.getAxesLim(plot_data, show.colorbar = F, show.lines = F,
 
 \item{show.labels}{logical, show or not labels for the data objects}
 
-\item{x_values}{a vector with x values.}
-
-\item{y_values}{a vector or a matrix with y values.}
-
-\item{lower}{a lower margin for y limits.}
-
-\item{upper}{an upper margin for y limits.}
+\item{show.excluded}{logical, show or not excluded values}
 }
 \value{
 Returns a list with four limits for the x and y axes.
 }
 \description{
-Calculates axes limits depending on data values that have to be plotted, 
+Calculates axes limits depending on data values that have to be plotted,
 extra plot elements that have to be shown and margins.
 }
 \details{
 Data can be a list with several matrices or just one matrix. The matrices can have single.x
-configuration, where first column is x values and the others are y values or normal configuration,
-where every odd column is x values and every even is corresponding y values.
+configuration, where first column is x values and the others are y values or normal
+configuration, where every odd column is x values and every even is corresponding y values.
 }
