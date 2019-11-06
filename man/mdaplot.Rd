@@ -5,28 +5,31 @@
 \title{Plotting function for a single set of objects}
 \usage{
 mdaplot(data = NULL, plot.data = NULL, type = "p", pch = 16,
-  col = NULL, lty = 1, lwd = 1, cex = 1, bwd = 0.8,
-  cgroup = NULL, xlim = NULL, ylim = NULL, colmap = "default",
-  labels = NULL, main = NULL, xlab = NULL, ylab = NULL,
-  show.labels = F, show.colorbar = TRUE, show.lines = FALSE,
-  show.grid = TRUE, grid.lwd = 0.5, grid.col = "lightgray",
-  show.axes = TRUE, xticks = NULL, yticks = NULL,
-  xticklabels = NULL, yticklabels = NULL, xlas = 0, ylas = 0,
-  lab.col = "darkgray", lab.cex = 0.65, show.excluded = FALSE,
-  col.excluded = "#E0E0E0", nbins = 256, colramp = mdaplot.getColors,
-  force.x_values = NA, opacity = 1, ...)
+  col = NULL, bg = par("bg"), lty = 1, lwd = 1, cex = 1,
+  bwd = 0.8, cgroup = NULL, xlim = NULL, ylim = NULL,
+  colmap = "default", labels = NULL, main = NULL, xlab = NULL,
+  ylab = NULL, show.labels = F, show.colorbar = TRUE,
+  show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
+  grid.col = "lightgray", show.axes = TRUE, xticks = NULL,
+  yticks = NULL, xticklabels = NULL, yticklabels = NULL, xlas = 0,
+  ylas = 0, lab.col = "darkgray", lab.cex = 0.65,
+  show.excluded = FALSE, col.excluded = "#E0E0E0", nbins = 256,
+  colramp = mdaplot.getColors, force.x_values = NA, opacity = 1,
+  pch.colinv = FALSE, ...)
 }
 \arguments{
 \item{data}{a vector, matrix or a data.frame with data values.}
 
 \item{plot.data}{a list of parameters and values obtained after preprocessing of original data provided
-by a user (if NULL it will be created automatically)}
+by a user (if NULL it will be created automatically).}
 
 \item{type}{type of the plot ('p', 'l', 'b', 'h', 'e', 'i').}
 
 \item{pch}{a character for markers (same as \code{plot} parameter).}
 
 \item{col}{a color for markers or lines (same as \code{plot} parameter).}
+
+\item{bg}{background color for scatter plots wich `pch=21:25`.}
 
 \item{lty}{the line type (same as \code{plot} parameter).}
 
@@ -60,40 +63,42 @@ by a user (if NULL it will be created automatically)}
 
 \item{show.grid}{logical, show or not a grid for the plot.}
 
-\item{grid.lwd}{line thinckness (width) for the grid}
+\item{grid.lwd}{line thinckness (width) for the grid.}
 
-\item{grid.col}{line color for the grid}
+\item{grid.col}{line color for the grid.}
 
 \item{show.axes}{logical, make a normal plot or show only elements (markers, lines, bars) without axes.}
 
-\item{xticks}{values for x ticks}
+\item{xticks}{values for x ticks.}
 
-\item{yticks}{values for y ticks}
+\item{yticks}{values for y ticks.}
 
 \item{xticklabels}{labels for x ticks.}
 
 \item{yticklabels}{labels for y ticks.}
 
-\item{xlas}{orientation of xticklabels}
+\item{xlas}{orientation of xticklabels.}
 
-\item{ylas}{orientation of yticklabels}
+\item{ylas}{orientation of yticklabels.}
 
 \item{lab.col}{color for data point labels.}
 
 \item{lab.cex}{size for data point labels.}
 
-\item{show.excluded}{logical, show or hide rows marked as excluded (attribute `exclrows`)}
+\item{show.excluded}{logical, show or hide rows marked as excluded (attribute `exclrows`).}
 
-\item{col.excluded}{color for the excluded objects (rows)}
+\item{col.excluded}{color for the excluded objects (rows).}
 
-\item{nbins}{if scatter density plot is shown, number of segments to split the plot area into
+\item{nbins}{if scatter density plot is shown, number of segments to split the plot area into.
 (see also ?smoothScatter)}
 
-\item{colramp}{Colramp function for density scatter plot}
+\item{colramp}{Colramp function for density scatter plot.}
 
-\item{force.x_values}{vector with corrected x-values for a bar plot (do not specify this manually)}
+\item{force.x_values}{vector with corrected x-values for a bar plot (do not specify this manually).}
 
-\item{opacity}{opacity for plot colors (value between 0 and 1)}
+\item{opacity}{opacity for plot colors (value between 0 and 1).}
+
+\item{pch.colinv}{allows to swap values for `col` and `bg` for scatter plots with `pch` valyes from 21 to 25.}
 
 \item{...}{other plotting arguments.}
 }

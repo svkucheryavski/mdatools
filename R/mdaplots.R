@@ -1136,7 +1136,7 @@ create_plot_data <- function(data, type, xlim, ylim, bwd, show.excluded,
 #' a vector, matrix or a data.frame with data values.
 #' @param plot.data
 #' a list of parameters and values obtained after preprocessing of original data provided
-#' by a user (if NULL it will be created automatically)
+#' by a user (if NULL it will be created automatically).
 #' @param type
 #' type of the plot ('p', 'l', 'b', 'h', 'e', 'i').
 #' @param cgroup
@@ -1147,6 +1147,8 @@ create_plot_data <- function(data, type, xlim, ylim, bwd, show.excluded,
 #' a character for markers (same as \code{plot} parameter).
 #' @param col
 #' a color for markers or lines (same as \code{plot} parameter).
+#' @param bg
+#' background color for scatter plots wich `pch=21:25`.
 #' @param lty
 #' the line type (same as \code{plot} parameter).
 #' @param lwd
@@ -1176,40 +1178,42 @@ create_plot_data <- function(data, type, xlim, ylim, bwd, show.excluded,
 #' @param show.grid
 #' logical, show or not a grid for the plot.
 #' @param grid.lwd
-#' line thinckness (width) for the grid
+#' line thinckness (width) for the grid.
 #' @param grid.col
-#' line color for the grid
+#' line color for the grid.
 #' @param show.axes
 #' logical, make a normal plot or show only elements (markers, lines, bars) without axes.
 #' @param xticks
-#' values for x ticks
+#' values for x ticks.
 #' @param yticks
-#' values for y ticks
+#' values for y ticks.
 #' @param xticklabels
 #' labels for x ticks.
 #' @param yticklabels
 #' labels for y ticks.
 #' @param xlas
-#' orientation of xticklabels
+#' orientation of xticklabels.
 #' @param ylas
-#' orientation of yticklabels
+#' orientation of yticklabels.
 #' @param lab.col
 #' color for data point labels.
 #' @param lab.cex
 #' size for data point labels.
 #' @param show.excluded
-#' logical, show or hide rows marked as excluded (attribute `exclrows`)
+#' logical, show or hide rows marked as excluded (attribute `exclrows`).
 #' @param col.excluded
-#' color for the excluded objects (rows)
+#' color for the excluded objects (rows).
 #' @param nbins
-#' if scatter density plot is shown, number of segments to split the plot area into
+#' if scatter density plot is shown, number of segments to split the plot area into.
 #' (see also ?smoothScatter)
 #' @param colramp
-#' Colramp function for density scatter plot
+#' Colramp function for density scatter plot.
 #' @param force.x_values
-#' vector with corrected x-values for a bar plot (do not specify this manually)
+#' vector with corrected x-values for a bar plot (do not specify this manually).
 #' @param opacity
-#' opacity for plot colors (value between 0 and 1)
+#' opacity for plot colors (value between 0 and 1).
+#' @param pch.colinv
+#' allows to swap values for `col` and `bg` for scatter plots with `pch` valyes from 21 to 25.
 #' @param ...
 #' other plotting arguments.
 #'
@@ -1253,16 +1257,18 @@ create_plot_data <- function(data, type, xlim, ylim, bwd, show.excluded,
 #' # See all examples in the tutorial.
 #'
 #' @export
-mdaplot <- function(data = NULL, plot.data = NULL, type = "p", pch = 16, col = NULL, lty = 1,
-                   lwd = 1, cex = 1, bwd = 0.8,
-                   cgroup = NULL, xlim = NULL, ylim = NULL, colmap = "default", labels = NULL,
-                   main = NULL, xlab = NULL, ylab = NULL, show.labels = F,
-                   show.colorbar = TRUE, show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
-                   grid.col = "lightgray", show.axes = TRUE, xticks = NULL, yticks = NULL,
-                   xticklabels = NULL, yticklabels = NULL,
-                   xlas = 0, ylas = 0, lab.col = "darkgray", lab.cex = 0.65,
-                   show.excluded = FALSE, col.excluded = "#E0E0E0", nbins = 256,
-                   colramp = mdaplot.getColors, force.x_values = NA, opacity = 1, ...) {
+mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
+      pch = 16, col = NULL, bg = par("bg"), 
+      lty = 1, lwd = 1, cex = 1, bwd = 0.8,
+      cgroup = NULL, xlim = NULL, ylim = NULL, colmap = "default", labels = NULL,
+      main = NULL, xlab = NULL, ylab = NULL, show.labels = F,
+      show.colorbar = TRUE, show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
+      grid.col = "lightgray", show.axes = TRUE, xticks = NULL, yticks = NULL,
+      xticklabels = NULL, yticklabels = NULL,
+      xlas = 0, ylas = 0, lab.col = "darkgray", lab.cex = 0.65,
+      show.excluded = FALSE, col.excluded = "#E0E0E0", nbins = 256,
+      colramp = mdaplot.getColors, force.x_values = NA, opacity = 1,
+      pch.colinv = FALSE, ...) {
 
    if (is.null(plot.data)) {
       # get the data for plot
@@ -1273,6 +1279,7 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p", pch = 16, col = N
       )
    }
 
+   # get values from the plot data list to make code cleaner
    plot.data$lower -> lower
    plot.data$upper -> upper
    plot.data$x_values -> x_values
@@ -1370,7 +1377,12 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p", pch = 16, col = N
    # make plot for the data
 
    if (type == "p" && density == FALSE) {
-      points(x_values, y_values, col = col, pch = pch, lwd = lwd, cex = cex, ...)
+      if (pch.colinv) {
+         bg.old <- bg
+         bg <- col
+         col <- bg.old
+      }
+      points(x_values, y_values, col = col, bg = bg, pch = pch, lwd = lwd, cex = cex, ...)
    } else if (type == "d" && density == TRUE) {
       par(new = T)
       smoothScatter(
