@@ -1402,7 +1402,7 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p", pch = 16, col = N
    }
 
    # show lines if needed
-   if (is.numeric(show.lines) && length(show.lines) == 2 ) {
+   if (is.numeric(show.lines) && length(show.lines) == 2) {
       mdaplot.showLines(show.lines)
    }
 
@@ -1413,7 +1413,7 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p", pch = 16, col = N
    }
 
    # show lables for excluded rows
-   if (show.labels && !is.null(labels_excluded) && length(labels_excluded) > 0) {
+   if (show.labels && show.excluded && length(labels_excluded) > 0) {
       mdaplot.showLabels(
          x_values_excluded, y_values_excluded, labels_excluded,
          type = type, col = lab.col, cex = lab.cex
