@@ -246,9 +246,10 @@ test_that("grid color and thickness can be changed", {
 })
 
 
-## handling hidden data
+## handling hidden columns
 
-data <- mda.exclrows(data, data[, "Beer"] > 300)
+data(people)
+data <- people[, -6]
 data <- mda.exclcols(data, "Height")
 
 test_that("hidden data is not shown by default", {
@@ -279,6 +280,7 @@ test_that("hidden data can be used with labels as names", {
    expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "names"))
 })
 
+
 test_that("hidden data can be used with labels as indices", {
    expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "indices"))
    expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "indices"))
@@ -286,6 +288,90 @@ test_that("hidden data can be used with labels as indices", {
    expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "indices"))
 })
 
+
+## handling hidden columns
+
+data(people)
+data <- people[, -6]
+data <- mda.exclrows(data, data[, "Beer"] > 300)
+
+test_that("hidden data is not shown by default", {
+   expect_silent(tf(groupby, type = "p"))
+   expect_silent(tf(groupby, type = "l"))
+   expect_silent(tf(groupby, type = "b"))
+   expect_silent(tf(groupby, type = "h"))
+})
+
+test_that("hidden data is shown as gray if needed and labels are produced correctly", {
+   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T))
+   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T))
+   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T))
+   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T))
+})
+
+test_that("hidden data can be used with labels as values", {
+   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "values"))
+})
+
+test_that("hidden data can be used with labels as names", {
+   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "names"))
+   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "names"))
+   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "names"))
+   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "names"))
+})
+
+test_that("hidden data can be used with labels as indices", {
+   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "indices"))
+})
+
+## handling both hidden columns and rows
+
+data(people)
+data <- people[, -6]
+data <- mda.exclrows(data, data[, "Beer"] > 300)
+data <- mda.exclcols(data, "Height")
+tf(groupby, type = "h")
+
+test_that("hidden data is not shown by default", {
+   expect_silent(tf(groupby, type = "p"))
+   expect_silent(tf(groupby, type = "l"))
+   expect_silent(tf(groupby, type = "b"))
+   expect_silent(tf(groupby, type = "h"))
+})
+
+test_that("hidden data is shown as gray if needed and labels are produced correctly", {
+   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T))
+   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T))
+   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T))
+   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T))
+})
+
+test_that("hidden data can be used with labels as values", {
+   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "values"))
+})
+
+test_that("hidden data can be used with labels as names", {
+   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "names"))
+   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "names"))
+   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "names"))
+   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "names"))
+})
+
+test_that("hidden data can be used with labels as indices", {
+   expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "indices"))
+})
 
 #######################################
 # Block 2: using list as data source  #
@@ -297,9 +383,9 @@ context("mdaplotg: plots with list as data")
 
 par(mfrow = c(2, 2))
 data(people)
-males <- people[people[, 'Sex'] == -1, -6]
-females <- people[people[, 'Sex'] == 1, -6]
-data <- list('males' = males, 'females' = females)
+males <- people[people[, "Sex"] == -1, -6]
+females <- people[people[, "Sex"] == 1, -6]
+data <- list("males" = males, "females" = females)
 
 ## shortcut for plotting function
 tf <- function(...) mdaplotg(data, ...)
