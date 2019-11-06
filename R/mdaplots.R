@@ -1,19 +1,24 @@
 #' Check color values
-#' 
+#'
+
 #' @description
 #' Checks if elements of argument are valid color values
-#' 
+#'
+
 #' @param palette
 #' vector with possibly color values (names, RGB, etc.)
-#' 
+#'
+
 mdaplot.areColors = function(palette) {
    sapply(palette, function(X) {tryCatch(is.matrix(col2rgb(X)), error = function(e) FALSE)} )
 }
 
 #' Format vector with numeric values
-#' 
+#'
+
 #' @description
-#' Format vector with values, so only significant decimal numbers are left. 
+#' Format vector with values, so only significant decimal numbers are left.
+
 #'
 #' @param data
 #' vector or matrix with values
@@ -21,13 +26,16 @@ mdaplot.areColors = function(palette) {
 #' logical, do formatting or only round the values
 #' @param digits
 #' how many significant digits take into account
-#' 
+#'
+
 #' @details
 #' Function takes into accound difference between values and the values themselves.
-#' 
+#'
+
 #' @return
 #' matrix with formatted values
-#' 
+#'
+
 mdaplot.formatValues <- function(data, round.only = F, digits = 3) {
    if (round.only == T)
       fdata <- round(data, digits)
@@ -43,11 +51,15 @@ mdaplot.formatValues <- function(data, round.only = F, digits = 3) {
 }
 
 #' Calculate axes limits
-#' 
+#'
+
 #' @description
-#' Calculates axes limits depending on data values that have to be plotted, 
-#' extra plot elements that have to be shown and margins. 
-#' 
+#' Calculates axes limits depending on data values that have to be plotted,
+
+#' extra plot elements that have to be shown and margins.
+
+#'
+
 #' @param x_values
 #' a vector with x values.
 #' @param y_values
@@ -71,13 +83,15 @@ mdaplot.formatValues <- function(data, round.only = F, digits = 3) {
 #'
 #' @details
 #' Data can be a list with several matrices or just one matrix. The matrices can have single.x
-#' configuration, where first column is x values and the others are y values or normal 
+#' configuration, where first column is x values and the others are y values or normal
+
 #' configuration, where every odd column is x values and every even is corresponding y values.
 #'
 #' @return
 #' Returns a list with four limits for the x and y axes.
 #'
-mdaplot.getAxesLim <- function(plot_data, show.colorbar = F, show.lines = F, legend = NULL, 
+mdaplot.getAxesLim <- function(plot_data, show.colorbar = F, show.lines = F, legend = NULL,
+
    show.legend = F, legend.position = "topright", show.labels = F, show.excluded = F) {
 
    if (is.null(plot_data))
@@ -169,18 +183,20 @@ mdaplot.getAxesLim <- function(plot_data, show.colorbar = F, show.lines = F, leg
    if (show.labels == T) {
       ylim[1] <- ylim[1] - dy
       ylim[2] <- ylim[2] + dy
-   }   
-   
+   }
+
    # return the limits
    return(list(xlim = xlim, ylim = ylim))
 }
 
 #' Color values for plot elements
-#' 
+#'
+
 #' @description
 #' Generate vector with color values for plot objects (lines, points, bars), depending
 #' on number of groups for the objects.
-#' 
+#'
+
 #' @param ngroups
 #' number of groups.
 #' @param cgroup
@@ -193,13 +209,15 @@ mdaplot.getAxesLim <- function(plot_data, show.colorbar = F, show.lines = F, leg
 #' if contenuous values are used for color gruping - how many groups to create?
 #'
 #' @importFrom grDevices col2rgb colorRampPalette rgb adjustcolor
-#' 
+#'
+
 #' @return
 #' Returns vector with generated color values
-#' 
+#'
+
 #' @export
-mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', opacity = 1, maxsplits = 64) { 
-   
+mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', opacity = 1, maxsplits = 64) {
+
    # if non of the main arguments defined assume only one color is needed
    if (is.null(ngroups) && is.null(cgroup)) {
       ngroups <- 1
@@ -207,11 +225,11 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
 
    # returns palette for given colormap
    get_palette <- function(colmap) {
-      
+
       if (length(colmap) > 1) {
          return(colmap)
       }
-      
+
       if (colmap == 'gray') {
          # grayscale
          return(c("#E8E8E8", "#D6D6D6", "#C4C4C4", "#B2B2B2", "#9A9A9A", "#808080", "#484848", "#101010"))
@@ -227,21 +245,22 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
          return(c("#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F"))
       }
 
-      # the current default colormap 
+      # the current default colormap
+
       return(c("#2679B2", "#1C9AA8", "#379531", "#EED524", "#FB7F28", "#D22C2F"))
    }
 
    # returns vector with colors
    prepare_colors <- function(colfunc, ncolors, opacity) {
       colors <- colfunc(ncolors)
-      
+
       if (is.null(opacity) || all(opacity == 1)) {
          return (colors)
       }
 
       if (length(opacity) == 1){
          opacity <- rep(opacity, ncolors)
-      } 
+      }
 
       if (length(opacity) != ncolors) {
          stop('Wrong number of values for "opacity" parameter!')
@@ -258,13 +277,14 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
    palette <- get_palette(colmap)
    if (!all(mdaplot.areColors(palette))) {
       stop("Parameter 'colmap' must contains valid color values or name of palette!")
-   }   
+   }
 
    # if grayscale palette and only one color is needed reorder pallete so the black is first
    if (all(colmap == 'gray') && is.null(cgroup) && ngroups == 1) {
-      palette <- rev(palette)      
+      palette <- rev(palette)
+
    }
-   
+
    # define color function based on the palette
    colfunc <- colorRampPalette(palette)
 
@@ -279,7 +299,7 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
       ngroups <- length(attr(cgroup, 'levels'))
       return (prepare_colors(colfunc, ngroups, opacity)[as.numeric(cgroup)])
    }
-   
+
    # if not split it into groups
    if (is.null(ngroups)) {
       ngroups <- length(unique(cgroup))
@@ -295,10 +315,12 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
 }
 
 #' Plot colorbar
-#' 
+#'
+
 #' @description
 #' Shows a colorbar if plot has color grouping of elements (points or lines).
-#' 
+#'
+
 #' @param cgroup
 #' a vector with values used to make color grouping of the elements
 #' @param colmap
@@ -307,7 +329,8 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
 #' color for legend labels
 #' @param lab.cex
 #' size for legend labels
-#' 
+#'
+
 mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray', lab.cex = 0.65) {
    # get number of levels for the cgroup
 
@@ -315,73 +338,77 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray'
          # get colors for 8 groups based on colormap
          col = mdaplot.getColors(ngroups = 12, colmap = colmap)
          ncol = length(unique(col))
-      
+
          # split values to intervals
          cgroupl = levels(cut(as.vector(cgroup), ncol))
-      
+
          # get left and right values for the intervals
-         lvals = as.numeric( sub("\\((.+),.*", "\\1", cgroupl) ) 
-         rvals = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", cgroupl) ) 
-      
+         lvals = as.numeric( sub("\\((.+),.*", "\\1", cgroupl) )
+
+         rvals = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", cgroupl) )
+
          # correct issue with first element
          if (min(cgroup) != lvals[1])
             lvals[1] = min(cgroup)
-      
+
          # combine values and define matrix for labels
          vals = c(lvals, rvals[ncol])
          labels = matrix(0, ncol = 2, nrow = ncol + 1)
    } else {
       if (!is.factor(cgroup))
          cgroup = factor(cgroup)
-   
+
       nlevels = length(attr(cgroup, 'levels'))
-      
+
       # no splitting is needed, just use factors as labels
       col = mdaplot.getColors(ngroups = nlevels, colmap = colmap)
       ncol = length(unique(col))
       vals = levels(cgroup)
       labels = matrix(0, ncol = 2, nrow = ncol)
-   }  
-   
+   }
+
    # use formatted values as rownames for labels matrix
    rownames(labels) = mdaplot.formatValues(vals)
-   
+
    # get size of the plotting area and calculate size for color bar elements
-   lim = par('usr') 
-   
+   lim = par('usr')
+
    dx = lim[2] - lim[1]
    dy = lim[4] - lim[3]
-   
+
    w = (dx * 0.8)/ncol
    h = dy * 0.015
-   
+
    x = lim[1] + dx * 0.1
    y = lim[4] - (h + 0.1 * h);
-   
+
    # show colorbar and define coordinates for labels
    for (i in 1:ncol)
    {
-      rect(x + w * (i - 1), y, x + w * i, y - h, col = col[i], border = NA)      
+      rect(x + w * (i - 1), y, x + w * i, y - h, col = col[i], border = NA)
+
       labels[i, ] = c(x + w * (i - 1), y - h)
-   }	
-   
+   }
+
    # add last value or shift coordinates if labels shall be centered
    if (nrow(labels) > i)
       labels[i + 1, ] = c(x + w * i, y - h)
    else
       labels[, 1] = labels[, 1] + w/2
-   
+
    # show labels for colorbar regions
-   mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col, 
+   mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col,
+
                       cex = lab.cex)
 }
 
-
 #' Plot legend
-#' 
+#'
+
 #' @description
 #' Shows a legend for plot elements or their groups.
-#' 
+#'
+
 #' @param legend
 #' vector with text elements for the legend items
 #' @param col
@@ -401,7 +428,8 @@ mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray'
 #' @param plot
 #' logical, show legend or just calculate and return its size
 #'
-mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, cex = 1, 
+mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, cex = 1,
+
                               bty = 'o', position = 'topright', plot = T) {
    # which positions need multiple columns
    onecolpos = c('topright', 'topleft', 'bottomright', 'bottomleft')
@@ -409,33 +437,38 @@ mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, c
 
    if (!(position %in% c(onecolpos, multcolpos))) {
       stop("Wrong values for 'legend.position' argument!")
-   } 
+   }
 
    # compute number of columns
    ncol <- if (position %in% onecolpos) 1 else length(legend)
-   
+
    # calculate inset values depending on a ration between width and height of a plot
-   lim <- par('plt') 
+   lim <- par('plt')
+
    dx <- lim[2] - lim[1]
-   dy <- lim[4] - lim[3]   
+   dy <- lim[4] - lim[3]
+
    inset <- c(0.02, 0.02 * (dx/dy))
-   
+
    # show legend
-   legend(position, legend, col = col, pch = pch, lty = lty, pt.cex = cex, lwd = lwd, 
+   legend(position, legend, col = col, pch = pch, lty = lty, pt.cex = cex, lwd = lwd,
+
           cex = 0.85, plot = plot, inset = inset, bg = 'white', box.lwd = 0.75, box.col = 'gray',
-          ncol = ncol)   
+          ncol = ncol)
+
 }
 
-
 #' Plot labels
-#' Shows labels for data elements (points, bars) on a plot. 
+#' Shows labels for data elements (points, bars) on a plot.
+
 #'
 #' @param x_values
 #' a vector with x-values
 #' @param y_values
 #' a vector with y-values
 #' @param labels
-#' a vector with labels 
+#' a vector with labels
+
 #' @param pos
 #' position of the labels relative to the points
 #' @param cex
@@ -449,38 +482,45 @@ mdaplot.showLegend = function(legend, col, pch = NULL, lty = NULL, lwd = NULL, c
 #' Rownames of matrix \code{data} are used as labels. If matrix has no rownames, row numbers
 #' will be used instead.
 #'
-mdaplot.showLabels = function(x_values, y_values, labels, pos = 3, 
-                              cex = 0.65, col = 'darkgray', type = NULL) {
+mdaplot.showLabels <- function(x_values, y_values, labels, pos = 3,
+                              cex = 0.65, col = "darkgray", type = NULL) {
+
    
-   if (!is.null(dim(y_values)) && nrow(y_values) > 1 && type != 'p')
-      y_values = apply(y_values, 2, max)
-   
+   if (length(labels) == 0 || length(x_values) == 0 || length(y_values) == 0) {
+      warning("No labels available.")
+      return;
+   }
+
+   if (!is.null(dim(y_values)) && nrow(y_values) > 1 && type != "p") {
+      y_values <- apply(y_values, 2, max)
+   }
+
    # show labels
-   x_values = as.vector(x_values)
-   y_values = as.vector(y_values)
-   
-   if (is.numeric(labels))
-      labels = mdaplot.formatValues(labels)
-   
-   if (!( any(is.nan(x_values)) || any(is.nan(y_values)) )) {
-      if (!is.null(type) && type == 'h') {   
+   x_values <- as.vector(x_values)
+   y_values <- as.vector(y_values)
+
+   if (is.numeric(labels)) {
+      labels <- mdaplot.formatValues(labels)
+   }
+
+   print(labels)
+   if (!(any(is.nan(x_values)) || any(is.nan(y_values)))) {
+      if (!is.null(type) && type == "h") {
          # show labels properly for bars with positive and negative values
-         neg = y_values < 0
-         if (sum(neg) > 0)
-            text(x_values[neg], y_values[neg], labels[neg], cex = cex, pos = 1, col = col)   
-         if (sum(!neg) > 0)
-            text(x_values[!neg], y_values[!neg], labels[!neg], cex = cex, pos = 3, col = col)   
+         text(x_values, y_values, labels, cex = cex, pos = ifelse(y_values < 0, 1, 3), col = col)
       } else {
-         text(x_values, y_values, labels, cex = cex, pos = pos, col = col)   
+         print(labels)
+         text(x_values, y_values, labels, cex = cex, pos = pos, col = col)
       }
    }
-}  
-
+}
 
 #' Plot lines
-#' 
+#'
+
 #' @description
-#' Shows horisontal and vertical lines on a plot. 
+#' Shows horisontal and vertical lines on a plot.
+
 #'
 #' @param point
 #' vector with two values: x coordinate for vertical point y for horizontal
@@ -495,18 +535,20 @@ mdaplot.showLabels = function(x_values, y_values, labels, pos = 3,
 #'  If it is needed to show only one line, the other coordinate shall be set to NA.
 #'
 mdaplot.showLines = function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2)) {
-   
+
    if (!is.na(point[2]))
       abline(h = point[2], lty = lty, lwd = lwd, col = col)
    if (!is.na(point[1]))
       abline(v = point[1], lty = lty, lwd = lwd, col = col)
-}  
+}
 
 #' Regression line for data points
-#' 
+#'
+
 #' @description
 #' Shows linear fit line for data points.
-#' 
+#'
+
 #' @param data
 #' data values
 #' @param lty
@@ -514,34 +556,45 @@ mdaplot.showLines = function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2
 #' @param lwd
 #' line width
 #' @param colmap
-#' color map 
+#' color map
+
 #' @param col
 #' color of lines
-#' 
-mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default', col = NULL) {   
-   if (is.list(data)) {   
+#'
+
+mdaplot.showRegressionLine = function(data, lty = 1, lwd = 1, colmap = 'default', col = NULL) {
+
+   if (is.list(data)) {
+
       ngroups = length(data)
-      
-      if (is.null(col))         
+
+      if (is.null(col))
+
          col = mdaplot.getColors(ngroups = ngroups, colmap = colmap)
       else if (length(col) == 1)
          col = rep(col, ngroups)
-      
-      for (i in 1:ngroups)   
-      {   
+
+      for (i in 1:ngroups)
+
+      {
+
          x = data[[i]][, 1]
          y = data[[i]][, 2]
          abline(lm(y ~ x), lty = lty, lwd = lwd, col = col[i])
-      }          
+      }
+
    } else {
-      if (is.null(col))         
+      if (is.null(col))
+
          col = mdaplot.getColors(ngroups = 1, colmap = colmap)
-      
+
       x = data[, 1]
       y = data[, 2]
-      
-      abline(lm(y ~ x), lty = lty, lwd = lwd, col = col)                
-   }   
+
+      abline(lm(y ~ x), lty = lty, lwd = lwd, col = col)
+
+   }
+
 }
 
 #' Show bars on axes
@@ -572,10 +625,12 @@ bars <- function(x, y, col = NULL, bwd = 0.8, border = NA) {
 }
 
 #' Show error bars on a plot
-#' 
+#'
+
 #' @description
 #' Shows error bars (errorbar plot) on predefined axes
-#' 
+#'
+
 #' @param x
 #' vector with x values
 #' @param lower
@@ -590,32 +645,36 @@ bars <- function(x, y, col = NULL, bwd = 0.8, border = NA) {
 #' marker symbol for the plot
 #' @param cex
 #' cex factor for the marker
-#' 
+#'
+
 errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16, cex = 1) {
    e2 = (max(x) - min(x)) / 50
    e1 = (max(x) - min(x)) / (length(x) * 5)
    e = min(e1, e2)
-   
+
    segments(x, y - lower, x, y + upper, col = col)
    segments(x - e, y - lower, x + e, y - lower, col = col)
    segments(x - e, y + upper, x + e, y + upper, col = col)
-   
+
    if (!is.null(y))
       points(x, y, col = col, pch = pch, cex = cex)
-}  
+}
 
 #' Create axes plane
-#' 
+#'
+
 #' @description
 #' Creates an empty axes plane for given parameters
-#' 
+#'
+
 #' @param xticklabels
 #' labels for x ticks
 #' @param yticklabels
 #' labels for y ticks
 #' @param xticks
 #' values for x ticks
-#' @param yticks 
+#' @param yticks
+
 #' values for y ticks
 #' @param lim
 #' vector with limits for x and y axis
@@ -635,11 +694,12 @@ errorbars = function(x, lower, upper, y = NULL, col = NULL, pch = 16, cex = 1) {
 #' line thinckness (width) for the grid
 #' @param grid.col
 #' line color for the grid
-#' 
-mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NULL, yticks = NULL, 
+#'
+
+mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL, xticks = NULL, yticks = NULL,
+
                             lim = NULL, main = NULL, xlab = NULL, ylab = NULL, xlas = 0, ylas = 0,
                             show.grid = TRUE, grid.lwd = 0.5, grid.col = 'lightgray') {
-   
 
    # check xticklabels and xticks
    if (!is.null(xticklabels)) {
@@ -662,38 +722,39 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
 
       if (length(yticklabels) != length(yticks)) {
          stop('Number of elements in "yticks" and "yticklabels" should be the same')
-      }      
+      }
+
    }
 
    # make plot without ticks
-   plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim, 
-        xaxt = 'n', yaxt = 'n')
+   plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim,
 
+        xaxt = 'n', yaxt = 'n')
 
    # generate x ticks
    if (is.null(xticks)) {
       xticks = axisTicks(lim$xlim, log = FALSE)
    }
-   
+
    # show x-axis
    if (is.null(xticklabels)) {
       axis(1, at = xticks, las = xlas)
    } else {
       axis(1, at = xticks, labels = xticklabels, las = xlas)
    }
-   
+
    # generate y ticks
    if (is.null(yticks)) {
       yticks = axisTicks(lim$ylim, log = FALSE)
    }
-   
+
    # show y-axis
    if (is.null(yticklabels)) {
       axis(2, at = yticks, las = ylas)
    } else {
       axis(2, at = yticks, labels = yticklabels, las = ylas)
    }
-   
+
    # show grid if needed
    if (show.grid) {
       grid(lwd = grid.lwd, col = grid.col)
@@ -701,24 +762,27 @@ mdaplot.plotAxes = function(xticklabels = NULL, yticklabels = NULL, xticks = NUL
 }
 
 #' Check if data argument looks correct for creatins plots, correct if needed
-#' 
+#'
+
 #' @param data
 #' dataset provided to mdaplot function
 #' @param type
 #' type of plot
 #'
-#' @export 
+#' @export
+
 prepare_data_for_plot <- function(data, type) {
 
    # save data arguments
    data_attrs <- attributes(data)
-   
+
    # make sure the data set is provided
    if (is.null(data) || length(data) < 1) {
       stop("The provided dataset is empty!")
    }
 
-   # if it is vector without dimension - make a matrix   
+   # if it is vector without dimension - make a matrix
+
    if (is.null(dim(data))) {
       data <- if (type == "p") as.matrix(data) else t(as.matrix(data))
    }
@@ -738,11 +802,13 @@ prepare_data_for_plot <- function(data, type) {
       colnames(data) <- paste0("X", 1:ncol(data))
    }
 
-   # handle excluded columns if any     
+   # handle excluded columns if any
+
    excluded_cols <- data_attrs$exclcols
    col_indices <- 1:ncol(data)
    if (length(excluded_cols) > 0) {
-      excluded_cols <- mda.getexclind(excluded_cols, colnames(data), ncol(data))      
+      excluded_cols <- mda.getexclind(excluded_cols, colnames(data), ncol(data))
+
       data <- data[, -excluded_cols, drop = F]
       col_indices <- col_indices[-excluded_cols]
    }
@@ -766,7 +832,8 @@ prepare_data_for_plot <- function(data, type) {
    excluded_data <- NULL
    excluded_rows <- data_attrs$exclrows
    if (length(excluded_rows) > 0) {
-      excluded_rows <- mda.getexclind(excluded_rows, rownames(data), nrow(data))      
+      excluded_rows <- mda.getexclind(excluded_rows, rownames(data), nrow(data))
+
       excluded_data <- data[excluded_rows, , drop = F]
       data <- data[-excluded_rows, , drop = F]
       row_indices <- row_indices[-excluded_rows]
@@ -796,15 +863,17 @@ prepare_data_for_plot <- function(data, type) {
 }
 
 #' Split dataset to x and y values depending on plot type
-#' 
+#'
+
 #' @param plot_data
 #' list with data and parameters prepared for plot by `prepare_data_for_plot()` function
 #' @param type
 #' type of plot
-#' 
+#'
+
 #' @export
 split_plot_data <- function(plot_data, type) {
-   
+
    # shortcuts to some of parameters
    data <- plot_data$data
    data_attrs <- plot_data$attrs
@@ -862,13 +931,16 @@ split_plot_data <- function(plot_data, type) {
    stop("Something went wrong on plot data preparation step (check plot type).")
 }
 
-#' Prepare x and y values for excluded rows 
-#' 
+#' Prepare x and y values for excluded rows
+
+#'
+
 #' @param plot_data
 #' list with data and parameters prepared for plot by `prepare_data_for_plot()` function
 #' @param type
 #' type of plot
-#' 
+#'
+
 #' @export
 process_excluded_rows <- function(plot_data, type) {
 
@@ -900,18 +972,22 @@ process_excluded_rows <- function(plot_data, type) {
 }
 
 #' Create a vector with labels for plot data series
-#' 
+#'
+
 #' @param plot_data
 #' list with data and parameters prepared for plot by `prepare_data_for_plot()` function
 #' @param type
 #' type of plot
 #' @param labels
 #' vector or type of labels to show
-#' 
-#' @description 
+#'
+
+#' @description
+
 #' For scatter plots labels correspond to rows of the data (names, values, indices, etc.). For
 #' non-scatter plots labels correspond to the columns (names, indices or max value for each column)
-#' 
+#'
+
 #' @export
 prepare_plot_data_labels <- function(plot_data, type, labels) {
 
@@ -922,7 +998,6 @@ prepare_plot_data_labels <- function(plot_data, type, labels) {
    y_values_excluded <- plot_data$y_values_excluded
    excluded_rows <- plot_data$excluded_rows
    excluded_cols <- plot_data$excluded_cols
-
 
    # if user provided labels - use them
    if (!is.null(labels) && length(labels) > 1) {
@@ -936,12 +1011,14 @@ prepare_plot_data_labels <- function(plot_data, type, labels) {
 
          if (is.null(excluded_rows)) {
             plot_data$labels_excluded <- NULL
-            plot_data$labels <- labels         
+            plot_data$labels <- labels
+
             return(plot_data)
          }
 
          plot_data$labels_excluded <- labels[excluded_rows]
-         plot_data$labels <- labels[-excluded_rows]         
+         plot_data$labels <- labels[-excluded_rows]
+
          return(plot_data)
       }
 
@@ -954,25 +1031,28 @@ prepare_plot_data_labels <- function(plot_data, type, labels) {
 
          if (is.null(excluded_cols)) {
             plot_data$labels_excluded <- NULL
-            plot_data$labels <- labels         
+            plot_data$labels <- labels
+
             return(plot_data)
          }
 
          plot_data$labels_excluded <- labels[excluded_cols]
-         plot_data$labels <- labels[-excluded_cols]         
+         plot_data$labels <- labels[-excluded_cols]
+
          return(plot_data)
-      }  
+      }
    }
 
-      
    # if labels were not provided, by default use names
    if (is.null(labels) || labels == 'names') {
       plot_data$labels_excluded <- if (type == "p") names(x_values_excluded) else NULL
-      plot_data$labels = names(x_values)         
+      plot_data$labels = names(x_values)
+
       return(plot_data)
    }
 
-   # if labels must be values use y-values for that 
+   # if labels must be values use y-values for that
+
    if (labels == "values") {
       labels <- y_values
       labels_excluded <- y_values_excluded
@@ -987,7 +1067,8 @@ prepare_plot_data_labels <- function(plot_data, type, labels) {
       return(plot_data)
    }
 
-   # if labels must be indices use row or column indices 
+   # if labels must be indices use row or column indices
+
    if (labels == "indices") {
 
       if (type == "p") {
@@ -1003,7 +1084,8 @@ prepare_plot_data_labels <- function(plot_data, type, labels) {
 }
 
 #' Create dataset to show as plot
-#' 
+#'
+
 #' @param data
 #' dataset (vector, matrix or data frame)
 #' @param type
@@ -1031,7 +1113,8 @@ prepare_plot_data_labels <- function(plot_data, type, labels) {
 create_plot_data <- function(data, type, xlim, ylim, bwd, show.excluded,
    show.colorbar, show.labels, show.lines, show.axes, labels) {
 
-   # check plot type 
+   # check plot type
+
    valid.types <- c("p", "l", "b", "h", "e", "d")
    if (!(type %in% valid.types)) {
       stop("Wrong plot type!")
@@ -1041,7 +1124,8 @@ create_plot_data <- function(data, type, xlim, ylim, bwd, show.excluded,
    data_attrs <- attributes(data)
    plot_data <- prepare_data_for_plot(data, type)
 
-   # check if density plot should be shown   
+   # check if density plot should be shown
+
    plot_data$density <- FALSE
    if (type == "d") {
       if (ncol(data) < 2) stop("Dataset with at least two columns required for density plot.")
@@ -1062,12 +1146,12 @@ create_plot_data <- function(data, type, xlim, ylim, bwd, show.excluded,
       plot_data <- prepare_plot_data_labels(plot_data, type, labels)
    }
 
-   # define name for the plot series 
+   # define name for the plot series
+
    plot_data$name <- if (type == "h") rownames(plot_data$data)[1] else data_attrs[["name"]]
 
    # compute limits for axes
 
-   # TODO: limits should take into account presence of excluded values (see last test)
    # TODO: labels for l/b should take into presence of excluded values (see last tests)
    # TODO: labels = "values" in case of l/b show double labels - why?
 
@@ -1082,83 +1166,86 @@ create_plot_data <- function(data, type, xlim, ylim, bwd, show.excluded,
    return(plot_data)
 }
 
-
 #' Plotting function for a single set of objects
 #'
 #' @description
 #' \code{mdaplot} is used to make different kinds of plot for one set of data objects.
-#' 
-#' @param data  
+#'
+
+#' @param data
 #' a vector, matrix or a data.frame with data values.
 #' @param plot.data
 #' a list of parameters and values obtained after preprocessing of original data provided
-#' by a user (if NULL it will be created automatically) 
-#' @param type  
+#' by a user (if NULL it will be created automatically)
+
+#' @param type
 #' type of the plot ('p', 'l', 'b', 'h', 'e', 'i').
-#' @param cgroup  
+#' @param cgroup
 #' a vector with values to use for make color groups.
-#' @param colmap  
+#' @param colmap
 #' a colormap to use for coloring the plot items.
-#' @param pch  
+#' @param pch
 #' a character for markers (same as \code{plot} parameter).
-#' @param col  
+#' @param col
 #' a color for markers or lines (same as \code{plot} parameter).
-#' @param lty  
+#' @param lty
 #' the line type (same as \code{plot} parameter).
-#' @param lwd  
+#' @param lwd
 #' the line width (thickness) (same as \code{plot} parameter).
-#' @param cex  
+#' @param cex
 #' the cex factor for markers (same as \code{plot} parameter).
-#' @param bwd  
+#' @param bwd
 #' a width of a bar as a percent of a maximum space available for each bar.
-#' @param xlim  
+#' @param xlim
 #' limits for the x axis (if NULL, will be calculated automatically).
-#' @param ylim  
+#' @param ylim
 #' limits for the y axis (if NULL, will be calculated automatically).
-#' @param xlab  
+#' @param xlab
 #' a title for the x axis (same as \code{plot} parameter).
-#' @param ylab  
+#' @param ylab
 #' a title for the y axis (same as \code{plot} parameter).
-#' @param main  
+#' @param main
 #' an overall title for the plot (same as \code{plot} parameter).
-#' @param labels  
+#' @param labels
 #' a vector with text labels for data points or one of the following: 'names', 'indices', 'values'.
-#' @param show.labels  
+#' @param show.labels
 #' logical, show or not labels for the data objects.
-#' @param show.colorbar  
+#' @param show.colorbar
 #' logical, show or not colorbar legend if color grouping is on.
-#' @param show.lines  
+#' @param show.lines
 #' vector with two coordinates (x, y) to show horizontal and vertical line cross the point.
-#' @param show.grid  
+#' @param show.grid
 #' logical, show or not a grid for the plot.
 #' @param grid.lwd
 #' line thinckness (width) for the grid
 #' @param grid.col
 #' line color for the grid
-#' @param show.axes  
+#' @param show.axes
 #' logical, make a normal plot or show only elements (markers, lines, bars) without axes.
 #' @param xticks
 #' values for x ticks
-#' @param yticks 
+#' @param yticks
+
 #' values for y ticks
-#' @param xticklabels  
+#' @param xticklabels
 #' labels for x ticks.
-#' @param yticklabels  
+#' @param yticklabels
 #' labels for y ticks.
 #' @param xlas
 #' orientation of xticklabels
 #' @param ylas
 #' orientation of yticklabels
-#' @param lab.col  
+#' @param lab.col
 #' color for data point labels.
-#' @param lab.cex  
+#' @param lab.cex
 #' size for data point labels.
 #' @param show.excluded
 #' logical, show or hide rows marked as excluded (attribute `exclrows`)
 #' @param col.excluded
 #' color for the excluded objects (rows)
 #' @param nbins
-#' if scatter density plot is shown, number of segments to split the plot area into 
+#' if scatter density plot is shown, number of segments to split the plot area into
+
 #' (see also ?smoothScatter)
 #' @param colramp
 #' Colramp function for density scatter plot
@@ -1166,64 +1253,93 @@ create_plot_data <- function(data, type, xlim, ylim, bwd, show.excluded,
 #' vector with corrected x-values for a bar plot (do not specify this manually)
 #' @param opacity
 #' opacity for plot colors (value between 0 and 1)
-#' @param ...  
+#' @param ...
 #' other plotting arguments.
-#' 
-#' @details 
-#' Most of the parameters are similar to what are used with standard \code{plot} function. The 
+#'
+
+#' @details
+
+#' Most of the parameters are similar to what are used with standard \code{plot} function. The
+
 #' differences are described below.
-#'   
-#' The function makes a plot of one set of objects. It can be a set of points (scatter plot), 
-#' bars, lines, scatter-lines, errorbars og an image. The data is organized as a data frame, 
-#' matrix or vector. For scatter and only first two columns will be used, for bar plot only 
-#' values from the first row. It is recommended to use \code{\link{mda.subset}} method if plot 
-#' should be made only for a subset of the data, especially if you have any excluded rows or 
+#'
+
+#' The function makes a plot of one set of objects. It can be a set of points (scatter plot),
+
+#' bars, lines, scatter-lines, errorbars og an image. The data is organized as a data frame,
+
+#' matrix or vector. For scatter and only first two columns will be used, for bar plot only
+
+#' values from the first row. It is recommended to use \code{\link{mda.subset}} method if plot
+
+#' should be made only for a subset of the data, especially if you have any excluded rows or
+
 #' columns or other special attributed, described in the Bookdown tutorial.
 #'
 #' If data is a data frame and contains one or more factors, they will be converted to a dummy
-#' variables (using function \code{\link{mda.df2mat}}) and appears at the end (last columns) if 
+#' variables (using function \code{\link{mda.df2mat}}) and appears at the end (last columns) if
+
 #' line or bar plot is selected.
-#'  
-#' The function allows to colorize lines and points according to values of a parameter 
+#'
+#' The function allows to colorize lines and points according to values of a parameter
+
 #' \code{cgroup}. The parameter must be a vector with the same elements as number of objects (rows)
-#' in the data. The values are divided into up to eight intervals and for each interval a 
-#' particular color from a selected color scheme is assigned. Parameter \code{show.colorbar} 
+#' in the data. The values are divided into up to eight intervals and for each interval a
+
+#' particular color from a selected color scheme is assigned. Parameter \code{show.colorbar}
+
 #' allows to turn off and on a color bar legend for this option.
 #'
 #' The used color scheme is defined by the \code{colmap} parameter. The default scheme is based
-#' on color brewer (colorbrewer2.org) diverging scheme with eight colors. There is also a gray 
-#' scheme (\code{colmap = 'gray'}) and user can define its own just by specifing the needed 
-#' sequence of colors (e.g. \code{colmap = c('red', 'yellow', 'green')}, two colors is minimum). 
-#' The scheme will then be generated automatically as a gradient among the colors.  
+#' on color brewer (colorbrewer2.org) diverging scheme with eight colors. There is also a gray
+
+#' scheme (\code{colmap = 'gray'}) and user can define its own just by specifing the needed
+
+#' sequence of colors (e.g. \code{colmap = c('red', 'yellow', 'green')}, two colors is minimum).
+
+#' The scheme will then be generated automatically as a gradient among the colors.
 #'
-#' Besides that the function allows to change tick values and corresponding tick labels for x and 
+#' Besides that the function allows to change tick values and corresponding tick labels for x and
+
 #' y axis, see Bookdown tutorial for more details.
 #'
-#' @author 
+#' @author
+
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
-#' 
-#' @seealso 
+#'
+
+#' @seealso
+
 #' \code{\link{mdaplotg}} - to make plots for several sets of data objects (groups of objects).
 #'
 #' @examples
 #' # See all examples in the tutorial.
-#' 
+#'
+
 #' @export
-mdaplot <- function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NULL, lty = 1, 
+mdaplot <- function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = NULL, lty = 1,
+
                    lwd = 1, cex = 1, bwd = 0.8,
-                   cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL, 
-                   main = NULL, xlab = NULL, ylab = NULL, show.labels = F, 
-                   show.colorbar = TRUE, show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5, 
-                   grid.col = 'lightgray', show.axes = TRUE, xticks = NULL, yticks = NULL, 
-                   xticklabels = NULL, yticklabels = NULL, 
-                   xlas = 0, ylas = 0, lab.col = 'darkgray', lab.cex = 0.65, 
+                   cgroup = NULL, xlim = NULL, ylim = NULL, colmap = 'default', labels = NULL,
+
+                   main = NULL, xlab = NULL, ylab = NULL, show.labels = F,
+
+                   show.colorbar = TRUE, show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
+
+                   grid.col = 'lightgray', show.axes = TRUE, xticks = NULL, yticks = NULL,
+
+                   xticklabels = NULL, yticklabels = NULL,
+
+                   xlas = 0, ylas = 0, lab.col = 'darkgray', lab.cex = 0.65,
+
                    show.excluded = FALSE, col.excluded = '#E0E0E0', nbins = 256,
                    colramp = mdaplot.getColors, force.x_values = NA, opacity = 1, ...) {
 
    if (is.null(plot.data)) {
       # get the data for plot
       plot.data <- create_plot_data(
-         data, type, xlim, ylim, bwd, show.excluded, show.colorbar, 
+         data, type, xlim, ylim, bwd, show.excluded, show.colorbar,
+
          show.labels, show.lines, show.axes, labels
       )
    }
@@ -1242,25 +1358,27 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = N
    plot.data$labels -> labels
    plot.data$labels_excluded -> labels_excluded
 
-   # if some rows are excluded remove part of values from cgroup   
+   # if some rows are excluded remove part of values from cgroup
+
    if (length(excluded_rows) > 0 && !is.null(cgroup) && length(cgroup) > 1) {
       cgroup <- cgroup[-excluded_rows]
    }
 
    # processs labels and ticklabels
-   if (show.axes == T) {  
+   if (show.axes == T) {
       # if some columns are excluded and xticklabels provided for all - exclude hidden values
       if (!is.null(excluded_cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data)) {
          xticklabels <- xticklabels[-excluded_cols]
       }
 
-      # number of x-values      
+      # number of x-values
+
       nxvals <- length(x_values)
 
       # define title and axis labels
       if (is.null(main)) main <- plot.data$name
-      if (is.null(xlab)) xlab = attr(x_values, "name")         
-      if (is.null(ylab)) ylab = attr(y_values, "name")
+      if (is.null(xlab)) xlab <- attr(x_values, "name")
+      if (is.null(ylab)) ylab <- attr(y_values, "name")
 
       # correct xticklabels and xticks if only one variable is provided for line or bar plot
       if (type != "p" && nxvals == 1) {
@@ -1320,20 +1438,24 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = N
       bwd <- bwd / force.x_values[2]
    }
 
-   # make plot for the data 
+   # make plot for the data
+
    if (type == "p" && density == FALSE) {
       points(x_values, y_values, col = col, pch = pch, lwd = lwd, cex = cex, ...)
    } else if (type == "d" && density == TRUE) {
       par(new = T)
       smoothScatter(
-         x_values, y_values, nbin = nbins, cex = cex, 
+         x_values, y_values, nbin = nbins, cex = cex,
+
          colramp = colramp, axes = F, ann = F,
          ...
       )
    } else if (type == "l" || type == "b") {
       matlines(
-         x_values, t(y_values), type = type, col = col, 
-         pch = pch, cex = cex, lty = lty, lwd = lwd, 
+         x_values, t(y_values), type = type, col = col,
+
+         pch = pch, cex = cex, lty = lty, lwd = lwd,
+
          ...
       )
    } else if (type == "h") {
@@ -1358,8 +1480,15 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = N
       mdaplot.showLines(show.lines)
    }
 
-   # show lables 
+   # show lables
+
    if (show.labels && !is.null(labels)) {
+      print('::::')
+      print(show.labels)
+      print(labels)
+      print(x_values)
+      print(y_values)
+      print(plot.data$labels)
       mdaplot.showLabels(x_values, y_values, labels, type = type, col = lab.col, cex = lab.cex)
    }
 
@@ -1379,71 +1508,74 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = N
 
 #' Plotting function for several sets of objects
 #'
-#' @description 
-#' \code{mdaplotg} is used to make different kinds of plots or their combination for several sets 
+#' @description
+
+#' \code{mdaplotg} is used to make different kinds of plots or their combination for several sets
+
 #' of objects.
 #'
-#' @param data  
+#' @param data
 #' a matrix, data frame or a list with data values (see details below).
-#' @param type  
+#' @param type
 #' type of the plot ('p', 'l', 'b', 'h', 'e').
-#' @param pch  
+#' @param pch
 #' a character for markers (same as \code{plot} parameter).
-#' @param lty  
+#' @param lty
 #' the line type (same as \code{plot} parameter).
-#' @param lwd  
+#' @param lwd
 #' the line width (thickness) (same as \code{plot} parameter).
-#' @param cex  
+#' @param cex
 #' the cex factor for the markers (same as \code{plot} parameter).
-#' @param bwd  
+#' @param bwd
 #' a width of a bar as a percent of a maximum space available for each bar.
-#' @param legend  
+#' @param legend
 #' a vector with legend elements (if NULL, no legend will be shown).
-#' @param xlab  
+#' @param xlab
 #' a title for the x axis (same as \code{plot} parameter).
-#' @param ylab  
+#' @param ylab
 #' a title for the y axis (same as \code{plot} parameter).
-#' @param main  
+#' @param main
 #' an overall title for the plot (same as \code{plot} parameter).
-#' @param labels  
+#' @param labels
 #' what to use as labels ('names' - row names, 'indices' - row indices, 'values' - values).
-#' @param ylim  
+#' @param ylim
 #' limits for the y axis (if NULL, will be calculated automatically).
-#' @param xlim  
+#' @param xlim
 #' limits for the x axis (if NULL, will be calculated automatically).
 #' @param col
-#' colors for the plot series 
-#' @param colmap  
+#' colors for the plot series
+
+#' @param colmap
 #' a colormap to generate colors if \code{col} is not provided
-#' @param legend.position  
+#' @param legend.position
 #' position of the legend ('topleft', 'topright', 'top', 'bottomleft', 'bottomright', 'bottom').
-#' @param show.legend  
+#' @param show.legend
 #' logical, show or not legend for the data objects.
-#' @param show.labels  
+#' @param show.labels
 #' logical, show or not labels for the data objects.
-#' @param show.lines  
+#' @param show.lines
 #' vector with two coordinates (x, y) to show horizontal and vertical line cross the point.
-#' @param show.grid  
+#' @param show.grid
 #' logical, show or not a grid for the plot.
 #' @param grid.lwd
 #' line thinckness (width) for the grid
 #' @param grid.col
 #' line color for the grid
-#' @param xticks  
+#' @param xticks
 #' tick values for x axis.
-#' @param xticklabels  
+#' @param xticklabels
 #' labels for x ticks.
-#' @param yticks  
+#' @param yticks
 #' tick values for y axis.
-#' @param yticklabels  
+#' @param yticklabels
 #' labels for y ticks.
 #' @param xlas
 #' orientation of xticklabels
 #' @param ylas
 #' orientation of yticklabels
-#' @param lab.col  
+#' @param lab.col
 #' color for data point labels.
-#' @param lab.cex  
+#' @param lab.cex
 #' size for data point labels.
 #' @param show.excluded
 #' logical, show or hide rows marked as excluded (attribute `exclrows`)
@@ -1451,102 +1583,111 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = 'p', pch = 16, col = N
 #' one or several factors used to create groups of data matrix rows (works if data is a matrix)
 #' @param opacity
 #' opacity for plot colors (value between 0 and 1)
-#' @param ...  
+#' @param ...
 #' other plotting arguments.
-#' 
-#' @details 
-#' The \code{mdaplotg} function is used to make a plot with several sets of objects. Simply 
-#' speaking, use it when you need a plot with legend. For example to show line plot with spectra 
-#' from calibration and test set, scatter plot for height and weight values for women and men, and 
+#'
+#' @details
+#' The \code{mdaplotg} function is used to make a plot with several sets of objects. Simply
+
+#' speaking, use it when you need a plot with legend. For example to show line plot with spectra
+
+#' from calibration and test set, scatter plot for height and weight values for women and men, and
+
 #' so on.
-#' 
+#'
 #' Most of the parameters are similar to \code{\link{mdaplot}}, the difference is described below.
-#' 
+#'
 #' The data should be organized as a list, every item is a matrix with data for one set of objects.
 #' Alternatively you can provide data as a matrix and use parameter \code{groupby} to create groups.
-#' See tutorial for more details. 
-#' 
-#' There is no color grouping option, because color is used to separate the sets. Marker symbol, 
-#' line style and type, etc. can be defined as a single value (one for all sets) and as a vector 
+#' See tutorial for more details.
+#'
+#' There is no color grouping option, because color is used to separate the sets. Marker symbol,
+
+#' line style and type, etc. can be defined as a single value (one for all sets) and as a vector
+
 #' with one value for each set.
-#' 
-#' @author 
+#'
+#' @author
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
-#' 
-#' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text 
+#'
+#' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text
+
 #' image plot.new rasterImage smoothScatter
-#' @importFrom grDevices axisTicks dev.cur 
-#' 
+#' @importFrom grDevices axisTicks dev.cur
+#'
 #' @export
-mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 1, cex = 1, col = NULL,
-                    bwd = 0.8, legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL, 
-                    ylim = NULL, xlim = NULL, colmap = 'default', legend.position = 'topright', 
-                    show.legend = T, show.labels = F, show.lines = F, show.grid = TRUE, grid.lwd = 0.5,
-                    grid.col = 'lightgray', xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL, 
-                    show.excluded = FALSE, lab.col = 'darkgray', lab.cex = 0.65, xlas = 1, 
-                    ylas = 1, opacity = 1, ...) {   
+mdaplotg <- function(
+   data, groupby = NULL, type = "p", pch = 16,  lty = 1, lwd = 1, cex = 1,
+   col = NULL, bwd = 0.8, legend = NULL, xlab = NULL, ylab = NULL, main = NULL, labels = NULL,
+   ylim = NULL, xlim = NULL, colmap = "default", legend.position = "topright",
+   show.legend = T, show.labels = F, show.lines = F, show.grid = TRUE, grid.lwd = 0.5,
+   grid.col = "lightgray", xticks = NULL, xticklabels = NULL, yticks = NULL, yticklabels = NULL,
+   show.excluded = FALSE, lab.col = "darkgray", lab.cex = 0.65, xlas = 1,
+   ylas = 1, opacity = 1, ...) {
 
    # name for the plot (mdain)
-   name = NULL
-   
+   name <- NULL
+
    # prepare list with groups of objects
    if (is.matrix(data) || is.data.frame(data)) {
       if (is.null(groupby)) {
          # take every line as a group
-         name = attr(data, 'name', exact = TRUE)
-         
-         if (!all(type %in% c('h', 'l', 'b'))) {
-            stop('Group plot with just one matrix or dataframe is available only for types "h", "l" and "b"!')
+         name <- attr(data, "name", exact = TRUE)
+
+         if (!all(type %in% c("h", "l", "b"))) {
+            stop("Group plot with matrix or dataframe can be made only for types 'h', 'l' and 'b'.")
          }
-         
+
          # split data into a list of subsets for each group
-         data.list = list()
-         for (i in 1:nrow(data)) {
-            data.list[[i]] = mda.subset(data, subset = i)
+         data.list <- list()
+         for (i in seq_len(nrow(data))) {
+            data.list[[i]] <- mda.subset(data, subset = i)
          }
-         
+
          # get rownames as legend values
          if (is.null(legend)) {
-            legend = rownames(data)
+            legend <- rownames(data)
          }
-         
+
          # redefine the data with list
-         data = data.list
+         data <- data.list
       } else {
          # split rows into groups using data frame with factors
+         # check that groupby is a factor or data frame with factor columns
+         is_groupby_factor <-
+            (is.data.frame(groupby) && all(unlist(lapply(groupby, is.factor)))) ||
+            is.factor(groupby)
 
-         # check that groupby is a factor or data frame with factor columns         
-         is_groupby_factor = (is.data.frame(groupby) && all(unlist(lapply(groupby, is.factor)))) || is.factor(groupby)
          if (!is_groupby_factor) {
-            stop('Parameter "groupby" should be a factor or data frame with several factors')
+            stop("Parameter 'groupby' should be a factor or data frame with several factors.")
          }
-         
-         attrs = mda.getattr(data)
-         data = as.data.frame(data)
-         
+
+         attrs <- mda.getattr(data)
+         data <- as.data.frame(data)
+
          # in this case if labels = indices generate labels for each case
-         data$row.ind = 1:nrow(data)
-         data = split(data, groupby)
-         for (i in 1:length(data)) {
-            row.ind = data[[i]]$row.ind
-            data[[i]] = subset(data[[i]], select = -row.ind)
-            data[[i]] = mda.setattr(data[[i]], attrs)
-            attr(data[[i]], 'exclrows') = which(row.ind %in% attrs$exclrows)
-            attr(data[[i]], 'labels') = row.ind
+         data$row.ind <- seq_len(nrow(data))
+         data <- split(data, groupby)
+         for (i in seq_len(length(data))) {
+            row.ind <- data[[i]]$row.ind
+            data[[i]] <- subset(data[[i]], select = -row.ind)
+            data[[i]] <- mda.setattr(data[[i]], attrs)
+            attr(data[[i]], "exclrows") <- which(row.ind %in% attrs$exclrows)
+            attr(data[[i]], "labels") <- row.ind
          }
       }
-   } 
+   }
 
-   ngroups = length(data)
-   
+   ngroups <- length(data)
+
    # check if plot.new() should be called first
    if (dev.cur() == 1) plot.new()
-   
-   # check numeric parameters and multiply them if necessary
-   processParam = function(param, name, is.type, ngroups) {
 
-      param = if (length(param) == 1) rep(param, ngroups) else param
-      
+   # check numeric parameters and multiply them if necessary
+   processParam <- function(param, name, is.type, ngroups) {
+
+      param <- if (length(param) == 1) rep(param, ngroups) else param
+
       if (!all(is.type(param))) {
          stop(paste0('Parameter "', name, '" mush be numeric!'))
       }
@@ -1557,125 +1698,129 @@ mdaplotg = function(data, groupby = NULL, type = 'p', pch = 16,  lty = 1, lwd = 
       return(param)
    }
 
-   type = processParam(type, "type", is.character, ngroups)
-   pch = processParam(pch, "pch", is.numeric, ngroups)
-   lty = processParam(lty, "lty", is.numeric, ngroups)
-   lwd = processParam(lwd, "lwd", is.numeric, ngroups)
-   cex = processParam(cex, "cex", is.numeric, ngroups)
-   opacity = processParam(opacity, "opacity", is.numeric, ngroups)
-   lab.col = processParam(lab.col, "lab.col", mdaplot.areColors, ngroups)
-   
+   type <- processParam(type, "type", is.character, ngroups)
+   pch <- processParam(pch, "pch", is.numeric, ngroups)
+   lty <- processParam(lty, "lty", is.numeric, ngroups)
+   lwd <- processParam(lwd, "lwd", is.numeric, ngroups)
+   cex <- processParam(cex, "cex", is.numeric, ngroups)
+   opacity <- processParam(opacity, "opacity", is.numeric, ngroups)
+   lab.col <- processParam(lab.col, "lab.col", mdaplot.areColors, ngroups)
+
    # check and define colors if necessary
-   
-   if (is.null(col)) col = mdaplot.getColors(ngroups = ngroups, colmap = colmap)
-   col = processParam(col, "col", mdaplot.areColors, ngroups)
-      
-   # get plot data for each group 
-   pd = list()
+
+   if (is.null(col)) col <- mdaplot.getColors(ngroups = ngroups, colmap = colmap)
+   col <- processParam(col, "col", mdaplot.areColors, ngroups)
+
+   # get plot data for each group
+
+   pd <- list()
    for (i in 1:ngroups) {
-      pd[[i]] = create_plot_data(
-         data[[i]], type[i], xlim, ylim, bwd, show.excluded, 
-         show.colorbar = FALSE, show.labels, 
+      pd[[i]] <- create_plot_data(
+         data[[i]], type[i], xlim, ylim, bwd, show.excluded,
+         show.colorbar = FALSE, show.labels, labels = labels,
          show.lines, show.axes = TRUE # ! why the hell it is TRUE?
       )
    }
-   
+
    # process legend
    getLegend <- function(legend, data, pd, show.legend) {
 
       if (!show.legend) {
-         return (NULL)
+         return(NULL)
       }
 
       if (!is.null(legend)) {
          return(legend)
-      }      
+      }
 
       if (!is.null(names(data))) {
          return(names(data))
       }
 
-      if (all(type == 'h')) {
+      if (all(type == "h")) {
          return(unlist(lapply(pd, function(x) {rownames(x$y_values)[1]})))
       }
 
       return(unlist(lapply(pd, function(x) {x$data_attrs$name})))
    }
 
-   legend = getLegend(legend, data, pd, show.legend)
+   legend <- getLegend(legend, data, pd, show.legend)
 
    # check legend if required
    if (show.legend) {
-      
+
       if (is.null(legend)) {
-         stop('Can not find values for the legend items.')
-      } 
+         stop("Can not find values for the legend items.")
+      }
 
       if (length(legend) != ngroups) {
-         stop('Number of values for "legend" is not the same as number of plot series.')
+         stop("Number of values for 'legend' is not the same as number of plot series.")
       }
    }
-   
-   # compute x-limits   
+
+   # compute x-limits
    if (is.null(xlim)) {
-      xlim = matrix(unlist(lapply(pd, function(x) {x$lim$xlim})), ncol = 2, byrow = TRUE)
-      xlim = c(min(xlim[, 1]), max(xlim[, 2]))
+      xlim <- matrix(unlist(lapply(pd, function(x) {x$lim$xlim})), ncol = 2, byrow = TRUE)
+      xlim <- c(min(xlim[, 1]), max(xlim[, 2]))
       # stretch limits if bar plot should be shown
-      xlim = if (any(type == "h")) xlim + c(-0.35, 0.35) else xlim
+      xlim <- if (any(type == "h")) xlim + c(-0.35, 0.35) else xlim
    }
 
-   # compute y-limits   
+   # compute y-limits
    if (is.null(ylim)) {
-      ylim = matrix(unlist(lapply(pd, function(y) {y$lim$ylim})), ncol = 2, byrow = TRUE)
-      ylim = c(min(ylim[, 1]), max(ylim[, 2]))
+      ylim <- matrix(unlist(lapply(pd, function(y) {y$lim$ylim})), ncol = 2, byrow = TRUE)
+      ylim <- c(min(ylim[, 1]), max(ylim[, 2]))
    }
 
    # combine limits to list
-   lim = list(xlim = xlim, ylim = ylim)   
-   
+   lim <- list(xlim = xlim, ylim = ylim)
+
    # define main title if not provided (either as "name" or as "name" attr of first dataset)
-   main = if (is.null(main)) name else main
-   main = if (is.null(main)) pd[[1]]$data_attrs[['name']] else main
-   
+   main <- if (is.null(main)) name else main
+   main <- if (is.null(main)) pd[[1]]$data_attrs[["name"]] else main
+
    # define labels for axes
-   xlab = if (is.null(xlab)) attr(pd[[1]]$x_values, 'name', exact = TRUE) else xlab
-   ylab = if (is.null(ylab)) attr(pd[[1]]$y_values, 'name', exact = TRUE) else ylab
-   
+   xlab <- if (is.null(xlab)) attr(pd[[1]]$x_values, "name", exact = TRUE) else xlab
+   ylab <- if (is.null(ylab)) attr(pd[[1]]$y_values, "name", exact = TRUE) else ylab
+
    # make an empty plot with proper limits and axis labels
    mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas,
       show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col)
-   
+
    # show lines if needed
-   if (is.numeric(show.lines) && length(show.lines) == 2 ) {
+   if (is.numeric(show.lines) && length(show.lines) == 2) {
       mdaplot.showLines(show.lines)
    }
-      
-   # count how many plots are bar plots
-   nbarplots = sum(type == 'h')
 
-   # make a plot for each group   
+   # count how many plots are bar plots
+   nbarplots <- sum(type == "h")
+
+   # make a plot for each group
    for (i in 1:ngroups) {
 
       # decide if x values should be forced as group index
       force.x_values = if (type[i] == 'h') c(i, nbarplots) else NA
 
-      # if error bars are shown and i > 1 do not show labels 
-      show.labels = ifelse(i > 1 && type[i] == 'e', FALSE, show.labels)
+      # if error bars are shown and i > 1 do not show labels
+      show.labels = ifelse(i > 1 && type[i] == "e", FALSE, show.labels)
 
-      # use mdaplot with show.axes = FALSE to create the plot      
+      # use mdaplot with show.axes = FALSE to create the plot
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
               lwd = lwd[i], cex = cex[i], force.x_values = force.x_values, bwd = bwd,
-              labels = labels, show.grid = F, show.labels = show.labels, opacity = opacity[i],
+              show.grid = F, show.labels = show.labels, opacity = opacity[i],
               lab.col = lab.col[i], lab.cex = lab.cex, show.axes = FALSE, ...
       )
-   }  
-      
+   }
+
    # show legend if required
    if (show.legend == TRUE) {
       lty[type == 'p' | type == 'h'] = 0
       pch[type == 'l'] = NA_integer_
-      pch[type == 'h'] = 15      
-      mdaplot.showLegend(legend, col, pch = pch, lty = lty, lwd = lwd, cex = cex, 
-                         position = legend.position)      
-   }   
+      pch[type == 'h'] = 15
+
+      mdaplot.showLegend(
+         legend, col, pch = pch, lty = lty, lwd = lwd, cex = cex,
+         position = legend.position
+      )
+   }
 }
