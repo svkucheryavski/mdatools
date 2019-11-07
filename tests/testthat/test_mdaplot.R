@@ -853,6 +853,10 @@ test_that("excluded values and labels (indices) work fine", {
 })
 
 
+################################
+# Block 10. New functionality  #
+################################
+
 ## color grouping with excluded values
 context("mdaplot: color grouping works fine with excluded values")
 
@@ -926,3 +930,17 @@ test_that("special parameters for pch values work fine", {
    expect_silent(tf(type = "p", pch = 21, cgroup = people[, "Height"], 
       bg = "white", lwd = 0.5, cex = 1.2, pch.colinv = TRUE))
 })
+
+
+g1 <- people[, "Sex"]
+f1 <- factor(g1, labels = c("M", "F"))
+g2 <- people[, "Region"]
+f2 <- factor(g2, labels = c("S", "M"))
+
+par(mfrow = c(2, 2))
+test_that("color grouping with factors is shown with discrete colorbar", {
+   expect_silent(tf(type = "p", cgroup = g1))
+   expect_silent(tf(type = "p", cgroup = f1))
+   expect_silent(tf(type = "p", cgroup = interaction(f1, f2)))
+})
+

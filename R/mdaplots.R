@@ -321,63 +321,66 @@ mdaplot.getColors = function(ngroups = NULL, cgroup = NULL, colmap = 'default', 
 #' size for legend labels
 #'
 
-mdaplot.showColorbar = function(cgroup, colmap = 'default', lab.col = 'darkgray', lab.cex = 0.65) {
+mdaplot.showColorbar <- function(cgroup, colmap = "default", lab.col = "darkgray", lab.cex = 0.65) {
    # get number of levels for the cgroup
+
+   # define if colorbar should be discrete (for factors) or not
+   shift <- ifelse(is.factor(cgroup), 1, 0)
 
    if (!is.factor(cgroup) && length(unique(cgroup)) > 12) {
          # get colors for 8 groups based on colormap
-         col = mdaplot.getColors(ngroups = 12, colmap = colmap)
-         ncol = length(unique(col))
+         col <- mdaplot.getColors(ngroups = 12, colmap = colmap)
+         ncol <- length(unique(col))
 
          # split values to intervals
-         cgroupl = levels(cut(as.vector(cgroup), ncol))
+         cgroupl <- levels(cut(as.vector(cgroup), ncol))
 
          # get left and right values for the intervals
-         lvals = as.numeric( sub("\\((.+),.*", "\\1", cgroupl) )
-
-         rvals = as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", cgroupl) )
+         lvals <- as.numeric(sub("\\((.+),.*", "\\1", cgroupl))
+         rvals <- as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", cgroupl))
 
          # correct issue with first element
-         if (min(cgroup) != lvals[1])
-            lvals[1] = min(cgroup)
+         if (min(cgroup) != lvals[1]) {
+            lvals[1] <- min(cgroup)
+         }
 
          # combine values and define matrix for labels
-         vals = c(lvals, rvals[ncol])
-         labels = matrix(0, ncol = 2, nrow = ncol + 1)
+         vals <- c(lvals, rvals[ncol])
+         labels <- matrix(0, ncol = 2, nrow = ncol + 1)
    } else {
-      if (!is.factor(cgroup))
-         cgroup = factor(cgroup)
+      if (!is.factor(cgroup)) {
+         cgroup <- factor(cgroup)
+      }
 
-      nlevels = length(attr(cgroup, 'levels'))
+      nlevels <- length(attr(cgroup, "levels"))
 
       # no splitting is needed, just use factors as labels
-      col = mdaplot.getColors(ngroups = nlevels, colmap = colmap)
-      ncol = length(unique(col))
-      vals = levels(cgroup)
-      labels = matrix(0, ncol = 2, nrow = ncol)
+      col <- mdaplot.getColors(ngroups = nlevels, colmap = colmap)
+      ncol <- length(unique(col))
+      vals <- levels(cgroup)
+      labels <- matrix(0, ncol = 2, nrow = ncol)
    }
 
    # use formatted values as rownames for labels matrix
-   rownames(labels) = mdaplot.formatValues(vals)
+   rownames(labels) <- mdaplot.formatValues(vals)
 
    # get size of the plotting area and calculate size for color bar elements
-   lim = par('usr')
+   lim <- par("usr")
 
-   dx = lim[2] - lim[1]
-   dy = lim[4] - lim[3]
+   dx <- lim[2] - lim[1]
+   dy <- lim[4] - lim[3]
 
-   w = (dx * 0.8)/ncol
-   h = dy * 0.015
+   w <- (dx * 0.8) / ncol
+   h <- dy * 0.015
+   shift <- shift * w * 0.02 # 2 percent of segment width 
 
-   x = lim[1] + dx * 0.1
-   y = lim[4] - (h + 0.1 * h);
+   x <- lim[1] + dx * 0.1
+   y <- lim[4] - (h + 0.1 * h);
 
    # show colorbar and define coordinates for labels
-   for (i in 1:ncol)
-   {
-      rect(x + w * (i - 1), y, x + w * i, y - h, col = col[i], border = NA)
-
-      labels[i, ] = c(x + w * (i - 1), y - h)
+   for (i in 1:ncol) {
+      rect(shift + x + w * (i - 1), y, x + w * i, y - h, col = col[i], border = NA)
+      labels[i, ] <- c(x + w * (i - 1), y - h)
    }
 
    # add last value or shift coordinates if labels shall be centered
@@ -664,9 +667,8 @@ errorbars <- function(x, lower, upper, y = NULL, col = NULL, pch = 16, cex = 1) 
 #' line color for the grid
 #'
 mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL, xticks = NULL, yticks = NULL,
-
                             lim = NULL, main = NULL, xlab = NULL, ylab = NULL, xlas = 0, ylas = 0,
-                            show.grid = TRUE, grid.lwd = 0.5, grid.col = 'lightgray') {
+                            show.grid = TRUE, grid.lwd = 0.5, grid.col = "lightgray") {
 
    # check xticklabels and xticks
    if (!is.null(xticklabels)) {
