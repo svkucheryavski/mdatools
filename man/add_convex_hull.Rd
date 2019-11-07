@@ -2,21 +2,22 @@
 % Please edit documentation in R/mdaplots.R
 \name{add_convex_hull}
 \alias{add_convex_hull}
-\title{Add convex hull for for groups of points on scatter plot}
+\title{Add convex hull for groups of points on scatter plot}
 \usage{
 add_convex_hull(plot_data, lwd = 1, lty = 1, opacity = 0)
 }
 \arguments{
-\item{plot_data}{plot data returned by function `mdaplot()`}
+\item{plot_data}{plot data returned by function `mdaplot()`.}
 
-\item{lwd}{thickness of line used to show the hull}
+\item{lwd}{thickness of line used to show the hull.}
 
-\item{lty}{type of line used to show the hull}
+\item{lty}{type of line used to show the hull.}
 
-\item{opacity}{of opacity is larger than 0 a semi-transparent polygon is shown over points}
+\item{opacity}{of opacity is larger than 0 a semi-transparent polygon is shown over points.}
 }
 \description{
-Add convex hull for for groups of points on scatter plot
+The method shows convex hull for groups of points on a scatter plot made using
+`mdaplot()` function with `cgroup` parameter. It will work only if `cgroup` is a factor.
 }
 \examples{
 # adds convex hull with semi-transparent area over two clusters of points

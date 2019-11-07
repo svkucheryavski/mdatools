@@ -703,12 +703,14 @@ get_convex_hull <- function(points) {
 #' of opacity is larger than 0 a semi-transparent polygon is shown over points
 #' @param shape_function
 #' function which calculates and return coordinates of the shape
+#' @param ...
+#' extra parameters for shape_function
 #'
 #' @importFrom graphics polygon
 #'
 #' @export
 add_points_shape <- function(plot_data, lwd, lty, conf.level, opacity, shape_function, ...) {
-   
+
    x <- plot_data$x_values
    y <- plot_data$y_values
    cgroup <- plot_data$cgroup
