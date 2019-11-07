@@ -634,6 +634,197 @@ errorbars <- function(x, lower, upper, y = NULL, col = NULL, pch = 16, cex = 1) 
    }
 }
 
+
+#' Compute confidence ellipse for a set of points
+#'
+#' @param points
+#' matrix of data frame with coordinates of the points
+#' @param conf.level
+#' confidence level for the ellipse
+#' @param n
+#' number of points in the ellipse coordinates
+#'
+#' @return
+#' matrix with coordinates of the ellipse points (x and y)
+#'
+#' @export
+get_confidence_ellipse <- function(points, conf.level = 0.95, n = 100) {
+
+   # compute igen vectors and values
+   e <- eigen(cov(points));
+
+   # get angle between the x-axis and the largest eigenvector
+   phi <- atan2(e$vectors[[2]], e$vectors[[1]])
+   if (phi < 0) phi <- phi + 2 * pi
+
+   # compute center and radii
+   chisq <- qchisq(conf.level, 2)
+   center <- apply(points, 2, mean)
+   radii <- sqrt(chisq * e$values)
+
+   # generate vector of angles
+   theta_grid <- seq(0, 2 * pi, length.out = n)
+
+   # compute x and y coordinates of the ellipse
+   ellipse <- cbind(radii[1] * cos(theta_grid), radii[2] * sin(theta_grid))
+
+   # rotate the coordinates to the angle found earlier and shift to center of points
+   R <- rbind(c(cos(phi), sin(phi)), c(-sin(phi), cos(phi)))
+   ellipse <- sweep(ellipse %*% R, 2, center, "+")
+
+   return(ellipse)
+}
+
+#' Compute coordinates of a closed convex hull for data points
+#'
+#' @param points
+#' matrix of data frame with coordinates of the points
+#'
+#' @importFrom grDevices chull
+#'
+#' @export
+get_convex_hull <- function(points) {
+   ch_ind <- chull(points)
+   ch_ind <- c(ch_ind, ch_ind[1])
+   return(points[ch_ind, ])
+}
+
+#' Add confidence ellipse or convex hull for group of points
+#'
+#' @param plot_data
+#' plot data returned by function `mdaplot()`
+#' @param lwd
+#' thickness of line used to show the hull
+#' @param lty
+#' type of line used to show the hull
+#' @param conf.level
+#' confidence level to make the ellipse for (between 0 and 1)
+#' @param opacity
+#' of opacity is larger than 0 a semi-transparent polygon is shown over points
+#' @param shape_function
+#' function which calculates and return coordinates of the shape
+#'
+#' @importFrom graphics polygon
+#'
+#' @export
+add_points_shape <- function(plot_data, lwd, lty, conf.level, opacity, shape_function, ...) {
+   
+   x <- plot_data$x_values
+   y <- plot_data$y_values
+   cgroup <- plot_data$cgroup
+   type <- plot_data$type
+
+   if (type != "p") {
+      stop("Shape can be added only to scatter plots.")
+   }
+
+   if (!is.factor(cgroup)) {
+      stop("Parameter 'cgroup' must be a factor if you want to show points shape.")
+   }
+
+   if (length(unique(cgroup)) != length(unique(plot_data$col))) {
+      stop("Number of colors should be the same as number of levels in parameter 'cgroup'.")
+   }
+
+   col <- split(plot_data$col, f = plot_data$cgroup, drop = TRUE)
+   d <- split(data.frame(x, y), f = cgroup, drop = TRUE)
+
+   plot_function <- function(i) {
+      # compute indices for convex hull points and draw the hull
+      shape <- shape_function(d[[i]], ...)
+      color <- col[[i]][1]
+      lines(shape[, 1], shape[, 2], col = color, lwd = lwd, lty = lty)
+
+      # if opacity is not zero add a polygon on top
+      if (opacity > 0) {
+         polygon(shape[, 1], shape[, 2], border = NA, col = adjustcolor(color, alpha.f = opacity))
+      }
+   }
+
+   sapply(seq_len(length(d)), plot_function)
+   invisible(NULL)
+}
+
+#' Add confidence ellipse for groups of points on scatter plot
+#'
+#' @param plot_data
+#' plot data returned by function `mdaplot()`.
+#' @param lwd
+#' thickness of line used to show the hull.
+#' @param lty
+#' type of line used to show the hull.
+#' @param conf.level
+#' confidence level to make the ellipse for (between 0 and 1).
+#' @param opacity
+#' of opacity is 0 ellipse is transparent otherwise semi-transparent.
+#'
+#' @description
+#' The method shows confidence ellipse for groups of points on a scatter plot made using
+#' `mdaplot()` function with `cgroup` parameter. It will work only if `cgroup` is a factor.
+#'
+#' @examples
+#' # adds 90% confidence ellipse with semi-transparent area over two clusters of points
+#'
+#' library(mdatools)
+#' data(people)
+#' group <- factor(people[, "Sex"], labels = c("Male", "Female"))
+#'
+#' # first make plot and then add confidence ellipse
+#' p <- mdaplot(people, cgroup = group)
+#' add_confidence_ellipse(p, conf.level = 0.90, opacity = 0.2)
+#'
+#' @export
+add_confidence_ellipse <- function(plot_data, conf.level = 0.95, lwd = 1, lty = 1, opacity = 0) {
+   add_points_shape(
+      plot_data,
+      lwd = lwd,
+      lty = lty,
+      opacity = opacity,
+      shape_function = get_confidence_ellipse,
+      conf.level = conf.level
+   )
+}
+
+
+#' Add convex hull for groups of points on scatter plot
+#'
+#' @param plot_data
+#' plot data returned by function `mdaplot()`.
+#' @param lwd
+#' thickness of line used to show the hull.
+#' @param lty
+#' type of line used to show the hull.
+#' @param opacity
+#' of opacity is larger than 0 a semi-transparent polygon is shown over points.
+#' 
+#' @description
+#' The method shows convex hull for groups of points on a scatter plot made using
+#' `mdaplot()` function with `cgroup` parameter. It will work only if `cgroup` is a factor.
+#'
+#' @examples
+#' # adds convex hull with semi-transparent area over two clusters of points
+#'
+#' library(mdatools)
+#' data(people)
+#' group <- factor(people[, "Sex"], labels = c("Male", "Female"))
+#'
+#' p <- mdaplot(people, cgroup = group)
+#' add_convex_hull(p, opacity = 0.2)
+#'
+#' @importFrom grDevices chull
+#' @importFrom graphics polygon
+#'
+#' @export
+add_convex_hull <- function(plot_data, lwd = 1, lty = 1, opacity = 0) {
+   add_points_shape(
+      plot_data, 
+      lwd = lwd, 
+      lty = lty, 
+      opacity = opacity, 
+      shape_function = get_convex_hull
+   )
+}
+
 #' Create axes plane
 #'
 #' @description
@@ -738,7 +929,6 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL, xticks = NU
 #' type of plot
 #'
 #' @export
-
 prepare_data_for_plot <- function(data, type) {
 
    # save data arguments
@@ -1366,6 +1556,7 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
       }  else {
          col <- mdaplot.getColors(1, colmap = colmap, opacity = opacity)
       }
+
       # set cgroup to NULL so method will not try to show color groups or colorbar legend
       cgroup <- NULL
    }
@@ -1438,6 +1629,11 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
    if (!is.null(cgroup) && show.colorbar) {
       mdaplot.showColorbar(cgroup, colmap, lab.col = lab.col, lab.cex = lab.cex)
    }
+
+   plot.data[["col"]] <- col
+   plot.data[["cgroup"]] <- cgroup
+   plot.data[["type"]] <- type
+   invisible(plot.data)
 }
 
 #' Plotting function for several sets of objects

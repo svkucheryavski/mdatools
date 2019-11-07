@@ -944,3 +944,170 @@ test_that("color grouping with factors is shown with discrete colorbar", {
    expect_silent(tf(type = "p", cgroup = interaction(f1, f2)))
 })
 
+## add convex hull
+context("mdaplot: add convex hull")
+
+data(people)
+attr(people, "exclrows") <- NULL
+attr(people, "exclcols") <- NULL
+gw <- people[, "Sex"]
+g1 <- factor(people[, "Sex"], labels = c("Male", "Female"))
+g2 <- factor(people[, "Region"], labels = c("Scan", "Med"))
+g <- interaction(g1, g2)
+
+tf <- function(type, cgroup, ...) {
+   p <- mdaplot(people, type = type, cgroup = cgroup)
+   add_convex_hull(p, ...)
+}
+
+par(mfrow = c(2, 2))
+test_that("add_convex_hull returns error if wrong type of plot is used", {
+   expect_error(tf(type = "l", cgroup = g1))
+   expect_error(tf(type = "b", cgroup = g1))
+   expect_error(tf(type = "h", cgroup = g1))
+   expect_error(tf(type = "e", cgroup = g1))
+})
+
+test_that("add_convex_hull returns error if cgroup is not a factor", {
+   expect_error(tf(type = "p", cgroup = gw))
+})
+
+par(mfrow = c(2, 2))
+test_that("add_convex_hull works as expected with default styles", {
+   expect_silent(tf(type = "p", cgroup = g1))
+   expect_silent(tf(type = "p", cgroup = g2))
+   expect_silent(tf(type = "p", cgroup = g))
+})
+
+par(mfrow = c(2, 2))
+test_that("add_convex_hull works as expected with different opacity", {
+   expect_silent(tf(type = "p", opacity = 0.8, cgroup = g1))
+   expect_silent(tf(type = "p", opacity = 0.4, cgroup = g1))
+   expect_silent(tf(type = "p", opacity = 0.2, cgroup = g2))
+   expect_silent(tf(type = "p", opacity = 0.1, cgroup = g))
+})
+
+par(mfrow = c(2, 2))
+test_that("add_convex_hull works as expected with different line parameters", {
+   expect_silent(tf(type = "p", opacity = 0.4, lwd = 1, lty = 1, cgroup = g1))
+   expect_silent(tf(type = "p", opacity = 0.2, lwd = 2, lty = 2, cgroup = g2))
+   expect_silent(tf(type = "p", opacity = 0.1, lwd = 3, lty = 3, cgroup = g))
+   expect_silent(tf(type = "p", opacity = 0.1, lwd = 3, lty = 4, cgroup = g))
+})
+
+## add convex hull for excluded data
+context("mdaplot: add convex hull for excluded data")
+
+data(people)
+attr(people, "exclrows") <- NULL
+attr(people, "exclcols") <- NULL
+people <- mda.exclrows(people, people[, "Beer"] > 300)
+people <- mda.exclcols(people, c("Height", "Beer"))
+
+gw <- people[, "Sex"]
+g1 <- factor(people[, "Sex"], labels = c("Male", "Female"))
+g2 <- factor(people[, "Region"], labels = c("Scan", "Med"))
+g <- interaction(g1, g2)
+
+p <- mdaplot(people, type = "p", cgroup = g1)
+add_convex_hull(p)
+
+tf <- function(type, cgroup, ...) {
+   p <- mdaplot(people, type = type, cgroup = cgroup)
+   add_convex_hull(p, ...)
+}
+
+par(mfrow = c(2, 2))
+test_that("add_convex_hull returns error if wrong type of plot is used", {
+   expect_error(tf(type = "l", cgroup = g1))
+   expect_error(tf(type = "b", cgroup = g1))
+   expect_error(tf(type = "h", cgroup = g1))
+   expect_error(tf(type = "e", cgroup = g1))
+})
+
+test_that("add_convex_hull returns error if cgroup is not a factor", {
+   expect_error(tf(type = "p", cgroup = gw))
+})
+
+par(mfrow = c(2, 2))
+test_that("add_convex_hull works as expected with default styles", {
+   expect_silent(tf(type = "p", cgroup = g1))
+   expect_silent(tf(type = "p", cgroup = g2))
+   expect_silent(tf(type = "p", cgroup = g))
+})
+
+par(mfrow = c(2, 2))
+test_that("add_convex_hull works as expected with different opacity", {
+   expect_silent(tf(type = "p", opacity = 0.8, cgroup = g1))
+   expect_silent(tf(type = "p", opacity = 0.4, cgroup = g1))
+   expect_silent(tf(type = "p", opacity = 0.2, cgroup = g2))
+   expect_silent(tf(type = "p", opacity = 0.1, cgroup = g))
+})
+
+par(mfrow = c(2, 2))
+test_that("add_convex_hull works as expected with different line parameters", {
+   expect_silent(tf(type = "p", opacity = 0.4, lwd = 1, lty = 1, cgroup = g1))
+   expect_silent(tf(type = "p", opacity = 0.2, lwd = 2, lty = 2, cgroup = g2))
+   expect_silent(tf(type = "p", opacity = 0.1, lwd = 3, lty = 3, cgroup = g))
+   expect_silent(tf(type = "p", opacity = 0.1, lwd = 3, lty = 4, cgroup = g))
+})
+
+## add confidence ellipse
+context("mdaplot: add confidence ellipse")
+
+data(people)
+attr(people, "exclrows") <- NULL
+attr(people, "exclcols") <- NULL
+gw <- people[, "Sex"]
+g1 <- factor(people[, "Sex"], labels = c("Male", "Female"))
+g2 <- factor(people[, "Region"], labels = c("Scan", "Med"))
+g <- interaction(g1, g2)
+
+tf <- function(type, cgroup, ...) {
+   p <- mdaplot(people, type = type, cgroup = cgroup)
+   add_confidence_ellipse(p, ...)
+}
+
+par(mfrow = c(2, 2))
+test_that("add_confidence_ellipse returns error if wrong type of plot is used", {
+   expect_error(tf(type = "l", cgroup = g1))
+   expect_error(tf(type = "b", cgroup = g1))
+   expect_error(tf(type = "h", cgroup = g1))
+   expect_error(tf(type = "e", cgroup = g1))
+})
+
+test_that("add_confidence_ellipse returns error if cgroup is not a factor", {
+   expect_error(tf(type = "p", cgroup = gw))
+})
+
+par(mfrow = c(2, 2))
+test_that("add_confidence_ellipse works as expected with default styles", {
+   expect_silent(tf(type = "p", cgroup = g1))
+   expect_silent(tf(type = "p", cgroup = g2))
+   expect_silent(tf(type = "p", cgroup = g))
+})
+
+par(mfrow = c(2, 2))
+test_that("add_confidence_ellipse works as expected with different opacity", {
+   expect_silent(tf(type = "p", opacity = 0.8, cgroup = g))
+   expect_silent(tf(type = "p", opacity = 0.4, cgroup = g))
+   expect_silent(tf(type = "p", opacity = 0.2, cgroup = g))
+   expect_silent(tf(type = "p", opacity = 0.1, cgroup = g))
+})
+
+par(mfrow = c(2, 2))
+test_that("add_confidence_ellipse works as expected with different confidence level", {
+   expect_silent(tf(type = "p", opacity = 0.8, conf.level = 0.80, cgroup = g))
+   expect_silent(tf(type = "p", opacity = 0.4, conf.level = 0.90, cgroup = g))
+   expect_silent(tf(type = "p", opacity = 0.2, conf.level = 0.95, cgroup = g))
+   expect_silent(tf(type = "p", opacity = 0.1, conf.level = 0.99, cgroup = g))
+})
+
+par(mfrow = c(2, 2))
+test_that("add_confidence_ellipse works as expected with different line parameters", {
+   expect_silent(tf(type = "p", opacity = 0.2, lwd = 1, lty = 1, cgroup = g1))
+   expect_silent(tf(type = "p", opacity = 0.2, lwd = 2, lty = 2, cgroup = g1))
+   expect_silent(tf(type = "p", opacity = 0.2, lwd = 3, lty = 3, cgroup = g1))
+   expect_silent(tf(type = "p", opacity = 0.2, lwd = 3, lty = 4, cgroup = g1))
+})
+
