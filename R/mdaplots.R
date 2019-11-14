@@ -1020,8 +1020,6 @@ mdaplot.plotAxes <- function(plot.data, type, bwd, xticklabels = NULL, yticklabe
       # get values from the plot data list to make code cleaner
       plot.data$x_values -> x_values
       plot.data$y_values -> y_values
-      plot.data$excluded_rows -> excluded_rows
-      plot.data$excluded_cols -> excluded_cols
       plot.data$lim -> lim
       plot.data$attrs -> data_attrs
 
