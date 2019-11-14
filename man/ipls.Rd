@@ -60,54 +60,54 @@ Applies iPLS alrogithm to find variable intervals most important for
 prediction
 }
 \details{
-The algorithm splits the predictors into several intervals and tries to find a combination 
+The algorithm splits the predictors into several intervals and tries to find a combination
 of the intervals, which gives best prediction performance. There are two selection methods:
 "forward" when the intervals are successively included, and "backward" when the intervals
 are successively excluded from a model. On the first step the algorithm finds the best
-(forward) or the worst (backward) individual interval. Then it tests the others to find the 
-one which gives the best model in a combination with the already selected/excluded one. The 
-procedure continues until the maximum number of iteration is reached. 
- 
-There are several ways to specify the intervals. First of all either number of intervals 
+(forward) or the worst (backward) individual interval. Then it tests the others to find the
+one which gives the best model in a combination with the already selected/excluded one. The
+procedure continues until the maximum number of iteration is reached.
+
+There are several ways to specify the intervals. First of all either number of intervals
 (\code{int.num}) or width of the intervals (\code{int.width}) can be provided. Alternatively
-one can specify the limits (first and last variable number) of the intervals manually 
+one can specify the limits (first and last variable number) of the intervals manually
 with \code{int.limits}.
 
-Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
-will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
-cross-validation will be preformed). If it is a list, the following syntax can be used: 
-\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
-segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
+Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
+will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
+cross-validation will be preformed). If it is a list, the following syntax can be used:
+\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg}
+segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits
 to \code{nseg} segments ('venetian blinds').
 }
 \examples{
 library(mdatools)
 
 ## forward selection for simdata
- 
+
 data(simdata)
 Xc = simdata$spectra.c
 yc = simdata$conc.c[, 3, drop = FALSE]
 
-# run iPLS and show results  
+# run iPLS and show results
 im = ipls(Xc, yc, int.ncomp = 5, int.num = 10, cv = 4, method = "forward")
 summary(im)
 plot(im)
- 
+
 # show "developing" of RMSECV during the algorithm execution
 plotRMSE(im)
- 
+
 # plot predictions before and after selection
 par(mfrow = c(1, 2))
 plotPredictions(im$gm)
 plotPredictions(im$om)
- 
+
 # show selected intervals on spectral plot
 ind = im$var.selected
 mspectrum = apply(Xc, 2, mean)
 plot(simdata$wavelength, mspectrum, type = 'l', col = 'lightblue')
 points(simdata$wavelength[ind], mspectrum[ind], pch = 16, col = 'blue')
- 
+
 }
 \references{
 [1] Lars Noergaard at al.  Interval partial least-squares regression (iPLS): a

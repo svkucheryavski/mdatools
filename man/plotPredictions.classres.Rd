@@ -12,9 +12,9 @@
 
 \item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
 
-\item{ncomp}{which number of components to make the plot for (one value, if NULL - model selected number will 
+\item{ncomp}{which number of components to make the plot for (one value, if NULL - model selected number will
 be used).
-This parameter shal not be used for multiclass models or results as predictions in this case are 
+This parameter shal not be used for multiclass models or results as predictions in this case are
  only
 for optimal number of components}
 
@@ -24,7 +24,7 @@ for optimal number of components}
 
 \item{ylab}{label for y axis}
 
-\item{...}{most of the graphical parameters from \code{\link{mdaplotg}} or \code{\link{mdaplot}} function 
+\item{...}{most of the graphical parameters from \code{\link{mdaplotg}} or \code{\link{mdaplot}} function
 can be used.}
 }
 \description{

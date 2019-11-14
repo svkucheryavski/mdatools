@@ -14,7 +14,7 @@
 \item{...}{most of the graphical parameters from \code{\link{mdaplot}} function can be used.}
 }
 \description{
-Makes a plot with sensitivity values vs. model complexity (e.g. number of components) for 
+Makes a plot with sensitivity values vs. model complexity (e.g. number of components) for
 classification results.
 }
 \details{

@@ -5,16 +5,16 @@
 \title{Plotting function for a single set of objects}
 \usage{
 mdaplot(data = NULL, plot.data = NULL, type = "p", pch = 16,
-  col = NULL, bg = par("bg"), lty = 1, lwd = 1, cex = 1,
-  bwd = 0.8, cgroup = NULL, xlim = NULL, ylim = NULL,
+  col = NULL, bg = par("bg"), bwd = 0.8, lty = 1, lwd = 1,
+  cex = 1, border = NA, cgroup = NULL, xlim = NULL, ylim = NULL,
   colmap = "default", labels = NULL, main = NULL, xlab = NULL,
   ylab = NULL, show.labels = F, show.colorbar = TRUE,
   show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
   grid.col = "lightgray", show.axes = TRUE, xticks = NULL,
   yticks = NULL, xticklabels = NULL, yticklabels = NULL, xlas = 0,
   ylas = 0, lab.col = "darkgray", lab.cex = 0.65,
-  show.excluded = FALSE, col.excluded = "#E0E0E0", nbins = 256,
-  colramp = mdaplot.getColors, force.x_values = NA, opacity = 1,
+  show.excluded = FALSE, col.excluded = "#E0E0E0", nbins = 60,
+  colramp = mdaplot.getColors, force.x.values = NA, opacity = 1,
   pch.colinv = FALSE, ...)
 }
 \arguments{
@@ -31,13 +31,15 @@ by a user (if NULL it will be created automatically).}
 
 \item{bg}{background color for scatter plots wich `pch=21:25`.}
 
+\item{bwd}{a width of a bar as a percent of a maximum space available for each bar.}
+
 \item{lty}{the line type (same as \code{plot} parameter).}
 
 \item{lwd}{the line width (thickness) (same as \code{plot} parameter).}
 
 \item{cex}{the cex factor for markers (same as \code{plot} parameter).}
 
-\item{bwd}{a width of a bar as a percent of a maximum space available for each bar.}
+\item{border}{color for border of bars (if barplot is used)}
 
 \item{cgroup}{a vector with values to use for make color groups.}
 
@@ -94,7 +96,7 @@ by a user (if NULL it will be created automatically).}
 
 \item{colramp}{Colramp function for density scatter plot.}
 
-\item{force.x_values}{vector with corrected x-values for a bar plot (do not specify this manually).}
+\item{force.x.values}{vector with corrected x-values for a bar plot (do not specify this manually).}
 
 \item{opacity}{opacity for plot colors (value between 0 and 1).}
 

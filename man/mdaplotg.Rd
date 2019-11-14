@@ -8,12 +8,12 @@ mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
   lwd = 1, cex = 1, col = NULL, bwd = 0.8, legend = NULL,
   xlab = NULL, ylab = NULL, main = NULL, labels = NULL,
   ylim = NULL, xlim = NULL, colmap = "default",
-  legend.position = "topright", show.legend = T, show.labels = F,
-  show.lines = F, show.grid = TRUE, grid.lwd = 0.5,
-  grid.col = "lightgray", xticks = NULL, xticklabels = NULL,
-  yticks = NULL, yticklabels = NULL, show.excluded = FALSE,
-  lab.col = "darkgray", lab.cex = 0.65, xlas = 1, ylas = 1,
-  opacity = 1, ...)
+  legend.position = "topright", show.legend = TRUE,
+  show.labels = FALSE, show.lines = FALSE, show.grid = TRUE,
+  grid.lwd = 0.5, grid.col = "lightgray", xticks = NULL,
+  xticklabels = NULL, yticks = NULL, yticklabels = NULL,
+  show.excluded = FALSE, lab.col = "darkgray", lab.cex = 0.65,
+  xlas = 1, ylas = 1, opacity = 1, ...)
 }
 \arguments{
 \item{data}{a matrix, data frame or a list with data values (see details below).}

@@ -26,7 +26,7 @@ context("mdaplot: prepare data for plots")
 ## empty data always raises an error
 test_that("if data is empty it raises an error for all plots", {
    for (p in all_plots) {
-      expect_error(prepare_data_for_plot(NULL, !!p))
+      expect_error(mdaplot.prepareDataForPlot(NULL, !!p))
    }
 })
 
@@ -34,14 +34,14 @@ test_that("if data is empty it raises an error for all plots", {
 test_that("vector without dimension handles correctly", {
    x <- 1:4
    for (p in linebar_plots) {
-      expect_equal(dim(prepare_data_for_plot(x, !!p)$data), c(1, 4))
+      expect_equal(dim(mdaplot.prepareDataForPlot(x, !!p)$data), c(1, 4))
    }
 
    # for scatter plot it is converted to column plus extra column is added
-   expect_equal(dim(prepare_data_for_plot(x, "p")$data), c(4, 2))
+   expect_equal(dim(mdaplot.prepareDataForPlot(x, "p")$data), c(4, 2))
 
    # for error bar it raises an error
-   expect_error(prepare_data_for_plot(x, "e"))
+   expect_error(mdaplot.prepareDataForPlot(x, "e"))
 })
 
 ## for errorbar it should give an error
@@ -55,13 +55,13 @@ colnames <- paste0("X", 1:3)
 
 test_that("if no rownames are not specified they are added", {
    for (p in all_plots) {
-      expect_equal(rownames(prepare_data_for_plot(x, !!p)$data), rownames)
+      expect_equal(rownames(mdaplot.prepareDataForPlot(x, !!p)$data), rownames)
    }
 })
 
 test_that("if no colnames are not specified they are added", {
    for (p in all_plots) {
-      expect_equal(colnames(prepare_data_for_plot(x, !!p)$data), colnames)
+      expect_equal(colnames(mdaplot.prepareDataForPlot(x, !!p)$data), colnames)
    }
 })
 
@@ -71,13 +71,13 @@ colnames(x) <- paste0("Var", 1:3)
 
 test_that("if rownames are specified they are kept", {
    for (p in all_plots) {
-      expect_equal(rownames(prepare_data_for_plot(x, !!p)$data), rownames(x))
+      expect_equal(rownames(mdaplot.prepareDataForPlot(x, !!p)$data), rownames(x))
    }
 })
 
 test_that("if colnames are specified they are kept", {
    for (p in all_plots) {
-      expect_equal(colnames(prepare_data_for_plot(x, !!p)$data), colnames(x))
+      expect_equal(colnames(mdaplot.prepareDataForPlot(x, !!p)$data), colnames(x))
    }
 })
 
@@ -85,10 +85,10 @@ test_that("if colnames are specified they are kept", {
 xn1c <- mda.exclcols(x, c(FALSE, TRUE, FALSE))
 test_that("missing columns are handled correctly (more than 1 is left)", {
    for (p in all_plots) {
-      expect_equal(dim(prepare_data_for_plot(xn1c, p)$data), c(3, 2))
-      expect_equal(colnames(prepare_data_for_plot(xn1c, p)$data), c("Var1", "Var3"))
-      expect_equal(rownames(prepare_data_for_plot(xn1c, p)$data), rownames(x))
-      expect_equal(prepare_data_for_plot(xn1c, p)$excluded_cols, 2)
+      expect_equal(dim(mdaplot.prepareDataForPlot(xn1c, p)$data), c(3, 2))
+      expect_equal(colnames(mdaplot.prepareDataForPlot(xn1c, p)$data), c("Var1", "Var3"))
+      expect_equal(rownames(mdaplot.prepareDataForPlot(xn1c, p)$data), rownames(x))
+      expect_equal(mdaplot.prepareDataForPlot(xn1c, p)$excluded_cols, 2)
    }
 })
 
@@ -96,42 +96,42 @@ test_that("missing columns are handled correctly (more than 1 is left)", {
 xn1r <- mda.exclrows(x, c(FALSE, TRUE, FALSE))
 test_that("missing rows are handled correctly (more than 1 is left)", {
    for (p in all_plots) {
-      expect_equal(dim(prepare_data_for_plot(xn1r, p)$data), c(2, 3))
-      expect_equal(colnames(prepare_data_for_plot(xn1r, p)$data), colnames(x))
-      expect_equal(rownames(prepare_data_for_plot(xn1r, p)$data), c("Obj1", "Obj3"))
-      expect_equal(prepare_data_for_plot(xn1r, p)$excluded_rows, 2)
+      expect_equal(dim(mdaplot.prepareDataForPlot(xn1r, p)$data), c(2, 3))
+      expect_equal(colnames(mdaplot.prepareDataForPlot(xn1r, p)$data), colnames(x))
+      expect_equal(rownames(mdaplot.prepareDataForPlot(xn1r, p)$data), c("Obj1", "Obj3"))
+      expect_equal(mdaplot.prepareDataForPlot(xn1r, p)$excluded_rows, 2)
    }
 })
 
-## remove two columns of three 
+## remove two columns of three
 xn2c <- mda.exclcols(x, c(TRUE, FALSE, TRUE))
 test_that("missing columns are handled correctly (only one is left)", {
    for (p in nonscatter_plots) {
-      expect_equal(dim(prepare_data_for_plot(xn2c, p)$data), c(3, 1))
-      expect_equal(colnames(prepare_data_for_plot(xn2c, p)$data), c("Var2"))
-      expect_equal(rownames(prepare_data_for_plot(xn2c, p)$data), rownames(x))
-      expect_equal(prepare_data_for_plot(xn2c, p)$excluded_cols, c(1, 3))
+      expect_equal(dim(mdaplot.prepareDataForPlot(xn2c, p)$data), c(3, 1))
+      expect_equal(colnames(mdaplot.prepareDataForPlot(xn2c, p)$data), c("Var2"))
+      expect_equal(rownames(mdaplot.prepareDataForPlot(xn2c, p)$data), rownames(x))
+      expect_equal(mdaplot.prepareDataForPlot(xn2c, p)$excluded_cols, c(1, 3))
    }
 
    # for scatter is a special one (since a column will be added if less than 2)
-   expect_equal(dim(prepare_data_for_plot(xn2c, "p")$data), c(3, 2))
-   expect_equal(colnames(prepare_data_for_plot(xn2c, "p")$data), c("Objects", "Var2"))
-   expect_equal(rownames(prepare_data_for_plot(xn2c, "p")$data), rownames(x))
-   expect_equal(prepare_data_for_plot(xn2c, "p")$excluded_cols, c(1, 3))
+   expect_equal(dim(mdaplot.prepareDataForPlot(xn2c, "p")$data), c(3, 2))
+   expect_equal(colnames(mdaplot.prepareDataForPlot(xn2c, "p")$data), c("Objects", "Var2"))
+   expect_equal(rownames(mdaplot.prepareDataForPlot(xn2c, "p")$data), rownames(x))
+   expect_equal(mdaplot.prepareDataForPlot(xn2c, "p")$excluded_cols, c(1, 3))
 })
 
-## remove two rows of three 
+## remove two rows of three
 xn2r <- mda.exclrows(x, c(TRUE, FALSE, TRUE))
 test_that("missing rows are handled correctly (only one is left)", {
    for (p in main_plots) {
-      expect_equal(dim(prepare_data_for_plot(xn2r, p)$data), c(1, 3))
-      expect_equal(colnames(prepare_data_for_plot(xn2r, p)$data), colnames(x))
-      expect_equal(rownames(prepare_data_for_plot(xn2r, p)$data), c("Obj2"))
-      expect_equal(prepare_data_for_plot(xn2r, p)$excluded_rows, c(1, 3))
+      expect_equal(dim(mdaplot.prepareDataForPlot(xn2r, p)$data), c(1, 3))
+      expect_equal(colnames(mdaplot.prepareDataForPlot(xn2r, p)$data), colnames(x))
+      expect_equal(rownames(mdaplot.prepareDataForPlot(xn2r, p)$data), c("Obj2"))
+      expect_equal(mdaplot.prepareDataForPlot(xn2r, p)$excluded_rows, c(1, 3))
    }
 
    # for error it raises an error
-   expect_error(prepare_data_for_plot(xn2r, "e"))
+   expect_error(mdaplot.prepareDataForPlot(xn2r, "e"))
 })
 
 
@@ -143,8 +143,14 @@ context("mdaplot: split plot data")
 
 x <- matrix(1:9, ncol = 3)
 
+test_that("function return an error if type is wrong", {
+   expect_error(mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "p"), "x"))
+   expect_error(mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "p"), "y"))
+   expect_silent(mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "p"), "p"))
+})
+
 test_that("data is split correctly for scatter plots", {
-   res <- split_plot_data(prepare_data_for_plot(x, "p"), "p")
+   res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "p"), "p")
    expect_equivalent(res$x_values, x[, 1])
    expect_equivalent(res$y_values, x[, 2])
    expect_equal(attr(res$x_values, "name"), "X1")
@@ -153,8 +159,8 @@ test_that("data is split correctly for scatter plots", {
 })
 
 test_that("data is split correctly for line plots", {
-   res <- split_plot_data(prepare_data_for_plot(x, "l"), "l")
-   expect_equivalent(res$x_values, 1:3)   
+   res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "l"), "l")
+   expect_equivalent(res$x_values, 1:3)
    expect_equivalent(res$y_values, x)
    expect_equal(attr(res$x_values, "name"), "Variables")
    expect_equal(attr(res$y_values, "name"), "")
@@ -162,7 +168,7 @@ test_that("data is split correctly for line plots", {
 })
 
 test_that("data is split correctly for bar plots", {
-   res <- split_plot_data(prepare_data_for_plot(x, "h"), "h")
+   res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "h"), "h")
    expect_equivalent(res$x_values, 1:3)
    expect_equivalent(res$y_values, x[1, ])
    expect_equal(attr(res$x_values, "name"), "Variables")
@@ -171,7 +177,7 @@ test_that("data is split correctly for bar plots", {
 })
 
 test_that("data is split correctly for errorbar plots", {
-   res <- split_plot_data(prepare_data_for_plot(x, "e"), "e")
+   res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "e"), "e")
    expect_equivalent(res$x_values, 1:3)
    expect_equivalent(res$y_values, x[1, ])
    expect_equivalent(res$lower, x[2, ])
@@ -182,7 +188,7 @@ test_that("data is split correctly for errorbar plots", {
 })
 
 test_that("data is split correctly for errorbar plots (two rows case)", {
-   res <- split_plot_data(prepare_data_for_plot(x[1:2, ], "e"), "e")
+   res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x[1:2, ], "e"), "e")
    expect_equivalent(res$x_values, 1:3)
    expect_equivalent(res$y_values, x[1, ])
    expect_equivalent(res$lower, x[2, ])
@@ -198,35 +204,40 @@ test_that("data is split correctly for errorbar plots (two rows case)", {
 
 context("mdaplot: excluded rows processing")
 
+tf <- function(data, type) {
+   mdaplot.processExcludedRows(
+      mdaplot.splitPlotData(mdaplot.prepareDataForPlot(data, type), type), type
+   )
+}
+
 x1 <- matrix(1:12, ncol = 2)
 x2 <- matrix(1:12, ncol = 2)
 x1 <- mda.exclrows(x1, c(TRUE, FALSE, TRUE, FALSE))
 
 test_that("excluded rows are processed correctly for scatter plot", {
-   x1r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, "p"), "p"), "p")
+   x1r <- tf(x1, "p")
    expect_equivalent(x1r$x_values_excluded, x1[c(1, 3), 1])
    expect_equivalent(x1r$y_values_excluded, x1[c(1, 3), 2])
 
-   x2r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, "p"), "p"), "p")
+   x2r <- tf(x2, "p")
    expect_equal(x2r$x_values_excluded, NULL)
    expect_equal(x2r$y_values_excluded, NULL)
 })
 
 test_that("excluded rows are processed correctly for line plots", {
-   x1r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, "l"), "l"), "l")
+   x1r <- tf(x1, "l")
    expect_equivalent(x1r$x_values_excluded, x1r$x_values)
    expect_equivalent(x1r$y_values_excluded, x1[c(1, 3), ])
 
-   x2r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, "l"), "l"), "l")
+   x2r <- tf("x2", "l")
    expect_equal(x2r$x_values_excluded, NULL)
    expect_equal(x2r$y_values_excluded, NULL)
 })
 
 test_that("trying to call this function for other plot gives error (if excluded rows exist)", {
-   expect_error(process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, "h"), "h"), "h"))
-   expect_error(process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, "e"), "e"), "e"))
-   expect_silent(process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, "h"), "h"), "h"))
-   expect_silent(process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, "e"), "e"), "e"))
+   expect_error(tf(x1, "e"))
+   expect_silent(tf(x2, "h"))
+   expect_silent(tf(x2, "e"))
 })
 
 ###########################################
@@ -246,129 +257,141 @@ row_labels_wrong <- c("A", "C")
 col_labels <- c("X", "Y", "Z")
 col_labels_wrong <- c("X", "Z")
 
+td <- function(data, type) {
+   mdaplot.processExcludedRows(
+      mdaplot.splitPlotData(mdaplot.prepareDataForPlot(data, type), type), type
+   )
+}
+
 test_that("processing of labels provided by user", {
 
    # data without hidden rows and cols (scatter plots)
-   x1r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, "p"), "p"), "p")
-   expect_error(prepare_plot_data_labels(x1r, "p", row_labels_wrong))
-   x1r <- prepare_plot_data_labels(x1r, "p", row_labels)
+   x1r <- tf(x1, "p")
+   expect_error(mdaplot.prepareDataLabels(x1r, "p", row_labels_wrong))
+
+   x1r <- mdaplot.prepareDataLabels(x1r, "p", row_labels)
    expect_equal(x1r$labels, row_labels)
    expect_equal(x1r$labels_excluded, NULL)
 
    # data with hidden rows (scatter plots)
-   x2r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, "p"), "p"), "p")
-   expect_error(prepare_plot_data_labels(x2r, "p", row_labels_wrong))
-   x2r <- prepare_plot_data_labels(x2r, "p", row_labels)
+   x2r <- tf(x2, "p")
+   expect_error(mdaplot.prepareDataLabels(x2r, "p", row_labels_wrong))
+
+   x2r <- mdaplot.prepareDataLabels(x2r, "p", row_labels)
    expect_equal(x2r$labels, row_labels[!excluded_rows])
    expect_equal(x2r$labels_excluded, row_labels[excluded_rows])
 
    # data with hidden cols (scatter plots)
-   x3r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x3, "p"), "p"), "p")
-   expect_error(prepare_plot_data_labels(x3r, "p", row_labels_wrong))
-   x3r <- prepare_plot_data_labels(x3r, "p", row_labels)
+   x3r <- tf(x3, "p")
+   expect_error(mdaplot.prepareDataLabels(x3r, "p", row_labels_wrong))
+
+   x3r <- mdaplot.prepareDataLabels(x3r, "p", row_labels)
    expect_equal(x3r$labels, row_labels)
    expect_equal(x3r$labels_excluded, NULL)
 
 
-   for (p in c("l", "b")) {
+   for (type in c("l", "b")) {
       # data with hidden rows (non scatter plots)
-      x2r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, p), p), p)
-      expect_error(prepare_plot_data_labels(x2r, p, col_labels_wrong))
-      x2r <- prepare_plot_data_labels(x2r, p, col_labels)
+      x2r <- tf(x2, type)
+      expect_error(mdaplot.prepareDataLabels(x2r, type, col_labels_wrong))
+
+      x2r <- mdaplot.prepareDataLabels(x2r, type, col_labels)
       expect_equivalent(x2r$labels, col_labels)
       expect_equivalent(x2r$labels_excluded, NULL)
    }
 
-   for (p in nonscatter_plots) {
+   for (type in nonscatter_plots) {
       # data without hidden rows and cols (non scatter plots)
-      x1r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, p), p), p)   
-      expect_error(prepare_plot_data_labels(x1r, p, col_labels_wrong))
-      x1r <- prepare_plot_data_labels(x1r, p, col_labels)
+      x1r <- tf(x1, type)
+      expect_error(mdaplot.prepareDataLabels(x1r, type, col_labels_wrong))
+
+      x1r <- mdaplot.prepareDataLabels(x1r, type, col_labels)
       expect_equivalent(x1r$labels, col_labels)
       expect_equal(x1r$labels_excluded, NULL)
 
       # data with hidden cols (scatter plots)
-      x3r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x3, p), p), p)
-      expect_error(prepare_plot_data_labels(x3r, p, col_labels_wrong))
-      x3r <- prepare_plot_data_labels(x3r, p, col_labels)
+      x3r <- tf(x3, type)
+      expect_error(mdaplot.prepareDataLabels(x3r, type, col_labels_wrong))
+
+      x3r <- mdaplot.prepareDataLabels(x3r, type, col_labels)
       expect_equivalent(x3r$labels, col_labels[!excluded_cols])
       expect_equivalent(x3r$labels_excluded, col_labels[excluded_cols])
    }
 })
 
 test_that("processing of labels which were not specified (scatter)", {
-   x1r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, "p"), "p"), "p")   
-   x1r <- prepare_plot_data_labels(x1r, "p", NULL)
+   x1r <- tf(x1, "p")
+   x1r <- mdaplot.prepareDataLabels(x1r, "p", NULL)
    expect_equal(x1r$labels, c("O1", "O2", "O3", "O4"))
    expect_equal(x1r$labels_excluded, NULL)
 
-   x2r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, "p"), "p"), "p")
-   x2r <- prepare_plot_data_labels(x2r, "p", NULL)
+   x2r <- tf(x2, "p")
+   x2r <- mdaplot.prepareDataLabels(x2r, "p", NULL)
    expect_equal(x2r$labels, c("O2", "O4"))
    expect_equal(x2r$labels_excluded, c("O1", "O3"))
 
-   x3r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x3, "p"), "p"), "p")   
-   x3r <- prepare_plot_data_labels(x3r, "p", NULL)
+   x3r <- tf(x3, "p")
+   x3r <- mdaplot.prepareDataLabels(x3r, "p", NULL)
    expect_equal(x3r$labels, c("O1", "O2", "O3", "O4"))
    expect_equal(x3r$labels_excluded, NULL)
 })
 
 test_that("processing of labels which were not specified (other plots)", {
 
-   for (p in c("l", "b")) {
-      x2r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, p), p), p)
-      x2r <- prepare_plot_data_labels(x2r, p, NULL)
+   for (type in c("l", "b")) {
+      x2r <- tf(x2, type)
+      x2r <- mdaplot.prepareDataLabels(x2r, type, NULL)
       expect_equal(x2r$labels, c("X1", "X2", "X3"))
       expect_equal(x2r$labels_excluded, NULL)
    }
 
-   for (p in nonscatter_plots) {
-      x1r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, p), p), p)
-      x1r <- prepare_plot_data_labels(x1r, p, NULL)
+   for (type in nonscatter_plots) {
+      x1r <- tf(x1, type)
+      x1r <- mdaplot.prepareDataLabels(x1r, type, NULL)
       expect_equal(x1r$labels, c("X1", "X2", "X3"))
       expect_equal(x1r$labels_excluded, NULL)
 
-      x3r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x3, p), p), p)   
-      x3r <- prepare_plot_data_labels(x3r, p, NULL)
+      x3r <- tf(x3, type)
+      x3r <- mdaplot.prepareDataLabels(x3r, type, NULL)
       expect_equal(x3r$labels, c("X1", "X3"))
       expect_equal(x3r$labels_excluded, NULL)
    }
 })
 
 test_that("processing of labels specified as 'values' (scatter)", {
-   x1r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, "p"), "p"), "p")   
-   x1r = prepare_plot_data_labels(x1r, "p", "values")
+   x1r <- tf(x1, "p")
+   x1r <- mdaplot.prepareDataLabels(x1r, "p", "values")
    expect_equivalent(x1r$labels, x1[, 2])
    expect_equivalent(x1r$labels_excluded, NULL)
 
-   x2r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, "p"), "p"), "p")
-   x2r <- prepare_plot_data_labels(x2r, "p", "values")
+   x2r <- tf(x2, "p")
+   x2r <- mdaplot.prepareDataLabels(x2r, "p", "values")
    expect_equivalent(x2r$labels, x2[!excluded_rows, 2])
    expect_equivalent(x2r$labels_excluded, x2[excluded_rows, 2])
 
-   x3r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x3, "p"), "p"), "p")   
-   x3r = prepare_plot_data_labels(x3r, "p", "values")
+   x3r <- tf(x3, "p")
+   x3r <- mdaplot.prepareDataLabels(x3r, "p", "values")
    expect_equivalent(x3r$labels, x3[, 3])
    expect_equivalent(x3r$labels_excluded, NULL)
 })
 
 test_that("processing of labels specified as 'values' (other plots)", {
 
-   for (p in c("l", "b")) {
-      x2r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, p), p), p)
-      x2r <- prepare_plot_data_labels(x2r, p, "values")
+   for (type in c("l", "b")) {
+      x2r <- tf(x2, type)
+      x2r <- mdaplot.prepareDataLabels(x2r, type, "values")
       expect_equivalent(x2r$labels, apply(x2[!excluded_rows, , drop = F], 2, max))
       expect_equivalent(x2r$labels_excluded, apply(x2[excluded_rows, , drop = F], 2, max))
    }
 
-   for (p in c("h", "e")) {
-      x1r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, p), p), p)
-      x1r <- prepare_plot_data_labels(x1r, p, "values")
+   for (type in c("h", "e")) {
+      x1r <- tf(x1, type)
+      x1r <- mdaplot.prepareDataLabels(x1r, type, "values")
       expect_equivalent(x1r$labels, x1[1, ])
       expect_equivalent(x1r$labels_excluded, NULL)
 
-      x3r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x3, p), p), p)   
-      x3r <- prepare_plot_data_labels(x3r, p, "values")
+      x3r <- tf(x3, type)
+      x3r <- mdaplot.prepareDataLabels(x3r, type, "values")
       expect_equivalent(x3r$labels, x3[1, !excluded_cols, drop = F])
       expect_equivalent(x3r$labels_excluded, NULL)
    }
@@ -376,39 +399,39 @@ test_that("processing of labels specified as 'values' (other plots)", {
 })
 
 test_that("processing of labels specified as 'indices' (scatter)", {
-   x1r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, "p"), "p"), "p")   
-   x1r <- prepare_plot_data_labels(x1r, "p", "indices")
+   x1r <- tf(x1, "p")
+   x1r <- mdaplot.prepareDataLabels(x1r, "p", "indices")
    expect_equivalent(x1r$labels, 1:4)
    expect_equivalent(x1r$labels_excluded, NULL)
 
-   x2r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, "p"), "p"), "p")
-   x2r <- prepare_plot_data_labels(x2r, "p", "indices")
+   x2r <- tf(x2, "p")
+   x2r <- mdaplot.prepareDataLabels(x2r, "p", "indices")
    expect_equivalent(x2r$labels, c(2, 4))
    expect_equivalent(x2r$labels_excluded, c(1, 3))
 
-   x3r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x3, "p"), "p"), "p")
-   x3r <- prepare_plot_data_labels(x3r, "p", "indices")
+   x3r <- tf(x3, "p")
+   x3r <- mdaplot.prepareDataLabels(x3r, "p", "indices")
    expect_equivalent(x3r$labels, 1:4)
    expect_equivalent(x3r$labels_excluded, NULL)
 })
 
 test_that("processing of labels specified as 'indices' (other plots)", {
 
-   for (p in c("l", "b")) {
-      x2r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x2, p), p), p)
-      x2r <- prepare_plot_data_labels(x2r, p, "indices")
+   for (type in c("l", "b")) {
+      x2r <- tf(x2, type)
+      x2r <- mdaplot.prepareDataLabels(x2r, type, "indices")
       expect_equivalent(x2r$labels, 1:3)
       expect_equivalent(x2r$labels_excluded, NULL)
    }
 
-   for (p in nonscatter_plots) {
-      x1r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x1, p), p), p)
-      x1r <- prepare_plot_data_labels(x1r, p, "indices")
+   for (type in nonscatter_plots) {
+      x1r <- tf(x1, type)
+      x1r <- mdaplot.prepareDataLabels(x1r, type, "indices")
       expect_equivalent(x1r$labels, 1:3)
       expect_equivalent(x1r$labels_excluded, NULL)
 
-      x3r <- process_excluded_rows(split_plot_data(prepare_data_for_plot(x3, p), p), p)
-      x3r <- prepare_plot_data_labels(x3r, p, "indices")
+      x3r <- tf(x3, type)
+      x3r <- mdaplot.prepareDataLabels(x3r, type, "indices")
       expect_equivalent(x3r$labels, c(1, 3))
       expect_equivalent(x3r$labels_excluded, NULL)
    }
@@ -474,9 +497,9 @@ test_that("can work with vectors as data source (part 2)", {
 
 par(mfrow = c(1, 1))
 test_that("several plots can be combined together using 'show.axes' parameter", {
-   m = apply(people, 2, mean)
-   expect_silent(mdaplot(m, type = 'h', col = 'pink', bwd = 0.25, show.labels = T))
-   expect_silent(mdaplot(stat1, type = 'e', col = 'red', show.axes = F, show.grid = F))
+   m <- apply(people, 2, mean)
+   expect_silent(mdaplot(m, type = "h", col = "pink", bwd = 0.25, show.labels = T))
+   expect_silent(mdaplot(stat1, type = "e", col = "red", show.axes = F, show.grid = F))
 })
 par(mfrow = c(2, 2))
 
@@ -526,8 +549,8 @@ test_that("handle and 'yaxis.names' attribute correctly", {
    expect_silent(mdaplot(spectra, type = "h"))
 })
 
-attr(spectra, "xaxis.values") = 10^7 / simdata$wavelength
-attr(spectra, "xaxis.name") = expression("Wavenumber, cm"^-1)
+attr(spectra, "xaxis.values") <- 10^7 / simdata$wavelength
+attr(spectra, "xaxis.name") <- expression("Wavenumber, cm"^-1)
 test_that("attribute 'xaxis.values' can be in reverse order", {
    expect_silent(mdaplot(spectra, type = "p"))
    expect_silent(mdaplot(spectra, type = "l"))
@@ -568,7 +591,8 @@ test_that("'xticks' and 'xticklabels' work correctly together", {
 })
 
 test_that("'xlas' parameter is handling correctly", {
-   expect_silent(tf(type = "p", xlas = 2, xticks = c(165, 180, 195), xticklabels=c("L", "M", "H")))
+   xticklabels2 <- c("L", "M", "H")
+   expect_silent(tf(type = "p", xlas = 2, xticks = c(165, 180, 195), xticklabels = xticklabels2))
    expect_silent(tf(type = "l", xlas = 2, xticks = xticks, xticklabels = xticklabels))
    expect_silent(tf(type = "b", xlas = 2, xticks = xticks, xticklabels = xticklabels))
    expect_silent(tf(type = "h", xlas = 2, xticks = xticks, xticklabels = xticklabels))
@@ -884,14 +908,17 @@ d <- 2.5 - d
 d[d < 0] <- 0
 pd <- cbind(x, y)
 
+usr_cmap1 <- c("red", "blue")
+usr_cmap2 <- c("red", "green", "blue")
+
 par(mfrow = c(3, 2))
 test_that("excluded values and color grouping work fine together", {
    expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: default"))
    expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: old", colmap = "old"))
    expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: gray", colmap = "gray"))
    expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: jet", colmap = "jet"))
-   expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: user", colmap = c("red", "blue")))
-   expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: user", colmap = c("red", "green", "blue")))
+   expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: user", colmap = usr_cmap1))
+   expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: user", colmap = usr_cmap2))
 })
 
 par(mfrow = c(2, 2))
@@ -927,7 +954,7 @@ test_that("special parameters for pch values work fine", {
    expect_silent(tf(type = "p", pch = 21))
    expect_silent(tf(type = "p", pch = 21, cgroup = people[, "Height"]))
    expect_silent(tf(type = "p", pch = 21, pch.colinv = TRUE))
-   expect_silent(tf(type = "p", pch = 21, cgroup = people[, "Height"], 
+   expect_silent(tf(type = "p", pch = 21, cgroup = people[, "Height"],
       bg = "white", lwd = 0.5, cex = 1.2, pch.colinv = TRUE))
 })
 
@@ -957,30 +984,30 @@ g <- interaction(g1, g2)
 
 tf <- function(type, cgroup, ...) {
    p <- mdaplot(people, type = type, cgroup = cgroup)
-   add_convex_hull(p, ...)
+   mdaplot.plotConvexHull(p, ...)
 }
 
 par(mfrow = c(2, 2))
-test_that("add_convex_hull returns error if wrong type of plot is used", {
+test_that("mdaplot.plotConvexHull returns error if wrong type of plot is used", {
    expect_error(tf(type = "l", cgroup = g1))
    expect_error(tf(type = "b", cgroup = g1))
    expect_error(tf(type = "h", cgroup = g1))
    expect_error(tf(type = "e", cgroup = g1))
 })
 
-test_that("add_convex_hull returns error if cgroup is not a factor", {
+test_that("mdaplot.plotConvexHull returns error if cgroup is not a factor", {
    expect_error(tf(type = "p", cgroup = gw))
 })
 
 par(mfrow = c(2, 2))
-test_that("add_convex_hull works as expected with default styles", {
+test_that("mdaplot.plotConvexHull works as expected with default styles", {
    expect_silent(tf(type = "p", cgroup = g1))
    expect_silent(tf(type = "p", cgroup = g2))
    expect_silent(tf(type = "p", cgroup = g))
 })
 
 par(mfrow = c(2, 2))
-test_that("add_convex_hull works as expected with different opacity", {
+test_that("mdaplot.plotConvexHull works as expected with different opacity", {
    expect_silent(tf(type = "p", opacity = 0.8, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.4, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, cgroup = g2))
@@ -988,7 +1015,7 @@ test_that("add_convex_hull works as expected with different opacity", {
 })
 
 par(mfrow = c(2, 2))
-test_that("add_convex_hull works as expected with different line parameters", {
+test_that("mdaplot.plotConvexHull works as expected with different line parameters", {
    expect_silent(tf(type = "p", opacity = 0.4, lwd = 1, lty = 1, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 2, lty = 2, cgroup = g2))
    expect_silent(tf(type = "p", opacity = 0.1, lwd = 3, lty = 3, cgroup = g))
@@ -1010,34 +1037,34 @@ g2 <- factor(people[, "Region"], labels = c("Scan", "Med"))
 g <- interaction(g1, g2)
 
 p <- mdaplot(people, type = "p", cgroup = g1)
-add_convex_hull(p)
+mdaplot.plotConvexHull(p)
 
 tf <- function(type, cgroup, ...) {
    p <- mdaplot(people, type = type, cgroup = cgroup)
-   add_convex_hull(p, ...)
+   mdaplot.plotConvexHull(p, ...)
 }
 
 par(mfrow = c(2, 2))
-test_that("add_convex_hull returns error if wrong type of plot is used", {
+test_that("mdaplot.plotConvexHull returns error if wrong type of plot is used", {
    expect_error(tf(type = "l", cgroup = g1))
    expect_error(tf(type = "b", cgroup = g1))
    expect_error(tf(type = "h", cgroup = g1))
    expect_error(tf(type = "e", cgroup = g1))
 })
 
-test_that("add_convex_hull returns error if cgroup is not a factor", {
+test_that("mdaplot.plotConvexHull returns error if cgroup is not a factor", {
    expect_error(tf(type = "p", cgroup = gw))
 })
 
 par(mfrow = c(2, 2))
-test_that("add_convex_hull works as expected with default styles", {
+test_that("mdaplot.plotConvexHull works as expected with default styles", {
    expect_silent(tf(type = "p", cgroup = g1))
    expect_silent(tf(type = "p", cgroup = g2))
    expect_silent(tf(type = "p", cgroup = g))
 })
 
 par(mfrow = c(2, 2))
-test_that("add_convex_hull works as expected with different opacity", {
+test_that("mdaplot.plotConvexHull works as expected with different opacity", {
    expect_silent(tf(type = "p", opacity = 0.8, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.4, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, cgroup = g2))
@@ -1045,7 +1072,7 @@ test_that("add_convex_hull works as expected with different opacity", {
 })
 
 par(mfrow = c(2, 2))
-test_that("add_convex_hull works as expected with different line parameters", {
+test_that("mdaplot.plotConvexHull works as expected with different line parameters", {
    expect_silent(tf(type = "p", opacity = 0.4, lwd = 1, lty = 1, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 2, lty = 2, cgroup = g2))
    expect_silent(tf(type = "p", opacity = 0.1, lwd = 3, lty = 3, cgroup = g))
@@ -1065,30 +1092,30 @@ g <- interaction(g1, g2)
 
 tf <- function(type, cgroup, ...) {
    p <- mdaplot(people, type = type, cgroup = cgroup)
-   add_confidence_ellipse(p, ...)
+   mdaplot.plotConfidenceEllipse(p, ...)
 }
 
 par(mfrow = c(2, 2))
-test_that("add_confidence_ellipse returns error if wrong type of plot is used", {
+test_that("mdaplot.plotConfidenceEllipse returns error if wrong type of plot is used", {
    expect_error(tf(type = "l", cgroup = g1))
    expect_error(tf(type = "b", cgroup = g1))
    expect_error(tf(type = "h", cgroup = g1))
    expect_error(tf(type = "e", cgroup = g1))
 })
 
-test_that("add_confidence_ellipse returns error if cgroup is not a factor", {
+test_that("mdaplot.plotConfidenceEllipse returns error if cgroup is not a factor", {
    expect_error(tf(type = "p", cgroup = gw))
 })
 
 par(mfrow = c(2, 2))
-test_that("add_confidence_ellipse works as expected with default styles", {
+test_that("mdaplot.plotConfidenceEllipse works as expected with default styles", {
    expect_silent(tf(type = "p", cgroup = g1))
    expect_silent(tf(type = "p", cgroup = g2))
    expect_silent(tf(type = "p", cgroup = g))
 })
 
 par(mfrow = c(2, 2))
-test_that("add_confidence_ellipse works as expected with different opacity", {
+test_that("mdaplot.plotConfidenceEllipse works as expected with different opacity", {
    expect_silent(tf(type = "p", opacity = 0.8, cgroup = g))
    expect_silent(tf(type = "p", opacity = 0.4, cgroup = g))
    expect_silent(tf(type = "p", opacity = 0.2, cgroup = g))
@@ -1096,7 +1123,7 @@ test_that("add_confidence_ellipse works as expected with different opacity", {
 })
 
 par(mfrow = c(2, 2))
-test_that("add_confidence_ellipse works as expected with different confidence level", {
+test_that("mdaplot.plotConfidenceEllipse works as expected with different confidence level", {
    expect_silent(tf(type = "p", opacity = 0.8, conf.level = 0.80, cgroup = g))
    expect_silent(tf(type = "p", opacity = 0.4, conf.level = 0.90, cgroup = g))
    expect_silent(tf(type = "p", opacity = 0.2, conf.level = 0.95, cgroup = g))
@@ -1104,10 +1131,27 @@ test_that("add_confidence_ellipse works as expected with different confidence le
 })
 
 par(mfrow = c(2, 2))
-test_that("add_confidence_ellipse works as expected with different line parameters", {
+test_that("mdaplot.plotConfidenceEllipse works as expected with different line parameters", {
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 1, lty = 1, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 2, lty = 2, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 3, lty = 3, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 3, lty = 4, cgroup = g1))
 })
 
+## test density plots
+context("mdaplot: density plot (hexbin)")
+
+N <- 100000
+x <- rnorm(N, 0, 1)
+y <- rnorm(N, 1, 5)
+d <- cbind(x, y)
+colnames(d) <- c("Var 1", "Var 2")
+
+tf <- function(x, ...) mdaplot(x, type = "d", ...)
+par(mfrow = c(2, 2))
+test_that("density plot works as expected with main parameters", {
+   expect_silent(tf(d))
+   expect_silent(tf(d, nbins = 10 , colmap = "gray"))
+   expect_silent(tf(d, nbins = 100, colmap = "old"))
+   expect_silent(tf(d, nbins = 50, colmap = c("red", "green", "blue")))
+})

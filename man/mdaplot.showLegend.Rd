@@ -5,7 +5,7 @@
 \title{Plot legend}
 \usage{
 mdaplot.showLegend(legend, col, pch = NULL, lty = NULL, lwd = NULL,
-  cex = 1, bty = "o", position = "topright", plot = T)
+  cex = 1, bty = "o", position = "topright", plot = TRUE)
 }
 \arguments{
 \item{legend}{vector with text elements for the legend items}
@@ -22,7 +22,7 @@ mdaplot.showLegend(legend, col, pch = NULL, lty = NULL, lwd = NULL,
 
 \item{bty}{border type for the legend}
 
-\item{position}{legend position ('topright', 'topleft', 'bottomright', 'bottomleft', 'top', 'bottom')}
+\item{position}{legend position ("topright", "topleft', "bottomright", "bottomleft", "top", "bottom")}
 
 \item{plot}{logical, show legend or just calculate and return its size}
 }

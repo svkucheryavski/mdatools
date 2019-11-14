@@ -1,11 +1,11 @@
 ## class and methods for iPLS ##
 
 #' Variable selection with interval PLS
-#' 
-#' @description 
+#'
+#' @description
 #' Applies iPLS alrogithm to find variable intervals most important for
 #' prediction
-#' 
+#'
 #' @param x
 #' a matrix with predictor values
 #' @param y
@@ -38,8 +38,8 @@
 #' iPLS method (\code{'forward'} or \code{'backward'})
 #' @param silent
 #' logical, show or not information about selection process
-#'  
-#' @return 
+#'
+#' @return
 #' object of 'ipls' class with several fields, including:
 #'    \item{var.selected}{a vector with indices of selected variables}
 #'    \item{int.selected}{a vector with indices of selected intervals }
@@ -50,67 +50,67 @@
 #'    \item{glob.stat}{a data frame with statistics for the first step (individual intervals)}
 #'    \item{gm}{global PLS model with all variables included}
 #'    \item{om}{optimized PLS model with selected variables}
-#'      
-#' @details 
-#' The algorithm splits the predictors into several intervals and tries to find a combination 
+#'
+#' @details
+#' The algorithm splits the predictors into several intervals and tries to find a combination
 #' of the intervals, which gives best prediction performance. There are two selection methods:
 #' "forward" when the intervals are successively included, and "backward" when the intervals
 #' are successively excluded from a model. On the first step the algorithm finds the best
-#' (forward) or the worst (backward) individual interval. Then it tests the others to find the 
-#' one which gives the best model in a combination with the already selected/excluded one. The 
-#' procedure continues until the maximum number of iteration is reached. 
-#'  
-#' There are several ways to specify the intervals. First of all either number of intervals 
+#' (forward) or the worst (backward) individual interval. Then it tests the others to find the
+#' one which gives the best model in a combination with the already selected/excluded one. The
+#' procedure continues until the maximum number of iteration is reached.
+#'
+#' There are several ways to specify the intervals. First of all either number of intervals
 #' (\code{int.num}) or width of the intervals (\code{int.width}) can be provided. Alternatively
-#' one can specify the limits (first and last variable number) of the intervals manually 
+#' one can specify the limits (first and last variable number) of the intervals manually
 #' with \code{int.limits}.
 #'
-#' Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
-#' will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
-#' cross-validation will be preformed). If it is a list, the following syntax can be used: 
-#' \code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
-#' segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
-#' to \code{nseg} segments ('venetian blinds').  
+#' Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
+#' will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
+#' cross-validation will be preformed). If it is a list, the following syntax can be used:
+#' \code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg}
+#' segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits
+#' to \code{nseg} segments ('venetian blinds').
 #'
-#' @references 
+#' @references
 #' [1] Lars Noergaard at al.  Interval partial least-squares regression (iPLS): a
 #' comparative chemometric study with an example from near-infrared spectroscopy.
 #' Appl.Spec. 2000; 54: 413-419
-#'  
-#' @examples 
+#'
+#' @examples
 #' library(mdatools)
 #'
 #' ## forward selection for simdata
-#'  
+#'
 #' data(simdata)
 #' Xc = simdata$spectra.c
 #' yc = simdata$conc.c[, 3, drop = FALSE]
 #'
-#' # run iPLS and show results  
+#' # run iPLS and show results
 #' im = ipls(Xc, yc, int.ncomp = 5, int.num = 10, cv = 4, method = "forward")
 #' summary(im)
 #' plot(im)
-#'  
+#'
 #' # show "developing" of RMSECV during the algorithm execution
 #' plotRMSE(im)
-#'  
+#'
 #' # plot predictions before and after selection
 #' par(mfrow = c(1, 2))
 #' plotPredictions(im$gm)
 #' plotPredictions(im$om)
-#'  
+#'
 #' # show selected intervals on spectral plot
 #' ind = im$var.selected
 #' mspectrum = apply(Xc, 2, mean)
 #' plot(simdata$wavelength, mspectrum, type = 'l', col = 'lightblue')
 #' points(simdata$wavelength[ind], mspectrum[ind], pch = 16, col = 'blue')
-#'  
+#'
 #' @export
 ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
-                exclcols = NULL, exclrows = NULL,  int.ncomp = glob.ncomp, int.num = NULL, 
-                int.width = NULL, int.limits = NULL, int.niter = NULL, ncomp.selcrit = 'min', 
+                exclcols = NULL, exclrows = NULL,  int.ncomp = glob.ncomp, int.num = NULL,
+                int.width = NULL, int.limits = NULL, int.niter = NULL, ncomp.selcrit = 'min',
                 method = 'forward', silent = F) {
-   
+
    # process names and values for xaxis
    xaxis.name = attr(x, 'xaxis.name')
    if (is.null(xaxis.name))
@@ -121,13 +121,13 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
       xaxis.values = 1:ncol(x)
 
    x = as.matrix(x)
-   
+
    if (is.null(dim(y))) {
-      y = matrix(y, ncol = 1)       
+      y = matrix(y, ncol = 1)
       rownames(y) = rownames(x)
-   }    
-  
-   # remove excluded columns and rows   
+   }
+
+   # remove excluded columns and rows
    if (length(exclcols) > 0) {
       x = mda.exclcols(x, exclcols)
       exclcols = attr(x, 'exclcols')
@@ -135,7 +135,7 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
       xaxis.values = xaxis.values[-exclcols]
       attr(x, 'exclcols') = NULL
    }
-   
+
    if (length(exclrows) > 0) {
       x = mda.exclrows(x, exclrows)
       exclrows = attr(x, 'exclrows')
@@ -144,51 +144,51 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
       attr(x, 'exclrows') = NULL
       attr(y, 'exclrows') = NULL
    }
-   
+
    attr(x, 'xaxis.values') = xaxis.values
    attr(x, 'xaxis.name') = xaxis.name
-   
+
    if (length(dim(y)) != 2) {
       stop('Response variable (y) should be a matrix or a sequence!')
-   }   
-   
+   }
+
    if (ncol(y) > 1) {
       warning('iPLS can work with one y-variable at time, selecting first column.')
       y = y[, 1, drop = F]
    }
-   
+
    if (is.null(colnames(y)))
       colnames(y) = paste('y', 1:ncol(y), sep = '')
-  
+
    nx = ncol(x)
-   
+
    # check and define width and number of intervals
-   if (is.null(int.limits)) {   
-      if (is.null(int.width)) {   
+   if (is.null(int.limits)) {
+      if (is.null(int.width)) {
          if (is.null(int.num))
             stop('Specify either interval width or number of intervals!')
-   
+
          if (int.num < 2 || int.num > nx)
             stop('Wrong value for number of intervals')
-      
+
          int.width = nx / int.num
       } else {
          if (int.width < 1 || int.width > nx)
             stop('Wrong value for interval width!')
 
-         int.num = round(nx / int.width)      
-      }   
-   
+         int.num = round(nx / int.width)
+      }
+
       # generate interval limits similar to the way from [1]
       if (int.num == nx) {
          int1 = 1:nx
          int2 = 1:nx
-      } else {   
+      } else {
          varrem = nx %% int.num
          nvarrem = trunc(nx/int.num)
          if (varrem == 0) {
             int1 = seq(1, nx, by = nvarrem)
-         } else {   
+         } else {
             int1 = c(
                seq(1, (varrem - 1) * (nvarrem + 1) + 1, by = nvarrem + 1),
                seq((varrem - 1) * (nvarrem + 1) + 2 + nvarrem, nx, by = nvarrem)
@@ -200,14 +200,14 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
    } else {
       if (is.null(dim(int.limits)) || ncol(int.limits) != 2 || nrow(int.limits) < 2)
          stop('Interval limits shall be provided as a matrix with two columns!')
-      
-      df = int.limits[, 2] - int.limits[, 1]    
+
+      df = int.limits[, 2] - int.limits[, 1]
       if (min(int.limits) < 1 || max(int.limits) > nx || any(df < 0))
          stop('Wrong values for interval limits!')
-      
+
       int.num = nrow(int.limits)
       int.width = mean(df)
-   }   
+   }
    rownames(int.limits) = 1:int.num
    colnames(int.limits) = c('Left', 'Right')
 
@@ -218,28 +218,28 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
    #show(int2)
    #show(cbind(int.limits, int.limits[, 2] - int.limits[, 1] + 1))
    #stop()
-   
+
   # define number of iterations
    if (is.null(int.niter)) {
       if (int.num < 30)
          int.niter = int.num
       else
          int.niter = 30
-   }   
-   
+   }
+
    # correct maximum number of components for interval models
    if (!is.numeric(cv))
       nseg = cv[[2]]
    else
       nseg = cv
-   
+
    if (nseg == 1)
       nobj.cv = 1
    else
-      nobj.cv = ceiling(nrow(x)/nseg)  
-   
-   int.ncomp = min(round(int.width), nrow(x) - 1 - nobj.cv, int.ncomp)   
-   
+      nobj.cv = ceiling(nrow(x)/nseg)
+
+   int.ncomp = min(round(int.width), nrow(x) - 1 - nobj.cv, int.ncomp)
+
    # build an object
    obj = list(
       cv = cv,
@@ -258,55 +258,55 @@ ipls = function(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
       xaxis.name = xaxis.name,
       xaxis.values = xaxis.values
    )
-   
+
    # make a global model
-   obj$gm = pls(x, y, ncomp = obj$glob.ncomp, center = obj$center, scale = obj$scale, 
+   obj$gm = pls(x, y, ncomp = obj$glob.ncomp, center = obj$center, scale = obj$scale,
                 cv = obj$cv, light = TRUE, ncomp.selcrit = obj$ncomp.selcrit)
-   
+
    if (method == 'forward')
       obj = ipls.forward(x, y, obj)
    else if (method == 'backward')
       obj = ipls.backward(x, y, obj)
    else
       stop('Wrong value for parameter "method"!')
-   
+
    if (!is.null(obj$int.stat)) {
       rownames(obj$int.stat) = 1:nrow(obj$int.stat)
       obj$int.stat$R2 = round(obj$int.stat$R2, 3)
-   }   
-   
+   }
+
    if (!is.null(obj$glob.stat)) {
       rownames(obj$glob.stat) = 1:nrow(obj$glob.stat)
       obj$glob.stat$R2 = round(obj$glob.stat$R2, 3)
-   }   
-   
+   }
+
    obj$var.selected = NULL
    for (i in obj$int.selected)
       obj$var.selected = c(obj$var.selected, seq(obj$int.limits[i, 1], obj$int.limits[i, 2]))
 
-   obj$om = pls(x[, obj$var.selected], y, ncomp = obj$int.ncomp, center = obj$center, 
+   obj$om = pls(x[, obj$var.selected], y, ncomp = obj$int.ncomp, center = obj$center,
                 scale = obj$scale, cv = obj$cv, light = TRUE, ncomp.selcrit = obj$ncomp.selcrit)
-   
-   obj$call = match.call()   
+
+   obj$call = match.call()
    class(obj) = "ipls"
-   
+
    obj
 }
 
 #' Runs the forward iPLS algorithm
-#' 
+#'
 #' @param x
 #' a matrix with predictor values
 #' @param y
 #' a vector with response values
 #' @param obj
 #' object with initial settings for iPLS algorithm
-#'  
+#'
 ipls.forward = function(x, y, obj) {
    # define vectors with status, selected and non-selected intervals
    int.nonselected = 1:obj$int.num
    int.selected = NULL
-   
+
    glob.stat = data.frame(
       'n' = 0,
       'start' = 1,
@@ -315,7 +315,7 @@ ipls.forward = function(x, y, obj) {
       'RMSE' = obj$gm$cvres$rmse[1, obj$gm$ncomp.selected],
       'R2' = obj$gm$cvres$r2[1, obj$gm$ncomp.selected]
    )
-   
+
    int.stat = data.frame(
       'n' = 0,
       'start' = 1,
@@ -325,31 +325,31 @@ ipls.forward = function(x, y, obj) {
       'RMSE' = obj$gm$cvres$rmse[1, obj$gm$ncomp.selected],
       'R2' = obj$gm$cvres$r2[1, obj$gm$ncomp.selected]
    )
- 
+
    if (!obj$silent)
-      cat(sprintf('Model with all intervals: RMSECV = %f, nLV = %d\n', 
+      cat(sprintf('Model with all intervals: RMSECV = %f, nLV = %d\n',
                   int.stat$RMSE[1], int.stat$nComp[1]))
-   
+
    # do loop for max number of intervals
-   selind = NULL 
+   selind = NULL
    rmse = Inf
    for (i in 1:obj$int.niter) {
       if (!obj$silent)
          cat(sprintf('Iteration %3d/%3d... ', i, obj$int.niter))
-      
+
       sel = NULL
       for (l in int.nonselected) {
          # combine already selected intervals with the current
          ind = obj$int.limits[l, 1]:obj$int.limits[l, 2]
          Xc = x[, c(selind, ind), drop = F]
-         
+
          # build a model
-         m = pls(Xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale, 
+         m = pls(Xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale,
                  cv = obj$cv, light = TRUE, ncomp.selcrit = obj$ncomp.selcrit)
-         
+
          # if first round, build a data frame with statistics for each interval
-         if (i == 1) { 
-            glob.stat = rbind(glob.stat, 
+         if (i == 1) {
+            glob.stat = rbind(glob.stat,
                               data.frame(
                                  'n' = l,
                                  'start' = obj$int.limits[l, 1],
@@ -358,15 +358,15 @@ ipls.forward = function(x, y, obj) {
                                  'RMSE' = m$cvres$rmse[1, m$ncomp.selected],
                                  'R2' = m$cvres$r2[1, m$ncomp.selected]
                               )
-            )      
+            )
          }
-         
+
          ## monitoring of the algorithm
          #cat(sprintf('%4d %4d %4d %8.3f %8.3f %4d %4d %4d %4d\n',
-         #            i, l, m$ncomp.selected, rmse, m$cvres$rmse[1, m$ncomp.selected], 
+         #            i, l, m$ncomp.selected, rmse, m$cvres$rmse[1, m$ncomp.selected],
          #            dim(Xc)[1], dim(Xc)[2],
          #            obj$int.limits[l, 1],obj$int.limits[l, 2]))
-         
+
          # else check if rmse has been improved
          if (rmse > m$cvres$rmse[1, m$ncomp.selected]) {
             ncomp = m$ncomp.selected
@@ -375,13 +375,13 @@ ipls.forward = function(x, y, obj) {
             sel = l
          }
       }
-      
-      
+
+
       if (!is.null(sel)) {
          selind = c(selind, obj$int.limits[sel, 1]:obj$int.limits[sel, 2])
          int.nonselected = int.nonselected[int.nonselected != sel]
          int.selected = c(int.selected, sel)
-         
+
          int.stat = rbind(int.stat, data.frame(
             'n' = sel,
             'start' = obj$int.limits[sel, 1],
@@ -390,40 +390,40 @@ ipls.forward = function(x, y, obj) {
             'nComp' = ncomp,
             'RMSE' = rmse,
             'R2' = r2
-         )) 
-         
+         ))
+
          if (!obj$silent)
             cat(sprintf('selected interval %3d (RMSECV = %f)\n', sel, rmse))
-      } else {   
+      } else {
          # no improvements, quit the outer loop
          if (!obj$silent)
             cat('no improvements, stop.\n')
          break
       }
-   }   
-   
+   }
+
    # return the selection results
    obj$glob.stat = glob.stat
    obj$int.stat = int.stat
    obj$int.selected = int.selected
-   
+
    obj
 }
 
 #' Runs the backward iPLS algorithm
-#' 
+#'
 #' @param x
 #' a matrix with predictor values
 #' @param y
 #' a vector with response values
 #' @param obj
 #' object with initial settings for iPLS algorithm
-#'  
+#'
 ipls.backward = function(x, y, obj) {
    # define vectors with status, selected and non-selected intervals
    int.selected = 1:obj$int.num
    int.nonselected = NULL
-  
+
    glob.stat = data.frame(
       'n' = 0,
       'start' = 1,
@@ -432,7 +432,7 @@ ipls.backward = function(x, y, obj) {
       'RMSE' = obj$gm$cvres$rmse[1, obj$gm$ncomp.selected],
       'R2' = obj$gm$cvres$r2[1, obj$gm$ncomp.selected]
    )
-   
+
    int.stat = data.frame(
       'n' = 0,
       'start' = 1,
@@ -442,35 +442,35 @@ ipls.backward = function(x, y, obj) {
       'RMSE' = obj$gm$cvres$rmse[1, obj$gm$ncomp.selected],
       'R2' = obj$gm$cvres$r2[1, obj$gm$ncomp.selected]
    )
-   
+
    if (!obj$silent)
-      cat(sprintf('Model with all intervals: RMSECV = %f, nLV = %d\n', 
+      cat(sprintf('Model with all intervals: RMSECV = %f, nLV = %d\n',
                   int.stat$RMSE[1], int.stat$nComp[1]))
-   
+
    # do loop for max number of intervals
-   unselind = NULL 
+   unselind = NULL
    rmse = Inf
    for (i in 1:obj$int.niter) {
       if (length(int.selected) == 1)
          break
-     
+
       if (!obj$silent)
          cat(sprintf('Iteration %3d/%3d... ', i, obj$int.niter))
-      
+
       # do loop to select an interval
       unsel = NULL
       for (l in int.selected) {
          # combine already selected intervals with the current
          ind = obj$int.limits[l, 1]:obj$int.limits[l, 2]
          Xc = x[, -c(unselind, ind), drop = F]
-         
+
          # build a model
-         m = pls(Xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale, 
+         m = pls(Xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale,
                  cv = obj$cv, light = TRUE, ncomp.selcrit = obj$ncomp.selcrit)
-         
+
          # if first round, build a data frame with statistics for each interval
          if (i == 1) {
-            glob.stat = rbind(glob.stat, 
+            glob.stat = rbind(glob.stat,
                              data.frame(
                                 'n' = l,
                                 'start' = obj$int.limits[l, 1],
@@ -479,15 +479,15 @@ ipls.backward = function(x, y, obj) {
                                 'RMSE' = m$cvres$rmse[1, m$ncomp.selected],
                                 'R2' = m$cvres$r2[1, m$ncomp.selected]
                              )
-            )      
+            )
          }
-         
+
          ## monitoring of the algorithm
          #cat(sprintf('%4d %4d %4d %8.3f %8.3f %4d %4d %4d %4d\n',
-         #            i, l, m$ncomp.selected, rmse, m$cvres$rmse[1, m$ncomp.selected], 
+         #            i, l, m$ncomp.selected, rmse, m$cvres$rmse[1, m$ncomp.selected],
          #            dim(Xc)[1], dim(Xc)[2],
          #            obj$int.limits[l, 1],obj$int.limits[l, 2]))
-        
+
          # if last two intervals are left keep them both
          if (length(int.selected) == 2) {
             int.stat = rbind(int.stat, data.frame(
@@ -499,7 +499,7 @@ ipls.backward = function(x, y, obj) {
                'RMSE' = m$cvres$rmse[1, m$ncomp.selected],
                'R2' = m$cvres$r2[1, m$ncomp.selected]
             ))
-            unsel = NULL           
+            unsel = NULL
          }  else if (rmse > m$cvres$rmse[1, m$ncomp.selected]) {
             # else check if rmse has been improved
             ncomp = m$ncomp.selected
@@ -508,12 +508,12 @@ ipls.backward = function(x, y, obj) {
             unsel = l
          }
       }
-      
+
       if (!is.null(unsel)) {
          unselind = c(unselind, obj$int.limits[unsel, 1]:obj$int.limits[unsel, 2])
          int.selected = int.selected[int.selected != unsel]
          int.nonselected = c(int.nonselected, unsel)
-         
+
          int.stat = rbind(int.stat, data.frame(
             'n' = unsel,
             'start' = obj$int.limits[unsel, 1],
@@ -523,107 +523,107 @@ ipls.backward = function(x, y, obj) {
             'RMSE' = rmse,
             'R2' = r2
          ))
-         
+
          if (!obj$silent)
             cat(sprintf('excluded interval %3d (RMSECV = %f)\n', unsel, rmse))
-         
-      } else {   
+
+      } else {
          # no improvements, quit the outer loop
          if (!obj$silent)
             cat('no improvements, stop.\n')
          break
       }
-   }   
-   
+   }
+
    # return the selection results
    obj$glob.stat = glob.stat
    obj$int.stat = int.stat
    obj$int.selected = int.selected
-   
+
    obj
 }
 
 #' iPLS performance plot
 #'
-#' @description 
+#' @description
 #' Shows PLS performance for each selected or excluded intervals at the
-#' first iteration 
-#' 
-#' @param obj 
+#' first iteration
+#'
+#' @param obj
 #' iPLS results (object of class ipls)
 #' @param glob.ncomp
 #' number of components for global PLS model with all intervals
-#' @param main 
+#' @param main
 #' main title for the plot
-#' @param xlab 
+#' @param xlab
 #' label for x-axis
-#' @param ylab 
+#' @param ylab
 #' label for y-axis
-#' @param xlim 
+#' @param xlim
 #' limits for x-axis
-#' @param ylim 
+#' @param ylim
 #' limits for y-axis
-#' @param ... 
+#' @param ...
 #' other arguments
 #'
 #' @details
 #' The plot shows intervals as bars, which height corresponds to RMSECV obtained when particular
-#' interval was selected (forward) or excluded (backward) from a model at the first iteration. 
-#' The intervals found optimal after backward/forward iPLS selection are shown with green color 
+#' interval was selected (forward) or excluded (backward) from a model at the first iteration.
+#' The intervals found optimal after backward/forward iPLS selection are shown with green color
 #' while the other intervals are gray.
-#' 
+#'
 #' See examples in help for \code{\link{ipls}} function.
 #'
-#'  @seealso 
+#'  @seealso
 #'  \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
-#'    
-plotSelection.ipls = function(obj, glob.ncomp = NULL, main = 'iPLS results', 
+#'
+plotSelection.ipls = function(obj, glob.ncomp = NULL, main = 'iPLS results',
                          xlab = obj$xaxis.name, ylab = 'RMSECV', xlim = NULL, ylim = NULL, ...) {
    int = obj$int.limits
    xlabels = obj$xaxis.values
    if (!is.null(xlabels)) {
       if (!is.numeric(xlabels))
          stop('Parameter "xlabels" should be a vector with numbers!')
-      
+
       if (length(xlabels) != (max(int) - min(int) + 1)) {
-         stop('Wrong values for "xlabels" parameter!')   
+         stop('Wrong values for "xlabels" parameter!')
       } else {
          int[, 1] = xlabels[int[, 1]]
          int[, 2] = xlabels[int[, 2]]
-      }   
+      }
    } else {
        xlabels = 1:max(int)
-   }   
-   
+   }
+
    bwd = (int[, 2] - int[, 1] + 1)
    mids = (int[, 2] + int[, 1])/2
    rmse = obj$glob.stat$RMSE[2:nrow(obj$glob.stat)]
    ncomp = obj$glob.stat$nComp[2:nrow(obj$glob.stat)]
-   
+
    if (is.null(xlim))
       xlim = c(min(int), max(int))
    if (is.null(ylim))
       ylim = c(0, max(rmse) * 1.1)
-  
+
    # rescale mean X values to fit the plot
    xmean = (obj$xmean - min(obj$xmean)) / (max(obj$xmean) - min(obj$xmean)) * (ylim[2] - ylim[1])
 
    # make plot
    plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, ...)
-   
+
    # gray and green bars
-   bars(mids, rmse, col = rgb(0.9, 0.9, 0.9), bwd = bwd, border = rgb(0.8, 0.8, 0.8)) 
-   bars(mids[obj$int.selected], rmse[obj$int.selected], col = rgb(0.5, 1.0, 0.6), 
+   mdaplot.plotBars(mids, rmse, col = rgb(0.9, 0.9, 0.9), bwd = bwd, border = rgb(0.8, 0.8, 0.8))
+   mdaplot.plotBars(mids[obj$int.selected], rmse[obj$int.selected], col = rgb(0.5, 1.0, 0.6),
       bwd = bwd[obj$int.selected], border = rgb(0.4, 0.9, 0.5))
 
    # mean signal
    lines(xlabels, xmean, col = rgb(1.0, 0.7, 0.7), lwd = 2)
 
    # number of components for each interval
-   text(mids,  matrix(0.05 * ylim[2], ncol = length(mids)), ncomp, 
-        col = rgb(0.4, 0.4, 0.4), cex = 0.85) 
+   text(mids,  matrix(0.05 * ylim[2], ncol = length(mids)), ncomp,
+        col = rgb(0.4, 0.4, 0.4), cex = 0.85)
 
-   # global model   
+   # global model
    if (is.null(glob.ncomp))
       glob.ncomp = obj$gm$ncomp.selected
    else if (glob.ncomp < 1 || glob.ncomp > obj$gm$ncomp)
@@ -631,51 +631,51 @@ plotSelection.ipls = function(obj, glob.ncomp = NULL, main = 'iPLS results',
 
    dx = (xlim[2] - xlim[1])/50
    abline(h = obj$gm$cvres$rmse[1, glob.ncomp], lty = 2, col = rgb(0.5, 0.5, 0.5))
-   text(xlim[2] + dx, obj$gm$cvres$rmse[1, glob.ncomp], glob.ncomp, cex = 0.85, 
+   text(xlim[2] + dx, obj$gm$cvres$rmse[1, glob.ncomp], glob.ncomp, cex = 0.85,
         col = rgb(0.3, 0.3, 0.3), font = 2, pos = 3)
 }
 
 #' RMSE development plot
 #'
-#' @description 
-#' Shows how RMSE develops for each iteration of iPLS selection 
+#' @description
+#' Shows how RMSE develops for each iteration of iPLS selection
 #' algorithm
-#' 
-#' @param obj 
+#'
+#' @param obj
 #' iPLS results (object of class ipls)
 #' @param glob.ncomp
 #' number of components for global PLS model with all intervals
-#' @param main 
+#' @param main
 #' main title for the plot
-#' @param xlab 
+#' @param xlab
 #' label for x-axis
-#' @param ylab 
+#' @param ylab
 #' label for y-axis
-#' @param xlim 
+#' @param xlim
 #' limits for x-axis
-#' @param ylim 
+#' @param ylim
 #' limits for y-axis
-#' @param ... 
+#' @param ...
 #' other arguments
 #'
 #' @details
-#' The plot shows RMSE values obtained at each iteration of the iPLS algorithm as bars. The first 
-#' bar correspond to the global model with all variables included, second - to the model obtained 
-#' at the first iteration and so on. Number at the bottom of each bar corresponds to the interval 
-#' included or excluded at the particular iteration. 
-#' 
-#' @seealso 
+#' The plot shows RMSE values obtained at each iteration of the iPLS algorithm as bars. The first
+#' bar correspond to the global model with all variables included, second - to the model obtained
+#' at the first iteration and so on. Number at the bottom of each bar corresponds to the interval
+#' included or excluded at the particular iteration.
+#'
+#' @seealso
 #' \code{\link{summary.ipls}}, \code{\link{plotSelection.ipls}}
-#' 
-#' @export      
-plotRMSE.ipls = function(obj, glob.ncomp = NULL, main = 'RMSE development', xlab = 'Iterations', 
+#'
+#' @export
+plotRMSE.ipls = function(obj, glob.ncomp = NULL, main = 'RMSE development', xlab = 'Iterations',
                     ylab = 'RMSECV', xlim = NULL, ylim = NULL, ...) {
 
    if (is.null(glob.ncomp))
       glob.ncomp = obj$gm$ncomp.selected
    else if (glob.ncomp < 1 || glob.ncomp > obj$gm$ncomp)
       stop('Wrong value for number of components!')
-   
+
    rmse = obj$int.stat$RMSE
    n = obj$int.stat$n
    mids = 0:(length(n) - 1)
@@ -689,45 +689,45 @@ plotRMSE.ipls = function(obj, glob.ncomp = NULL, main = 'RMSE development', xlab
    plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, ...)
 
    # gray and green bars
-   bars(mids, rmse, col = rgb(0.5, 1.0, 0.6), bwd = 1, border = rgb(0.4, 0.9, 0.5)) 
-   bars(mids[1], rmse[1], col = rgb(0.98, 0.98, 0.98), bwd = 1, border = rgb(0.85, 0.85, 0.85)) 
+   mdaplot.plotBars(mids, rmse, col = rgb(0.5, 1.0, 0.6), bwd = 1, border = rgb(0.4, 0.9, 0.5))
+   mdaplot.plotBars(mids[1], rmse[1], col = rgb(0.98, 0.98, 0.98), bwd = 1, border = rgb(0.85, 0.85, 0.85))
 
-   # interval numbers 
-   text(mids[-1],  ylim[1] + (ylim[2] - ylim[1])/25, n[-1], col = rgb(0.4, 0.4, 0.4), cex = 0.80) 
+   # interval numbers
+   text(mids[-1],  ylim[1] + (ylim[2] - ylim[1])/25, n[-1], col = rgb(0.4, 0.4, 0.4), cex = 0.80)
 }
 
 #' Overview plot for iPLS results
-#' 
+#'
 #' @description
 #' Shows a plot for iPLS results.
-#' 
+#'
 #' @param x
 #' a  (object of class \code{pca})
 #' @param ...
 #' other arguments
-#' 
+#'
 #' @details
 #' See details for \code{\link{plotSelection.ipls}}.
-#' 
+#'
 #' @export
-plot.ipls = function(x, ...) {  
+plot.ipls = function(x, ...) {
    plotSelection(x, ...)
 }
 
 #' Print method for iPLS
-#' 
+#'
 #' @description
 #' Prints information about the iPLS object structure
-#' 
+#'
 #' @param x
 #' a iPLS (object of class \code{ipls})
 #' @param ...
 #' other arguments
 #'
-#' @export 
+#' @export
 print.ipls = function(x, ...) {
    obj = x
-   
+
    cat('\niPLS results (class ipls)\n')
    cat('\nCall:\n')
    print(obj$call)
@@ -739,40 +739,40 @@ print.ipls = function(x, ...) {
    cat('$int.limits - limits for the intervals\n')
    cat('$int.stat - table with statistics for the interval selection results\n')
    cat('$glob.stat - table with statistics for the first iteration of the algorithm\n')
-   cat('\nTry summary(obj) and plot(obj) to see details.\n')   
+   cat('\nTry summary(obj) and plot(obj) to see details.\n')
 }
 
 #' Summary for iPLS results
-#' 
+#'
 #' @description
 #' Shows statistics and algorithm parameters for iPLS results.
-#' 
+#'
 #' @param object
 #' a iPLS (object of class \code{ipls})
 #' @param glob.ncomp
 #' number of components for global PLS model with all intervals
 #' @param ...
 #' other arguments
-#' 
-#' @details 
+#'
+#' @details
 #' The method shows information on the algorithm parameters as well as a table with selected or
 #' excluded interval. The table has the following columns: 'step' showing on which iteration
 #' an interval was selected or excluded, 'start and 'end' show variable indices for the interval,
-#' 'nComp' is a number of components used in a model, 'RMSE' is RMSECV for the model and 'R2' is 
+#' 'nComp' is a number of components used in a model, 'RMSE' is RMSECV for the model and 'R2' is
 #' coefficient of determination for the same model.
 #'
-#' @export 
+#' @export
 summary.ipls = function(object, glob.ncomp = NULL, ...) {
-   # statistics for global model   
+   # statistics for global model
    if (is.null(glob.ncomp))
       glob.ncomp = object$gm$ncomp.selected
    else if (glob.ncomp < 1 || glob.ncomp > object$gm$ncomp)
       stop('Wrong value for number of components!')
-   
+
    glob.rmse = object$gm$cvres$rmse[1, glob.ncomp]
    opt.ncomp = object$om$ncomp.selected
    opt.rmse = object$om$cvres$rmse[1, opt.ncomp]
-   
+
    cat('\niPLS variable selection results\n')
    cat(sprintf('  Method: %s\n', object$method))
    cat(sprintf('  Validation: %s\n', crossval.str(object$cv)))

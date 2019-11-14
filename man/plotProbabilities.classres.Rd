@@ -30,6 +30,6 @@
 \item{...}{most of the graphical parameters from \code{\link{mdaplot}} function can be used.}
 }
 \description{
-Makes a plot with class belonging probabilities for each object of the classification results. 
+Makes a plot with class belonging probabilities for each object of the classification results.
 Works only with classification methods, which compute this probability (e.g. SIMCA).
 }

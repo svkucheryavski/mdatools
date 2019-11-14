@@ -21,7 +21,7 @@
 \item{...}{other arguments}
 }
 \description{
-Shows a set of plots (x residuals, y variance, classification performance and predictions) 
+Shows a set of plots (x residuals, y variance, classification performance and predictions)
 for PLS-DA results.
 }
 \details{

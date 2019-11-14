@@ -17,6 +17,6 @@ separate values for each, if NULL - model selected number will be used).}
 \item{...}{other arguments}
 }
 \description{
-Generic \code{summary} function for classification results. Prints performance values for the 
+Generic \code{summary} function for classification results. Prints performance values for the
 results.
 }

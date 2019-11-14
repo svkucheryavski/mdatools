@@ -31,10 +31,10 @@ The following fields are available only if reference values were provided.
 \code{classres} is used to store results classification for one or multiple classes.
 }
 \details{
-There is no need to create a \code{classres} object manually, it is created automatically when 
-build a classification model (e.g. using \code{\link{simca}} or \code{\link{plsda}}) or apply the 
-model to new data. For any classification method from \code{mdatools}, a class using to represent 
-results of classification (e.g. \code{\link{simcares}}) inherits fields and methods of 
+There is no need to create a \code{classres} object manually, it is created automatically when
+build a classification model (e.g. using \code{\link{simca}} or \code{\link{plsda}}) or apply the
+model to new data. For any classification method from \code{mdatools}, a class using to represent
+results of classification (e.g. \code{\link{simcares}}) inherits fields and methods of
 \code{classres}.
 }
 \seealso{
@@ -45,7 +45,7 @@ Methods \code{classres} class:
  \code{\link{plotSensitivity.classres}} \tab makes plot with sensitivity vs. components values.\cr
  \code{\link{plotSpecificity.classres}} \tab makes plot with specificity vs. components values.\cr
  \code{\link{plotMisclassified.classres}} \tab makes plot with misclassified ratio values.\cr
- \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity 
+ \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity
  and sensitivity values.\cr
 }
 }
