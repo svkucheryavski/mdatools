@@ -141,6 +141,45 @@ mdaplot.getAxesLimits <- function(plot_data, show.colorbar = F, show.lines = F,
    return(list(xlim = xlim, ylim = ylim))
 }
 
+#' Prepare colors based on palette and opacity value
+#'
+#' @param palette
+#' vector with main colors for current pallette
+#' @param ncolors
+#' number of colors to generate
+#' @param opacity
+#' opacity for the colors (one value or individual for each color)
+#'
+#' @return
+#' vector with colors
+#'
+mdaplot.prepareColors <- function(palette, ncolors, opacity) {
+
+   # generate colors based on color ramp and palette
+   colors <- colorRampPalette(palette)(ncolors)
+
+   # no opacity - just return colors as is
+   if (is.null(opacity) || all(opacity == 1)) {
+      return(colors)
+   }
+
+   # repeate opacity values for each color
+   if (length(opacity) == 1) {
+      opacity <- rep(opacity, ncolors)
+   }
+
+   if (length(opacity) != ncolors) {
+      stop('Wrong number of values for "opacity" parameter!')
+   }
+
+   # apply opacity
+   for (i in 1:ncolors) {
+      colors[i] <- adjustcolor(colors[i], alpha.f = opacity[i])
+   }
+
+   return(colors)
+}
+
 #' Color values for plot elements
 #'
 #' @description
@@ -170,29 +209,6 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
    # if non of the main arguments defined assume only one color is needed
    if (is.null(ngroups) && is.null(cgroup)) {
       ngroups <- 1
-   }
-
-   # returns vector with colors
-   prepare_colors <- function(colfunc, ncolors, opacity) {
-      colors <- colfunc(ncolors)
-
-      if (is.null(opacity) || all(opacity == 1)) {
-         return(colors)
-      }
-
-      if (length(opacity) == 1) {
-         opacity <- rep(opacity, ncolors)
-      }
-
-      if (length(opacity) != ncolors) {
-         stop('Wrong number of values for "opacity" parameter!')
-      }
-
-      for (i in 1:ncolors) {
-         colors[i] <- adjustcolor(colors[i], alpha.f = opacity[i])
-      }
-
-      return(colors)
    }
 
    # define palette (if colmap has more than one value - take it as palette)
@@ -228,19 +244,16 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
       palette <- rev(palette)
    }
 
-   # define color function based on the palette
-   colfunc <- colorRampPalette(palette)
-
    # if cgroup is not provided just return the colors
 
    if (is.null(cgroup)) {
-      return(prepare_colors(colfunc, ngroups, opacity))
+      return(mdaplot.prepareColors(palette, ngroups, opacity))
    }
 
    # if cgroup is factor return vector with corresponding values
    if (is.factor(cgroup)) {
       ngroups <- length(attr(cgroup, "levels"))
-      return(prepare_colors(colfunc, ngroups, opacity)[as.numeric(cgroup)])
+      return(mdaplot.prepareColors(palette, ngroups, opacity)[as.numeric(cgroup)])
    }
 
    # if not split it into groups
@@ -249,8 +262,11 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
       ngroups <- ifelse(ngroups > maxsplits, maxsplits, ngroups)
    }
 
-   cgroup <- cut(as.numeric(cgroup), ngroups, include.lowest = TRUE)
-   out_palette <- prepare_colors(colfunc, ngroups, opacity)
+   if (ngroups > 1) {
+      cgroup <- cut(as.numeric(cgroup), ngroups, include.lowest = TRUE)
+   }
+
+   out_palette <- mdaplot.prepareColors(palette, ngroups, opacity)
    colors <- out_palette[as.numeric(cgroup)]
    attr(colors, "palette") <- out_palette
 
@@ -816,9 +832,7 @@ mdaplot.prepareDataLabels <- function(plot_data, type, labels) {
          plot_data$labels <- labels[-excluded_rows]
 
          return(plot_data)
-      }
-
-      if (type != "p") {
+      } else {
          # non scatter plots
 
          if (length(labels) != (length(x_values) + length(excluded_cols))) {
@@ -963,6 +977,12 @@ mdaplot.createPlotData <- function(data, type, xlim, ylim, bwd, show.excluded,
 #' @description
 #' Creates an empty axes plane for given parameters
 #'
+#' @param plot.data
+#' list with data prepared for mdaplot() if any
+#' @param type
+#' type of the plot
+#' @param bwd
+#' width of bars in case of bar plot
 #' @param xticklabels
 #' labels for x ticks
 #' @param yticklabels
@@ -971,8 +991,10 @@ mdaplot.createPlotData <- function(data, type, xlim, ylim, bwd, show.excluded,
 #' values for x ticks
 #' @param yticks
 #' values for y ticks
-#' @param lim
-#' vector with limits for x and y axis
+#' @param xlim
+#' vector with limits for x axis
+#' @param ylim
+#' vector with limits for y axis
 #' @param main
 #' main title for the plot
 #' @param xlab
@@ -990,42 +1012,85 @@ mdaplot.createPlotData <- function(data, type, xlim, ylim, bwd, show.excluded,
 #' @param grid.col
 #' line color for the grid
 #'
-mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL, xticks = NULL, yticks = NULL,
-                            lim = NULL, main = NULL, xlab = NULL, ylab = NULL, xlas = 0, ylas = 0,
-                            show.grid = TRUE, grid.lwd = 0.5, grid.col = "lightgray") {
+mdaplot.plotAxes <- function(plot.data, type, bwd, xticklabels = NULL, yticklabels = NULL,
+   xlim = xlim, ylim = ylim, xticks = NULL, yticks = NULL, main = NULL, xlab = NULL, ylab = NULL,
+   xlas = 0, ylas = 0, show.grid = TRUE, grid.lwd = 0.5, grid.col = "lightgray") {
 
-   # check xticklabels and xticks
-   if (!is.null(xticklabels)) {
+   if (!is.null(plot.data)) {
+      # get values from the plot data list to make code cleaner
+      plot.data$x_values -> x_values
+      plot.data$y_values -> y_values
+      plot.data$excluded_rows -> excluded_rows
+      plot.data$excluded_cols -> excluded_cols
+      plot.data$lim -> lim
+      plot.data$attrs -> data_attrs
 
-      if (is.null(xticks)) {
-         stop('Please, specify "xticks" vector for corresponding "xticklabels".')
+      # number of x-values
+      nxvals <- length(x_values)
+
+      # define title and axis labels
+      if (is.null(main)) main <- plot.data$name
+      if (is.null(xlab)) xlab <- attr(x_values, "name")
+      if (is.null(ylab)) ylab <- attr(y_values, "name")
+
+      # correct xticklabels and xticks if only one variable is provided for line or bar plot
+      if (type != "p" && nxvals == 1) {
+         xticks <- 1
+         if (is.null(xticklabels)) xticklabels <- x_values
       }
 
-      if (length(xticks) != length(xticklabels)) {
-         stop('Number of elements in "xticks" and "xticklabels" should be the same')
-      }
-   }
-
-   # check yticklabels and yticks
-   if (!is.null(yticklabels)) {
-
-      if (is.null(yticks)) {
-         stop('Please, specify "yticks" vector for corresponding "yticklabels".')
+      # correct x axis limits and bar width if it is a bar plot
+      if (type == "h") {
+         if (nxvals == 1) {
+            lim$xlim <- c(x_values - bwd, x_values + bwd)
+         } else {
+            bwd <- bwd * min(diff(x_values))
+            lim$xlim <- c(min(x_values) - bwd / 2, max(x_values) + bwd / 2)
+         }
       }
 
-      if (length(yticklabels) != length(yticks)) {
-         stop('Number of elements in "yticks" and "yticklabels" should be the same')
+      # redefine axes limits if user specified values
+      if (is.null(xlim)) xlim <- lim$xlim
+      if (is.null(ylim)) ylim <- lim$ylim
+
+      # if no x-values were provided to line or bar plot we generate them as integer numbers
+      if ((type %in% c("h", "l", "b")) && is.null(xticks) && is.null(data_attrs$xaxis_values)) {
+         xticks <- axisTicks(xlim, log = FALSE)
+         xticks <- unique(round(xticks[xticks > 0 & xticks <= max(x_values)]))
       }
 
+      # check xticklabels and xticks
+      if (!is.null(xticklabels)) {
+
+         if (is.null(xticks)) {
+            stop('Please, specify "xticks" vector for corresponding "xticklabels".')
+         }
+
+         if (length(xticks) != length(xticklabels)) {
+            stop('Number of elements in "xticks" and "xticklabels" should be the same')
+         }
+      }
+
+      # check yticklabels and yticks
+      if (!is.null(yticklabels)) {
+
+         if (is.null(yticks)) {
+            stop('Please, specify "yticks" vector for corresponding "yticklabels".')
+         }
+
+         if (length(yticklabels) != length(yticks)) {
+            stop('Number of elements in "yticks" and "yticklabels" should be the same')
+         }
+      }
    }
 
    # make plot without ticks
-   plot(0, 0, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = lim$xlim, ylim = lim$ylim,
+   plot(0, 0, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
         xaxt = "n", yaxt = "n")
 
    # generate x ticks
    if (is.null(xticks)) {
-      xticks <- axisTicks(lim$xlim, log = FALSE)
+      xticks <- axisTicks(xlim, log = FALSE)
    }
 
    # show x-axis
@@ -1037,7 +1102,7 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL, xticks = NU
 
    # generate y ticks
    if (is.null(yticks)) {
-      yticks <- axisTicks(lim$ylim, log = FALSE)
+      yticks <- axisTicks(ylim, log = FALSE)
    }
 
    # show y-axis
@@ -1070,7 +1135,6 @@ mdaplot.plotDensity <- function(x, y, nbins = 60, colmap = "default") {
    # Compute coordinates of nearest lattice center
    getNearest <- function(value, scale, round = 1) {
       div <- floor(value / (scale / 2))
-      mod <- value %% (scale / scale)
       return(scale / 2 * (div + as.numeric(div %% 2 == round)))
    }
 
@@ -1588,6 +1652,7 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
       )
    }
 
+
    # get values from the plot data list to make code cleaner
    plot.data$lower -> lower
    plot.data$upper -> upper
@@ -1597,69 +1662,29 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
    plot.data$y_values_excluded -> y_values_excluded
    plot.data$excluded_rows -> excluded_rows
    plot.data$excluded_cols -> excluded_cols
-   plot.data$lim -> lim
    plot.data$attrs -> data_attrs
    plot.data$density -> density
    plot.data$labels -> labels
    plot.data$labels_excluded -> labels_excluded
 
-   # if some rows are excluded remove part of values from cgroup
-
-   if (length(excluded_rows) > 0 && !is.null(cgroup) && length(cgroup) > 1) {
-      cgroup <- cgroup[-excluded_rows]
-   }
-
-   # processs labels and ticklabels
+   # show axes if needed
    if (show.axes) {
-
       # if some columns are excluded and xticklabels provided for all - exclude hidden values
       if (!is.null(excluded_cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data)) {
          xticklabels <- xticklabels[-excluded_cols]
       }
 
-      # number of x-values
-      nxvals <- length(x_values)
-
-      # define title and axis labels
-      if (is.null(main)) main <- plot.data$name
-      if (is.null(xlab)) xlab <- attr(x_values, "name")
-      if (is.null(ylab)) ylab <- attr(y_values, "name")
-
-      # correct xticklabels and xticks if only one variable is provided for line or bar plot
-      if (type != "p" && nxvals == 1) {
-         xticks <- 1
-         if (is.null(xticklabels)) xticklabels <- x_values
-      }
-
-      # correct x axis limits and bar width if it is a bar plot
-      if (type == "h") {
-         if (nxvals == 1) {
-            lim$xlim <- c(x_values - bwd, x_values + bwd)
-         } else {
-            bwd <- bwd * min(diff(x_values))
-            lim$xlim <- c(min(x_values) - bwd / 2, max(x_values) + bwd / 2)
-         }
-      }
-
-      # redefine x axis limits if user specified values
-      if (!is.null(xlim)) {
-         lim$xlim <- xlim
-      }
-
-      # redefine y axis limits if user specified values
-      if (!is.null(ylim)) {
-         lim$ylim <- ylim
-      }
-
-      # if no x-values were provided to line or bar plot we generate them as integer numbers
-      if ((type %in% c("h", "l", "b")) && is.null(xticks) && is.null(data_attrs$xaxis.values)) {
-         xticks <- axisTicks(lim$xlim, log = FALSE)
-         xticks <- unique(round(xticks[xticks > 0 & xticks <= max(x_values)]))
-      }
-
       # make an empty plot with proper limits and axis labels
-      mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas,
-         show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col)
+      mdaplot.plotAxes(plot.data, type = type, bwd = bwd, xticklabels = xticklabels,
+         yticklabels = yticklabels, xticks = xticks, yticks = yticks, xlim = xlim, ylim = ylim,
+         main = main, xlab = xlab, ylab = ylab, xlas = xlas, ylas = ylas, show.grid = show.grid,
+         grid.lwd = grid.lwd, grid.col = grid.col
+      )
+   }
+
+   # if some rows are excluded remove part of values from cgroup
+   if (length(excluded_rows) > 0 && length(cgroup) > 1) {
+      cgroup <- cgroup[-excluded_rows]
    }
 
    #  get proper colors
@@ -1917,18 +1942,16 @@ mdaplotg <- function(
    lab.col <- processParam(lab.col, "lab.col", mdaplot.areColors, ngroups)
 
    # check and define colors if necessary
-
    if (is.null(col)) col <- mdaplot.getColors(ngroups = ngroups, colmap = colmap)
    col <- processParam(col, "col", mdaplot.areColors, ngroups)
 
    # get plot data for each group
-
    pd <- list()
    for (i in 1:ngroups) {
       pd[[i]] <- mdaplot.createPlotData(
          data[[i]], type[i], xlim, ylim, bwd, show.excluded,
          show.colorbar = FALSE, show.labels, labels = labels,
-         show.lines, show.axes = TRUE # ! why the hell it is TRUE?
+         show.lines, show.axes = TRUE
       )
    }
 
@@ -2014,8 +2037,6 @@ mdaplotg <- function(
       ylim[mrg[2, 1]] <- ylim[mrg[2, 1]] + h * mrg[2, 2] + dy * mrg[2, 3]
    }
 
-   # combine limits to list
-   lim <- list(xlim = xlim, ylim = ylim)
 
    # define main title if not provided (either as "name" or as "name" attr of first dataset)
    main <- if (is.null(main)) name else main
@@ -2026,8 +2047,14 @@ mdaplotg <- function(
    ylab <- if (is.null(ylab)) attr(pd[[1]]$y_values, "name", exact = TRUE) else ylab
 
    # make an empty plot with proper limits and axis labels
-   mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas,
-      show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col)
+   mdaplot.plotAxes(plot.data = NULL, xticklabels = xticklabels,
+      yticklabels = yticklabels, xticks = xticks, yticks = yticks, xlim = xlim, ylim = ylim,
+      main = main, xlab = xlab, ylab = ylab, xlas = xlas, ylas = ylas, show.grid = show.grid,
+      grid.lwd = grid.lwd, grid.col = grid.col
+   )
+
+   #mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas,
+   #   show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col)
 
    # show lines if needed
    if (is.numeric(show.lines) && length(show.lines) == 2) {
@@ -2044,7 +2071,7 @@ mdaplotg <- function(
       force.x.values <- if (type[i] == "h") c(i, nbarplots) else NA
 
       # if error bars are shown and i > 1 do not show labels
-      show.labels <- ifelse(i > 1 && type[i] == "e", FALSE, show.labels)
+      show.labels <- if (i > 1 && type[i] == "e") FALSE else show.labels
 
       # use mdaplot with show.axes = FALSE to create the plot
       mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],

@@ -4,21 +4,30 @@
 \alias{mdaplot.plotAxes}
 \title{Create axes plane}
 \usage{
-mdaplot.plotAxes(xticklabels = NULL, yticklabels = NULL,
-  xticks = NULL, yticks = NULL, lim = NULL, main = NULL,
-  xlab = NULL, ylab = NULL, xlas = 0, ylas = 0, show.grid = TRUE,
-  grid.lwd = 0.5, grid.col = "lightgray")
+mdaplot.plotAxes(plot.data, type, bwd, xticklabels = NULL,
+  yticklabels = NULL, xlim = xlim, ylim = ylim, xticks = NULL,
+  yticks = NULL, main = NULL, xlab = NULL, ylab = NULL, xlas = 0,
+  ylas = 0, show.grid = TRUE, grid.lwd = 0.5,
+  grid.col = "lightgray")
 }
 \arguments{
+\item{plot.data}{list with data prepared for mdaplot() if any}
+
+\item{type}{type of the plot}
+
+\item{bwd}{width of bars in case of bar plot}
+
 \item{xticklabels}{labels for x ticks}
 
 \item{yticklabels}{labels for y ticks}
 
+\item{xlim}{vector with limits for x axis}
+
+\item{ylim}{vector with limits for y axis}
+
 \item{xticks}{values for x ticks}
 
 \item{yticks}{values for y ticks}
-
-\item{lim}{vector with limits for x and y axis}
 
 \item{main}{main title for the plot}
 
