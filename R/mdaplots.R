@@ -357,7 +357,7 @@ mdaplot.showColorbar <- function(cgroup, colmap = "default", lab.col = "darkgray
 
    # show labels for colorbar regions
    mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col,
-                      cex = lab.cex)
+      cex = lab.cex)
 }
 
 #' Plot legend
@@ -435,20 +435,20 @@ mdaplot.showLegend <- function(legend, col, pch = NULL, lty = NULL, lwd = NULL, 
 #' will be used instead.
 #'
 mdaplot.showLabels <- function(x_values, y_values, labels, pos = 3,
-   cex = 0.65, col = "darkgray", type = NULL) {
+   cex = 0.65, col = "darkgray", type = "") {
 
    if (length(labels) == 0 || length(x_values) == 0 || length(y_values) == 0) {
       warning("No labels available.")
       return()
    }
 
-   if (!is.null(dim(y_values)) && nrow(y_values) > 1 && type != "p") {
+   if (type != "p" && !is.null(dim(y_values))) {
       y_values <- apply(y_values, 2, max)
    }
 
    # prepare labels
-   x_values <- as.vector(x_values)
-   y_values <- as.vector(y_values)
+   x_values <- as.numeric(x_values)
+   y_values <- as.numeric(y_values)
    labels <- mdaplot.formatValues(labels)
 
    # if x or y values contains NA do nothing
@@ -601,7 +601,7 @@ mdaplot.prepareDataForPlot <- function(data, type) {
    data_attrs <- attributes(data)
 
    # make sure the data set is provided
-   if (is.null(data) || length(data) < 1) {
+   if (length(data) < 1) {
       stop("The provided dataset is empty!")
    }
 
@@ -614,6 +614,15 @@ mdaplot.prepareDataForPlot <- function(data, type) {
    # convert data frame to a matrix if needed
    if (is.data.frame(data)) {
       data <- mda.df2mat(data)
+   }
+
+   # at least two rows (y values and size of error bars) are needed for errorbar plot
+   if (type == "e" && nrow(data) < 2) {
+      stop("Errorbar plot requires dataset with at least two rows!")
+   }
+
+   if (type == "e" && length(data_attrs$exclrows) > 0) {
+      stop("Bar or errobar plot can not be made for data with excluded rows.")
    }
 
    # if row names are missing - add them
@@ -632,22 +641,20 @@ mdaplot.prepareDataForPlot <- function(data, type) {
    col_indices <- seq_len(ncol(data))
    if (length(excluded_cols) > 0) {
       excluded_cols <- mda.getexclind(excluded_cols, colnames(data), ncol(data))
-
       data <- data[, -excluded_cols, drop = F]
       col_indices <- col_indices[-excluded_cols]
    }
 
    # check if data still has some columns
-   if (is.null(dim(data)) || ncol(data) < 1) {
+   if (is.null(ncol(data))) {
       stop("No columns left when excluded hidden values.")
    }
 
    # add columns with row numbers or yaxis values to the data if necessary
-   if (ncol(data) == 1 && type == "p") {
+   if (type == "p" && ncol(data) == 1) {
       rownames <- rownames(data)
       if (is.null(data_attrs$yaxis.values)) data_attrs$yaxis.values <- seq_len(nrow(data))
       new_column <- data_attrs$yaxis.values
-
       data <- mda.cbind(new_column, data)
       colnames(data)[1] <- if (is.null(data_attrs$yaxis.name)) "Objects" else data_attrs$yaxis.name
       rownames(data) <- rownames
@@ -659,20 +666,14 @@ mdaplot.prepareDataForPlot <- function(data, type) {
    excluded_rows <- data_attrs$exclrows
    if (length(excluded_rows) > 0) {
       excluded_rows <- mda.getexclind(excluded_rows, rownames(data), nrow(data))
-
       excluded_data <- data[excluded_rows, , drop = F]
       data <- data[-excluded_rows, , drop = F]
       row_indices <- row_indices[-excluded_rows]
    }
 
    # check that number of rows is still sufficient
-   if (is.null(dim(data)) || nrow(data) < 1) {
+   if (is.null(nrow(data))) {
       stop("No rows left when excluded hidden values.")
-   }
-
-   # at least two rows (y values and size of error bars) are needed for errorbar plot
-   if (type == "e" && nrow(data) < 2) {
-      stop("Errorbar plot requires dataset with at least two rows!")
    }
 
    return(
@@ -768,21 +769,15 @@ mdaplot.processExcludedRows <- function(plot_data, type) {
       return(plot_data)
    }
 
-   if (type == "e" || type == "h") {
-      stop("Bar plor and errorbar plot can not be made for matrix with excluded rows.")
-   }
-
    if (type == "p") {
       plot_data$x_values_excluded <- excluded_data[, 1]
       plot_data$y_values_excluded <- excluded_data[, 2, drop = F]
-
       return(plot_data)
    }
 
    if (type == "l" || type == "b") {
       plot_data$x_values_excluded <- plot_data$x_values
       plot_data$y_values_excluded <- excluded_data
-
       return(plot_data)
    }
 }
@@ -801,7 +796,7 @@ mdaplot.processExcludedRows <- function(plot_data, type) {
 #' non-scatter plots labels correspond to the columns (names, indices or max value for each column)
 #'
 #' @export
-mdaplot.prepareDataLabels <- function(plot_data, type, labels) {
+mdaplot.prepareDataLabels <- function(plot_data, type, labels = NULL) {
 
    # shortcuts for some parameters
    x_values <- plot_data$x_values
@@ -811,63 +806,38 @@ mdaplot.prepareDataLabels <- function(plot_data, type, labels) {
    excluded_rows <- plot_data$excluded_rows
    excluded_cols <- plot_data$excluded_cols
 
+   # if labels are not specified - use names
+   if (is.null(labels)) labels <- "names"
+
    # if user provided labels - use them
-   if (!is.null(labels) && length(labels) > 1) {
+   if (length(labels) > 1) {
 
-      if (type == "p") {
-         # scatter plots
+      # get values and excluded values (rows or cols depending on plot type)
+      n_values <- if (type == "p") nrow(y_values) else length(x_values)
+      excluded_values <- if (type == "p") excluded_rows else excluded_cols
 
-         if (length(labels) != (nrow(y_values) + length(excluded_rows))) {
-            stop("Labels must be provided for all data rows (including excluded)")
-         }
+      # check that labels were specified for all values
+      if (length(labels) != (n_values + length(excluded_values))) {
+         stop("Labels must be provided for all values (also ones which are excluded).")
+      }
 
-         if (is.null(excluded_rows)) {
-            plot_data$labels_excluded <- NULL
-            plot_data$labels <- labels
-
-            return(plot_data)
-         }
-
-         plot_data$labels_excluded <- labels[excluded_rows]
-         plot_data$labels <- labels[-excluded_rows]
-
-         return(plot_data)
-      } else {
-         # non scatter plots
-
-         if (length(labels) != (length(x_values) + length(excluded_cols))) {
-            stop("Labels must be provided for all data columns (including excluded)")
-         }
-
-         if (is.null(excluded_cols)) {
-            plot_data$labels_excluded <- NULL
-            plot_data$labels <- labels
-
-            return(plot_data)
-         }
-
-         plot_data$labels_excluded <- labels[excluded_cols]
-         plot_data$labels <- labels[-excluded_cols]
-
+      if (is.null(excluded_values)) {
+         plot_data$labels_excluded <- NULL
+         plot_data$labels <- labels
          return(plot_data)
       }
-   }
 
-   # if labels were not provided, by default use names
-   if (is.null(labels) || labels == "names") {
-      plot_data$labels_excluded <- if (type == "p") names(x_values_excluded) else NULL
-      plot_data$labels <- names(x_values)
-
+      plot_data$labels_excluded <- labels[excluded_values]
+      plot_data$labels <- labels[-excluded_values]
       return(plot_data)
    }
 
    # if labels must be values use y-values for that
-
    if (labels == "values") {
       labels <- y_values
       labels_excluded <- y_values_excluded
 
-      if (type == "l" || type == "b") {
+      if (type %in% c("l", "b")) {
          labels <- apply(labels, 2, max)
          labels_excluded <- if (!is.null(labels_excluded)) apply(labels_excluded, 2, max)
       }
@@ -878,7 +848,6 @@ mdaplot.prepareDataLabels <- function(plot_data, type, labels) {
    }
 
    # if labels must be indices use row or column indices
-
    if (labels == "indices") {
 
       if (type == "p") {
@@ -891,6 +860,11 @@ mdaplot.prepareDataLabels <- function(plot_data, type, labels) {
       plot_data$labels_excluded <- NULL
       return(plot_data)
    }
+
+   # if nothing above works - use names as labels
+   plot_data$labels_excluded <- if (type == "p") names(x_values_excluded) else NULL
+   plot_data$labels <- names(x_values)
+   return(plot_data)
 }
 
 
@@ -935,7 +909,6 @@ mdaplot.createPlotData <- function(data, type, xlim, ylim, bwd, show.excluded,
    plot_data <- mdaplot.prepareDataForPlot(data, type)
 
    # check if density plot should be shown
-
    plot_data$density <- FALSE
    if (type == "d") {
       if (ncol(data) < 2) stop("Dataset with at least two columns required for density plot.")
@@ -1017,6 +990,7 @@ mdaplot.plotAxes <- function(plot.data, type, bwd, xticklabels = NULL, yticklabe
    xlas = 0, ylas = 0, show.grid = TRUE, grid.lwd = 0.5, grid.col = "lightgray") {
 
    if (!is.null(plot.data)) {
+
       # get values from the plot data list to make code cleaner
       plot.data$x_values -> x_values
       plot.data$y_values -> y_values
@@ -1058,27 +1032,13 @@ mdaplot.plotAxes <- function(plot.data, type, bwd, xticklabels = NULL, yticklabe
       }
 
       # check xticklabels and xticks
-      if (!is.null(xticklabels)) {
-
-         if (is.null(xticks)) {
-            stop('Please, specify "xticks" vector for corresponding "xticklabels".')
-         }
-
-         if (length(xticks) != length(xticklabels)) {
-            stop('Number of elements in "xticks" and "xticklabels" should be the same')
-         }
+      if (!is.null(xticklabels) && (length(xticks) != length(xticklabels))) {
+         stop('Number of elements in "xticks" and "xticklabels" should be the same')
       }
 
       # check yticklabels and yticks
-      if (!is.null(yticklabels)) {
-
-         if (is.null(yticks)) {
-            stop('Please, specify "yticks" vector for corresponding "yticklabels".')
-         }
-
-         if (length(yticklabels) != length(yticks)) {
-            stop('Number of elements in "yticks" and "yticklabels" should be the same')
-         }
+      if (!is.null(yticklabels) && (length(yticklabels) != length(yticks))) {
+         stop('Number of elements in "yticks" and "yticklabels" should be the same')
       }
    }
 
@@ -1086,29 +1046,17 @@ mdaplot.plotAxes <- function(plot.data, type, bwd, xticklabels = NULL, yticklabe
    plot(0, 0, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
         xaxt = "n", yaxt = "n")
 
-   # generate x ticks
-   if (is.null(xticks)) {
-      xticks <- axisTicks(xlim, log = FALSE)
-   }
+   # generate x and y ticks
+   if (is.null(xticks)) xticks <- axisTicks(xlim, log = FALSE)
+   if (is.null(yticks)) yticks <- axisTicks(ylim, log = FALSE)
 
    # show x-axis
-   if (is.null(xticklabels)) {
-      axis(1, at = xticks, las = xlas)
-   } else {
-      axis(1, at = xticks, labels = xticklabels, las = xlas)
-   }
-
-   # generate y ticks
-   if (is.null(yticks)) {
-      yticks <- axisTicks(ylim, log = FALSE)
-   }
+   if (is.null(xticklabels)) xticklabels <- TRUE
+   axis(1, at = xticks, labels = xticklabels, las = xlas)
 
    # show y-axis
-   if (is.null(yticklabels)) {
-      axis(2, at = yticks, las = ylas)
-   } else {
-      axis(2, at = yticks, labels = yticklabels, las = ylas)
-   }
+   if (is.null(yticklabels)) yticklabels <- TRUE
+   axis(2, at = yticks, labels = yticklabels, las = ylas)
 
    # show grid if needed
    if (show.grid) {

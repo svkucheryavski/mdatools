@@ -65,7 +65,7 @@ test_that("if no rownames are not specified they are added", {
 
 test_that("if no colnames are not specified they are added", {
    for (p in all_plots) {
-      expect_equal(colnames(mdaplot.prepareDataForPlot(x, !!p)$data), colnames)
+      expect_equal(colnames(mdaplot.prepareDataForPlot(x, p)$data), colnames)
    }
 })
 
@@ -89,22 +89,29 @@ test_that("if colnames are specified they are kept", {
 xn1c <- mda.exclcols(x, c(FALSE, TRUE, FALSE))
 test_that("missing columns are handled correctly (more than 1 is left)", {
    for (p in all_plots) {
-      expect_equal(dim(mdaplot.prepareDataForPlot(xn1c, p)$data), c(3, 2))
-      expect_equal(colnames(mdaplot.prepareDataForPlot(xn1c, p)$data), c("Var1", "Var3"))
-      expect_equal(rownames(mdaplot.prepareDataForPlot(xn1c, p)$data), rownames(x))
-      expect_equal(mdaplot.prepareDataForPlot(xn1c, p)$excluded_cols, 2)
+      plot_data <- mdaplot.prepareDataForPlot(xn1c, p)
+      expect_equal(dim(plot_data$data), c(3, 2))
+      expect_equal(colnames(plot_data$data), c("Var1", "Var3"))
+      expect_equal(rownames(plot_data$data), rownames(x))
+      expect_equal(plot_data$excluded_cols, 2)
    }
 })
 
 ## remove one row of three - similar behaviour for all plots
 xn1r <- mda.exclrows(x, c(FALSE, TRUE, FALSE))
 test_that("missing rows are handled correctly (more than 1 is left)", {
-   for (p in all_plots) {
-      expect_equal(dim(mdaplot.prepareDataForPlot(xn1r, p)$data), c(2, 3))
-      expect_equal(colnames(mdaplot.prepareDataForPlot(xn1r, p)$data), colnames(x))
-      expect_equal(rownames(mdaplot.prepareDataForPlot(xn1r, p)$data), c("Obj1", "Obj3"))
-      expect_equal(mdaplot.prepareDataForPlot(xn1r, p)$excluded_rows, 2)
+   for (p in c("l", "b", "p", "h")) {
+      plot_data <- mdaplot.prepareDataForPlot(xn1r, p)
+      expect_equal(dim(plot_data$data), c(2, 3))
+      expect_equal(colnames(plot_data$data), colnames(x))
+      expect_equal(rownames(plot_data$data), c("Obj1", "Obj3"))
+      expect_equal(plot_data$excluded_rows, 2)
    }
+
+   for (p in c("e")) {
+      expect_error(mdaplot.prepareDataForPlot(xn1r, p))
+   }
+
 })
 
 ## remove two columns of three
@@ -127,15 +134,12 @@ test_that("missing columns are handled correctly (only one is left)", {
 ## remove two rows of three
 xn2r <- mda.exclrows(x, c(TRUE, FALSE, TRUE))
 test_that("missing rows are handled correctly (only one is left)", {
-   for (p in main_plots) {
+   for (p in c("p", "l", "b")) {
       expect_equal(dim(mdaplot.prepareDataForPlot(xn2r, p)$data), c(1, 3))
       expect_equal(colnames(mdaplot.prepareDataForPlot(xn2r, p)$data), colnames(x))
       expect_equal(rownames(mdaplot.prepareDataForPlot(xn2r, p)$data), c("Obj2"))
       expect_equal(mdaplot.prepareDataForPlot(xn2r, p)$excluded_rows, c(1, 3))
    }
-
-   # for error it raises an error
-   expect_error(mdaplot.prepareDataForPlot(xn2r, "e"))
 })
 
 
@@ -261,7 +265,7 @@ row_labels_wrong <- c("A", "C")
 col_labels <- c("X", "Y", "Z")
 col_labels_wrong <- c("X", "Z")
 
-td <- function(data, type) {
+tf <- function(data, type) {
    mdaplot.processExcludedRows(
       mdaplot.splitPlotData(mdaplot.prepareDataForPlot(data, type), type), type
    )
@@ -641,6 +645,7 @@ test_that("'ylas' parameter is handling correctly", {
 #####################################
 
 context("mdaplot: color groups and labels")
+tf <- function(...) mdaplot(people, ...)
 
 test_that("row names are used as labels by default", {
    expect_silent(tf(type = "p", show.labels = T))
@@ -732,6 +737,9 @@ context("mdaplot: can handle excluded rows")
 attr(people, "exclrows") <- NULL
 attr(people, "exclcols") <- NULL
 people <- mda.exclrows(people, people[, "Beer"] > 300)
+tf <- function(...) mdaplot(people, ...)
+tf(type = "p", show.labels = T)
+tf(type = "h", show.labels = T)
 
 test_that("excluded values are hidden by default", {
    expect_silent(tf(type = "p", show.labels = T))
