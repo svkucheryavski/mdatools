@@ -43,102 +43,143 @@ mdaplot.formatValues <- function(data, round.only = F, digits = 3) {
    return(fdata)
 }
 
-#' Calculate axes limits
+#' Calculate axes limits (common method for each axis)
 #'
 #' @description
 #' Calculates axes limits depending on data values that have to be plotted,
 #' extra plot elements that have to be shown and margins.
 #'
-#' @param plot_data
-#' a list with plot data and related parameters returned by `mdaplot.createPlotData()`.
-#' @param show.colorbar
-#' logical, show or not the colorbar on the plot.
+#' @param min
+#' smallest value for the axis.
+#' @param max
+#' largest value for the axis.
 #' @param show.lines
-#' logical or numeric with line coordinates to be shown on the plot.
-#' @param show.labels
-#' logical, show or not labels for the data objects
-#' @param show.excluded
-#' logical, show or not excluded values
-#'
-#' @details
-#' Data can be a list with several matrices or just one matrix. The matrices can have single.x
-#' configuration, where first column is x values and the others are y values or normal
-
-#' configuration, where every odd column is x values and every even is corresponding y values.
+#' numeric value - horizontal or vertical line to show for given axis.
+#' @param scale
+#' scale factor for limit margins (7.5% by default)
 #'
 #' @return
-#' Returns a list with four limits for the x and y axes.
+#' Returns a vector with two limits for given axis.
 #'
-mdaplot.getAxesLimits <- function(plot_data, show.colorbar = F, show.lines = F,
-   show.labels = F, show.excluded = F) {
-
-   if (is.null(plot_data)) return(NULL)
-
-   if (is.null(show.labels)) {
-      show.labels <- FALSE
-   }
-
-   x_values <- plot_data$x_values
-   y_values <- plot_data$y_values
-
-   if (show.excluded) {
-      x_values <- c(x_values, plot_data$x_values_excluded)
-      y_values <- rbind(y_values, plot_data$y_values_excluded)
-   }
-
-   lower <- plot_data$lower
-   upper <- plot_data$upper
-
-   # scale for margins - 7.5% of plot width or height
-   scale <- 0.075
-
-   # find range for x values
-   xmin <- min(x_values)
-   xmax <- max(x_values)
-
-   # find range for y values
-   ymin <- min(y_values, if (is.null(lower)) y_values else y_values - lower, na.rm = TRUE)
-   ymax <- max(y_values, if (is.null(lower)) y_values else y_values + upper, na.rm = TRUE)
+mdaplot.getAxesLimits <- function(min, max, show.lines = NULL, scale = 0.075) {
 
    # if min and max are equal add 5% on each side (or just 0.05 if they are zero)
-   if (xmin == xmax) {
-      xmin <- xmin - 0.05 * ifelse(xmin == 0, 1, xmin)
-      xmax <- xmax + 0.05 * ifelse(xmax == 0, 1, xmax)
-   }
-
-   # if min and max are equal add 5% on each side (or just 0.05 if they are zero)
-   if (ymin == ymax) {
-      ymin <- ymin - 0.05 * ifelse(ymin == 0, 1, ymin)
-      ymax <- ymax + 0.05 * ifelse(ymax == 0, 1, ymax)
+   if (min == max) {
+      min <- min - 0.05 * ifelse(min == 0, 1, min)
+      max <- max + 0.05 * ifelse(max == 0, 1, max)
    }
 
    # correct limits if some lines that have to be shown are outside the data points cloud
    if (is.numeric(show.lines)) {
-      xmax <- max(xmax, show.lines[1], na.rm = TRUE)
-      xmin <- min(xmin, show.lines[1], na.rm = TRUE)
-      ymax <- max(ymax, show.lines[2], na.rm = TRUE)
-      ymax <- max(ymax, show.lines[2], na.rm = TRUE)
+      max <- max(xmax, show.lines, na.rm = TRUE)
+      min <- min(xmin, show.lines, na.rm = TRUE)
    }
 
    # calculate margins: dx and dy
-   dx <- (xmax - xmin) * scale
-   dy <- (ymax - ymin) * scale
+   d <- (max - min) * scale
 
    # define limits with margins
-   xlim <- c(xmin - dx, xmax + dx)
-   ylim <- c(ymin - dy, ymax + dy)
+   lim <- c(min - d, max + d)
+
+   # return the limits
+   return(lim)
+}
+
+#' Calculate limits for x-axis.
+#'
+#' @description
+#' Calculates limits for x-axis depending on data values that have to be plotted,
+#' extra plot elements that have to be shown and margins.
+#'
+#' @param plot_data
+#' a list with plot data and related parameters returned by `mdaplot.createPlotData()`.
+#' @param xlim
+#' limits provided by user
+#' @param show.excluded
+#' logical, show or not the excluded values
+#' @param show.lines
+#' logical or numeric with line coordinates to be shown on the plot.
+#' @param bwd
+#' if limits are computed for bar plot, this is a bar width (otherwise NULL)
+#'
+#' @return
+#' Returns a vector with two limits.
+#'
+mdaplot.getXAxesLimits <- function(plot.data, xlim, show.excluded = FALSE,
+   show.lines = FALSE, bwd = NULL, scale = 0.075) {
+
+   # if user provided limits for x - use them strictly
+   if (!is.null(xlim)) return(xlim)
+
+   values <- plot.data$x_values
+   values_excluded <- plot.data$x_values_excluded
+
+   if (show.excluded) {
+      values <- c(values, values_excluded)
+   }
+
+   # find range for x values
+   min <- min(values)
+   max <- max(values)
+
+   # find if show.lines is in use
+   show.lines <- if (!is.numeric(show.lines) || is.na(show.lines[1])) NULL else show.lines[1]
+
+   # get the limits
+   lim <- mdaplot.getAxesLimits(min, max, show.lines, scale)
+
+   # correct x axis limits and bar width if it is a bar plot
+   if (!is.null(bwd) && bwd > 0) {
+      bwd <- if (length(values) == 1) 2 * bwd else bwd * min(diff(values))
+      lim <- c(min(values) - bwd / 2, max(values) + bwd / 2)
+   }
+
+   return(lim)
+}
+
+
+mdaplot.getYAxesLimits <- function(plot.data, ylim, show.excluded = FALSE,
+   show.lines = FALSE, show.colorbar = FALSE, show.labels = FALSE, scale = 0.075) {
+
+   # if user provided limits for y - use them strictly
+   if (!is.null(ylim)) return(ylim)
+
+   values <- plot.data$y_values
+   values_excluded <- plot.data$y_values_excluded
+   lower <- plot.data$lower
+   upper <- plot.data$upper
+
+   if (show.excluded) {
+      values <- rbind(values, values_excluded)
+   }
+
+   # find range for x values
+   min <- min(values)
+   max <- max(values)
+
+   # correct the range if lower and upper values are provided
+   min <- min(values, if (is.null(lower)) values else values - lower, na.rm = TRUE)
+   max <- max(values, if (is.null(upper)) values else values + upper, na.rm = TRUE)
+
+   # find if show.lines is in use
+   show_y_line <- is.numeric(show.lines) && length(show.lines) == 2 && !is.na(show.lines[2])
+   show.lines <- if (show_y_line) show.lines[2] else NULL
+
+   # get the limits
+   lim <- mdaplot.getAxesLimits(min, max, show.lines, scale)
+
+   # compute margin size based on limits
+   d <- -diff(lim) * scale / (1 + 2 * scale)
 
    # add an extra margin to y limit if colorbar must be shown
-   if (show.colorbar == T) ylim[2] <- ylim[2] + dy * 3
+   if (show.colorbar == T) lim[2] <- lim[2] + diff(lim) * 0.075 * 3
 
    # add extra margins if labels must be shown
    if (show.labels == T) {
-      ylim[1] <- ylim[1] - dy
-      ylim[2] <- ylim[2] + dy
+      lim <- lim + c(-d, d)
    }
 
-   # return the limits
-   return(list(xlim = xlim, ylim = ylim))
+   return(lim)
 }
 
 #' Prepare colors based on palette and opacity value
@@ -587,6 +628,200 @@ mdaplot.getConvexHull <- function(points) {
 }
 
 
+#' Create dataset to show as plot
+#'
+#' @param data
+#' dataset (vector, matrix or data frame)
+#' @param type
+#' type of the plot
+#' @param main
+#' main plot title provided by user (if any)
+#' @param xlab
+#' label for x-axis provided by user (if any)
+#' @param ylab
+#' label for y-axis provided by user (if any)
+#' @param xlim
+#' limits for x-axis provided by user
+#' @param ylim
+#' limits for y-axis provided by user
+#' @param bwd
+#' width of bars provided by user
+#' @param show.excluded
+#' logical, show or not excluded values
+#' @param show.colorbar
+#' logical, show or not colorbar (needed to compute limits correctly)
+#' @param show.labels
+#' logical, show or not labels for data points
+#' @param show.lines
+#' logical, show or not lines
+#' @param show.axes
+#' logical, show or not axes
+#' @param labels
+#' vector with labels
+#'
+#' @export
+mdaplot.createPlotData <- function(data, type, main, xlab, ylab, xlim, ylim, bwd, show.excluded,
+   show.colorbar, show.labels, show.lines, show.axes, labels) {
+
+   # check plot type
+
+   valid.types <- c("p", "l", "b", "h", "e", "d")
+   if (!(type %in% valid.types)) {
+      stop("Wrong plot type!")
+   }
+
+   # get attributes and prepare dataset
+   data_attrs <- attributes(data)
+   plot_data <- mdaplot.prepareDataForPlot(data, type)
+
+   # check if density plot should be shown
+   plot_data$density <- FALSE
+   if (type == "d") {
+      if (ncol(data) < 2) stop("Dataset with at least two columns required for density plot.")
+      type <- "p"
+      plot_data$density <- TRUE
+   }
+
+   # split plot data to x and y values
+   plot_data <- mdaplot.splitPlotData(plot_data, type, xlab, ylab)
+
+   # process excluded rows if they have to be shown
+   if (show.excluded) {
+      plot_data <- mdaplot.processExcludedRows(plot_data, type)
+   }
+
+   # create labels if necessary
+   if (show.labels) {
+      plot_data <- mdaplot.prepareDataLabels(plot_data, type, labels)
+   }
+
+   # define name for the plot series
+   plot_data$name <- if (type == "h") rownames(plot_data$data)[1] else data_attrs[["name"]]
+   if (!is.null(main)) plot_data$name <- main
+
+   # compute limits for axes
+   plot_data$xlim <- mdaplot.getXAxesLimits(
+      plot_data,
+      xlim,
+      show.lines = show.lines,
+      show.excluded = show.excluded,
+      bwd = if (type == "h") bwd else NULL
+   )
+
+   plot_data$ylim <- mdaplot.getYAxesLimits(
+      plot_data,
+      ylim,
+      show.lines = show.lines,
+      show.excluded = show.excluded,
+      show.colorbar = show.colorbar
+   )
+
+
+   return(plot_data)
+}
+
+
+#' Split dataset to x and y values depending on plot type
+#'
+#' @param plot_data
+#' list with data and parameters prepared for plot by `mdaplot.prepareDataForPlot()` function
+#' @param type
+#' type of plot
+#' @param xlab
+#' label for x-axis provided by user (if any)
+#' @param ylab
+#' label for y-axis provided by user (if any)
+#'
+#' @export
+mdaplot.splitPlotData <- function(plot_data, type, xlab = NULL, ylab = NULL) {
+
+   # shortcuts to some of parameters
+   data <- plot_data$data
+   data_attrs <- plot_data$attrs
+   excluded_cols <- plot_data$excluded_cols
+   xaxis_name <- data_attrs$xaxis.name
+   yaxis_name <- data_attrs$yaxis.name
+
+   if (type == "p") {
+      # scatter plot
+      plot_data$x_values <- data[, 1]
+      attr(plot_data$x_values, "name") <- colnames(data)[1]
+      plot_data$y_values <- data[, 2, drop = F]
+      attr(plot_data$y_values, "name") <- colnames(data)[2]
+      return(plot_data)
+   }
+
+   # prepare x-axis values for other types of plots
+   x_values <- seq_len(ncol(data))
+   if (!is.null(data_attrs$xaxis.values)) {
+      x_values <- data_attrs$xaxis.values
+      if (length(excluded_cols) > 0) x_values[-excluded_cols]
+   }
+
+   if (is.null(names(x_values))) names(x_values) <- colnames(data)
+
+   # add name to x-values (and names)
+   if (!is.null(xlab)) xaxix_name <- xlab
+   if (is.null(xaxis_name)) xaxis_name <- "Variables"
+   attr(x_values, "name") <- xaxis_name
+
+   # add x values to the plot data
+   plot_data$x_values <- x_values
+
+   # for bar plot we show only the first row
+   if (!is.null(ylab)) yaxix_name <- ylab
+   switch(type,
+
+      "h" = {
+         plot_data$y_values <- data[1, , drop = F]
+         attr(plot_data$y_values, "name") <- if (is.null(yaxis_name)) "" else yaxis_name
+      },
+      "l" = ,
+      "b" = {
+         plot_data$y_values <- data
+         attr(plot_data$y_values, "name") <- if (is.null(yaxis_name)) "" else yaxis_name
+      },
+      "e" = {
+         plot_data$y_values <- data[1, , drop = F]
+         attr(plot_data$y_values, "name") <- if (is.null(ylab)) rownames(data)[1] else yaxis_name
+         plot_data$lower <- data[2, ]
+         plot_data$upper <- if (nrow(data) > 2) data[3, ] else plot_data$lower
+      },
+      stop("Something went wrong on plot data preparation step (check plot type).")
+   )
+
+   return(plot_data)
+}
+
+#' Prepare x and y values for excluded rows
+#'
+#' @param plot_data
+#' list with data and parameters prepared for plot by `mdaplot.prepareDataForPlot()` function
+#' @param type
+#' type of plot
+#'
+#' @export
+mdaplot.processExcludedRows <- function(plot_data, type) {
+
+   # shortcuts for some parameters
+   excluded_data <- plot_data$excluded_data
+
+   # if nothing to show - return
+   if (is.null(excluded_data) || (nrow(excluded_data) == 0)) {
+      return(plot_data)
+   }
+
+   if (type == "p") {
+      plot_data$x_values_excluded <- excluded_data[, 1]
+      plot_data$y_values_excluded <- excluded_data[, 2, drop = F]
+      return(plot_data)
+   }
+
+   plot_data$x_values_excluded <- plot_data$x_values
+   plot_data$y_values_excluded <- excluded_data
+   return(plot_data)
+}
+
 #' Check if data argument looks correct for creatins plots, correct if needed
 #'
 #' @param data
@@ -622,7 +857,7 @@ mdaplot.prepareDataForPlot <- function(data, type) {
    }
 
    if (type == "e" && length(data_attrs$exclrows) > 0) {
-      stop("Bar or errobar plot can not be made for data with excluded rows.")
+      stop("Errobar plot can not be made for data with excluded rows.")
    }
 
    # if row names are missing - add them
@@ -687,99 +922,6 @@ mdaplot.prepareDataForPlot <- function(data, type) {
          attrs = data_attrs
       )
    )
-}
-
-#' Split dataset to x and y values depending on plot type
-#'
-#' @param plot_data
-#' list with data and parameters prepared for plot by `mdaplot.prepareDataForPlot()` function
-#' @param type
-#' type of plot
-#'
-#' @export
-mdaplot.splitPlotData <- function(plot_data, type) {
-
-   # shortcuts to some of parameters
-   data <- plot_data$data
-   data_attrs <- plot_data$attrs
-   excluded_cols <- plot_data$excluded_cols
-   xaxis_name <- data_attrs$xaxis.name
-   yaxis_name <- data_attrs$yaxis.name
-
-   if (type == "p") {
-      # scatter plot
-      plot_data$x_values <- data[, 1]
-      attr(plot_data$x_values, "name") <- colnames(data)[1]
-      plot_data$y_values <- data[, 2, drop = F]
-      attr(plot_data$y_values, "name") <- colnames(data)[2]
-      return(plot_data)
-   }
-
-   # prepare x-axis values for other types of plots
-   x_values <- seq_len(ncol(data))
-   if (!is.null(data_attrs$xaxis.values)) {
-      x_values <- data_attrs$xaxis.values
-      if (length(excluded_cols) > 0) x_values[-excluded_cols]
-   }
-
-   if (is.null(names(x_values))) names(x_values) <- colnames(data)
-
-   # add name to x-values (and names)
-   attr(x_values, "name") <- if (is.null(xaxis_name)) "Variables" else xaxis_name
-   plot_data$x_values <- x_values
-
-   # for bar plot we show only the first row
-   switch(type,
-      "h" = {
-         plot_data$y_values <- data[1, , drop = F]
-         attr(plot_data$y_values, "name") <- if (is.null(yaxis_name)) "" else yaxis_name
-      },
-      "l" = ,
-      "b" = {
-         plot_data$y_values <- data
-         attr(plot_data$y_values, "name") <- if (is.null(yaxis_name)) "" else yaxis_name
-      },
-      "e" = {
-        plot_data$y_values <- data[1, , drop = F]
-         attr(plot_data$y_values, "name") <- rownames(data)[1]
-         plot_data$lower <- data[2, ]
-         plot_data$upper <- if (nrow(data) > 2) data[3, ] else plot_data$lower
-      },
-      stop("Something went wrong on plot data preparation step (check plot type).")
-   )
-
-   return(plot_data)
-}
-
-#' Prepare x and y values for excluded rows
-#'
-#' @param plot_data
-#' list with data and parameters prepared for plot by `mdaplot.prepareDataForPlot()` function
-#' @param type
-#' type of plot
-#'
-#' @export
-mdaplot.processExcludedRows <- function(plot_data, type) {
-
-   # shortcuts for some parameters
-   excluded_data <- plot_data$excluded_data
-
-   # if nothing to show - return
-   if (is.null(excluded_data) || (nrow(excluded_data) == 0)) {
-      return(plot_data)
-   }
-
-   if (type == "p") {
-      plot_data$x_values_excluded <- excluded_data[, 1]
-      plot_data$y_values_excluded <- excluded_data[, 2, drop = F]
-      return(plot_data)
-   }
-
-   if (type == "l" || type == "b") {
-      plot_data$x_values_excluded <- plot_data$x_values
-      plot_data$y_values_excluded <- excluded_data
-      return(plot_data)
-   }
 }
 
 #' Create a vector with labels for plot data series
@@ -868,80 +1010,134 @@ mdaplot.prepareDataLabels <- function(plot_data, type, labels = NULL) {
 }
 
 
-#' Create dataset to show as plot
+
+#' Prepare xticks for plot
 #'
-#' @param data
-#' dataset (vector, matrix or data frame)
+#' @param xticks
+#' xticks provided by user (if any)
+#' @param x_values
+#' x values for the plot data object
+#' @param xlim
+#' limits for x axis
 #' @param type
 #' type of the plot
-#' @param xlim
-#' limits for x-axis provided by user
-#' @param ylim
-#' limits for y-axis provided by user
-#' @param bwd
-#' width of bars provided by user
-#' @param show.excluded
-#' logical, show or not excluded values
-#' @param show.colorbar
-#' logical, show or not colorbar (needed to compute limits correctly)
-#' @param show.labels
-#' logical, show or not labels for data points
-#' @param show.lines
-#' logical, show or not lines
-#' @param show.axes
-#' logical, show or not axes
-#' @param labels
-#' vector with labels
+mdaplot.prepareXTicks <- function(xticks, x_values, xlim, type) {
+
+   if (!is.null(xticks)) return(xticks)
+   if (type != "p" && length(x_values) == 1) return(1)
+   return(axisTicks(xlim, log = FALSE))
+}
+
+#' Prepare yticks for plot
 #'
-#' @export
-mdaplot.createPlotData <- function(data, type, xlim, ylim, bwd, show.excluded,
-   show.colorbar, show.labels, show.lines, show.axes, labels) {
+#' @param yticks
+#' yticks provided by user (if any)
+#' @param y_values
+#' y values for the plot data object
+#' @param ylim
+#' limits for y axis
+#' @param type
+#' type of the plot
+mdaplot.prepareYTicks <- function(yticks, y_values, ylim, type) {
 
-   # check plot type
+   if (!is.null(yticks)) return(yticks)
+   if (type != "p" && length(y_values) == 1) return(1)
 
-   valid.types <- c("p", "l", "b", "h", "e", "d")
-   if (!(type %in% valid.types)) {
-      stop("Wrong plot type!")
+   return(axisTicks(ylim, log = FALSE))
+}
+
+#' Prepare xticklabels for plot
+#'
+#' @param xticklabels
+#' xticklables provided by user (if any)
+#' @param xticks
+#' xticks (provided or computed)
+#' @param excluded_cols
+#' columns excluded from plot data (if any)
+#'
+mdaplot.prepareXTickLabels <- function(xticklabels, xticks, excluded_cols) {
+
+   if (is.null(xticklabels)) return(TRUE)
+
+   # if xticklabels were provided - remove excluded columns if any and check the length
+   if (!is.null(excluded_cols)) xticklabels <- xticklabels[-excluded_cols]
+   if (length(xticks) != length(xticklabels)) {
+      stop('Number of elements in "xticks" and "xticklabels" should be the same')
    }
 
-   # get attributes and prepare dataset
-   data_attrs <- attributes(data)
-   plot_data <- mdaplot.prepareDataForPlot(data, type)
+   return(xticklabels)
+}
 
-   # check if density plot should be shown
-   plot_data$density <- FALSE
-   if (type == "d") {
-      if (ncol(data) < 2) stop("Dataset with at least two columns required for density plot.")
-      type <- "p"
-      plot_data$density <- TRUE
+#' Prepare yticklabels for plot
+#'
+#' @param yticklabels
+#' yticklables provided by user (if any)
+#' @param yticks
+#' yticks (provided or computed)
+#' @param excluded_rows
+#' rows excluded from plot data (if any)
+#'
+mdaplot.prepareYTickLabels <- function(yticklabels, yticks, excluded_rows) {
+
+   if (is.null(yticklabels)) return(TRUE)
+
+   # if yticklabels were provided - remove excluded rows if any and check the length
+   if (length(yticks) != length(yticklabels)) {
+      stop('Number of elements in "yticks" and "yticklabels" should be the same')
    }
 
-   # split plot data to x and y values
-   plot_data <- mdaplot.splitPlotData(plot_data, type)
+   return(yticklabels)
+}
 
-   # process excluded rows if they have to be shown
-   if (show.excluded) {
-      plot_data <- mdaplot.processExcludedRows(plot_data, type)
+mdaplot.prepareDataForGroupPlots <- function(data, type, groupby) {
+
+   if (is.list(data) && !is.data.frame(data)) return(data)
+
+   if (is.null(groupby)) {
+      # take every row of matrix or data frame as separate group
+
+      if (!all(type %in% c("h", "l", "b"))) {
+         stop("Group plot with matrix or data frame can be made only for types 'h', 'l' and 'b'.")
+      }
+
+      # split data into a list of subsets for each group
+      data_list <- list()
+      for (i in seq_len(nrow(data))) {
+         data_list[[rownames(data)[i]]] <- mda.subset(data, subset = i)
+      }
+
+      # redefine the data with list
+      return(data_list)
    }
 
-   # create labels if necessary
-   if (show.labels) {
-      plot_data <- mdaplot.prepareDataLabels(plot_data, type, labels)
+   # if groupby is provided - use it to split rows into groups
+
+   ## check that groupby is a factor or data frame with factor columns
+   ## TODO: simplify the three lines below
+   is_groupby_factor <-
+      (is.data.frame(groupby) && all(unlist(lapply(groupby, is.factor)))) ||
+      is.factor(groupby)
+
+   if (!is_groupby_factor) {
+      stop("Parameter 'groupby' should be a factor or data frame with several factors.")
    }
 
-   # define name for the plot series
-   plot_data$name <- if (type == "h") rownames(plot_data$data)[1] else data_attrs[["name"]]
+   attrs <- mda.getattr(data)
+   data <- as.data.frame(data)
 
-   # compute limits for axes
-   plot_data$lim <- mdaplot.getAxesLimits(
-      plot_data,
-      show.colorbar = show.colorbar,
-      show.labels = show.labels,
-      show.lines = show.lines,
-      show.excluded = show.excluded
-   )
+   # in this case if labels = indices generate labels for each case
+   data$row.ind <- seq_len(nrow(data))
+   data_list <- split(data, groupby)
 
-   return(plot_data)
+   for (i in seq_len(length(data_list))) {
+      row.ind <- data_list[[i]]$row.ind
+      data_list[[i]] <- subset(data_list[[i]], select = -row.ind)
+      data_list[[i]] <- mda.setattr(data_list[[i]], attrs)
+      attr(data_list[[i]], "exclrows") <- which(row.ind %in% attrs$exclrows)
+      attr(data_list[[i]], "labels") <- row.ind
+   }
+
+   return(data_list)
 }
 
 
@@ -950,12 +1146,6 @@ mdaplot.createPlotData <- function(data, type, xlim, ylim, bwd, show.excluded,
 #' @description
 #' Creates an empty axes plane for given parameters
 #'
-#' @param plot.data
-#' list with data prepared for mdaplot() if any
-#' @param type
-#' type of the plot
-#' @param bwd
-#' width of bars in case of bar plot
 #' @param xticklabels
 #' labels for x ticks
 #' @param yticklabels
@@ -985,62 +1175,9 @@ mdaplot.createPlotData <- function(data, type, xlim, ylim, bwd, show.excluded,
 #' @param grid.col
 #' line color for the grid
 #'
-mdaplot.plotAxes <- function(plot.data, type, bwd, xticklabels = NULL, yticklabels = NULL,
+mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
    xlim = xlim, ylim = ylim, xticks = NULL, yticks = NULL, main = NULL, xlab = NULL, ylab = NULL,
    xlas = 0, ylas = 0, show.grid = TRUE, grid.lwd = 0.5, grid.col = "lightgray") {
-
-   if (!is.null(plot.data)) {
-
-      # get values from the plot data list to make code cleaner
-      plot.data$x_values -> x_values
-      plot.data$y_values -> y_values
-      plot.data$lim -> lim
-      plot.data$attrs -> data_attrs
-
-      # number of x-values
-      nxvals <- length(x_values)
-
-      # define title and axis labels
-      if (is.null(main)) main <- plot.data$name
-      if (is.null(xlab)) xlab <- attr(x_values, "name")
-      if (is.null(ylab)) ylab <- attr(y_values, "name")
-
-      # correct xticklabels and xticks if only one variable is provided for line or bar plot
-      if (type != "p" && nxvals == 1) {
-         xticks <- 1
-         if (is.null(xticklabels)) xticklabels <- x_values
-      }
-
-      # correct x axis limits and bar width if it is a bar plot
-      if (type == "h") {
-         if (nxvals == 1) {
-            lim$xlim <- c(x_values - bwd, x_values + bwd)
-         } else {
-            bwd <- bwd * min(diff(x_values))
-            lim$xlim <- c(min(x_values) - bwd / 2, max(x_values) + bwd / 2)
-         }
-      }
-
-      # redefine axes limits if user specified values
-      if (is.null(xlim)) xlim <- lim$xlim
-      if (is.null(ylim)) ylim <- lim$ylim
-
-      # if no x-values were provided to line or bar plot we generate them as integer numbers
-      if ((type %in% c("h", "l", "b")) && is.null(xticks) && is.null(data_attrs$xaxis_values)) {
-         xticks <- axisTicks(xlim, log = FALSE)
-         xticks <- unique(round(xticks[xticks > 0 & xticks <= max(x_values)]))
-      }
-
-      # check xticklabels and xticks
-      if (!is.null(xticklabels) && (length(xticks) != length(xticklabels))) {
-         stop('Number of elements in "xticks" and "xticklabels" should be the same')
-      }
-
-      # check yticklabels and yticks
-      if (!is.null(yticklabels) && (length(yticklabels) != length(yticks))) {
-         stop('Number of elements in "yticks" and "yticklabels" should be the same')
-      }
-   }
 
    # make plot without ticks
    plot(0, 0, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
@@ -1593,11 +1730,10 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
    if (is.null(plot.data)) {
       # get the data for plot
       plot.data <- mdaplot.createPlotData(
-         data, type, xlim, ylim, bwd, show.excluded, show.colorbar,
+         data, type, main, xlab, ylab, xlim, ylim, bwd, show.excluded, show.colorbar,
          show.labels, show.lines, show.axes, labels
       )
    }
-
 
    # get values from the plot data list to make code cleaner
    plot.data$lower -> lower
@@ -1612,19 +1748,28 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
    plot.data$density -> density
    plot.data$labels -> labels
    plot.data$labels_excluded -> labels_excluded
+   plot.data$xlim -> xlim
+   plot.data$ylim -> ylim
 
    # show axes if needed
    if (show.axes) {
-      # if some columns are excluded and xticklabels provided for all - exclude hidden values
-      if (!is.null(excluded_cols) && !is.null(xticklabels) && length(xticklabels) == ncol(data)) {
-         xticklabels <- xticklabels[-excluded_cols]
-      }
+
+      # check and prepare xticklabels
+      xticks <- mdaplot.prepareXTicks(xticks, x_values, xlim, type)
+      xticklabels <- mdaplot.prepareXTickLabels(xticklabels, xticks, excluded_cols)
+
+      # check and prepare yticklabels
+      yticks <- mdaplot.prepareYTicks(yticks, y_values, ylim, type)
+      yticklabels <- mdaplot.prepareYTickLabels(yticklabels, yticks, excluded_rows)
+
+      main <- plot.data$name
+      xlab <- attr(x_values, "name")
+      ylab <- attr(y_values, "name")
 
       # make an empty plot with proper limits and axis labels
-      mdaplot.plotAxes(plot.data, type = type, bwd = bwd, xticklabels = xticklabels,
-         yticklabels = yticklabels, xticks = xticks, yticks = yticks, xlim = xlim, ylim = ylim,
-         main = main, xlab = xlab, ylab = ylab, xlas = xlas, ylas = ylas, show.grid = show.grid,
-         grid.lwd = grid.lwd, grid.col = grid.col
+      mdaplot.plotAxes(xticklabels = xticklabels, yticklabels = yticklabels, xticks = xticks,
+         yticks = yticks, xlim = xlim, ylim = ylim, main = main, xlab = xlab, ylab = ylab,
+         xlas = xlas, ylas = ylas, show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col
       )
    }
 
@@ -1806,59 +1951,9 @@ mdaplotg <- function(
    show.excluded = FALSE, lab.col = "darkgray", lab.cex = 0.65, xlas = 1,
    ylas = 1, opacity = 1, ...) {
 
-   # name for the plot (mdain)
-   name <- NULL
-
-   # prepare list with groups of objects
-   if (is.matrix(data) || is.data.frame(data)) {
-      if (is.null(groupby)) {
-         # take every line as a group
-         name <- attr(data, "name", exact = TRUE)
-
-         if (!all(type %in% c("h", "l", "b"))) {
-            stop("Group plot with matrix or dataframe can be made only for types 'h', 'l' and 'b'.")
-         }
-
-         # split data into a list of subsets for each group
-         data.list <- list()
-         for (i in seq_len(nrow(data))) {
-            data.list[[i]] <- mda.subset(data, subset = i)
-         }
-
-         # get rownames as legend values
-         if (is.null(legend)) {
-            legend <- rownames(data)
-         }
-
-         # redefine the data with list
-         data <- data.list
-      } else {
-         # split rows into groups using data frame with factors
-         # check that groupby is a factor or data frame with factor columns
-         is_groupby_factor <-
-            (is.data.frame(groupby) && all(unlist(lapply(groupby, is.factor)))) ||
-            is.factor(groupby)
-
-         if (!is_groupby_factor) {
-            stop("Parameter 'groupby' should be a factor or data frame with several factors.")
-         }
-
-         attrs <- mda.getattr(data)
-         data <- as.data.frame(data)
-
-         # in this case if labels = indices generate labels for each case
-         data$row.ind <- seq_len(nrow(data))
-         data <- split(data, groupby)
-         for (i in seq_len(length(data))) {
-            row.ind <- data[[i]]$row.ind
-            data[[i]] <- subset(data[[i]], select = -row.ind)
-            data[[i]] <- mda.setattr(data[[i]], attrs)
-            attr(data[[i]], "exclrows") <- which(row.ind %in% attrs$exclrows)
-            attr(data[[i]], "labels") <- row.ind
-         }
-      }
-   }
-
+   # split data into groups
+   name <- attr(data, "name", exact = TRUE)
+   data <- mdaplot.prepareDataForGroupPlots(data, type, groupby)
    ngroups <- length(data)
 
    # check if plot.new() should be called first
@@ -1889,15 +1984,15 @@ mdaplotg <- function(
 
    # check and define colors if necessary
    if (is.null(col)) col <- mdaplot.getColors(ngroups = ngroups, colmap = colmap)
-   col <- processParam(col, "col", mdaplot.areColors, ngroups)
+      col <- processParam(col, "col", mdaplot.areColors, ngroups)
 
    # get plot data for each group
    pd <- list()
    for (i in 1:ngroups) {
       pd[[i]] <- mdaplot.createPlotData(
-         data[[i]], type[i], xlim, ylim, bwd, show.excluded,
-         show.colorbar = FALSE, show.labels, labels = labels,
-         show.lines, show.axes = TRUE
+         data = data[[i]], type = type[i], main = main, xlab = xlab, ylab = ylab, xlim = xlim,
+         ylim = ylim, bwd = bwd, show.excluded = show.excluded, show.colorbar = FALSE,
+         show.labels = show.labels, labels = labels, show.lines = show.lines, show.axes = TRUE
       )
    }
 
@@ -1939,7 +2034,7 @@ mdaplotg <- function(
 
    # compute x-limits
    if (is.null(xlim)) {
-      xlim <- matrix(unlist(lapply(pd, function(x) x$lim$xlim)), ncol = 2, byrow = TRUE)
+      xlim <- matrix(unlist(lapply(pd, function(x) x$xlim)), ncol = 2, byrow = TRUE)
       xlim <- c(min(xlim[, 1]), max(xlim[, 2]))
 
       # stretch limits if bar plot should be shown
@@ -1948,7 +2043,7 @@ mdaplotg <- function(
 
    # compute y-limits
    if (is.null(ylim)) {
-      ylim <- matrix(unlist(lapply(pd, function(y) y$lim$ylim)), ncol = 2, byrow = TRUE)
+      ylim <- matrix(unlist(lapply(pd, function(y) y$ylim)), ncol = 2, byrow = TRUE)
       ylim <- c(min(ylim[, 1]), max(ylim[, 2]))
    }
 
@@ -1993,14 +2088,11 @@ mdaplotg <- function(
    ylab <- if (is.null(ylab)) attr(pd[[1]]$y_values, "name", exact = TRUE) else ylab
 
    # make an empty plot with proper limits and axis labels
-   mdaplot.plotAxes(plot.data = NULL, xticklabels = xticklabels,
-      yticklabels = yticklabels, xticks = xticks, yticks = yticks, xlim = xlim, ylim = ylim,
-      main = main, xlab = xlab, ylab = ylab, xlas = xlas, ylas = ylas, show.grid = show.grid,
+   mdaplot.plotAxes(xticklabels = xticklabels, yticklabels = yticklabels, xticks = xticks,
+      yticks = yticks, xlim = xlim, ylim = ylim, main = main, xlab = xlab, ylab = ylab,
+      xlas = xlas, ylas = ylas, show.grid = show.grid,
       grid.lwd = grid.lwd, grid.col = grid.col
    )
-
-   #mdaplot.plotAxes(xticklabels, yticklabels, xticks, yticks, lim, main, xlab, ylab, xlas, ylas,
-   #   show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col)
 
    # show lines if needed
    if (is.numeric(show.lines) && length(show.lines) == 2) {

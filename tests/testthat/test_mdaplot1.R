@@ -147,6 +147,8 @@ test_that("missing rows are handled correctly (only one is left)", {
 # Block 2. Test split plot data function     #
 ####################################################
 
+# TODO: add tests for manually provided xlab and ylab to splitPlotData
+
 context("mdaplot: split plot data")
 
 x <- matrix(1:9, ncol = 3)
@@ -738,8 +740,7 @@ attr(people, "exclrows") <- NULL
 attr(people, "exclcols") <- NULL
 people <- mda.exclrows(people, people[, "Beer"] > 300)
 tf <- function(...) mdaplot(people, ...)
-tf(type = "p", show.labels = T)
-tf(type = "h", show.labels = T)
+tf(type = "h", show.excluded = T)
 
 test_that("excluded values are hidden by default", {
    expect_silent(tf(type = "p", show.labels = T))
@@ -762,12 +763,12 @@ test_that("hidden excluded values and labels (indices) work fine", {
    expect_silent(tf(type = "h", show.labels = T, labels = "values"))
 })
 
-test_that("excluded values can be shown on all plots except bar and errorbar", {
+test_that("excluded values can be shown on all plots except errorbar", {
    tf(type = "p", show.excluded = T)
    expect_silent(tf(type = "p", show.excluded = T))
    expect_silent(tf(type = "l", show.excluded = T))
    expect_silent(tf(type = "b", show.excluded = T))
-   expect_error(tf(type = "h", show.excluded = T))
+   expect_silent(tf(type = "h", show.excluded = T))
    expect_error(tf(type = "e", show.excluded = T))
 })
 
@@ -862,7 +863,7 @@ test_that("excluded values can be shown on all plots except bar and errorbar", {
    expect_silent(tf(type = "p", show.excluded = T))
    expect_silent(tf(type = "l", show.excluded = T))
    expect_silent(tf(type = "b", show.excluded = T))
-   expect_error(tf(type = "h", show.excluded = T))
+   expect_silent(tf(type = "h", show.excluded = T))
    expect_error(tf(type = "e", show.excluded = T))
 })
 

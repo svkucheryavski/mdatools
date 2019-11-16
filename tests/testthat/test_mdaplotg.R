@@ -306,28 +306,28 @@ test_that("hidden data is shown as gray if needed and labels are produced correc
    expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T))
    expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T))
    expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T))
-   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T))
+   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T))
 })
 
 test_that("hidden data can be used with labels as values", {
    expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "values"))
    expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "values"))
    expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "values"))
-   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "values"))
 })
 
 test_that("hidden data can be used with labels as names", {
    expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "names"))
    expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "names"))
    expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "names"))
-   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "names"))
+   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "names"))
 })
 
 test_that("hidden data can be used with labels as indices", {
    expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "indices"))
    expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "indices"))
    expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "indices"))
-   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "indices"))
 })
 
 ## handling both hidden columns and rows
@@ -349,28 +349,28 @@ test_that("hidden data is shown as gray if needed and labels are produced correc
    expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T))
    expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T))
    expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T))
-   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T))
+   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T))
 })
 
 test_that("hidden data can be used with labels as values", {
    expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "values"))
    expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "values"))
    expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "values"))
-   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "values"))
+   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "values"))
 })
 
 test_that("hidden data can be used with labels as names", {
    expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "names"))
    expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "names"))
    expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "names"))
-   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "names"))
+   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "names"))
 })
 
 test_that("hidden data can be used with labels as indices", {
    expect_silent(tf(groupby, type = "p", show.excluded = TRUE, show.labels = T, labels = "indices"))
    expect_silent(tf(groupby, type = "l", show.excluded = TRUE, show.labels = T, labels = "indices"))
    expect_silent(tf(groupby, type = "b", show.excluded = TRUE, show.labels = T, labels = "indices"))
-   expect_error(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "indices"))
+   expect_silent(tf(groupby, type = "h", show.excluded = TRUE, show.labels = T, labels = "indices"))
 })
 
 #######################################
