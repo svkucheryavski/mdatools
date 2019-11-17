@@ -12,7 +12,6 @@ par(mfrow = c(2, 2))
 
 data("people")
 people <- people[, -6]
-people <- as.data.frame(people)
 
 m <- apply(people, 2, mean)
 s <- apply(people, 2, sd)
@@ -180,8 +179,9 @@ test_that("data is split correctly for bar plots", {
 
 test_that("data is split correctly for errorbar plots", {
    res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "e"), "e")
+   errorbar_data <- rbind(x[1, ], x[1, ] - x[2, ], x[1, ] + x[3, ])
    expect_equivalent(res$x_values, 1:3)
-   expect_equivalent(res$y_values, x)
+   expect_equivalent(res$y_values, errorbar_data)
    expect_equal(attr(res$x_values, "name"), "Variables")
    expect_equal(attr(res$y_values, "name"), "")
    expect_equal(names(res$x_values), c("X1", "X2", "X3"))
@@ -608,13 +608,13 @@ yticks <- c(100, 200, 300, 400, 500)
 yticklabels <- c("XS", "S", "M", "L", "XL")
 
 test_that("manual yticks work correctly", {
-   expect_silent(tf(type = "p", yticks = c(50, 70, 100)))
+   expect_silent(tf(type = "p", yticks = c(50, 70, 90)))
    expect_silent(tf(type = "l", yticks = yticks))
    expect_silent(tf(type = "b", yticks = yticks))
    expect_silent(tf(type = "h", yticks = yticks))
 })
 
-test_that("'yticklabels' can not be specified without 'xticks'", {
+test_that("'yticklabels' can not be specified without 'yticks'", {
    expect_error(tf(type = "l", yticklabels = yticklabels))
    expect_error(tf(type = "b", yticklabels = yticklabels))
    expect_error(tf(type = "h", yticklabels = yticklabels))
@@ -622,7 +622,7 @@ test_that("'yticklabels' can not be specified without 'xticks'", {
 
 
 test_that("'yticks' and 'yticklabels' work correctly together", {
-   expect_silent(tf(type = "p", yticks = c(50, 70, 100), yticklabels = c("L", "M", "H")))
+   expect_silent(tf(type = "p", yticks = c(50, 70, 90), yticklabels = c("L", "M", "H")))
    expect_silent(tf(type = "l", yticks = yticks, yticklabels = yticklabels))
    expect_silent(tf(type = "b", yticks = yticks, yticklabels = yticklabels))
    expect_silent(tf(type = "h", yticks = yticks, yticklabels = yticklabels))
@@ -735,7 +735,6 @@ attr(people, "exclrows") <- NULL
 attr(people, "exclcols") <- NULL
 people <- mda.exclrows(people, people[, "Beer"] > 300)
 tf <- function(...) mdaplot(people, ...)
-tf(type = "h", show.excluded = T)
 
 test_that("excluded values are hidden by default", {
    expect_silent(tf(type = "p", show.labels = T))
@@ -758,8 +757,8 @@ test_that("hidden excluded values and labels (indices) work fine", {
    expect_silent(tf(type = "h", show.labels = T, labels = "values"))
 })
 
+# TODO: Bar plot looks very strange here
 test_that("excluded values can be shown on all plots except errorbar", {
-   tf(type = "p", show.excluded = T)
    expect_silent(tf(type = "p", show.excluded = T))
    expect_silent(tf(type = "l", show.excluded = T))
    expect_silent(tf(type = "b", show.excluded = T))

@@ -475,7 +475,11 @@ mdaplot.showLabels <- function(x_values, y_values, labels, pos = 3,
       return()
    }
 
-   if (type != "p" && !is.null(dim(y_values))) {
+   if (type %in% c("h", "e")) {
+      y_values = y_values[1, ]
+   }
+
+   if (type %in% c("l", "b")) {
       y_values <- apply(y_values, 2, max)
    }
 
@@ -1044,6 +1048,7 @@ mdaplot.prepareYTicks <- function(yticks, y_values, ylim, type) {
 mdaplot.prepareXTickLabels <- function(xticklabels, xticks, excluded_cols) {
 
    if (is.null(xticklabels)) return(TRUE)
+   if (is.null(xticks)) stop("You need to specify both 'xticklabels' and 'xticks'")
 
    # if xticklabels were provided - remove excluded columns if any and check the length
    if (!is.null(excluded_cols)) xticklabels <- xticklabels[-excluded_cols]
@@ -1066,6 +1071,7 @@ mdaplot.prepareXTickLabels <- function(xticklabels, xticks, excluded_cols) {
 mdaplot.prepareYTickLabels <- function(yticklabels, yticks, excluded_rows) {
 
    if (is.null(yticklabels)) return(TRUE)
+   if (is.null(yticks)) stop("You need to specify both 'yticklabels' and 'yticks'")
 
    # if yticklabels were provided - remove excluded rows if any and check the length
    if (length(yticks) != length(yticklabels)) {
@@ -1451,7 +1457,7 @@ mdaplot.plotBars <- function(x, y, col = NULL, bwd = 0.8, border = NA, force.x.v
       col <- rep(col, length.out = length(y))
    }
 
-   rect(x - bwd / 2, 0, x + bwd / 2, y, col = col, border = border)
+   rect(x - bwd / 2, 0, x + bwd / 2, y[1, ], col = col, border = border)
 }
 
 
@@ -1472,9 +1478,11 @@ mdaplot.plotBars <- function(x, y, col = NULL, bwd = 0.8, border = NA, force.x.v
 #' cex factor for the marker
 #'
 mdaplot.plotErrorbars <- function(x, y, col = NULL, pch = 16, cex = 1) {
+
    e2 <- (max(x) - min(x)) / 50
    e1 <- (max(x) - min(x)) / (length(x) * 5)
    e <- min(e1, e2)
+   if (e == 0) x[1] * 0.05
 
    segments(x, y[2, ], x, y[3, ], col = col)
    segments(x - e, y[2, ], x + e, y[2, ], col = col)
@@ -1733,12 +1741,12 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
    if (show.axes) {
 
       # check and prepare xticklabels
-      xticks <- mdaplot.prepareXTicks(xticks, x_values, xlim, type)
       xticklabels <- mdaplot.prepareXTickLabels(xticklabels, xticks, excluded_cols)
+      xticks <- mdaplot.prepareXTicks(xticks, x_values, xlim, type)
 
       # check and prepare yticklabels
-      yticks <- mdaplot.prepareYTicks(yticks, y_values, ylim, type)
       yticklabels <- mdaplot.prepareYTickLabels(yticklabels, yticks, excluded_rows)
+      yticks <- mdaplot.prepareYTicks(yticks, y_values, ylim, type)
 
       main <- plot.data$name
       xlab <- attr(x_values, "name")
