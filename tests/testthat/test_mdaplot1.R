@@ -147,17 +147,9 @@ test_that("missing rows are handled correctly (only one is left)", {
 # Block 2. Test split plot data function     #
 ####################################################
 
-# TODO: add tests for manually provided xlab and ylab to splitPlotData
-
 context("mdaplot: split plot data")
 
 x <- matrix(1:9, ncol = 3)
-
-test_that("function return an error if type is wrong", {
-   expect_error(mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "p"), "x"))
-   expect_error(mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "p"), "y"))
-   expect_silent(mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "p"), "p"))
-})
 
 test_that("data is split correctly for scatter plots", {
    res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "p"), "p")
@@ -180,7 +172,7 @@ test_that("data is split correctly for line plots", {
 test_that("data is split correctly for bar plots", {
    res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "h"), "h")
    expect_equivalent(res$x_values, 1:3)
-   expect_equivalent(res$y_values, x[1, ])
+   expect_equivalent(res$y_values, x)
    expect_equal(attr(res$x_values, "name"), "Variables")
    expect_equal(attr(res$y_values, "name"), "")
    expect_equal(names(res$x_values), c("X1", "X2", "X3"))
@@ -189,23 +181,26 @@ test_that("data is split correctly for bar plots", {
 test_that("data is split correctly for errorbar plots", {
    res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, "e"), "e")
    expect_equivalent(res$x_values, 1:3)
-   expect_equivalent(res$y_values, x[1, ])
-   expect_equivalent(res$lower, x[2, ])
-   expect_equivalent(res$upper, x[3, ])
+   expect_equivalent(res$y_values, x)
    expect_equal(attr(res$x_values, "name"), "Variables")
-   expect_equal(attr(res$y_values, "name"), "O1")
+   expect_equal(attr(res$y_values, "name"), "")
    expect_equal(names(res$x_values), c("X1", "X2", "X3"))
 })
 
-test_that("data is split correctly for errorbar plots (two rows case)", {
-   res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x[1:2, ], "e"), "e")
-   expect_equivalent(res$x_values, 1:3)
-   expect_equivalent(res$y_values, x[1, ])
-   expect_equivalent(res$lower, x[2, ])
-   expect_equivalent(res$upper, x[2, ])
-   expect_equal(attr(res$x_values, "name"), "Variables")
-   expect_equal(attr(res$y_values, "name"), "O1")
-   expect_equal(names(res$x_values), c("X1", "X2", "X3"))
+test_that("xlab paramenetr is handled correctly", {
+   xlab <- "My x variable"
+   for (type in all_plots) {
+      res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, type), type, xlab = xlab)
+      expect_equal(attr(res$x_values, "name"), xlab)
+   }
+})
+
+test_that("ylab paramenetr is handled correctly", {
+   ylab <- "My y variable"
+   for (type in all_plots) {
+      res <- mdaplot.splitPlotData(mdaplot.prepareDataForPlot(x, type), type, ylab = ylab)
+      expect_equal(attr(res$y_values, "name"), ylab)
+   }
 })
 
 ###########################################
