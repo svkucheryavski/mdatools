@@ -169,9 +169,7 @@ mdaplot.getYAxesLimits <- function(plot.data, ylim, show.excluded = FALSE,
    if (show.colorbar == T) lim[2] <- lim[2] + diff(lim) * 0.075 * 3
 
    # add extra margins if labels must be shown
-   if (show.labels == T) {
-      lim <- lim + c(-d, d)
-   }
+   if (show.labels == T) lim <- lim + c(-d, d)
 
    return(lim)
 }
@@ -743,6 +741,15 @@ mdaplot.splitPlotData <- function(plot_data, type, xlab = NULL, ylab = NULL) {
       plot_data$y_values <- data[, 2, drop = F]
       attr(plot_data$y_values, "name") <- if (is.null(ylab)) colnames(data)[2] else ylab
       return(plot_data)
+   }
+
+   if (type == "e") {
+      # errorbar plor
+      data <- rbind(
+         data[1, ],
+         data[1, ] - data[2, ],
+         data[1, ] + if (nrow(data) > 2) data[3, ] else data[2, ]
+      )
    }
 
    # prepare x-axis values for other types of plots
@@ -1469,14 +1476,10 @@ mdaplot.plotErrorbars <- function(x, y, col = NULL, pch = 16, cex = 1) {
    e1 <- (max(x) - min(x)) / (length(x) * 5)
    e <- min(e1, e2)
 
-   lower <- y[2, ]
-   upper <- if (nrow(y) > 2) y[3, ] else y[2, ]
-   y <- y[1, ]
-
-   segments(x, y - lower, x, y + upper, col = col)
-   segments(x - e, y - lower, x + e, y - lower, col = col)
-   segments(x - e, y + upper, x + e, y + upper, col = col)
-   points(x, y, col = col, pch = pch, cex = cex)
+   segments(x, y[2, ], x, y[3, ], col = col)
+   segments(x - e, y[2, ], x + e, y[2, ], col = col)
+   segments(x - e, y[3, ], x + e, y[3, ], col = col)
+   points(x, y[1, ], col = col, pch = pch, cex = cex)
 }
 
 #' Show set of points on a plot
@@ -1695,7 +1698,7 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
       pch = 16, col = NULL, bg = par("bg"), bwd = 0.8, lty = 1, lwd = 1, cex = 1, border = NA,
       cgroup = NULL, xlim = NULL, ylim = NULL, colmap = "default", labels = NULL,
       main = NULL, xlab = NULL, ylab = NULL, show.labels = F,
-      show.colorbar = TRUE, show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
+      show.colorbar = !is.null(cgroup), show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
       grid.col = "lightgray", show.axes = TRUE, xticks = NULL, yticks = NULL,
       xticklabels = NULL, yticklabels = NULL,
       xlas = 0, ylas = 0, lab.col = "darkgray", lab.cex = 0.65,
@@ -1706,8 +1709,9 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
    if (is.null(plot.data)) {
       # get the data for plot
       plot.data <- mdaplot.createPlotData(
-         data, type, main, xlab, ylab, xlim, ylim, bwd, show.excluded, show.colorbar,
-         show.labels, show.lines, show.axes, labels
+         data = data, type = type, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+         bwd = bwd, show.excluded = show.excluded, show.colorbar = show.colorbar,
+         show.labels = show.labels, show.lines = show.lines, show.axes = show.axes, labels = labels
       )
    }
 
