@@ -71,8 +71,8 @@ mdaplot.getAxesLimits <- function(min, max, show.lines = NULL, scale = 0.075) {
 
    # correct limits if some lines that have to be shown are outside the data points cloud
    if (is.numeric(show.lines)) {
-      max <- max(xmax, show.lines, na.rm = TRUE)
-      min <- min(xmin, show.lines, na.rm = TRUE)
+      max <- max(max, show.lines, na.rm = TRUE)
+      min <- min(min, show.lines, na.rm = TRUE)
    }
 
    # calculate margins: dx and dy
@@ -146,8 +146,6 @@ mdaplot.getYAxesLimits <- function(plot.data, ylim, show.excluded = FALSE,
 
    values <- plot.data$y_values
    values_excluded <- plot.data$y_values_excluded
-   lower <- plot.data$lower
-   upper <- plot.data$upper
 
    if (show.excluded) {
       values <- rbind(values, values_excluded)
@@ -156,10 +154,6 @@ mdaplot.getYAxesLimits <- function(plot.data, ylim, show.excluded = FALSE,
    # find range for x values
    min <- min(values)
    max <- max(values)
-
-   # correct the range if lower and upper values are provided
-   min <- min(values, if (is.null(lower)) values else values - lower, na.rm = TRUE)
-   max <- max(values, if (is.null(upper)) values else values + upper, na.rm = TRUE)
 
    # find if show.lines is in use
    show_y_line <- is.numeric(show.lines) && length(show.lines) == 2 && !is.na(show.lines[2])
@@ -739,15 +733,15 @@ mdaplot.splitPlotData <- function(plot_data, type, xlab = NULL, ylab = NULL) {
    data <- plot_data$data
    data_attrs <- plot_data$attrs
    excluded_cols <- plot_data$excluded_cols
-   xaxis_name <- data_attrs$xaxis.name
-   yaxis_name <- data_attrs$yaxis.name
+   xaxis_name <- if (!is.null(xlab)) xlab else data_attrs$xaxis.name
+   yaxis_name <- if (!is.null(ylab)) ylab else data_attrs$yaxis.name
 
    if (type == "p") {
       # scatter plot
       plot_data$x_values <- data[, 1]
-      attr(plot_data$x_values, "name") <- colnames(data)[1]
+      attr(plot_data$x_values, "name") <- if (is.null(xlab)) colnames(data)[1] else xlab
       plot_data$y_values <- data[, 2, drop = F]
-      attr(plot_data$y_values, "name") <- colnames(data)[2]
+      attr(plot_data$y_values, "name") <- if (is.null(ylab)) colnames(data)[2] else ylab
       return(plot_data)
    }
 
@@ -758,37 +752,16 @@ mdaplot.splitPlotData <- function(plot_data, type, xlab = NULL, ylab = NULL) {
       if (length(excluded_cols) > 0) x_values[-excluded_cols]
    }
 
+   # assign names to x values
    if (is.null(names(x_values))) names(x_values) <- colnames(data)
 
-   # add name to x-values (and names)
-   if (!is.null(xlab)) xaxix_name <- xlab
-   if (is.null(xaxis_name)) xaxis_name <- "Variables"
-   attr(x_values, "name") <- xaxis_name
-
-   # add x values to the plot data
+   # add x values to the plot data and assign name to x-variable
    plot_data$x_values <- x_values
+   attr(plot_data$x_values, "name") <- if (is.null(xaxis_name)) "Variables" else xaxis_name
 
-   # for bar plot we show only the first row
-   if (!is.null(ylab)) yaxix_name <- ylab
-   switch(type,
-
-      "h" = {
-         plot_data$y_values <- data[1, , drop = F]
-         attr(plot_data$y_values, "name") <- if (is.null(yaxis_name)) "" else yaxis_name
-      },
-      "l" = ,
-      "b" = {
-         plot_data$y_values <- data
-         attr(plot_data$y_values, "name") <- if (is.null(yaxis_name)) "" else yaxis_name
-      },
-      "e" = {
-         plot_data$y_values <- data[1, , drop = F]
-         attr(plot_data$y_values, "name") <- if (is.null(ylab)) rownames(data)[1] else yaxis_name
-         plot_data$lower <- data[2, ]
-         plot_data$upper <- if (nrow(data) > 2) data[3, ] else plot_data$lower
-      },
-      stop("Something went wrong on plot data preparation step (check plot type).")
-   )
+   # by default take all data values as y and assign name to the x-variable
+   plot_data$y_values <- data
+   attr(plot_data$y_values, "name") <- if (is.null(yaxis_name)) "" else yaxis_name
 
    return(plot_data)
 }
@@ -976,16 +949,22 @@ mdaplot.prepareDataLabels <- function(plot_data, type, labels = NULL) {
 
    # if labels must be values use y-values for that
    if (labels == "values") {
-      labels <- y_values
-      labels_excluded <- y_values_excluded
 
       if (type %in% c("l", "b")) {
-         labels <- apply(labels, 2, max)
-         labels_excluded <- if (!is.null(labels_excluded)) apply(labels_excluded, 2, max)
+         plot_data$labels <- apply(y_values, 2, max)
+         plot_data$labels_excluded <- if (!is.null(y_values_excluded)) apply(y_values_excluded, 2, max)
+         return(plot_data)
       }
 
-      plot_data$labels <- labels
-      plot_data$labels_excluded <- labels_excluded
+      if (type %in% c("h", "e")) {
+         plot_data$labels <- y_values[1, ]
+         plot_data$labels_excluded <- y_values_excluded[1, ]
+         return(plot_data)
+      }
+
+      # otherwise prepare labels as for scatter plot
+      plot_data$labels <- y_values
+      plot_data$labels_excluded <- y_values_excluded
       return(plot_data)
    }
 
@@ -1476,12 +1455,8 @@ mdaplot.plotBars <- function(x, y, col = NULL, bwd = 0.8, border = NA, force.x.v
 #'
 #' @param x
 #' vector with x values
-#' @param lower
-#' vector with lower limits for the bars
-#' @param upper
-#' vector with upper limits for the bars
 #' @param y
-#' vector with y values (bid points)
+#' matrix with y values (matrix with three or two rows)
 #' @param col
 #' color for the error bars
 #' @param pch
@@ -1489,18 +1464,19 @@ mdaplot.plotBars <- function(x, y, col = NULL, bwd = 0.8, border = NA, force.x.v
 #' @param cex
 #' cex factor for the marker
 #'
-mdaplot.plotErrorbars <- function(x, lower, upper, y = NULL, col = NULL, pch = 16, cex = 1) {
+mdaplot.plotErrorbars <- function(x, y, col = NULL, pch = 16, cex = 1) {
    e2 <- (max(x) - min(x)) / 50
    e1 <- (max(x) - min(x)) / (length(x) * 5)
    e <- min(e1, e2)
 
+   lower <- y[2, ]
+   upper <- if (nrow(y) > 2) y[3, ] else y[2, ]
+   y <- y[1, ]
+
    segments(x, y - lower, x, y + upper, col = col)
    segments(x - e, y - lower, x + e, y - lower, col = col)
    segments(x - e, y + upper, x + e, y + upper, col = col)
-
-   if (!is.null(y)) {
-      points(x, y, col = col, pch = pch, cex = cex)
-   }
+   points(x, y, col = col, pch = pch, cex = cex)
 }
 
 #' Show set of points on a plot
@@ -1736,8 +1712,6 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
    }
 
    # get values from the plot data list to make code cleaner
-   plot.data$lower -> lower
-   plot.data$upper -> upper
    plot.data$x_values -> x_values
    plot.data$y_values -> y_values
    plot.data$x_values_excluded -> x_values_excluded
@@ -1806,7 +1780,7 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
                lty = lty, lwd = lwd, cex = cex, ...),
       "h" = mdaplot.plotBars(x_values, y_values, col = col, bwd = bwd, border = border,
                force.x.values = force.x.values, ...),
-      "e" = mdaplot.plotErrorbars(x_values, lower, upper, y = y_values, col = col, pch = pch,
+      "e" = mdaplot.plotErrorbars(x_values, y_values, col = col, pch = pch,
                cex = cex, ...)
    )
 
