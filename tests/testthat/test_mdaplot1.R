@@ -767,7 +767,7 @@ test_that("excluded values can be shown on all plots except errorbar", {
 })
 
 par(mfrow = c(2, 2))
-test_that("excluded values and labels (names) work find", {
+test_that("excluded values and labels (names) work fine", {
    expect_silent(tf(type = "p", show.labels = T, show.excluded = T))
    expect_silent(tf(type = "l", show.labels = T, show.excluded = T))
    expect_silent(tf(type = "b", show.labels = T, show.excluded = T))

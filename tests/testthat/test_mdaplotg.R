@@ -45,6 +45,7 @@ tfl <- function(groupby, ...) {
    mdaplotg(data, groupby = groupby, showl.labels = TRUE, ...)
 }
 
+par(mfrow = c(2, 2))
 test_that("parameter 'show.labels' is accepted", {
    expect_silent(tf(groupby, type = "p", show.labels = TRUE))
    expect_silent(tf(groupby, type = "l", show.labels = TRUE))
@@ -150,6 +151,8 @@ xticks_p <- c(150, 170, 190)
 xticklabels   <- colnames(people)[xticks]
 xticklabels_p <- c("Small", "Normal", "Large")
 
+par(mfrow = c(2, 2))
+
 test_that("'xticks' can be user defined", {
    expect_silent(tf(groupby, type = "l", xticks = xticks))
    expect_silent(tf(groupby, type = "b", xticks = xticks))
@@ -173,7 +176,7 @@ test_that("'xticklabels' can not be used without 'xticks' or if they have differ
 
 ## checking ticks and ticklabels for y-axis
 
-yticks   <- c(10000, 30000)
+yticks   <- c(100, 300)
 yticks_p <- c(50, 70, 90)
 yticklabels   <- c("Mini", "Mega")
 yticklabels_p <- c("Small", "Normal", "Large")
@@ -289,7 +292,7 @@ test_that("hidden data can be used with labels as indices", {
 })
 
 
-## handling hidden columns
+## handling hidden rows
 
 data(people)
 data <- people[, -6]

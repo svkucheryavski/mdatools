@@ -172,9 +172,6 @@ g1 <- factor(people[, "Sex"], labels = c("Male", "Female"))
 g2 <- factor(people[, "Region"], labels = c("Scan", "Med"))
 g <- interaction(g1, g2)
 
-p <- mdaplot(people, type = "p", cgroup = g1)
-mdaplot.plotConvexHull(p)
-
 tf <- function(type, cgroup, ...) {
    p <- mdaplot(people, type = type, cgroup = cgroup)
    mdaplot.plotConvexHull(p, ...)
