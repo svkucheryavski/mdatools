@@ -629,7 +629,7 @@ test_that("'yticks' and 'yticklabels' work correctly together", {
 })
 
 test_that("'ylas' parameter is handling correctly", {
-   expect_silent(tf(type = "p", ylas = 2, yticks = c(50, 70, 100), yticklabels = c("L", "M", "H")))
+   expect_silent(tf(type = "p", ylas = 2, yticks = c(50, 70, 90), yticklabels = c("L", "M", "H")))
    expect_silent(tf(type = "l", ylas = 2, yticks = yticks, yticklabels = yticklabels))
    expect_silent(tf(type = "b", ylas = 2, yticks = yticks, yticklabels = yticklabels))
    expect_silent(tf(type = "h", ylas = 2, yticks = yticks, yticklabels = yticklabels))
@@ -757,7 +757,7 @@ test_that("hidden excluded values and labels (indices) work fine", {
    expect_silent(tf(type = "h", show.labels = T, labels = "values"))
 })
 
-# TODO: Bar plot looks very strange here
+par(mfrow = c(2, 2))
 test_that("excluded values can be shown on all plots except errorbar", {
    expect_silent(tf(type = "p", show.excluded = T))
    expect_silent(tf(type = "l", show.excluded = T))

@@ -106,7 +106,7 @@ mdaplot.getAxesLimits <- function(min, max, show.lines = NULL, scale = 0.075) {
 #' Returns a vector with two limits.
 #'
 mdaplot.getXAxesLimits <- function(plot.data, xlim, show.excluded = FALSE,
-   show.lines = FALSE, bwd = NULL, scale = 0.075) {
+   show.lines = FALSE, bwd = NULL, scale = 0.075, type = NULL) {
 
    # if user provided limits for x - use them strictly
    if (!is.null(xlim)) return(xlim)
@@ -114,7 +114,7 @@ mdaplot.getXAxesLimits <- function(plot.data, xlim, show.excluded = FALSE,
    values <- plot.data$x_values
    values_excluded <- plot.data$x_values_excluded
 
-   if (show.excluded) {
+   if (show.excluded && type == "p") {
       values <- c(values, values_excluded)
    }
 
@@ -701,7 +701,8 @@ mdaplot.createPlotData <- function(data, type, main, xlab, ylab, xlim, ylim, bwd
       xlim,
       show.lines = show.lines,
       show.excluded = show.excluded,
-      bwd = if (type == "h") bwd else NULL
+      bwd = if (type == "h") bwd else NULL,
+      type = type
    )
 
    plot_data$ylim <- mdaplot.getYAxesLimits(
@@ -1442,7 +1443,6 @@ mdaplot.plotPointsShape <- function(plot_data, lwd, lty, conf.level,
 #' vector with corrected x-values for a bar plot (do not specify this manually).
 #'
 mdaplot.plotBars <- function(x, y, col = NULL, bwd = 0.8, border = NA, force.x.values = NA) {
-
    # correct x_values if they were forced by bwd
    if (is.numeric(force.x.values)) {
       x <- x - bwd / 2 + (force.x.values[1] - 0.5) * bwd / force.x.values[2]
