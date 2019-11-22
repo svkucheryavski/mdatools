@@ -476,7 +476,7 @@ mdaplot.showLabels <- function(x_values, y_values, labels, pos = 3,
    }
 
    if (type %in% c("h", "e")) {
-      y_values = y_values[1, ]
+      y_values <- y_values[1, ]
    }
 
    if (type %in% c("l", "b")) {
@@ -820,20 +820,9 @@ mdaplot.prepareDataForPlot <- function(data, type) {
    # save data arguments
    data_attrs <- attributes(data)
 
-   # make sure the data set is provided
-   if (length(data) < 1) {
-      stop("The provided dataset is empty!")
-   }
-
    # if it is vector without dimension - make a matrix
-
    if (is.null(dim(data))) {
       data <- if (type == "p") as.matrix(data) else t(as.matrix(data))
-   }
-
-   # convert data frame to a matrix if needed
-   if (is.data.frame(data)) {
-      data <- mda.df2mat(data)
    }
 
    # at least two rows (y values and size of error bars) are needed for errorbar plot
@@ -843,6 +832,11 @@ mdaplot.prepareDataForPlot <- function(data, type) {
 
    if (type == "e" && length(data_attrs$exclrows) > 0) {
       stop("Errobar plot can not be made for data with excluded rows.")
+   }
+
+   # convert data frame to a matrix if needed
+   if (is.data.frame(data)) {
+      data <- mda.df2mat(data)
    }
 
    # if row names are missing - add them
@@ -856,7 +850,6 @@ mdaplot.prepareDataForPlot <- function(data, type) {
    }
 
    # handle excluded columns if any
-
    excluded_cols <- data_attrs$exclcols
    col_indices <- seq_len(ncol(data))
    if (length(excluded_cols) > 0) {
@@ -870,10 +863,14 @@ mdaplot.prepareDataForPlot <- function(data, type) {
       stop("No columns left when excluded hidden values.")
    }
 
+   # define yaxis values
+   if (is.null(data_attrs$yaxis.values)) {
+      data_attrs$yaxis.values <- seq_len(nrow(data))
+   }
+
    # add columns with row numbers or yaxis values to the data if necessary
    if (type == "p" && ncol(data) == 1) {
       rownames <- rownames(data)
-      if (is.null(data_attrs$yaxis.values)) data_attrs$yaxis.values <- seq_len(nrow(data))
       new_column <- data_attrs$yaxis.values
       data <- mda.cbind(new_column, data)
       colnames(data)[1] <- if (is.null(data_attrs$yaxis.name)) "Objects" else data_attrs$yaxis.name
@@ -891,11 +888,6 @@ mdaplot.prepareDataForPlot <- function(data, type) {
       row_indices <- row_indices[-excluded_rows]
    }
 
-   # check that number of rows is still sufficient
-   if (is.null(nrow(data))) {
-      stop("No rows left when excluded hidden values.")
-   }
-
    return(
       list(
          data = data,
@@ -907,6 +899,57 @@ mdaplot.prepareDataForPlot <- function(data, type) {
          attrs = data_attrs
       )
    )
+}
+
+
+#' Create data labels as values
+#'
+#' @param plot_data
+#' list with data and parameters prepared for plot by `mdaplot.prepareDataForPlot()` function
+#' @param type
+#' type of plot
+#'
+mdaplot.getLabelsAsValues <- function(plot_data, type) {
+   y_values <- plot_data$y_values
+   y_values_excluded <- plot_data$y_values_excluded
+
+   if (type %in% c("l", "b")) {
+      plot_data$labels <- apply(y_values, 2, max)
+      plot_data$labels_excluded <- if (!is.null(y_values_excluded)) apply(y_values_excluded, 2, max)
+      return(plot_data)
+   }
+
+   if (type %in% c("h", "e")) {
+      plot_data$labels <- y_values[1, ]
+      plot_data$labels_excluded <- y_values_excluded[1, ]
+      return(plot_data)
+   }
+
+   # otherwise prepare labels as for scatter plot
+   plot_data$labels <- y_values
+   plot_data$labels_excluded <- y_values_excluded
+   return(plot_data)
+}
+
+#' Create data labels as indices
+#'
+#' @param plot_data
+#' list with data and parameters prepared for plot by `mdaplot.prepareDataForPlot()` function
+#' @param type
+#' type of plot
+#'
+mdaplot.getLabelsAsIndices <- function(plot_data, type) {
+   excluded_rows <- plot_data$excluded_rows
+
+   if (type == "p") {
+      plot_data$labels <- plot_data$row_indices
+      plot_data$labels_excluded <- excluded_rows
+      return(plot_data)
+   }
+
+   plot_data$labels <- plot_data$col_indices
+   plot_data$labels_excluded <- NULL
+   return(plot_data)
 }
 
 #' Create a vector with labels for plot data series
@@ -924,20 +967,16 @@ mdaplot.prepareDataForPlot <- function(data, type) {
 #'
 #' @export
 mdaplot.prepareDataLabels <- function(plot_data, type, labels = NULL) {
-
-   # shortcuts for some parameters
-   x_values <- plot_data$x_values
    y_values <- plot_data$y_values
-   x_values_excluded <- plot_data$x_values_excluded
-   y_values_excluded <- plot_data$y_values_excluded
-   excluded_rows <- plot_data$excluded_rows
-   excluded_cols <- plot_data$excluded_cols
+   x_values <- plot_data$x_values
 
    # if labels are not specified - use names
    if (is.null(labels)) labels <- "names"
 
    # if user provided labels - use them
    if (length(labels) > 1) {
+      excluded_cols <- plot_data$excluded_cols
+      excluded_rows <- plot_data$excluded_rows
 
       # get values and excluded values (rows or cols depending on plot type)
       n_values <- if (type == "p") nrow(y_values) else length(x_values)
@@ -961,42 +1000,18 @@ mdaplot.prepareDataLabels <- function(plot_data, type, labels = NULL) {
 
    # if labels must be values use y-values for that
    if (labels == "values") {
-
-      if (type %in% c("l", "b")) {
-         plot_data$labels <- apply(y_values, 2, max)
-         plot_data$labels_excluded <- if (!is.null(y_values_excluded)) apply(y_values_excluded, 2, max)
-         return(plot_data)
-      }
-
-      if (type %in% c("h", "e")) {
-         plot_data$labels <- y_values[1, ]
-         plot_data$labels_excluded <- y_values_excluded[1, ]
-         return(plot_data)
-      }
-
-      # otherwise prepare labels as for scatter plot
-      plot_data$labels <- y_values
-      plot_data$labels_excluded <- y_values_excluded
-      return(plot_data)
+      return(mdaplot.getLabelsAsValues(plot_data, type))
    }
 
    # if labels must be indices use row or column indices
    if (labels == "indices") {
-
-      if (type == "p") {
-         plot_data$labels <- plot_data$row_indices
-         plot_data$labels_excluded <- excluded_rows
-         return(plot_data)
-      }
-
-      plot_data$labels <- plot_data$col_indices
-      plot_data$labels_excluded <- NULL
-      return(plot_data)
+      return(mdaplot.getLabelsAsIndices(plot_data, type))
    }
 
    # if nothing above works - use names as labels
-   plot_data$labels_excluded <- if (type == "p") names(x_values_excluded) else NULL
+   x_values_excluded <- plot_data$x_values_excluded
    plot_data$labels <- names(x_values)
+   plot_data$labels_excluded <- if (type == "p") names(x_values_excluded) else NULL
    return(plot_data)
 }
 
@@ -1729,7 +1744,6 @@ mdaplot <- function(data = NULL, plot.data = NULL, type = "p",
    plot.data$y_values_excluded -> y_values_excluded
    plot.data$excluded_rows -> excluded_rows
    plot.data$excluded_cols -> excluded_cols
-   plot.data$attrs -> data_attrs
    plot.data$density -> density
    plot.data$labels -> labels
    plot.data$labels_excluded -> labels_excluded
