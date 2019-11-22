@@ -1384,8 +1384,7 @@ mdaplot.plotConvexHull <- function(plot_data, lwd = 1, lty = 1, opacity = 0) {
 #' @importFrom graphics polygon
 #'
 #' @export
-mdaplot.plotPointsShape <- function(plot_data, lwd, lty, conf.level,
-   opacity, shape_function, ...) {
+mdaplot.plotPointsShape <- function(plot_data, lwd, lty, opacity, shape_function, ...) {
 
    x <- plot_data$x_values
    y <- plot_data$y_values
