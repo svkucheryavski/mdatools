@@ -1,4 +1,5 @@
 pdf(file = "~/Desktop/test_mdaplots.pdf")
-devtools::test()
+devtools::test_file("tests/testthat/test-getcolors.R")
+devtools::test_file("tests/testthat/test-plotseries.R")
 dev.off()
 options(device = "quartz")

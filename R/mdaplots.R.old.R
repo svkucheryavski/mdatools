@@ -1097,7 +1097,7 @@ mdaplot.prepareYTickLabels <- function(yticklabels, yticks, excluded_rows) {
    return(yticklabels)
 }
 
-mdaplot.prepareDataForGroupPlots <- function(data, type, groupby) {
+mdaplot.prepareDataForGPlots <- function(data, type, groupby) {
 
    if (is.list(data) && !is.data.frame(data)) return(data)
 
@@ -1952,7 +1952,7 @@ mdaplotg <- function(
 
    # split data into groups
    name <- attr(data, "name", exact = TRUE)
-   data <- mdaplot.prepareDataForGroupPlots(data, type, groupby)
+   data <- mdaplot.prepareDataForGPlots(data, type, groupby)
    ngroups <- length(data)
 
    # check if plot.new() should be called first
