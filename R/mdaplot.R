@@ -294,7 +294,8 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
    return(colors)
 }
 
-' Calculate limits for x-axis.
+
+#' Calculate limits for x-axis.
 #'
 #' @description
 #' Calculates limits for x-axis depending on data values that have to be plotted,
@@ -312,11 +313,10 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
 #' @return
 #' Returns a vector with two limits.
 #'
-mdaplot.getXAxisLim <- function(ps, xlim, show.lines = FALSE, bwd = NULL) {
+mdaplot.getXAxisLim <- function(ps, xlim, show.lines = FALSE, show.excluded = FALSE, bwd = NULL) {
 
    # if user provided limits for x - use them
    if (!is.null(xlim)) return(xlim)
-
 
    # x axis limits in case of bar plot
    if (!is.null(bwd) && bwd > 0) {
@@ -325,22 +325,38 @@ mdaplot.getXAxisLim <- function(ps, xlim, show.lines = FALSE, bwd = NULL) {
       return(c(min(values) - bwd / 2, max(values) + bwd / 2))
    }
 
-   # find if show.lines is in use
+   # if excluded values must be shown - correct internal limits
    xlim <- ps$xlim
+   if (show.excluded) {
+      xlim_excluded <- range(ps$x_values_excluded)
+      xlim <- c(min(xlim[1], xlim_excluded[1]), max(xlim[2], xlim_excluded[2]))
+   }
+
+   # find if show.lines is in use
    if (length(show.lines) == 2 && is.numeric(show.lines[1])) {
       xlim <- c(min(xlim[1], show.lines[1]), max(xlim[2], show.lines[1]))
    }
 
+   # add extra margins
    return(xlim)
 }
 
-mdaplot.getYAxisLim <- function(ps, ylim, show.lines = FALSE, show.colorbar = FALSE) {
+mdaplot.getYAxisLim <- function(ps, ylim, show.excluded = FALSE, show.lines = FALSE,
+   show.colorbar = FALSE) {
 
    # if user provided limits for y - use them
    if (!is.null(ylim)) return(ylim)
 
-   # find if show.lines is in use
+   # get computed data limits
    ylim <- ps$ylim
+
+   # if excluded values must be shown - correct internal limits
+   if (show.excluded) {
+      ylim_excluded <- range(ps$y_values_excluded)
+      ylim <- c(min(ylim[1], ylim_excluded[1]), max(ylim[2], ylim_excluded[2]))
+   }
+
+   # find if show.lines is in use
    if (length(show.lines) == 2 && is.numeric(show.lines[2])) {
       ylim <- c(min(ylim[1], show.lines[2]), max(ylim[2], show.lines[2]))
    }
@@ -515,12 +531,6 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #' a color for markers or lines (same as \code{plot} parameter).
 #' @param bg
 #' background color for scatter plots wich `pch=21:25`.
-#' @param lty
-#' the line type (same as \code{plot} parameter).
-#' @param lwd
-#' the line width (thickness) (same as \code{plot} parameter).
-#' @param cex
-#' the cex factor for markers (same as \code{plot} parameter).
 #' @param bwd
 #' a width of a bar as a percent of a maximum space available for each bar.
 #' @param border
@@ -671,10 +681,11 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
 
    # make plot for the data
    switch(type,
-      "p" = plotScatter(ps, pch.colinv = pch.colinv, pch = pch, bg = bg, col.excluded = col.excluded, ...),
+      "p" = plotScatter(ps, pch.colinv = pch.colinv, pch = pch, bg = bg,
+         col.excluded = col.excluded, ...),
       "d" = plotDensity(ps, nbins = nbins, colmap = colmap),
-      "l" = ,
-      "b" = plotLines(ps, type = "b", pch = pch, col.excluded = col.excluded, ...),
+      "l" = plotLines(ps, pch = pch, col.excluded = col.excluded, ...),
+      "b" = plotLines(ps, pch = pch, col.excluded = col.excluded, ...),
       "h" = plotBars(ps, bwd = bwd, border = border, force.x.values = force.x.values, ...),
       "e" = plotErrorbars(os, pch = pch, ...)
    )
