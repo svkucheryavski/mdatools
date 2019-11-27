@@ -86,7 +86,6 @@ test_that("several plots can be combined together using 'show.axes' parameter", 
 })
 par(mfrow = c(2, 2))
 
-
 ######################################
 # Block 2. Handling data attributes  #
 ######################################
@@ -112,7 +111,6 @@ test_that("handle 'name' attribute correctly (errorbar)", {
    expect_silent(mdaplot(stat1, type = "e"))
    expect_silent(mdaplot(stat2, type = "e"))
 })
-
 
 attr(spectra, "xaxis.values") <- simdata$wavelength
 attr(spectra, "xaxis.name")   <- "Wavelength, nm"
@@ -158,6 +156,7 @@ test_that("manual xticks work correctly", {
    expect_silent(tf(type = "b", xticks = xticks))
    expect_silent(tf(type = "h", xticks = xticks))
 })
+
 
 test_that("'xticklabels' can not be specified without 'xticks'", {
    expect_error(tf(type = "l", xticklabels = xticklabels))
@@ -214,12 +213,11 @@ test_that("'ylas' parameter is handling correctly", {
 })
 
 
-
 #####################################
 # Block 4. Color groups and labels  #
 #####################################
 
-context("mdaplot: color groups and labels")
+context("mdaplot: using labels")
 tf <- function(...) mdaplot(people, ...)
 
 test_that("row names are used as labels by default", {
@@ -230,10 +228,10 @@ test_that("row names are used as labels by default", {
 })
 
 test_that("in case of vector, numbers or names are used as labels", {
-   expect_silent(mdaplot(people[1, ], type = "p", show.labels = T))
-   expect_silent(mdaplot(people[1, ], type = "l", show.labels = T))
-   expect_silent(mdaplot(people[1, ], type = "b", show.labels = T))
-   expect_silent(mdaplot(people[1, ], type = "h", show.labels = T))
+   expect_silent(mdaplot(people[, 1, drop = F], type = "p", show.labels = T))
+   expect_silent(mdaplot(people[1, ,drop = F], type = "l", show.labels = T))
+   expect_silent(mdaplot(people[1, ,drop = F], type = "b", show.labels = T))
+   expect_silent(mdaplot(people[1, ,drop = F], type = "h", show.labels = T))
 })
 
 test_that("user can specify the labels manually", {
@@ -265,6 +263,8 @@ test_that("user can specify the labels as 'names'", {
 })
 
 
+context("mdaplot: using color grouping")
+
 test_that("user can use color grouping by numeric values", {
    expect_silent(tf(type = "p", cgroup = people[, 1]))
    expect_silent(tf(type = "l", cgroup = people[, 6]))
@@ -280,7 +280,8 @@ test_that("user can use color grouping by factors", {
    expect_silent(tf(type = "h", cgroup = factor(rep(c(1, 2), 6), labels = c("A", "B"))))
 })
 
-test_that("user if both color grouping and color are specified first wins", {
+
+test_that("user if both color grouping and color are specified color wins", {
    expect_silent(tf(type = "p", col = "red", cgroup = people[, 1]))
    expect_silent(tf(type = "l", col = "red", cgroup = people[, 6]))
    expect_silent(tf(type = "b", col = "red", cgroup = people[, 3]))
@@ -301,7 +302,6 @@ test_that("different color maps can be used", {
    expect_silent(tf(type = "h", cgroup = people[1, ], colmap = c("green", "red")))
 })
 
-
 #######################################
 # Block 5. Excluding rows and columns  #
 #######################################
@@ -320,6 +320,7 @@ test_that("excluded values are hidden by default", {
    expect_silent(tf(type = "b", show.labels = T))
    expect_silent(tf(type = "h", show.labels = T))
 })
+
 
 test_that("hidden excluded values and labels (indices) work fine", {
    expect_silent(tf(type = "p", show.labels = T, labels = "indices"))
@@ -365,6 +366,7 @@ test_that("excluded values and labels (indices) work fine", {
    expect_silent(tf(type = "b", show.labels = T, labels = "indices", show.excluded = T))
 })
 
+
 ## only columns
 context("mdaplot: can handle excluded columns")
 
@@ -372,12 +374,14 @@ attr(people, "exclrows") <- NULL
 attr(people, "exclcols") <- NULL
 people <- mda.exclcols(people, c("Height", "Beer"))
 
+par(mfrow = c(2, 2))
 test_that("excluded columns are always hidden", {
    expect_silent(tf(type = "p", show.labels = T))
    expect_silent(tf(type = "l", show.labels = T))
    expect_silent(tf(type = "b", show.labels = T))
    expect_silent(tf(type = "h", show.labels = T))
 })
+
 
 test_that("excluded columns and labels (indices) work fine", {
    expect_silent(tf(type = "p", show.labels = T, labels = "indices"))
@@ -394,12 +398,13 @@ test_that("excluded columns and labels (indices) work fine", {
 })
 
 test_that("show excluded does not change anything", {
-   tf(type = "p", show.excluded = T)
    expect_silent(tf(type = "p", show.excluded = T))
    expect_silent(tf(type = "l", show.excluded = T))
    expect_silent(tf(type = "b", show.excluded = T))
    expect_silent(tf(type = "h", show.excluded = T))
 })
+
+
 
 ## both rows and columns
 context("mdaplot: can handle both excluded rows and columns")
@@ -431,7 +436,6 @@ test_that("hidden excluded values and labels (indices) work fine", {
 })
 
 test_that("excluded values can be shown on all plots except bar and errorbar", {
-   tf(type = "p", show.excluded = T)
    expect_silent(tf(type = "p", show.excluded = T))
    expect_silent(tf(type = "l", show.excluded = T))
    expect_silent(tf(type = "b", show.excluded = T))
@@ -439,7 +443,6 @@ test_that("excluded values can be shown on all plots except bar and errorbar", {
    expect_error(tf(type = "e", show.excluded = T))
 })
 
-par(mfrow = c(2, 2))
 test_that("excluded values and labels (names) work find", {
    expect_silent(tf(type = "p", show.labels = T, show.excluded = T))
    expect_silent(tf(type = "l", show.labels = T, show.excluded = T))

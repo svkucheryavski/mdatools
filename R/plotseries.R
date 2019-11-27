@@ -46,6 +46,7 @@ plotseries <- function(data, type, cgroup = NULL, col = NULL, opacity = 1,
 
    ps <- list()
    ps$type <- type
+   ps$name <- attr(data, "name", exact = TRUE)
    ps$call <- match.call()
    class(ps) <- "plotseries"
 
@@ -92,7 +93,7 @@ preparePlotData <- function(data) {
 
    # if it is vector without dimension - make a matrix
    if (is.null(dim(data))) {
-      data <- as.matrix(data)
+      data <- t(as.matrix(data))
    }
 
    # convert data frame to a matrix if needed
@@ -149,7 +150,7 @@ preparePlotData <- function(data) {
    attr(data, "xaxis.values") <- attrs$xaxis.values
    attr(data, "yaxis.values") <- attrs$yaxis.values
    attr(data, "xaxis.name") <- attrs$xaxis.name
-   attr(data, "yaxis.name") <- attrs$xaxis.name
+   attr(data, "yaxis.name") <- attrs$yaxis.name
    attr(data, "name") <- attrs$name
 
    # add necessary attributes to excluded data
@@ -178,9 +179,10 @@ splitPlotData <- function(data, type) {
    # shortcuts to some of parameters
    attrs <- attributes(data)
 
+
    if (type == "p" && ncol(data) == 1) {
       # if data has only one column add y values in front
-      data <- cbind(attrs$y.values, data)
+      data <- cbind(attrs$yaxis.values, data)
    }
 
    if (type %in%  c("p", "d")) {
@@ -248,7 +250,11 @@ getPlotColors <- function(ps, col, opacity, cgroup, colmap) {
 
    # if user specified color - use it
    if (!is.null(col)) {
-      return(list(col = adjustcolor(col, opacity), cgroup = NULL))
+      return(list(
+         col = adjustcolor(col, opacity),
+         colmap = colmap,
+         cgroup = NULL
+      ))
    }
 
    #  get proper colors
@@ -256,12 +262,14 @@ getPlotColors <- function(ps, col, opacity, cgroup, colmap) {
       # show color groups according to cdata values
       return(list(
          col = mdaplot.getColors(cgroup = cgroup, colmap = colmap, opacity = opacity),
+         colmap = colmap,
          cgroup = cgroup
       ))
    }
 
    return(list(
       col = mdaplot.getColors(1, colmap = colmap, opacity = opacity),
+      colmap = colmap,
       cgroup = NULL
     ))
 }
@@ -312,7 +320,7 @@ getConfidenceEllipse <- function(points, conf.level = 0.95, n = 100) {
 #'
 #' @importFrom grDevices chull
 #'
-mdaplot.getConvexHull <- function(points) {
+getConvexHull <- function(points) {
    ch_ind <- chull(points)
    ch_ind <- c(ch_ind, ch_ind[1])
    return(points[ch_ind, ])
@@ -442,41 +450,25 @@ getDataLabels <- function(ps, labels = NULL) {
 #' @param col
 #' color of the labels text
 #'
-showLabels <- function(ps, pos = 3, cex = 0.65, col = "darkgray") {
+showLabels <- function(ps, show.excluded = FALSE, pos = 3, cex = 0.65, col = "darkgray") {
 
-   if (length(ps$labels) == 0) {
-      stop("No labels available.")
+   f <- function(x, y, labels, type) {
+      if (length(labels) == 0) stop("No labels available.")
+      if (ps$type %in% c("h", "e")) y <- y[1, ]
+      if (ps$type %in% c("l", "b")) y <- apply(y, 2, max)
+      x <- as.numeric(x)
+      y <- as.numeric(y)
+      labels <- mdaplot.formatValues(labels)
+
+      if (ps$type == "h") pos = ifelse(y < 0, 1, 3)
+      text(x, y, labels, cex = cex, pos = pos, col = col)
    }
 
-   x_values <- ps$x_values
-   y_values <- ps$y_values
+   f(ps$x_values, ps$y_values, ps$labels, ps$type)
 
-   if (type %in% c("h", "e")) {
-      y_values <- y_values[1, ]
+   if (show.excluded && !is.null(ps$labels_excluded)) {
+      f(ps$x_values_excluded, ps$y_values_excluded, ps$labels_excluded, ps$type)
    }
-
-   if (type %in% c("l", "b")) {
-      y_values <- apply(y_values, 2, max)
-   }
-
-   # prepare labels
-   x_values <- as.numeric(x_values)
-   y_values <- as.numeric(y_values)
-   labels <- mdaplot.formatValues(labels)
-
-   # if x or y values contains NA do nothing
-   if (any(is.nan(x_values)) || any(is.nan(y_values))) {
-      return()
-   }
-
-   if (!is.null(type) && type == "h") {
-      # show labels properly for bars with positive and negative values
-      text(x_values, y_values, labels, cex = cex, pos = ifelse(y_values < 0, 1, 3), col = col)
-      return()
-   }
-
-   # default way to show the labels
-   text(x_values, y_values, labels, cex = cex, pos = pos, col = col)
 }
 
 #' Show plot series as set of points
@@ -513,7 +505,7 @@ plotScatter <- function(ps, pch = 16, col = ps$col, bg = "white", col.excluded =
    points(ps$x_values, ps$y_values, col = col, bg = bg, pch = pch, ...)
 
    # show excluded points if any
-   if (show.excluded) {
+   if (show.excluded && !is.null(ps$y_values_excluded)) {
       points(ps$x_values_excluded, ps$y_values_excluded, col = col.excluded, pch = pch, ...)
    }
 }
@@ -532,15 +524,16 @@ plotScatter <- function(ps, pch = 16, col = ps$col, bg = "white", col.excluded =
 #' other arguments for function `lines()`.
 #'
 #' @export
-plotLines <- function(ps, col = ps$col, col.excluded = "darkgray", ...) {
+plotLines <- function(ps, col = ps$col, lty = 1,
+   col.excluded = "darkgray", show.excluded = FALSE, ...) {
 
    # show main set of lines
-   matlines(ps$x_values, t(ps$y_values), type = ps$type, col = col, ...)
+   matlines(ps$x_values, t(ps$y_values), type = ps$type, col = col, lty = lty, ...)
 
    # show excluded rows
    if (show.excluded && !is.null(ps$y_values_excluded)) {
       matlines(ps$x_values_excluded, t(ps$y_values_excluded), type = ps$type,
-         col = col.excluded, ...)
+         lty = lty, col = col.excluded, ...)
    }
 }
 
@@ -566,7 +559,7 @@ plotErrorbars <- function(ps, col = ps$col, pch = 16, ...) {
    x <- ps$x_values
    y <- ps$y_values
 
-   dx <- ps$xlim / max(50, (length(x) * 3))
+   dx <- diff(ps$xlim) / max(50, (length(x) * 3))
 
    segments(x, y[2, ], x, y[3, ], col = ps$col)
    segments(x - dx, y[2, ], x + dx, y[2, ], col = ps$col)
@@ -737,7 +730,7 @@ plotConfidenceEllipse <- function(p, conf.level = 0.95, lwd = 1, lty = 1, opacit
       lwd = lwd,
       lty = lty,
       opacity = opacity,
-      shape_function = mdaplot.getConfidenceEllipse,
+      shape_function = getConfidenceEllipse,
       conf.level = conf.level
    )
 }
@@ -777,7 +770,7 @@ plotConvexHull <- function(p, lwd = 1, lty = 1, opacity = 0) {
       lwd = lwd,
       lty = lty,
       opacity = opacity,
-      shape_function = mdaplot.getConvexHull
+      shape_function = getConvexHull
    )
 }
 

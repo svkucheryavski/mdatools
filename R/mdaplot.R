@@ -167,7 +167,7 @@ mdaplot.showColorbar <- function(cgroup, colmap = "default", lab.col = "darkgray
       labels[, 1] <- labels[, 1] + w / 2
 
    # show labels for colorbar regions
-   mdaplot.showLabels(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col,
+   text(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col,
       cex = lab.cex)
 }
 
@@ -320,14 +320,18 @@ mdaplot.getXAxisLim <- function(ps, xlim, show.lines = FALSE, show.excluded = FA
 
    # x axis limits in case of bar plot
    if (!is.null(bwd) && bwd > 0) {
-      values <- length(ps$x_values)
+      values <- ps$x_values
       bwd <- if (length(values) == 1) 2 * bwd else bwd * min(diff(values))
       return(c(min(values) - bwd / 2, max(values) + bwd / 2))
    }
 
    # if excluded values must be shown - correct internal limits
    xlim <- ps$xlim
-   if (show.excluded) {
+
+   # correct if limits are equal
+   if (diff(xlim) == 0) xlim <- xlim * c(0.95, 1.05)
+
+   if (show.excluded && !is.null(ps$x_values_excluded)) {
       xlim_excluded <- range(ps$x_values_excluded)
       xlim <- c(min(xlim[1], xlim_excluded[1]), max(xlim[2], xlim_excluded[2]))
    }
@@ -337,12 +341,15 @@ mdaplot.getXAxisLim <- function(ps, xlim, show.lines = FALSE, show.excluded = FA
       xlim <- c(min(xlim[1], show.lines[1]), max(xlim[2], show.lines[1]))
    }
 
-   # add extra margins
+   # add extra margins (3.5%)
+   m <- diff(xlim) * 0.035
+   xlim <- xlim + c(-m, m)
+
    return(xlim)
 }
 
 mdaplot.getYAxisLim <- function(ps, ylim, show.excluded = FALSE, show.lines = FALSE,
-   show.colorbar = FALSE) {
+   show.labels = FALSE, show.colorbar = FALSE) {
 
    # if user provided limits for y - use them
    if (!is.null(ylim)) return(ylim)
@@ -350,10 +357,23 @@ mdaplot.getYAxisLim <- function(ps, ylim, show.excluded = FALSE, show.lines = FA
    # get computed data limits
    ylim <- ps$ylim
 
+   # correct if limits are equal
+   if (diff(ylim) == 0) ylim <- ylim * c(0.95, 1.05)
+
    # if excluded values must be shown - correct internal limits
-   if (show.excluded) {
+   if (show.excluded && !is.null(ps$y_values_excluded)) {
       ylim_excluded <- range(ps$y_values_excluded)
       ylim <- c(min(ylim[1], ylim_excluded[1]), max(ylim[2], ylim_excluded[2]))
+   }
+
+   # if labels must be shown increase the upper limit
+   if (show.labels) {
+      ylim[2] <- ylim[2] + diff(ylim) * 0.05
+   }
+
+   # if it is a bar plot and some bars look "down" correct the bottom limit as well
+   if (show.labels && ps$type == "h" && any(ps$y_values < 0)) {
+      ylim[1] <- ylim[1] - diff(ylim) * 0.05
    }
 
    # find if show.lines is in use
@@ -363,9 +383,12 @@ mdaplot.getYAxisLim <- function(ps, ylim, show.excluded = FALSE, show.lines = FA
 
    # add an extra margin to y limit if colorbar must be shown
    if (show.colorbar == T) {
-      ylim[2] <- ylim[2] + diff(ylim) * 0.015 * 3
+      ylim[2] <- ylim[2] + diff(ylim) * 0.15
    }
 
+   # add extra margins (3.5%)
+   m <- diff(ylim) * 0.035
+   ylim <- ylim + c(-m, m)
    return(ylim)
 }
 
@@ -636,9 +659,9 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #'
 #' @export
 mdaplot <- function(data = NULL, ps = NULL, type = "p",
-      pch = 16, col = NULL, bg = par("bg"), bwd = 0.8, border = NA,
+      pch = 16, col = NULL, bg = par("bg"), bwd = 0.8, border = NA, lty = 1,
       cgroup = NULL, xlim = NULL, ylim = NULL, colmap = "default", labels = NULL,
-      main = NULL, xlab = NULL, ylab = NULL, show.labels = F,
+      main = NULL, xlab = NULL, ylab = NULL, show.labels = FALSE,
       show.colorbar = !is.null(cgroup), show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
       grid.col = "lightgray", show.axes = TRUE, xticks = NULL, yticks = NULL,
       xticklabels = NULL, yticklabels = NULL,
@@ -649,15 +672,21 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
 
    if (is.null(ps)) {
       # get the data for plot
-      ps <- plotseries(data, type, col = col, cgroup = cgroup, colmap = colmap,
-         show.excluded = show.excluded, show.labels = show.labels, labels = labels)
+      ps <- plotseries(data, type, col = col, cgroup = cgroup, colmap = colmap, labels = labels)
+   }
+
+   # if cgroup is NULL for plot data - color grouping is not allowed
+   if(is.null(ps$cgroup)) {
+      show.colorbar = FALSE
    }
 
    # show axes if needed
    if (show.axes) {
       # get limits for axes
-      xlim <- mdaplot.getXAxisLim(ps, xlim, show.lines, bwd = (if (type == "h") bwd else NULL))
-      ylim <- mdaplot.getYAxisLim(ps, ylim, show.colorbar, show.lines)
+      xlim <- mdaplot.getXAxisLim(ps, xlim = xlim, show.excluded = show.excluded,
+         show.lines = show.lines, bwd = (if (type == "h") bwd else NULL))
+      ylim <- mdaplot.getYAxisLim(ps, ylim = ylim, show.excluded = show.excluded,
+         show.lines = show.lines, show.labels = show.labels, show.colorbar = show.colorbar)
 
       # check and prepare xticklabels
       xticklabels <- mdaplot.getXTickLabels(xticklabels, xticks, ps$excluded_cols)
@@ -682,12 +711,12 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
    # make plot for the data
    switch(type,
       "p" = plotScatter(ps, pch.colinv = pch.colinv, pch = pch, bg = bg,
-         col.excluded = col.excluded, ...),
+         col.excluded = col.excluded, show.excluded = show.excluded, ...),
       "d" = plotDensity(ps, nbins = nbins, colmap = colmap),
-      "l" = plotLines(ps, pch = pch, col.excluded = col.excluded, ...),
-      "b" = plotLines(ps, pch = pch, col.excluded = col.excluded, ...),
+      "l" = plotLines(ps, pch = pch, show.excluded = show.excluded, col.excluded = col.excluded, ...),
+      "b" = plotLines(ps, pch = pch, show.excluded = show.excluded, col.excluded = col.excluded, ...),
       "h" = plotBars(ps, bwd = bwd, border = border, force.x.values = force.x.values, ...),
-      "e" = plotErrorbars(os, pch = pch, ...)
+      "e" = plotErrorbars(ps, pch = pch, ...)
    )
 
    # show lines if needed
@@ -696,12 +725,12 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
    }
 
    # show lables
-   if (show.labels && !is.null(labels)) {
-      mdaplot.showLabels(ps, col = lab.col, cex = lab.cex)
+   if (show.labels) {
+      showLabels(ps, show.excluded = show.excluded, col = lab.col, cex = lab.cex)
    }
 
    # show colorbar if needed
-   if (!is.null(cgroup) && show.colorbar) {
+   if (show.colorbar) {
       mdaplot.showColorbar(ps$cgroup, ps$colmap, lab.col = lab.col, lab.cex = lab.cex)
    }
 

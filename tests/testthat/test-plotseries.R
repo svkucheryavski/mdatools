@@ -15,7 +15,7 @@ linebar_plots <- c("l", "b", "h")
 # Block 1. preparePlotData()                    #
 #################################################
 
-context("mdaplot: prepare data for plot")
+context("plotseries: prepare data for plot")
 
 ## empty data always raises an error
 test_that("if data is empty it raises an error for all plots", {
@@ -28,9 +28,9 @@ test_that("vector without dimension handles correctly", {
    x <- 1:4
    pd <- preparePlotData(x)
    expect_false(is.null(dim(pd$visible)))
-   expect_equal(dim(pd$visible), c(4, 1))
-   expect_equal(attr(pd$visible, "xaxis.values"), 1)
-   expect_equal(attr(pd$visible, "yaxis.values"), 1:4)
+   expect_equal(dim(pd$visible), c(1, 4))
+   expect_equal(attr(pd$visible, "xaxis.values"), 1:4)
+   expect_equal(attr(pd$visible, "yaxis.values"), 1)
    expect_null(pd$excluded)
    expect_null(pd$excluded_rows)
    expect_null(pd$excluded_cols)
@@ -153,7 +153,7 @@ test_that("missing rows are handled correctly (only one is left)", {
 # Block 2. splitPlotData()                      #
 #################################################
 
-context("mdaplot: split plot data")
+context("plotseries: split plot data")
 
 x <- matrix(1:9, ncol = 3)
 
@@ -215,7 +215,7 @@ test_that("yaxis.name argument is handled correctly", {
    attr(x, "yaxis.name") <- yaxis.name
    for (type in nonscatter_plots) {
       res <- splitPlotData(preparePlotData(x)$visible, type)
-      expect_equal(attr(res$y_values, "name"), "")
+      expect_equal(attr(res$y_values, "name"), yaxis.name)
    }
 
    for (type in scatter_plots) {
@@ -228,7 +228,7 @@ test_that("yaxis.name argument is handled correctly", {
 # Block 3. Test excluded rows processing  #
 ###########################################
 
-context("mdaplot: excluded rows processing")
+context("plotseries: excluded rows processing")
 
 x1 <- matrix(1:12, ncol = 2)
 x2 <- matrix(1:12, ncol = 2)
@@ -264,7 +264,7 @@ test_that("trying to call this function for other plot gives error (if excluded 
 # Block 4. Test data labels preparation   #
 ###########################################
 
-context("mdaplot: prepare data labels")
+context("plotseries: prepare data labels")
 
 excluded_rows <- c(TRUE, FALSE, TRUE, FALSE)
 excluded_cols <- c(FALSE, TRUE, FALSE)
@@ -383,7 +383,7 @@ test_that("processing of labels which were not specified (other plots)", {
       expect_equal(x1r$labels_excluded, NULL)
 
       x3r <- tf(x3, type)
-      x3r <- mdaplot.prepareDataLabels(x3r, type, NULL)
+      x3r <- getDataLabels(x3r, NULL)
       expect_equal(x3r$labels, c("X1", "X3"))
       expect_equal(x3r$labels_excluded, NULL)
    }
