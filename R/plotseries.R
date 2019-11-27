@@ -257,21 +257,37 @@ getPlotColors <- function(ps, col, opacity, cgroup, colmap) {
       ))
    }
 
-   #  get proper colors
-   if (!is.null(cgroup) && ps$type != "e") {
-      # show color groups according to cdata values
+   # if user did not specify cgroup - get one color based on colmap and opacity
+   if (is.null(cgroup) || ps$type == "e") {
       return(list(
-         col = mdaplot.getColors(cgroup = cgroup, colmap = colmap, opacity = opacity),
+         col = mdaplot.getColors(1, colmap = colmap, opacity = opacity),
          colmap = colmap,
-         cgroup = cgroup
+         cgroup = NULL
       ))
    }
 
+   # check if cgroup is provided for all values, also from excluded rows and correct this
+   if(ps$type == "h") {
+      cgroup_expected_length <- length(ps$x_values)
+      cgroup_excluded_values <- ps$excluded_cols
+   } else {
+      cgroup_expected_length <- nrow(ps$y_values)
+      cgroup_excluded_values <- ps$excluded_rows
+   }
+
+   if (length(cgroup) != cgroup_expected_length && length(cgroup_excluded_values) > 0) {
+      cgroup <- cgroup[-cgroup_excluded_values]
+   }
+
+   if (length(cgroup) != cgroup_expected_length) {
+      stop("Parameter 'cgroup' does not match size of the dataset.")
+   }
+
    return(list(
-      col = mdaplot.getColors(1, colmap = colmap, opacity = opacity),
+      col = mdaplot.getColors(cgroup = cgroup, colmap = colmap, opacity = opacity),
       colmap = colmap,
-      cgroup = NULL
-    ))
+      cgroup = cgroup
+   ))
 }
 
 #' Compute confidence ellipse for a set of points
@@ -720,12 +736,12 @@ plotDensity <- function(ps, nbins = 60, colmap = ps$colmap) {
 #'
 #' # first make plot and then add confidence ellipse
 #' p <- mdaplot(people, type = "p", cgroup = group)
-#' mdaplot.plotConfidenceEllipse(p, conf.level = 0.90, opacity = 0.2)
+#' plotConfidenceEllipse(p, conf.level = 0.90, opacity = 0.2)
 #'
 #' @export
 plotConfidenceEllipse <- function(p, conf.level = 0.95, lwd = 1, lty = 1, opacity = 0) {
 
-   mdaplot.plotPointsShape(
+   plotPointsShape(
       p,
       lwd = lwd,
       lty = lty,
@@ -758,14 +774,14 @@ plotConfidenceEllipse <- function(p, conf.level = 0.95, lwd = 1, lty = 1, opacit
 #' group <- factor(people[, "Sex"], labels = c("Male", "Female"))
 #'
 #' p <- mdaplot(people, type = "p", cgroup = group)
-#' mdaplot.plotConvexHull(p)
+#' plotConvexHull(p)
 #'
 #' @importFrom grDevices chull
 #' @importFrom graphics polygon
 #'
 #' @export
 plotConvexHull <- function(p, lwd = 1, lty = 1, opacity = 0) {
-   mdaplot.plotPointsShape(
+   plotPointsShape(
       p,
       lwd = lwd,
       lty = lty,
@@ -810,12 +826,12 @@ plotPointsShape <- function(p, lwd, lty, opacity, shape_function, ...) {
       stop("Parameter 'cgroup' must be a factor if you want to show points shape.")
    }
 
-   if (length(unique(cgroup)) != length(unique(plot_data$col))) {
+   if (length(unique(cgroup)) != length(unique(p$col))) {
       stop("Number of colors should be the same as number of levels in parameter 'cgroup'.")
    }
 
    col <- split(p$col, f = p$cgroup, drop = TRUE)
-   d <- split(data.frame(x, y), f = cgroup, drop = TRUE)
+   d <- split(data.frame(x, y), f = p$cgroup, drop = TRUE)
 
    plot_function <- function(i) {
       # compute indices for convex hull points and draw the hull

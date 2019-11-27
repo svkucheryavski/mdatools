@@ -27,9 +27,8 @@ test_that("excluded values and color grouping work fine together", {
    expect_silent(tf(type = "p", cgroup = people$Wine, show.excluded = T, show.labels = T))
    expect_silent(tf(type = "l", cgroup = people$Wine, show.excluded = T))
    expect_silent(tf(type = "b", cgroup = people$Wine, show.excluded = T))
-   expect_silent(tf(type = "h", cgroup = rep(c(1, 2), 5), show.excluded = F))
+   expect_silent(tf(type = "h", cgroup = rep(c(1, 2), 6)[1:11], show.excluded = F))
 })
-
 
 ## compare different colormaps
 context("mdaplot: colormaps, opacity and markers")
@@ -67,7 +66,7 @@ test_that("opacity parameter works well together with color grouping", {
    expect_silent(tf(type = "p", cgroup = people[, "Wine"], opacity = 0.5))
    expect_silent(tf(type = "l", cgroup = people[, "Wine"], opacity = 0.5))
    expect_silent(tf(type = "b", cgroup = people[, "Wine"], opacity = 0.5))
-   expect_silent(tf(type = "h", cgroup = people[, "Wine"], opacity = 0.5))
+   expect_silent(tf(type = "h", cgroup = people[1, ], opacity = 0.5))
 })
 
 par(mfrow = c(4, 2))
@@ -120,30 +119,30 @@ g <- interaction(g1, g2)
 
 tf <- function(type, cgroup, ...) {
    p <- mdaplot(people, type = type, cgroup = cgroup)
-   mdaplot.plotConvexHull(p, ...)
+   plotConvexHull(p, ...)
 }
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConvexHull returns error if wrong type of plot is used", {
+test_that("plotConvexHull() returns error if wrong type of plot is used", {
    expect_error(tf(type = "l", cgroup = g1))
    expect_error(tf(type = "b", cgroup = g1))
    expect_error(tf(type = "h", cgroup = g1))
    expect_error(tf(type = "e", cgroup = g1))
 })
 
-test_that("mdaplot.plotConvexHull returns error if cgroup is not a factor", {
+test_that("plotConvexHull() returns error if cgroup is not a factor", {
    expect_error(tf(type = "p", cgroup = gw))
 })
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConvexHull works as expected with default styles", {
+test_that("plotConvexHull() works as expected with default styles", {
    expect_silent(tf(type = "p", cgroup = g1))
    expect_silent(tf(type = "p", cgroup = g2))
    expect_silent(tf(type = "p", cgroup = g))
 })
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConvexHull works as expected with different opacity", {
+test_that("plotConvexHull works as expected with different opacity", {
    expect_silent(tf(type = "p", opacity = 0.8, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.4, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, cgroup = g2))
@@ -151,7 +150,7 @@ test_that("mdaplot.plotConvexHull works as expected with different opacity", {
 })
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConvexHull works as expected with different line parameters", {
+test_that("plotConvexHull works as expected with different line parameters", {
    expect_silent(tf(type = "p", opacity = 0.4, lwd = 1, lty = 1, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 2, lty = 2, cgroup = g2))
    expect_silent(tf(type = "p", opacity = 0.1, lwd = 3, lty = 3, cgroup = g))
@@ -174,38 +173,40 @@ g <- interaction(g1, g2)
 
 tf <- function(type, cgroup, ...) {
    p <- mdaplot(people, type = type, cgroup = cgroup)
-   mdaplot.plotConvexHull(p, ...)
+   plotConvexHull(p, ...)
 }
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConvexHull returns error if wrong type of plot is used", {
+test_that("plotConvexHull returns error if wrong type of plot is used", {
    expect_error(tf(type = "l", cgroup = g1))
    expect_error(tf(type = "b", cgroup = g1))
    expect_error(tf(type = "h", cgroup = g1))
    expect_error(tf(type = "e", cgroup = g1))
 })
 
-test_that("mdaplot.plotConvexHull returns error if cgroup is not a factor", {
+test_that("plotConvexHull returns error if cgroup is not a factor", {
    expect_error(tf(type = "p", cgroup = gw))
 })
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConvexHull works as expected with default styles", {
+test_that("plotConvexHull works as expected with default styles", {
    expect_silent(tf(type = "p", cgroup = g1))
    expect_silent(tf(type = "p", cgroup = g2))
    expect_silent(tf(type = "p", cgroup = g))
 })
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConvexHull works as expected with different opacity", {
+test_that("plotConvexHull works as expected with different opacity", {
    expect_silent(tf(type = "p", opacity = 0.8, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.4, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, cgroup = g2))
    expect_silent(tf(type = "p", opacity = 0.1, cgroup = g))
 })
 
+tf(type = "p", opacity = 0.1, lwd = 3, lty = 3, cgroup = g)
+
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConvexHull works as expected with different line parameters", {
+test_that("plotConvexHull works as expected with different line parameters", {
    expect_silent(tf(type = "p", opacity = 0.4, lwd = 1, lty = 1, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 2, lty = 2, cgroup = g2))
    expect_silent(tf(type = "p", opacity = 0.1, lwd = 3, lty = 3, cgroup = g))
@@ -225,30 +226,30 @@ g <- interaction(g1, g2)
 
 tf <- function(type, cgroup, ...) {
    p <- mdaplot(people, type = type, cgroup = cgroup)
-   mdaplot.plotConfidenceEllipse(p, ...)
+   plotConfidenceEllipse(p, ...)
 }
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConfidenceEllipse returns error if wrong type of plot is used", {
+test_that("plotConfidenceEllipse returns error if wrong type of plot is used", {
    expect_error(tf(type = "l", cgroup = g1))
    expect_error(tf(type = "b", cgroup = g1))
    expect_error(tf(type = "h", cgroup = g1))
    expect_error(tf(type = "e", cgroup = g1))
 })
 
-test_that("mdaplot.plotConfidenceEllipse returns error if cgroup is not a factor", {
+test_that("plotConfidenceEllipse returns error if cgroup is not a factor", {
    expect_error(tf(type = "p", cgroup = gw))
 })
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConfidenceEllipse works as expected with default styles", {
+test_that("plotConfidenceEllipse works as expected with default styles", {
    expect_silent(tf(type = "p", cgroup = g1))
    expect_silent(tf(type = "p", cgroup = g2))
    expect_silent(tf(type = "p", cgroup = g))
 })
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConfidenceEllipse works as expected with different opacity", {
+test_that("plotConfidenceEllipse works as expected with different opacity", {
    expect_silent(tf(type = "p", opacity = 0.8, cgroup = g))
    expect_silent(tf(type = "p", opacity = 0.4, cgroup = g))
    expect_silent(tf(type = "p", opacity = 0.2, cgroup = g))
@@ -256,7 +257,7 @@ test_that("mdaplot.plotConfidenceEllipse works as expected with different opacit
 })
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConfidenceEllipse works as expected with different confidence level", {
+test_that("plotConfidenceEllipse works as expected with different confidence level", {
    expect_silent(tf(type = "p", opacity = 0.8, conf.level = 0.80, cgroup = g))
    expect_silent(tf(type = "p", opacity = 0.4, conf.level = 0.90, cgroup = g))
    expect_silent(tf(type = "p", opacity = 0.2, conf.level = 0.95, cgroup = g))
@@ -264,7 +265,7 @@ test_that("mdaplot.plotConfidenceEllipse works as expected with different confid
 })
 
 par(mfrow = c(2, 2))
-test_that("mdaplot.plotConfidenceEllipse works as expected with different line parameters", {
+test_that("plotConfidenceEllipse works as expected with different line parameters", {
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 1, lty = 1, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 2, lty = 2, cgroup = g1))
    expect_silent(tf(type = "p", opacity = 0.2, lwd = 3, lty = 3, cgroup = g1))

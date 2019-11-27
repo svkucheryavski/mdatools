@@ -277,7 +277,7 @@ test_that("user can use color grouping by factors", {
    expect_silent(tf(type = "p", cgroup = cgroup))
    expect_silent(tf(type = "l", cgroup = cgroup))
    expect_silent(tf(type = "b", cgroup = cgroup))
-   expect_silent(tf(type = "h", cgroup = factor(rep(c(1, 2), 6), labels = c("A", "B"))))
+   expect_silent(tf(type = "h", cgroup = factor(rep(c(1, 2), 6), labels = c("A", "B"))[1:11]))
 })
 
 
