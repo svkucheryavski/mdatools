@@ -19,6 +19,6 @@ Exclude/hide columns in a dataset
 }
 \details{
 The method assign attribute 'exclcols', which contains number of columns, which should be excluded/hidden
-from calculations and plots (without removing them physically). The argument \code{ind} should contain 
+from calculations and plots (without removing them physically). The argument \code{ind} should contain
 column numbers (excluding already hidden), names or logical values.
 }

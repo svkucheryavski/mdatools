@@ -9,7 +9,7 @@ mda.df2mat(x, full = FALSE)
 \arguments{
 \item{x}{a data frame}
 
-\item{full}{logical, if TRUE number of dummy variables for a factor will be the same as number of levels, 
+\item{full}{logical, if TRUE number of dummy variables for a factor will be the same as number of levels,
 otherwise by one smaller}
 }
 \value{
@@ -19,7 +19,7 @@ a numeric matrix
 The function converts data frame to a numeric matrix.
 }
 \details{
-If one or several columns of the data frame are factors they will be converted to a set of dummy 
+If one or several columns of the data frame are factors they will be converted to a set of dummy
 variables. If any columns/rows were hidden in the data frame they will remain hidden in the matrix. If
 there are factors among the hidden columns, the corresponding dummy variables will be hidden as well.
 
