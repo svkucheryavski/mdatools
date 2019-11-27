@@ -157,7 +157,7 @@ mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.positi
    # compute xlim values for each plotseries
    f <- function(p) {
       return(
-         mdaplot.getYAxisLim(p, ylim = NULL, show.excluded = show.excluded)
+         mdaplot.getXAxisLim(p, xlim = NULL, show.excluded = show.excluded)
       )
    }
 
@@ -406,7 +406,7 @@ mdaplotg <- function(
       pch[type == "h"] <- 15
 
       mdaplotg.showLegend(
-         legend, col = col, pch = pch, lty = lty, lwd = lwd, cex = cex,
+         legend, col = col, pch = pch, lty = lty, lwd = lwd, cex = 0.85,
          position = legend.position
       )
    }

@@ -5,7 +5,7 @@
 \title{Show labels on plot}
 \usage{
 showLabels(ps, show.excluded = FALSE, pos = 3, cex = 0.65,
-  col = "darkgray")
+  col = "darkgray", force.x.values = NULL, bwd = 0.8)
 }
 \arguments{
 \item{ps}{`plotseries` object}

@@ -728,7 +728,8 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
 
    # show lables
    if (show.labels) {
-      showLabels(ps, show.excluded = show.excluded, col = lab.col, cex = lab.cex)
+      showLabels(ps, show.excluded = show.excluded, col = lab.col, cex = lab.cex,
+         force.x.values = force.x.values, bwd = bwd)
    }
 
    # show colorbar if needed

@@ -466,12 +466,21 @@ getDataLabels <- function(ps, labels = NULL) {
 #' @param col
 #' color of the labels text
 #'
-showLabels <- function(ps, show.excluded = FALSE, pos = 3, cex = 0.65, col = "darkgray") {
+showLabels <- function(ps, show.excluded = FALSE, pos = 3, cex = 0.65, col = "darkgray",
+   force.x.values = NULL, bwd = 0.8) {
 
    f <- function(x, y, labels, type) {
+
       if (length(labels) == 0) stop("No labels available.")
       if (ps$type %in% c("h", "e")) y <- y[1, ]
       if (ps$type %in% c("l", "b")) y <- apply(y, 2, max)
+
+      # correct x_values if they were forced by bwd
+      if (is.numeric(force.x.values)) {
+         x <- x - bwd / 2 + (force.x.values[1] - 0.5) * bwd / force.x.values[2]
+         bwd <- bwd / force.x.values[2]
+      }
+
       x <- as.numeric(x)
       y <- as.numeric(y)
       labels <- mdaplot.formatValues(labels)
