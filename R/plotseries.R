@@ -38,7 +38,7 @@
 #'
 #' @export
 plotseries <- function(data, type, cgroup = NULL, col = NULL, opacity = 1,
-   colmap = "default", labels = NULL, show.labels = FALSE, show.excluded = FALSE) {
+   colmap = "default", labels = NULL) {
 
    if (is.null(data)) {
       stop("Seems you forgot to provide data values (vector, matrix of data frame).")
@@ -497,6 +497,10 @@ showLabels <- function(ps, show.excluded = FALSE, pos = 3, cex = 0.65, col = "da
 #' color of the points
 #' @param bg
 #' background color of the points if `pch=21:25`
+#' @param lwd
+#' line width for the error bars
+#' @param cex
+#' scale factor for the marker
 #' @param col.excluded
 #' color for excluded values (if must be shown)
 #' @param pch.colinv
@@ -507,8 +511,8 @@ showLabels <- function(ps, show.excluded = FALSE, pos = 3, cex = 0.65, col = "da
 #' other arguments for function `points()`.
 #'
 #' @export
-plotScatter <- function(ps, pch = 16, col = ps$col, bg = "white", col.excluded = "lightgray",
-   pch.colinv = FALSE, show.excluded = FALSE, ...) {
+plotScatter <- function(ps, pch = 16, col = ps$col, bg = "white", lwd = 1, cex = 1,
+   col.excluded = "lightgray", pch.colinv = FALSE, show.excluded = FALSE, ...) {
 
    if (pch.colinv) {
       # switch colors for main and background in case pch=21:25
@@ -518,11 +522,12 @@ plotScatter <- function(ps, pch = 16, col = ps$col, bg = "white", col.excluded =
    }
 
    # show main set of points
-   points(ps$x_values, ps$y_values, col = col, bg = bg, pch = pch, ...)
+   points(ps$x_values, ps$y_values, col = col, bg = bg, pch = pch, lwd = lwd, cex = cex, ...)
 
    # show excluded points if any
    if (show.excluded && !is.null(ps$y_values_excluded)) {
-      points(ps$x_values_excluded, ps$y_values_excluded, col = col.excluded, pch = pch, ...)
+      points(ps$x_values_excluded, ps$y_values_excluded, col = col.excluded, pch = pch,
+         lwd = lwd, cex = cex, ...)
    }
 }
 
@@ -532,6 +537,10 @@ plotScatter <- function(ps, pch = 16, col = ps$col, bg = "white", col.excluded =
 #' `plotseries` object
 #' @param col
 #' a color for markers or lines (same as \code{plot} parameter).
+#' @param lwd
+#' line width for the error bars
+#' @param cex
+#' scale factor for the marker
 #' @param col.excluded
 #' color for the excluded lines.
 #' @param show.excluded
@@ -540,16 +549,17 @@ plotScatter <- function(ps, pch = 16, col = ps$col, bg = "white", col.excluded =
 #' other arguments for function `lines()`.
 #'
 #' @export
-plotLines <- function(ps, col = ps$col, lty = 1,
+plotLines <- function(ps, col = ps$col, lty = 1, lwd = 1, cex = 1,
    col.excluded = "darkgray", show.excluded = FALSE, ...) {
 
    # show main set of lines
-   matlines(ps$x_values, t(ps$y_values), type = ps$type, col = col, lty = lty, ...)
+   matlines(ps$x_values, t(ps$y_values), type = ps$type, col = col, lty = lty,
+      lwd = lwd, cex = cex, ...)
 
    # show excluded rows
    if (show.excluded && !is.null(ps$y_values_excluded)) {
       matlines(ps$x_values_excluded, t(ps$y_values_excluded), type = ps$type,
-         lty = lty, col = col.excluded, ...)
+         lty = lty, lwd = lwd, cex = cex, col = col.excluded, ...)
    }
 }
 
@@ -561,6 +571,10 @@ plotLines <- function(ps, col = ps$col, lty = 1,
 #' color for the error bars
 #' @param pch
 #' marker symbol for the plot
+#' @param lwd
+#' line width for the error bars
+#' @param cex
+#' scale factor for the marker
 #' @param ...
 #' other arguments for function `points()`.
 #'
@@ -570,17 +584,17 @@ plotLines <- function(ps, col = ps$col, lty = 1,
 #' only two rows are provided it is assumed that error bars are symmetric.
 #'
 #' @export
-plotErrorbars <- function(ps, col = ps$col, pch = 16, ...) {
+plotErrorbars <- function(ps, col = ps$col, pch = 16, lwd = 1, cex = 1, ...) {
 
    x <- ps$x_values
    y <- ps$y_values
 
    dx <- diff(ps$xlim) / max(50, (length(x) * 3))
 
-   segments(x, y[2, ], x, y[3, ], col = ps$col)
-   segments(x - dx, y[2, ], x + dx, y[2, ], col = ps$col)
-   segments(x - dx, y[3, ], x + dx, y[3, ], col = ps$col)
-   points(x, y[1, ], col = col, pch = pch, ...)
+   segments(x, y[2, ], x, y[3, ], col = ps$col, lwd = lwd)
+   segments(x - dx, y[2, ], x + dx, y[2, ], col = ps$col, lwd = lwd)
+   segments(x - dx, y[3, ], x + dx, y[3, ], col = ps$col, lwd = lwd)
+   points(x, y[1, ], col = col, pch = pch, cex = cex, ...)
 }
 
 

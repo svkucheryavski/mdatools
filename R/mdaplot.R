@@ -659,7 +659,7 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #'
 #' @export
 mdaplot <- function(data = NULL, ps = NULL, type = "p",
-      pch = 16, col = NULL, bg = par("bg"), bwd = 0.8, border = NA, lty = 1,
+      pch = 16, col = NULL, bg = par("bg"), bwd = 0.8, border = NA, lty = 1, lwd = 1, cex = 1,
       cgroup = NULL, xlim = NULL, ylim = NULL, colmap = "default", labels = NULL,
       main = NULL, xlab = NULL, ylab = NULL, show.labels = FALSE,
       show.colorbar = !is.null(cgroup), show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
@@ -710,15 +710,15 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
 
    # make plot for the data
    switch(type,
-      "p" = plotScatter(ps, pch.colinv = pch.colinv, pch = pch, bg = bg,
+      "p" = plotScatter(ps, pch.colinv = pch.colinv, pch = pch, bg = bg, lwd = lwd, cex = cex,
          col.excluded = col.excluded, show.excluded = show.excluded, ...),
       "d" = plotDensity(ps, nbins = nbins, colmap = colmap),
-      "l" = plotLines(ps, pch = pch, show.excluded = show.excluded,
+      "l" = plotLines(ps, pch = pch, lwd = lwd, cex = cex, show.excluded = show.excluded,
          col.excluded = col.excluded, ...),
-      "b" = plotLines(ps, pch = pch, show.excluded = show.excluded,
+      "b" = plotLines(ps, pch = pch, lwd = lwd, cex = cex, show.excluded = show.excluded,
          col.excluded = col.excluded, ...),
       "h" = plotBars(ps, bwd = bwd, border = border, force.x.values = force.x.values, ...),
-      "e" = plotErrorbars(ps, pch = pch, ...)
+      "e" = plotErrorbars(ps, pch = pch, lwd = lwd, cex = cex, ...)
    )
 
    # show lines if needed

@@ -247,17 +247,14 @@ mdaplotg <- function(
       col <- processParam(col, "col", mdaplot.areColors, ngroups)
 
    # get plot data for each group
-   pd <- list()
+   ps <- list()
    for (i in 1:ngroups) {
-      pd[[i]] <- mdaplot.createPlotData(
-         data = data[[i]], type = type[i], main = main, xlab = xlab, ylab = ylab, xlim = xlim,
-         ylim = ylim, bwd = bwd, show.excluded = show.excluded, show.colorbar = FALSE,
-         show.labels = show.labels, labels = labels, show.lines = show.lines, show.axes = TRUE
-      )
+      ps[[i]] <- plotseries(data[[i]], type = type[i], col = col[i], opacity <- opacity[i],
+         labels = labels)
    }
 
    # process legend
-   get_legend <- function(legend, data, pd, show.legend) {
+   get_legend <- function(legend, data, ps, show.legend) {
 
       if (!show.legend) {
          return(NULL)
@@ -272,13 +269,13 @@ mdaplotg <- function(
       }
 
       if (all(type == "h")) {
-         return(unlist(lapply(pd, function(x) rownames(x$y_values)[1])))
+         return(unlist(lapply(ps, function(x) rownames(x$y_values)[1])))
       }
 
-      return(unlist(lapply(pd, function(x) x$data_attrs$name)))
+      return(unlist(lapply(ps, function(x) x$data_attrs$name)))
    }
 
-   legend <- get_legend(legend, data, pd, show.legend)
+   legend <- get_legend(legend, data, ps, show.legend)
 
    # check legend if required
    if (show.legend) {
@@ -294,7 +291,7 @@ mdaplotg <- function(
 
    # compute x-limits
    if (is.null(xlim)) {
-      xlim <- matrix(unlist(lapply(pd, function(x) x$xlim)), ncol = 2, byrow = TRUE)
+      xlim <- matrix(unlist(lapply(ps, function(x) x$xlim)), ncol = 2, byrow = TRUE)
       xlim <- c(min(xlim[, 1]), max(xlim[, 2]))
 
       # stretch limits if bar plot should be shown
@@ -303,7 +300,7 @@ mdaplotg <- function(
 
    # compute y-limits
    if (is.null(ylim)) {
-      ylim <- matrix(unlist(lapply(pd, function(y) y$ylim)), ncol = 2, byrow = TRUE)
+      ylim <- matrix(unlist(lapply(ps, function(y) y$ylim)), ncol = 2, byrow = TRUE)
       ylim <- c(min(ylim[, 1]), max(ylim[, 2]))
    }
 
@@ -341,11 +338,11 @@ mdaplotg <- function(
 
    # define main title if not provided (either as "name" or as "name" attr of first dataset)
    main <- if (is.null(main)) name else main
-   main <- if (is.null(main)) pd[[1]]$data_attrs[["name"]] else main
+   main <- if (is.null(main)) ps[[1]]$data_attrs[["name"]] else main
 
    # define labels for axes
-   xlab <- if (is.null(xlab)) attr(pd[[1]]$x_values, "name", exact = TRUE) else xlab
-   ylab <- if (is.null(ylab)) attr(pd[[1]]$y_values, "name", exact = TRUE) else ylab
+   xlab <- if (is.null(xlab)) attr(ps[[1]]$x_values, "name", exact = TRUE) else xlab
+   ylab <- if (is.null(ylab)) attr(ps[[1]]$y_values, "name", exact = TRUE) else ylab
 
    # make an empty plot with proper limits and axis labels
    mdaplot.plotAxes(xticklabels = xticklabels, yticklabels = yticklabels, xticks = xticks,
@@ -372,7 +369,7 @@ mdaplotg <- function(
       show.labels <- if (i > 1 && type[i] == "e") FALSE else show.labels
 
       # use mdaplot with show.axes = FALSE to create the plot
-      mdaplot(plot.data = pd[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
+      mdaplot(ps = ps[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
               lwd = lwd[i], cex = cex[i], force.x.values = force.x.values, bwd = bwd,
               show.grid = F, show.labels = show.labels, opacity = opacity[i],
               lab.col = lab.col[i], lab.cex = lab.cex, show.axes = FALSE, ...
