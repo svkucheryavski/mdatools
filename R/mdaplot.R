@@ -676,8 +676,8 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
    }
 
    # if cgroup is NULL for plot data - color grouping is not allowed
-   if(is.null(ps$cgroup)) {
-      show.colorbar = FALSE
+   if (is.null(ps$cgroup)) {
+      show.colorbar <- FALSE
    }
 
    # show axes if needed
@@ -713,8 +713,10 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
       "p" = plotScatter(ps, pch.colinv = pch.colinv, pch = pch, bg = bg,
          col.excluded = col.excluded, show.excluded = show.excluded, ...),
       "d" = plotDensity(ps, nbins = nbins, colmap = colmap),
-      "l" = plotLines(ps, pch = pch, show.excluded = show.excluded, col.excluded = col.excluded, ...),
-      "b" = plotLines(ps, pch = pch, show.excluded = show.excluded, col.excluded = col.excluded, ...),
+      "l" = plotLines(ps, pch = pch, show.excluded = show.excluded,
+         col.excluded = col.excluded, ...),
+      "b" = plotLines(ps, pch = pch, show.excluded = show.excluded,
+         col.excluded = col.excluded, ...),
       "h" = plotBars(ps, bwd = bwd, border = border, force.x.values = force.x.values, ...),
       "e" = plotErrorbars(ps, pch = pch, ...)
    )

@@ -267,7 +267,7 @@ getPlotColors <- function(ps, col, opacity, cgroup, colmap) {
    }
 
    # check if cgroup is provided for all values, also from excluded rows and correct this
-   if(ps$type == "h") {
+   if (ps$type == "h") {
       cgroup_expected_length <- length(ps$x_values)
       cgroup_excluded_values <- ps$excluded_cols
    } else {
@@ -476,7 +476,7 @@ showLabels <- function(ps, show.excluded = FALSE, pos = 3, cex = 0.65, col = "da
       y <- as.numeric(y)
       labels <- mdaplot.formatValues(labels)
 
-      if (ps$type == "h") pos = ifelse(y < 0, 1, 3)
+      if (ps$type == "h") pos <- ifelse(y < 0, 1, 3)
       text(x, y, labels, cex = cex, pos = pos, col = col)
    }
 
