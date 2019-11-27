@@ -4,7 +4,7 @@
 \alias{plotErrorbars}
 \title{Show plot series as error bars}
 \usage{
-plotErrorbars(ps, col = ps$col, pch = 16, ...)
+plotErrorbars(ps, col = ps$col, pch = 16, lwd = 1, cex = 1, ...)
 }
 \arguments{
 \item{ps}{`plotseries` object}
@@ -12,6 +12,10 @@ plotErrorbars(ps, col = ps$col, pch = 16, ...)
 \item{col}{color for the error bars}
 
 \item{pch}{marker symbol for the plot}
+
+\item{lwd}{line width for the error bars}
+
+\item{cex}{scale factor for the marker}
 
 \item{...}{other arguments for function `points()`.}
 }

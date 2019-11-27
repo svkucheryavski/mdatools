@@ -4,13 +4,17 @@
 \alias{plotLines}
 \title{Show plot series as set of lines}
 \usage{
-plotLines(ps, col = ps$col, lty = 1, col.excluded = "darkgray",
-  show.excluded = FALSE, ...)
+plotLines(ps, col = ps$col, lty = 1, lwd = 1, cex = 1,
+  col.excluded = "darkgray", show.excluded = FALSE, ...)
 }
 \arguments{
 \item{ps}{`plotseries` object}
 
 \item{col}{a color for markers or lines (same as \code{plot} parameter).}
+
+\item{lwd}{line width for the error bars}
+
+\item{cex}{scale factor for the marker}
 
 \item{col.excluded}{color for the excluded lines.}
 

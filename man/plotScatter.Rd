@@ -4,8 +4,8 @@
 \alias{plotScatter}
 \title{Show plot series as set of points}
 \usage{
-plotScatter(ps, pch = 16, col = ps$col, bg = "white",
-  col.excluded = "lightgray", pch.colinv = FALSE,
+plotScatter(ps, pch = 16, col = ps$col, bg = "white", lwd = 1,
+  cex = 1, col.excluded = "lightgray", pch.colinv = FALSE,
   show.excluded = FALSE, ...)
 }
 \arguments{
@@ -16,6 +16,10 @@ plotScatter(ps, pch = 16, col = ps$col, bg = "white",
 \item{col}{color of the points}
 
 \item{bg}{background color of the points if `pch=21:25`}
+
+\item{lwd}{line width for the error bars}
+
+\item{cex}{scale factor for the marker}
 
 \item{col.excluded}{color for excluded values (if must be shown)}
 

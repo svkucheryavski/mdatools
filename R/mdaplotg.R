@@ -22,7 +22,7 @@
 #' @param plot
 #' logical, show legend or just calculate and return its size
 #'
-mdaplot.showLegend <- function(legend, col, pch = NULL, lty = NULL, lwd = NULL, cex = 1,
+mdaplotg.showLegend <- function(legend, col, pch = NULL, lty = NULL, lwd = NULL, cex = 1,
                               bty = "o", position = "topright", plot = TRUE) {
    # which positions need multiple columns
    onecolpos <- c("topright", "topleft", "bottomright", "bottomleft")
@@ -49,7 +49,8 @@ mdaplot.showLegend <- function(legend, col, pch = NULL, lty = NULL, lwd = NULL, 
           ncol = ncol)
 
 }
-mdaplot.prepareDataForGPlots <- function(data, type, groupby) {
+
+mdaplotg.prepareData <- function(data, type, groupby) {
 
    if (is.list(data) && !is.data.frame(data)) return(data)
 
@@ -100,6 +101,117 @@ mdaplot.prepareDataForGPlots <- function(data, type, groupby) {
    return(data_list)
 }
 
+# check numeric parameters and multiply them if necessary
+mdaplotg.processParam <- function(param, name, is.type, ngroups) {
+
+   param <- if (length(param) == 1) rep(param, ngroups) else param
+
+   if (!all(is.type(param))) {
+      stop(paste0('Parameter "', name, '" mush be numeric!'))
+   }
+
+   if (length(param) != ngroups)
+      stop(paste0('Parameter "', name, '" should be specified for each group or one for all!'))
+
+   return(param)
+}
+
+#' Create and return vector with legend values
+#'
+#' @param ngroups
+#' number of grops (plot series)
+#' @param data.names
+#' names of the series
+#' @param legend
+#' legend values provided by user
+mdaplotg.getLegend <- function(ngroups, data.names, legend = NULL) {
+
+   if (!is.null(legend)) {
+      return(legend)
+   }
+
+   if (!is.null(data.names)) {
+      return(data.names)
+   }
+
+   legend.out <- unlist(lapply(ps, function(x) x$data_attrs$name))
+
+   if (is.null(legend.out)) {
+      stop("Can not find values for the legend items.")
+   }
+
+   if (length(legend.out) != length(ps)) {
+      stop("Number of values for 'legend' is not the same as number of plot series.")
+   }
+
+   return(legend.out)
+}
+
+mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.position) {
+
+   # if user provided xlim values - use them
+   if (!is.null(xlim)) {
+      return(xlim)
+   }
+
+   # compute xlim values for each plotseries
+   f <- function(p) {
+      return(
+         mdaplot.getYAxisLim(p, ylim = NULL, show.excluded = show.excluded)
+      )
+   }
+
+   xlim <- matrix(unlist(lapply(ps, f)), ncol = 2, byrow = TRUE)
+   xlim <- c(min(xlim[, 1]), max(xlim[, 2]))
+
+   # add extra margins if legend must be shown
+   if (show.legend) {
+
+      # calculate margins: dx and dy
+      margin <- c(
+         (regexpr("left", legend.position) > 0) * -0.1,
+         (regexpr("right", legend.position) > 0) * 0.1
+      )
+
+      xlim <- xlim + diff(xlim) * margin
+   }
+
+   return(xlim)
+}
+
+
+mdaplotg.getYLim <- function(ps, ylim, show.excluded, show.legend, legend.position, show.labels) {
+
+   # if user provided xlim values - use them
+   if (!is.null(ylim)) {
+      return(ylim)
+   }
+
+   # compute xlim values for each plotseries
+   f <- function(p) {
+      return(
+         mdaplot.getYAxisLim(p, ylim = NULL, show.excluded = show.excluded,
+            show.labels = show.labels)
+      )
+   }
+
+   ylim <- matrix(unlist(lapply(ps, f)), ncol = 2, byrow = TRUE)
+   ylim <- c(min(ylim[, 1]), max(ylim[, 2]))
+
+   # add extra margins if legend must be shown
+   if (show.legend) {
+
+      # calculate margins: dx and dy
+      margin <- c(
+         (regexpr("bottom", legend.position) > 0) * -0.1,
+         (regexpr("top", legend.position) > 0) * 0.1
+      )
+
+      ylim <- ylim + diff(ylim) * margin
+   }
+
+   return(ylim)
+}
 
 #' Plotting function for several sets of objects
 #'
@@ -213,38 +325,23 @@ mdaplotg <- function(
 
    # split data into groups
    name <- attr(data, "name", exact = TRUE)
-   data <- mdaplot.prepareDataForGPlots(data, type, groupby)
+   data <- mdaplotg.prepareData(data, type, groupby)
    ngroups <- length(data)
 
    # check if plot.new() should be called first
    if (dev.cur() == 1) plot.new()
 
-   # check numeric parameters and multiply them if necessary
-   processParam <- function(param, name, is.type, ngroups) {
-
-      param <- if (length(param) == 1) rep(param, ngroups) else param
-
-      if (!all(is.type(param))) {
-         stop(paste0('Parameter "', name, '" mush be numeric!'))
-      }
-
-      if (length(param) != ngroups)
-         stop(paste0('Parameter "', name, '" should be specified for each group or one for all!'))
-
-      return(param)
-   }
-
-   type <- processParam(type, "type", is.character, ngroups)
-   pch <- processParam(pch, "pch", is.numeric, ngroups)
-   lty <- processParam(lty, "lty", is.numeric, ngroups)
-   lwd <- processParam(lwd, "lwd", is.numeric, ngroups)
-   cex <- processParam(cex, "cex", is.numeric, ngroups)
-   opacity <- processParam(opacity, "opacity", is.numeric, ngroups)
-   lab.col <- processParam(lab.col, "lab.col", mdaplot.areColors, ngroups)
+   type <- mdaplotg.processParam(type, "type", is.character, ngroups)
+   pch <- mdaplotg.processParam(pch, "pch", is.numeric, ngroups)
+   lty <- mdaplotg.processParam(lty, "lty", is.numeric, ngroups)
+   lwd <- mdaplotg.processParam(lwd, "lwd", is.numeric, ngroups)
+   cex <- mdaplotg.processParam(cex, "cex", is.numeric, ngroups)
+   opacity <- mdaplotg.processParam(opacity, "opacity", is.numeric, ngroups)
+   lab.col <- mdaplotg.processParam(lab.col, "lab.col", mdaplot.areColors, ngroups)
 
    # check and define colors if necessary
    if (is.null(col)) col <- mdaplot.getColors(ngroups = ngroups, colmap = colmap)
-      col <- processParam(col, "col", mdaplot.areColors, ngroups)
+   col <- mdaplotg.processParam(col, "col", mdaplot.areColors, ngroups)
 
    # get plot data for each group
    ps <- list()
@@ -253,88 +350,9 @@ mdaplotg <- function(
          labels = labels)
    }
 
-   # process legend
-   get_legend <- function(legend, data, ps, show.legend) {
-
-      if (!show.legend) {
-         return(NULL)
-      }
-
-      if (!is.null(legend)) {
-         return(legend)
-      }
-
-      if (!is.null(names(data))) {
-         return(names(data))
-      }
-
-      if (all(type == "h")) {
-         return(unlist(lapply(ps, function(x) rownames(x$y_values)[1])))
-      }
-
-      return(unlist(lapply(ps, function(x) x$data_attrs$name)))
-   }
-
-   legend <- get_legend(legend, data, ps, show.legend)
-
-   # check legend if required
-   if (show.legend) {
-
-      if (is.null(legend)) {
-         stop("Can not find values for the legend items.")
-      }
-
-      if (length(legend) != ngroups) {
-         stop("Number of values for 'legend' is not the same as number of plot series.")
-      }
-   }
-
-   # compute x-limits
-   if (is.null(xlim)) {
-      xlim <- matrix(unlist(lapply(ps, function(x) x$xlim)), ncol = 2, byrow = TRUE)
-      xlim <- c(min(xlim[, 1]), max(xlim[, 2]))
-
-      # stretch limits if bar plot should be shown
-      xlim <- if (any(type == "h")) xlim + c(-0.35, 0.35) else xlim
-   }
-
-   # compute y-limits
-   if (is.null(ylim)) {
-      ylim <- matrix(unlist(lapply(ps, function(y) y$ylim)), ncol = 2, byrow = TRUE)
-      ylim <- c(min(ylim[, 1]), max(ylim[, 2]))
-   }
-
-   # add extra margins if legend must be shown
-   if (show.legend == T && !is.null(legend)) {
-
-      scale <- 0.1
-
-      # calculate margins: dx and dy
-      dx <- diff(xlim) * scale
-      dy <- diff(ylim) * scale
-
-      # table for margin factors depending on legend size and position
-      legend_margins <- data.frame(
-                         #  i  w    dx   j   h    dy
-         "bottom"       = c(1, 0,  0.0,  1, -1, -0.2),
-         "bottomleft"   = c(1, 0, -0.2,  1,  0, -0.2),
-         "bottomright"  = c(2, 0,  0.2,  1,  0, -0.2),
-         "top"          = c(1, 0,  0.0,  2,  1,  0.2),
-         "topleft"      = c(1, 0, -0.2,  2,  0,  0.2),
-         "topright"     = c(2, 0,  0.2,  2,  0,  0.2)
-      )
-
-      # get size of legend
-      legend_size <- mdaplot.showLegend(legend, position = legend.position, plot = F)
-      w <- legend_size$rect$w
-      h <- legend_size$rect$h
-
-      # correct limits
-      mrg <- matrix(legend_margins[[legend.position]], nrow = 2, byrow = TRUE)
-      xlim[mrg[1, 1]] <- xlim[mrg[1, 1]] + w * mrg[1, 2] + dx * mrg[1, 3]
-      ylim[mrg[2, 1]] <- ylim[mrg[2, 1]] + h * mrg[2, 2] + dy * mrg[2, 3]
-   }
-
+   # get axis limits
+   xlim <- mdaplotg.getXLim(ps, xlim, show.excluded, show.legend, legend.position)
+   ylim <- mdaplotg.getYLim(ps, ylim, show.excluded, show.legend, legend.position, show.labels)
 
    # define main title if not provided (either as "name" or as "name" attr of first dataset)
    main <- if (is.null(main)) name else main
@@ -378,12 +396,17 @@ mdaplotg <- function(
 
    # show legend if required
    if (show.legend == TRUE) {
+      legend <- mdaplotg.getLegend(ngroups, names(data), legend)
+      if (length(legend) != ngroups) {
+         stop("Number of values for 'legend' is not the same as number of plot series.")
+      }
+
       lty[type == "p" | type == "h"] <- 0
       pch[type == "l"] <- NA_integer_
       pch[type == "h"] <- 15
 
-      mdaplot.showLegend(
-         legend, col, pch = pch, lty = lty, lwd = lwd, cex = cex,
+      mdaplotg.showLegend(
+         legend, col = col, pch = pch, lty = lty, lwd = lwd, cex = cex,
          position = legend.position
       )
    }
