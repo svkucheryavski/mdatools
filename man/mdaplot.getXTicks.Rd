@@ -4,14 +4,14 @@
 \alias{mdaplot.getXTicks}
 \title{Prepare xticks for plot}
 \usage{
-mdaplot.getXTicks(xticks, x_values, xlim, type)
+mdaplot.getXTicks(xticks, xlim, x_values = NULL, type = NULL)
 }
 \arguments{
 \item{xticks}{xticks provided by user (if any)}
 
-\item{x_values}{x values for the plot data object}
-
 \item{xlim}{limits for x axis}
+
+\item{x_values}{x values for the plot data object}
 
 \item{type}{type of the plot}
 }

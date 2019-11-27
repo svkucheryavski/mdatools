@@ -402,7 +402,7 @@ mdaplot.getYAxisLim <- function(ps, ylim, show.excluded = FALSE, show.lines = FA
 #' limits for x axis
 #' @param type
 #' type of the plot
-mdaplot.getXTicks <- function(xticks, x_values, xlim, type) {
+mdaplot.getXTicks <- function(xticks, xlim, x_values = NULL, type = NULL) {
 
    if (!is.null(xticks)) return(xticks)
    if (type != "p" && length(x_values) == 1) return(1)
@@ -419,7 +419,7 @@ mdaplot.getXTicks <- function(xticks, x_values, xlim, type) {
 #' limits for y axis
 #' @param type
 #' type of the plot
-mdaplot.getYTicks <- function(yticks, y_values, ylim, type) {
+mdaplot.getYTicks <- function(yticks, ylim, y_values = NULL, type = NULL) {
 
    if (!is.null(yticks)) return(yticks)
    if (type != "p" && length(y_values) == 1) return(1)
@@ -690,11 +690,11 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
 
       # check and prepare xticklabels
       xticklabels <- mdaplot.getXTickLabels(xticklabels, xticks, ps$excluded_cols)
-      xticks <- mdaplot.getXTicks(xticks, ps$x_values, xlim, type)
+      xticks <- mdaplot.getXTicks(xticks, xlim, ps$x_values, type)
 
       # check and prepare yticklabels
       yticklabels <- mdaplot.getYTickLabels(yticklabels, yticks, ps$excluded_rows)
-      yticks <- mdaplot.getYTicks(yticks, ps$y_values, ylim, type)
+      yticks <- mdaplot.getYTicks(yticks, ylim, ps$y_values, type)
 
       # define title and labels
       if (is.null(main)) main <- ps$name

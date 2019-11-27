@@ -354,6 +354,14 @@ mdaplotg <- function(
    xlim <- mdaplotg.getXLim(ps, xlim, show.excluded, show.legend, legend.position)
    ylim <- mdaplotg.getYLim(ps, ylim, show.excluded, show.legend, legend.position, show.labels)
 
+   # check and prepare xticklabels
+   xticklabels <- mdaplot.getXTickLabels(xticklabels, xticks, NULL)
+   xticks <- mdaplot.getXTicks(xticks, xlim = xlim)
+
+   # check and prepare yticklabels
+   yticklabels <- mdaplot.getYTickLabels(yticklabels, yticks, NULL)
+   yticks <- mdaplot.getYTicks(yticks, ylim = ylim)
+
    # define main title if not provided (either as "name" or as "name" attr of first dataset)
    main <- if (is.null(main)) name else main
    main <- if (is.null(main)) ps[[1]]$data_attrs[["name"]] else main

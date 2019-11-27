@@ -4,14 +4,14 @@
 \alias{mdaplot.getYTicks}
 \title{Prepare yticks for plot}
 \usage{
-mdaplot.getYTicks(yticks, y_values, ylim, type)
+mdaplot.getYTicks(yticks, ylim, y_values = NULL, type = NULL)
 }
 \arguments{
 \item{yticks}{yticks provided by user (if any)}
 
-\item{y_values}{y values for the plot data object}
-
 \item{ylim}{limits for y axis}
+
+\item{y_values}{y values for the plot data object}
 
 \item{type}{type of the plot}
 }
