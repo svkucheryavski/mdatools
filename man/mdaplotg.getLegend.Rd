@@ -4,14 +4,14 @@
 \alias{mdaplotg.getLegend}
 \title{Create and return vector with legend values}
 \usage{
-mdaplotg.getLegend(ngroups, data.names, legend = NULL)
+mdaplotg.getLegend(ps, data.names, legend = NULL)
 }
 \arguments{
-\item{ngroups}{number of grops (plot series)}
-
 \item{data.names}{names of the series}
 
 \item{legend}{legend values provided by user}
+
+\item{ngroups}{number of grops (plot series)}
 }
 \description{
 Create and return vector with legend values

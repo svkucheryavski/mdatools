@@ -124,7 +124,7 @@ mdaplotg.processParam <- function(param, name, is.type, ngroups) {
 #' names of the series
 #' @param legend
 #' legend values provided by user
-mdaplotg.getLegend <- function(ngroups, data.names, legend = NULL) {
+mdaplotg.getLegend <- function(ps, data.names, legend = NULL) {
 
    if (!is.null(legend)) {
       return(legend)
@@ -404,7 +404,7 @@ mdaplotg <- function(
 
    # show legend if required
    if (show.legend == TRUE) {
-      legend <- mdaplotg.getLegend(ngroups, names(data), legend)
+      legend <- mdaplotg.getLegend(ps, names(data), legend)
       if (length(legend) != ngroups) {
          stop("Number of values for 'legend' is not the same as number of plot series.")
       }
