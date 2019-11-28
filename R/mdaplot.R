@@ -208,7 +208,7 @@ mdaplot.showLines <- function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.
 #' on number of groups for the objects.
 #'
 #' @param ngroups
-#' number of groups.
+#' number of colors to create.
 #' @param cgroup
 #' vector of values, used for color grouping of plot points or lines.
 #' @param colmap
@@ -283,10 +283,12 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
       ngroups <- ifelse(ngroups > maxsplits, maxsplits, ngroups)
    }
 
+   # if number of groups is larger make binning of cgroup parameter
    if (ngroups > 1) {
       cgroup <- cut(as.numeric(cgroup), ngroups, include.lowest = TRUE)
    }
 
+   # create colors and return
    out_palette <- mdaplot.prepareColors(palette, ngroups, opacity)
    colors <- out_palette[as.numeric(cgroup)]
    attr(colors, "palette") <- out_palette
@@ -307,6 +309,8 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
 #' limits provided by user
 #' @param show.lines
 #' logical or numeric with line coordinates to be shown on the plot.
+#' @param show.excluded
+#' logical, will excluded values be shown on the plot
 #' @param bwd
 #' if limits are computed for bar plot, this is a bar width (otherwise NULL)
 #'
@@ -333,12 +337,18 @@ mdaplot.getXAxisLim <- function(ps, xlim, show.lines = FALSE, show.excluded = FA
 
    if (show.excluded && !is.null(ps$x_values_excluded)) {
       xlim_excluded <- range(ps$x_values_excluded)
-      xlim <- c(min(xlim[1], xlim_excluded[1]), max(xlim[2], xlim_excluded[2]))
+      xlim <- c(
+         min(xlim[1], xlim_excluded[1], na.rm = TRUE),
+         max(xlim[2], xlim_excluded[2], na.rm = TRUE)
+      )
    }
 
    # find if show.lines is in use
    if (length(show.lines) == 2 && is.numeric(show.lines[1])) {
-      xlim <- c(min(xlim[1], show.lines[1]), max(xlim[2], show.lines[1]))
+      xlim <- c(
+         min(xlim[1], show.lines[1], na.rm = TRUE),
+         max(xlim[2], show.lines[1], na.rm = TRUE)
+      )
    }
 
    # add extra margins (3.5%)
@@ -348,7 +358,29 @@ mdaplot.getXAxisLim <- function(ps, xlim, show.lines = FALSE, show.excluded = FA
    return(xlim)
 }
 
-mdaplot.getYAxisLim <- function(ps, ylim, show.excluded = FALSE, show.lines = FALSE,
+#' Calculate limits for y-axis.
+#'
+#' @description
+#' Calculates limits for y-axis depending on data values that have to be plotted,
+#' extra plot elements that have to be shown and margins.
+#'
+#' @param ps
+#' `plotseries` object.
+#' @param ylim
+#' limits provided by user
+#' @param show.lines
+#' logical or numeric with line coordinates to be shown on the plot.
+#' @param show.excluded
+#' logical, will excluded values be shown on the plot
+#' @param show.labels
+#' logical, will data labels be shown on the plot
+#' @param show.colorbar
+#' logical, will colorbar be shown on the plot
+#'
+#' @return
+#' Returns a vector with two limits.
+#'
+mdaplot.getYAxisLim <- function(ps, ylim, show.lines = FALSE, show.excluded = FALSE,
    show.labels = FALSE, show.colorbar = FALSE) {
 
    # if user provided limits for y - use them
@@ -363,7 +395,10 @@ mdaplot.getYAxisLim <- function(ps, ylim, show.excluded = FALSE, show.lines = FA
    # if excluded values must be shown - correct internal limits
    if (show.excluded && !is.null(ps$y_values_excluded)) {
       ylim_excluded <- range(ps$y_values_excluded)
-      ylim <- c(min(ylim[1], ylim_excluded[1]), max(ylim[2], ylim_excluded[2]))
+      ylim <- c(
+         min(ylim[1], ylim_excluded[1], na.rm = TRUE),
+         max(ylim[2], ylim_excluded[2], na.rm = TRUE)
+      )
    }
 
    # if labels must be shown increase the upper limit
@@ -378,7 +413,10 @@ mdaplot.getYAxisLim <- function(ps, ylim, show.excluded = FALSE, show.lines = FA
 
    # find if show.lines is in use
    if (length(show.lines) == 2 && is.numeric(show.lines[2])) {
-      ylim <- c(min(ylim[1], show.lines[2]), max(ylim[2], show.lines[2]))
+      ylim <- c(
+         min(ylim[1], show.lines[2], na.rm = TRUE),
+         max(ylim[2], show.lines[2], na.rm = TRUE)
+      )
    }
 
    # add an extra margin to y limit if colorbar must be shown
@@ -396,12 +434,14 @@ mdaplot.getYAxisLim <- function(ps, ylim, show.excluded = FALSE, show.lines = FA
 #'
 #' @param xticks
 #' xticks provided by user (if any)
-#' @param x_values
-#' x values for the plot data object
 #' @param xlim
 #' limits for x axis
+#' @param x_values
+#' x values for the plot data object
 #' @param type
 #' type of the plot
+#'
+#' @export
 mdaplot.getXTicks <- function(xticks, xlim, x_values = NULL, type = NULL) {
 
    if (!is.null(xticks)) return(xticks)
@@ -413,12 +453,14 @@ mdaplot.getXTicks <- function(xticks, xlim, x_values = NULL, type = NULL) {
 #'
 #' @param yticks
 #' yticks provided by user (if any)
-#' @param y_values
-#' y values for the plot data object
 #' @param ylim
 #' limits for y axis
+#' @param y_values
+#' y values for the plot data object
 #' @param type
 #' type of the plot
+#'
+#' @export
 mdaplot.getYTicks <- function(yticks, ylim, y_values = NULL, type = NULL) {
 
    if (!is.null(yticks)) return(yticks)
@@ -436,6 +478,7 @@ mdaplot.getYTicks <- function(yticks, ylim, y_values = NULL, type = NULL) {
 #' @param excluded_cols
 #' columns excluded from plot data (if any)
 #'
+#' @export
 mdaplot.getXTickLabels <- function(xticklabels, xticks, excluded_cols) {
 
    if (is.null(xticklabels)) return(TRUE)
@@ -459,6 +502,7 @@ mdaplot.getXTickLabels <- function(xticklabels, xticks, excluded_cols) {
 #' @param excluded_rows
 #' rows excluded from plot data (if any)
 #'
+#' @export
 mdaplot.getYTickLabels <- function(yticklabels, yticks, excluded_rows) {
 
    if (is.null(yticklabels)) return(TRUE)
@@ -539,9 +583,8 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #'
 #' @param data
 #' a vector, matrix or a data.frame with data values.
-#' @param plot.data
-#' a list of parameters and values obtained after preprocessing of original data provided
-#' by a user (if NULL it will be created automatically).
+#' @param ps
+#' `plotseries` object, if NULL will be created based on the provided data values
 #' @param type
 #' type of the plot ('p', 'l', 'b', 'h', 'e', 'i').
 #' @param cgroup
@@ -558,6 +601,12 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #' a width of a bar as a percent of a maximum space available for each bar.
 #' @param border
 #' color for border of bars (if barplot is used)
+#' @param lty
+#' line type
+#' @param lwd
+#' line width
+#' @param cex
+#' scale factor for the marker
 #' @param xlim
 #' limits for the x axis (if NULL, will be calculated automatically).
 #' @param ylim
@@ -656,6 +705,10 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #'
 #' @examples
 #' # See all examples in the tutorial.
+#'
+#' @importFrom grDevices axisTicks dev.cur
+#' @importFrom graphics abline axis grid hist image lines matlines par
+#' @importFrom graphics plot plot.new points rasterImage rect segments text
 #'
 #' @export
 mdaplot <- function(data = NULL, ps = NULL, type = "p",

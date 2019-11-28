@@ -258,7 +258,7 @@ getPlotColors <- function(ps, col, opacity, cgroup, colmap) {
    }
 
    # if user did not specify cgroup - get one color based on colmap and opacity
-   if (is.null(cgroup) || ps$type == "e") {
+   if (is.null(cgroup) || ps$type == "e") {
       return(list(
          col = mdaplot.getColors(1, colmap = colmap, opacity = opacity),
          colmap = colmap,
@@ -459,12 +459,18 @@ getDataLabels <- function(ps, labels = NULL) {
 #'
 #' @param ps
 #' `plotseries` object
+#' @param show.excluded
+#' logical, are excluded rows also shown on the plot
 #' @param pos
 #' position of the labels relative to the data points
 #' @param cex
 #' size of the labels text
 #' @param col
 #' color of the labels text
+#' @param force.x.values
+#' vector with forced x-values (or NULL)
+#' @param bwd
+#' bar width in case of bar plot
 #'
 showLabels <- function(ps, show.excluded = FALSE, pos = 3, cex = 0.65, col = "darkgray",
    force.x.values = NULL, bwd = 0.8) {
@@ -546,8 +552,10 @@ plotScatter <- function(ps, pch = 16, col = ps$col, bg = "white", lwd = 1, cex =
 #' `plotseries` object
 #' @param col
 #' a color for markers or lines (same as \code{plot} parameter).
+#' @param lty
+#' line type
 #' @param lwd
-#' line width for the error bars
+#' line width
 #' @param cex
 #' scale factor for the marker
 #' @param col.excluded
@@ -822,8 +830,6 @@ plotConvexHull <- function(p, lwd = 1, lty = 1, opacity = 0) {
 #' thickness of line used to show the hull
 #' @param lty
 #' type of line used to show the hull
-#' @param conf.level
-#' confidence level to make the ellipse for (between 0 and 1)
 #' @param opacity
 #' of opacity is larger than 0 a semi-transparent polygon is shown over points
 #' @param shape_function
@@ -885,6 +891,6 @@ plotPointsShape <- function(p, lwd, lty, opacity, shape_function, ...) {
 #' @param ...
 #' other parameters available for `abline()` function
 #'
-plotRegressionLine <- function(p, col = ps$col, ...) {
+plotRegressionLine <- function(p, col = p$col, ...) {
    abline(lm(p$y_values ~ p$x_values), col = col, ...)
 }

@@ -13,6 +13,6 @@ pls.calculateVIPScores(object)
 matrix \code{nvar x ny} with VIP score values for selected number of components
 }
 \description{
-Calculates VIP (Variable Importance in Projection) scores for each component and 
+Calculates VIP (Variable Importance in Projection) scores for each component and
 response variable in the PLS model
 }

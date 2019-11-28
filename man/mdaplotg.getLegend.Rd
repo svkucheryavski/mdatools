@@ -7,11 +7,14 @@
 mdaplotg.getLegend(ps, data.names, legend = NULL)
 }
 \arguments{
-\item{data.names}{names of the series}
+\item{ps}{list with plot series}
+
+\item{data.names}{names of the data sets}
 
 \item{legend}{legend values provided by user}
-
-\item{ngroups}{number of grops (plot series)}
+}
+\value{
+vector of text values for the legend
 }
 \description{
 Create and return vector with legend values

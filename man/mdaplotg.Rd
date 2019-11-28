@@ -2,7 +2,7 @@
 % Please edit documentation in R/mdaplotg.R
 \name{mdaplotg}
 \alias{mdaplotg}
-\title{Plotting function for several sets of objects}
+\title{Plotting function for several plot series}
 \usage{
 mdaplotg(data, groupby = NULL, type = "p", pch = 16, lty = 1,
   lwd = 1, cex = 1, col = NULL, bwd = 0.8, legend = NULL,
@@ -93,14 +93,14 @@ of objects.
 \details{
 The \code{mdaplotg} function is used to make a plot with several sets of objects. Simply
 speaking, use it when you need a plot with legend. For example to show line plot with spectra
-from calibration and test set, scatter plot for height and weight values for women and men, and
+from calibration and test set, scatter plot with height and weight values for women and men, and
 so on.
 
 Most of the parameters are similar to \code{\link{mdaplot}}, the difference is described below.
 
-The data should be organized as a list, every item is a matrix with data for one set of objects.
-Alternatively you can provide data as a matrix and use parameter \code{groupby} to create groups.
-See tutorial for more details.
+The data should be organized as a list, every item is a matrix (or data frame) with data for one
+set of objects. Alternatively you can provide data as a matrix and use parameter
+\code{groupby} to create the groups. See tutorial for more details.
 
 There is no color grouping option, because color is used to separate the sets. Marker symbol,
 line style and type, etc. can be defined as a single value (one for all sets) and as a vector

@@ -1,7 +1,7 @@
 #' Regression results
-#' 
+#'
 #' @description
-#' Class for storing and visualisation of regression predictions 
+#' Class for storing and visualisation of regression predictions
 #'
 #' @param y.pred
 #' vector or matrix with y predicted values
@@ -9,7 +9,7 @@
 #' vector with reference (measured) y values
 #' @param ncomp.selected
 #' if y.pred calculated for different components, which to use as default
-#' 
+#'
 #' @return
 #' a list (object of \code{regres} class) with fields, including:
 #' \tabular{ll}{
@@ -23,19 +23,19 @@
 #'    \code{bias} \tab bias for predicted vs measured values \cr
 #'    \code{rpd} \tab RPD values \cr
 #' }
-#' 
+#'
 #' @export
-regres = function(y.pred, y.ref = NULL, ncomp.selected = 1) {   
+regres = function(y.pred, y.ref = NULL, ncomp.selected = 1) {
    obj = list()
    obj$y.pred = y.pred
    obj$ncomp.selected = ncomp.selected
-   
+
    if (!is.null(y.ref)) {
       attrs = mda.getattr(y.ref)
-      y.ref = as.matrix(y.ref)      
+      y.ref = as.matrix(y.ref)
       y.ref = mda.setattr(y.ref, attrs)
       obj$y.ref = y.ref
-      
+
       # remove excluded rows so they are not counted
       # when calculating statistics
       attrs = mda.getattr(y.pred)
@@ -44,28 +44,28 @@ regres = function(y.pred, y.ref = NULL, ncomp.selected = 1) {
          if (nrow(y.ref) > nrow(y.pred))
             y.ref = y.ref[-attrs$exclrows, , drop = F]
       }
-      
+
       # residuals (errors) based statistics
       err = regres.err(y.ref, y.pred)
       ytot = apply(y.ref, 2, function(y) { sum((y - mean(y))^2) })
       obj$r2 = regres.r2(err, ytot)
       obj$bias = regres.bias(err)
       obj$rmse = regres.rmse(err)
-      
-      # other statistics      
+
+      # other statistics
       obj$slope = regres.slope(y.ref, y.pred)
       obj$sep = sqrt(obj$rmse^2 - obj$bias^2)
       obj$rpd = apply(y.ref, 2, sd)/obj$sep
    }
-         
-   obj$call = match.call()   
+
+   obj$call = match.call()
    class(obj) = "regres"
-   
+
    obj
 }
 
 #' Error of prediction
-#' 
+#'
 #' @description
 #' Calculates array of differences between predicted and reference values.
 #'
@@ -76,23 +76,23 @@ regres = function(y.pred, y.ref = NULL, ncomp.selected = 1) {
 #'
 regres.err = function(y.ref, y.pred) {
    err = array(0, dim = dim(y.pred))
-   
+
    for (i in 1:ncol(y.ref)) {
-      # minus because in computing err we use y.pred - y.ref 
+      # minus because in computing err we use y.pred - y.ref
       err[, , i] = -apply(y.pred[, , i, drop = F], 2, "-", y.ref[, i, drop = F])
    }
-   
+
    dimnames(err) = dimnames(y.pred)
    attr(err, 'name') = 'Errors'
    attr(err, 'xaxis.name') = 'Components'
    attr(err, 'yaxis.name') = 'Predictors'
    err
-} 
+}
 
 #' Determination coefficient
-#' 
+#'
 #' @description
-#' Calculates matrix with coeffient of determination for every response and components 
+#' Calculates matrix with coeffient of determination for every response and components
 #'
 #' @param err
 #' vector with difference between reference and predicted y-values
@@ -102,39 +102,39 @@ regres.err = function(y.ref, y.pred) {
 regres.r2 = function(err, ytot) {
 
    r2 = t(1 - scale(colSums(err^2), center = F, scale = ytot))
-   
+
    rownames(r2) = dimnames(err)[[3]]
    colnames(r2) = dimnames(err)[[2]]
    attr(r2, 'name') = 'Coefficient of determination'
    attr(r2, 'xaxis.name') = 'Components'
    attr(r2, 'yaxis.name') = 'Predictors'
-   
-   r2
-}  
 
-#' Prediction bias 
-#' 
+   r2
+}
+
+#' Prediction bias
+#'
 #' @description
-#' Calculates matrix with bias (average prediction error) for every response and components 
+#' Calculates matrix with bias (average prediction error) for every response and components
 #'
 #' @param err
 #' vector with difference between reference and predicted y-values
 #'
 regres.bias = function(err) {
-   
+
    bias = t(colSums(err) / nrow(err))
-   
+
    rownames(bias) = dimnames(err)[[3]]
    colnames(bias) = dimnames(err)[[2]]
    attr(bias, 'name') = 'Bias'
    attr(bias, 'xaxis.name') = 'Components'
    attr(bias, 'yaxis.name') = 'Predictors'
-   
+
    bias
-}  
+}
 
 #' RMSE
-#' 
+#'
 #' @description
 #' Calculates matrix with root mean squared error of prediction for every response and components.
 #'
@@ -144,18 +144,18 @@ regres.bias = function(err) {
 regres.rmse = function(err) {
 
    rmse = t(sqrt(colSums(err^2) / nrow(err)))
-   
+
    rownames(rmse) = dimnames(err)[[3]]
    colnames(rmse) = dimnames(err)[[2]]
    attr(rmse, 'name') = 'RMSE'
    attr(rmse, 'xaxis.name') = 'Components'
    attr(rmse, 'yaxis.name') = 'Predictors'
-   
-   rmse
-} 
 
-#' Slope 
-#' 
+   rmse
+}
+
+#' Slope
+#'
 #' @description
 #' Calculates matrix with slope of predicted and measured values for every response and components.
 #'
@@ -168,11 +168,11 @@ regres.slope = function(y.ref, y.pred) {
    nresp = ncol(y.ref)
    ncomp = ncol(y.pred)
    slope = matrix(0, nrow = nresp, ncol = ncomp)
-   
+
    for (i in 1:nresp)
-   {   
+   {
       for (a in 1:ncomp)
-      {   
+      {
          m = lm(y.pred[, a, i] ~ y.ref[, i])
          slope[i, a] = m$coefficients[[2]]
       }
@@ -183,12 +183,12 @@ regres.slope = function(y.ref, y.pred) {
    attr(slope, 'name') = 'Slope'
    attr(slope, 'xaxis.name') = 'Components'
    attr(slope, 'yaxis.name') = 'Predictors'
-   
+
    slope
-}   
+}
 
 #' RMSE plot for regression results
-#' 
+#'
 #' @description
 #' Shows plot with RMSE values vs. model complexity (e.g. number of components).
 #'
@@ -199,18 +199,18 @@ regres.slope = function(y.ref, y.pred) {
 #' @param type
 #' type of the plot
 #' @param labels
-#' what to show as labels for plot objects. 
+#' what to show as labels for plot objects.
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
 #' @export
 plotRMSE.regres = function(obj, ny = 1, type = 'b', labels = 'values', ...) {
-   
+
    if (is.null(obj$rmse)) {
       warning('RMSE values are not available.')
       return()
    }
- 
+
    data = mda.subset(obj$rmse, ny)
    attr(data, 'xaxis.name') = 'Components'
    attr(data, 'yaxis.name') = 'RMSE'
@@ -222,7 +222,7 @@ plotRMSE.regres = function(obj, ny = 1, type = 'b', labels = 'values', ...) {
 }
 
 #' Predictions plot for regression results
-#' 
+#'
 #' @description
 #' Shows plot with predicted y values.
 #'
@@ -234,11 +234,11 @@ plotRMSE.regres = function(obj, ny = 1, type = 'b', labels = 'values', ...) {
 #' complexity of model (e.g. number of components) to show the plot for
 #' @param show.line
 #' logical, show or not line fit for the plot points
-#' @param show.stat 
+#' @param show.stat
 #' logical, show or not legend with statistics on the plot
-#' @param stat.col 
+#' @param stat.col
 #' color of text in legend with statistics
-#' @param stat.cex 
+#' @param stat.cex
 #' size of text in legend with statistics
 #' @param axes.equal
 #' logical, make limits for x and y axes equal or not
@@ -248,14 +248,14 @@ plotRMSE.regres = function(obj, ny = 1, type = 'b', labels = 'values', ...) {
 #' other plot parameters (see \code{mdaplot} for details)
 #'
 #' @details
-#' If reference values are available, the function shows a scatter plot with predicted vs. 
+#' If reference values are available, the function shows a scatter plot with predicted vs.
 #' reference values, otherwise predicted values are shown vs. object numbers.
-#' 
+#'
 #' @export
-plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T, 
+plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T,
                                   show.stat = F, stat.col = '#606060', stat.cex = 0.85,
                                   axes.equal = T, col = mdaplot.getColors(1), ...) {
-   
+
    if (length(ny) != 1)
       stop('You can show prediction plot only for one selected response variable!')
 
@@ -263,36 +263,36 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T,
       ncomp = obj$ncomp.selected
    else if (length(ncomp) != 1 || ncomp < 1 || ncomp > ncol(obj$y.pred))
       stop('Wrong number of components!')
-   
-   if (is.null(dimnames(obj$y.pred)) || is.null(dimnames(obj$y.pred)[[3]])) 
+
+   if (is.null(dimnames(obj$y.pred)) || is.null(dimnames(obj$y.pred)[[3]]))
       yaxis.name = 'y, predicted'
    else
       yaxis.name = sprintf('%s, predicted', dimnames(obj$y.pred)[[3]][ny])
-   
-   if (!is.null(dimnames(obj$y.pred)) && !is.null(dimnames(obj$y.pred)[[3]])) 
+
+   if (!is.null(dimnames(obj$y.pred)) && !is.null(dimnames(obj$y.pred)[[3]]))
       xaxis.name = sprintf('%s, reference', dimnames(obj$y.pred)[[3]][ny])
    else
       xaxis.name = 'y, reference'
 
    attrs = mda.getattr(obj$y.pred)
-   if (is.null(obj$y.ref)) {   
+   if (is.null(obj$y.ref)) {
       data = matrix(obj$y.pred[, ncomp, ny], ncol = 1)
       xaxis.name = NULL
-   } else {      
+   } else {
       data = cbind(obj$y.ref[, ny], obj$y.pred[, ncomp, ny])
    }
-   
+
    lim = c(min(data), max(data))
    data = mda.setattr(data, attrs)
    colnames(data) = c(xaxis.name, yaxis.name)
    rownames(data) = rownames(obj$y.pred)
    attr(data, 'name') = 'Predictions'
-   
+
    if (axes.equal && !is.null(lim))
       p = mdaplot(data, type = 'p', xlim = lim, ylim = lim, ...)
    else
       p = mdaplot(data, type = 'p', ...)
-   
+
    if (show.stat && !is.null(obj$y.ref)) {
       dl = (lim[2] - lim[1])/20
       stat.text = paste(
@@ -301,18 +301,21 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T,
          'R2 = ', round(obj$r2[ncomp], 3),
          sep = ''
       )
-      
+
       text(lim[1] + dl, lim[2], stat.text, adj = c(0, 1), col = stat.col, cex = stat.cex)
    }
-   if (show.line == T && ncol(data) == 2)
-      mdaplot.showRegressionLine(data, colmap = 'default', col = col)
+
+   # TODO: refactor next three lines according to new plotting methods
+   #if (show.line == T && ncol(data) == 2) {
+   #   mdaplot.showRegressionLine(data, colmap = 'default', col = col)
+   #}
 }
 
 #' Residuals plot for regression results
 #'
 #' @description
-#' Shows plot with Y residuals (difference between predicted and reference values) for selected 
-#' response variable and complexity (number of components). 
+#' Shows plot with Y residuals (difference between predicted and reference values) for selected
+#' response variable and complexity (number of components).
 #'
 #' @param obj
 #' regression results (object of class \code{regres})
@@ -324,35 +327,35 @@ plotPredictions.regres = function(obj, ny = 1, ncomp = NULL, show.line = T,
 #' logical, show or not zero line on the plot
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
-#' 
+#'
 #' @export
 plotYResiduals.regres = function(obj, ny = 1, ncomp = NULL, show.line = T, ...) {
 
-   if (is.null(obj$y.ref)) {   
+   if (is.null(obj$y.ref)) {
       warning('Y residuals can not be plotted without reference values.')
    }
 
    if (length(ny) != 1)
       stop('You can show prediction plot only for one selected response variable!')
-   
+
    if (is.null(ncomp))
       ncomp = obj$ncomp.selected
    else if (length(ncomp) != 1 || ncomp < 1 || ncomp > ncol(obj$y.pred))
       stop('Wrong number of components!')
-   
+
    if (show.line == T)
       show.line = c(NA, 0)
-      
+
    if (is.null(ncomp))
       name = 'Y residuals'
    else
       name = sprintf('Y residuals (ncomp = %d)', ncomp)
 
-   if (!is.null(dimnames(obj$y.pred)) && !is.null(dimnames(obj$y.pred)[[3]])) 
+   if (!is.null(dimnames(obj$y.pred)) && !is.null(dimnames(obj$y.pred)[[3]]))
       xaxis.name = sprintf('%s, reference', dimnames(obj$y.pred)[[3]][ny])
    else
       xaxis.name = 'y, reference'
-   
+
    attr = mda.getattr(obj$y.pred)
    data = cbind(obj$y.ref[, ny], obj$y.ref[, ny] - obj$y.pred[, ncomp, ny])
    data = mda.setattr(data, attr)
@@ -363,30 +366,30 @@ plotYResiduals.regres = function(obj, ny = 1, ncomp = NULL, show.line = T, ...) 
 }
 
 #' plot method for regression results
-#' 
+#'
 #' @details
 #' Shows prediction plot for the results (the same as \code{plotPredictions.regres})
-#' 
+#'
 #' @param x
 #' regression results (object of class \code{regres})
 #' @param ny
 #' which response to show the plot for (if y is multivariate)
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
-#' 
+#'
 #' @export
 plot.regres = function(x, ny = 1, ...)
 {
    obj = x
-   
+
    plotPredictions.regres(obj, ny = ny, ...)
-}   
+}
 
 #' as.matrix method for regression results
-#' 
+#'
 #' @description
 #' Returns a matrix with model performance statistics for regression results
-#' 
+#'
 #' @param x
 #' regression results (object of class \code{regres})
 #' @param ncomp
@@ -395,31 +398,31 @@ plot.regres = function(x, ny = 1, ...)
 #' for which response variable calculate the statistics for
 #' @param ...
 #' other arguments
-#' 
+#'
 #' @export
 as.matrix.regres = function(x, ncomp = NULL, ny = 1, ...) {
    obj = x
-   
-   if (!is.null(obj$y.ref)) {  
+
+   if (!is.null(obj$y.ref)) {
       if (is.null(ncomp))
-         res = cbind(obj$r2[ny, ], obj$rmse[ny, ], obj$slope[ny, ], obj$bias[ny, ], obj$rpd[ny, ])   
+         res = cbind(obj$r2[ny, ], obj$rmse[ny, ], obj$slope[ny, ], obj$bias[ny, ], obj$rpd[ny, ])
       else
-         res = cbind(obj$r2[ny, ncomp], obj$rmse[ny, ncomp], obj$slope[ny, ncomp], 
-                     obj$bias[ny, ncomp], obj$rpd[ny, ncomp])   
-      
+         res = cbind(obj$r2[ny, ncomp], obj$rmse[ny, ncomp], obj$slope[ny, ncomp],
+                     obj$bias[ny, ncomp], obj$rpd[ny, ncomp])
+
       colnames(res) = c('R2', 'RMSE', 'Slope', 'Bias', 'RPD')
    } else {
       res = NULL
-   }   
-   
+   }
+
    res
 }
 
 #' summary method for regression results object
-#' 
+#'
 #' @description
 #' Shows performance statistics for the regression results.
-#' 
+#'
 #' @param object
 #' regression results (object of class \code{regres})
 #' @param ncomp
@@ -428,68 +431,68 @@ as.matrix.regres = function(x, ncomp = NULL, ny = 1, ...) {
 #' for which response variable show the summary for
 #' @param ...
 #' other arguments
-#' 
+#'
 #' @export
 summary.regres = function(object, ncomp = NULL, ny = NULL, ...) {
    obj = object
-   
+
    cat('\nRegression results (class regres) summary\n')
    if (!is.null(obj$y.ref))
-   {         
+   {
       if (is.null(ncomp))
          ncomp = obj$ncomp.selected
-      
+
       if (is.null(ny))
          ny = 1:ncol(obj$y.ref)
-      
+
       if (!is.null(ncomp))
          cat(sprintf('\nNumber of selected components: %d\n\n', ncomp))
-         
+
       for (i in ny)
-      {   
+      {
          cat(sprintf('\nResponse variable %s:\n', colnames(obj$y.ref)[i]))
          res = as.matrix.regres(obj, ny = i, ncomp = ncomp)
          rownames(res) = ncomp
          print(res)
       }
-      
-   }      
+
+   }
    else
    {
       cat('No reference data provided to calculate prediction performance.')
-   }   
-}   
+   }
+}
 
 #' print method for regression results object
-#' 
+#'
 #' @description
 #' Prints information about the object structure
-#' 
+#'
 #' @param x
 #' regression results (object of class \code{regres})
 #' @param ...
 #' other arguments
-#' 
+#'
 #' @export
 print.regres = function(x, ...){
    obj = x
-   
+
    cat('\nRegression results (class regres)\n')
    cat('\nCall:\n')
    print(obj$call)
-   
-   cat('\nMajor fields:\n')   
+
+   cat('\nMajor fields:\n')
    cat('$y.pred - matrix or vector with predicted y values\n')
    if (!is.null(obj$y.ref))
-   {   
+   {
       cat('$y.ref - vector with reference y values\n')
       cat('$rmse - root mean squared error\n')
       cat('$r2 - coefficient of determination\n')
       cat('$slope - slope for predicted vs. measured values\n')
       cat('$bias - bias for prediction vs. measured values\n')
    }
-   
-   if (ncol(obj$y.pred) > 1)   
+
+   if (ncol(obj$y.pred) > 1)
       cat('$ncomp.selected - number of selected components for PCR or PLS\n')
-}   
+}
 

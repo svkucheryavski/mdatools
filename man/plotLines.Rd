@@ -12,7 +12,9 @@ plotLines(ps, col = ps$col, lty = 1, lwd = 1, cex = 1,
 
 \item{col}{a color for markers or lines (same as \code{plot} parameter).}
 
-\item{lwd}{line width for the error bars}
+\item{lty}{line type}
+
+\item{lwd}{line width}
 
 \item{cex}{scale factor for the marker}
 

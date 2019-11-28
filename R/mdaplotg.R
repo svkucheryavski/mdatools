@@ -1,4 +1,4 @@
-#' Plot legend
+#' Show legend for mdaplotg
 #'
 #' @description
 #' Shows a legend for plot elements or their groups.
@@ -50,8 +50,27 @@ mdaplotg.showLegend <- function(legend, col, pch = NULL, lty = NULL, lwd = NULL,
 
 }
 
+#' Prepare data for mdaplotg
+#'
+#' @param data
+#' datasets (in form of list, matrix or data frame)
+#' @param type
+#' vector with type for dataset
+#' @param groupby
+#' factor or  data frame with factors - used to split data matrix into groups
+#'
+#' @return
+#' list of datasets
+#'
+#' The method should prepare data as a list of datasets (matrices or data frames). One list
+#' element will be used to create one plot series.
+#'
+#' If `data` is matrix or data frame and not `groupby` parameter is provided, then every row
+#' will be taken as separate set. This option is available only for line or bar plots.
+#'
 mdaplotg.prepareData <- function(data, type, groupby) {
 
+   # if already a list - do nothing
    if (is.list(data) && !is.data.frame(data)) return(data)
 
    if (is.null(groupby)) {
@@ -74,12 +93,9 @@ mdaplotg.prepareData <- function(data, type, groupby) {
    # if groupby is provided - use it to split rows into groups
 
    ## check that groupby is a factor or data frame with factor columns
-   ## TODO: simplify the three lines below
-   is_groupby_factor <-
-      (is.data.frame(groupby) && all(unlist(lapply(groupby, is.factor)))) ||
-      is.factor(groupby)
+   if (!is.data.frame(groupby)) groupby <- as.data.frame(groupby)
 
-   if (!is_groupby_factor) {
+   if (!all(unlist(lapply(groupby, is.factor)))) {
       stop("Parameter 'groupby' should be a factor or data frame with several factors.")
    }
 
@@ -101,7 +117,17 @@ mdaplotg.prepareData <- function(data, type, groupby) {
    return(data_list)
 }
 
-# check numeric parameters and multiply them if necessary
+#' Check mdaplotg parameters and replicate them if necessary
+#'
+#' @param param
+#' A parameter to check
+#' @param name
+#' name of the parameter (needed for error message)
+#' @param is.type
+#' function to use for checking parameter type
+#' @param ngroups
+#' number of groups (plot series)
+#'
 mdaplotg.processParam <- function(param, name, is.type, ngroups) {
 
    param <- if (length(param) == 1) rep(param, ngroups) else param
@@ -118,35 +144,51 @@ mdaplotg.processParam <- function(param, name, is.type, ngroups) {
 
 #' Create and return vector with legend values
 #'
-#' @param ngroups
-#' number of grops (plot series)
+#' @param ps
+#' list with plot series
 #' @param data.names
-#' names of the series
+#' names of the data sets
 #' @param legend
 #' legend values provided by user
+#'
+#' @return
+#' vector of text values for the legend
+#'
 mdaplotg.getLegend <- function(ps, data.names, legend = NULL) {
 
-   if (!is.null(legend)) {
-      return(legend)
+   # if legend is not provided - get legend items from data names or plotseries names
+   if (is.null(legend)) {
+      legend <- if (is.null(data.names)) unlist(lapply(ps, function(x) x$data_attrs$name))
+         else data.names
    }
 
-   if (!is.null(data.names)) {
-      return(data.names)
-   }
-
-   legend.out <- unlist(lapply(ps, function(x) x$data_attrs$name))
-
-   if (is.null(legend.out)) {
+   if (is.null(legend)) {
       stop("Can not find values for the legend items.")
    }
 
-   if (length(legend.out) != length(ps)) {
+   if (length(legend) != length(ps)) {
       stop("Number of values for 'legend' is not the same as number of plot series.")
    }
 
-   return(legend.out)
+   return(legend)
 }
 
+#' Compute x-axis limits for mdaplotg
+#'
+#' @param ps
+#' list with plotseries
+#' @param xlim
+#' limits provided by user
+#' @param show.excluded
+#' logical, will excluded values also be shown
+#' @param show.legend
+#' will legend be shown on the plot
+#' @param legend.position
+#' position of legend on the plot (if shown)
+#'
+#' @return
+#' vector with two values
+#'
 mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.position) {
 
    # if user provided xlim values - use them
@@ -154,20 +196,23 @@ mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.positi
       return(xlim)
    }
 
-   # compute xlim values for each plotseries
+   # function which returns xlim values for given plotseries
    f <- function(p) {
       return(
          mdaplot.getXAxisLim(p, xlim = NULL, show.excluded = show.excluded)
       )
    }
 
+   # compute limits for all plot series and combine into matrix
    xlim <- matrix(unlist(lapply(ps, f)), ncol = 2, byrow = TRUE)
+
+   # get the smallest of min and larges of max
    xlim <- c(min(xlim[, 1]), max(xlim[, 2]))
 
    # add extra margins if legend must be shown
    if (show.legend) {
 
-      # calculate margins: dx and dy
+      # calculate margins: (10% of current limits)
       margin <- c(
          (regexpr("left", legend.position) > 0) * -0.1,
          (regexpr("right", legend.position) > 0) * 0.1
@@ -180,14 +225,32 @@ mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.positi
 }
 
 
+#' Compute y-axis limits for mdaplotg
+#'
+#' @param ps
+#' list with plotseries
+#' @param ylim
+#' limits provided by user
+#' @param show.excluded
+#' logical, will excluded values also be shown
+#' @param show.legend
+#' will legend be shown on the plot
+#' @param legend.position
+#' position of legend on the plot (if shown)
+#' @param show.labels
+#' logical, will data ponit labels also be shown
+#'
+#' @return
+#' vector with two values
+#'
 mdaplotg.getYLim <- function(ps, ylim, show.excluded, show.legend, legend.position, show.labels) {
 
-   # if user provided xlim values - use them
+   # if user provided ylim values - use them
    if (!is.null(ylim)) {
       return(ylim)
    }
 
-   # compute xlim values for each plotseries
+   # function which returns ylim values for given plotseries
    f <- function(p) {
       return(
          mdaplot.getYAxisLim(p, ylim = NULL, show.excluded = show.excluded,
@@ -195,7 +258,11 @@ mdaplotg.getYLim <- function(ps, ylim, show.excluded, show.legend, legend.positi
       )
    }
 
+   # compute limits for all plot series and combine into matrix
    ylim <- matrix(unlist(lapply(ps, f)), ncol = 2, byrow = TRUE)
+
+
+   # get the smallest of min and larges of max
    ylim <- c(min(ylim[, 1]), max(ylim[, 2]))
 
    # add extra margins if legend must be shown
@@ -213,7 +280,7 @@ mdaplotg.getYLim <- function(ps, ylim, show.excluded, show.legend, legend.positi
    return(ylim)
 }
 
-#' Plotting function for several sets of objects
+#' Plotting function for several plot series
 #'
 #' @description
 #' \code{mdaplotg} is used to make different kinds of plots or their combination for several sets
@@ -293,14 +360,14 @@ mdaplotg.getYLim <- function(ps, ylim, show.excluded, show.legend, legend.positi
 #' @details
 #' The \code{mdaplotg} function is used to make a plot with several sets of objects. Simply
 #' speaking, use it when you need a plot with legend. For example to show line plot with spectra
-#' from calibration and test set, scatter plot for height and weight values for women and men, and
+#' from calibration and test set, scatter plot with height and weight values for women and men, and
 #' so on.
 #'
 #' Most of the parameters are similar to \code{\link{mdaplot}}, the difference is described below.
 #'
-#' The data should be organized as a list, every item is a matrix with data for one set of objects.
-#' Alternatively you can provide data as a matrix and use parameter \code{groupby} to create groups.
-#' See tutorial for more details.
+#' The data should be organized as a list, every item is a matrix (or data frame) with data for one
+#' set of objects. Alternatively you can provide data as a matrix and use parameter
+#' \code{groupby} to create the groups. See tutorial for more details.
 #'
 #' There is no color grouping option, because color is used to separate the sets. Marker symbol,
 #' line style and type, etc. can be defined as a single value (one for all sets) and as a vector
@@ -308,10 +375,6 @@ mdaplotg.getYLim <- function(ps, ylim, show.excluded, show.legend, legend.positi
 #'
 #' @author
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
-#'
-#' @importFrom graphics abline axis grid hist lines matlines par plot points rect segments text
-#' image plot.new rasterImage smoothScatter
-#' @importFrom grDevices axisTicks dev.cur
 #'
 #' @export
 mdaplotg <- function(

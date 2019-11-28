@@ -23,6 +23,6 @@ and weights.
 SIMPLS algorithm for calibration of PLS model
 }
 \references{
-[1]. S. de Jong. SIMPLS: An Alternative approach to partial least squares regression. 
+[1]. S. de Jong. SIMPLS: An Alternative approach to partial least squares regression.
 Chemometrics and Intelligent Laboratory Systems, 18, 1993 (251-263).
 }

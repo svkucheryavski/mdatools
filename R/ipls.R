@@ -612,9 +612,10 @@ plotSelection.ipls = function(obj, glob.ncomp = NULL, main = 'iPLS results',
    plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, ...)
 
    # gray and green bars
-   mdaplot.plotBars(mids, rmse, col = rgb(0.9, 0.9, 0.9), bwd = bwd, border = rgb(0.8, 0.8, 0.8))
-   mdaplot.plotBars(mids[obj$int.selected], rmse[obj$int.selected], col = rgb(0.5, 1.0, 0.6),
-      bwd = bwd[obj$int.selected], border = rgb(0.4, 0.9, 0.5))
+   # TODO: refactor next two lines according to new plotting methods
+   # mdaplot.plotBars(mids, rmse, col = rgb(0.9, 0.9, 0.9), bwd = bwd, border = rgb(0.8, 0.8, 0.8))
+   # mdaplot.plotBars(mids[obj$int.selected], rmse[obj$int.selected], col = rgb(0.5, 1.0, 0.6),
+   #    bwd = bwd[obj$int.selected], border = rgb(0.4, 0.9, 0.5))
 
    # mean signal
    lines(xlabels, xmean, col = rgb(1.0, 0.7, 0.7), lwd = 2)
@@ -689,8 +690,9 @@ plotRMSE.ipls = function(obj, glob.ncomp = NULL, main = 'RMSE development', xlab
    plot(0, 0, type = 'n', main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, ...)
 
    # gray and green bars
-   mdaplot.plotBars(mids, rmse, col = rgb(0.5, 1.0, 0.6), bwd = 1, border = rgb(0.4, 0.9, 0.5))
-   mdaplot.plotBars(mids[1], rmse[1], col = rgb(0.98, 0.98, 0.98), bwd = 1, border = rgb(0.85, 0.85, 0.85))
+   # TODO: refactor next two lines according to new plotting methods
+   #mdaplot.plotBars(mids, rmse, col = rgb(0.5, 1.0, 0.6), bwd = 1, border = rgb(0.4, 0.9, 0.5))
+   #mdaplot.plotBars(mids[1], rmse[1], col = rgb(0.98, 0.98, 0.98), bwd = 1, border = rgb(0.85, 0.85, 0.85))
 
    # interval numbers
    text(mids[-1],  ylim[1] + (ylim[2] - ylim[1])/25, n[-1], col = rgb(0.4, 0.4, 0.4), cex = 0.80)

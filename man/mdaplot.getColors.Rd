@@ -8,7 +8,7 @@ mdaplot.getColors(ngroups = NULL, cgroup = NULL, colmap = "default",
   opacity = 1, maxsplits = 64)
 }
 \arguments{
-\item{ngroups}{number of groups.}
+\item{ngroups}{number of colors to create.}
 
 \item{cgroup}{vector of values, used for color grouping of plot points or lines.}
 

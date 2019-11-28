@@ -4,7 +4,7 @@
 \alias{plotRegressionLine}
 \title{Add regression line for data points}
 \usage{
-plotRegressionLine(p, col = ps$col, ...)
+plotRegressionLine(p, col = p$col, ...)
 }
 \arguments{
 \item{p}{plot data returned by function `mdaplot()`}

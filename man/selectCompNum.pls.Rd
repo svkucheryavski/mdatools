@@ -12,7 +12,7 @@
 
 \item{ncomp}{number of components to select}
 
-\item{selcrit}{criterion for selecting optimal number of components (\code{'min'} for 
+\item{selcrit}{criterion for selecting optimal number of components (\code{'min'} for
 first local minimum of RMSECV and \code{'wold'} for Wold's rule.)}
 
 \item{...}{other parameters if any}
@@ -26,7 +26,7 @@ Allows user to select optimal number of components for PLS model
 \details{
 If number of components is not specified, the cross-validation statistics will be used. It can
 be either first local minimum of RMSECV (`selcrit='min'`) or Wold's rule (`selcrit='wold'`)
-based on ratio of PRESS values and threshold of 0.95. 
+based on ratio of PRESS values and threshold of 0.95.
 
 See examples in help for \code{\link{pls}} function.
 }

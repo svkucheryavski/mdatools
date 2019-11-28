@@ -18,8 +18,6 @@ plotPointsShape(p, lwd, lty, opacity, shape_function, ...)
 \item{shape_function}{function which calculates and return coordinates of the shape}
 
 \item{...}{extra parameters for shape_function}
-
-\item{conf.level}{confidence level to make the ellipse for (between 0 and 1)}
 }
 \description{
 Add confidence ellipse or convex hull for group of points

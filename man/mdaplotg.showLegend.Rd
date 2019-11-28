@@ -2,7 +2,7 @@
 % Please edit documentation in R/mdaplotg.R
 \name{mdaplotg.showLegend}
 \alias{mdaplotg.showLegend}
-\title{Plot legend}
+\title{Show legend for mdaplotg}
 \usage{
 mdaplotg.showLegend(legend, col, pch = NULL, lty = NULL, lwd = NULL,
   cex = 1, bty = "o", position = "topright", plot = TRUE)

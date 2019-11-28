@@ -20,6 +20,8 @@ mdaplot(data = NULL, ps = NULL, type = "p", pch = 16, col = NULL,
 \arguments{
 \item{data}{a vector, matrix or a data.frame with data values.}
 
+\item{ps}{`plotseries` object, if NULL will be created based on the provided data values}
+
 \item{type}{type of the plot ('p', 'l', 'b', 'h', 'e', 'i').}
 
 \item{pch}{a character for markers (same as \code{plot} parameter).}
@@ -31,6 +33,12 @@ mdaplot(data = NULL, ps = NULL, type = "p", pch = 16, col = NULL,
 \item{bwd}{a width of a bar as a percent of a maximum space available for each bar.}
 
 \item{border}{color for border of bars (if barplot is used)}
+
+\item{lty}{line type}
+
+\item{lwd}{line width}
+
+\item{cex}{scale factor for the marker}
 
 \item{cgroup}{a vector with values to use for make color groups.}
 
@@ -94,9 +102,6 @@ mdaplot(data = NULL, ps = NULL, type = "p", pch = 16, col = NULL,
 \item{pch.colinv}{allows to swap values for `col` and `bg` for scatter plots with `pch` valyes from 21 to 25.}
 
 \item{...}{other plotting arguments.}
-
-\item{plot.data}{a list of parameters and values obtained after preprocessing of original data provided
-by a user (if NULL it will be created automatically).}
 }
 \description{
 \code{mdaplot} is used to make different kinds of plot for one set of data objects.

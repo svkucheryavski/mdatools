@@ -23,7 +23,7 @@
 \item{...}{other optional arguments}
 }
 \description{
-Makes a plot with statistic values vs. coefficient of determination between permuted 
+Makes a plot with statistic values vs. coefficient of determination between permuted
 and reference y-values.
 }
 \details{

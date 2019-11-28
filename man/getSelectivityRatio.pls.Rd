@@ -9,7 +9,7 @@
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{number of components to get the values for (if NULL user selected as optimal will be 
+\item{ncomp}{number of components to get the values for (if NULL user selected as optimal will be
 used)}
 
 \item{ny}{which response to get the values for (if y is multivariate)}

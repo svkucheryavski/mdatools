@@ -407,7 +407,7 @@ mda.exclrows = function(x, ind) {
    }
 
    # check that number of rows is still sufficient
-   if (is.null(nrow(x)) || nrow(x) == 0) {
+   if (is.null(nrow(x)) || nrow(x) == 0) {
       stop("No rows left when excluded hidden values.")
    }
 

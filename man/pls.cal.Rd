@@ -25,7 +25,7 @@ pls.cal(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci,
 
 \item{alpha}{significance level for calculating statistical limits for residuals.}
 
-\item{coeffs.ci}{method to calculate p-values and confidence intervals for regression coefficients (so far only 
+\item{coeffs.ci}{method to calculate p-values and confidence intervals for regression coefficients (so far only
 jack-knifing is availavle: \code{='jk'}).}
 
 \item{coeffs.alpha}{significance level for calculating confidence intervals for regression coefficients.}
@@ -38,7 +38,7 @@ jack-knifing is availavle: \code{='jk'}).}
 
 \item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
 
-\item{ncomp.selcrit}{criterion for selecting optimal number of components (\code{'min'} for 
+\item{ncomp.selcrit}{criterion for selecting optimal number of components (\code{'min'} for
 first local minimum of RMSECV and \code{'wold'} for Wold's rule.)}
 }
 \value{

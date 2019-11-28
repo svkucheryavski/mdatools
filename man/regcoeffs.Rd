@@ -9,7 +9,7 @@ regcoeffs(coeffs, ci.coeffs = NULL)
 \arguments{
 \item{coeffs}{vector or matrix with regression coefficients}
 
-\item{ci.coeffs}{array (nobj x ncomp x ny x cv) with regression coefficients for 
+\item{ci.coeffs}{array (nobj x ncomp x ny x cv) with regression coefficients for
 computing confidence intervals (e.g. from jack-knifing)}
 }
 \value{

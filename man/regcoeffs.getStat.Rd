@@ -12,10 +12,10 @@ regcoeffs.getStat(coeffs.values, ci.coeffs)
 \item{ci.coeffs}{array with regression coefficients for calculation of condifence intervals}
 }
 \value{
-a list with statistics (\code{$ci} - array with confidence intervals, 
+a list with statistics (\code{$ci} - array with confidence intervals,
 \code{$p.values} - array with p-values, \code{$t.values} - array with t-values)
 }
 \description{
-calculates confidence intervals and t-test based p-values for 
+calculates confidence intervals and t-test based p-values for
 regression coefficients based on jack-knifing procedure
 }

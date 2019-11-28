@@ -14,6 +14,8 @@ mdaplot.getXAxisLim(ps, xlim, show.lines = FALSE,
 
 \item{show.lines}{logical or numeric with line coordinates to be shown on the plot.}
 
+\item{show.excluded}{logical, will excluded values be shown on the plot}
+
 \item{bwd}{if limits are computed for bar plot, this is a bar width (otherwise NULL)}
 }
 \value{
