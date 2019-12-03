@@ -20,13 +20,12 @@
 #' Returns an object (list) of \code{ldecomp} class with following fields:
 #' \item{scores }{matrix with score values (nobj x ncomp).}
 #' \item{residuals }{matrix with data residuals (nobj x nvar).}
-#' \item{T2 }{matrix with T2 distances (nobj x ncomp).}
-#' \item{Q }{matrix with Q statistic (nobj x ncomp).}
 #' \item{tnorm }{vector with singular values used for scores normalization.}
 #' \item{ncomp.selected }{selected number of components.}
 #' \item{expvar }{explained variance for each component.}
 #' \item{cumexpvar }{cumulative explained variance.}
-#' \item{modpower}{modelling power of variables.}
+#' \item{T2 }{matrix with T2 distances (nobj x ncomp).}
+#' \item{Q }{matrix with Q statistic (nobj x ncomp).}
 #'
 #' @details
 #' \code{ldecomp} is a general class for decomposition of data in form X = TP' + E. Here, X is a
@@ -42,7 +41,8 @@
 #' @importFrom stats convolve cor lm na.exclude predict pt qf qnorm qt sd var
 #'
 #' @export
-ldecomp <- function(scores, loadings, residuals, ncomp.selected = ncol(scores), tnorm = NULL) {
+ldecomp <- function(scores, loadings, residuals, ncomp.selected = ncol(scores),
+   Qlim = NULL, T2lim = NULL, tnorm = NULL) {
 
    ncomp <- ncol(scores)
 
@@ -58,8 +58,10 @@ ldecomp <- function(scores, loadings, residuals, ncomp.selected = ncol(scores), 
    obj <- c(obj, dist)
 
    # get variance and add it to the object
-   var = ldecomp.getVariances(scores, loadings, residuals, dist$Q)
+   var <- ldecomp.getVariances(scores, loadings, residuals, dist$Q)
    obj <- c(obj, var)
+
+   # if limits are not provided - compute them
 
    obj$call <- match.call()
    class(obj) <- "ldecomp"
@@ -67,10 +69,11 @@ ldecomp <- function(scores, loadings, residuals, ncomp.selected = ncol(scores), 
    return(obj)
 }
 
-#' Residuals distances for linear decomposition
+#' Compute score and residual distances
 #'
 #' @description
-#' Computes residual distances (Q and T2) and modelling power for a data decomposition X = TP' + E.
+#' Compute orthogonal Euclidean distance from object to PC space (Q, q) and Mahalanobis
+#' squared distance between projection of the object to the space and its origin (T2, h).
 #'
 #' @param scores
 #' matrix with scores (T).
@@ -79,16 +82,14 @@ ldecomp <- function(scores, loadings, residuals, ncomp.selected = ncol(scores), 
 #' @param residuals
 #' matrix with residuals (E).
 #' @param tnorm
-#' vector with singular values for scores normalisation
-#' @param cal
-#' if TRUE method will realize that these distances are calculated for calibration set
+#' vector with singular values for scores normalisation (can be provided)
 #'
 #' @details
 #' The distances are calculated for every 1:n components, where n goes from 1 to ncomp
 #' (number of columns in scores and loadings).
 #'
 #' @return
-#' Returns a list with Q, Qvar, T2 and modelling power values for each component.
+#' Returns a list with Q, T2 and tnorm values for each component.
 #'
 ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL) {
 
@@ -149,12 +150,12 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL) {
 
    # set attributes for Q
    Q <- mda.setattr(Q, mda.getattr(scores), type = 'row')
-   attr(Q, "name") <- "Squared residual distance (Q)"
+   attr(Q, "name") <- "Squared residual distance (q)"
    attr(Q, "xaxis.name") <- "Components"
 
    # set attributes for T2
    T2 = mda.setattr(T2, mda.getattr(Q))
-   attr(T2, 'name') = 'Score distance (T^2)'
+   attr(T2, 'name') = 'Score distance (h)'
 
    colnames(Q) <- colnames(T2) <- colnames(loadings)
    rownames(Q) <- rownames(T2) <- rownames(scores)
@@ -164,21 +165,24 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL) {
 }
 
 
-#' Explained variance for linear decomposition
+#' Compute explained variance
 #'
 #' @description
-#' Computes explained variance and cumulative explained variance for a data decomposition
-#' X = TP' + E.
+#' Computes explained variance and cumulative explained variance for data decomposition.
 #'
+#' @param scores
+#' matrix with scores (T).
+#' @param loadings
+#' matrix with loadings (P).
+#' @param residuals
+#' matrix with residuals (E).
 #' @param Q
-#' Q values (squared residuals distance from object to component space).
-#' @param totvar
-#' Total variance of the original data (after preprocessing).
+#' matrix with squared orthogonal distances.
 #'
 #' @return
 #' Returns a list with two vectors.
 #'
-ldecomp.getVariances = function(scores, loadings, residuals, Q) {
+ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
 
    # get names and attributes
    rows_excluded <- attr(scores, "exclrows")
@@ -202,16 +206,22 @@ ldecomp.getVariances = function(scores, loadings, residuals, Q) {
    totvar <- sum(tcrossprod(scores, loadings)^2) + sum(residuals^2)
 
    # compute explained variance
-   cumexpvar <- 100 - colSums(Q) / totvar * 100
+   cumexpvar <- 100 * (1 - colSums(Q) / totvar)
    expvar <- c(cumexpvar[1], diff(cumexpvar))
 
+   names(cumexpvar) <- names(expvar) <- colnames(Q)
    return(list(expvar = expvar, cumexpvar = cumexpvar))
 }
 
-#' Calculates critical limits for T2-residuals using Hotelling T2 distribution
-#'
-#' @description
-#' The method is based on n
+ldecomp.getQLimits <- function(Q, Qlim, alpha, gamma) {
+
+}
+
+ldecomp.getT2Limits <- function() {
+
+}
+
+#' Calculate critical limits for score distance using Hotelling T2 distribution
 #'
 #' @param ncomp
 #' number of components
@@ -227,25 +237,25 @@ ldecomp.getVariances = function(scores, loadings, residuals, Q) {
 #' what to return: \code{'limits'} or \code{'probability'}
 #'
 #' @export
-reslim.hotelling = function(ncomp, T2 = NULL, alpha = 0.05, gamma = 0.01,
+reslim.hotelling <- function(ncomp, T2 = NULL, alpha = 0.05, gamma = 0.01,
                             T2lim = NULL, return = 'limits') {
-   if (return == 'limits') {
-      nobj = length(T2)
-      out = rep(0, 4)
-      if (nobj > ncomp) {
-         out[1:2] =
-            (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(c(1 - alpha, 1 - gamma), ncomp, nobj - ncomp)
-      } else {
-         out[1:2] = 0
-      }
-      out[3] = mean(T2)
-      out[4] = nobj - ncomp
-   } else {
-      nobj = T2lim[4] + ncomp
-      out = pf(T2 * (nobj - ncomp) / (ncomp * (nobj - 1)), ncomp, nobj - ncomp)
+
+   # return critical values
+   if (return == "limits") {
+      nobj <- T2lim[4] + ncomp
+      out <- pf(T2 * (nobj - ncomp) / (ncomp * (nobj - 1)), ncomp, nobj - ncomp)
+      return(out)
    }
 
-   out
+   # return probabilities
+   nobj <- length(T2)
+   DoF <- nobj - ncomp
+   out <- c(0, 0, mean(T2), DoF)
+   if (nobj > ncomp) {
+      out[1:2] <- (ncomp * (nobj - 1) / DoF) * qf(c(1 - alpha, 1 - gamma), ncomp, DoF)
+   }
+
+   return(out)
 }
 
 #' Calculates critical limits or statistic values for Q-residuals using Chi-squared distribution

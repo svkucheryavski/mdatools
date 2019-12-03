@@ -93,7 +93,8 @@ getPCARes <- function(X, ncomp) {
    rownames(loadings) <- colnames(residuals) <- colnames
    colnames(scores) <- colnames(loadings) <- paste("Comp", 1:ncomp)
 
-   return(list(scores = scores, loadings = loadings, residuals = residuals, tnorm = tnorm))
+   return(list(scores = scores, loadings = loadings, residuals = residuals,
+      tnorm = tnorm, totvar = sum(X_cal^2)))
 }
 
 ##########################
@@ -107,13 +108,11 @@ tf <- function(X) {
 
    for (A in c(1, 5, ncol(X$data) - length(attr(X$data, "exclcols")))) {
       m <- getPCARes(X$data, A)
-      res <- ldecomp(m$scores, m$loadings, m$residuals)
+      res <- ldecomp.getDistances(m$scores, m$loadings, m$residuals)
 
       # check dimensions
       expect_equal(dim(res$Q), c(32, A))
       expect_equal(dim(res$T2), c(32, A))
-      expect_equal(length(res$expvar), A)
-      expect_equal(length(res$cumexpvar), A)
 
       # check values
       for (a in 1:A) {
@@ -134,8 +133,6 @@ tf <- function(X) {
       expect_equal(colnames(res$Q), colnames(m$loadings))
       expect_equal(rownames(res$T2), rownames(m$scores))
       expect_equal(colnames(res$T2), colnames(m$loadings))
-      expect_equal(names(res$expvar), colnames(m$loadings))
-      expect_equal(names(res$cumexpvar), colnames(m$loadings))
       expect_equal(names(res$tnorm), colnames(m$loadings))
 
       # check attributes
@@ -154,3 +151,46 @@ test_that("tnorm, Q and T2 are correct for data attributes", { tf(X2) })
 test_that("tnorm, Q and T2 are correct for data with excluded rows", { tf(X3) })
 test_that("tnorm, Q and T2 are correct for data with excluded columns", { tf(X3) })
 
+
+context("ldecomp: computing variance")
+
+## shortcut for testing function
+tf <- function(X) {
+
+   for (A in c(1, 5, ncol(X$data) - length(attr(X$data, "exclcols")))) {
+      m <- getPCARes(X$data, A)
+      dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals)
+      res <- ldecomp.getVariances(m$scores, m$loadings, m$residuals, dist$Q)
+
+      # check dimensions
+      expect_equal(length(res$expvar), A)
+      expect_equal(length(res$cumexpvar), A)
+
+      # check values
+      for (a in 1:A) {
+         E <- m$residuals
+         if (a < A) {
+            E <- E + m$scores[, (a + 1):A, drop = F] %*% t(m$loadings[, (a + 1):A, drop = F])
+         }
+
+         # excluded rows should not be taken into account for calculation of variance
+         rows_excluded <- attr(m$scores, "exclrows")
+         if (length(rows_excluded) > 0) {
+            E <- E[-rows_excluded, ]
+         }
+
+         expect_equivalent(res$cumexpvar[a], 100 * (1 - sum(E^2) / m$totvar))
+      }
+
+      # check names
+      expect_equal(names(res$expvar), colnames(m$loadings))
+      expect_equal(names(res$cumexpvar), colnames(m$loadings))
+   }
+}
+
+test_that("explained variance is correct for plain data", { tf(X1) })
+test_that("explained variance is correct for data attributes", { tf(X2) })
+test_that("explained variance is correct for data with excluded rows", { tf(X3) })
+test_that("explained variance is correct for data with excluded columns", { tf(X3) })
+
+context("ldecomp: computing limits")
