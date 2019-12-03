@@ -54,7 +54,7 @@ ldecomp <- function(scores, loadings, residuals, ncomp.selected = ncol(scores), 
    )
 
    # get distances and add them to the object
-   dist <- ldecomp.getDistances(scores, loadings, residuals, tnorm, cal = cal)
+   dist <- ldecomp.getDistances(scores, loadings, residuals, tnorm)
    obj <- c(obj, dist)
 
    # get variance and add it to the object
@@ -90,7 +90,7 @@ ldecomp <- function(scores, loadings, residuals, ncomp.selected = ncol(scores), 
 #' @return
 #' Returns a list with Q, Qvar, T2 and modelling power values for each component.
 #'
-ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal = FALSE) {
+ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL) {
 
    # get names and attributes
    var_names <- rownames(loadings)
@@ -103,7 +103,7 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
    nobj <- nrow(scores)
    nvar <- nrow(loadings)
 
-   # remove excluded columns from loadings and residuals
+   # remove excluded variables from loadings and residuals
    if (length(cols_excluded) > 0) {
       loadings <- loadings[-cols_excluded, , drop = FALSE]
       residuals <- residuals[-cols_excluded, , drop = FALSE]
@@ -118,6 +118,7 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL, cal =
       residuals_visible <- residuals_visible[-rows_excluded, , drop = FALSE]
       nobj_visible <- nobj - length(rows_excluded)
    }
+
 
    # calculate singular values for score normalization (if not provided)
    if (is.null(tnorm)) {

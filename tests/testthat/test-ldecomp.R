@@ -37,7 +37,7 @@ X3$data <- mda.exclrows(X3$data, X3$exp_exclrows)
 
 ## data with names and attributes, excluded rows and columns
 X4 <- X3
-X4 <- mda.exclcols(X4$data, c("Hairleng", "IQ"))
+X4$data <- mda.exclcols(X4$data, c("Hairleng", "IQ"))
 
 # function to get scores, loadings and residuals from data
 getPCARes <- function(X, ncomp) {
@@ -49,42 +49,46 @@ getPCARes <- function(X, ncomp) {
    }
 
    if (is.null(colnames(X))) {
-      colnames(X) <- paste0('X', 1:nrow(X))
+      colnames(X) <- paste0('X', 1:ncol(X))
    }
 
    rownames <- rownames(X)
    colnames <- colnames(X)
 
    X_cal <- X
-   if (length(cols_excluded) > 0) {
-      X_cal <- X_cal[, -cols_excluded, drop = FALSE]
-   }
 
+   # remove excluded rows from calibration data
    if (length(rows_excluded) > 0) {
       X_cal <- X_cal[-rows_excluded, , drop = FALSE]
    }
 
-   # autoscale only visible
+   # get mean and center and do autoscaling of the calibration data
    m <- apply(X_cal, 2, mean)
    s <- apply(X_cal, 2, sd)
    X_cal <- scale(X_cal, center = m, scale = s)
 
-   # loadings
+   # remove excluded columns
+   if (length(cols_excluded) > 0) {
+      X_cal <- X_cal[, -cols_excluded, drop = FALSE]
+   }
+
+   # find loadings
+   loadings_visible <- svd(X_cal)$v[, 1:ncomp, drop = F]
    loadings <- matrix(0, nrow = ncol(X), ncol = ncomp)
    if (length(cols_excluded) > 0) {
-      loadings[-cols_excluded] <- svd(X_cal)$v[, 1:ncomp, drop = F]
+      loadings[-cols_excluded, ] <- loadings_visible
    } else {
-      loadings <- svd(X_cal)$v[, 1:ncomp, drop = F]
+      loadings <- loadings_visible
    }
 
    # eigenvalues using only visible rows
-   tnorm <- sqrt(colSums((X_cal %*% loadings)^2) / (nrow(X_cal) - 1))
+   tnorm <- sqrt(colSums((X_cal %*% loadings_visible)^2) / (nrow(X_cal) - 1))
 
    X <- scale(X, center = m, scale = s)
    scores <- X %*% loadings
    residuals <- X - tcrossprod(scores, loadings)
 
-   scores <- mda.setattr(scores, mda.getattr(X$data), type = 'row')
+   scores <- mda.setattr(scores, mda.getattr(X), type = 'row')
    rownames(scores) <- rownames(residuals) <- rownames
    rownames(loadings) <- colnames(residuals) <- colnames
    colnames(scores) <- colnames(loadings) <- paste("Comp", 1:ncomp)
@@ -101,7 +105,7 @@ context("ldecomp: computing distances and tnorm")
 ## shortcut for testing function
 tf <- function(X) {
 
-   for (A in c(1, 5, 12)) {
+   for (A in c(1, 5, ncol(X$data) - length(attr(X$data, "exclcols")))) {
       m <- getPCARes(X$data, A)
       res <- ldecomp(m$scores, m$loadings, m$residuals)
 
@@ -138,16 +142,15 @@ tf <- function(X) {
       expect_equal(attr(res$Q, "exclrows"), X$exp_exclrows)
       expect_equal(attr(res$Q, "yaxis.name"), attr(X$data, "yaxis.name"))
       expect_equal(attr(res$Q, "yaxis.values"), attr(X$data, "yaxis.values"))
-
-      # check values for expvar
-      # print(res$expvar)
-
-      # check values for cumexpvar
-      expect_equal(cumsum(res$expvar), res$cumexpvar)
+      expect_equal(attr(res$T2, "exclrows"), X$exp_exclrows)
+      expect_equal(attr(res$T2, "yaxis.name"), attr(X$data, "yaxis.name"))
+      expect_equal(attr(res$T2, "yaxis.values"), attr(X$data, "yaxis.values"))
    }
 }
 
 
-test_that("can compute Q and T2 distances", {
-   tf(X2)
-})
+test_that("tnorm, Q and T2 are correct for plain data", { tf(X1) })
+test_that("tnorm, Q and T2 are correct for data attributes", { tf(X2) })
+test_that("tnorm, Q and T2 are correct for data with excluded rows", { tf(X3) })
+test_that("tnorm, Q and T2 are correct for data with excluded columns", { tf(X3) })
+
