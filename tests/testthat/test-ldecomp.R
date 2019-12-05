@@ -193,4 +193,48 @@ test_that("explained variance is correct for data attributes", { tf(X2) })
 test_that("explained variance is correct for data with excluded rows", { tf(X3) })
 test_that("explained variance is correct for data with excluded columns", { tf(X3) })
 
+
 context("ldecomp: computing limits")
+
+# in this case we use predefined values computed for full People data with autoscaling
+# the values we got from PLS_Toolbox and DD-SIMCA Toolbox
+
+m <- getPCARes(X1$data, 12)
+dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals)
+
+test_that("critical limits for Q are correct (chisq)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # (computed using "residuallimit" function from PLS_Toolbox)
+   expQlim1 <- rbind(
+      c(9.25512512, 7.37431769, 3.64879767, 1.55968461, 0.82955551, 0.52538528, 0.23914330,
+         0.15607468, 0.11587272, 0.04727562, 0.04666972, 0.00000000),
+      c(16.87605393, 16.33648881, 8.08326204, 4.19946801, 2.23358734, 1.25780278, 0.52977943,
+         0.37365182, 0.31198858, 0.15980027, 0.15775224, 0.00000000),
+      apply(dist$Q, 2, mean),
+      apply(dist$Q, 2, function(x) 2 * (mean(x) / sd(x))^2)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # (computed using "residuallimit" function from PLS_Toolbox)
+   expQlim2 <- rbind(
+      c(8.03234581, 6.04655385, 2.99182277, 1.19880757, 0.63761443, 0.42028176, 0.19608497,
+         0.12485188, 0.08906230, 0.03329627, 0.03286953, 0.00000000),
+      c(14.57482653, 13.53946609, 6.69930078, 3.35119154, 1.78241124, 1.02644677, 0.43907419,
+         0.30492357, 0.24896808, 0.12254836, 0.12097776, 0.00000000),
+      apply(dist$Q, 2, mean),
+      apply(dist$Q, 2, function(x)  2 * (mean(x) / sd(x))^2)
+   )
+
+   lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "chisq")
+   lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "chisq")
+
+   expect_equivalent(chisq.crit(dist$Q[, 3], 3, 0.05, 0.01), expQlim1[, 3])
+   expect_equivalent(chisq.crit(dist$Q[, 4], 4, 0.10, 0.05), expQlim2[, 4])
+   expect_equivalent(lim1$Qlim, expQlim1)
+   expect_equivalent(lim2$Qlim, expQlim2)
+
+
+
+})
+

@@ -61,8 +61,6 @@ ldecomp <- function(scores, loadings, residuals, ncomp.selected = ncol(scores),
    var <- ldecomp.getVariances(scores, loadings, residuals, dist$Q)
    obj <- c(obj, var)
 
-   # if limits are not provided - compute them
-
    obj$call <- match.call()
    class(obj) <- "ldecomp"
 
@@ -213,235 +211,227 @@ ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
    return(list(expvar = expvar, cumexpvar = cumexpvar))
 }
 
-ldecomp.getQLimits <- function(Q, Qlim, alpha, gamma) {
 
-}
-
-ldecomp.getT2Limits <- function() {
-
-}
-
-#' Calculate critical limits for score distance using Hotelling T2 distribution
+#' Compute critical limits for orthogonal distance
 #'
-#' @param ncomp
-#' number of components
-#' @param T2
-#' vector with T2-residuals for selected component
+#' @param Q
+#' matrix with distances
 #' @param alpha
 #' significance level for extreme objects
 #' @param gamma
 #' significance level for outliers
-#' @param T2lim
-#' T2 limits from a PCA model (needed for probabilities)
-#' @param return
-#' what to return: \code{'limits'} or \code{'probability'}
+#' @param lim.type
+#' which method to use ("chisq", "ddrobust", "ddmoments")
+#'
+#' @description
+#' Compute critical values for extremes and outliers based on the matrix with distances.
+#'
+#' If data driven approach is used ("ddrobust" or "ddmoments") then instead of the limit,
+#' number of degrees of freedom (Nq) and scaling factor (q0) are computed instead.
+#'
+ldecomp.getLimits <- function(Q, T2, alpha, gamma, lim.type) {
+
+   ncomp <- ncol(Q)
+
+   # list of functions to compute critical values for Q
+   fqcrit <- list(
+      "chisq" = chisq.crit,
+      "ddmoments" = ddmoments.crit,
+      "ddrobust" = ddrobust.crit
+   )
+
+   # list of functions to compute critical values for T2
+   fhcrit <- list(
+      "chisq" = hotelling.crit,
+      "ddmoments" = ddmoments.crit,
+      "ddrobust" = ddrobust.crit
+   )
+
+   # remove excluded rows from Q
+   rows_excluded <- attr(Q, "exclrows")
+   if (length(rows_excluded) > 0) {
+      Q <- Q[-rows_excluded, , drop = FALSE]
+      T2 <- T2[-rows_excluded, , drop = FALSE]
+   }
+
+   # compute the values
+   Qlim <- fqcrit[[lim.type]](Q, 1:ncomp, alpha, gamma)
+   T2lim <- fhcrit[[lim.type]](T2, 1:ncomp, alpha, gamma)
+
+   # in case of data driven approach we need to compute the critical values manually
+   if (regexpr("dd", lim.type) > 0) {
+      # get the parameters
+      h0 <- T2lim[3, ]
+      Nh <- T2lim[4, ]
+      q0 <- Qlim[3, ]
+      Nq <- Qlim[4, ]
+
+      # calculate critical limits
+      crit1 = qchisq(1 - alpha, Nh + Nq)
+      crit2 = qchisq((1 - gamma)^(1/nrow(Q)), Nh + Nq)
+
+      # save limits as slope and intercept of critical limit line
+      Qlim[1, ] = crit1 * q0 / Nq
+      Qlim[2, ] = crit2 * q0 / Nq
+      T2lim[1, ] = crit1 * h0 / Nh
+      T2lim[2, ] = crit2 * h0 / Nh
+   }
+
+   # set column and row names
+   colnames(Qlim) <- colnames(T2lim) <- colnames(Q)
+   rownames(Qlim) <- rownames(T2lim) <- c("Extremes limit", "Outliers limit", "Mean (u0)", "DoF")
+
+   # set attributes
+   attr(Qlim, "name") <- "Critical limits for Q"
+   attr(T2lim, "name") <- "Critical limits for T2"
+   attr(Qlim, "alpha") <- attr(T2lim, "alpha") <- alpha
+   attr(Qlim, "gamma") <- attr(T2lim, "gamma") <- gamma
+
+   return(list(Qlim = Qlim, T2lim = T2lim))
+}
+
+#' Calculate critical limits for distance values using Hotelling T2 distribution
+#'
+#' @param U
+#' matrix or vector with distances
+#' @param ncomp
+#' number of components
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#'
+#' @return
+#' vector with four values: critical limits for given alpha and gamma, mean distance and DoF.
 #'
 #' @export
-reslim.hotelling <- function(ncomp, T2 = NULL, alpha = 0.05, gamma = 0.01,
-                            T2lim = NULL, return = 'limits') {
+hotelling.crit <- function(U, ncomp, alpha = 0.05, gamma = 0.01) {
 
-   # return critical values
-   if (return == "limits") {
-      nobj <- T2lim[4] + ncomp
-      out <- pf(T2 * (nobj - ncomp) / (ncomp * (nobj - 1)), ncomp, nobj - ncomp)
-      return(out)
-   }
+   if (is.null(dim(U))) dim(U) <- c(length(U), 1)
 
-   # return probabilities
-   nobj <- length(T2)
-   DoF <- nobj - ncomp
-   out <- c(0, 0, mean(T2), DoF)
-   if (nobj > ncomp) {
-      out[1:2] <- (ncomp * (nobj - 1) / DoF) * qf(c(1 - alpha, 1 - gamma), ncomp, DoF)
-   }
+   nobj <- nrow(U)
+   u0 <- apply(U, 2, mean)
+   DoF <- (nobj - ncomp)
+   out <- rbind(
+      (ncomp * (nobj - 1) / DoF) * qf(1 - alpha, ncomp, DoF),
+      (ncomp * (nobj - 1) / DoF) * qf((1 - gamma)^(1/nobj), ncomp, DoF),
+      u0, DoF
+   )
 
    return(out)
 }
 
-#' Calculates critical limits or statistic values for Q-residuals using Chi-squared distribution
+#' Calculate probabilities for distance values and given parameters using Hotelling T2 distribution
 #'
-#' @description
-#' The method is based on Chi-squared distribution with DF = 2 * (m(Q)/s(Q)^2
-#'
-#' @param Q
-#' vector with Q-residuals for selected component
-#' @param alpha
-#' significance level for extreme objects
-#' @param gamma
-#' significance level for outliers
-#' @param Qlim
-#' vector with Q limits for selected number of components (from model)
-#' @param return
-#' what to return: \code{'limits'} or \code{'probability'}
+#' @param U
+#' matrix or vector with distances
+#' @param ncomp
+#' number of components
+#' @param lim
+#' vector with parameters
 #'
 #' @export
-reslim.chisq = function(Q, alpha = 0.05, gamma = 0.01, Qlim = NULL, return = 'limits') {
-   nobj = length(Q)
-   if (return == 'limits') {
-
-      # calculate mean and DF for Q
-      Q.mean = mean(Q)
-      Q.DF = 2 * (Q.mean/sd(Q))^2
-
-      out = rep(0, 4)
-      if (Q.mean == 0) {
-         out = c(0, 0, 0, 1)
-      } else {
-         out[1] = qchisq(1 - alpha, floor(Q.DF)) * Q.mean / Q.DF
-         out[2] = qchisq((1 - gamma)^(1/nobj), floor(Q.DF)) * Q.mean / Q.DF
-         out[3] = Q.mean
-         out[4] = Q.DF
-      }
-   } else {
-      # get mean and DF from model
-      Q.mean = Qlim[3]
-      Q.DF = Qlim[4]
-      out = pchisq(Q.DF * Q / Q.mean, floor(Q.DF))
-   }
-
-   out
+hotteling.prob <- function(U, ncomp, lim){
+      nobj <- lim[4] + ncomp
+      return(pf(u * (DoF) / (ncomp * (nobj - 1)), ncomp, DoF))
 }
 
-#' Calculates critical limits for Q-residuals using classic JM approach
+#' Calculates critical limits for distance values using Chi-square distribution
 #'
 #' @description
-#' The method is based on
+#' The method is based on Chi-squared distribution with DF = 2 * (m(u)/s(u)^2
 #'
-#' @param eigenvals
-#' vector with eigenvalues for all variables
-#' @param Q
-#' vector with Q-residuals for selected component
+#' @param U
+#' matrix or vector with distance values
 #' @param ncomp
 #' number of components
 #' @param alpha
 #' significance level for extreme objects
 #' @param gamma
 #' significance level for outliers
-#' @param return
-#' what to return: \code{'limits'} or \code{'probability'}
 #'
 #' @export
-reslim.jm = function(eigenvals, Q, ncomp, alpha = 0.05, gamma = 0.01, return = 'limits') {
-   evals = eigenvals[(ncomp + 1):length(eigenvals)]
-   t1 = sum(evals)
-   t2 = sum(evals^2)
-   t3 = sum(evals^3)
-   h0 = 1 - 2 * t1 * t3/3/(t2^2);
-   if (h0 < 0.001) h0 = 0.001
+chisq.crit <- function(U, ncomp, alpha = 0.05, gamma = 0.01) {
 
-   if (return == 'limits') {
-      # inverse error function
-      erfinv = function (x) qnorm((1 + x)/2)/sqrt(2)
+   if (is.null(dim(U))) dim(U) <- c(length(U), 1)
 
-      out = rep(0, 4)
-      ca = sqrt(2) * erfinv(c(1 - 2 * alpha, 1 - 2 * gamma))
-      h1 = ca * sqrt(2 * t2 * h0^2)/t1
-      h2 = t2 * h0 * (h0 - 1)/(t1^2)
-      out[1:2] = t1 * (1 + h1 + h2)^(1/h0)
-      out[3] = mean(Q)
-      out[4] = 1
-   } else {
-      # error function
-      erf = function (x) 1 - pnorm(-x * sqrt(2)) * 2
+   nobj <- nrow(U)
+   u0 <- apply(U, 2, mean)
+   su <- apply(U, 2, sd)
+   Nu <- 2 * (u0/su)^2
 
-      h1 = (Q/t1)^h0
-      h2 = t2 * h0 * (h0 - 1)/t1^2
-      d = t1 * (h1 - 1 - h2)/(sqrt(2 * t2) * h0)
-      out = 0.5 * (1+erf(d/sqrt(2)))
-   }
+   DoF <- floor(Nu)
+   DoF[DoF == 0] <- 1
 
-   out
+   out <- rbind(
+      qchisq(1 - alpha, DoF) * u0 / Nu,
+      qchisq((1 - gamma)^(1/nobj), DoF) * u0 / Nu,
+      u0, Nu
+   )
+
+   return(out)
 }
 
-#' Statistical limits for Q and T2 residuals using Data Driven approach
+
+#' Calculate probabilities for distance values using Chi-square distribution
 #'
-#' @description
-#' Method is based on paper by Pomerantsev, Rodionova (JChem, 2014)
+#' @param u
+#' vector with distances
+#' @param ncomp
+#' number of components
+#' @param lim
+#' vector with parameters
 #'
-#' @param Q
-#' vector with Q-residuals for selected component
-#' @param T2
-#' vector with T2-residuals for selected component
-#' @param type
-#' which estimator to use: 'moments' or 'robust'
+#' @export
+chisq.prob <- function(u, ncomp, lim){
+   u0 <- lim[3]
+   DoF <- lim[4]
+   return(pchisq(DoF * u / u0, DoF))
+}
+
+
+#' Calculates critical limits for distance values using Data Driven moments approach
+#'
+#' @param u
+#' vector with distance values
+#' @param ncomp
+#' number of components
 #' @param alpha
 #' significance level for extreme objects
 #' @param gamma
 #' significance level for outliers
-#' @param Qlim
-#' vector with Q limits for selected number of components (from model)
-#' @param T2lim
-#' vector with T2 limits for selected number of components (from model)
-#' @param return
-#' what to return: \code{'limits'} or \code{'probability'}
-#'
-#' @import stats
 #'
 #' @export
-reslim.dd = function(Q, T2, type = 'ddmoments', alpha = 0.05, gamma = 0.01, Qlim = NULL,
-                     T2lim = NULL, return = 'limits') {
-
-   # classic estimator of u0 and DF for DD method
-   ddclassic = function(u) {
-      u0 = mean(u)
-      DF = round(2 * (u0/sd(u))^2)
-      if (DF == 1) DF = 1
-      res = c(u0, ifelse(DF > 250, 250, DF))
-      res
-   }
-
-   # robust estimator of u0 and DF for DD method
-   ddrobust = function(u) {
-      M = median(u)
-      R = quantile(u, 0.75) - quantile(u, 0.25)
-      DF = R/M
-      if (DF > 2.685592117) {
-         DF = 1
-      } else if (DF < 0.194565995) {
-         DF = 100
-      } else {
-         DF = exp(1.380948 * log(2.68631 / DF))^1.185785
-      }
-      u0 = 0.5 * DF * (M/qchisq(0.5, DF) + R/(qchisq(0.75, DF) - qchisq(0.25, DF)))
-      res = c(u0, ifelse(DF > 250, 250, DF))
-      res
-   }
+ddmoments.crit <- function(u, ncomp, alpha = 0.05, gamma = 0.01) {
+   u0 <- mean(u)
+   Nu <- 2 * (u0/sd(u))^2
+   return(c(0, 0, u0, ifelse(Nu > 250, 250, Nu)))
+}
 
 
-   if (return == 'limits') {
+#' Calculates critical limits for distance values using Data Driven robust approach
+#'
+#' @param u
+#' vector with distance values
+#' @param ncomp
+#' number of components
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#'
+#' @export
+ddrobust.crit <- function(u, ncomp, alpha, gamma) {
+   Mu <- median(u)
+   Su <- quantile(u, 0.75) - quantile(u, 0.25)
 
-      # estimate mean and DF
-      if (type == 'ddmoments') {
-         T2.res = ddclassic(T2)
-         Q.res = ddclassic(Q)
-      } else if (type == "ddrobust"){
-         T2.res = ddrobust(T2)
-         Q.res = ddrobust(Q)
-      } else {
-         stop('Wrong value for "type" parameter!')
-      }
+   d1 <- 1/0.72414 # 1/d1
+   d2 <- 2.68631
+   d3 <- 1/0.84332 # 1/d3
+   Nu <- round( exp(d1 * log(d2 * Mu / Su)^d3) )
+   u0 <- 0.5 * Nu * (Mu/qchisq(0.5, Nu) + Su/(qchisq(0.75, Nu) - qchisq(0.25, Nu)))
 
-      T2.mean = T2.res[1]; T2.DF = T2.res[2]
-      Q.mean = Q.res[1]; Q.DF = Q.res[2]
-
-      nobj = length(Q)
-
-      # calculate critical values
-      Ocrit = qchisq((1 - gamma)^(1/nobj), T2.DF + Q.DF)
-      Dcrit = qchisq(1 - alpha, T2.DF + Q.DF)
-
-      # calculate critical limits
-      Qlim = c(Dcrit * Q.mean / Q.DF, Ocrit * Q.mean / Q.DF, Q.mean, round(Q.DF))
-      T2lim = c(rep(-(Q.mean / T2.mean) * (T2.DF / Q.DF), 2), T2.mean, round(T2.DF))
-      out = list(Qlim = Qlim, T2lim = T2lim)
-   } else {
-      # get mean and DF from matrix with limits from model
-      Q.mean = Qlim[3]; Q.DF = Qlim[4]
-      T2.mean = T2lim[3]; T2.DF = T2lim[4]
-      out = pchisq(Q / Q.mean * Q.DF + T2 / T2.mean * T2.DF, round(Q.DF) + round(T2.DF))
-   }
-
-   out
+   return(c(0, 0, u0, ifelse(Nu > 250, 250, Nu)))
 }
 
 #' Shows lines with critical limits on residuals plot
@@ -738,13 +728,4 @@ summary.ldecomp = function(object, str = NULL, ...) {
    data = as.matrix(object)
    print(round(data, 2))
 }
-
-#' Inverse error function
-#'
-#' @param x
-#' a matrix or vector with data values
-#'
-#' @export
-erfinv = function (x) qnorm((1 + x)/2)/sqrt(2)
-
 
