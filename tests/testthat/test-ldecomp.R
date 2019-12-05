@@ -205,7 +205,7 @@ dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals)
 test_that("critical limits for Q are correct (chisq)", {
 
    # expected limits for alpha = 0.05 and gamma = 0.01
-   # (computed using "residuallimit" function from PLS_Toolbox)
+   # computed using "residuallimit" function from PLS_Toolbox
    expQlim1 <- rbind(
       c(9.25512512, 7.37431769, 3.64879767, 1.55968461, 0.82955551, 0.52538528, 0.23914330,
          0.15607468, 0.11587272, 0.04727562, 0.04666972, 0.00000000),
@@ -216,7 +216,7 @@ test_that("critical limits for Q are correct (chisq)", {
    )
 
    # expected limits for alpha = 0.10 and gamma = 0.05
-   # (computed using "residuallimit" function from PLS_Toolbox)
+   # computed using "residuallimit" function from PLS_Toolbox
    expQlim2 <- rbind(
       c(8.03234581, 6.04655385, 2.99182277, 1.19880757, 0.63761443, 0.42028176, 0.19608497,
          0.12485188, 0.08906230, 0.03329627, 0.03286953, 0.00000000),
@@ -229,12 +229,43 @@ test_that("critical limits for Q are correct (chisq)", {
    lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "chisq")
    lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "chisq")
 
-   expect_equivalent(chisq.crit(dist$Q[, 3], 3, 0.05, 0.01), expQlim1[, 3])
-   expect_equivalent(chisq.crit(dist$Q[, 4], 4, 0.10, 0.05), expQlim2[, 4])
-   expect_equivalent(lim1$Qlim, expQlim1)
-   expect_equivalent(lim2$Qlim, expQlim2)
-
-
+   expect_equivalent(chisq.crit(dist$Q[, 3], 3, 0.05, 0.01), expQlim1[, 3], tolerance = 10^-5)
+   expect_equivalent(chisq.crit(dist$Q[, 4], 4, 0.10, 0.05), expQlim2[, 4], tolerance = 10^-5)
+   expect_equivalent(lim1$Qlim, expQlim1, tolerance = 10^-5)
+   expect_equivalent(lim2$Qlim, expQlim2, tolerance = 10^-5)
 
 })
 
+test_that("critical limits for T2 are correct (hotelling)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using "tsqlim" function from PLS_Toolbox
+   expT2lim1 <- rbind(
+      c(4.15961510, 6.85271430, 9.40913034, 12.01947857, 14.76453307, 17.69939358, 20.87303997,
+         24.33584211, 28.14388532, 32.36253393, 37.07020868, 42.36299868),
+      c(16.43763399, 22.07592005, 27.49293159, 33.11628022, 39.14366436, 45.72590957, 53.01070123,
+         61.16173704, 70.37250826, 80.88041709, 92.98424615, 107.06768987),
+      apply(dist$T2, 2, mean),
+      nrow(dist$T2) - (1:ncol(dist$T2))
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using "tsqlim" function from PLS_Toolbox
+   expT2lim2 <- rbind(
+      c(2.87478394, 5.14334644, 7.32156708, 9.55303105, 11.90044572, 14.40708180, 17.11153965,
+         20.05346964, 23.27685391, 26.83267841, 30.78172763, 35.19795488),
+      c(11.96070234, 16.61285114, 21.04123968, 25.60304588, 30.45666797, 35.71776166, 41.49572457,
+         47.90883728, 55.09430867, 63.21788003, 72.48520544, 83.15679204),
+      apply(dist$T2, 2, mean),
+      nrow(dist$T2) - (1:ncol(dist$T2))
+   )
+
+
+   lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "chisq")
+   lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "chisq")
+
+   expect_equivalent(hotelling.crit(dist$T2[, 3], 3, 0.05, 0.01), expT2lim1[, 3], tolerance = 10^-5)
+   expect_equivalent(hotelling.crit(dist$T2[, 4], 4, 0.10, 0.05), expT2lim2[, 4], tolerance = 10^-5)
+   expect_equivalent(lim1$T2lim, expT2lim1, tolerance = 10^-5)
+   expect_equivalent(lim2$T2lim, expT2lim2, tolerance = 10^-5)
+})

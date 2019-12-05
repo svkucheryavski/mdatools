@@ -331,7 +331,7 @@ hotelling.crit <- function(U, ncomp, alpha = 0.05, gamma = 0.01) {
 #' vector with parameters
 #'
 #' @export
-hotteling.prob <- function(U, ncomp, lim){
+hotelling.prob <- function(U, ncomp, lim){
       nobj <- lim[4] + ncomp
       return(pf(u * (DoF) / (ncomp * (nobj - 1)), ncomp, DoF))
 }
@@ -384,9 +384,12 @@ chisq.crit <- function(U, ncomp, alpha = 0.05, gamma = 0.01) {
 #'
 #' @export
 chisq.prob <- function(u, ncomp, lim){
-   u0 <- lim[3]
-   DoF <- lim[4]
-   return(pchisq(DoF * u / u0, DoF))
+   u0 <- lim[3, ]
+   Nu <- lim[4, ]
+   DoF <- floor(Nu)
+   DoF[DoF == 0] <- 1
+
+   return(pchisq(Nu * u / u0, DoF))
 }
 
 
