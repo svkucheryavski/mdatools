@@ -95,7 +95,7 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL) {
    var_names <- rownames(loadings)
    obj_names <- rownames(scores)
    rows_excluded <- attr(scores, "exclrows")
-   cols_excluded <- attr(scores, "exclcols")
+   cols_excluded <- attr(loadings, "exclrows")
 
    # get sizes
    ncomp <- ncol(scores)
@@ -105,7 +105,7 @@ ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL) {
    # remove excluded variables from loadings and residuals
    if (length(cols_excluded) > 0) {
       loadings <- loadings[-cols_excluded, , drop = FALSE]
-      residuals <- residuals[-cols_excluded, , drop = FALSE]
+      residuals <- residuals[, -cols_excluded, drop = FALSE]
    }
 
    # get rid of hidden scores and residuals (needed for some calculations)

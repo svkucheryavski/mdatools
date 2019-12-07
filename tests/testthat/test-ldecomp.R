@@ -89,6 +89,12 @@ getPCARes <- function(X, ncomp) {
    residuals <- X - tcrossprod(scores, loadings)
 
    scores <- mda.setattr(scores, mda.getattr(X), type = 'row')
+   residuals <- mda.setattr(residuals, mda.getattr(X))
+
+   attr(loadings, "exclrows") <- attr(X, "exclcols")
+   attr(loadings, "yaxis.name") <- attr(X, "xaxis.name")
+   attr(loadings, "yaxis.values") <- attr(X, "xaxis.values")
+
    rownames(scores) <- rownames(residuals) <- rownames
    rownames(loadings) <- colnames(residuals) <- colnames
    colnames(scores) <- colnames(loadings) <- paste("Comp", 1:ncomp)
@@ -199,6 +205,7 @@ context("ldecomp: computing limits")
 # in this case we use predefined values computed for full People data with autoscaling
 # the values we got from PLS_Toolbox and DD-SIMCA Toolbox
 
+## for full data
 m <- getPCARes(X1$data, 12)
 dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals)
 
@@ -268,4 +275,76 @@ test_that("critical limits for T2 are correct (hotelling)", {
    expect_equivalent(hotelling.crit(dist$T2[, 4], 4, 0.10, 0.05), expT2lim2[, 4], tolerance = 10^-5)
    expect_equivalent(lim1$T2lim, expT2lim1, tolerance = 10^-5)
    expect_equivalent(lim2$T2lim, expT2lim2, tolerance = 10^-5)
+})
+
+
+## for excluded data
+m <- getPCARes(X4$data, 10)
+dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals)
+rows_excluded <- X4$exp_exclrows
+cols_excluded <- X4$exp_exclcols
+test_that("critical limits for Q are correct when rows and columns are excluded (chisq)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using "residuallimit" function from PLS_Toolbox
+   expQlim1 <- rbind(
+      c(8.48240511, 4.44080558, 0.89616079, 0.56211531, 0.32748958, 0.18707463, 0.11620620,
+         0.05214964, 0.02356848, 0.00000000),
+      c(16.22421281, 11.81101671, 1.85705202, 1.49503355, 0.71805040, 0.49755423, 0.30906855,
+         0.17377461, 0.07853561, 0.00000000),
+      apply(dist$Q[-rows_excluded, , drop = F], 2, mean),
+      apply(dist$Q[-rows_excluded, , drop = F], 2, function(x) 2 * (mean(x) / sd(x))^2)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using "residuallimit" function from PLS_Toolbox
+   expQlim2 <- rbind(
+      c(7.24620424, 3.41329992, 0.74768643, 0.43205407, 0.26852429, 0.14378964, 0.08931862, 0.03672904, 0.01659930, 0.00000000),
+      c(13.81464099, 9.39586381, 1.55391044, 1.18932451, 0.59370604, 0.39581282, 0.24586927, 0.13272621, 0.05998421, 0.00000000),
+      apply(dist$Q[-rows_excluded, , drop = F], 2, mean),
+      apply(dist$Q[-rows_excluded, , drop = F], 2, function(x)  2 * (mean(x) / sd(x))^2)
+   )
+
+   lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "chisq")
+   lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "chisq")
+
+   expect_equivalent(chisq.crit(dist$Q[-rows_excluded, 3], 3, 0.05, 0.01), expQlim1[, 3], tolerance = 10^-5)
+   expect_equivalent(chisq.crit(dist$Q[-rows_excluded, 4], 4, 0.10, 0.05), expQlim2[, 4], tolerance = 10^-5)
+   expect_equivalent(lim1$Qlim, expQlim1, tolerance = 10^-5)
+   expect_equivalent(lim2$Qlim, expQlim2, tolerance = 10^-5)
+
+})
+
+test_that("critical limits for T2 are correct when rows and columns are excluded (chisq/hotelling)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using "residuallimit" function from PLS_Toolbox
+   expT2lim1 <- rbind(
+      c(4.19597182, 6.95671580, 9.61203588, 12.35902290, 15.28714920, 18.46287368, 21.94998503,
+         25.81826344, 30.14945777, 35.04323329),
+      c(16.57969094, 22.52147374, 28.33766821, 34.48651357, 41.20190951, 48.68181023, 57.13678256,
+         66.81570665, 78.02909222, 91.17751461),
+      apply(dist$T2[-rows_excluded, , drop = F], 2, mean),
+      nrow(dist$T2) - (1:ncol(dist$T2)) - length(rows_excluded)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using "residuallimit" function from PLS_Toolbox
+   expT2lim2 <- rbind(
+      c(2.89384646, 5.20718834, 7.45497071, 9.78540224, 12.26769498, 14.95365699, 17.89298964,
+         21.13982013, 24.75715160, 28.82121257),
+      c(11.94402185, 16.77785866, 21.45842445, 26.36104904, 31.66743997, 37.52399529, 44.08105163,
+         51.51194381, 60.02878045, 69.90058746),
+      apply(dist$T2[-rows_excluded, , drop = F], 2, mean),
+      nrow(dist$T2) - (1:ncol(dist$T2)) - length(rows_excluded)
+   )
+
+   lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "chisq")
+   lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "chisq")
+
+   expect_equivalent(hotelling.crit(dist$T2[-rows_excluded, 3], 3, 0.05, 0.01), expT2lim1[, 3], tolerance = 10^-5)
+   expect_equivalent(hotelling.crit(dist$T2[-rows_excluded, 4], 4, 0.10, 0.05), expT2lim2[, 4], tolerance = 10^-5)
+   expect_equivalent(lim1$T2lim, expT2lim1, tolerance = 10^-5)
+   expect_equivalent(lim2$T2lim, expT2lim2, tolerance = 10^-5)
+
 })
