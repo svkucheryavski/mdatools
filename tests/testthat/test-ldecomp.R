@@ -291,9 +291,8 @@ context("ldecomp: computing limits (chisq/hotelling, excluded data)")
 
 m <- getPCARes(X4$data, 10)
 dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals)
-
 rows_excluded <- X4$exp_exclrows
-cols_excluded <- X4$exp_exclcols
+
 test_that("critical limits for Q are correct when rows and columns are excluded (chisq)", {
 
    # expected limits for alpha = 0.05 and gamma = 0.01
@@ -446,3 +445,89 @@ test_that("critical limits for T2 are correct (ddmoments)", {
    expect_equivalent(lim1$T2lim, expT2lim1, tolerance = 10^-4)
    expect_equivalent(lim2$T2lim, expT2lim2, tolerance = 10^-4)
 })
+
+
+## ddmoments for excluded data
+context("ldecomp: computing limits (ddmoments, excluded data)")
+
+m <- getPCARes(X4$data, 9)
+dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals)
+rows_excluded <- X4$exp_exclrows
+
+test_that("critical limits for Q are correct when rows and columns are excluded (ddmoments)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using DDSimca toolbox
+   expQlim1 <- rbind(
+      c(11.60190138, 19.20059700, 2.76585832, 2.42038062, 1.05556531, 0.75748212, 0.59999005,
+         0.35177998, 0.20881386),
+      c(20.51821091, 30.94285188, 4.28239312, 3.81776382, 1.66498567, 1.20720511, 0.90716035,
+         0.56691340, 0.32937052),
+      c(4.43617757, 2.19049660, 0.44027710, 0.25151771, 0.14625433, 0.08237345, 0.05117557,
+         0.02675517, 0.00723308),
+      c(7.00000000, 3.00000000, 5.00000000, 3.00000000, 4.00000000, 3.00000000, 3.00000000,
+         2.00000000, 1.00000000)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using DDSimca toolbox
+   expQlim2 <- rbind(
+      c(10.13171606, 17.18942863, 2.50182801, 2.17893453, 0.95026695, 0.68010334, 0.54599027,
+         0.31493275, 0.18798355),
+      c(17.78135669, 27.40039229, 3.82840757, 3.39793186, 1.48189048, 1.07182017, 0.81563549,
+         0.50201092, 0.29315029),
+      c(4.43617757, 2.19049660, 0.44027710, 0.25151771, 0.14625433, 0.08237345, 0.05117557,
+         0.02675517, 0.00723308),
+      c(7.00000000, 3.00000000, 5.00000000, 3.00000000, 4.00000000, 3.00000000, 3.00000000,
+         2.00000000, 1.00000000)
+   )
+
+   lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "ddmoments")
+   lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "ddmoments")
+
+   expect_equivalent(ddmoments.crit(dist$Q[-rows_excluded, 3], 3, 0.05, 0.01)[3:4], expQlim1[3:4, 3], tolerance = 10^-4)
+   expect_equivalent(ddmoments.crit(dist$Q[-rows_excluded, 4], 4, 0.10, 0.05)[3:4], expQlim2[3:4, 4], tolerance = 10^-4)
+   expect_equivalent(lim1$Qlim, expQlim1, tolerance = 10^-4)
+   expect_equivalent(lim2$Qlim, expQlim2, tolerance = 10^-4)
+})
+
+test_that("critical limits for T2 are correct when rows and columns are excluded (ddmoments)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using DDSimca toolbox
+   expT2lim1 <- rbind(
+      c(5.89192305, 3.90607053, 6.06546174, 7.43301692, 9.95493338, 11.41536020, 11.88586181,
+         14.50826197, 14.75672477),
+      c(10.41999203, 6.29485437, 9.39118662, 11.72439691, 15.70231730, 18.19274770, 17.97093555,
+         23.38088765, 23.27637623),
+      c(0.96551724, 1.93103448, 2.89655172, 3.86206897, 4.82758621, 5.79310345, 6.75862069,
+         7.72413793, 8.68965517),
+      c(3.00000000, 13.00000000, 15.00000000, 15.00000000, 14.00000000, 14.00000000, 20.00000000,
+         14.00000000, 17.00000000)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using DDSimca toolbox
+   expT2lim2 <- rbind(
+      c(5.14530244, 3.49692880, 5.48644953, 6.69153318, 8.96187480, 10.24925118, 10.81612080,
+         12.98859268, 13.28466146),
+      c(9.03010480, 5.57419464, 8.39560708, 10.43508810, 13.97556442, 16.15247798, 16.15781902,
+         20.70415152, 20.71671903),
+      c(0.96551724, 1.93103448, 2.89655172, 3.86206897, 4.82758621, 5.79310345, 6.75862069,
+         7.72413793, 8.68965517),
+      c(3.00000000, 13.00000000, 15.00000000, 15.00000000, 14.00000000, 14.00000000, 20.00000000,
+         14.00000000, 17.00000000)
+   )
+
+   lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "ddmoments")
+   lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "ddmoments")
+
+   lim13 <- ddmoments.crit(dist$T2[-rows_excluded, 3], 3, 0.05, 0.01)[3:4]
+   expect_equivalent(lim13, expT2lim1[3:4, 3], tolerance = 10^-4)
+   lim24 <- ddmoments.crit(dist$T2[-rows_excluded, 4], 4, 0.10, 0.05)[3:4]
+   expect_equivalent(lim24, expT2lim2[3:4, 4], tolerance = 10^-4)
+
+   expect_equivalent(lim1$T2lim, expT2lim1, tolerance = 10^-4)
+   expect_equivalent(lim2$T2lim, expT2lim2, tolerance = 10^-4)
+})
+
