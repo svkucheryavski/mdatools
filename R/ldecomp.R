@@ -267,14 +267,14 @@ ldecomp.getLimits <- function(Q, T2, alpha, gamma, lim.type) {
       Nq <- Qlim[4, ]
 
       # calculate critical limits
-      crit1 = qchisq(1 - alpha, Nh + Nq)
-      crit2 = qchisq((1 - gamma)^(1/nrow(Q)), Nh + Nq)
+      crit1 <- qchisq(1 - alpha, Nh + Nq)
+      crit2 <- qchisq((1 - gamma)^(1/nrow(Q)), Nh + Nq)
 
       # save limits as slope and intercept of critical limit line
-      Qlim[1, ] = crit1 * q0 / Nq
-      Qlim[2, ] = crit2 * q0 / Nq
-      T2lim[1, ] = crit1 * h0 / Nh
-      T2lim[2, ] = crit2 * h0 / Nh
+      Qlim[1, ] <- crit1 * q0 / Nq
+      Qlim[2, ] <- crit2 * q0 / Nq
+      T2lim[1, ] <- crit1 * h0 / Nh
+      T2lim[2, ] <- crit2 * h0 / Nh
    }
 
    # set column and row names
@@ -395,8 +395,8 @@ chisq.prob <- function(u, ncomp, lim){
 
 #' Calculates critical limits for distance values using Data Driven moments approach
 #'
-#' @param u
-#' vector with distance values
+#' @param U
+#' matrix or vector with distance values
 #' @param ncomp
 #' number of components
 #' @param alpha
@@ -405,10 +405,18 @@ chisq.prob <- function(u, ncomp, lim){
 #' significance level for outliers
 #'
 #' @export
-ddmoments.crit <- function(u, ncomp, alpha = 0.05, gamma = 0.01) {
-   u0 <- mean(u)
-   Nu <- 2 * (u0/sd(u))^2
-   return(c(0, 0, u0, ifelse(Nu > 250, 250, Nu)))
+ddmoments.crit <- function(U, ncomp, alpha = 0.05, gamma = 0.01) {
+
+   if (is.null(dim(U))) dim(U) <- c(length(U), 1)
+
+   u0 <- apply(U, 2, mean)
+   su <- apply(U, 2, sd)
+
+   Nu <- round(2 * (u0/su)^2)
+   Nu <- ifelse(Nu > 250, 250, Nu)
+   Nu <- ifelse(Nu < 1, 1, Nu)
+
+   return(rbind(0, 0, u0, Nu))
 }
 
 
