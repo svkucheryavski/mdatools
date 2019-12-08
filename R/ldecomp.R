@@ -422,8 +422,8 @@ ddmoments.crit <- function(U, ncomp, alpha = 0.05, gamma = 0.01) {
 
 #' Calculates critical limits for distance values using Data Driven robust approach
 #'
-#' @param u
-#' vector with distance values
+#' @param U
+#' matrix or vector with distance values
 #' @param ncomp
 #' number of components
 #' @param alpha
@@ -432,17 +432,20 @@ ddmoments.crit <- function(U, ncomp, alpha = 0.05, gamma = 0.01) {
 #' significance level for outliers
 #'
 #' @export
-ddrobust.crit <- function(u, ncomp, alpha, gamma) {
-   Mu <- median(u)
-   Su <- quantile(u, 0.75) - quantile(u, 0.25)
+ddrobust.crit <- function(U, ncomp, alpha, gamma) {
 
-   d1 <- 1/0.72414 # 1/d1
-   d2 <- 2.68631
-   d3 <- 1/0.84332 # 1/d3
-   Nu <- round( exp(d1 * log(d2 * Mu / Su)^d3) )
-   u0 <- 0.5 * Nu * (Mu/qchisq(0.5, Nu) + Su/(qchisq(0.75, Nu) - qchisq(0.25, Nu)))
+   if (is.null(dim(U))) dim(U) <- c(length(U), 1)
 
-   return(c(0, 0, u0, ifelse(Nu > 250, 250, Nu)))
+   Mu <- apply(U, 2, median)
+   Su <- apply(U, 2, IQR)
+
+   RM <- Su / Mu
+   Nu <- round(exp((1.380948*log(2.68631 / RM)) ^ 1.185785))
+   Nu[RM > 2.685592117] <- 1
+   Nu[RM < 0.194565995] <- 100
+
+   u0 <- 0.5 * Nu * (Mu/qchisq(0.50, Nu) + Su/(qchisq(0.75, Nu) - qchisq(0.25, Nu)))
+   return(rbind(0, 0, u0, Nu))
 }
 
 #' Shows lines with critical limits on residuals plot

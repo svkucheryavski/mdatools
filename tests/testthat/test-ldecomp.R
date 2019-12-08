@@ -363,7 +363,6 @@ test_that("critical limits for T2 are correct when rows and columns are excluded
 # Block 4. Computing critical limits (ddmoments)  #
 ###################################################
 
-
 ## ddmoments for full data data
 context("ldecomp: computing limits (ddmoments, full data)")
 
@@ -531,3 +530,172 @@ test_that("critical limits for T2 are correct when rows and columns are excluded
    expect_equivalent(lim2$T2lim, expT2lim2, tolerance = 10^-4)
 })
 
+
+###################################################
+# Block 5. Computing critical limits (ddrobust)   #
+###################################################
+
+## ddmoments for full data data
+context("ldecomp: computing limits (ddrobust, full data)")
+
+### in this case we use 11 components as the 12th explain mostly noise for Q
+m <- getPCARes(X1$data, 11)
+dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals)
+
+test_that("critical limits for Q are correct (ddrobust)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using DDSimca toolbox
+   expQlim1 <- rbind(
+      c(10.15325434, 14.52405375, 9.87019680, 5.01044538, 2.52248917, 2.34463394, 0.88961632,
+         0.74738500, 0.39573108, 0.21597701, 0.09364917),
+      c(15.68388669, 20.95236870, 15.01145008, 8.33916906, 3.96573316, 3.62179177, 1.37420388,
+         1.15449701, 0.60641832, 0.37065397, 0.15380476),
+      c(5.59398247, 3.14412554, 1.68373781, 0.63464055, 0.33473045, 0.21529782, 0.13614951,
+         0.06862920, 0.04666029, 0.02054372, 0.00374660),
+      c(18.00000000, 10.00000000, 6.00000000, 3.00000000, 4.00000000, 3.00000000, 5.00000000,
+         3.00000000, 4.00000000, 2.00000000, 1.00000000)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using DDSimca toolbox
+   expQlim2 <- rbind(
+      c(9.20367955, 13.38917413, 8.98186792, 4.45605266, 2.27646590, 2.12535397, 0.80641568,
+         0.67748643, 0.35943919, 0.19053642, 0.08357579),
+      c(14.06529482, 19.09677672, 13.51144603, 7.35081860, 3.54188909, 3.24801945, 1.23238475,
+         1.03535183, 0.54485629, 0.32446297, 0.13598882),
+      c(5.59398247, 3.14412554, 1.68373781, 0.63464055, 0.33473045, 0.21529782, 0.13614951,
+         0.06862920, 0.04666029, 0.02054372, 0.00374660),
+      c(18.00000000, 10.00000000, 6.00000000, 3.00000000, 4.00000000, 3.00000000, 5.00000000,
+         3.00000000, 4.00000000, 2.00000000, 1.00000000)
+   )
+
+   lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "ddrobust")
+   lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "ddrobust")
+
+   expect_equivalent(ddrobust.crit(dist$Q[, 3], 3, 0.05, 0.01)[3:4], expQlim1[3:4, 3], tolerance = 10^-4)
+   expect_equivalent(ddrobust.crit(dist$Q[, 4], 4, 0.10, 0.05)[3:4], expQlim2[3:4, 4], tolerance = 10^-4)
+   expect_equivalent(lim1$Qlim, expQlim1, tolerance = 10^-4)
+   expect_equivalent(lim2$Qlim, expQlim2, tolerance = 10^-4)
+})
+
+test_that("critical limits for T2 are correct (ddrobust)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using DDSimca toolbox
+   expT2lim1 <- rbind(
+      c(13.49051625, 3.87287602, 5.54095383, 8.43336946, 9.07842620, 10.27911626, 12.17217082,
+         13.06617385, 15.20430507, 18.82185388, 17.87728459),
+      c(20.83900601, 5.58700262, 8.42716245, 14.03613618, 14.27265426, 15.87830752, 18.80253774,
+         20.18351784, 23.29907765, 32.30156273, 29.36076688),
+      c(1.23877706, 1.84445603, 2.67812507, 3.91673370, 4.51759976, 5.66332668, 5.96116787,
+         7.19886896, 8.06726598, 8.95166844, 10.01296469),
+      c(3.00000000, 22.00000000, 17.00000000, 11.00000000, 15.00000000, 18.00000000, 16.00000000,
+         18.00000000, 18.00000000, 10.00000000, 14.00000000)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using DDSimca toolbox
+   expT2lim2 <- rbind(
+      c(12.22882677, 3.57025747, 5.04226172, 7.50023912, 8.19298966, 9.31777034, 11.03377852,
+         11.84417065, 13.80994172, 16.60477015, 15.95431303),
+      c(18.68840097, 5.09220428, 7.58508672, 12.37258654, 12.74724151, 14.23965123, 16.86209814,
+         18.10055980, 20.93381524, 28.27613333, 25.95977002),
+      c(1.23877706, 1.84445603, 2.67812507, 3.91673370, 4.51759976, 5.66332668, 5.96116787,
+         7.19886896, 8.06726598, 8.95166844, 10.01296469),
+      c(3.00000000, 22.00000000, 17.00000000, 11.00000000, 15.00000000, 18.00000000, 16.00000000,
+         18.00000000, 18.00000000, 10.00000000, 14.00000000)
+   )
+
+   lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "ddrobust")
+   lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "ddrobust")
+
+   expect_equivalent(ddrobust.crit(dist$T2[, 3], 3, 0.05, 0.01)[3:4], expT2lim1[3:4, 3], tolerance = 10^-4)
+   expect_equivalent(ddrobust.crit(dist$T2[, 4], 4, 0.10, 0.05)[3:4], expT2lim2[3:4, 4], tolerance = 10^-4)
+   expect_equivalent(lim1$T2lim, expT2lim1, tolerance = 10^-4)
+   expect_equivalent(lim2$T2lim, expT2lim2, tolerance = 10^-4)
+})
+
+## ddmoments for excluded data
+context("ldecomp: computing limits (ddrobust, excluded data)")
+
+m <- getPCARes(X4$data, 9)
+dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals)
+rows_excluded <- X4$exp_exclrows
+
+test_that("critical limits for Q are correct when rows and columns are excluded (ddrobust)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using DDSimca toolbox
+   expQlim1 <- rbind(
+      c(8.71406195, 27.16167173, 4.67241416, 1.99760592, 0.64638798, 0.49704699, 1.18743408,
+         0.45737021, 0.20709631),
+      c(13.61362649, 41.37423787, 6.80661271, 3.25834093, 1.06828931, 0.80101944, 1.65599362,
+         0.69152500, 0.33374746),
+      c(4.62537076, 2.40195599, 0.43916799, 0.23975306, 0.13645627, 0.07560735, 0.04351790,
+         0.02600730, 0.00787551),
+      c(16.00000000, 3.00000000, 4.00000000, 3.00000000, 5.00000000, 4.00000000, 2.00000000,
+         2.00000000, 1.00000000)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using DDSimca toolbox
+   expQlim2 <- rbind(
+      c(7.86416256, 24.67071673, 4.29149155, 1.78273328, 0.57486684, 0.44498376, 1.10230325,
+         0.41620638, 0.18540399),
+      c(12.14433627, 37.13321925, 6.17541759, 2.87712373, 0.94039845, 0.70931558, 1.51864614,
+         0.62175594, 0.29553873),
+      c(4.62537076, 2.40195599, 0.43916799, 0.23975306, 0.13645627, 0.07560735, 0.04351790,
+         0.02600730, 0.00787551),
+      c(16.00000000, 3.00000000, 4.00000000, 3.00000000, 5.00000000, 4.00000000, 2.00000000,
+         2.00000000, 1.00000000)
+   )
+
+   lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "ddrobust")
+   lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "ddrobust")
+
+   expect_equivalent(ddrobust.crit(dist$Q[-rows_excluded, 3], 3, 0.05, 0.01)[3:4], expQlim1[3:4, 3], tolerance = 10^-4)
+   expect_equivalent(ddrobust.crit(dist$Q[-rows_excluded, 4], 4, 0.10, 0.05)[3:4], expQlim2[3:4, 4], tolerance = 10^-4)
+   expect_equivalent(lim1$Qlim, expQlim1, tolerance = 10^-4)
+   expect_equivalent(lim2$Qlim, expQlim2, tolerance = 10^-4)
+})
+
+test_that("critical limits for T2 are correct when rows and columns are excluded (ddrobust)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using DDSimca toolbox
+   expT2lim1 <- rbind(
+      c(13.97913356, 3.68373634, 4.44651850, 7.73816836, 13.23719406, 12.44317048, 9.02269130,
+         12.24451916, 14.24081027),
+      c(21.83903490, 5.61128141, 6.47753566, 12.62190422, 21.87719039, 20.05287550, 12.58303051,
+         18.51321075, 22.94987405),
+      c(1.39125723, 2.06314350, 2.61209799, 3.71494609, 5.03000803, 5.67830732, 6.11739113,
+         7.31069105, 8.12330118),
+      c(3.00000000, 19.00000000, 25.00000000, 12.00000000, 9.00000000, 12.00000000, 37.00000000,
+         21.00000000, 15.00000000)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using DDSimca toolbox
+   expT2lim2 <- rbind(
+      c(12.61572152, 3.34590657, 4.08401223, 6.90581165, 11.77253307, 11.13980940, 8.37582660,
+         11.14249858, 12.74915524),
+      c(19.48199356, 5.03610347, 5.87685672, 11.14517509, 19.25815009, 17.75714331, 11.53939875,
+         16.64538321, 20.32248206),
+      c(1.39125723, 2.06314350, 2.61209799, 3.71494609, 5.03000803, 5.67830732, 6.11739113,
+         7.31069105, 8.12330118),
+      c(3.00000000, 19.00000000, 25.00000000, 12.00000000, 9.00000000, 12.00000000, 37.00000000,
+         21.00000000, 15.00000000)
+   )
+
+   lim1 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.05, gamma = 0.01, lim.type = "ddrobust")
+   lim2 <- ldecomp.getLimits(dist$Q, dist$T2, alpha = 0.10, gamma = 0.05, lim.type = "ddrobust")
+
+   lim13 <- ddrobust.crit(dist$T2[-rows_excluded, 3], 3, 0.05, 0.01)[3:4]
+   expect_equivalent(lim13, expT2lim1[3:4, 3], tolerance = 10^-4)
+   lim24 <- ddrobust.crit(dist$T2[-rows_excluded, 4], 4, 0.10, 0.05)[3:4]
+   expect_equivalent(lim24, expT2lim2[3:4, 4], tolerance = 10^-4)
+
+   expect_equivalent(lim1$T2lim, expT2lim1, tolerance = 10^-4)
+   expect_equivalent(lim2$T2lim, expT2lim2, tolerance = 10^-4)
+})
