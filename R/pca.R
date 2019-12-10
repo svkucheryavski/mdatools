@@ -179,45 +179,36 @@
 #' par(mfrow = c(1, 1))
 #'
 #' @export
-pca = function(x, ncomp = 15, center = T, scale = F, cv = NULL, exclrows = NULL,
-               exclcols = NULL, x.test = NULL, method = 'svd', rand = NULL, lim.type = 'jm',
-               alpha = 0.05, gamma = 0.01, info = '') {
+pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
+   exclrows = NULL, exclcols = NULL, x.test = NULL, method = "svd", rand = NULL,
+   lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "") {
 
-   # calibrate and cross-validate model
-   model = pca.cal(x, ncomp, center = center, scale = scale, method = method, exclcols = exclcols,
-                   exclrows = exclrows, cv = cv, rand = rand, lim.type = lim.type, alpha = alpha,
-                   gamma = gamma, info = info)
-   model$call = match.call()
+   # exclude columns if "exclcols" is provided
+   if (length(exclcols) > 0) {
+      x <- mda.exclcols(x, exclcols)
+   }
+
+   # exclude rows if "exclrows" is provided
+   if (length(exclrows) > 0) {
+      x <- mda.exclrows(x, exclrows)
+   }
+
+   # calibrate model and set distance limits
+   model <- pca.cal(x, ncomp, center = center, scale = scale, method = method, rand = rand)
+   model <- pca.setDistanceLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
+   model$info <- info
+   model$call <- match.call()
+
+   # apply the model to calibration set
+   model$res <- list()
+   model$res$cal <- predict.pca(model, x)
 
    # apply model to test set if provided
-   if (!is.null(x.test))
-      model$testres = predict.pca(model, x.test)
+   if (!is.null(x.test)) {
+      model$res$test <- predict.pca(model, x.test)
+   }
 
-   model
-}
-
-#' Get calibration data
-#'
-#' @description
-#' Get data, used for calibration of the PCA model
-#'
-#' @param obj
-#' PCA model (object of class \code{pca})
-#' @param ...
-#' other parameters
-#'
-#' @export
-getCalibrationData.pca = function(obj, ...) {
-   x = tcrossprod(obj$calres$scores, obj$loadings) + obj$calres$residuals
-
-   if (is.numeric(attr(x, 'prep:scale')))
-      x = sweep(x, 2L, attr(x, 'prep:scale'), '*', check.margin = F)
-
-   if (is.numeric(attr(x, 'prep:center')))
-      x = sweep(x, 2L, attr(x, 'prep:center'), '+', check.margin = F)
-
-   x = mda.setattr(x, mda.getattr(obj$calres$residuals))
-   x
+   return(model)
 }
 
 #' Select optimal number of components for PCA model
@@ -236,21 +227,19 @@ getCalibrationData.pca = function(obj, ...) {
 #' the same model with selected number of components
 #'
 #' @export
-selectCompNum.pca = function(model, ncomp, ...) {
-   if (ncomp < 1 || ncomp > model$ncomp)
+selectCompNum.pca <- function(model, ncomp, ...) {
+   if (ncomp < 1 || ncomp > model$ncomp) {
       stop('Wrong number of selected components!')
+   }
 
-   model$ncomp.selected = ncomp
+   model$ncomp.selected <- ncomp
+   model$calres$ncomp.selected <- ncomp
 
-   model$calres$ncomp.selected = ncomp
+   if (!is.null(model$testres)) {
+      model$testres$ncomp.selected <- ncomp
+   }
 
-   if (!is.null(model$testres))
-      model$testres$ncomp.selected = ncomp
-
-   if (!is.null(model$cvres))
-      model$cvres$ncomp.selected = ncomp
-
-   model
+   return(model)
 }
 
 #' Replace missing values in data
@@ -400,12 +389,17 @@ pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
 #' distribution for generating random numbers, 'unif' or 'norm'
 #'
 #' @import stats
-getB = function(X, k = NULL, rand = c(1, 5), dist = 'unif') {
-   nrows = nrow(X)
-   ncols = ncol(X)
+getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
 
-   q = rand[1]
-   p = rand[2]
+   if(is.null(rand)) {
+      return(X)
+   }
+
+   nrows <- nrow(X)
+   ncols <- ncol(X)
+
+   q <- rand[1]
+   p <- rand[2]
 
    if (is.null(k)) {
       k = ncols
@@ -445,23 +439,24 @@ getB = function(X, k = NULL, rand = c(1, 5), dist = 'unif') {
 #' parameters for randomized algorithm (if not NULL)
 #'
 #' @export
-pca.run = function(x, ncomp, method, rand = NULL) {
-   # compute loadings, scores and eigenvalues for data without excluded elements
+pca.run <- function(x, ncomp, method, rand = NULL) {
 
-   isRand = FALSE
-   if (!is.null(rand) && length(rand) == 2) {
-      x = getB(x, k = ncomp, rand = rand)
-      isRand = TRUE
+   f <- switch(
+      method,
+      "svd" = pca.svd,
+      "nipals" = pca.nipals,
+      stop('Wrong value for PCA method!')
+   )
+
+   res <- f(getB(x, k = ncomp, rand = rand), ncomp)
+
+   # recompute scores and eigenvalues if randomized algorithm was used
+   if (!is.null(rand)) {
+      res$scores <- x %*% res$loadings
+      res$eigenvals <- colSums(res$scores^2)/(nrow(x) - 1)
    }
 
-   if (method == 'svd')
-      res = pca.svd(x, ncomp)
-   else if(method == 'nipals')
-      res = pca.nipals(x, ncomp)
-   else
-      stop('Wrong value for PCA method!')
-
-   res
+   return(res)
 }
 
 #' PCA model calibration
@@ -499,133 +494,94 @@ pca.run = function(x, ncomp, method, rand = NULL) {
 #' @return
 #' an object with calibrated PCA model
 #'
-pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL,
+pca.cal <- function(x, ncomp, center, scale, method, exclcols = NULL,
                    exclrows = NULL, cv, rand, lim.type, alpha, gamma, info) {
-   # prepare empty list for model object
-   model = list()
-
-   if (length(exclcols) > 0)
-      x = mda.exclcols(x, exclcols)
-
-   if (length(exclrows) > 0)
-      x = mda.exclrows(x, exclrows)
-
-   # get attributes
-   attrs = mda.getattr(x)
-
-   # convert data to a matrix
-   x = mda.df2mat(x)
-   x.nrows = nrow(x)
-   x.ncols = ncol(x)
 
    # check if data has missing values
-   if (any(is.na(x)))
-      stop('Data has missing values, try to fix this using pca.mvreplace.')
+   if (any(is.na(x))) {
+      stop("Data has missing values, try to fix this using pca.mvreplace.")
+   }
 
+   # prepare empty list for model object
+   model <- list()
+
+   # save data attributes
+   attrs <- mda.getattr(x)
+
+   # convert data to a matrix
+   x <- mda.df2mat(x)
+   nrows_full <- nrow(x)
+   ncols_full <- ncol(x)
 
    # correct maximum number of components
-   ncols = x.ncols - length(attrs$exclcols)
-   nrows = x.nrows - length(attrs$exclrows)
-   if (!is.null(cv)) {
-      if (!is.numeric(cv))
-         nseg = cv[[2]]
-      else
-         nseg = cv
+   ncols <- ncols_full - length(attrs$exclcols)
+   nrows <- nrows_full - length(attrs$exclrows)
 
-      if (nseg == 1)
-         nobj.cv = 1
-      else
-         nobj.cv = ceiling(nrow(x)/nseg)
-   } else {
-      nobj.cv = 0
+   if (!is.null(cv)) {
+      warning("Cross-validation is no mor supported by PCA. See help text for details.")
    }
-   ncomp = min(ncomp, ncols, nrows - 1 - nobj.cv)
+
+   # make sure that ncomp is correct
+   ncomp <- min(ncomp, ncols, nrows - 1)
 
    # prepare data for model calibration and cross-validation
-   x.cal = x
+   x_cal <- x
 
    # remove excluded rows
-   if (length(attrs$exclrows) > 0)
-      x.cal = x.cal[-attrs$exclrows, , drop = F]
+   if (length(attrs$exclrows) > 0) {
+      x_cal = x_cal[-attrs$exclrows, , drop = F]
+   }
 
    # autoscale and save the mean and std values for predictions
-   x.cal = prep.autoscale(x.cal, center = center, scale = scale)
-   model$center = attr(x.cal, 'prep:center')
-   model$scale = attr(x.cal, 'prep:scale')
+   x_cal <- prep.autoscale(x_cal, center = center, scale = scale)
+   model$center <- attr(x_cal, "prep:center")
+   model$scale <- attr(x_cal, "prep:scale")
 
    # remove excluded columns
-   if (length(attrs$exclcols) > 0)
-      x.cal = x.cal[, -attrs$exclcols, drop = F]
+   if (length(attrs$exclcols) > 0) {
+      x.cal <- x.cal[, -attrs$exclcols, drop = F]
+   }
 
    # compute loadings, scores and eigenvalues for data without excluded elements
-   res = pca.run(x.cal, ncomp, method, rand)
-
-   # recompute scores if randomized algorithm was used
-   if (!is.null(rand)) {
-      res$scores = x.cal %*% res$loadings
-   }
-
-   # calculate eigenvalues
-   model$eigenvals = apply(res$scores, 2, function(x) sd(x)^2)
-   if (lim.type == 'jm') {
-      # in this case we need a vector with all eigenvalues
-      model$eigenvals =
-         c(model$eigenvals, svd(x.cal - tcrossprod(res$scores, res$loadings))$d^2/(nrows - 1))
-   }
+   res <- pca.run(x.cal, ncomp, method, rand)
 
    # correct loadings for missing columns in x
    # corresponding rows in loadings will be set to 0 and excluded
    if (length(attrs$exclcols) > 0) {
-      loadings = matrix(0, nrow = x.ncols, ncol = ncomp)
-      loadings[-attrs$exclcols, ] = res$loadings
-      loadings = mda.exclrows(loadings, attrs$exclcols)
+      loadings <- matrix(0, nrow = x.ncols, ncol = ncomp)
+      loadings[-attrs$exclcols, ] <- res$loadings
+      loadings <- mda.exclrows(loadings, attrs$exclcols)
    } else {
-      loadings = res$loadings
+      loadings <- res$loadings
    }
 
    if (is.null(dim(loadings))) {
-      loadings = matrix(loadings, ncol = ncomp)
+      loadings <- matrix(loadings, ncol = ncomp)
    }
 
    # set names and attributes for the loadings
-   rownames(loadings) = colnames(x)
-   colnames(loadings) = paste('Comp', 1:ncol(loadings))
-   attr(loadings, 'name') = 'Loadings'
-   attr(loadings, 'xaxis.name') = 'Components'
-   attr(loadings, 'yaxis.name') = attrs$xaxis.name
-   attr(loadings, 'yaxis.values') = attrs$xaxis.values
-   model$loadings = loadings
+   rownames(loadings) <- colnames(x)
+   colnames(loadings) <- paste("Comp", 1:ncol(loadings))
+   attr(loadings, "name") <- "Loadings"
+   attr(loadings, "xaxis.name") <- "Components"
+   attr(loadings, "yaxis.name") <- attrs$xaxis.name
+   attr(loadings, "yaxis.values") <- attrs$xaxis.values
+   model$loadings <- loadings
 
    # finalize model
-   model$lim.type = lim.type
-   model$method = method
-   model$rand = rand
-
-   # calculate tnorm using data without excluded values
-   model$tnorm = sqrt(colSums(res$scores ^ 2)/(nrows - 1));
+   model$method <- method
+   model$rand <- rand
 
    # setup other fields and return the model
-   model$ncomp = ncomp
-   model$ncomp.selected = model$ncomp
-   model$info = info
+   model$ncomp <- ncomp
+   model$ncomp.selected <- model$ncomp
 
    # save excluded columns and rows
    model$exclcols = attrs$exclcols
    model$exclrows = attrs$exclrows
    class(model) = "pca"
 
-   # get calibration results
-   model$calres = predict(model, x, cal = TRUE)
-   model$modpower = model$calres$modpower
-
-   # compute and set residual limits
-   model = setResLimits(model, alpha, gamma)
-
-   # do cross-validation if needed
-   if (!is.null(cv))
-      model$cvres = pca.crossval(model, x, cv, center = center, scale = scale)
-
-   model
+   return(model)
 }
 
 #' Singular Values Decomposition based PCA algorithm
@@ -639,23 +595,19 @@ pca.cal = function(x, ncomp, center, scale, method, exclcols = NULL,
 #' number of components to calculate
 #'
 #' @return
-#' a list with scores, loadings and eigencalues for the components
+#' a list with scores, loadings and eigenvalues for the components
 #'
-pca.svd = function(x, ncomp = NULL) {
-   if (is.null(ncomp))
-      ncomp = min(ncol(x), nrow(x) - 1)
-   else
-      ncomp = min(ncomp, ncol(x), nrow(x) - 1)
+pca.svd <- function(x, ncomp = min(ncol(x), nrow(x) - 1)) {
 
-   s = svd(x)
-   loadings = s$v[, 1:ncomp, drop = F]
-
-   res = list(
-      loadings = loadings,
-      scores = x %*% loadings
+   s <- svd(x, nu = ncomp, nv = ncomp)
+   return(
+      list(
+         loadings = s$v,
+         scores = s$u %*% diag(s$d)[1:ncomp, 1:ncomp],
+         eigenvals = s$d[1:ncomp]^2 / (nrow(x) - 1),
+         ncomp = ncomp
+      )
    )
-
-   res
 }
 
 #' NIPALS based PCA algorithm
@@ -668,147 +620,49 @@ pca.svd = function(x, ncomp = NULL) {
 #' a matrix with data values (preprocessed)
 #' @param ncomp
 #' number of components to calculate
+#' @param tol
+#' tolerance (if difference in eigenvalues is smaller - convergence achieved)
 #'
 #' @return
-#' a list with scores, loadings and eigencalues for the components
+#' a list with scores, loadings and eigenvalues for the components
 #'
 #' @references
 #' Geladi, Paul; Kowalski, Bruce (1986), "Partial Least Squares
 #' Regression:A Tutorial", Analytica Chimica Acta 185: 1-17
 #'
-pca.nipals = function(x, ncomp) {
-   nobj = nrow(x)
-   nvar = ncol(x)
-   ncomp = min(ncomp, nobj - 1, nvar)
+pca.nipals <- function(x, ncomp = min(ncol(x), nrow(x) - 1), tol = 10^-10) {
+   nobj <- nrow(x)
+   nvar <- ncol(x)
 
-   scores = matrix(0, nrow = nobj, ncol = ncomp)
-   loadings = matrix(0, nrow = nvar, ncol = ncomp)
-   eigenvals = rep(0, ncomp)
+   scores <- matrix(0, nrow = nobj, ncol = ncomp)
+   loadings <- matrix(0, nrow = nvar, ncol = ncomp)
 
-   E = x
-   for (i in 1:ncomp)
-   {
-      ind = which.max(apply(E, 2, sd))
-      t = E[, ind, drop = F]
-      tau = 99999
-      th = 9999
+   E <- x
+   for (i in 1:ncomp) {
+      ind <- which.max(apply(E, 2, sd))
+      t <- E[, ind, drop = F]
+      tau <- th <- 99999999
+      while (th > tol * tau) {
+         p <- crossprod(E, t) / as.vector(crossprod(t))
+         p <- p / as.vector(crossprod(p)) ^ 0.5
+         t <- (E %*% p)/as.vector(crossprod(p))
 
-      while (th > 0.0000001)
-      {
-         p = crossprod(E, t) / as.vector(crossprod(t))
-         p = p / as.vector(crossprod(p)) ^ 0.5
-         t = (E %*% p)/as.vector(crossprod(p))
-         th = abs(tau - as.vector(crossprod(t)))
-         tau = as.vector(crossprod(t))
+         th <- abs(tau - as.vector(crossprod(t)))
+         tau <- as.vector(crossprod(t))
       }
 
-      E = E - tcrossprod(t, p)
-      scores[, i] = t
-      loadings[, i] = p
+      E <- E - tcrossprod(t, p)
+      scores[, i] <- t
+      loadings[, i] <- p
    }
 
-   s = svd(E)
-   res = list(
-      loadings = loadings,
-      scores = scores
+   return(
+      list(
+         loadings = loadings,
+         scores = scores,
+         eigenvals = colSums(scores^2) / (nobj - 1)
+      )
    )
-   res
-}
-
-#' Cross-validation of a PCA model
-#'
-#' @description
-#' Does the cross-validation of a PCA model
-#'
-#' @param model
-#' a PCA model (object of class \code{pca})
-#' @param x
-#' a matrix with data values (calibration set)
-#' @param cv
-#' number of segments (if cv = 1, full cross-validation will be used)
-#' @param center
-#' logical, do mean centering or not
-#' @param scale
-#' logical, do standardization or not
-#'
-#' @return
-#' object of class \code{pcares} with results of cross-validation
-#'
-pca.crossval = function(model, x, cv, center = T, scale = F) {
-
-   # get attributes
-   attrs = attributes(x)
-
-   # remove excluded rows
-   if (length(attrs$exclrows) > 0)
-      x = x[-attrs$exclrows, , drop = F]
-
-   # remove excluded columns
-   if (length(attrs$exclcols) > 0)
-      x = x[-attrs$exclcols, , drop = F]
-
-   # get matrix with indices for cv segments
-   nobj = nrow(x)
-   idx = crossval(nobj, cv)
-   nrep = dim(idx)[3]
-
-   ncomp = model$ncomp
-   Q = matrix(0, ncol = ncomp, nrow = nobj)
-   T2 = matrix(0, ncol = ncomp, nrow = nobj)
-
-   # loop over repetitions and segments
-   for (iRep in 1:nrep) {
-      for (iSeg in 1:nrow(idx)) {
-
-         ind = na.exclude(idx[iSeg, ,iRep])
-
-         if (length(ind) > 0) {
-            x.cal = x[-ind, , drop = F]
-            x.val = x[ind, , drop = F]
-
-            # autoscale calibration set
-            x.cal = prep.autoscale(x.cal, center = center, scale = scale)
-
-            # get loadings
-            m = pca.run(x.cal, ncomp, model$method)
-
-            # apply autoscaling to the validation set
-            x.val = prep.autoscale(x.val,
-                                   center = attr(x.cal, 'prep:center'),
-                                   scale = attr(x.cal, 'prep:scale')
-            )
-
-            # get scores
-            scores = x.val %*% m$loadings
-            residuals = x.val - tcrossprod(scores, m$loadings)
-
-            # compute distances
-            res = ldecomp.getDistances(scores = scores, loadings = m$loadings,
-                                       residuals = residuals, tnorm = model$tnorm)
-            Q[ind, ] = Q[ind, ] + res$Q
-            T2[ind, ] = T2[ind, ] + res$T2
-         }
-      }
-   }
-
-   # prepare results
-   Q = Q / nrep
-   T2 = T2 / nrep
-
-   var = ldecomp.getVariances(Q, model$calres$totvar)
-
-   # in CV results there are no scores nor residuals, only residual distances and variances
-   attrs$exclrows = NULL
-   attrs$exclcols = NULL
-   attrs$dimnames = dimnames(x)
-   res = pcares(ncomp.selected = model$ncomp.selected, dist = list(Q = Q, T2 = T2),
-                var = var, attrs = attrs, loadings = model$loadings)
-   res$Qlim = model$Qlim
-   res$T2lim = model$T2lim
-   res$lim.type = model$lim.type
-   res$alpha = model$alpha
-   res$gamma = model$gamma
-   res
 }
 
 #' PCA predictions
@@ -854,7 +708,7 @@ predict.pca = function(object, x, cal = FALSE, ...) {
 
    totvar = sum(x^2)
 
-   rownames(scores) <- rownames(residuals) = attrs$dimnames[[1]]
+   rownames(scores) <- rownames(residuals) <- attrs$dimnames[[1]]
    colnames(scores) <- colnames(loadings)
    colnames(residuals) <- attrs$dimnames[[2]]
    attr(scores, "name") <- "Scores"
@@ -1138,6 +992,99 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
    }
 }
 
+#' Compute score and residual distances
+#'
+#' @description
+#' Compute orthogonal Euclidean distance from object to PC space (Q, q) and Mahalanobis
+#' squared distance between projection of the object to the space and its origin (T2, h).
+#'
+#' @param scores
+#' matrix with scores (T).
+#' @param loadings
+#' matrix with loadings (P).
+#' @param residuals
+#' matrix with residuals (E).
+#' @param tnorm
+#' vector with singular values for scores normalisation (can be provided)
+#'
+#' @details
+#' The distances are calculated for every 1:n components, where n goes from 1 to ncomp
+#' (number of columns in scores and loadings).
+#'
+#' @return
+#' Returns a list with Q, T2 and tnorm values for each component.
+#'
+ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL) {
+
+   # get names and attributes
+   var_names <- rownames(loadings)
+   obj_names <- rownames(scores)
+   rows_excluded <- attr(scores, "exclrows")
+   cols_excluded <- attr(loadings, "exclrows")
+
+   # get sizes
+   ncomp <- ncol(scores)
+   nobj <- nrow(scores)
+   nvar <- nrow(loadings)
+
+   # remove excluded variables from loadings and residuals
+   if (length(cols_excluded) > 0) {
+      loadings <- loadings[-cols_excluded, , drop = FALSE]
+      residuals <- residuals[, -cols_excluded, drop = FALSE]
+   }
+
+   # get rid of hidden scores and residuals (needed for some calculations)
+   scores_visible <- scores
+   residuals_visible <- residuals
+   nobj_visible <- nobj
+   if (length(rows_excluded) > 0) {
+      scores_visible <- scores_visible[-rows_excluded, , drop = FALSE]
+      residuals_visible <- residuals_visible[-rows_excluded, , drop = FALSE]
+      nobj_visible <- nobj - length(rows_excluded)
+   }
+
+   # calculate singular values for score normalization (if not provided)
+   if (is.null(tnorm)) {
+      tnorm <- sqrt(colSums(scores_visible^2)/(nobj_visible - 1));
+   }
+
+   # normalize the scores
+   scoresn <- scale(scores, center = FALSE, scale = tnorm)
+
+   # prepare zero matrices for the and model power
+   T2 <- matrix(0, nrow = nobj, ncol = ncomp)
+   Q <- matrix(0, nrow = nobj, ncol = ncomp)
+
+   # calculate distances and model power for each possible number of components in model
+   for (i in 1:ncomp) {
+      res <- residuals
+      if (i < ncomp) {
+         res <- res +
+            tcrossprod(
+               scores[, (i + 1):ncomp, drop = F],
+               loadings[, (i + 1):ncomp, drop = F]
+            )
+      }
+
+      Q[, i] <- rowSums(res^2)
+      T2[, i] <- rowSums(scoresn[, 1:i, drop = F]^2)
+   }
+
+   # set attributes for Q
+   Q <- mda.setattr(Q, mda.getattr(scores), type = 'row')
+   attr(Q, "name") <- "Squared residual distance (q)"
+   attr(Q, "xaxis.name") <- "Components"
+
+   # set attributes for T2
+   T2 = mda.setattr(T2, mda.getattr(Q))
+   attr(T2, 'name') = 'Score distance (h)'
+
+   colnames(Q) <- colnames(T2) <- colnames(loadings)
+   rownames(Q) <- rownames(T2) <- rownames(scores)
+
+   # return the results
+   return(list(Q = Q, T2 = T2, tnorm = tnorm))
+}
 
 #' Residuals plot for PCA
 #'
