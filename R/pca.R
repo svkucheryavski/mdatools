@@ -404,31 +404,25 @@ getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
 
    q <- rand[1]
    p <- rand[2]
+   k <- if (is.null(k)) ncols else 2 * k
 
-   if (is.null(k)) {
-      k = ncols
-   } else {
-      k = 2 * k
-   }
+   l <- k + p
+   Y <- if (dist == 'unif')
+            X %*% matrix(runif(ncols * l, -1, 1), ncols, l)
+         else
+            X %*% matrix(rnorm(ncols * l), ncols, l)
 
-   l = k + p
-   if (dist == 'unif')
-      Y = X %*% matrix(runif(ncols * l, -1, 1), ncols, l)
-   else
-      Y = X %*% matrix(rnorm(ncols * l), ncols, l)
-
-   Q = qr.Q(qr(Y))
+   Q <- qr.Q(qr(Y))
    if (q > 0) {
       for (i in 1:q) {
-         Y = crossprod(X, Q)
-         Q = qr.Q(qr(Y))
-         Y = X %*% Q
-         Q = qr.Q(qr(Y))
+         Y <- crossprod(X, Q)
+         Q <- qr.Q(qr(Y))
+         Y <- X %*% Q
+         Q <- qr.Q(qr(Y))
       }
    }
 
-   B = crossprod(Q, X)
-   B
+   return(crossprod(Q, X))
 }
 
 #' Runs one of the selected PCA methods
