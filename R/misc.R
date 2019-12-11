@@ -717,17 +717,9 @@ mda.df2mat = function(x, full = FALSE) {
 #' use did not provide any value) or check the user choice for correctness and returns
 #' it back
 #'
-getSelectedComponents = function(obj, ncomp = NULL)
-{
-   if (is.null(ncomp))
-   {
-      if (is.null(obj$ncomp.selected))
-         ncomp = 1
-      else
-         ncomp = obj$ncomp.selected
-   }
-
-   ncomp
+getSelectedComponents <- function(obj, ncomp = NULL) {
+   if (!is.null(ncomp)) return(ncomp)
+   return(if (is.null(obj$ncomp.selected)) 1 else obj$ncomp.selected)
 }
 
 #' Get main title
@@ -745,15 +737,149 @@ getSelectedComponents = function(obj, ncomp = NULL)
 #' @details
 #' Depedning on a user choice it returns main title for a plot
 #'
-getMainTitle = function(main, ncomp, default)
-{
-   if (is.null(main))
-   {
-      if (is.null(ncomp))
-         main = default
-      else
-         main = sprintf('%s (ncomp = %d)', default, ncomp)
-   }
+getMainTitle <- function(main, ncomp, default) {
+   if (!is.null(main)) return(main)
+   return(if (is.null(ncomp)) default else sprintf('%s (ncomp = %d)', default, ncomp))
+}
 
-   main
+
+#' Calculate critical limits for distance values using Hotelling T2 distribution
+#'
+#' @param nobj
+#' number of objects in calibration set
+#' @param ncomp
+#' number of components
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#'
+#' @return
+#' vector with four values: critical limits for given alpha and gamma, mean distance and DoF.
+#'
+#' @export
+hotelling.crit <- function(nobj, ncomp, alpha = 0.05, gamma = 0.01) {
+   out <- rbind(
+      (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(1 - alpha, ncomp, (nobj - ncomp)),
+      (ncomp * (nobj - 1) / (nobj - ncomp)) * qf((1 - gamma)^(1/nobj), ncomp, (nobj - ncomp)),
+      u0, DoF
+   )
+
+   return(out)
+}
+
+#' Calculate probabilities for distance values and given parameters using Hotelling T2 distribution
+#'
+#' @param u
+#' vector with distances
+#' @param ncomp
+#' number of components
+#' @param lim
+#' vector with parameters
+#'
+#' @export
+hotelling.prob <- function(u, ncomp, nobj){
+   return(pf(u * (nobj - ncomp) / (ncomp * (nobj - 1)), ncomp, (nobj - ncomp)))
+}
+
+#' Calculates critical limits for distance values using Chi-square distribution
+#'
+#' @description
+#' The method is based on Chi-squared distribution with DF = 2 * (m(u)/s(u)^2
+#'
+#' @param U
+#' matrix or vector with distance values
+#' @param ncomp
+#' number of components
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#'
+#' @export
+chisq.crit <- function(param, alpha = 0.05, gamma = 0.01) {
+
+   u0 <- param$u0
+   Nu <- param$Nu
+
+   DoF <- floor(Nu)
+   DoF[DoF == 0] <- 1
+
+   return(
+      rbind(
+         qchisq(1 - alpha, DoF) * u0 / Nu,
+         qchisq((1 - gamma)^(1/nobj), DoF) * u0 / Nu,
+         u0, Nu
+      )
+   )
+}
+
+
+#' Calculate probabilities for distance values using Chi-square distribution
+#'
+#' @param u
+#' vector with distances
+#' @param ncomp
+#' number of components
+#' @param lim
+#' vector with parameters
+#'
+#' @export
+chisq.prob <- function(u, param){
+   u0 <- param$u0
+   Nu <- param$Nu
+
+   DoF <- floor(Nu)
+   DoF[DoF == 0] <- 1
+   return(pchisq(Nu * u / u0, DoF))
+}
+
+
+#' Calculates critical limits for distance values using Data Driven moments approach
+#'
+#' @param U
+#' matrix or vector with distance values
+#'
+#' @export
+ddmoments.param <- function(U) {
+
+   if (is.null(dim(U))) dim(U) <- c(length(U), 1)
+
+   u0 <- apply(U, 2, mean)
+   su <- apply(U, 2, sd)
+
+   Nu <- round(2 * (u0/su)^2)
+   Nu <- ifelse(Nu > 250, 250, Nu)
+   Nu <- ifelse(Nu < 1, 1, Nu)
+
+   return(rbind(0, 0, u0, Nu))
+}
+
+
+#' Calculates critical limits for distance values using Data Driven robust approach
+#'
+#' @param U
+#' matrix or vector with distance values
+#' @param ncomp
+#' number of components
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#'
+#' @export
+ddrobust.param <- function(U, ncomp, alpha, gamma) {
+
+   if (is.null(dim(U))) dim(U) <- c(length(U), 1)
+
+   Mu <- apply(U, 2, median)
+   Su <- apply(U, 2, IQR)
+
+   RM <- Su / Mu
+   Nu <- round(exp((1.380948*log(2.68631 / RM)) ^ 1.185785))
+   Nu[RM > 2.685592117] <- 1
+   Nu[RM < 0.194565995] <- 100
+
+   u0 <- 0.5 * Nu * (Mu/qchisq(0.50, Nu) + Su/(qchisq(0.75, Nu) - qchisq(0.25, Nu)))
+   return(rbind(u0, Nu))
 }
