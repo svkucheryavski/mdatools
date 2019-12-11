@@ -17,8 +17,8 @@
 \item{...}{other arguments}
 }
 \value{
-Returns a list with two matrices:  \code{T2lim} and \code{Qlim}. Each matrix contains limits 
-for extreme objects and outliers (first two rows), mean residual and degrees of freedom, 
+Returns a list with two matrices:  \code{T2lim} and \code{Qlim}. Each matrix contains limits
+for extreme objects and outliers (first two rows), mean residual and degrees of freedom,
 calculated for each number of components included to the model
 }
 \description{
@@ -26,9 +26,9 @@ Computes statisticsl limits for Q and T2 residuals for a PCA model and assing th
 values as corresponding model properties
 }
 \details{
-If data driven method is used, first two rows of Qlim and T2lim will contain slope and intercept 
+If data driven method is used, first two rows of Qlim and T2lim will contain slope and intercept
 of line defined by the method, otherwise they contain the critical values (first row for extreme
-values and second for outliers) for each of the residuals. 
+values and second for outliers) for each of the residuals.
 
 Third row containes average values and fourth row contains degrees of freedom.
 

@@ -2,11 +2,12 @@
 % Please edit documentation in R/ldecomp.R
 \name{plotScores.ldecomp}
 \alias{plotScores.ldecomp}
-\title{Scores plot for linear decomposition}
+\title{Scores plot}
 \usage{
 \method{plotScores}{ldecomp}(obj, comp = c(1, 2), main = "Scores",
   type = "p", xlab = NULL, ylab = NULL, show.labels = FALSE,
-  show.legend = TRUE, show.axes = TRUE, ...)
+  labels = "names", show.legend = TRUE, show.axes = TRUE,
+  plot = TRUE, ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
@@ -23,9 +24,11 @@
 
 \item{show.labels}{logical, show or not labels for the plot objects}
 
-\item{show.legend}{logical, show or not a legend on the plot.}
+\item{show.legend}{logical, show or not a legend on the plot (needed in case of line or bar plot).}
 
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+
+\item{plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
 }

@@ -4,7 +4,7 @@
 \alias{pca.svd}
 \title{Singular Values Decomposition based PCA algorithm}
 \usage{
-pca.svd(x, ncomp = NULL)
+pca.svd(x, ncomp = min(ncol(x), nrow(x) - 1))
 }
 \arguments{
 \item{x}{a matrix with data values (preprocessed)}
@@ -12,7 +12,7 @@ pca.svd(x, ncomp = NULL)
 \item{ncomp}{number of components to calculate}
 }
 \value{
-a list with scores, loadings and eigencalues for the components
+a list with scores, loadings and eigenvalues for the components
 }
 \description{
 Computes principal component space using Singular Values Decomposition

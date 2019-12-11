@@ -27,11 +27,11 @@ of components in PCA models).}
 Returns the same matrix \code{x} where missing values are replaced with approximated.
 }
 \description{
-\code{pca.mvreplace} is used to replace missing values in a data matrix with 
+\code{pca.mvreplace} is used to replace missing values in a data matrix with
 approximated by iterative PCA decomposition.
 }
 \details{
-The function uses iterative PCA modeling of the data to approximate and impute missing values. 
+The function uses iterative PCA modeling of the data to approximate and impute missing values.
 The result is most optimal for data sets with low or moderate level of noise and with number of
 missing values less than 10\% for small dataset and up to 20\% for large data.
 }
@@ -56,8 +56,8 @@ show(cbind(odata, mdata, round(rdata, 2)))
 
 }
 \references{
-Philip R.C. Nelson, Paul A. Taylor, John F. MacGregor. Missing data methods in PCA and PLS: 
-Score calculations with incomplete observations. Chemometrics and Intelligent Laboratory 
+Philip R.C. Nelson, Paul A. Taylor, John F. MacGregor. Missing data methods in PCA and PLS:
+Score calculations with incomplete observations. Chemometrics and Intelligent Laboratory
 Systems, 35 (1), 1996.
 }
 \author{

@@ -2,11 +2,11 @@
 % Please edit documentation in R/ldecomp.R
 \name{plotVariance.ldecomp}
 \alias{plotVariance.ldecomp}
-\title{Explained variance plot for linear decomposition}
+\title{Explained variance plot}
 \usage{
 \method{plotVariance}{ldecomp}(obj, type = "b", main = "Variance",
   xlab = "Components", ylab = "Explained variance, \%",
-  show.labels = F, labels = "values", ...)
+  show.labels = F, labels = "values", plot = TRUE, ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
@@ -22,6 +22,8 @@
 \item{show.labels}{logical, show or not labels for plot objects.}
 
 \item{labels}{what to show as labels for plot objects.}
+
+\item{plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
 }

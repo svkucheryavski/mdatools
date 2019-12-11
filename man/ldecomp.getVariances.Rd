@@ -2,19 +2,22 @@
 % Please edit documentation in R/ldecomp.R
 \name{ldecomp.getVariances}
 \alias{ldecomp.getVariances}
-\title{Explained variance for linear decomposition}
+\title{Compute explained variance}
 \usage{
-ldecomp.getVariances(Q, totvar)
+ldecomp.getVariances(scores, loadings, residuals, Q)
 }
 \arguments{
-\item{Q}{Q values (squared residuals distance from object to component space).}
+\item{scores}{matrix with scores (T).}
 
-\item{totvar}{Total variance of the original data (after preprocessing).}
+\item{loadings}{matrix with loadings (P).}
+
+\item{residuals}{matrix with residuals (E).}
+
+\item{Q}{matrix with squared orthogonal distances.}
 }
 \value{
 Returns a list with two vectors.
 }
 \description{
-Computes explained variance and cumulative explained variance for a data decomposition 
-X = TP' + E.
+Computes explained variance and cumulative explained variance for data decomposition.
 }

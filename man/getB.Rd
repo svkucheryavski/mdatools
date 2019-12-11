@@ -4,7 +4,7 @@
 \alias{getB}
 \title{Low-dimensional approximation of data matrix X}
 \usage{
-getB(X, k = NULL, rand = c(1, 5), dist = "unif")
+getB(X, k = NULL, rand = NULL, dist = "unif")
 }
 \arguments{
 \item{X}{data matrix}
