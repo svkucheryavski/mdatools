@@ -425,6 +425,88 @@ getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
    return(crossprod(Q, X))
 }
 
+
+#' Singular Values Decomposition based PCA algorithm
+#'
+#' @description
+#' Computes principal component space using Singular Values Decomposition
+#'
+#' @param x
+#' a matrix with data values (preprocessed)
+#' @param ncomp
+#' number of components to calculate
+#'
+#' @return
+#' a list with scores, loadings and eigenvalues for the components
+#'
+pca.svd <- function(x, ncomp = min(ncol(x), nrow(x) - 1)) {
+
+   s <- svd(x, nu = ncomp, nv = ncomp)
+   return(
+      list(
+         loadings = s$v,
+         scores = s$u %*% diag(s$d)[1:ncomp, 1:ncomp],
+         eigenvals = s$d[1:ncomp]^2 / (nrow(x) - 1),
+         ncomp = ncomp
+      )
+   )
+}
+
+#' NIPALS based PCA algorithm
+#'
+#' @description
+#' Calculates principal component space using non-linear iterative partial least squares algorithm
+#' (NIPALS)
+#'
+#' @param x
+#' a matrix with data values (preprocessed)
+#' @param ncomp
+#' number of components to calculate
+#' @param tol
+#' tolerance (if difference in eigenvalues is smaller - convergence achieved)
+#'
+#' @return
+#' a list with scores, loadings and eigenvalues for the components
+#'
+#' @references
+#' Geladi, Paul; Kowalski, Bruce (1986), "Partial Least Squares
+#' Regression:A Tutorial", Analytica Chimica Acta 185: 1-17
+#'
+pca.nipals <- function(x, ncomp = min(ncol(x), nrow(x) - 1), tol = 10^-10) {
+   nobj <- nrow(x)
+   nvar <- ncol(x)
+
+   scores <- matrix(0, nrow = nobj, ncol = ncomp)
+   loadings <- matrix(0, nrow = nvar, ncol = ncomp)
+
+   E <- x
+   for (i in 1:ncomp) {
+      ind <- which.max(apply(E, 2, sd))
+      t <- E[, ind, drop = F]
+      tau <- th <- 99999999
+      while (th > tol * tau) {
+         p <- crossprod(E, t) / as.vector(crossprod(t))
+         p <- p / as.vector(crossprod(p)) ^ 0.5
+         t <- (E %*% p)/as.vector(crossprod(p))
+
+         th <- abs(tau - as.vector(crossprod(t)))
+         tau <- as.vector(crossprod(t))
+      }
+
+      E <- E - tcrossprod(t, p)
+      scores[, i] <- t
+      loadings[, i] <- p
+   }
+
+   return(
+      list(
+         loadings = loadings,
+         scores = scores,
+         eigenvals = colSums(scores^2) / (nobj - 1)
+      )
+   )
+}
+
 #' Runs one of the selected PCA methods
 #'
 #' @param x
@@ -556,6 +638,9 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
    model$eigenvals <- res$eigenvals
    names(model$eigenvals) <- colnames(loadings)
 
+   # compute parameters for distance critical limits
+   model$limParams <- pca.getLimParams(res)
+
    # finalize model
    model$method <- method
    model$rand <- rand
@@ -572,87 +657,35 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
    return(model)
 }
 
-#' Singular Values Decomposition based PCA algorithm
+#' Compute parameters for critical limits based on calibration results
 #'
-#' @description
-#' Computes principal component space using Singular Values Decomposition
+#' @param res
+#' results returned by \code{pca.run()}
 #'
-#' @param x
-#' a matrix with data values (preprocessed)
-#' @param ncomp
-#' number of components to calculate
-#'
-#' @return
-#' a list with scores, loadings and eigenvalues for the components
-#'
-pca.svd <- function(x, ncomp = min(ncol(x), nrow(x) - 1)) {
+pca.getLimParams <- function(res) {
 
-   s <- svd(x, nu = ncomp, nv = ncomp)
+   dist <- ldecomp.getDistances(res$scores, res$loadings, res$residuals, res$eigenvals)
    return(
       list(
-         loadings = s$v,
-         scores = s$u %*% diag(s$d)[1:ncomp, 1:ncomp],
-         eigenvals = s$d[1:ncomp]^2 / (nrow(x) - 1),
-         ncomp = ncomp
+         T2 <- list(
+            "moments" = ddmoments.param(dist$T2),
+            "robust" = ddrobust.param(dist$T2),
+            "nobj" = nrow(res$scores)
+         ),
+         Q <- list(
+            "moments" = ddmoments.param(dist$Q),
+            "robust" = ddrobust.param(dist$Q),
+            "nobj" = nrow(res$scores)
+         )
       )
    )
 }
 
-#' NIPALS based PCA algorithm
-#'
-#' @description
-#' Calculates principal component space using non-linear iterative partial least squares algorithm
-#' (NIPALS)
-#'
-#' @param x
-#' a matrix with data values (preprocessed)
-#' @param ncomp
-#' number of components to calculate
-#' @param tol
-#' tolerance (if difference in eigenvalues is smaller - convergence achieved)
-#'
-#' @return
-#' a list with scores, loadings and eigenvalues for the components
-#'
-#' @references
-#' Geladi, Paul; Kowalski, Bruce (1986), "Partial Least Squares
-#' Regression:A Tutorial", Analytica Chimica Acta 185: 1-17
-#'
-pca.nipals <- function(x, ncomp = min(ncol(x), nrow(x) - 1), tol = 10^-10) {
-   nobj <- nrow(x)
-   nvar <- ncol(x)
 
-   scores <- matrix(0, nrow = nobj, ncol = ncomp)
-   loadings <- matrix(0, nrow = nvar, ncol = ncomp)
 
-   E <- x
-   for (i in 1:ncomp) {
-      ind <- which.max(apply(E, 2, sd))
-      t <- E[, ind, drop = F]
-      tau <- th <- 99999999
-      while (th > tol * tau) {
-         p <- crossprod(E, t) / as.vector(crossprod(t))
-         p <- p / as.vector(crossprod(p)) ^ 0.5
-         t <- (E %*% p)/as.vector(crossprod(p))
 
-         th <- abs(tau - as.vector(crossprod(t)))
-         tau <- as.vector(crossprod(t))
-      }
 
-      E <- E - tcrossprod(t, p)
-      scores[, i] <- t
-      loadings[, i] <- p
-   }
-
-   return(
-      list(
-         loadings = loadings,
-         scores = scores,
-         eigenvals = colSums(scores^2) / (nobj - 1)
-      )
-   )
-}
-
+# ! stopped here
 #' PCA predictions
 #'
 #' @description
@@ -980,99 +1013,6 @@ plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab
    }
 }
 
-#' Compute score and residual distances
-#'
-#' @description
-#' Compute orthogonal Euclidean distance from object to PC space (Q, q) and Mahalanobis
-#' squared distance between projection of the object to the space and its origin (T2, h).
-#'
-#' @param scores
-#' matrix with scores (T).
-#' @param loadings
-#' matrix with loadings (P).
-#' @param residuals
-#' matrix with residuals (E).
-#' @param tnorm
-#' vector with singular values for scores normalisation (can be provided)
-#'
-#' @details
-#' The distances are calculated for every 1:n components, where n goes from 1 to ncomp
-#' (number of columns in scores and loadings).
-#'
-#' @return
-#' Returns a list with Q, T2 and tnorm values for each component.
-#'
-ldecomp.getDistances = function(scores, loadings, residuals, tnorm = NULL) {
-
-   # get names and attributes
-   var_names <- rownames(loadings)
-   obj_names <- rownames(scores)
-   rows_excluded <- attr(scores, "exclrows")
-   cols_excluded <- attr(loadings, "exclrows")
-
-   # get sizes
-   ncomp <- ncol(scores)
-   nobj <- nrow(scores)
-   nvar <- nrow(loadings)
-
-   # remove excluded variables from loadings and residuals
-   if (length(cols_excluded) > 0) {
-      loadings <- loadings[-cols_excluded, , drop = FALSE]
-      residuals <- residuals[, -cols_excluded, drop = FALSE]
-   }
-
-   # get rid of hidden scores and residuals (needed for some calculations)
-   scores_visible <- scores
-   residuals_visible <- residuals
-   nobj_visible <- nobj
-   if (length(rows_excluded) > 0) {
-      scores_visible <- scores_visible[-rows_excluded, , drop = FALSE]
-      residuals_visible <- residuals_visible[-rows_excluded, , drop = FALSE]
-      nobj_visible <- nobj - length(rows_excluded)
-   }
-
-   # calculate singular values for score normalization (if not provided)
-   if (is.null(tnorm)) {
-      tnorm <- sqrt(colSums(scores_visible^2)/(nobj_visible - 1));
-   }
-
-   # normalize the scores
-   scoresn <- scale(scores, center = FALSE, scale = tnorm)
-
-   # prepare zero matrices for the and model power
-   T2 <- matrix(0, nrow = nobj, ncol = ncomp)
-   Q <- matrix(0, nrow = nobj, ncol = ncomp)
-
-   # calculate distances and model power for each possible number of components in model
-   for (i in 1:ncomp) {
-      res <- residuals
-      if (i < ncomp) {
-         res <- res +
-            tcrossprod(
-               scores[, (i + 1):ncomp, drop = F],
-               loadings[, (i + 1):ncomp, drop = F]
-            )
-      }
-
-      Q[, i] <- rowSums(res^2)
-      T2[, i] <- rowSums(scoresn[, 1:i, drop = F]^2)
-   }
-
-   # set attributes for Q
-   Q <- mda.setattr(Q, mda.getattr(scores), type = 'row')
-   attr(Q, "name") <- "Squared residual distance (q)"
-   attr(Q, "xaxis.name") <- "Components"
-
-   # set attributes for T2
-   T2 = mda.setattr(T2, mda.getattr(Q))
-   attr(T2, 'name') = 'Score distance (h)'
-
-   colnames(Q) <- colnames(T2) <- colnames(loadings)
-   rownames(Q) <- rownames(T2) <- rownames(scores)
-
-   # return the results
-   return(list(Q = Q, T2 = T2, tnorm = tnorm))
-}
 
 #' Residuals plot for PCA
 #'
