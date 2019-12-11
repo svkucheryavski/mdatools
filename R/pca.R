@@ -304,81 +304,81 @@ selectCompNum.pca <- function(model, ncomp, ...) {
 #' show(cbind(odata, mdata, round(rdata, 2)))
 #'
 #' @export
-pca.mvreplace = function(x, center = T, scale = F, maxncomp = 7,
+pca.mvreplace <- function(x, center = T, scale = F, maxncomp = 7,
                          expvarlim = 0.95, covlim = 10^-6, maxiter = 100) {
-   x.rep = x
-   mvidx = is.na(x.rep)
+   mvidx <- is.na(x)
 
-   # calculate number of missing values for every variable
-   # and make initial estimates with mean values
-   for (i in 1:ncol(x)) {
-      mv = is.na(x[, i])
-
-      if (sum(mv)/length(x[, i]) > 0.2)
-         stop(sprintf('To many missing values in column #%d', i))
-
-      x.rep[mv, i] = mean(x[, i], na.rm = T)
+   # check if any column has more than 20% values
+   nmv_cols <- colSums(mvidx) / nrow(x)
+   if (any(nmv_cols > 0.2)) {
+      stop("Some of columns have more than 20% missing values.")
    }
 
+   # make initial estimates with mean values for each column
+   col_means <- matrix(apply(x, 2, mean, na.rm = TRUE), nrow(x), ncol(x))
+   x[mvidx] <- col_means[midx]
+
    # autoscale
-   x.rep = scale(x.rep, center = center, scale = scale)
+   x <- scale(x, center = center, scale = scale)
 
-   if (scale == T)
-      gsd = attr(x.rep, 'scaled:scale')
+   if (scale) {
+      gsd <- attr(x.rep, 'scaled:scale')
+   }
 
-   if (center == T)
-      gmean = attr(x.rep, 'scaled:center');
+   if (center) {
+      gmean <- attr(x.rep, 'scaled:center');
+   }
 
-   x = x.rep
+   n <- 1
+   scoresp <- 0
+   scores <- 1
+   cond <- 1
+   maxncomp <- min(maxncomp, nrow(x) - 1, ncol(x))
 
-   n = 1
-   scoresp = 0
-   scores = 1
-   cond = 1
-   maxncomp = min(maxncomp, nrow(x.rep) - 1, ncol(x.rep))
    while (cond > covlim && n < maxiter) {
-      n = n + 1
 
-      # rescale data on every iteration
-      x.rep = scale(x.rep, center = T, scale = F)
-      lmean = attr(x.rep, 'scaled:center')
+      # recenter data on every iteration
+      x <- scale(x, center = TRUE, scale = FALSE)
+      lmean <- attr(x, 'scaled:center')
 
-      res = pca.svd(x.rep, maxncomp)
-      expvar = cumsum(res$eigenvals/sum(res$eigenvals))
-      ncomp = min(which(expvar >= expvarlim), maxncomp)
+      # compute PCA decomposition annd find number of components
+      res <- pca.svd(x.rep, maxncomp)
+      expvar <- cumsum(res$eigenvals/sum(res$eigenvals))
+      ncomp <- min(which(expvar >= expvarlim), maxncomp)
 
-      if (ncomp == length(expvar))
-         ncomp = ncomp - 1
-      if (ncomp == 0)
-         ncomp = 1
+      # correct number of components for border cases
+      if (ncomp == length(expvar)) ncomp <- ncomp - 1
+      if (ncomp == 0) ncomp <- 1
 
       # get and trancate scores and loadings and reestimate the values
-      scoresp = scores
-      loadings = res$loadings[, 1:ncomp]
-      scores = x.rep %*% loadings
-      x.new = tcrossprod(scores, loadings)
+      scoresp <- scores
+      loadings <- res$loadings[, 1:ncomp]
+      scores <- x %*% loadings
+      x_new <- tcrossprod(scores, loadings)
 
       # remove centering
-      x.new = sweep(x.new, 2L, lmean, '+', check.margin = F)
+      x_new <- sweep(x.new, 2L, lmean, '+', check.margin = F)
 
-      x.rep = x
-      x.rep[mvidx] = x.new[mvidx]
+      # replace missing values by the calculated
+      x[mvidx] <- x_new[mvidx]
 
       if (n > 2) {
          # calculate difference between scores for convergence
-         ncompcond = min(ncol(scores), ncol(scoresp))
-         cond = sum((scores[, 1:ncompcond] - scoresp[, 1:ncompcond])^2)
+         ncompcond <- min(ncol(scores), ncol(scoresp))
+         cond <- sum((scores[, 1:ncompcond] - scoresp[, 1:ncompcond])^2)
       }
    }
 
    # rescale the data back and return
-   if (scale == T)
-      x.rep = sweep(x.rep, 2L, gsd, '*', check.margin = F)
+   if (scale) {
+      x <- sweep(x.rep, 2L, gsd, '*', check.margin = FALSE)
+   }
 
-   if (center == T)
-      x.rep = sweep(x.rep, 2L, gmean, '+', check.margin = F)
+   if (center) {
+      x <- sweep(x.rep, 2L, gmean, '+', check.margin = FALSE)
+   }
 
-   x.rep
+   return(x)
 }
 
 #' Low-dimensional approximation of data matrix X
