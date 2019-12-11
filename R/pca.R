@@ -180,8 +180,12 @@
 #'
 #' @export
 pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
-   exclrows = NULL, exclcols = NULL, x.test = NULL, method = "svd", rand = NULL,
+   exclrows = NULL, exclcols = NULL, x.test = NULL, method = "svd", rand = NULL, cv = NULL,
    lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "") {
+
+   if (!is.null(cv)) {
+      warning("Cross-validation is no mor supported by PCA. See help text for details.")
+   }
 
    # exclude columns if "exclcols" is provided
    if (length(exclcols) > 0) {
@@ -441,6 +445,7 @@ getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
 #' @export
 pca.run <- function(x, ncomp, method, rand = NULL) {
 
+   # define which function to use depending on method name
    f <- switch(
       method,
       "svd" = pca.svd,
@@ -448,6 +453,7 @@ pca.run <- function(x, ncomp, method, rand = NULL) {
       stop('Wrong value for PCA method!')
    )
 
+   # use proper function to compute scores, loadings and eigenvalues
    res <- f(getB(x, k = ncomp, rand = rand), ncomp)
 
    # recompute scores and eigenvalues if randomized algorithm was used
@@ -455,6 +461,9 @@ pca.run <- function(x, ncomp, method, rand = NULL) {
       res$scores <- x %*% res$loadings
       res$eigenvals <- colSums(res$scores^2)/(nrow(x) - 1)
    }
+
+   # compute and add residuals
+   res$residuals <- x - tcrossprod(res$scores, res$loadings)
 
    return(res)
 }
@@ -474,28 +483,13 @@ pca.run <- function(x, ncomp, method, rand = NULL) {
 #' logical, do standardization or not
 #' @param method
 #' algorithm for compiting PC space (only 'svd' and 'nipals' are supported so far)
-#' @param exclrows
-#' rows to be excluded from calculations (numbers, names or vector with logical values)
-#' @param exclcols
-#' columns to be excluded from calculations (numbers, names or vector with logical values)
-#' @param cv
-#' number of segments for random cross-validation (1 for full cross-validation).
 #' @param rand
 #' vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)
-#' @param lim.type
-#' which method to use for calculation of critical limits for residuals (see details for \code{pca})
-#' @param alpha
-#' significance level for calculating critical limits for T2 and Q residuals.
-#' @param gamma
-#' significance level for calculating outlier limits for T2 and Q residuals.
-#' @param info
-#' a short text line with model description.
 #'
 #' @return
 #' an object with calibrated PCA model
 #'
-pca.cal <- function(x, ncomp, center, scale, method, exclcols = NULL,
-                   exclrows = NULL, cv, rand, lim.type, alpha, gamma, info) {
+pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
 
    # check if data has missing values
    if (any(is.na(x))) {
@@ -517,10 +511,6 @@ pca.cal <- function(x, ncomp, center, scale, method, exclcols = NULL,
    ncols <- ncols_full - length(attrs$exclcols)
    nrows <- nrows_full - length(attrs$exclrows)
 
-   if (!is.null(cv)) {
-      warning("Cross-validation is no mor supported by PCA. See help text for details.")
-   }
-
    # make sure that ncomp is correct
    ncomp <- min(ncomp, ncols, nrows - 1)
 
@@ -539,16 +529,16 @@ pca.cal <- function(x, ncomp, center, scale, method, exclcols = NULL,
 
    # remove excluded columns
    if (length(attrs$exclcols) > 0) {
-      x.cal <- x.cal[, -attrs$exclcols, drop = F]
+      x_cal <- x_cal[, -attrs$exclcols, drop = F]
    }
 
    # compute loadings, scores and eigenvalues for data without excluded elements
-   res <- pca.run(x.cal, ncomp, method, rand)
+   res <- pca.run(x_cal, ncomp, method, rand)
 
    # correct loadings for missing columns in x
    # corresponding rows in loadings will be set to 0 and excluded
    if (length(attrs$exclcols) > 0) {
-      loadings <- matrix(0, nrow = x.ncols, ncol = ncomp)
+      loadings <- matrix(0, nrow = ncols_full, ncol = ncomp)
       loadings[-attrs$exclcols, ] <- res$loadings
       loadings <- mda.exclrows(loadings, attrs$exclcols)
    } else {
@@ -568,6 +558,10 @@ pca.cal <- function(x, ncomp, center, scale, method, exclcols = NULL,
    attr(loadings, "yaxis.values") <- attrs$xaxis.values
    model$loadings <- loadings
 
+   # organize eigen values
+   model$eigenvals <- res$eigenvals
+   names(model$eigenvals) <- colnames(loadings)
+
    # finalize model
    model$method <- method
    model$rand <- rand
@@ -577,9 +571,9 @@ pca.cal <- function(x, ncomp, center, scale, method, exclcols = NULL,
    model$ncomp.selected <- model$ncomp
 
    # save excluded columns and rows
-   model$exclcols = attrs$exclcols
-   model$exclrows = attrs$exclrows
-   class(model) = "pca"
+   model$exclcols <- attrs$exclcols
+   model$exclrows <- attrs$exclrows
+   class(model) <- "pca"
 
    return(model)
 }
