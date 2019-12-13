@@ -667,12 +667,12 @@ pca.getLimParams <- function(res) {
    dist <- ldecomp.getDistances(res$scores, res$loadings, res$residuals, res$eigenvals)
    return(
       list(
-         T2 <- list(
+         "T2" = list(
             "moments" = ddmoments.param(dist$T2),
             "robust" = ddrobust.param(dist$T2),
             "nobj" = nrow(res$scores)
          ),
-         Q <- list(
+         "Q" = list(
             "moments" = ddmoments.param(dist$Q),
             "robust" = ddrobust.param(dist$Q),
             "nobj" = nrow(res$scores)

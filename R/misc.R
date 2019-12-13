@@ -189,13 +189,14 @@ mda.show = function(x, n = 50) {
 #' a data with the subset
 #'
 #' @details
-#' The method works similar to the standard \code{subset()} method, with minor differences. First of all
-#' it keeps (and correct, if necessary) all important attributes. If only columns are selected, it keeps
-#' all excluded rows as excluded. If only rows are selected, it keeps all excluded columns. If both rows
-#' and columns are selected it removed all excluded elements first and then makes the subset.
+#' The method works similar to the standard \code{subset()} method, with minor differences. First
+#' of all it keeps (and correct, if necessary) all important attributes. If only columns are
+#' selected, it keeps all excluded rows as excluded. If only rows are selected, it keeps all
+#' excluded columns. If both rows and columns are selected it removed all excluded elements first
+#' and then makes the subset.
 #'
-#' The parameters \code{subset} and \code{select} may each be a vector with numbers or nanes without excluded
-#' elements, or a logical expression.
+#' The parameters \code{subset} and \code{select} may each be a vector with numbers or nanes
+#' without excluded elements, or a logical expression.
 #'
 #' @export
 mda.subset = function(x, subset = NULL, select = NULL) {
@@ -379,9 +380,10 @@ mda.t = function(x) {
 #' dataset with excluded rows
 #'
 #' @details
-#' The method assign attribute 'exclrows', which contains number of rows, which should be excluded/hidden
-#' from calculations and plots (without removing them physically). The argument \code{ind} should contain
-#' rows numbers (excluding already hidden), names or logical values.
+#' The method assign attribute 'exclrows', which contains number of rows, which should be
+#' excluded/hidden from calculations and plots (without removing them physically). The
+#' argument \code{ind} should contain rows numbers (excluding already hidden), names or logical
+#' values.
 #'
 #' @export
 mda.exclrows = function(x, ind) {
@@ -447,9 +449,9 @@ mda.inclrows = function(x, ind) {
 #' dataset with excluded columns
 #'
 #' @details
-#' The method assign attribute 'exclcols', which contains number of columns, which should be excluded/hidden
-#' from calculations and plots (without removing them physically). The argument \code{ind} should contain
-#' column numbers (excluding already hidden), names or logical values.
+#' The method assign attribute 'exclcols', which contains number of columns, which should be
+#' excluded/hidden from calculations and plots (without removing them physically). The argument
+#' \code{ind} should contain column numbers (excluding already hidden), names or logical values.
 #'
 #' @export
 mda.exclcols = function(x, ind) {
@@ -580,7 +582,8 @@ mda.getexclind = function(excl, names, n) {
    if (length(excl) < nitems)
       stop('At least one index or name is incorrect!')
 
-   if (!(is.null(excl) || length(excl) == 0) && (!is.numeric(excl) || min(excl) < 1 || max(excl) > n))
+   if (!(is.null(excl) || length(excl) == 0) && (!is.numeric(excl) ||
+      min(excl) < 1 || max(excl) > n))
       stop('At least one index or name is incorrect!')
 
 #   if (length(excl) >= n)
@@ -602,8 +605,9 @@ mda.getexclind = function(excl, names, n) {
 #'
 #' @details
 #' If one or several columns of the data frame are factors they will be converted to a set of dummy
-#' variables. If any columns/rows were hidden in the data frame they will remain hidden in the matrix. If
-#' there are factors among the hidden columns, the corresponding dummy variables will be hidden as well.
+#' variables. If any columns/rows were hidden in the data frame they will remain hidden in the
+#' matrix. If there are factors among the hidden columns, the corresponding dummy variables will be
+#' hidden as well.
 #'
 #' All other attributes (names, axis names, etc.) will be inherited.
 #'
@@ -759,13 +763,12 @@ getMainTitle <- function(main, ncomp, default) {
 #'
 #' @export
 hotelling.crit <- function(nobj, ncomp, alpha = 0.05, gamma = 0.01) {
-   out <- rbind(
-      (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(1 - alpha, ncomp, (nobj - ncomp)),
-      (ncomp * (nobj - 1) / (nobj - ncomp)) * qf((1 - gamma)^(1/nobj), ncomp, (nobj - ncomp)),
-      u0, DoF
+   return(
+      rbind(
+         (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(1 - alpha, ncomp, (nobj - ncomp)),
+         (ncomp * (nobj - 1) / (nobj - ncomp)) * qf((1 - gamma)^(1/nobj), ncomp, (nobj - ncomp))
+      )
    )
-
-   return(out)
 }
 
 #' Calculate probabilities for distance values and given parameters using Hotelling T2 distribution
@@ -800,16 +803,16 @@ hotelling.prob <- function(u, ncomp, nobj){
 chisq.crit <- function(param, alpha = 0.05, gamma = 0.01) {
 
    u0 <- param$u0
+   nobj <- param$nobj
    Nu <- param$Nu
 
    DoF <- floor(Nu)
-   DoF[DoF == 0] <- 1
+   DoF <- ifelse(DoF < 1, 1, DoF)
 
    return(
       rbind(
          qchisq(1 - alpha, DoF) * u0 / Nu,
-         qchisq((1 - gamma)^(1/nobj), DoF) * u0 / Nu,
-         u0, Nu
+         qchisq((1 - gamma)^(1/nobj), DoF) * u0 / Nu
       )
    )
 }
@@ -841,18 +844,40 @@ chisq.prob <- function(u, param){
 #' matrix or vector with distance values
 #'
 #' @export
+dd.crit <- function(paramQ, paramT2, alpha = 0.05, gamma = 0.01) {
+
+   nobj <- paramQ$nobj
+   Nq <- round(paramQ$Nu)
+   Nq[Nq < 1] <- 1
+   Nq[Nq > 250] <- 250
+
+   Nh <- round(paramT2$Nu)
+   Nh[Nh < 1] <- 1
+   Nh[Nh > 250] <- 250
+
+   return(
+      rbind(
+         qchisq(1 - alpha, Nq + Nh),
+         qchisq((1 - gamma)^(1/nobj), Nq + Nh)
+      )
+   )
+}
+
+#' Calculates critical limits for distance values using Data Driven moments approach
+#'
+#' @param U
+#' matrix or vector with distance values
+#'
+#' @export
 ddmoments.param <- function(U) {
 
    if (is.null(dim(U))) dim(U) <- c(length(U), 1)
 
    u0 <- apply(U, 2, mean)
    su <- apply(U, 2, sd)
+   Nu <- 2 * (u0/su)^2
 
-   Nu <- round(2 * (u0/su)^2)
-   Nu <- ifelse(Nu > 250, 250, Nu)
-   Nu <- ifelse(Nu < 1, 1, Nu)
-
-   return(rbind(0, 0, u0, Nu))
+   return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
 }
 
 
@@ -881,5 +906,5 @@ ddrobust.param <- function(U, ncomp, alpha, gamma) {
    Nu[RM < 0.194565995] <- 100
 
    u0 <- 0.5 * Nu * (Mu/qchisq(0.50, Nu) + Su/(qchisq(0.75, Nu) - qchisq(0.25, Nu)))
-   return(rbind(u0, Nu))
+   return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
 }
