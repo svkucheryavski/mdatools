@@ -817,7 +817,6 @@ chisq.crit <- function(param, alpha = 0.05, gamma = 0.01) {
    )
 }
 
-
 #' Calculate probabilities for distance values using Chi-square distribution
 #'
 #' @param u
@@ -836,7 +835,6 @@ chisq.prob <- function(u, param){
    DoF[DoF == 0] <- 1
    return(pchisq(Nu * u / u0, DoF))
 }
-
 
 #' Calculates critical limits for distance values using Data Driven moments approach
 #'
@@ -879,7 +877,6 @@ ddmoments.param <- function(U) {
 
    return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
 }
-
 
 #' Calculates critical limits for distance values using Data Driven robust approach
 #'
