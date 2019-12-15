@@ -354,3 +354,298 @@ test_that("pca.cal calculates limit parameters correctly (excluded data)", {
    }
 })
 
+
+############################################################
+# Block 4: testing getQlimits() and getT2Limits() methods  #
+############################################################
+
+x <- people
+m <- pca.cal(x, 11, center = TRUE, scale = TRUE, method = "svd")
+
+context('PCA: testing getQlimits()')
+
+test_that("getQLimits() works fine (chisq)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using "residuallimit" function from PLS_Toolbox
+   expQlim1 <- rbind(
+      c(9.25512512, 7.37431769, 3.64879767, 1.55968461, 0.82955551, 0.52538528, 0.23914330,
+         0.15607468, 0.11587272, 0.04727562, 0.04666972),
+      c(16.87605393, 16.33648881, 8.08326204, 4.19946801, 2.23358734, 1.25780278, 0.52977943,
+         0.37365182, 0.31198858, 0.15980027, 0.15775224)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using "residuallimit" function from PLS_Toolbox
+   expQlim2 <- rbind(
+      c(8.03234581, 6.04655385, 2.99182277, 1.19880757, 0.63761443, 0.42028176, 0.19608497,
+         0.12485188, 0.08906230, 0.03329627, 0.03286953),
+      c(14.57482653, 13.53946609, 6.69930078, 3.35119154, 1.78241124, 1.02644677, 0.43907419,
+         0.30492357, 0.24896808, 0.12254836, 0.12097776)
+   )
+
+   Qlim1 <- pca.getQLimits(m, lim.type = "chisq", alpha = 0.05, gamma = 0.01)
+   Qlim2 <- pca.getQLimits(m, lim.type = "chisq", alpha = 0.10, gamma = 0.05)
+
+   expect_equivalent(Qlim1[1:2, ], expQlim1, tolerance = 10^-5)
+   expect_equivalent(Qlim2[1:2, ], expQlim2, tolerance = 10^-5)
+})
+
+test_that("getQLimits() works fine (ddmoments)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using DDSimca toolbox
+   expQlim1 <- rbind(
+      c(11.34617157, 19.08855942, 11.42533747, 6.34336609, 3.34064053, 1.84178155, 0.55799538,
+         0.39965752, 0.47200886, 0.25476038, 0.17850637),
+      c(19.47199649, 31.77017452, 18.32858290, 10.17605927, 5.41986135, 3.02485080, 0.94234321,
+         0.67494207, 0.81004899, 0.42401219, 0.28960906)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using DDSimca toolbox
+   expQlim2 <- rbind(
+      c(10.00967132, 16.97646011, 10.25820924, 5.69537459, 2.99072482, 1.64367017, 0.49436318,
+         0.35408172, 0.41640949, 0.22657181, 0.15980870),
+      c(17.04539107, 28.00480337, 16.29329975, 9.04606673, 4.80551079, 2.67446799, 0.82790983,
+         0.59298052, 0.70910047, 0.37375866, 0.25678138)
+   )
+
+   Qlim1 <- pca.getQLimits(m, lim.type = "ddmoments", alpha = 0.05, gamma = 0.01)
+   Qlim2 <- pca.getQLimits(m, lim.type = "ddmoments", alpha = 0.10, gamma = 0.05)
+   expect_equivalent(Qlim1[1:2, ], expQlim1, tolerance = 10^-5)
+   expect_equivalent(Qlim2[1:2, ], expQlim2, tolerance = 10^-5)
+})
+
+test_that("getQLimits() works fine (ddrobust)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using DDSimca toolbox
+   expQlim1 <- rbind(
+      c(10.15325434, 14.52405375, 9.87019680, 5.01044538, 2.52248917, 2.34463394, 0.88961632,
+         0.74738500, 0.39573108, 0.21597701, 0.09364917),
+      c(15.68388669, 20.95236870, 15.01145008, 8.33916906, 3.96573316, 3.62179177, 1.37420388,
+         1.15449701, 0.60641832, 0.37065397, 0.15380476)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using DDSimca toolbox
+   expQlim2 <- rbind(
+      c(9.20367955, 13.38917413, 8.98186792, 4.45605266, 2.27646590, 2.12535397, 0.80641568,
+         0.67748643, 0.35943919, 0.19053642, 0.08357579),
+      c(14.06529482, 19.09677672, 13.51144603, 7.35081860, 3.54188909, 3.24801945, 1.23238475,
+         1.03535183, 0.54485629, 0.32446297, 0.13598882)
+   )
+
+   Qlim1 <- pca.getQLimits(m, lim.type = "ddrobust", alpha = 0.05, gamma = 0.01)
+   Qlim2 <- pca.getQLimits(m, lim.type = "ddrobust", alpha = 0.10, gamma = 0.05)
+   expect_equivalent(Qlim1[1:2, ], expQlim1, tolerance = 10^-5)
+   expect_equivalent(Qlim2[1:2, ], expQlim2, tolerance = 10^-5)
+})
+
+context('PCA: testing getT2limits()')
+
+test_that("getT2Limits() works fine (chisq)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using "tsqlim" function from PLS_Toolbox
+   expT2lim1 <- rbind(
+      c(4.15961510, 6.85271430, 9.40913034, 12.01947857, 14.76453307, 17.69939358, 20.87303997,
+         24.33584211, 28.14388532, 32.36253393, 37.07020868),
+      c(16.43763399, 22.07592005, 27.49293159, 33.11628022, 39.14366436, 45.72590957, 53.01070123,
+         61.16173704, 70.37250826, 80.88041709, 92.98424615)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using "tsqlim" function from PLS_Toolbox
+   expT2lim2 <- rbind(
+      c(2.87478394, 5.14334644, 7.32156708, 9.55303105, 11.90044572, 14.40708180, 17.11153965,
+         20.05346964, 23.27685391, 26.83267841, 30.78172763),
+      c(11.96070234, 16.61285114, 21.04123968, 25.60304588, 30.45666797, 35.71776166, 41.49572457,
+         47.90883728, 55.09430867, 63.21788003, 72.48520544)
+   )
+
+
+
+   T2lim1 <- pca.getT2Limits(m, lim.type = "chisq", alpha = 0.05, gamma = 0.01)
+   T2lim2 <- pca.getT2Limits(m, lim.type = "chisq", alpha = 0.10, gamma = 0.05)
+
+   expect_equivalent(T2lim1[1:2, ], expT2lim1, tolerance = 10^-5)
+   expect_equivalent(T2lim2[1:2, ], expT2lim2, tolerance = 10^-5)
+})
+
+test_that("getT2Limits() works fine (ddmoments)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using DDSimca toolbox
+   expT2lim1 <- rbind(
+      c(10.18450977, 4.58893048, 6.16731299, 7.63572085, 9.79787223, 12.10733682, 18.95532441,
+         19.25620258, 18.33211759, 19.12054367, 18.68127639),
+      c(17.47838355, 7.63761785, 9.89363402, 12.24926117, 15.89608595, 19.88449041, 32.01177265,
+         32.51989603, 31.46109039, 31.82340773, 30.30853722)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using DDSimca toolbox
+   expT2lim2 <- rbind(
+      c(8.98484522, 4.08117729, 5.53730578, 6.85571191, 8.77159317, 10.80501016, 16.79371331,
+         17.06028019, 16.17272140, 17.00490539, 16.72450430),
+      c(15.30022271, 6.73241458, 8.79500317, 10.88905154, 14.09423741, 17.58117559, 28.12442515,
+         28.57084459, 27.54040088, 28.05172743, 26.87301266)
+   )
+
+   T2lim1 <- pca.getT2Limits(m, lim.type = "ddmoments", alpha = 0.05, gamma = 0.01)
+   T2lim2 <- pca.getT2Limits(m, lim.type = "ddmoments", alpha = 0.10, gamma = 0.05)
+   expect_equivalent(T2lim1[1:2, ], expT2lim1, tolerance = 10^-5)
+   expect_equivalent(T2lim2[1:2, ], expT2lim2, tolerance = 10^-5)
+})
+
+test_that("getT2Limits() works fine (ddrobust)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using DDSimca toolbox
+   expT2lim1 <- rbind(
+      c(13.49051625, 3.87287602, 5.54095383, 8.43336946, 9.07842620, 10.27911626, 12.17217082,
+         13.06617385, 15.20430507, 18.82185388, 17.87728459),
+      c(20.83900601, 5.58700262, 8.42716245, 14.03613618, 14.27265426, 15.87830752, 18.80253774,
+         20.18351784, 23.29907765, 32.30156273, 29.36076688)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using DDSimca toolbox
+   expT2lim2 <- rbind(
+      c(12.22882677, 3.57025747, 5.04226172, 7.50023912, 8.19298966, 9.31777034, 11.03377852,
+         11.84417065, 13.80994172, 16.60477015, 15.95431303),
+      c(18.68840097, 5.09220428, 7.58508672, 12.37258654, 12.74724151, 14.23965123, 16.86209814,
+         18.10055980, 20.93381524, 28.27613333, 25.95977002)
+   )
+
+   T2lim1 <- pca.getT2Limits(m, lim.type = "ddrobust", alpha = 0.05, gamma = 0.01)
+   T2lim2 <- pca.getT2Limits(m, lim.type = "ddrobust", alpha = 0.10, gamma = 0.05)
+   expect_equivalent(T2lim1[1:2, ], expT2lim1, tolerance = 10^-5)
+   expect_equivalent(T2lim2[1:2, ], expT2lim2, tolerance = 10^-5)
+})
+
+#########################################
+# Block 5: testing categorize() method  #
+#########################################
+
+tf <- function(m, outliers, extremes) {
+
+   expect_equivalent(which(categorize(m, m$calres, 1) == "outlier"), outliers[[1]])
+   expect_equivalent(which(categorize(m, m$calres, 3) == "outlier"), outliers[[2]])
+   expect_equivalent(which(categorize(m, m$calres, 5) == "outlier"), outliers[[3]])
+
+   expect_equivalent(which(categorize(m, m$calres, 1) == "extreme"), extremes[[1]])
+   expect_equivalent(which(categorize(m, m$calres, 3) == "extreme"), extremes[[2]])
+   expect_equivalent(which(categorize(m, m$calres, 5) == "extreme"), extremes[[3]])
+}
+
+context('PCA: testing categorize()')
+
+x <- people
+m <- pca(x, 11, scale = TRUE)
+
+test_that("categorize() works well (chisq)", {
+
+   ## outliers and extremes computed using PLS toolbox
+
+   m <- setDistanceLimits.pca(m, "chisq", 0.05, 0.01)
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(1, 18, 27, 28), c(7), c(4, 20, 28, 29, 31))
+   tf(m, outliers, extremes)
+
+   m <- setDistanceLimits.pca(m, "chisq", 0.10, 0.05)
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(1, 17, 18, 27, 28), c(4, 7, 19), c(4, 19, 20, 28, 29, 31))
+   tf(m, outliers, extremes)
+
+})
+
+test_that("categorize() works well (ddmoments)", {
+
+   ## outliers and extremes computed using DD SIMCA toolbox
+
+   m <- setDistanceLimits.pca(m, "ddmoments", 0.05, 0.01)
+
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(28), c(1, 28), c(1, 4, 28))
+   tf(m, outliers, extremes)
+
+   m <- setDistanceLimits.pca(m, "ddmoments", 0.10, 0.05)
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(18, 28), c(1, 18, 28), c(1, 4, 19, 20, 27, 28))
+   tf(m, outliers, extremes)
+
+})
+
+test_that("categorize() works well (ddrobust)", {
+
+   ## outliers and extremes computed using DD SIMCA toolbox
+
+   m <- setDistanceLimits.pca(m, "ddrobust", 0.05, 0.01)
+
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(28), c(1, 18, 28), c(1, 4, 19, 20, 28))
+   tf(m, outliers, extremes)
+
+   m <- setDistanceLimits.pca(m, "ddrobust", 0.10, 0.05)
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(17, 18, 27, 28), c(1, 7, 17, 18, 19, 27, 28), c(1, 4, 7, 19, 20, 27, 28))
+   tf(m, outliers, extremes)
+
+})
+
+x <- people
+x <- mda.exclrows(x, c(1, 10, 20))
+x <- mda.exclcols(x, c(3, 12))
+m <- pca(x, 11, scale = TRUE)
+test_that("categorize() works well for excluded data (chisq)", {
+
+   ## outliers and extremes computed using PLS toolbox
+
+   m <- setDistanceLimits.pca(m, "chisq", 0.05, 0.01)
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(16, 25), c(9, 18, 28), c(17, 19, 28))
+   tf(m, outliers, extremes)
+
+   m <- setDistanceLimits.pca(m, "chisq", 0.10, 0.05)
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(15, 16, 25), c(9, 11, 18, 26, 28), c(17, 19, 28))
+   tf(m, outliers, extremes)
+
+})
+
+test_that("categorize() works well for excluded data (ddmoments)", {
+
+   ## outliers and extremes computed using DD SIMCA toolbox
+
+   m <- setDistanceLimits.pca(m, "ddmoments", 0.05, 0.01)
+
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(16), c(16), c(28))
+   tf(m, outliers, extremes)
+
+   m <- setDistanceLimits.pca(m, "ddmoments", 0.10, 0.05)
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(15, 16, 25), c(16, 25), c(9, 16, 17, 28))
+   tf(m, outliers, extremes)
+
+})
+
+test_that("categorize() works well for excluded data (ddrobust)", {
+
+   ## outliers and extremes computed using DD SIMCA toolbox
+
+   m <- setDistanceLimits.pca(m, "ddrobust", 0.05, 0.01)
+
+   outliers <- list(integer(0), integer(0), integer(0))
+   extremes <- list(c(15, 16, 25), c(15, 16, 22, 25), c(17, 28))
+   tf(m, outliers, extremes)
+
+   m <- setDistanceLimits.pca(m, "ddrobust", 0.10, 0.05)
+   outliers <- list(integer(0), c(16), integer(0))
+   extremes <- list(c(15, 16, 25), c(15, 22, 23, 25), c(17, 28))
+   tf(m, outliers, extremes)
+
+})

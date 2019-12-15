@@ -199,9 +199,11 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
 
    # calibrate model and set distance limits
    model <- pca.cal(x, ncomp, center = center, scale = scale, method = method, rand = rand)
-   model <- pca.setDistanceLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
    model$info <- info
    model$call <- match.call()
+
+   # set distance limits
+   model <- setDistanceLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
 
    # apply the model to calibration set
    model$res <- list()
@@ -211,6 +213,10 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
    if (!is.null(x.test)) {
       model$res$test <- predict.pca(model, x.test)
    }
+
+   # make links for backward compatibility
+   model$calres <- model$res$cal
+   model$testres <- model$res$test
 
    return(model)
 }
@@ -231,20 +237,172 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
 #' the same model with selected number of components
 #'
 #' @export
-selectCompNum.pca <- function(model, ncomp, ...) {
-   if (ncomp < 1 || ncomp > model$ncomp) {
-      stop('Wrong number of selected components!')
+selectCompNum.pca <- function(obj, ncomp, ...) {
+   if (ncomp < 1 || ncomp > obj$ncomp) {
+      stop("Wrong number of selected components.")
    }
 
-   model$ncomp.selected <- ncomp
-   model$calres$ncomp.selected <- ncomp
+   obj$ncomp.selected <- ncomp
+   obj$calres$ncomp.selected <- ncomp
 
-   if (!is.null(model$testres)) {
-      model$testres$ncomp.selected <- ncomp
+   if (!is.null(obj$testres)) {
+      obj$testres$ncomp.selected <- ncomp
    }
 
-   return(model)
+   return(obj)
 }
+
+
+#' Set statistical limits for Q and T2 residuals for PCA model
+#'
+#' @description
+#' Computes statisticsl limits for Q and T2 residuals for a PCA model and assing the calculated
+#' values as corresponding model properties. Plus it recategoryse objects in calibration and test
+#' set according to the new limits
+#'
+#' @param obj
+#' object with PCA model
+#' @param lim.type
+#' type of limits ("chisq", "ddmoments", "ddrobust")
+#' @param alpha
+#' significance level for detection of extreme objects
+#' @param gamma
+#' significance level for detection of outliers (for data driven approach)
+#' @param ...
+#' other arguments
+#'
+#' @details
+# TODO: rewrite the text
+#' Third row containes average values and fourth row contains degrees of freedom.
+#'
+#' See help for \code{\link{pca}} for more details.
+#'
+#' @return
+#' Returns a list with two matrices:  \code{T2lim} and \code{Qlim}. Each matrix contains limits
+#' for extreme objects and outliers (first two rows), mean residual and degrees of freedom,
+#' calculated for each number of components included to the model
+#'
+#' @export
+setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alpha,
+   gamma = obj$gamma) {
+
+   obj$Qlim <- pca.getQLimits(obj, lim.type, alpha = alpha, gamma = gamma)
+   obj$T2lim <- pca.getT2Limits(obj, lim.type, alpha = alpha, gamma = gamma)
+
+   obj$alpha <- alpha
+   obj$gamma <- gamma
+   obj$lim.type <- lim.type
+
+   return(obj)
+}
+
+#' Categorize PCA results as normal, extreme and outliers
+#'
+#' @param obj
+#' object with PCA model
+#' @param res
+#' object with PCA results
+#'
+#' @return
+#' factor with categories for all
+#'
+#' @export
+categorize.pca <- function(obj, res, ncomp = obj$ncomp.selected) {
+
+   create_categories <- function(nobj, extremes_ind, outliers_ind) {
+      categories <- rep(1, nobj)
+      categories[extremes_ind] <- 2
+      categories[outliers_ind] <- 3
+      return(factor(categories, levels = 1:3, labels = c("normal", "extreme", "outlier")))
+   }
+
+   # get distance values for selected number of components
+   h <- res$T2[, ncomp]
+   q <- res$Q[, ncomp]
+
+   # remove excluded values if any
+   rows_excluded <- attr(res$T2, "exclrows")
+   if (length(rows_excluded) > 0) {
+      h <- h[-rows_excluded]
+      q <- q[-rows_excluded]
+   }
+
+   nobj <- length(h)
+
+   # if chisq / hotelling
+   if (obj$lim.type == "chisq") {
+      outliers_ind <- (h >= obj$T2lim[2, ncomp] | q >= obj$Qlim[2, ncomp])
+      extremes_ind <- (h >= obj$T2lim[1, ncomp] | q >= obj$Qlim[1, ncomp])
+      return(create_categories(nobj, extremes_ind, outliers_ind))
+   }
+
+   # if data driven
+   h0 <- obj$T2lim[3, ncomp]
+   Nh <- round(obj$T2lim[4, ncomp])
+   q0 <- obj$Qlim[3, ncomp]
+   Nq <- round(obj$Qlim[4, ncomp])
+
+   f <- Nh * h / h0 + Nq * q / q0
+   outliers_ind <- f > (obj$T2lim[2, ncomp] * Nh / h0)
+   extremes_ind <- f > (obj$T2lim[1, ncomp] * Nh / h0)
+   return(create_categories(nobj, extremes_ind, outliers_ind))
+}
+
+#' PCA predictions
+#'
+#' @description
+#' Applies PCA model to a new data
+#'
+#' @param object
+#' a PCA model (object of class \code{pca})
+#' @param x
+#' a matrix with data values
+#' @param cal
+#' logical, if TRUE the predictions are made for calibration set
+#' @param ...
+#' other arguments
+#'
+#' @return
+#' PCA results (an object of class \code{pcares})
+#'
+#' @export
+predict.pca <- function(object, x, cal = FALSE, ...) {
+   # convert to matrix
+   x <- mda.df2mat(x)
+   attrs <- attributes(x)
+
+   if (ncol(x) != nrow(object$loadings)) {
+      stop("Number and type of data columns should be the same as in calibration dataset.")
+   }
+
+   # compute scores and residuals
+   x <- prep.autoscale(x, center = object$center, scale = object$scale)
+   scores <- x %*% object$loadings
+   residuals <- x - tcrossprod(scores, object$loadings)
+
+   rownames(scores) <- rownames(residuals) <- attrs$dimnames[[1]]
+   colnames(scores) <- colnames(loadings)
+   colnames(residuals) <- attrs$dimnames[[2]]
+
+   scores <- mda.setattr(scores, attrs, "row")
+   residuals <- mda.setattr(residuals, attrs)
+   attr(scores, "name") <- "Scores"
+   attr(scores, "xaxis.name") <- "Components"
+   attr(residuals, "name") <- "Residuals"
+
+
+   # create and return the results object
+   res <- pcares(scores, object$loadings, residuals, object$eigenvals, object$ncomp.selected)
+   #res$category <- categorize(object, res)
+
+   return(res)
+}
+
+
+################################
+#  Static methods              #
+################################
+
 
 #' Replace missing values in data
 #'
@@ -681,189 +839,86 @@ pca.getLimParams <- function(res) {
    )
 }
 
+#' Compute critical limits for orthogonal distances (Q)
+#'
+#' @param model
+#' PCA model
+#' @param lim.type
+#' which method to use for calculation of critical limits for residuals (see details)
+#' @param alpha
+#' significance level for extreme limits.
+#' @param gamma
+#' significance level for outlier limits.
+#'
+pca.getQLimits <- function(model, lim.type, alpha, gamma) {
 
+   params <- model$limParams
+   pQ <- if (regexpr("robust", lim.type) > 0) params$Q$robust else params$Q$moments
+   pT2 <- if (regexpr("robust", lim.type) > 0) params$T2$robust else params$T2$moments
 
+   DoF <- round(pQ$Nu)
+   DoF[DoF < 1] <- 1
+   DoF[DoF > 250] <- 250
+
+   lim <- switch(lim.type,
+      "chisq" = chisq.crit(pQ, alpha, gamma),
+      "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
+      "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
+      stop("Wrong value for 'lim.type' parameter.")
+   )
+
+   lim <- rbind(lim, pQ$u0, DoF)
+   colnames(lim) <- colnames(model$loadings)
+   rownames(lim) <- c("Extremes limits", "Outliers limits", "Mean", "DoF")
+   attr(lim, "name") <- "Critical limits for orthogonal distances (Q)"
+   attr(lim, "alpha") <- alpha
+   attr(lim, "gamma") <- gamma
+   attr(lim, "lim.type") <- lim.type
+
+   return(lim)
+}
+
+#' Compute critical limits for score distances (T2)
+#'
+#' @param model
+#' PCA model
+#' @param lim.type
+#' which method to use for calculation ("chisq", "ddmoments", "ddrobust")
+#' @param alpha
+#' significance level for extreme limits.
+#' @param gamma
+#' significance level for outlier limits.
+#'
+pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
+
+   params <- model$limParams
+   pQ <- if (regexpr("robust", lim.type) > 0) params$Q$robust else params$Q$moments
+   pT2 <- if (regexpr("robust", lim.type) > 0) params$T2$robust else params$T2$moments
+
+   DoF <- round(pT2$Nu)
+   DoF[DoF < 1] <- 1
+   DoF[DoF > 250] <- 250
+
+   lim <- switch(lim.type,
+      "chisq" = hotelling.crit(pT2$nobj, 1:model$ncomp, alpha, gamma),
+      "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
+      "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
+      stop("Wrong value for 'lim.type' parameter.")
+   )
+
+   lim <- rbind(lim, pT2$u0, DoF)
+   colnames(lim) <- colnames(model$loadings)
+   rownames(lim) <- c("Extremes limits", "Outliers limits", "Mean", "DoF")
+   attr(lim, "name") <- "Critical limits for score distances (T2)"
+   attr(lim, "alpha") <- alpha
+   attr(lim, "gamma") <- gamma
+   attr(lim, "lim.type") <- lim.type
+
+   return(lim)
+}
 
 
 # ! stopped here
-#' PCA predictions
-#'
-#' @description
-#' Applies PCA model to a new data
-#'
-#' @param object
-#' a PCA model (object of class \code{pca})
-#' @param x
-#' a matrix with data values
-#' @param cal
-#' logical, if TRUE the predictions are made for calibration set
-#' @param ...
-#' other arguments
-#'
-#' @return
-#' PCA results (an object of class \code{pcares})
-#'
-#' @export
-predict.pca = function(object, x, cal = FALSE, ...) {
-   # convert to matrix
-   x = mda.df2mat(x)
-   attrs = attributes(x)
-
-   if (ncol(x) != nrow(object$loadings))
-      stop('Number and type of data columns should be the same as in calibration dataset!')
-
-   # compute scores and residuals
-   x = prep.autoscale(x, center = object$center, scale = object$scale)
-   scores = x %*% object$loadings
-   residuals = x - tcrossprod(scores, object$loadings)
-
-   # compute total variance
-   if (length(object$exclcols) > 0){
-      x = x[, -object$exclcols, drop = F]
-      attrs$exclcols = object$exclcols
-   }
-
-   if (length(attrs$exclrows) > 0){
-      x = x[-object$exclrows, ,drop = F]
-   }
-
-   totvar = sum(x^2)
-
-   rownames(scores) <- rownames(residuals) <- attrs$dimnames[[1]]
-   colnames(scores) <- colnames(loadings)
-   colnames(residuals) <- attrs$dimnames[[2]]
-   attr(scores, "name") <- "Scores"
-   attr(scores, "xaxis.name") = "Components"
-   attr(residuals, "name") = "Residuals"
-
-
-   # create and return the results object
-   res = pcares(scores = scores, loadings = object$loadings, residuals = residuals, attrs = attrs,
-                ncomp.selected = object$ncomp.selected, tnorm = object$tnorm, totvar = totvar,
-                cal = TRUE)
-
-   res$Qlim = object$Qlim
-   res$T2lim = object$T2lim
-   res$lim.type = object$lim.type
-   res$alpha = object$alpha
-   res$gamma = object$gamma
-   res
-}
-
-#' Set statistical limits for Q and T2 residuals for PCA model
-#'
-#' @description
-#' Computes statisticsl limits for Q and T2 residuals for a PCA model and assing the calculated
-#' values as corresponding model properties
-#'
-#' @param obj
-#' object with PCA model
-#' @param alpha
-#' significance level for detection of extreme objects
-#' @param gamma
-#' significance level for detection of outliers (for data driven approach)
-#' @param ...
-#' other arguments
-#'
-#' @details
-#' If data driven method is used, first two rows of Qlim and T2lim will contain slope and intercept
-#' of line defined by the method, otherwise they contain the critical values (first row for extreme
-#' values and second for outliers) for each of the residuals.
-#'
-#' Third row containes average values and fourth row contains degrees of freedom.
-#'
-#' See help for \code{\link{pca}} for more details.
-#'
-#' @return
-#' Returns a list with two matrices:  \code{T2lim} and \code{Qlim}. Each matrix contains limits
-#' for extreme objects and outliers (first two rows), mean residual and degrees of freedom,
-#' calculated for each number of components included to the model
-#'
-#' @export
-setResLimits.pca = function(obj, alpha = obj$alpha, gamma = obj$gamma, ...) {
-   # get residuals and exclude hidden rows
-   mQ = obj$calres$Q
-   mT2 = obj$calres$T2
-   attrs = mda.getattr(obj$calres$Q)
-   if (length(attrs$exclrows) > 0) {
-      mQ = mQ[-attrs$exclrows, , drop = F]
-      mT2 = mT2[-attrs$exclrows, , drop = F]
-   }
-
-   # get parameters
-   attrs = mda.getattr(obj$loadings)
-   nvar = nrow(obj$loadings) - length(attrs$exclrows)
-   lim.type = obj$lim.type
-   ncomp = ncol(mQ)
-   nobj = nrow(mQ)
-
-   # we need four rows to keep limit for extremes and outliers, u0 and DF for each type of residual
-   T2lim = matrix(0, ncol = ncomp, nrow = 4)
-   Qlim  = matrix(0, ncol = ncomp, nrow = 4)
-   for (i in 1:ncomp) {
-      Q = mQ[, i]
-      T2 = mT2[, i]
-      T2lim[, i] = reslim.hotelling(T2 = T2, ncomp = i, alpha = alpha, gamma = gamma)
-      if (i < nvar) {
-         if (lim.type == 'chisq') {
-            Qlim[, i] = reslim.chisq(Q = Q, alpha = alpha, gamma = gamma)
-         } else if (lim.type == 'jm') {
-            Qlim[, i] = reslim.jm(eigenvals = obj$eigenvals, Q = Q, ncomp = i, alpha = alpha,
-                                  gamma = gamma)
-         } else if (lim.type == 'ddmoments') {
-            lim = reslim.dd(Q = Q, T2 = T2, type = 'ddmoments', alpha = alpha, gamma = gamma)
-            T2lim[, i] = lim$T2lim
-            Qlim[, i] = lim$Qlim
-         } else if (lim.type == 'ddrobust') {
-            lim = reslim.dd(Q = Q, T2 = T2, type = 'ddrobust', alpha = alpha, gamma = gamma)
-            T2lim[, i] = lim$T2lim
-            Qlim[, i] = lim$Qlim
-         } else {
-            stop('Wrong value for "lim.type" parameter!')
-         }
-      } else {
-         Qlim[, i] = c(0, 0, 0, 1)
-      }
-   }
-
-   colnames(T2lim) = colnames(Qlim) = paste('Comp', 1:ncomp)
-   rownames(T2lim) = rownames(Qlim) = c(
-      paste('Critical limit (alpha = ', alpha, ')', sep = ''),
-      paste('Outliers limit (gamma = ', gamma, ')', sep = ''),
-      'Mean (u0)',
-      'DoF'
-   )
-
-   # set limits for the obj
-   obj$Qlim = Qlim
-   obj$T2lim = T2lim
-   obj$alpha = alpha
-   obj$gamma = gamma
-
-   # set limits for the calibration set
-   obj$calres$Qlim = Qlim
-   obj$calres$T2lim = T2lim
-   obj$calres$alpha = alpha
-   obj$calres$gamma = gamma
-
-   # set limits for the test set (if exists)
-   if (!is.null(obj$testres)) {
-      obj$testres$Qlim = Qlim
-      obj$testres$T2lim = T2lim
-      obj$testres$alpha = alpha
-      obj$testres$gamma = gamma
-   }
-
-   # set limits for the cross-validation set (if exists)
-   if (!is.null(obj$cvres)) {
-      obj$cvres$Qlim = Qlim
-      obj$cvres$T2lim = T2lim
-      obj$cvres$alpha = alpha
-      obj$cvres$gamma = gamma
-   }
-
-   obj
-}
 
 
 #' Explained variance plot for PCA

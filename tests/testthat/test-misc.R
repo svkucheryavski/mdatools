@@ -128,7 +128,6 @@ test_that("critical limits for Q are correct (chisq)", {
 
    # expected limits for alpha = 0.05 and gamma = 0.01
    # computed using "residuallimit" function from PLS_Toolbox
-
    expQlim1 <- rbind(
       c(9.25512512, 7.37431769, 3.64879767, 1.55968461, 0.82955551, 0.52538528, 0.23914330,
          0.15607468, 0.11587272, 0.04727562, 0.04666972, 0.00000000),
@@ -223,8 +222,7 @@ test_that("critical limits for Q are correct for excluded data (chisq)", {
    expect_equivalent(chisq.crit(p, 0.10, 0.05), expQlim2, tolerance = 10^-5)
 })
 
-test_that("critical limits for T2 are correct for excluded data (chisq/hotelling)",
-   {
+test_that("critical limits for T2 are correct for excluded data (chisq/hotelling)", {
 
    # expected limits for alpha = 0.05 and gamma = 0.01
    # computed using "residuallimit" function from PLS_Toolbox
@@ -355,7 +353,7 @@ rows_excluded <- X4$exp_exclrows
 pQ <- ddmoments.param(dist$Q[-rows_excluded, ])
 pT2 <- ddmoments.param(dist$T2[-rows_excluded, ])
 
-test_that("critical limits for Q are correct when rows and columns are excluded (ddmoments)", {
+test_that("critical limits for Q are correct for excluded data (ddmoments)", {
 
    # expected distribution parameters
    expParams <- list(
@@ -396,7 +394,7 @@ test_that("critical limits for Q are correct when rows and columns are excluded 
    expect_equivalent(lim2, expQlim2, tolerance = 10^-5)
 })
 
-test_that("critical limits for T2 are correct when rows and columns are excluded (ddmoments)", {
+test_that("critical limits for T2 are correct for excluded data (ddmoments)", {
 
    # expected distribution parameters
    expParams <- list(
@@ -543,7 +541,7 @@ rows_excluded <- X4$exp_exclrows
 pQ <- ddrobust.param(dist$Q[-rows_excluded, ])
 pT2 <- ddrobust.param(dist$T2[-rows_excluded, ])
 
-test_that("critical limits for Q are correct when rows and columns are excluded (ddrobust)", {
+test_that("critical limits for Q are correct for excluded data (ddrobust)", {
 
    # expected distribution parameters
    expParams <- list(
@@ -584,7 +582,7 @@ test_that("critical limits for Q are correct when rows and columns are excluded 
    expect_equivalent(lim2, expQlim2, tolerance = 10^-5)
 })
 
-test_that("critical limits for T2 are correct when rows and columns are excluded (ddrobust)", {
+test_that("critical limits for T2 are correct for excluded data (ddrobust)", {
 
    # expected distribution parameters
    expParams <- list(
