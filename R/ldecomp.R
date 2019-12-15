@@ -275,11 +275,11 @@ plotResiduals.ldecomp = function(obj, ncomp = obj$ncomp.selected, norm = TRUE, l
 
    # apply log transformation
    if (log) {
-      h = log(1 + h)
-      q = log(1 + q)
+      h <- log(1 + h)
+      q <- log(1 + q)
 
-      lxlab <- paste0('log(1 + ', lxlab, ')')
-      lylab <- paste0('log(1 + ', lylab, ')')
+      lxlab <- paste0("log(1 + ", lxlab, ")")
+      lylab <- paste0("log(1 + ", lylab, ")")
    }
 
    # combine everything to dataset and assign attributes
@@ -304,19 +304,19 @@ plotResiduals.ldecomp = function(obj, ncomp = obj$ncomp.selected, norm = TRUE, l
    lylab <- if (is.null(ylab)) "q" else ylab
 
    if (tr == 0) {
-      h = log(1 + h)
-      q = log(1 + q)
+      h <- log(1 + h)
+      q <- log(1 + q)
 
-      aInd = aLimY > 0
-      aLimX = log(1 + aLimX[aInd])
-      aLimY = log(1 + aLimY[aInd])
+      aInd <- aLimY > 0
+      aLimX <- log(1 + aLimX[aInd])
+      aLimY <- log(1 + aLimY[aInd])
 
-      oInd = oLimY > 0
-      oLimX = log(1 + oLimX[oInd])
-      oLimY = log(1 + oLimY[oInd])
+      oInd <- oLimY > 0
+      oLimX <- log(1 + oLimX[oInd])
+      oLimY <- log(1 + oLimY[oInd])
 
-      lxlab <- if (is.null(xlab)) paste0('log(1 + ', lxlab, ')') else xlab
-      lylab <- if (is.null(ylab)) paste0('log(1 + ', lylab, ')') else ylab
+      lxlab <- if (is.null(xlab)) paste0("log(1 + ", lxlab, ")") else xlab
+      lylab <- if (is.null(ylab)) paste0("log(1 + ", lylab, ")") else ylab
    }
 
    # set up main title for the plot

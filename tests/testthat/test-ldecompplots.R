@@ -1,0 +1,98 @@
+#####################################################
+# Tests for basic functionality of ldecomp() class  #
+#####################################################
+
+pdf(file = "../plots/test_ldecomp_plots.pdf")
+
+# function to get scores, loadings and residuals from data
+getPCARes <- function(X, ncomp) {
+   rows_excluded <- attr(X, "exclrows")
+   cols_excluded <- attr(X, "exclcols")
+
+   if (is.null(rownames(X))) {
+      rownames(X) <- paste0("O", 1:nrow(X))
+   }
+
+   if (is.null(colnames(X))) {
+      colnames(X) <- paste0("X", 1:ncol(X))
+   }
+
+   rownames <- rownames(X)
+   colnames <- colnames(X)
+
+   X_cal <- X
+
+   # remove excluded rows from calibration data
+   if (length(rows_excluded) > 0) {
+      X_cal <- X_cal[-rows_excluded, , drop = FALSE]
+   }
+
+   # get mean and center and do autoscaling of the calibration data
+   m <- apply(X_cal, 2, mean)
+   s <- apply(X_cal, 2, sd)
+   X_cal <- scale(X_cal, center = m, scale = s)
+
+   # remove excluded columns
+   if (length(cols_excluded) > 0) {
+      X_cal <- X_cal[, -cols_excluded, drop = FALSE]
+   }
+
+   # find loadings
+   loadings_visible <- svd(X_cal)$v[, 1:ncomp, drop = F]
+   loadings <- matrix(0, nrow = ncol(X), ncol = ncomp)
+   if (length(cols_excluded) > 0) {
+      loadings[-cols_excluded, ] <- loadings_visible
+   } else {
+      loadings <- loadings_visible
+   }
+
+   # eigenvalues using only visible rows
+   eigenvals <- colSums((X_cal %*% loadings_visible)^2) / (nrow(X_cal) - 1)
+
+   X <- scale(X, center = m, scale = s)
+   scores <- X %*% loadings
+   residuals <- X - tcrossprod(scores, loadings)
+
+   scores <- mda.setattr(scores, mda.getattr(X), type = 'row')
+   residuals <- mda.setattr(residuals, mda.getattr(X))
+
+   attr(loadings, "exclrows") <- attr(X, "exclcols")
+   attr(loadings, "yaxis.name") <- attr(X, "xaxis.name")
+   attr(loadings, "yaxis.values") <- attr(X, "xaxis.values")
+
+   rownames(scores) <- rownames(residuals) <- rownames
+   rownames(loadings) <- colnames(residuals) <- colnames
+   colnames(scores) <- colnames(loadings) <- paste("Comp", 1:ncomp)
+
+   return(list(scores = scores, loadings = loadings, residuals = residuals,
+      eigenvals = eigenvals, totvar = sum(X_cal^2)))
+}
+
+x <- people
+x <- prep.autoscale(x, center = TRUE, scale = TRUE)
+m <- getPCARes(x, 5)
+obj <- ldecomp(m$scores, m$loadings, m$residuals, m$eigenvals)
+
+context('ldecomp: plots')
+
+test_that("scores plot works fine.", {
+   expect_silent({
+      par(mfrow = c(2, 2))
+      plotScores(obj)
+      plotScores(obj, c(1, 3), show.labels = T)
+      plotScores(obj, c(1, 2), cgroup = x[, 1], show.labels = T, show.colorbar = F, show.axes = F)
+      plotScores(obj, 1, cgroup = x[, 1], show.labels = T, colmap = c("red", "green"), pch = 17)
+   })
+})
+
+test_that("residuals plot works fine.", {
+   expect_silent({
+      par(mfrow = c(2, 2))
+      plotResiduals(obj)
+      plotResiduals(obj, 1, show.labels = T)
+      plotResiduals(obj, 2, cgroup = "category", show.labels = T)
+      plotResiduals(obj, 3, cgroup = x[, 1], show.labels = T, colmap = c("red", "green"), pch = 17)
+   })
+})
+
+dev.off()

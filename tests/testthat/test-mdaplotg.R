@@ -2,6 +2,8 @@
 # Block 1: using matrix as data source plus groupby parameter  #
 ################################################################
 
+pdf(file = "../plots/test_mdaplots2.pdf")
+
 context("mdaplotg: plots with matrix as data and groupby parameter")
 par(mfrow = c(2, 2))
 data(people)
@@ -420,3 +422,5 @@ test_that("providing data as matrix works for line and bar plots only", {
    expect_silent(tf(type = "h"))
    expect_error(tf(type = "p"))
 })
+
+dev.off()

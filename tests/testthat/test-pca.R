@@ -649,3 +649,41 @@ test_that("categorize() works well for excluded data (ddrobust)", {
    tf(m, outliers, extremes)
 
 })
+
+
+##################################
+# Block 6: testing pca()         #
+##################################
+
+tf <- function(x, ncomp) {
+   m <- pca(x, ncomp = ncomp, scale = TRUE)
+   expect_equal(m$calres, predict(m, x))
+   expect_equal(m$calres$categories, categorize(m, m$calres))
+   expect_equal(dim(m$Qlim), c(4, ncomp))
+   expect_equal(dim(m$T2lim), c(4, ncomp))
+   expect_equal(m$exclcols, attr(x, "exclcols"))
+   expect_equal(m$exclrows, attr(x, "exclrows"))
+   expect_output(summary(m))
+   expect_output(print(m))
+}
+
+context("PCA: testing pca()")
+
+# full data
+x <- people
+
+tf(x, 1)
+tf(x, 5)
+tf(x, 12)
+
+# excluded data
+x <- people
+x <- mda.exclrows(x, c(1, 10, 20))
+x <- mda.exclcols(x, c(3, 12))
+
+tf(x, 1)
+tf(x, 5)
+tf(x, 10)
+
+
+

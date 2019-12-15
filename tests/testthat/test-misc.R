@@ -109,7 +109,7 @@ getPCARes <- function(X, ncomp) {
 #########################################################
 
 ## chisq/hotelling for full data
-context("ldecomp: computing limits (chisq/hotelling, full data)")
+context("misc: computing limits (chisq/hotelling, full data)")
 
 # in this case we use predefined values computed for full People data with autoscaling
 # the values we got from PLS_Toolbox and DD-SIMCA Toolbox
@@ -180,7 +180,7 @@ test_that("critical limits for T2 are correct (hotelling)", {
 })
 
 ## chisq/hotelling for excluded data data
-context("ldecomp: computing limits (chisq/hotelling, excluded data)")
+context("misc: computing limits (chisq/hotelling, excluded data)")
 
 m <- getPCARes(X4$data, 10)
 dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals, m$eigenvals)
@@ -254,7 +254,7 @@ test_that("critical limits for T2 are correct for excluded data (chisq/hotelling
 ###################################################
 
 ## ddmoments for full data data
-context("ldecomp: computing limits (ddmoments, full data)")
+context("misc: computing limits (ddmoments, full data)")
 
 ### in this case we use 11 components as the 12th explain mostly noise for Q
 m <- getPCARes(X1$data, 11)
@@ -345,7 +345,7 @@ test_that("critical limits for T2 are correct (ddmoments)", {
 })
 
 ## ddmoments for excluded data
-context("ldecomp: computing limits (ddmoments, excluded data)")
+context("misc: computing limits (ddmoments, excluded data)")
 
 m <- getPCARes(X4$data, 9)
 dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals, m$eigenvals)
@@ -441,7 +441,7 @@ test_that("critical limits for T2 are correct for excluded data (ddmoments)", {
 ###################################################
 
 ## ddmoments for full data data
-context("ldecomp: computing limits (ddrobust, full data)")
+context("misc: computing limits (ddrobust, full data)")
 
 ### in this case we use 11 components as the 12th explain mostly noise for Q
 m <- getPCARes(X1$data, 11)
@@ -533,7 +533,7 @@ test_that("critical limits for T2 are correct (ddrobust)", {
 
 
 ## ddmoments for excluded data
-context("ldecomp: computing limits (ddrobust, excluded data)")
+context("misc: computing limits (ddrobust, excluded data)")
 
 m <- getPCARes(X4$data, 9)
 dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals, m$eigenvals)

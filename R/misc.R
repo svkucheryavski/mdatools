@@ -905,3 +905,31 @@ ddrobust.param <- function(U, ncomp, alpha, gamma) {
    u0 <- 0.5 * Nu * (Mu/qchisq(0.50, Nu) + Su/(qchisq(0.75, Nu) - qchisq(0.25, Nu)))
    return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
 }
+
+#' Returns list with all model results available (cal, cv and tes)
+#'
+#' @param model
+#' object with model
+#'
+#' @export
+getModelRes <- function(model) {
+   res <- list()
+   res$cal <- model$calres
+
+   if (!is.null(model$cvres)) {
+      res$cv <- model$cvres
+   }
+
+   if (!is.null(model$testres)) {
+      res$test <- model$testres
+   }
+
+   return(res)
+}
+
+#' Imitation of fprinf() function
+#'
+#' @export
+fprintf <- function(...) {
+   cat(sprintf(...))
+}

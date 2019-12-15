@@ -2,6 +2,8 @@
 # Tests for basic functionality of mdaplot() and related methods  #
 ###################################################################
 
+pdf(file = "../plots/test_mdaplots1.pdf")
+
 # prepare dataset
 all_plots <- c("p", "l", "b", "h", "e")
 nonscatter_plots <- c("l", "b", "h", "e")
@@ -462,3 +464,5 @@ test_that("excluded values and labels (indices) work fine", {
    expect_silent(tf(type = "l", show.labels = T, labels = "indices", show.excluded = T))
    expect_silent(tf(type = "b", show.labels = T, labels = "indices", show.excluded = T))
 })
+
+dev.off()

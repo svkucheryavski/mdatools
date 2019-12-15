@@ -201,4 +201,3 @@ test_that("explained variance is correct for data with excluded rows", { tf(X3) 
 test_that("explained variance is correct for data with excluded columns", { tf(X3) })
 
 
-# TODO: test for plots, print and summary
