@@ -605,8 +605,7 @@ plotRegcoeffs = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotResiduals = function(obj, ...)
-{
+plotResiduals <- function(obj, ...) {
    UseMethod("plotResiduals")
 }
 

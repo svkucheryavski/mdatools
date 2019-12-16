@@ -273,6 +273,16 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
    obj$gamma <- gamma
    obj$lim.type <- lim.type
 
+   obj$calres$categories <- categorize(object, obj$calres)
+   attr(obj$calres$Q, "u0") <- obj$Qlim[, 3]
+   attr(obj$calres$T2, "u0") <- obj$T2lim[, 3]
+
+   if (!is.null(obj$testres)) {
+      obj$testres$categories <- categorize(object, obj$testres)
+      attr(obj$testres$Q, "u0") <- obj$Qlim[, 3]
+      attr(obj$testres$T2, "u0") <- obj$T2lim[, 3]
+   }
+
    return(obj)
 }
 
@@ -380,6 +390,8 @@ predict.pca <- function(object, x, ...) {
    # create and return the results object
    res <- pcares(scores, object$loadings, residuals, object$eigenvals, object$ncomp.selected)
    res$categories <- categorize(object, res)
+   attr(res$Q, "u0") <- m$Qlim[, 3]
+   attr(res$T2, "u0") <- m$T2lim[, 3]
 
    return(res)
 }

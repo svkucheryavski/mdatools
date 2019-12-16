@@ -2,7 +2,6 @@
 # Tests for basic functionality of ldecomp() class  #
 #####################################################
 
-pdf(file = "../plots/test_ldecomp_plots.pdf")
 
 # function to get scores, loadings and residuals from data
 getPCARes <- function(X, ncomp) {
@@ -73,9 +72,18 @@ x <- prep.autoscale(x, center = TRUE, scale = TRUE)
 m <- getPCARes(x, 5)
 obj <- ldecomp(m$scores, m$loadings, m$residuals, m$eigenvals)
 
+pdf(file = "../plots/test_ldecomp_plots.pdf")
+
 context('ldecomp: plots')
 
-test_that("scores plot works fine.", {
+test_that("scores plot can return plot data.", {
+   pd <- plotScores(obj, c(1, 3), show.plot = FALSE)
+   expect_equal(class(pd), "plotseries")
+   expect_equivalent(pd$x_values, obj$scores[, 1])
+   expect_equivalent(pd$y_values, obj$scores[, 3])
+})
+
+test_that("scores plot works fine with different attributes.", {
    expect_silent({
       par(mfrow = c(2, 2))
       plotScores(obj)
@@ -85,13 +93,37 @@ test_that("scores plot works fine.", {
    })
 })
 
+test_that("residuals plot can return plot data.", {
+   pd <- plotResiduals(obj, ncomp = 4, show.plot = FALSE)
+   expect_equal(class(pd), "plotseries")
+   expect_equivalent(pd$x_values, obj$T2[, 4])
+   expect_equivalent(pd$y_values, obj$Q[, 4])
+})
+
 test_that("residuals plot works fine.", {
    expect_silent({
       par(mfrow = c(2, 2))
       plotResiduals(obj)
       plotResiduals(obj, 1, show.labels = T)
-      plotResiduals(obj, 2, cgroup = "category", show.labels = T)
+      plotResiduals(obj, 2, cgroup = x[, 1], show.labels = T)
       plotResiduals(obj, 3, cgroup = x[, 1], show.labels = T, colmap = c("red", "green"), pch = 17)
+   })
+})
+
+test_that("varance plot can return plot data.", {
+   pd <- plotVariance(obj, show.plot = FALSE)
+   expect_equal(class(pd), "plotseries")
+   expect_equivalent(pd$x_values, 1:obj$ncomp)
+   expect_equivalent(pd$y_values, obj$expvar)
+})
+
+test_that("variance plot works fine.", {
+   expect_silent({
+      par(mfrow = c(2, 2))
+      plotVariance(obj)
+      plotVariance(obj, type = "h")
+      plotVariance(obj, type = "h", col = "red")
+      plotVariance(obj, type = "h", col = "red", show.labels = TRUE)
    })
 })
 

@@ -97,14 +97,14 @@ ldecomp <- function(scores, loadings, residuals, eigenvals, ncomp.selected = nco
 #' @export
 plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance",
    xlab = "Components", ylab = "Explained variance, %", show.labels = FALSE,
-   labels = "values", plot = TRUE, ...) {
+   labels = "values", show.plot = TRUE, ...) {
 
-   if (!plot) {
+   if (!show.plot) {
       return(plotseries(obj$cumexpvar, type = type, labels = labels))
    }
 
-   p <- mdaplot(obj$cumexpvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab, type = type,
-           show.labels = show.labels, labels = labels, ...)
+   p <- mdaplot(obj$cumexpvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
+            type = type, show.labels = show.labels, labels = labels, ...)
 
    invisible(p)
 }
@@ -134,11 +134,11 @@ plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotVariance.ldecomp = function(obj, type = "b", main = "Variance", xlab = "Components",
-   ylab = "Explained variance, %", show.labels = F, labels = "values", plot = TRUE, ...) {
+plotVariance.ldecomp <- function(obj, type = "b", main = "Variance", xlab = "Components",
+   ylab = "Explained variance, %", show.labels = F, labels = "values", show.plot = TRUE, ...) {
 
-   if (!plot) {
-      return(plotseries(obj$expvar, type = type, labels = labels))
+   if (!show.plot) {
+      return(plotseries(obj$expvar, type = type, labels = labels, ...))
    }
 
    p <- mdaplot(obj$expvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
@@ -146,7 +146,6 @@ plotVariance.ldecomp = function(obj, type = "b", main = "Variance", xlab = "Comp
 
    invisible(p)
 }
-
 
 #' Scores plot
 #'
@@ -179,14 +178,14 @@ plotVariance.ldecomp = function(obj, type = "b", main = "Variance", xlab = "Comp
 #' @export
 plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p", xlab = NULL,
    ylab = NULL, show.labels = FALSE, labels = "names", show.legend = TRUE, show.axes = TRUE,
-   plot = TRUE, ...) {
+   show.plot = TRUE, ...) {
 
    # get scores for given components and generate column names with explained variance
    plot_data <- mda.subset(obj$scores, select = comp)
 
    # if no plot required - return plot series object
-   if (!plot) {
-      return(plotseries(plot_data, type = type, labels = labels))
+   if (!show.plot) {
+      return(plotseries(plot_data, type = type, labels = labels, ...))
    }
 
    # set up values for showing axes lines
@@ -223,14 +222,6 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p",
 #' object of \code{ldecomp} class.
 #' @param ncomp
 #' number of components to show the plot for (if NULL, selected by model value will be used).
-#' @param norm
-#' logical, shall values be normalized or not
-#' @param log
-#' logical, if TRUE, then log(1 + u) transformation is applied
-#' @param cgroup
-#' color grouping of distance points, if "type" then they will be grouped by type ("normal", "extreme", "outliers")
-#' @param show.limits
-#' logical, shall extreme and outlier limits be shown or not
 #' @param show.labels
 #' logical, show or not labels for the plot objects
 #' @param labels
@@ -241,82 +232,30 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p",
 #' label for x axis
 #' @param ylab
 #' label for y axis
-#' @param plot
+#' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotResiduals.ldecomp = function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
-   cgroup = "type", alpha = obj$alpha, gamma = gamma$alpha, show.limits = TRUE, show.labels = FALSE,
-   labels = "names", main = NULL, xlab = NULL, ylab = NULL, ...) {
+plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected,
+   show.labels = FALSE, labels = "names", main = NULL, show.plot = TRUE, ...) {
 
-   # get parameters
-   h0 <- obj$T2lim[3, ncomp]
-   q0 <- obj$Qlim[3, ncomp]
+   attrs <- mda.getattr(obj$Q)
 
    # prepare plot data
-   attrs <- mda.getattr(obj$Q)
    h <- obj$T2[, ncomp]
    q <- obj$Q[, ncomp]
-
-   # default values for local labels
-   lxlab <- "h"
-   lylab <- "q"
-
-   # normalize data
-   if (norm) {
-      h <- h/h0
-      q <- q/q0
-
-      lxlab <- paste0(lxlab, "/h0")
-      lylab <- paste0(lylab, "/q0")
-   }
-
-   # apply log transformation
-   if (log) {
-      h <- log(1 + h)
-      q <- log(1 + q)
-
-      lxlab <- paste0("log(1 + ", lxlab, ")")
-      lylab <- paste0("log(1 + ", lylab, ")")
-   }
 
    # combine everything to dataset and assign attributes
    plot_data <- mda.cbind(h, q)
    plot_data <- mda.setattr(plot_data, attrs, "row")
    rownames(plot_data) <- rownames(obj$Q)
-   colnames(plot_data) <- c(
-      paste0("Orthogonal distance, ", lxlab),
-      paste0("Score distance, ", yxlab)
-   )
+   colnames(plot_data) <- c("Score distance, h", "Orthogonal distance, q")
 
    # if no plot required - return plot series object
-   if (!plot) {
-      return(plotseries(plot_data, type = "p", labels = labels))
-   }
-
-   if (!is.null(cgroup) && cgroup == "type") {
-      cgroup <- classify(obj, alpha = alpha, gamma = gamma)
-   }
-
-   lxlab <- if (is.null(xlab)) "h" else xlab
-   lylab <- if (is.null(ylab)) "q" else ylab
-
-   if (tr == 0) {
-      h <- log(1 + h)
-      q <- log(1 + q)
-
-      aInd <- aLimY > 0
-      aLimX <- log(1 + aLimX[aInd])
-      aLimY <- log(1 + aLimY[aInd])
-
-      oInd <- oLimY > 0
-      oLimX <- log(1 + oLimX[oInd])
-      oLimY <- log(1 + oLimY[oInd])
-
-      lxlab <- if (is.null(xlab)) paste0("log(1 + ", lxlab, ")") else xlab
-      lylab <- if (is.null(ylab)) paste0("log(1 + ", lylab, ")") else ylab
+   if (!show.plot) {
+      return(plotseries(plot_data, type = "p", labels = labels, ...))
    }
 
    # set up main title for the plot
@@ -325,8 +264,8 @@ plotResiduals.ldecomp = function(obj, ncomp = obj$ncomp.selected, norm = TRUE, l
    }
 
    # show plot
-   mdaplot(data, main = main, xlab = xlab, ylab = ylab, cgroup = cgroup, show.labels = show.labels,
-      labels = labels, ...)
+   p <- mdaplot(plot_data, main = main, show.labels = show.labels, labels = labels, ...)
+   invisible(p)
 }
 
 #' Print method for linear decomposition
@@ -405,9 +344,8 @@ summary.ldecomp = function(object, str = NULL, ...) {
 }
 
 
-
 ##########################
-# * Static methods       #
+# Static methods         #
 ##########################
 
 

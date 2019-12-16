@@ -95,119 +95,104 @@ pcares <- function(...) {
    # uses its methods and attributes.
 
    res <- ldecomp(...)
-   class(res) = c('pcares', 'ldecomp')
+   res$categories = NULL
+   class(res) = c("pcares", "ldecomp")
 
    res
 }
 
-
-#' Residuals plot for PCA results
+#' Residual distance plot
 #'
 #' @description
-#' Shows a plot with T2 vs Q values for data objects.
+#' Shows a plot with orthogonal (Q, q) vs score (T2, h) distances for data objects. By default the
+#' distance values are normalize using corresponding means (q/q0 and h/h0).
 #'
 #' @param obj
 #' object of \code{ldecomp} class.
 #' @param ncomp
-#' what number of components to show the plot for (if NULL, model selected value will be used).
+#' number of components to show the plot for (if NULL, selected by model value will be used).
+#' @param norm
+#' logical, shall values be normalized or not
+#' @param log
+#' logical, if TRUE, then log(1 + u) transformation is applied
+#' @param cgroup
+#' color grouping of distance points, if "type" then they will be grouped by type ("normal", "extreme", "outliers")
+#' @param show.limits
+#' logical, shall extreme and outlier limits be shown or not
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param labels
+#' what to show as labels if necessary
 #' @param main
 #' main title for the plot
 #' @param xlab
 #' label for x axis
 #' @param ylab
 #' label for y axis
-#' @param show.labels
-#' logical, show or not labels for the plot objects
-#' @param show.limits
-#' logical, show or not lines for statistical limits of the residuals
-#' @param norm
-#' logical, show normalized Q vs T2 (\code{norm = T}) values or original ones (\code{norm = F})
-#' @param xlim
-#' limits for x-axis
-#' @param ylim
-#' limits for y-axis
-#' @param lim.col
-#' vector with two values - line color for extreme and outlier borders
-#' @param lim.lwd
-#' vector with two values - line width for extreme and outlier borders
-#' @param lim.lty
-#' vector with two values - line type for extreme and outlier borders
+#' @param plot
+#' logical, shall plot be created or just plot series object is needed
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotResiduals.pcares = function(obj, ncomp = NULL, main = NULL, xlab = NULL, ylab = NULL,
-                                 show.labels = F, show.limits = T, norm = F,
-                                 xlim = NULL, ylim = NULL,
-                                 lim.col = c('#333333', '#333333'),
-                                 lim.lwd = c(1, 1), lim.lty = c(2, 3), ...) {
-   if (is.null(main)) {
-      if (is.null(ncomp))
-         main = 'Residuals'
-      else
-         main = sprintf('Residuals (ncomp = %d)', ncomp)
+plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected, cgroup = obj$categories,
+   norm = TRUE, log = FALSE, show.labels = FALSE, labels = "names", main = NULL,
+   show.plot = TRUE, ...) {
+
+   # function for transforming distances
+   transform <- function(u, u0, norm, log) {
+      if (norm) u <- u/u0
+      if (log) u <- log(1 + u)
+      return(u)
    }
 
-   if (is.null(ncomp))
-      ncomp = obj$ncomp.selected
+   # function for creating labels depending on transformation
+   get_label <- function(lab, norm, log) {
+      if (norm) lab <- paste0(lab, "/", lab, "0")
+      if (log) lab <- paste0("log(1 + ", lab, ")")
+      return(lab)
+   }
 
-   data = mda.cbind(
-      mda.subset(obj$T2, select = ncomp),
-      mda.subset(obj$Q, select = ncomp)
+   attrs <- mda.getattr(obj$Q)
+   h0 <- attr(obj$T2, "u0")
+   q0 <- attr(obj$Qlim, "u0")
+
+   # check that scaling values exist
+   if (norm && (is.null(h0) || is.null(q0))) {
+      warning("Can not normalize distances as scaling values are absent.")
+      norm <- FALSE
+   }
+
+   # prepare plot data
+   h <- transform(obj$T2[, ncomp], h0, norm, log)
+   q <- transform(obj$Q[, ncomp], q0, norm, log)
+
+   # default values for local labels
+   lxlab <- get_label("h", norm, log)
+   lylab <- get_label("q", norm, log)
+
+   # combine everything to dataset and assign attributes
+   plot_data <- mda.cbind(h, q)
+   plot_data <- mda.setattr(plot_data, attrs, "row")
+   rownames(plot_data) <- rownames(obj$Q)
+   colnames(plot_data) <- c(
+      paste0("Orthogonal distance, ", lxlab),
+      paste0("Score distance, ", lylab)
    )
 
-   # set values for normalization of residuals if necessary
-   if (norm) {
-      T2.mean = obj$T2lim[3, ncomp]
-      Q.mean = obj$Qlim[3, ncomp]
-      if (is.null(xlab))
-         xlab = expression(paste('Hotelling ', T^2, ' distance (norm)'))
-      if (is.null(ylab))
-         ylab = 'Squared residual distance, Q (norm)'
-   } else {
-      T2.mean = 1
-      Q.mean = 1
-      if (is.null(xlab))
-         xlab = expression(paste('Hotelling ', T^2, ' distance'))
-      if (is.null(ylab))
-         ylab = 'Squared residual distance, Q'
+   # if no plot required - return plot series object
+   if (!show.plot) {
+      return(plotseries(plot_data, type = "p", labels = labels, cgroup = cgroup))
    }
 
-   data[, 1] = data[, 1] / T2.mean
-   data[, 2] = data[, 2] / Q.mean
-   x.max = max(data[, 1])
-   y.max = max(data[, 2])
-
-   if (show.limits == T) {
-      # get residual limits, correct if necessary and recalculate axes maximum limit
-      lim = cbind(obj$T2lim[1:2, ncomp], obj$Qlim[1:2, ncomp])
-      if (substr(obj$lim.type, 1, 2) != 'dd') {
-         lim[, 1] = lim[, 1] / T2.mean
-         lim[, 2] = lim[, 2] / Q.mean
-         x.max = max(x.max, lim[, 1])
-         y.max = max(y.max, lim[, 2])
-      } else {
-         lim[, 1] = lim[, 1] * T2.mean / Q.mean
-         lim[, 2] = lim[, 2] / Q.mean
-         x.max = 1.5 * x.max
-         y.max = 1.5 * y.max
-      }
+   # set up main title for the plot
+   if (is.null(main)) {
+      main <- if (is.null(ncomp)) "Residuals" else sprintf("Residuals (ncomp = %d)", ncomp)
    }
-
-   # use computed max values for axes limits if user did not specify anything
-   if (is.null(xlim))
-      xlim = c(0, 1.2 * x.max)
-   if (is.null(ylim))
-      ylim = c(0, 1.2 * y.max)
 
    # show plot
-   mdaplot(data, main = main, xlab = xlab, ylab = ylab, show.labels = show.labels,
-           xlim = xlim, ylim = ylim, ...)
-
-   # show limits
-   if (show.limits) {
-      ldecomp.plotLimits(lim, obj$lim.type, lim.col, lim.lwd, lim.lty)
-   }
+   mdaplot(plot_data, main = main, cgroup = cgroup, show.labels = show.labels, labels = labels,
+      cgroup = cgroup, ...)
 }
 
 #' Plot method for PCA results object
@@ -246,8 +231,8 @@ plot.pcares = function(x, comp = c(1, 2), show.labels = T, ...) {
 #' other arguments
 #'
 #' @export
-summary.pcares = function(object, ...) {
-   summary.ldecomp(object, 'Summary for PCA results', ...)
+summary.pcares <- function(object, ...) {
+   summary.ldecomp(object, "Summary for PCA results", ...)
 }
 
 
@@ -262,7 +247,7 @@ summary.pcares = function(object, ...) {
 #' other arguments
 #'
 #' @export
-print.pcares = function(x, ...) {
+print.pcares <- function(x, ...) {
    print.ldecomp(x, 'Results for PCA decomposition (class pcares)', ...)
    cat('\n')
 }
