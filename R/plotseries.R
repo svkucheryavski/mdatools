@@ -70,6 +70,7 @@ plotseries <- function(data, type, cgroup = NULL, col = NULL, opacity = 1,
    # compute axes limits
    ps$xlim <- range(ps$x_values)
    ps$ylim <- range(ps$y_values)
+   class(ps) <- "plotseries"
    return(ps)
 }
 
