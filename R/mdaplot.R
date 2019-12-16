@@ -317,7 +317,8 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
 #' @return
 #' Returns a vector with two limits.
 #'
-mdaplot.getXAxisLim <- function(ps, xlim, show.lines = FALSE, show.excluded = FALSE, bwd = NULL) {
+mdaplot.getXAxisLim <- function(ps, xlim, show.labels = FALSE, show.lines = FALSE,
+   show.excluded = FALSE, bwd = NULL) {
 
    # if user provided limits for x - use them
    if (!is.null(xlim)) return(xlim)
@@ -341,6 +342,12 @@ mdaplot.getXAxisLim <- function(ps, xlim, show.lines = FALSE, show.excluded = FA
          min(xlim[1], xlim_excluded[1], na.rm = TRUE),
          max(xlim[2], xlim_excluded[2], na.rm = TRUE)
       )
+   }
+
+   # if labels must be shown increase the upper limit
+   if (show.labels) {
+      xlim[1] <- xlim[1] - diff(xlim) * 0.05
+      xlim[2] <- xlim[2] + diff(xlim) * 0.05
    }
 
    # find if show.lines is in use
@@ -403,7 +410,7 @@ mdaplot.getYAxisLim <- function(ps, ylim, show.lines = FALSE, show.excluded = FA
 
    # if labels must be shown increase the upper limit
    if (show.labels) {
-      ylim[2] <- ylim[2] + diff(ylim) * 0.05
+      ylim[2] <- ylim[2] + diff(ylim) * 0.075
    }
 
    # if it is a bar plot and some bars look "down" correct the bottom limit as well
@@ -736,8 +743,9 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
    # show axes if needed
    if (show.axes) {
       # get limits for axes
-      xlim <- mdaplot.getXAxisLim(ps, xlim = xlim, show.excluded = show.excluded,
-         show.lines = show.lines, bwd = (if (type == "h") bwd else NULL))
+      xlim <- mdaplot.getXAxisLim(ps, xlim = xlim, show.labels = show.labels,
+         show.excluded = show.excluded, show.lines = show.lines,
+         bwd = (if (type == "h") bwd else NULL))
       ylim <- mdaplot.getYAxisLim(ps, ylim = ylim, show.excluded = show.excluded,
          show.lines = show.lines, show.labels = show.labels, show.colorbar = show.colorbar)
 
