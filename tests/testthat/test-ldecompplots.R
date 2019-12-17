@@ -98,6 +98,13 @@ test_that("residuals plot can return plot data.", {
    expect_equal(class(pd), "plotseries")
    expect_equivalent(pd$x_values, obj$T2[, 4])
    expect_equivalent(pd$y_values, obj$Q[, 4])
+
+   pd <- plotResiduals(obj, ncomp = 4, show.plot = FALSE, col = "#00AAFFFF", labels = "values")
+   expect_equal(class(pd), "plotseries")
+   expect_equivalent(pd$x_values, obj$T2[, 4])
+   expect_equivalent(pd$y_values, obj$Q[, 4])
+   expect_equal(pd$col, "#00AAFFFF")
+   expect_equivalent(pd$labels, obj$Q[, 4])
 })
 
 test_that("residuals plot works fine.", {
@@ -115,6 +122,13 @@ test_that("varance plot can return plot data.", {
    expect_equal(class(pd), "plotseries")
    expect_equivalent(pd$x_values, 1:obj$ncomp)
    expect_equivalent(pd$y_values, obj$expvar)
+
+   pd <- plotVariance(obj, show.plot = FALSE, col = "#00AAFFFF", labels = "names")
+   expect_equal(class(pd), "plotseries")
+   expect_equivalent(pd$x_values, 1:obj$ncomp)
+   expect_equivalent(pd$y_values, obj$expvar)
+   expect_equal(pd$col, "#00AAFFFF")
+   expect_equal(pd$labels, names(obj$expvar))
 })
 
 test_that("variance plot works fine.", {
@@ -124,6 +138,31 @@ test_that("variance plot works fine.", {
       plotVariance(obj, type = "h")
       plotVariance(obj, type = "h", col = "red")
       plotVariance(obj, type = "h", col = "red", show.labels = TRUE)
+   })
+})
+
+test_that("cumulative varance plot can return plot data.", {
+   pd <- plotCumVariance(obj, show.plot = FALSE)
+   expect_equal(class(pd), "plotseries")
+   expect_equivalent(pd$x_values, 1:obj$ncomp)
+   expect_equivalent(pd$y_values, obj$cumexpvar)
+
+   pd <- plotCumVariance(obj, show.plot = FALSE, col = "#00AAFFFF", labels = "names")
+   expect_equal(class(pd), "plotseries")
+   expect_equivalent(pd$x_values, 1:obj$ncomp)
+   expect_equivalent(pd$y_values, obj$cumexpvar)
+   expect_equal(pd$col, "#00AAFFFF")
+   expect_equal(pd$labels, names(obj$cumexpvar))
+
+})
+
+test_that("variance plot works fine.", {
+   expect_silent({
+      par(mfrow = c(2, 2))
+      plotCumVariance(obj)
+      plotCumVariance(obj, type = "h")
+      plotCumVariance(obj, type = "h", col = "red", show.labels = TRUE)
+      plotCumVariance(obj, type = "h", col = "red", show.labels = TRUE, labels = "names")
    })
 })
 

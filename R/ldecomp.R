@@ -100,7 +100,7 @@ plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance
    labels = "values", show.plot = TRUE, ...) {
 
    if (!show.plot) {
-      return(plotseries(obj$cumexpvar, type = type, labels = labels))
+      return(plotseries(obj$cumexpvar, type = type, labels = labels, ...))
    }
 
    p <- mdaplot(obj$cumexpvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
