@@ -4,9 +4,17 @@
 \alias{plotPredictions.pls}
 \title{Predictions plot for PLS}
 \usage{
-\method{plotPredictions}{pls}(obj, ncomp = NULL, ny = 1, main = NULL,
-  legend.position = "topleft", show.line = T, colmap = "default",
-  col = NULL, ...)
+\method{plotPredictions}{pls}(
+  obj,
+  ncomp = NULL,
+  ny = 1,
+  main = NULL,
+  legend.position = "topleft",
+  show.line = T,
+  colmap = "default",
+  col = NULL,
+  ...
+)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

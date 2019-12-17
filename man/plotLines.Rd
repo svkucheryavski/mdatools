@@ -4,8 +4,16 @@
 \alias{plotLines}
 \title{Show plot series as set of lines}
 \usage{
-plotLines(ps, col = ps$col, lty = 1, lwd = 1, cex = 1,
-  col.excluded = "darkgray", show.excluded = FALSE, ...)
+plotLines(
+  ps,
+  col = ps$col,
+  lty = 1,
+  lwd = 1,
+  cex = 1,
+  col.excluded = "darkgray",
+  show.excluded = FALSE,
+  ...
+)
 }
 \arguments{
 \item{ps}{`plotseries` object}

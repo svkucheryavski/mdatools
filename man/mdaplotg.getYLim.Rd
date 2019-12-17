@@ -4,8 +4,14 @@
 \alias{mdaplotg.getYLim}
 \title{Compute y-axis limits for mdaplotg}
 \usage{
-mdaplotg.getYLim(ps, ylim, show.excluded, show.legend, legend.position,
-  show.labels)
+mdaplotg.getYLim(
+  ps,
+  ylim,
+  show.excluded,
+  show.legend,
+  legend.position,
+  show.labels
+)
 }
 \arguments{
 \item{ps}{list with plotseries}

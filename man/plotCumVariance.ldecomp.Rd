@@ -4,10 +4,17 @@
 \alias{plotCumVariance.ldecomp}
 \title{Cumulative explained variance plot}
 \usage{
-\method{plotCumVariance}{ldecomp}(obj, type = "b",
-  main = "Cumulative variance", xlab = "Components",
-  ylab = "Explained variance, \%", show.labels = FALSE,
-  labels = "values", plot = TRUE, ...)
+\method{plotCumVariance}{ldecomp}(
+  obj,
+  type = "b",
+  main = "Cumulative variance",
+  xlab = "Components",
+  ylab = "Explained variance, \%",
+  show.labels = FALSE,
+  labels = "values",
+  show.plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
@@ -24,10 +31,10 @@
 
 \item{labels}{what to show as labels for plot objects}
 
-\item{plot}{logical, shall plot be created or just plot series object is needed}
+\item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
 }
 \description{
-Shows a plot with cumulative explained variance values vs. number of components.
+Shows a plot with cumulative explained variance vs. number of components.
 }

@@ -4,8 +4,15 @@
 \alias{plotseries}
 \title{Create plot series object based on data, plot type and parameters}
 \usage{
-plotseries(data, type, cgroup = NULL, col = NULL, opacity = 1,
-  colmap = "default", labels = NULL)
+plotseries(
+  data,
+  type,
+  cgroup = NULL,
+  col = NULL,
+  opacity = 1,
+  colmap = "default",
+  labels = NULL
+)
 }
 \arguments{
 \item{data}{data to make the plot for (vector, matrix or data frame).}

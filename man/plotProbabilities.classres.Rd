@@ -4,9 +4,18 @@
 \alias{plotProbabilities.classres}
 \title{Plot for class belonging probability}
 \usage{
-\method{plotProbabilities}{classres}(obj, ncomp = obj$ncomp.selected,
-  nc = 1, type = "h", xlab = "Objects", ylab = "Probability",
-  main = NULL, ylim = c(0, 1.1), show.lines = c(NA, 0.5), ...)
+\method{plotProbabilities}{classres}(
+  obj,
+  ncomp = obj$ncomp.selected,
+  nc = 1,
+  type = "h",
+  xlab = "Objects",
+  ylab = "Probability",
+  main = NULL,
+  ylim = c(0, 1.1),
+  show.lines = c(NA, 0.5),
+  ...
+)
 }
 \arguments{
 \item{obj}{classification results (e.g. object of class \code{simcamres}).}

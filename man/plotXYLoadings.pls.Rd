@@ -4,8 +4,7 @@
 \alias{plotXYLoadings.pls}
 \title{XY loadings plot for PLS}
 \usage{
-\method{plotXYLoadings}{pls}(obj, comp = c(1, 2), main = "XY loadings",
-  show.axes = F, ...)
+\method{plotXYLoadings}{pls}(obj, comp = c(1, 2), main = "XY loadings", show.axes = F, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

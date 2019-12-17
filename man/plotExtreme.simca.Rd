@@ -4,8 +4,14 @@
 \alias{plotExtreme.simca}
 \title{Shows extreme plot for SIMCA model}
 \usage{
-\method{plotExtreme}{simca}(obj, ncomp = NULL, main = NULL,
-  xlab = "Expected", ylab = "Observed", ...)
+\method{plotExtreme}{simca}(
+  obj,
+  ncomp = NULL,
+  main = NULL,
+  xlab = "Expected",
+  ylab = "Observed",
+  ...
+)
 }
 \arguments{
 \item{obj}{SIMCA model}

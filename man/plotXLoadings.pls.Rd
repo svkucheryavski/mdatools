@@ -4,8 +4,14 @@
 \alias{plotXLoadings.pls}
 \title{X loadings plot for PLS}
 \usage{
-\method{plotXLoadings}{pls}(obj, comp = c(1, 2), type = "p",
-  main = "X loadings", show.axes = T, ...)
+\method{plotXLoadings}{pls}(
+  obj,
+  comp = c(1, 2),
+  type = "p",
+  main = "X loadings",
+  show.axes = T,
+  ...
+)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

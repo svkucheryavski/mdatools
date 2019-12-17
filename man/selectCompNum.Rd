@@ -4,10 +4,10 @@
 \alias{selectCompNum}
 \title{Select optimal number of components for a model}
 \usage{
-selectCompNum(model, ncomp = NULL, ...)
+selectCompNum(obj, ncomp = NULL, ...)
 }
 \arguments{
-\item{model}{a model object}
+\item{obj}{a model object}
 
 \item{ncomp}{number of components to select}
 

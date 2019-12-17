@@ -4,23 +4,20 @@
 \alias{plotResiduals.ldecomp}
 \title{Residual distance plot}
 \usage{
-\method{plotResiduals}{ldecomp}(obj, ncomp = obj$ncomp.selected,
-  norm = TRUE, log = FALSE, cgroup = "type", alpha = obj$alpha,
-  gamma = gamma$alpha, show.limits = TRUE, show.labels = FALSE,
-  labels = "names", main = NULL, xlab = NULL, ylab = NULL, ...)
+\method{plotResiduals}{ldecomp}(
+  obj,
+  ncomp = obj$ncomp.selected,
+  show.labels = FALSE,
+  labels = "names",
+  main = NULL,
+  show.plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
 
 \item{ncomp}{number of components to show the plot for (if NULL, selected by model value will be used).}
-
-\item{norm}{logical, shall values be normalized or not}
-
-\item{log}{logical, if TRUE, then log(1 + u) transformation is applied}
-
-\item{cgroup}{color grouping of distance points, if "type" then they will be grouped by type ("normal", "extreme", "outliers")}
-
-\item{show.limits}{logical, shall extreme and outlier limits be shown or not}
 
 \item{show.labels}{logical, show or not labels for the plot objects}
 
@@ -28,15 +25,10 @@
 
 \item{main}{main title for the plot}
 
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
+\item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
-
-\item{plot}{logical, shall plot be created or just plot series object is needed}
 }
 \description{
-Shows a plot with orthogonal (Q, q) vs score (T2, h) distances for data objects. By default the
-distance values are normalize using corresponding means (q/q0 and h/h0).
+Shows a plot with orthogonal (Q, q) vs. score (T2, h) distances for data objects.
 }

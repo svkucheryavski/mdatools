@@ -4,8 +4,7 @@
 \alias{plotBars}
 \title{Show plot series as bars}
 \usage{
-plotBars(ps, col = ps$col, bwd = 0.8, border = NA,
-  force.x.values = NA)
+plotBars(ps, col = ps$col, bwd = 0.8, border = NA, force.x.values = NA)
 }
 \arguments{
 \item{ps}{`plotseries` object}

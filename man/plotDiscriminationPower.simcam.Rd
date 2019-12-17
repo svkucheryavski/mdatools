@@ -4,8 +4,15 @@
 \alias{plotDiscriminationPower.simcam}
 \title{Discrimination power plot for SIMCAM model}
 \usage{
-\method{plotDiscriminationPower}{simcam}(obj, nc = c(1, 2), type = "h",
-  main = NULL, xlab = "Variables", ylab = "", ...)
+\method{plotDiscriminationPower}{simcam}(
+  obj,
+  nc = c(1, 2),
+  type = "h",
+  main = NULL,
+  xlab = "Variables",
+  ylab = "",
+  ...
+)
 }
 \arguments{
 \item{obj}{a SIMCAM model (object of class \code{simcam})}

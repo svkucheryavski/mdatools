@@ -4,8 +4,7 @@
 \alias{plotConfidenceEllipse}
 \title{Add confidence ellipse for groups of points on scatter plot}
 \usage{
-plotConfidenceEllipse(p, conf.level = 0.95, lwd = 1, lty = 1,
-  opacity = 0)
+plotConfidenceEllipse(p, conf.level = 0.95, lwd = 1, lty = 1, opacity = 0)
 }
 \arguments{
 \item{p}{plot data returned by function `mdaplot()`.}

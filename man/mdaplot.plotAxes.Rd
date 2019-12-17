@@ -4,10 +4,22 @@
 \alias{mdaplot.plotAxes}
 \title{Create axes plane}
 \usage{
-mdaplot.plotAxes(xticklabels = NULL, yticklabels = NULL, xlim = xlim,
-  ylim = ylim, xticks = NULL, yticks = NULL, main = NULL,
-  xlab = NULL, ylab = NULL, xlas = 0, ylas = 0, show.grid = TRUE,
-  grid.lwd = 0.5, grid.col = "lightgray")
+mdaplot.plotAxes(
+  xticklabels = NULL,
+  yticklabels = NULL,
+  xlim = xlim,
+  ylim = ylim,
+  xticks = NULL,
+  yticks = NULL,
+  main = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  xlas = 0,
+  ylas = 0,
+  show.grid = TRUE,
+  grid.lwd = 0.5,
+  grid.col = "lightgray"
+)
 }
 \arguments{
 \item{xticklabels}{labels for x ticks}

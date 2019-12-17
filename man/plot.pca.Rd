@@ -4,8 +4,7 @@
 \alias{plot.pca}
 \title{Model overview plot for PCA}
 \usage{
-\method{plot}{pca}(x, comp = c(1, 2), show.labels = FALSE,
-  show.legend = TRUE, ...)
+\method{plot}{pca}(x, comp = c(1, 2), show.labels = FALSE, show.legend = TRUE, ...)
 }
 \arguments{
 \item{x}{a PCA model (object of class \code{pca})}

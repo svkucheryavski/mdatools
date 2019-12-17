@@ -4,13 +4,21 @@
 \alias{mdaplot.getXAxisLim}
 \title{Calculate limits for x-axis.}
 \usage{
-mdaplot.getXAxisLim(ps, xlim, show.lines = FALSE,
-  show.excluded = FALSE, bwd = NULL)
+mdaplot.getXAxisLim(
+  ps,
+  xlim,
+  show.labels = FALSE,
+  show.lines = FALSE,
+  show.excluded = FALSE,
+  bwd = NULL
+)
 }
 \arguments{
 \item{ps}{`plotseries` object.}
 
 \item{xlim}{limits provided by user}
+
+\item{show.labels}{logical, will data labels be shown on the plot}
 
 \item{show.lines}{logical or numeric with line coordinates to be shown on the plot.}
 

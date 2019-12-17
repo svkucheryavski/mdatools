@@ -4,9 +4,18 @@
 \alias{plotScatter}
 \title{Show plot series as set of points}
 \usage{
-plotScatter(ps, pch = 16, col = ps$col, bg = "white", lwd = 1,
-  cex = 1, col.excluded = "lightgray", pch.colinv = FALSE,
-  show.excluded = FALSE, ...)
+plotScatter(
+  ps,
+  pch = 16,
+  col = ps$col,
+  bg = "white",
+  lwd = 1,
+  cex = 1,
+  col.excluded = "lightgray",
+  pch.colinv = FALSE,
+  show.excluded = FALSE,
+  ...
+)
 }
 \arguments{
 \item{ps}{`plotseries` object}

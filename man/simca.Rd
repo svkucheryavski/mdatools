@@ -4,10 +4,24 @@
 \alias{simca}
 \title{SIMCA one-class classification}
 \usage{
-simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL,
-  exclcols = NULL, exclrows = NULL, x.test = NULL, c.test = NULL,
-  method = "svd", rand = NULL, lim.type = "jm", alpha = 0.05,
-  gamma = 0.01, info = "")
+simca(
+  x,
+  classname,
+  ncomp = 15,
+  center = T,
+  scale = F,
+  cv = NULL,
+  exclcols = NULL,
+  exclrows = NULL,
+  x.test = NULL,
+  c.test = NULL,
+  method = "svd",
+  rand = NULL,
+  lim.type = "jm",
+  alpha = 0.05,
+  gamma = 0.01,
+  info = ""
+)
 }
 \arguments{
 \item{x}{a numerical matrix with data values.}

@@ -4,8 +4,7 @@
 \alias{plotVIPScores.pls}
 \title{VIP scores plot for PLS model}
 \usage{
-\method{plotVIPScores}{pls}(obj, ny = 1, type = "l", main = NULL,
-  ylab = "", ...)
+\method{plotVIPScores}{pls}(obj, ny = 1, type = "l", main = NULL, ylab = "", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

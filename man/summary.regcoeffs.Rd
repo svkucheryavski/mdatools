@@ -4,8 +4,7 @@
 \alias{summary.regcoeffs}
 \title{Summary method for regcoeffs object}
 \usage{
-\method{summary}{regcoeffs}(object, ncomp = 1, ny = 1, alpha = 0.05,
-  ...)
+\method{summary}{regcoeffs}(object, ncomp = 1, ny = 1, alpha = 0.05, ...)
 }
 \arguments{
 \item{object}{object of class \code{regcoeffs}}

@@ -2,42 +2,49 @@
 % Please edit documentation in R/pcares.R
 \name{plotResiduals.pcares}
 \alias{plotResiduals.pcares}
-\title{Residuals plot for PCA results}
+\title{Residual distance plot}
 \usage{
-\method{plotResiduals}{pcares}(obj, ncomp = NULL, main = NULL,
-  xlab = NULL, ylab = NULL, show.labels = F, show.limits = T,
-  norm = F, xlim = NULL, ylim = NULL, lim.col = c("#333333",
-  "#333333"), lim.lwd = c(1, 1), lim.lty = c(2, 3), ...)
+\method{plotResiduals}{pcares}(
+  obj,
+  ncomp = obj$ncomp.selected,
+  cgroup = obj$categories,
+  norm = TRUE,
+  log = FALSE,
+  show.labels = FALSE,
+  labels = "names",
+  main = NULL,
+  show.plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
 
-\item{ncomp}{what number of components to show the plot for (if NULL, model selected value will be used).}
+\item{ncomp}{number of components to show the plot for (if NULL, selected by model value will be used).}
+
+\item{cgroup}{color grouping of distance points, if "type" then they will be grouped by type ("normal", "extreme", "outliers")}
+
+\item{norm}{logical, shall values be normalized or not}
+
+\item{log}{logical, if TRUE, then log(1 + u) transformation is applied}
+
+\item{show.labels}{logical, show or not labels for the plot objects}
+
+\item{labels}{what to show as labels if necessary}
 
 \item{main}{main title for the plot}
+
+\item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
+
+\item{show.limits}{logical, shall extreme and outlier limits be shown or not}
 
 \item{xlab}{label for x axis}
 
 \item{ylab}{label for y axis}
 
-\item{show.labels}{logical, show or not labels for the plot objects}
-
-\item{show.limits}{logical, show or not lines for statistical limits of the residuals}
-
-\item{norm}{logical, show normalized Q vs T2 (\code{norm = T}) values or original ones (\code{norm = F})}
-
-\item{xlim}{limits for x-axis}
-
-\item{ylim}{limits for y-axis}
-
-\item{lim.col}{vector with two values - line color for extreme and outlier borders}
-
-\item{lim.lwd}{vector with two values - line width for extreme and outlier borders}
-
-\item{lim.lty}{vector with two values - line type for extreme and outlier borders}
-
-\item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
+\item{plot}{logical, shall plot be created or just plot series object is needed}
 }
 \description{
-Shows a plot with T2 vs Q values for data objects.
+Shows a plot with orthogonal (Q, q) vs score (T2, h) distances for data objects. By default the
+distance values are normalize using corresponding means (q/q0 and h/h0).
 }

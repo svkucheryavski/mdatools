@@ -4,8 +4,7 @@
 \alias{plotPredictions.plsres}
 \title{Predictions plot for PLS results}
 \usage{
-\method{plotPredictions}{plsres}(obj, ny = 1, ncomp = NULL,
-  main = NULL, ...)
+\method{plotPredictions}{plsres}(obj, ny = 1, ncomp = NULL, main = NULL, ...)
 }
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}

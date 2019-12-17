@@ -4,10 +4,10 @@
 \alias{hotelling.crit}
 \title{Calculate critical limits for distance values using Hotelling T2 distribution}
 \usage{
-hotelling.crit(U, ncomp, alpha = 0.05, gamma = 0.01)
+hotelling.crit(nobj, ncomp, alpha = 0.05, gamma = 0.01)
 }
 \arguments{
-\item{U}{matrix or vector with distances}
+\item{nobj}{number of objects in calibration set}
 
 \item{ncomp}{number of components}
 

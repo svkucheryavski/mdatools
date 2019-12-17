@@ -4,8 +4,16 @@
 \alias{plotRMSE.pls}
 \title{RMSE plot for PLS}
 \usage{
-\method{plotRMSE}{pls}(obj, ny = 1, type = "b", main = "RMSE",
-  xlab = "Components", ylab = NULL, labels = "values", ...)
+\method{plotRMSE}{pls}(
+  obj,
+  ny = 1,
+  type = "b",
+  main = "RMSE",
+  xlab = "Components",
+  ylab = NULL,
+  labels = "values",
+  ...
+)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

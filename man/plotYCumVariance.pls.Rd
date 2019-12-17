@@ -4,9 +4,14 @@
 \alias{plotYCumVariance.pls}
 \title{Cumulative explained Y variance plot for PLS}
 \usage{
-\method{plotYCumVariance}{pls}(obj, type = "b",
-  main = "Y cumulative variance", xlab = "Components",
-  ylab = "Explained variance, \%", ...)
+\method{plotYCumVariance}{pls}(
+  obj,
+  type = "b",
+  main = "Y cumulative variance",
+  xlab = "Components",
+  ylab = "Explained variance, \%",
+  ...
+)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

@@ -4,8 +4,14 @@
 \alias{plsres}
 \title{PLS results}
 \usage{
-plsres(y.pred, y.ref = NULL, ncomp.selected = NULL, xdecomp = NULL,
-  ydecomp = NULL, info = "")
+plsres(
+  y.pred,
+  y.ref = NULL,
+  ncomp.selected = NULL,
+  xdecomp = NULL,
+  ydecomp = NULL,
+  info = ""
+)
 }
 \arguments{
 \item{y.pred}{predicted y values.}

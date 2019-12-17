@@ -4,10 +4,25 @@
 \alias{pls}
 \title{Partial Least Squares regression}
 \usage{
-pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
-  exclcols = NULL, exclrows = NULL, x.test = NULL, y.test = NULL,
-  method = "simpls", alpha = 0.05, coeffs.ci = NULL,
-  coeffs.alpha = 0.05, info = "", light = F, ncomp.selcrit = "min")
+pls(
+  x,
+  y,
+  ncomp = 15,
+  center = T,
+  scale = F,
+  cv = NULL,
+  exclcols = NULL,
+  exclrows = NULL,
+  x.test = NULL,
+  y.test = NULL,
+  method = "simpls",
+  alpha = 0.05,
+  coeffs.ci = NULL,
+  coeffs.alpha = 0.05,
+  info = "",
+  light = F,
+  ncomp.selcrit = "min"
+)
 }
 \arguments{
 \item{x}{matrix with predictors.}

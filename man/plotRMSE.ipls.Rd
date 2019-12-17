@@ -4,9 +4,16 @@
 \alias{plotRMSE.ipls}
 \title{RMSE development plot}
 \usage{
-\method{plotRMSE}{ipls}(obj, glob.ncomp = NULL,
-  main = "RMSE development", xlab = "Iterations", ylab = "RMSECV",
-  xlim = NULL, ylim = NULL, ...)
+\method{plotRMSE}{ipls}(
+  obj,
+  glob.ncomp = NULL,
+  main = "RMSE development",
+  xlab = "Iterations",
+  ylab = "RMSECV",
+  xlim = NULL,
+  ylim = NULL,
+  ...
+)
 }
 \arguments{
 \item{obj}{iPLS results (object of class ipls)}

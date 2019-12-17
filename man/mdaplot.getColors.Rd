@@ -4,8 +4,13 @@
 \alias{mdaplot.getColors}
 \title{Color values for plot elements}
 \usage{
-mdaplot.getColors(ngroups = NULL, cgroup = NULL, colmap = "default",
-  opacity = 1, maxsplits = 64)
+mdaplot.getColors(
+  ngroups = NULL,
+  cgroup = NULL,
+  colmap = "default",
+  opacity = 1,
+  maxsplits = 64
+)
 }
 \arguments{
 \item{ngroups}{number of colors to create.}

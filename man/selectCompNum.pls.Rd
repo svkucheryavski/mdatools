@@ -4,8 +4,7 @@
 \alias{selectCompNum.pls}
 \title{Select optimal number of components for PLS model}
 \usage{
-\method{selectCompNum}{pls}(model, ncomp = NULL,
-  selcrit = model$ncomp.selcrit, ...)
+\method{selectCompNum}{pls}(model, ncomp = NULL, selcrit = model$ncomp.selcrit, ...)
 }
 \arguments{
 \item{model}{PLS model (object of class \code{pls})}

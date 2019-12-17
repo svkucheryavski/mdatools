@@ -4,18 +4,18 @@
 \alias{selectCompNum.pca}
 \title{Select optimal number of components for PCA model}
 \usage{
-\method{selectCompNum}{pca}(model, ncomp, ...)
+\method{selectCompNum}{pca}(obj, ncomp, ...)
 }
 \arguments{
-\item{model}{PCA model (object of class \code{pca})}
-
 \item{ncomp}{number of components to select}
 
 \item{...}{other parameters if any}
+
+\item{model}{PCA model (object of class \code{pca})}
 }
 \value{
 the same model with selected number of components
 }
 \description{
-Allows user to select optimal number of components for PCA model
+Allows user to select optimal number of components for a PCA model
 }

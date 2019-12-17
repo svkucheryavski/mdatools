@@ -4,8 +4,14 @@
 \alias{mdaplot.getYAxisLim}
 \title{Calculate limits for y-axis.}
 \usage{
-mdaplot.getYAxisLim(ps, ylim, show.lines = FALSE,
-  show.excluded = FALSE, show.labels = FALSE, show.colorbar = FALSE)
+mdaplot.getYAxisLim(
+  ps,
+  ylim,
+  show.lines = FALSE,
+  show.excluded = FALSE,
+  show.labels = FALSE,
+  show.colorbar = FALSE
+)
 }
 \arguments{
 \item{ps}{`plotseries` object.}

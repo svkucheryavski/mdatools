@@ -4,8 +4,17 @@
 \alias{mdaplotg.showLegend}
 \title{Show legend for mdaplotg}
 \usage{
-mdaplotg.showLegend(legend, col, pch = NULL, lty = NULL, lwd = NULL,
-  cex = 1, bty = "o", position = "topright", plot = TRUE)
+mdaplotg.showLegend(
+  legend,
+  col,
+  pch = NULL,
+  lty = NULL,
+  lwd = NULL,
+  cex = 1,
+  bty = "o",
+  position = "topright",
+  plot = TRUE
+)
 }
 \arguments{
 \item{legend}{vector with text elements for the legend items}

@@ -4,10 +4,19 @@
 \alias{plotPerformance.classres}
 \title{Performance plot for classification results}
 \usage{
-\method{plotPerformance}{classres}(obj, nc = NULL,
-  ncomp = obj$ncomp.selected, param = "all", type = "h",
-  legend = NULL, main = NULL, xlab = "Components", ylab = "",
-  ylim = c(0, 1.1), ...)
+\method{plotPerformance}{classres}(
+  obj,
+  nc = NULL,
+  ncomp = obj$ncomp.selected,
+  param = "all",
+  type = "h",
+  legend = NULL,
+  main = NULL,
+  xlab = "Components",
+  ylab = "",
+  ylim = c(0, 1.1),
+  ...
+)
 }
 \arguments{
 \item{obj}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}

@@ -4,8 +4,7 @@
 \alias{plot.pls}
 \title{Model overview plot for PLS}
 \usage{
-\method{plot}{pls}(x, ncomp = NULL, ny = 1, show.legend = T,
-  show.labels = F, ...)
+\method{plot}{pls}(x, ncomp = NULL, ny = 1, show.legend = T, show.labels = F, ...)
 }
 \arguments{
 \item{x}{a PLS model (object of class \code{pls})}

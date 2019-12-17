@@ -25,11 +25,11 @@ Returns an object (list) of class \code{pcares} and \code{ldecomp} with followin
 }
 \details{
 In fact \code{pcares} is a wrapper for \code{\link{ldecomp}} - general class for storing
-results for linear decomposition X = TP' + E. So, most of the methods, arguments and 
+results for linear decomposition X = TP' + E. So, most of the methods, arguments and
 returned values are inherited from \code{ldecomp}.
-  
-There is no need to create a \code{pcares} object manually, it is created automatically when 
-build a PCA model (see \code{\link{pca}}) or apply the model to a new data (see 
+
+There is no need to create a \code{pcares} object manually, it is created automatically when
+build a PCA model (see \code{\link{pca}}) or apply the model to a new data (see
 \code{\link{predict.pca}}). The object can be used to show summary and plots for the results.
 }
 \examples{
@@ -87,7 +87,7 @@ Methods for \code{pcares} objects:
  \code{summary.pcares} \tab shows statistics for the PCA results.\cr
 }
 
-Methods, inherited from \code{\link{ldecomp}} class:   
+Methods, inherited from \code{\link{ldecomp}} class:
 \tabular{ll}{
  \code{\link{plotScores.ldecomp}} \tab makes scores plot.\cr
  \code{\link{plotVariance.ldecomp}} \tab makes explained variance plot.\cr

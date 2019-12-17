@@ -4,8 +4,7 @@
 \alias{plot.plsda}
 \title{Model overview plot for PLS-DA}
 \usage{
-\method{plot}{plsda}(x, ncomp = NULL, nc = 1, show.legend = T,
-  show.labels = F, ...)
+\method{plot}{plsda}(x, ncomp = NULL, nc = 1, show.legend = T, show.labels = F, ...)
 }
 \arguments{
 \item{x}{a PLS-DA model (object of class \code{plsda})}

@@ -4,10 +4,23 @@
 \alias{plotResiduals.pca}
 \title{Residuals plot for PCA}
 \usage{
-\method{plotResiduals}{pca}(obj, ncomp = NULL, norm = F, main = NULL,
-  xlab = NULL, ylab = NULL, show.labels = F, show.legend = T,
-  show.limits = T, xlim = NULL, ylim = NULL, lim.col = c("#333333",
-  "#333333"), lim.lwd = c(1, 1), lim.lty = c(2, 3), ...)
+\method{plotResiduals}{pca}(
+  obj,
+  ncomp = NULL,
+  norm = F,
+  main = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  show.labels = F,
+  show.legend = T,
+  show.limits = T,
+  xlim = NULL,
+  ylim = NULL,
+  lim.col = c("#333333", "#333333"),
+  lim.lwd = c(1, 1),
+  lim.lty = c(2, 3),
+  ...
+)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}

@@ -4,9 +4,16 @@
 \alias{plotVariance.pca}
 \title{Explained variance plot for PCA}
 \usage{
-\method{plotVariance}{pca}(obj, type = "b", variance = "expvar",
-  main = "Variance", xlab = "Components",
-  ylab = "Explained variance, \%", show.legend = T, ...)
+\method{plotVariance}{pca}(
+  obj,
+  type = "b",
+  variance = "expvar",
+  main = "Variance",
+  xlab = "Components",
+  ylab = "Explained variance, \%",
+  show.legend = T,
+  ...
+)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}

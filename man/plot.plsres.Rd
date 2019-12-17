@@ -4,8 +4,7 @@
 \alias{plot.plsres}
 \title{Overview plot for PLS results}
 \usage{
-\method{plot}{plsres}(x, ncomp = obj$ncomp.selected, ny = 1,
-  show.labels = F, ...)
+\method{plot}{plsres}(x, ncomp = obj$ncomp.selected, ny = 1, show.labels = F, ...)
 }
 \arguments{
 \item{x}{PLS results (object of class \code{plsres})}

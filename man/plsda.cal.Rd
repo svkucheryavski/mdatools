@@ -4,9 +4,24 @@
 \alias{plsda.cal}
 \title{Calibrate PLS-DA model}
 \usage{
-plsda.cal(x, c, ncomp, center, scale, cv, method, light, alpha, coeffs.ci,
-  coeffs.alpha, info, exclcols = NULL, exclrows = NULL, ncomp.selcrit,
-  classname = NULL)
+plsda.cal(
+  x,
+  c,
+  ncomp,
+  center,
+  scale,
+  cv,
+  method,
+  light,
+  alpha,
+  coeffs.ci,
+  coeffs.alpha,
+  info,
+  exclcols = NULL,
+  exclrows = NULL,
+  ncomp.selcrit,
+  classname = NULL
+)
 }
 \arguments{
 \item{x}{matrix with predictors.}

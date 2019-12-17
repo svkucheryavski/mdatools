@@ -4,8 +4,13 @@
 \alias{plotCumVariance.pca}
 \title{Cumulative explained variance plot for PCA}
 \usage{
-\method{plotCumVariance}{pca}(obj, xlab = "Components",
-  ylab = "Explained variance, \%", main = "Cumulative variance", ...)
+\method{plotCumVariance}{pca}(
+  obj,
+  xlab = "Components",
+  ylab = "Explained variance, \%",
+  main = "Cumulative variance",
+  ...
+)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}

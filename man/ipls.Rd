@@ -4,11 +4,24 @@
 \alias{ipls}
 \title{Variable selection with interval PLS}
 \usage{
-ipls(x, y, glob.ncomp = 10, center = T, scale = F, cv = 10,
-  exclcols = NULL, exclrows = NULL, int.ncomp = glob.ncomp,
-  int.num = NULL, int.width = NULL, int.limits = NULL,
-  int.niter = NULL, ncomp.selcrit = "min", method = "forward",
-  silent = F)
+ipls(
+  x,
+  y,
+  glob.ncomp = 10,
+  center = T,
+  scale = F,
+  cv = 10,
+  exclcols = NULL,
+  exclrows = NULL,
+  int.ncomp = glob.ncomp,
+  int.num = NULL,
+  int.width = NULL,
+  int.limits = NULL,
+  int.niter = NULL,
+  ncomp.selcrit = "min",
+  method = "forward",
+  silent = F
+)
 }
 \arguments{
 \item{x}{a matrix with predictor values}

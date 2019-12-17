@@ -4,8 +4,7 @@
 \alias{plot.plsdares}
 \title{Overview plot for PLS-DA results}
 \usage{
-\method{plot}{plsdares}(x, nc = NULL, ncomp = NULL, show.labels = F,
-  show.line = T, ...)
+\method{plot}{plsdares}(x, nc = NULL, ncomp = NULL, show.labels = F, show.line = T, ...)
 }
 \arguments{
 \item{x}{PLS-DA results (object of class \code{plsdares})}

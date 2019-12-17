@@ -4,8 +4,15 @@
 \alias{plotPredictions.classres}
 \title{Prediction plot for classification results}
 \usage{
-\method{plotPredictions}{classres}(obj, nc = NULL, ncomp = NULL,
-  type = "p", main = NULL, ylab = "", ...)
+\method{plotPredictions}{classres}(
+  obj,
+  nc = NULL,
+  ncomp = NULL,
+  type = "p",
+  main = NULL,
+  ylab = "",
+  ...
+)
 }
 \arguments{
 \item{obj}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}

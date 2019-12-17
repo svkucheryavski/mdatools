@@ -4,8 +4,14 @@
 \alias{plotYVariance.pls}
 \title{Explained Y variance plot for PLS}
 \usage{
-\method{plotYVariance}{pls}(obj, type = "b", main = "Y variance",
-  xlab = "Components", ylab = "Explained variance, \%", ...)
+\method{plotYVariance}{pls}(
+  obj,
+  type = "b",
+  main = "Y variance",
+  xlab = "Components",
+  ylab = "Explained variance, \%",
+  ...
+)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

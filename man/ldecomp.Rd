@@ -2,10 +2,9 @@
 % Please edit documentation in R/ldecomp.R
 \name{ldecomp}
 \alias{ldecomp}
-\title{Class for storing and visualising of data linear decomposition (X = TP' + E)}
+\title{Class for storing and visualising linear decomposition of dataset (X = TP' + E)}
 \usage{
-ldecomp(scores, loadings, residuals, ncomp.selected = ncol(scores),
-  tnorm = NULL, T2.scale = NULL, Q.scale = NULL)
+ldecomp(scores, loadings, residuals, eigenvals, ncomp.selected = ncol(scores))
 }
 \arguments{
 \item{scores}{matrix with score values (I x A).}
@@ -14,33 +13,29 @@ ldecomp(scores, loadings, residuals, ncomp.selected = ncol(scores),
 
 \item{residuals}{matrix with data residuals (I x J)}
 
+\item{eigenvals}{vector with eigenvalues for the loadings}
+
 \item{ncomp.selected}{number of selected components}
-
-\item{tnorm}{vector with singular values for score normalization}
-
-\item{T2.scale}{vector with scale values for T2 (also known as h0)}
-
-\item{Q.scale}{vector with scale values for Q (also known as q0)}
 }
 \value{
 Returns an object (list) of \code{ldecomp} class with following fields:
-\item{scores }{matrix with score values (nobj x ncomp).}
-\item{residuals }{matrix with data residuals (nobj x nvar).}
-\item{tnorm }{vector with singular values used for scores normalization.}
+\item{scores }{matrix with score values (I x A).}
+\item{residuals }{matrix with data residuals (I x J).}
+\item{T2 }{matrix with score distances (I x A).}
+\item{Q }{matrix with squared orthogonal distances (I x A).}
 \item{ncomp.selected }{selected number of components.}
 \item{expvar }{explained variance for each component.}
 \item{cumexpvar }{cumulative explained variance.}
-\item{T2 }{matrix with T2 distances (nobj x ncomp).}
-\item{Q }{matrix with Q statistic (nobj x ncomp).}
 }
 \description{
 Creates an object of ldecomp class.
 }
 \details{
-\code{ldecomp} is a general class for decomposition of data in form X = TP' + E. Here, X is a
-data matrix, T - matrix with scores, P - matrix with loadings and E - matrix with residuals.
-It is used, for example, for PCA results (\code{\link{pcares}}), in PLS and other methods.
-The class also includes methods for calculation and plotting residuals, variances, and so on.
+\code{ldecomp} is a general class for storing results of decomposition of dataset in
+form X = TP' + E. Here, X is a data matrix, T - matrix with scores, P - matrix with
+loadings and E - matrix with residuals. It is used, for example, for PCA results
+(\code{\link{pcares}}), in PLS and other methods. The class also includes methods for
+calculation of residual distances and explained variance.
 
 There is no need to use the \code{ldecomp} manually. For example, when build PCA model
 with \code{\link{pca}} or apply it to a new data, the results will automatically inherit

@@ -4,8 +4,7 @@
 \alias{plotModellingPower.simca}
 \title{Modelling power plot for SIMCA model}
 \usage{
-\method{plotModellingPower}{simca}(obj, ncomp = NULL, type = "h",
-  main = NULL, ylab = "", ...)
+\method{plotModellingPower}{simca}(obj, ncomp = NULL, type = "h", main = NULL, ylab = "", ...)
 }
 \arguments{
 \item{obj}{a SIMCA model (object of class \code{simca})}

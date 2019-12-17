@@ -4,8 +4,12 @@
 \alias{mdaplot.showColorbar}
 \title{Plot colorbar}
 \usage{
-mdaplot.showColorbar(cgroup, colmap = "default", lab.col = "darkgray",
-  lab.cex = 0.65)
+mdaplot.showColorbar(
+  cgroup,
+  colmap = "default",
+  lab.col = "darkgray",
+  lab.cex = 0.65
+)
 }
 \arguments{
 \item{cgroup}{a vector with values used to make color grouping of the elements}

@@ -4,8 +4,7 @@
 \alias{plotYResiduals.pls}
 \title{Y residuals plot for PLS}
 \usage{
-\method{plotYResiduals}{pls}(obj, ncomp = NULL, ny = 1, main = NULL,
-  show.line = T, ...)
+\method{plotYResiduals}{pls}(obj, ncomp = NULL, ny = 1, main = NULL, show.line = T, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

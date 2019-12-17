@@ -4,8 +4,7 @@
 \alias{plotPredictions.classmodel}
 \title{Predictions plot for classification model}
 \usage{
-\method{plotPredictions}{classmodel}(obj, res = NULL, nc = NULL,
-  ncomp = NULL, main = NULL, ...)
+\method{plotPredictions}{classmodel}(obj, res = NULL, nc = NULL, ncomp = NULL, main = NULL, ...)
 }
 \arguments{
 \item{obj}{a classification model (object of class \code{simca}, \code{plsda}, etc.). if \code{NULL} value 

@@ -4,12 +4,10 @@
 \alias{chisq.crit}
 \title{Calculates critical limits for distance values using Chi-square distribution}
 \usage{
-chisq.crit(U, ncomp, alpha = 0.05, gamma = 0.01)
+chisq.crit(param, alpha = 0.05, gamma = 0.01)
 }
 \arguments{
-\item{U}{matrix or vector with distance values}
-
-\item{ncomp}{number of components}
+\item{param}{matrix with distribution parameters}
 
 \item{alpha}{significance level for extreme objects}
 

@@ -4,10 +4,20 @@
 \alias{plotResiduals.simcares}
 \title{Residuals plot for SIMCA results}
 \usage{
-\method{plotResiduals}{simcares}(obj, ncomp = NULL, main = NULL,
-  xlab = NULL, ylab = NULL, norm = F, show.limits = T,
-  legend = NULL, lim.col = c("#c0a0a0", "#906060"), lim.lwd = c(1,
-  1), lim.lty = c(2, 3), ...)
+\method{plotResiduals}{simcares}(
+  obj,
+  ncomp = NULL,
+  main = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  norm = F,
+  show.limits = T,
+  legend = NULL,
+  lim.col = c("#c0a0a0", "#906060"),
+  lim.lwd = c(1, 1),
+  lim.lty = c(2, 3),
+  ...
+)
 }
 \arguments{
 \item{obj}{SIMCA results (object of class \code{simcares})}

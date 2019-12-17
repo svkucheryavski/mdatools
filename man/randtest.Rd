@@ -4,9 +4,18 @@
 \alias{randtest}
 \title{Randomization test for PLS regression}
 \usage{
-randtest(x, y, ncomp = 15, center = T, scale = F, nperm = 1000,
-  sig.level = 0.05, silent = TRUE, exclcols = NULL,
-  exclrows = NULL)
+randtest(
+  x,
+  y,
+  ncomp = 15,
+  center = T,
+  scale = F,
+  nperm = 1000,
+  sig.level = 0.05,
+  silent = TRUE,
+  exclcols = NULL,
+  exclrows = NULL
+)
 }
 \arguments{
 \item{x}{matrix with predictors.}

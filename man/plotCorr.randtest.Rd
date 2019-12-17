@@ -4,8 +4,15 @@
 \alias{plotCorr.randtest}
 \title{Correlation plot for randomization test results}
 \usage{
-\method{plotCorr}{randtest}(obj, comp = NULL, main = NULL,
-  xlab = expression(r^2), ylab = "Test statistic", ylim = NULL, ...)
+\method{plotCorr}{randtest}(
+  obj,
+  comp = NULL,
+  main = NULL,
+  xlab = expression(r^2),
+  ylab = "Test statistic",
+  ylim = NULL,
+  ...
+)
 }
 \arguments{
 \item{obj}{results of randomization test (object of class `randtest`)}

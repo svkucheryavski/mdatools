@@ -4,14 +4,12 @@
 \alias{chisq.prob}
 \title{Calculate probabilities for distance values using Chi-square distribution}
 \usage{
-chisq.prob(u, ncomp, lim)
+chisq.prob(u, param)
 }
 \arguments{
 \item{u}{vector with distances}
 
-\item{ncomp}{number of components}
-
-\item{lim}{vector with parameters}
+\item{param}{vector with distribution parameters}
 }
 \description{
 Calculate probabilities for distance values using Chi-square distribution

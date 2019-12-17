@@ -4,14 +4,14 @@
 \alias{hotelling.prob}
 \title{Calculate probabilities for distance values and given parameters using Hotelling T2 distribution}
 \usage{
-hotelling.prob(U, ncomp, lim)
+hotelling.prob(u, ncomp, nobj)
 }
 \arguments{
-\item{U}{matrix or vector with distances}
+\item{u}{vector with distances}
 
 \item{ncomp}{number of components}
 
-\item{lim}{vector with parameters}
+\item{obj}{number of objects in calibration set}
 }
 \description{
 Calculate probabilities for distance values and given parameters using Hotelling T2 distribution

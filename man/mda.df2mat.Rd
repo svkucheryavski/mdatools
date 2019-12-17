@@ -20,8 +20,9 @@ The function converts data frame to a numeric matrix.
 }
 \details{
 If one or several columns of the data frame are factors they will be converted to a set of dummy
-variables. If any columns/rows were hidden in the data frame they will remain hidden in the matrix. If
-there are factors among the hidden columns, the corresponding dummy variables will be hidden as well.
+variables. If any columns/rows were hidden in the data frame they will remain hidden in the
+matrix. If there are factors among the hidden columns, the corresponding dummy variables will be
+hidden as well.
 
 All other attributes (names, axis names, etc.) will be inherited.
 }

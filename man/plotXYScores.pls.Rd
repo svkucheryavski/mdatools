@@ -4,8 +4,7 @@
 \alias{plotXYScores.pls}
 \title{XY scores plot for PLS}
 \usage{
-\method{plotXYScores}{pls}(obj, comp = 1, main = "XY scores",
-  show.axes = T, ...)
+\method{plotXYScores}{pls}(obj, comp = 1, main = "XY scores", show.axes = T, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}

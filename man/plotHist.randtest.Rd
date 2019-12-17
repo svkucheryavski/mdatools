@@ -4,8 +4,14 @@
 \alias{plotHist.randtest}
 \title{Histogram plot for randomization test results}
 \usage{
-\method{plotHist}{randtest}(obj, comp = NULL, main = NULL,
-  xlab = "Test statistic", ylab = "Frequency", ...)
+\method{plotHist}{randtest}(
+  obj,
+  comp = NULL,
+  main = NULL,
+  xlab = "Test statistic",
+  ylab = "Frequency",
+  ...
+)
 }
 \arguments{
 \item{obj}{results of randomization test (object of class `randtest`)}
