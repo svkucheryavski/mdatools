@@ -166,7 +166,7 @@ getSelectivityRatio = function(obj, ...) {
 #' @description
 #' Generic function for selecting number of components for multivariate models (e.g. PCA, PLS, ...)
 #'
-#' @param model
+#' @param obj
 #' a model object
 #' @param ncomp
 #' number of components to select
@@ -174,7 +174,7 @@ getSelectivityRatio = function(obj, ...) {
 #' other arguments
 #'
 #' @export
-selectCompNum = function(model, ncomp = NULL, ...) {
+selectCompNum = function(obj, ncomp = NULL, ...) {
    UseMethod("selectCompNum")
 }
 

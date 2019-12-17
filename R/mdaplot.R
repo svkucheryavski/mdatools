@@ -307,6 +307,8 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
 #' `plotseries` object.
 #' @param xlim
 #' limits provided by user
+#' @param show.labels
+#' logical, will data labels be shown on the plot
 #' @param show.lines
 #' logical or numeric with line coordinates to be shown on the plot.
 #' @param show.excluded

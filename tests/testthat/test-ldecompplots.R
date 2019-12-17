@@ -89,7 +89,7 @@ test_that("scores plot works fine with different attributes.", {
       plotScores(obj)
       plotScores(obj, c(1, 3), show.labels = T)
       plotScores(obj, c(1, 2), cgroup = x[, 1], show.labels = T, show.colorbar = F, show.axes = F)
-      plotScores(obj, 1, cgroup = x[, 1], show.labels = T, colmap = c("red", "green"), pch = 17)
+      plotScores(obj, 1, show.labels = T, colmap = c("red", "green"), pch = 17)
    })
 })
 

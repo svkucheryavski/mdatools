@@ -777,8 +777,8 @@ hotelling.crit <- function(nobj, ncomp, alpha = 0.05, gamma = 0.01) {
 #' vector with distances
 #' @param ncomp
 #' number of components
-#' @param lim
-#' vector with parameters
+#' @param nobj
+#' number of objects in calibration set
 #'
 #' @export
 hotelling.prob <- function(u, ncomp, nobj){
@@ -790,10 +790,8 @@ hotelling.prob <- function(u, ncomp, nobj){
 #' @description
 #' The method is based on Chi-squared distribution with DF = 2 * (m(u)/s(u)^2
 #'
-#' @param U
-#' matrix or vector with distance values
-#' @param ncomp
-#' number of components
+#' @param param
+#' matrix with distribution parameters
 #' @param alpha
 #' significance level for extreme objects
 #' @param gamma
@@ -821,10 +819,8 @@ chisq.crit <- function(param, alpha = 0.05, gamma = 0.01) {
 #'
 #' @param u
 #' vector with distances
-#' @param ncomp
-#' number of components
-#' @param lim
-#' vector with parameters
+#' @param param
+#' vector with distribution parameters
 #'
 #' @export
 chisq.prob <- function(u, param){
@@ -838,8 +834,14 @@ chisq.prob <- function(u, param){
 
 #' Calculates critical limits for distance values using Data Driven moments approach
 #'
-#' @param U
-#' matrix or vector with distance values
+#' @param paramQ
+#' matrix with parameters for distribution of Q distances
+#' @param paramT2
+#' matrix with parameters for distribution of T2 distances
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
 #'
 #' @export
 dd.crit <- function(paramQ, paramT2, alpha = 0.05, gamma = 0.01) {
@@ -928,6 +930,9 @@ getModelRes <- function(model) {
 }
 
 #' Imitation of fprinf() function
+#'
+#' @param ...
+#' arguments for sprintf function
 #'
 #' @export
 fprintf <- function(...) {

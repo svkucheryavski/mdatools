@@ -1,39 +1,35 @@
-#' Class for storing and visualising of data linear decomposition (X = TP' + E)
+#' Class for storing and visualising linear decomposition of dataset (X = TP' + E)
 #'
 #' @description
 #' Creates an object of ldecomp class.
 #'
 #' @param scores
 #' matrix with score values (I x A).
-#' @param T2
+#' @param loadings
 #' matrix with loading values (J x A).
-#' @param Q
+#' @param residuals
 #' matrix with data residuals (I x J)
+#' @param eigenvals
+#' vector with eigenvalues for the loadings
 #' @param ncomp.selected
 #' number of selected components
-#' @param tnorm
-#' vector with singular values for score normalization
-#' @param T2.scale
-#' vector with scale values for T2 (also known as h0)
-#' @param Q.scale
-#' vector with scale values for Q (also known as q0)
 #'
 #' @return
 #' Returns an object (list) of \code{ldecomp} class with following fields:
-#' \item{scores }{matrix with score values (nobj x ncomp).}
-#' \item{residuals }{matrix with data residuals (nobj x nvar).}
-#' \item{tnorm }{vector with singular values used for scores normalization.}
+#' \item{scores }{matrix with score values (I x A).}
+#' \item{residuals }{matrix with data residuals (I x J).}
+#' \item{T2 }{matrix with score distances (I x A).}
+#' \item{Q }{matrix with squared orthogonal distances (I x A).}
 #' \item{ncomp.selected }{selected number of components.}
 #' \item{expvar }{explained variance for each component.}
 #' \item{cumexpvar }{cumulative explained variance.}
-#' \item{T2 }{matrix with T2 distances (nobj x ncomp).}
-#' \item{Q }{matrix with Q statistic (nobj x ncomp).}
 #'
 #' @details
-#' \code{ldecomp} is a general class for decomposition of data in form X = TP' + E. Here, X is a
-#' data matrix, T - matrix with scores, P - matrix with loadings and E - matrix with residuals.
-#' It is used, for example, for PCA results (\code{\link{pcares}}), in PLS and other methods.
-#' The class also includes methods for calculation and plotting residuals, variances, and so on.
+#' \code{ldecomp} is a general class for storing results of decomposition of dataset in
+#' form X = TP' + E. Here, X is a data matrix, T - matrix with scores, P - matrix with
+#' loadings and E - matrix with residuals. It is used, for example, for PCA results
+#' (\code{\link{pcares}}), in PLS and other methods. The class also includes methods for
+#' calculation of residual distances and explained variance.
 #'
 #' There is no need to use the \code{ldecomp} manually. For example, when build PCA model
 #' with \code{\link{pca}} or apply it to a new data, the results will automatically inherit
@@ -73,7 +69,7 @@ ldecomp <- function(scores, loadings, residuals, eigenvals, ncomp.selected = nco
 #' Cumulative explained variance plot
 #'
 #' @description
-#' Shows a plot with cumulative explained variance values vs. number of components.
+#' Shows a plot with cumulative explained variance vs. number of components.
 #'
 #' @param obj
 #' object of \code{ldecomp} class.
@@ -89,7 +85,7 @@ ldecomp <- function(scores, loadings, residuals, eigenvals, ncomp.selected = nco
 #' logical, show or not labels for the plot objects
 #' @param labels
 #' what to show as labels for plot objects
-#' @param plot
+#' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
@@ -112,7 +108,7 @@ plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance
 #' Explained variance plot
 #'
 #' @description
-#' Shows a plot with explained variance values vs. number of components.
+#' Shows a plot with explained variance vs. number of components.
 #'
 #' @param obj
 #' object of \code{ldecomp} class.
@@ -128,7 +124,7 @@ plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance
 #' logical, show or not labels for plot objects.
 #' @param labels
 #' what to show as labels for plot objects.
-#' @param plot
+#' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
@@ -168,9 +164,11 @@ plotVariance.ldecomp <- function(obj, type = "b", main = "Variance", xlab = "Com
 #' logical, show or not a legend on the plot (needed in case of line or bar plot).
 #' @param show.labels
 #' logical, show or not labels for the plot objects
+#' @param labels
+#' what to show as labels
 #' @param show.axes
 #' logical, show or not a axes lines crossing origin (0,0)
-#' @param plot
+#' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
@@ -191,15 +189,16 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p",
    # set up values for showing axes lines
    show.lines <- FALSE
    if (show.axes) {
-      show.lines <- if (length(comp) == 2 && type =="p") c(0, 0) else c(NA, 0)
+      show.lines <- if (length(comp) == 2 && type == "p") c(0, 0) else c(NA, 0)
    }
 
    # scatter plot
    if (type == "p") {
-      colnames(plot_data) <- paste0("Comp ", comp, " (", round(obj$expvar[comp], 2) , "%)")
+      colnames(plot_data) <- paste0("Comp ", comp, " (", round(obj$expvar[comp], 2), "%)")
       p <- mdaplot(plot_data, type = type, show.labels = show.labels, labels = labels,
          show.lines = show.lines, main = main, xlab = xlab, ylab = ylab, ...)
-      return(p)
+
+      return(invisible(p))
    }
 
    # line or bar plot
@@ -215,8 +214,7 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p",
 #' Residual distance plot
 #'
 #' @description
-#' Shows a plot with orthogonal (Q, q) vs score (T2, h) distances for data objects. By default the
-#' distance values are normalize using corresponding means (q/q0 and h/h0).
+#' Shows a plot with orthogonal (Q, q) vs. score (T2, h) distances for data objects.
 #'
 #' @param obj
 #' object of \code{ldecomp} class.
@@ -228,10 +226,6 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p",
 #' what to show as labels if necessary
 #' @param main
 #' main title for the plot
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
 #' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
@@ -282,20 +276,22 @@ plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected,
 #' other arguments
 #'
 #' @export
-print.ldecomp = function(x, str = NULL, ...) {
-   if (is.null(str))
-      str ='Results of data decomposition (class ldecomp)'
+print.ldecomp <- function(x, str = NULL, ...) {
+   if (is.null(str)) {
+      str <- "Results of data decomposition (class ldecomp)."
+   }
 
-   if (nchar(str) > 0)
-      cat(sprintf('\n%s\n', str))
+   if (nchar(str) > 0) {
+      fprintf("\n%s\n", str)
+   }
 
-   cat('\nMajor fields:\n')
-   cat('$scores - matrix with score values\n')
-   cat('$T2 - matrix with T2 distances\n')
-   cat('$Q - matrix with Q residuals\n')
-   cat('$ncomp.selected - selected number of components\n')
-   cat('$expvar - explained variance for each component\n')
-   cat('$cumexpvar - cumulative explained variance\n')
+   cat("\nMajor fields:\n")
+   cat("$scores - matrix with score values\n")
+   cat("$T2 - matrix with T2 distances\n")
+   cat("$Q - matrix with Q residuals\n")
+   cat("$ncomp.selected - selected number of components\n")
+   cat("$expvar - explained variance for each component\n")
+   cat("$cumexpvar - cumulative explained variance\n")
 }
 
 #' as.matrix method for ldecomp object
@@ -310,11 +306,11 @@ print.ldecomp = function(x, str = NULL, ...) {
 #' other arguments
 #'
 #' @export
-as.matrix.ldecomp = function(x, ...) {
-   data = cbind(x$expvar, x$cumexpvar)
-   rownames(data) = colnames(x$Q)
-   colnames(data) = c('Expvar', 'Cumexpvar')
-   data
+as.matrix.ldecomp <- function(x, ...) {
+   data <- cbind(x$expvar, x$cumexpvar)
+   rownames(data) <- colnames(x$Q)
+   colnames(data) <- c("Expvar", "Cumexpvar")
+   return(data)
 }
 
 #' Summary statistics for linear decomposition
@@ -331,16 +327,15 @@ as.matrix.ldecomp = function(x, ...) {
 #' other arguments
 #'
 #' @export
-summary.ldecomp = function(object, str = NULL, ...) {
-   if (is.null(str))
-      str ='Summary for data decomposition (class ldecomp)'
+summary.ldecomp <- function(object, str = NULL, ...) {
+   if (is.null(str)) {
+      str <- "Summary for data decomposition (class ldecomp)."
+   }
 
-   cat('\n')
-   cat(str, '\n')
-   cat(sprintf('\nSelected components: %d\n\n', object$ncomp.selected))
+   fprintf("\n%s\n", str)
+   fprintf("\nSelected components: %d\n\n", object$ncomp.selected)
 
-   data = as.matrix(object)
-   print(round(data, 2))
+   print(round(as.matrix(object), 2))
 }
 
 
@@ -419,18 +414,15 @@ ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
 #' @return
 #' Returns a list with Q, T2 and tnorm values for each component.
 #'
-ldecomp.getDistances = function(scores, loadings, residuals, eigenvals) {
+ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
 
    # get names and attributes
-   var_names <- rownames(loadings)
-   obj_names <- rownames(scores)
    rows_excluded <- attr(scores, "exclrows")
    cols_excluded <- attr(loadings, "exclrows")
 
    # get sizes
    ncomp <- ncol(scores)
    nobj <- nrow(scores)
-   nvar <- nrow(loadings)
 
    # remove excluded variables from loadings and residuals
    if (length(cols_excluded) > 0) {
@@ -441,11 +433,9 @@ ldecomp.getDistances = function(scores, loadings, residuals, eigenvals) {
    # get rid of hidden scores and residuals (needed for some calculations)
    scores_visible <- scores
    residuals_visible <- residuals
-   nobj_visible <- nobj
    if (length(rows_excluded) > 0) {
       scores_visible <- scores_visible[-rows_excluded, , drop = FALSE]
       residuals_visible <- residuals_visible[-rows_excluded, , drop = FALSE]
-      nobj_visible <- nobj - length(rows_excluded)
    }
 
    # normalize the scores
@@ -471,13 +461,13 @@ ldecomp.getDistances = function(scores, loadings, residuals, eigenvals) {
    }
 
    # set attributes for Q
-   Q <- mda.setattr(Q, mda.getattr(scores), type = 'row')
+   Q <- mda.setattr(Q, mda.getattr(scores), type = "row")
    attr(Q, "name") <- "Squared residual distance (q)"
    attr(Q, "xaxis.name") <- "Components"
 
    # set attributes for T2
-   T2 = mda.setattr(T2, mda.getattr(Q))
-   attr(T2, 'name') = 'Score distance (h)'
+   T2 <- mda.setattr(T2, mda.getattr(Q))
+   attr(T2, "name") <- "Score distance (h)"
 
    colnames(Q) <- colnames(T2) <- colnames(loadings)
    rownames(Q) <- rownames(T2) <- rownames(scores)

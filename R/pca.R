@@ -264,7 +264,7 @@ selectCompNum.pca <- function(obj, ncomp, ...) {
 #'
 #' @export
 setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alpha,
-   gamma = obj$gamma) {
+   gamma = obj$gamma, ...) {
 
    obj$Qlim <- pca.getQLimits(obj, lim.type, alpha = alpha, gamma = gamma)
    obj$T2lim <- pca.getT2Limits(obj, lim.type, alpha = alpha, gamma = gamma)
@@ -297,6 +297,10 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
 #' object with PCA model
 #' @param res
 #' object with PCA results
+#' @param ncomp
+#' number of components to use for the categorization
+#' @param ...
+#' other parameters
 #'
 #' @details
 #' The method does not categorize hidden values if any.
@@ -305,7 +309,7 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
 #' vector (factor) with results of categorization.
 #'
 #' @export
-categorize.pca <- function(obj, res, ncomp = obj$ncomp.selected) {
+categorize.pca <- function(obj, res, ncomp = obj$ncomp.selected, ...) {
 
    create_categories <- function(nobj, extremes_ind, outliers_ind) {
       categories <- rep(1, nobj)
