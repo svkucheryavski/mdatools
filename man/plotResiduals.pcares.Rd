@@ -7,7 +7,6 @@
 \method{plotResiduals}{pcares}(
   obj,
   ncomp = obj$ncomp.selected,
-  cgroup = obj$categories,
   norm = TRUE,
   log = FALSE,
   show.labels = FALSE,
@@ -22,9 +21,7 @@
 
 \item{ncomp}{number of components to show the plot for (if NULL, selected by model value will be used).}
 
-\item{cgroup}{color grouping of distance points, if "type" then they will be grouped by type ("normal", "extreme", "outliers")}
-
-\item{norm}{logical, shall values be normalized or not}
+\item{norm}{logical, if TRUE disance values be normalized (u/u0)}
 
 \item{log}{logical, if TRUE, then log(1 + u) transformation is applied}
 
@@ -34,15 +31,9 @@
 
 \item{main}{main title for the plot}
 
+\item{show.plot}{logical, shall plot be created or just plot series object is needed}
+
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
-
-\item{show.limits}{logical, shall extreme and outlier limits be shown or not}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{plot}{logical, shall plot be created or just plot series object is needed}
 }
 \description{
 Shows a plot with orthogonal (Q, q) vs score (T2, h) distances for data objects. By default the

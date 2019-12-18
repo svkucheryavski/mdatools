@@ -1,9 +1,10 @@
 #' Results of PCA decomposition
+#'
 #' @description
-#' \code{pcares} is used to store results for PCA decomposition of data.
+#' \code{pcares} is used to store and visualise results for PCA decomposition.
 #'
 #' @param ...
-#' other arguments supported by \code{ldecomp}.
+#' all arguments supported by \code{ldecomp}.
 #'
 #' @details
 #' In fact \code{pcares} is a wrapper for \code{\link{ldecomp}} - general class for storing
@@ -14,13 +15,14 @@
 #' build a PCA model (see \code{\link{pca}}) or apply the model to a new data (see
 #' \code{\link{predict.pca}}). The object can be used to show summary and plots for the results.
 #'
+#' It is assumed that data is a matrix or data frame with I rows and J columns.
+#'
 #' @return
 #' Returns an object (list) of class \code{pcares} and \code{ldecomp} with following fields:
-#' \item{scores }{matrix with score values (nobj x ncomp).}
-#' \item{residuals }{matrix with data residuals (nobj x nvar).}
-#' \item{T2 }{matrix with T2 distances (nobj x ncomp).}
-#' \item{Q }{matrix with Q residuals (nobj x ncomp).}
-#' \item{tnorm }{vector with singular values used for scores normalization.}
+#' \item{scores }{matrix with score values (I x A).}
+#' \item{residuals }{matrix with data residuals (I x J).}
+#' \item{T2 }{matrix with score distances (I x A).}
+#' \item{Q }{matrix with orthogonal distances (I x A).}
 #' \item{ncomp.selected }{selected number of components.}
 #' \item{expvar }{explained variance for each component.}
 #' \item{cumexpvar }{cumulative explained variance.}
@@ -30,6 +32,7 @@
 #' \tabular{ll}{
 #'  \code{print.pcares} \tab shows information about the object.\cr
 #'  \code{summary.pcares} \tab shows statistics for the PCA results.\cr
+#'  \code{\link{plotResiduals.pcares}} \tab makes Q vs. T2 distance plot.\cr
 #' }
 #'
 #' Methods, inherited from \code{\link{ldecomp}} class:
@@ -37,7 +40,6 @@
 #'  \code{\link{plotScores.ldecomp}} \tab makes scores plot.\cr
 #'  \code{\link{plotVariance.ldecomp}} \tab makes explained variance plot.\cr
 #'  \code{\link{plotCumVariance.ldecomp}} \tab makes cumulative explained variance plot.\cr
-#'  \code{\link{plotResiduals.ldecomp}} \tab makes Q vs. T2 residuals plot.\cr
 #' }
 #'
 #' Check also \code{\link{pca}} and \code{\link{ldecomp}}.
@@ -54,7 +56,7 @@
 #' x = people[seq(1, 32, 2), ]
 #' x.new = people[seq(1, 32, 2), ]
 #'
-#' model = pca(people, scale = TRUE, cv = 1, info = 'Simple PCA model')
+#' model = pca(people, scale = TRUE, info = "Simple PCA model")
 #' model = selectCompNum(model, 4)
 #'
 #' res = predict(model, x.new)
@@ -64,9 +66,8 @@
 #' ## 1. Make PCA model for People data with autoscaling
 #' ## and full cross-validation and get calibration results
 #'
-#'
 #' data(people)
-#' model = pca(people, scale = TRUE, cv = 1, info = 'Simple PCA model')
+#' model = pca(people, scale = TRUE, info = "Simple PCA model")
 #' model = selectCompNum(model, 4)
 #'
 #' res = model$calres
@@ -76,16 +77,16 @@
 #' ## 2. Show scores plots for the results
 #' par(mfrow = c(2, 2))
 #' plotScores(res)
-#' plotScores(res, cgroup = people[, 'Beer'], show.labels = TRUE)
+#' plotScores(res, cgroup = people[, "Beer"], show.labels = TRUE)
 #' plotScores(res, comp = c(1, 3), show.labels = TRUE)
-#' plotScores(res, comp = 2, type = 'h', show.labels = TRUE)
+#' plotScores(res, comp = 2, type = "h", show.labels = TRUE)
 #' par(mfrow = c(1, 1))
 #'
 #' ## 3. Show residuals and variance plots for the results
 #' par(mfrow = c(2, 2))
-#' plotVariance(res, type = 'h')
-#' plotCumVariance(res, show.labels = TRUE, legend.position = 'bottomright')
-#' plotResiduals(res, show.labels = TRUE, cgroup = people[, 'Sex'])
+#' plotVariance(res, type = "h")
+#' plotCumVariance(res, show.labels = TRUE)
+#' plotResiduals(res, show.labels = TRUE, cgroup = people[, "Sex"])
 #' plotResiduals(res, ncomp = 2, show.labels = TRUE)
 #' par(mfrow = c(1, 1))
 #'
@@ -95,10 +96,9 @@ pcares <- function(...) {
    # uses its methods and attributes.
 
    res <- ldecomp(...)
-   res$categories = NULL
-   class(res) = c("pcares", "ldecomp")
+   class(res) <- c("pcares", "ldecomp")
 
-   res
+   return(res)
 }
 
 #' Residual distance plot
@@ -112,22 +112,16 @@ pcares <- function(...) {
 #' @param ncomp
 #' number of components to show the plot for (if NULL, selected by model value will be used).
 #' @param norm
-#' logical, shall values be normalized or not
+#' logical, if TRUE disance values be normalized (u/u0)
 #' @param log
 #' logical, if TRUE, then log(1 + u) transformation is applied
-#' @param show.limits
-#' logical, shall extreme and outlier limits be shown or not
 #' @param show.labels
 #' logical, show or not labels for the plot objects
 #' @param labels
 #' what to show as labels if necessary
 #' @param main
 #' main title for the plot
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param plot
+#' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
@@ -139,7 +133,7 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected,
 
    # function for transforming distances
    transform <- function(u, u0, norm, log) {
-      if (norm) u <- u/u0
+      if (norm) u <- u / u0
       if (log) u <- log(1 + u)
       return(u)
    }
@@ -156,7 +150,7 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected,
    q0 <- attr(obj$Q, "u0")[[ncomp]]
 
    # check that scaling values exist
-   if (norm && (is.null(h0) || is.null(q0))) {
+   if (norm && (is.null(h0) || is.null(q0))) {
       warning("Can not normalize distances as scaling values are absent.")
       norm <- FALSE
    }
@@ -174,8 +168,8 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected,
    plot_data <- mda.setattr(plot_data, mda.getattr(obj$Q), "row")
    rownames(plot_data) <- rownames(obj$Q)
    colnames(plot_data) <- c(
-      paste0("Orthogonal distance, ", lxlab),
-      paste0("Score distance, ", lylab)
+      paste0("Score distance, ", lxlab),
+      paste0("Orthogonal distance, ", lylab)
    )
 
    # if no plot required - return plot series object
@@ -201,18 +195,20 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected,
 #' PCA results (object of class \code{pcares})
 #' @param comp
 #' which components to show the scores plot for (can be one value or vector with two values).
+#' @param ncomp
+#' how many components to use for showing the residual distance plot
 #' @param show.labels
 #' logical, show or not labels for the plot objects
 #' @param ...
 #' other arguments
 #'
 #' @export
-plot.pcares = function(x, comp = c(1, 2), show.labels = T, ...) {
+plot.pcares <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, show.labels = T, ...) {
    par(mfrow = c(2, 2))
    plotScores(x, comp = comp, show.labels = show.labels, ...)
-   plotResiduals(x, show.labels = show.labels, ...)
-   plotVariance(x, show.labels = show.labels, ...)
-   plotCumVariance(x, show.labels = show.labels, ...)
+   plotResiduals(x, ncomp, show.labels = show.labels, ...)
+   plotVariance(x, type = "h", show.labels = show.labels, ...)
+   plotCumVariance(x, type = "h", show.labels = show.labels, ...)
    par(mfrow = c(1, 1))
 }
 

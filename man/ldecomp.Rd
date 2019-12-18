@@ -22,7 +22,7 @@ Returns an object (list) of \code{ldecomp} class with following fields:
 \item{scores }{matrix with score values (I x A).}
 \item{residuals }{matrix with data residuals (I x J).}
 \item{T2 }{matrix with score distances (I x A).}
-\item{Q }{matrix with squared orthogonal distances (I x A).}
+\item{Q }{matrix with orthogonal distances (I x A).}
 \item{ncomp.selected }{selected number of components.}
 \item{expvar }{explained variance for each component.}
 \item{cumexpvar }{cumulative explained variance.}
