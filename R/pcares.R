@@ -115,8 +115,6 @@ pcares <- function(...) {
 #' logical, shall values be normalized or not
 #' @param log
 #' logical, if TRUE, then log(1 + u) transformation is applied
-#' @param cgroup
-#' color grouping of distance points, if "type" then they will be grouped by type ("normal", "extreme", "outliers")
 #' @param show.limits
 #' logical, shall extreme and outlier limits be shown or not
 #' @param show.labels
@@ -135,7 +133,7 @@ pcares <- function(...) {
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected, cgroup = obj$categories,
+plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected,
    norm = TRUE, log = FALSE, show.labels = FALSE, labels = "names", main = NULL,
    show.plot = TRUE, ...) {
 
@@ -153,9 +151,9 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected, cgroup = obj$c
       return(lab)
    }
 
-   attrs <- mda.getattr(obj$Q)
-   h0 <- attr(obj$T2, "u0")
-   q0 <- attr(obj$Qlim, "u0")
+   # get scale factors
+   h0 <- attr(obj$T2, "u0")[[ncomp]]
+   q0 <- attr(obj$Q, "u0")[[ncomp]]
 
    # check that scaling values exist
    if (norm && (is.null(h0) || is.null(q0))) {
@@ -173,7 +171,7 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected, cgroup = obj$c
 
    # combine everything to dataset and assign attributes
    plot_data <- mda.cbind(h, q)
-   plot_data <- mda.setattr(plot_data, attrs, "row")
+   plot_data <- mda.setattr(plot_data, mda.getattr(obj$Q), "row")
    rownames(plot_data) <- rownames(obj$Q)
    colnames(plot_data) <- c(
       paste0("Orthogonal distance, ", lxlab),
@@ -182,7 +180,7 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected, cgroup = obj$c
 
    # if no plot required - return plot series object
    if (!show.plot) {
-      return(plotseries(plot_data, type = "p", labels = labels, cgroup = cgroup))
+      return(plotseries(plot_data, type = "p", labels = labels, ...))
    }
 
    # set up main title for the plot
@@ -191,8 +189,7 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected, cgroup = obj$c
    }
 
    # show plot
-   mdaplot(plot_data, main = main, cgroup = cgroup, show.labels = show.labels, labels = labels,
-      cgroup = cgroup, ...)
+   return(mdaplot(plot_data, main = main, show.labels = show.labels, labels = labels, ...))
 }
 
 #' Plot method for PCA results object
@@ -248,6 +245,6 @@ summary.pcares <- function(object, ...) {
 #'
 #' @export
 print.pcares <- function(x, ...) {
-   print.ldecomp(x, 'Results for PCA decomposition (class pcares)', ...)
-   cat('\n')
+   print.ldecomp(x, "Results for PCA decomposition (class pcares)", ...)
+   cat("\n")
 }
