@@ -2,7 +2,7 @@
 # Tests for new features for mdaplot() and related methods  #
 #############################################################
 
-pdf(file = "../plots/test_mdaplots2.pdf")
+pdf(file = "test_mdaplots2.pdf")
 
 par(mfrow = c(2, 2))
 

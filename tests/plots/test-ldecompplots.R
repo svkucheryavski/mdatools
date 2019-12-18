@@ -2,6 +2,8 @@
 # Tests for basic functionality of ldecomp() class  #
 #####################################################
 
+pdf(file = "test_ldecomp_plots.pdf")
+
 
 # function to get scores, loadings and residuals from data
 getPCARes <- function(X, ncomp) {
@@ -71,8 +73,6 @@ x <- people
 x <- prep.autoscale(x, center = TRUE, scale = TRUE)
 m <- getPCARes(x, 5)
 obj <- ldecomp(m$scores, m$loadings, m$residuals, m$eigenvals)
-
-pdf(file = "../plots/test_ldecomp_plots.pdf")
 
 context('ldecomp: plots')
 

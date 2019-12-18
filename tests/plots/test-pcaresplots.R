@@ -2,6 +2,8 @@
 # Tests for basic functionality of ldecomp() class  #
 #####################################################
 
+pdf(file = "test_pcares_plots.pdf")
+
 data(people)
 x <- people
 m <- pca(x, scale = TRUE, ncomp = 10)
@@ -12,7 +14,6 @@ plotResiduals(m$calres, 1, show.labels = T)
 plotResiduals(m$calres, 2, show.labels = T, colmap = c("red", "green"))
 plotResiduals(m$calres, 3, cgroup = x[, 1], show.labels = T, colmap = c("red", "green"), pch = 17)
 
-pdf(file = "../plots/test_pcares_plots.pdf")
 
 context('pcares: residual distance plots')
 
@@ -155,3 +156,9 @@ test_that("print() and summary() produce output", {
 })
 
 dev.off()
+
+# just output to check in txt file
+sink("output.txt", append=FALSE, split=FALSE)
+print(m$calres)
+summary(m$calres)
+sink()

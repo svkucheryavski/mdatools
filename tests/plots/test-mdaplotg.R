@@ -2,7 +2,7 @@
 # Block 1: using matrix as data source plus groupby parameter  #
 ################################################################
 
-pdf(file = "../plots/test_mdaplots2.pdf")
+pdf(file = "test_mdaplots2.pdf")
 
 context("mdaplotg: plots with matrix as data and groupby parameter")
 par(mfrow = c(2, 2))

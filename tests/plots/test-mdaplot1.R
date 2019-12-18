@@ -2,7 +2,7 @@
 # Tests for basic functionality of mdaplot() and related methods  #
 ###################################################################
 
-pdf(file = "../plots/test_mdaplots1.pdf")
+pdf(file = "test_mdaplots1.pdf")
 
 # prepare dataset
 all_plots <- c("p", "l", "b", "h", "e")
