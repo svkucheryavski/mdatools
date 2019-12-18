@@ -88,8 +88,29 @@ test_that("scores plot works fine with different attributes.", {
       par(mfrow = c(2, 2))
       plotScores(obj)
       plotScores(obj, c(1, 3), show.labels = T)
-      plotScores(obj, c(1, 2), cgroup = x[, 1], show.labels = T, show.colorbar = F, show.axes = F)
-      plotScores(obj, 1, show.labels = T, colmap = c("red", "green"), pch = 17)
+      plotScores(obj, c(1, 2), cgroup = x[, 1], show.labels = T, show.axes = F)
+      plotScores(obj, 1, show.labels = T, cgroup = x[, "Sex"], colmap = c("red", "green"), pch = 17)
+   })
+})
+
+test_that("scores plot works fine with cgroup and convex hulls.", {
+
+   cgroup <- interaction(
+      factor(x[, "Sex"], labels = c("M", "F")),
+      factor(x[, "Region"], labels = c("S", "M"))
+   )
+
+   expect_silent({
+      par(mfrow = c(2, 2))
+      p <- plotScores(obj, cgroup = cgroup)
+      plotConvexHull(p)
+      p <- plotScores(obj, cgroup = cgroup, colmap = c("red", "green"))
+      plotConvexHull(p, opacity = 0.25)
+      p <- plotScores(obj, cgroup = cgroup)
+      plotConfidenceEllipse(p)
+      p <- plotScores(obj, cgroup = cgroup, colmap = c("red", "green"))
+      plotConfidenceEllipse(p, conf.level = 0.99, opacity = 0.25)
+
    })
 })
 

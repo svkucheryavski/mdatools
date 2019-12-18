@@ -19,7 +19,7 @@
 #' \item{scores }{matrix with score values (I x A).}
 #' \item{residuals }{matrix with data residuals (I x J).}
 #' \item{T2 }{matrix with score distances (I x A).}
-#' \item{Q }{matrix with squared orthogonal distances (I x A).}
+#' \item{Q }{matrix with orthogonal distances (I x A).}
 #' \item{ncomp.selected }{selected number of components.}
 #' \item{expvar }{explained variance for each component.}
 #' \item{cumexpvar }{cumulative explained variance.}
@@ -99,10 +99,8 @@ plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance
       return(plotseries(obj$cumexpvar, type = type, labels = labels, ...))
    }
 
-   p <- mdaplot(obj$cumexpvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
-            type = type, show.labels = show.labels, labels = labels, ...)
-
-   invisible(p)
+   return(mdaplot(obj$cumexpvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
+            type = type, show.labels = show.labels, labels = labels, ...))
 }
 
 #' Explained variance plot
@@ -137,10 +135,8 @@ plotVariance.ldecomp <- function(obj, type = "b", main = "Variance", xlab = "Com
       return(plotseries(obj$expvar, type = type, labels = labels, ...))
    }
 
-   p <- mdaplot(obj$expvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
-           show.labels = show.labels, labels = labels, type = type, ...)
-
-   invisible(p)
+   return(mdaplot(obj$expvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
+           show.labels = show.labels, labels = labels, type = type, ...))
 }
 
 #' Scores plot
@@ -204,11 +200,10 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p",
    # line or bar plot
    if (is.null(ylab)) ylab <- "Score value"
    if (type == "h") show.lines <- FALSE
-   p <- mdaplotg(mda.t(plot_data), type = type, show.labels = show.labels, labels = labels,
-      show.lines = show.lines, show.legend = show.legend, main = main, xlab = xlab,
-      ylab = ylab, ...)
 
-   invisible(p)
+   return(mdaplotg(mda.t(plot_data), type = type, show.labels = show.labels, labels = labels,
+      show.lines = show.lines, show.legend = show.legend, main = main, xlab = xlab,
+      ylab = ylab, ...))
 }
 
 #' Residual distance plot
@@ -258,8 +253,7 @@ plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected,
    }
 
    # show plot
-   p <- mdaplot(plot_data, main = main, show.labels = show.labels, labels = labels, ...)
-   invisible(p)
+   return(mdaplot(plot_data, main = main, show.labels = show.labels, labels = labels, ...))
 }
 
 #' Print method for linear decomposition
