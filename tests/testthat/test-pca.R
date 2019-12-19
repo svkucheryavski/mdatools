@@ -100,7 +100,7 @@ test_that("SVD and NIPALS gives similar results works correctly", {
 # Block 2: testing pca.run() method  #
 ######################################
 
-context('PCA: testing pca.run()')
+context("PCA: testing pca.run()")
 
 ## testing function for comparing pca.run() results with algorithms
 tf <- function(x, f1, method, rand, tol = 10^-6) {
@@ -149,7 +149,7 @@ test_that("pca.run works correctly with rand (nipals)", {
 # Block 3: testing pca.cal() method  #
 ######################################
 
-context('PCA: testing pca.cal()')
+context("PCA: testing pca.cal()")
 
 
 ## setup two datasets - one without attributes and with
@@ -362,7 +362,7 @@ test_that("pca.cal calculates limit parameters correctly (excluded data)", {
 x <- people
 m <- pca.cal(x, 11, center = TRUE, scale = TRUE, method = "svd")
 
-context('PCA: testing getQlimits()')
+context("PCA: testing getQlimits()")
 
 test_that("getQLimits() works fine (chisq)", {
 
@@ -541,7 +541,7 @@ tf <- function(m, outliers, extremes) {
    expect_equivalent(which(categorize(m, m$calres, 5) == "extreme"), extremes[[3]])
 }
 
-context('PCA: testing categorize()')
+context("PCA: testing categorize()")
 
 x <- people
 m <- pca(x, 11, scale = TRUE)
@@ -658,7 +658,6 @@ test_that("categorize() works well for excluded data (ddrobust)", {
 tf <- function(x, ncomp) {
    m <- pca(x, ncomp = ncomp, scale = TRUE)
    expect_equal(m$calres, predict(m, x))
-   expect_equal(m$calres$categories, categorize(m, m$calres))
    expect_equal(dim(m$Qlim), c(4, ncomp))
    expect_equal(dim(m$T2lim), c(4, ncomp))
    expect_equal(m$exclcols, attr(x, "exclcols"))
@@ -686,4 +685,58 @@ tf(x, 5)
 tf(x, 10)
 
 
+#########################################
+# Block 7: testing pca() with test set  #
+#########################################
+
+
+tf <- function(x, x.test, ncomp) {
+   m <- pca(x, ncomp = ncomp, scale = TRUE, x.test = x.test)
+
+   # results for calibration and test set are correct
+   expect_equal(m$calres, predict(m, x))
+   expect_equal(m$testres, predict(m, x.test))
+
+   # getModelres returns correct output
+   expect_equivalent(getModelRes(m) , list("cal" = m$calres, "test" = m$testres))
+
+   # dimension of limits is correct
+   expect_equal(dim(m$Qlim), c(4, ncomp))
+   expect_equal(dim(m$T2lim), c(4, ncomp))
+
+   # excluded data is stored in model
+   expect_equal(m$exclcols, attr(x, "exclcols"))
+   expect_equal(m$exclrows, attr(x, "exclrows"))
+
+   # loadings matrix has zeros for excluded variables
+   if (length(attr(x, "exclcols")) > 0) {
+      nexcols <- length(attr(x, "exclcols"))
+      expect_equivalent(m$loadings[attr(x, "exclcols"), ], matrix(0, nrow = nexcols, ncol = ncomp))
+   }
+
+   # print and summery produce some output
+   expect_output(summary(m))
+   expect_output(print(m))
+}
+
+context("PCA: testing pca() for test set")
+
+# full data
+ind <- seq(1, 32, by = 4)
+x <- people[-ind, ]
+x.test <- people[ind, ]
+
+tf(x, x.test, 1)
+tf(x, x.test, 5)
+tf(x, x.test, 12)
+
+# excluded data
+x <- people[-ind, ]
+x <- mda.exclrows(x, c(1, 10, 20))
+x <- mda.exclcols(x, c(3, 12))
+x.test <- people[ind, ]
+
+tf(x, x.test, 1)
+tf(x, x.test, 5)
+tf(x, x.test, 10)
 

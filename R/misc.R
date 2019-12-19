@@ -915,18 +915,13 @@ ddrobust.param <- function(U, ncomp, alpha, gamma) {
 #'
 #' @export
 getModelRes <- function(model) {
-   res <- list()
-   res$cal <- model$calres
+   res <- list(
+      "cal" = model$calres,
+      "cv" = model$cvres,
+      "test" = model$testres
+   )
 
-   if (!is.null(model$cvres)) {
-      res$cv <- model$cvres
-   }
-
-   if (!is.null(model$testres)) {
-      res$test <- model$testres
-   }
-
-   return(res)
+   return(res[sapply(res, function(x) !is.null(x))])
 }
 
 #' Imitation of fprinf() function

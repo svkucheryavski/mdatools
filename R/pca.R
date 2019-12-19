@@ -333,8 +333,8 @@ categorize.pca <- function(obj, res, ncomp = obj$ncomp.selected, ...) {
 
    # if chisq / hotelling
    if (obj$lim.type == "chisq") {
-      outliers_ind <- (h >= obj$T2lim[2, ncomp] | q >= obj$Qlim[2, ncomp])
-      extremes_ind <- (h >= obj$T2lim[1, ncomp] | q >= obj$Qlim[1, ncomp])
+      outliers_ind <- (h >= obj$T2lim[2, ncomp] | q >= obj$Qlim[2, ncomp])
+      extremes_ind <- (h >= obj$T2lim[1, ncomp] | q >= obj$Qlim[1, ncomp])
       return(create_categories(nobj, extremes_ind, outliers_ind))
    }
 
@@ -399,7 +399,6 @@ predict.pca <- function(object, x, ...) {
 
    return(res)
 }
-
 
 #' Print method for PCA model object
 #'
@@ -1126,49 +1125,17 @@ plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained varia
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotScores.pca = function(obj, comp = c(1, 2), type = 'p', main = 'Scores', xlab = NULL,
-                          ylab = NULL, show.labels = F, show.legend = NULL, cgroup = NULL,
-                          show.axes = TRUE, ...) {
-   ncomp = length(comp)
+plotScores.pca <- function(obj, res = getResults(obj), comp = c(1, 2), type = "p", cgroup = NULL,
+   main = "Scores", xlab = NULL, ylab = NULL, show.labels = F, show.legend = NULL,
+   show.axes = TRUE, ...) {
 
-   if (type != 'p') {
-      plotScores(obj$calres, comp = comp, type = type, main = main, xlab = xlab, ylab = ylab,
-                 show.labels = show.labels, show.legend = show.legend, show.axes = show.axes, ...)
-   } else {
-      data = list()
-      data$cal = mda.subset(obj$calres$scores, select = comp)
-      colnames(data$cal) =
-         paste('Comp ', comp, ' (', round(obj$calres$expvar[comp], 2) , '%)', sep = '')
-
-      if (!is.null(obj$testres)) {
-         data$test = mda.subset(obj$testres$scores, select = comp)
-         colnames(data$test) =
-            paste('Comp ', comp, ' (', round(obj$calres$expvar[comp], 2) , '%)', sep = '')
-      }
-
-      if (show.axes == TRUE) {
-         if (ncomp == 1)
-            show.lines = c(NA, 0)
-         else
-            show.lines = c(0, 0)
-      } else {
-         show.lines = FALSE
-      }
-
-      if (is.null(show.legend)) {
-         if (length(data) > 0)
-            show.legend = TRUE
-         else
-            show.legend = FALSE
-      }
-
-      if (length(data) == 1)
-         mdaplot(data[[1]], type = type, main = main, show.labels = show.labels,
-                 show.lines = show.lines, xlab = xlab, ylab = ylab, cgroup = cgroup, ...)
-      else
-         mdaplotg(data, type = type, main = main, show.labels = show.labels,
-                  show.lines = show.lines, xlab = xlab, ylab = ylab, show.legend = show.legend, ...)
+   plot_data <- list()
+   for (r in res) {
+      plot_data <- c(plot_data, plotScores(res, comp = comp, type = type))
    }
+
+   mdaplotg(plot.data = plot_data, main = main, show.labels = show.labels,
+      xlab = xlab, ylab = ylab, show.legend = show.legend, ...)
 }
 
 
