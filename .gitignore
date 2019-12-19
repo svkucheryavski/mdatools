@@ -7,7 +7,9 @@
 .lintr
 .vscode/*
 
-tests/plots
-tests/plots/*
+tests/plots/*.pdf
+tests/plots/*.txt
+tests/matlab
+tests/matlab/*
 
 mdatools.Rproj
