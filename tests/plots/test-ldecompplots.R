@@ -74,13 +74,13 @@ x <- prep.autoscale(x, center = TRUE, scale = TRUE)
 m <- getPCARes(x, 5)
 obj <- ldecomp(m$scores, m$loadings, m$residuals, m$eigenvals)
 
-context('ldecomp: plots')
+context("ldecomp: plots")
 
 test_that("scores plot can return plot data.", {
    pd <- plotScores(obj, c(1, 3), show.plot = FALSE)
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, obj$scores[, 1])
-   expect_equivalent(pd$y_values, obj$scores[, 3])
+   expect_equal(class(pd), "matrix")
+   expect_equivalent(pd[, 1], obj$scores[, 1])
+   expect_equivalent(pd[, 2], obj$scores[, 3])
 })
 
 test_that("scores plot works fine with different attributes.", {
@@ -116,16 +116,9 @@ test_that("scores plot works fine with cgroup and convex hulls.", {
 
 test_that("residuals plot can return plot data.", {
    pd <- plotResiduals(obj, ncomp = 4, show.plot = FALSE)
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, obj$T2[, 4])
-   expect_equivalent(pd$y_values, obj$Q[, 4])
-
-   pd <- plotResiduals(obj, ncomp = 4, show.plot = FALSE, col = "#00AAFFFF", labels = "values")
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, obj$T2[, 4])
-   expect_equivalent(pd$y_values, obj$Q[, 4])
-   expect_equal(pd$col, "#00AAFFFF")
-   expect_equivalent(pd$labels, obj$Q[, 4])
+   expect_equal(class(pd), "matrix")
+   expect_equivalent(pd[, 1], obj$T2[, 4])
+   expect_equivalent(pd[, 2], obj$Q[, 4])
 })
 
 test_that("residuals plot works fine.", {
@@ -140,16 +133,8 @@ test_that("residuals plot works fine.", {
 
 test_that("varance plot can return plot data.", {
    pd <- plotVariance(obj, show.plot = FALSE)
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, 1:obj$ncomp)
-   expect_equivalent(pd$y_values, obj$expvar)
-
-   pd <- plotVariance(obj, show.plot = FALSE, col = "#00AAFFFF", labels = "names")
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, 1:obj$ncomp)
-   expect_equivalent(pd$y_values, obj$expvar)
-   expect_equal(pd$col, "#00AAFFFF")
-   expect_equal(pd$labels, names(obj$expvar))
+   expect_equal(class(pd), "numeric")
+   expect_equivalent(pd, obj$expvar)
 })
 
 test_that("variance plot works fine.", {
@@ -164,17 +149,8 @@ test_that("variance plot works fine.", {
 
 test_that("cumulative varance plot can return plot data.", {
    pd <- plotCumVariance(obj, show.plot = FALSE)
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, 1:obj$ncomp)
-   expect_equivalent(pd$y_values, obj$cumexpvar)
-
-   pd <- plotCumVariance(obj, show.plot = FALSE, col = "#00AAFFFF", labels = "names")
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, 1:obj$ncomp)
-   expect_equivalent(pd$y_values, obj$cumexpvar)
-   expect_equal(pd$col, "#00AAFFFF")
-   expect_equal(pd$labels, names(obj$cumexpvar))
-
+   expect_equal(class(pd), "numeric")
+   expect_equivalent(pd, obj$cumexpvar)
 })
 
 test_that("variance plot works fine.", {

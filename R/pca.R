@@ -1044,13 +1044,13 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
 #'
 #' @export
 plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Components",
-   ylab = "Explained variance, %", show.legend = TRUE, res = getModelRes(obj),
+   ylab = "Explained variance, %", show.legend = TRUE, labels = "values", res = getModelRes(obj),
    variance = "expvar", ...) {
 
    if (length(res) == 1) {
       return(
          plotVariance(res[[1]], type = type, main = main, xlab = xlab, ylab = ylab,
-            variance = variance, ...)
+            variance = variance, labels = labels, ...)
       )
    }
 
@@ -1063,7 +1063,7 @@ plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Compone
    colnames(plot_data) <- colnames(obj$loadings)
    rownames(plot_data) <- names(res)
    mdaplotg(plot_data, main = main, xlab = xlab, xticks = 1:obj$ncomp, ylab = ylab,
-            show.legend = show.legend, type = type, ...)
+            show.legend = show.legend, labels = labels, type = type, ...)
 }
 
 #' Cumulative explained variance plot for PCA
@@ -1089,10 +1089,11 @@ plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Compone
 #'
 #' @export
 plotCumVariance.pca <- function(obj, type = "b", main = "Cumulative variance", xlab = "Components",
-   ylab = "Explained variance, %", show.legend = TRUE, res = getModelRes(obj), ...) {
+   ylab = "Explained variance, %", show.legend = TRUE, labels = "values",
+   res = getModelRes(obj), ...) {
 
    plotVariance(obj, type = type, main = main, xlab = xlab, show.legend = show.legend,
-      res = res, variance = "cumexpvar")
+      res = res, labels = labels, variance = "cumexpvar", ...)
 }
 
 

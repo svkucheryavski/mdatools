@@ -1,5 +1,5 @@
 #####################################################
-# Tests for basic functionality of ldecomp() class  #
+# Tests for basic functionality of pcares() class  #
 #####################################################
 
 pdf(file = "test_pcares_plots.pdf")
@@ -57,17 +57,15 @@ test_that("residuals plot works well with categorize coloring.", {
 
 test_that("residuals plot returns correct plot data.", {
    pd <- plotResiduals(m$calres, ncomp = 4, show.plot = FALSE)
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, m$calres$T2[, 4] / m$T2lim[3, 4])
-   expect_equivalent(pd$y_values, m$calres$Q[, 4] / m$Qlim[3, 4])
+   expect_equal(class(pd), "matrix")
+   expect_equivalent(pd[, 1], m$calres$T2[, 4] / m$T2lim[3, 4])
+   expect_equivalent(pd[, 2], m$calres$Q[, 4] / m$Qlim[3, 4])
 
    pd <- plotResiduals(m$calres, ncomp = 4, log = TRUE, show.plot = FALSE, col = "#00AAFFFF",
       labels = "values")
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, log(1 + m$calres$T2[, 4]/m$T2lim[3, 4]))
-   expect_equivalent(pd$y_values, log(1 + m$calres$Q[, 4]/m$Qlim[3, 4]))
-   expect_equal(pd$col, "#00AAFFFF")
-   expect_equivalent(pd$labels, log(1 + m$calres$Q[, 4]/m$Qlim[3, 4]))
+   expect_equal(class(pd), "matrix")
+   expect_equivalent(pd[, 1], log(1 + m$calres$T2[, 4]/m$T2lim[3, 4]))
+   expect_equivalent(pd[, 2], log(1 + m$calres$Q[, 4]/m$Qlim[3, 4]))
 })
 
 
@@ -75,9 +73,9 @@ context('pcares: scores plots')
 
 test_that("scores plot can return plot data.", {
    pd <- plotScores(m$calres, c(1, 3), show.plot = FALSE)
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, m$calres$scores[, 1])
-   expect_equivalent(pd$y_values, m$calres$scores[, 3])
+   expect_equal(class(pd), "matrix")
+   expect_equivalent(pd[, 1], m$calres$scores[, 1])
+   expect_equivalent(pd[, 2], m$calres$scores[, 3])
 })
 
 test_that("scores plot works fine with different attributes.", {
@@ -95,16 +93,8 @@ context('pcares: variance plots')
 
 test_that("varance plot can return plot data.", {
    pd <- plotVariance(m$calres, show.plot = FALSE)
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, 1:m$calres$ncomp)
-   expect_equivalent(pd$y_values, m$calres$expvar)
-
-   pd <- plotVariance(m$calres, show.plot = FALSE, col = "#00AAFFFF", labels = "names")
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, 1:m$calres$ncomp)
-   expect_equivalent(pd$y_values, m$calres$expvar)
-   expect_equal(pd$col, "#00AAFFFF")
-   expect_equal(pd$labels, names(m$calres$expvar))
+   expect_equal(class(pd), "numeric")
+   expect_equivalent(pd, m$calres$expvar)
 })
 
 test_that("variance plot works fine.", {
@@ -119,17 +109,8 @@ test_that("variance plot works fine.", {
 
 test_that("cumulative varance plot can return plot data.", {
    pd <- plotCumVariance(m$calres, show.plot = FALSE)
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, 1:m$calres$ncomp)
-   expect_equivalent(pd$y_values, m$calres$cumexpvar)
-
-   pd <- plotCumVariance(m$calres, show.plot = FALSE, col = "#00AAFFFF", labels = "names")
-   expect_equal(class(pd), "plotseries")
-   expect_equivalent(pd$x_values, 1:m$calres$ncomp)
-   expect_equivalent(pd$y_values, m$calres$cumexpvar)
-   expect_equal(pd$col, "#00AAFFFF")
-   expect_equal(pd$labels, names(m$calres$cumexpvar))
-
+   expect_equal(class(pd), "numeric")
+   expect_equivalent(pd, m$calres$cumexpvar)
 })
 
 test_that("variance plot works fine.", {
