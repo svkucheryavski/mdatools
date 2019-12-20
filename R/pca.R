@@ -198,6 +198,7 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
       model$testres <- predict.pca(model, x.test)
    }
 
+   class(model) <- c("pca")
    return(model)
 }
 
@@ -495,13 +496,6 @@ summary.pca <- function(object, ...) {
 
 
 ################################
-#  Plotting methods            #
-################################
-
-
-
-
-################################
 #  Static methods              #
 ################################
 
@@ -674,7 +668,7 @@ getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
 
    Q <- qr.Q(qr(Y))
    if (q > 0) {
-      for (i in 1:q) {
+      for (i in seq_len(q)) {
          Y <- crossprod(X, Q)
          Q <- qr.Q(qr(Y))
          Y <- X %*% Q
@@ -740,7 +734,7 @@ pca.nipals <- function(x, ncomp = min(ncol(x), nrow(x) - 1), tol = 10^-10) {
    loadings <- matrix(0, nrow = nvar, ncol = ncomp)
 
    E <- x
-   for (i in 1:ncomp) {
+   for (i in seq_len(ncomp)) {
       ind <- which.max(apply(E, 2, sd))
       t <- E[, ind, drop = F]
       tau <- th <- 99999999
@@ -1020,7 +1014,9 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
 }
 
 
-# ! stopped here
+################################
+#  Plotting methods            #
+################################
 
 
 #' Explained variance plot for PCA
@@ -1031,9 +1027,7 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
 #' @param obj
 #' a PCA model (object of class \code{pca})
 #' @param type
-#' type of the plot ('b', 'l', 'h')
-#' @param variance
-#' which variance to use ('expvar', 'cumexpvar')
+#' type of the plot ("b", "l", "h")
 #' @param main
 #' main title for the plot
 #' @param xlab
@@ -1049,21 +1043,26 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotVariance.pca = function(obj, type = 'b', variance = 'expvar',
-                            main = 'Variance', xlab = 'Components',
-                            ylab = 'Explained variance, %',
-                            show.legend = T, ...) {
+plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Components",
+   ylab = "Explained variance, %", show.legend = TRUE, res = getModelRes(obj),
+   variance = "expvar", ...) {
 
-   data = list()
-   data$cal = obj$calres[[variance]]
+   if (length(res) == 1) {
+      return(
+         plotVariance(res[[1]], type = type, main = main, xlab = xlab, ylab = ylab,
+            variance = variance, ...)
+      )
+   }
 
-   if (!is.null(obj$cvres))
-      data$cv = obj$cvres[[variance]]
+   nres <- length(res)
+   plot_data <- matrix(0, nres, obj$ncomp)
+   for (i in seq_len(nres)) {
+      plot_data[i, ] <- plotVariance(res[[i]], type = type, variance = variance, show.plot = FALSE)
+   }
 
-   if (!is.null(obj$testres))
-      data$test = obj$testres[[variance]]
-
-   mdaplotg(data, main = main, xlab = xlab, xticks = 1:obj$ncomp, ylab = ylab,
+   colnames(plot_data) <- colnames(obj$loadings)
+   rownames(plot_data) <- names(res)
+   mdaplotg(plot_data, main = main, xlab = xlab, xticks = 1:obj$ncomp, ylab = ylab,
             show.legend = show.legend, type = type, ...)
 }
 
@@ -1080,6 +1079,8 @@ plotVariance.pca = function(obj, type = 'b', variance = 'expvar',
 #' label for x axis
 #' @param ylab
 #' label for y axis
+#' @param show.legend
+#' logical, show or not a legend on the plot
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1087,11 +1088,13 @@ plotVariance.pca = function(obj, type = 'b', variance = 'expvar',
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained variance, %',
-                               main = 'Cumulative variance', ...) {
+plotCumVariance.pca <- function(obj, type = "b", main = "Cumulative variance", xlab = "Components",
+   ylab = "Explained variance, %", show.legend = TRUE, res = getModelRes(obj), ...) {
 
-   plotVariance.pca(obj, variance = 'cumexpvar', xlab = xlab, ylab = ylab, main = main, ...)
+   plotVariance(obj, type = type, main = main, xlab = xlab, show.legend = show.legend,
+      res = res, variance = "cumexpvar")
 }
+
 
 #' Scores plot for PCA
 #'
@@ -1125,17 +1128,36 @@ plotCumVariance.pca = function(obj, xlab = 'Components', ylab = 'Explained varia
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotScores.pca <- function(obj, res = getResults(obj), comp = c(1, 2), type = "p", cgroup = NULL,
-   main = "Scores", xlab = NULL, ylab = NULL, show.labels = F, show.legend = NULL,
-   show.axes = TRUE, ...) {
+plotScores.pca <- function(obj, comp = c(1, 2), type = "p", main = "Scores", show.labels = F,
+   show.legend = TRUE, legend.position = "topright", show.axes = TRUE,
+   res = getModelRes(obj), ...) {
 
-   plot_data <- list()
-   for (r in res) {
-      plot_data <- c(plot_data, plotScores(res, comp = comp, type = type))
+   if (length(res) == 1) {
+      return(
+         plotScores(res[[1]], comp = comp, type = type, main = main,
+            show.labels = show.labels, ...)
+      )
    }
 
-   mdaplotg(plot.data = plot_data, main = main, show.labels = show.labels,
-      xlab = xlab, ylab = ylab, show.legend = show.legend, ...)
+   plot_data <- list()
+   for (i in seq_len(length(res))) {
+      plot_data[[names(res[i])]] <-
+         plotScores(res[[i]], comp = comp, type = type, show.plot = FALSE)
+   }
+
+   if (type != "p") {
+      stop("You have several result objects in model, only scatter plot is available for scores.")
+   }
+
+
+   # set up values for showing axes lines
+   show.lines <- FALSE
+   if (show.axes) {
+      show.lines <- if (length(comp) == 2 && type == "p") c(0, 0) else c(NA, 0)
+   }
+
+   mdaplotg(data = plot_data, main = main, show.labels = show.labels, show.legend = show.legend,
+      legend.position = legend.position, show.lines = show.lines, ...)
 }
 
 

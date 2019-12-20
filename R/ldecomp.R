@@ -95,12 +95,10 @@ plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance
    xlab = "Components", ylab = "Explained variance, %", show.labels = FALSE,
    labels = "values", show.plot = TRUE, ...) {
 
-   if (!show.plot) {
-      return(plotseries(obj$cumexpvar, type = type, labels = labels, ...))
-   }
-
-   return(mdaplot(obj$cumexpvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
-            type = type, show.labels = show.labels, labels = labels, ...))
+   return(
+      plotVariance(ob, variance = "cumexpvar", main = main, xlab = xlab, ylab = ylab,
+            type = type, show.labels = show.labels, labels = labels, show.plot = show.plot, ...)
+   )
 }
 
 #' Explained variance plot
@@ -122,21 +120,26 @@ plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance
 #' logical, show or not labels for plot objects.
 #' @param labels
 #' what to show as labels for plot objects.
+#' @param variance
+#' string, which variance to make the plot for ("expvar", "cumexpvar")
 #' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotVariance.ldecomp <- function(obj, type = "b", main = "Variance", xlab = "Components",
-   ylab = "Explained variance, %", show.labels = F, labels = "values", show.plot = TRUE, ...) {
+plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", main = "Variance",
+   xlab = "Components", ylab = "Explained variance, %", show.labels = F, labels = "values",
+   show.plot = TRUE, ...) {
 
    if (!show.plot) {
-      return(plotseries(obj$expvar, type = type, labels = labels, ...))
+      return(obj[[variance]])
    }
 
-   return(mdaplot(obj$expvar, main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
-           show.labels = show.labels, labels = labels, type = type, ...))
+   return(
+      mdaplot(obj[[variance]], main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
+           show.labels = show.labels, labels = labels, type = type, ...)
+   )
 }
 
 #' Scores plot
@@ -176,10 +179,11 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p",
 
    # get scores for given components and generate column names with explained variance
    plot_data <- mda.subset(obj$scores, select = comp)
+   colnames(plot_data) <- paste0("Comp ", comp, " (", round(obj$expvar[comp], 2), "%)")
 
    # if no plot required - return plot series object
    if (!show.plot) {
-      return(plotseries(plot_data, type = type, labels = labels, ...))
+      return(plot_data)
    }
 
    # set up values for showing axes lines
@@ -190,7 +194,6 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p",
 
    # scatter plot
    if (type == "p") {
-      colnames(plot_data) <- paste0("Comp ", comp, " (", round(obj$expvar[comp], 2), "%)")
       p <- mdaplot(plot_data, type = type, show.labels = show.labels, labels = labels,
          show.lines = show.lines, main = main, xlab = xlab, ylab = ylab, ...)
 
@@ -244,7 +247,7 @@ plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected,
 
    # if no plot required - return plot series object
    if (!show.plot) {
-      return(plotseries(plot_data, type = "p", labels = labels, ...))
+      return(plot_data)
    }
 
    # set up main title for the plot
