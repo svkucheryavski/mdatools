@@ -386,6 +386,7 @@ mdaplotg <- function(
    show.excluded = FALSE, lab.col = "darkgray", lab.cex = 0.65, xlas = 1,
    ylas = 1, opacity = 1, ...) {
 
+
    # split data into groups
    name <- attr(data, "name", exact = TRUE)
    data <- mdaplotg.prepareData(data, type, groupby)
@@ -461,7 +462,8 @@ mdaplotg <- function(
       mdaplot(ps = ps[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
               lwd = lwd[i], cex = cex[i], force.x.values = force.x.values, bwd = bwd,
               show.grid = F, show.labels = show.labels, opacity = opacity[i],
-              lab.col = lab.col[i], lab.cex = lab.cex, show.axes = FALSE, ...
+              lab.col = lab.col[i], lab.cex = lab.cex, show.axes = FALSE,
+              show.excluded = show.excluded, ...
       )
    }
 
