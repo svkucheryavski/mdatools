@@ -734,6 +734,10 @@ pca.nipals <- function(x, ncomp = min(ncol(x), nrow(x) - 1), tol = 10^-10) {
    nobj <- nrow(x)
    nvar <- ncol(x)
 
+   if (ncomp < 1 || ncomp > min(nobj - 1, nvar)) {
+      stop("Wrong number of components")
+   }
+
    scores <- matrix(0, nrow = nobj, ncol = ncomp)
    loadings <- matrix(0, nrow = nvar, ncol = ncomp)
 
