@@ -372,6 +372,10 @@ predict.pca <- function(object, x, ...) {
    x <- mda.df2mat(x)
    attrs <- attributes(x)
 
+   if (is.null(dim(x))) {
+      stop("Test set should be a matrix or a data frame.")
+   }
+
    if (ncol(x) != nrow(object$loadings)) {
       stop("Number and type of data columns should be the same as in calibration dataset.")
    }
@@ -1036,6 +1040,12 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
 #' label for y axis
 #' @param show.legend
 #' logical, show or not a legend on the plot
+#' @param labels
+#' what to use as labels (if \code{show.labels = TRUE})
+#' @param res
+#' list with result objects to show the variance for
+#' @param variance
+#' which variance to show
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1073,6 +1083,8 @@ plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Compone
 #'
 #' @param obj
 #' a PCA model (object of class \code{pca})
+#' @param type
+#' type of the plot ("b", "l", "h")
 #' @param main
 #' main title for the plot
 #' @param xlab
@@ -1081,6 +1093,10 @@ plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Compone
 #' label for y axis
 #' @param show.legend
 #' logical, show or not a legend on the plot
+#' @param labels
+#' what to use as labels (if \code{show.labels = TRUE})
+#' @param res
+#' list with result objects to show the variance for
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1088,14 +1104,13 @@ plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Compone
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotCumVariance.pca <- function(obj, type = "b", main = "Cumulative variance", xlab = "Components",
-   ylab = "Explained variance, %", show.legend = TRUE, labels = "values",
+plotCumVariance.pca <- function(obj, type = "b", main = "Cumulative variance",
+   xlab = "Components", ylab = "Explained variance, %", show.legend = TRUE, labels = "values",
    res = getModelRes(obj), ...) {
 
    plotVariance(obj, type = type, main = main, xlab = xlab, show.legend = show.legend,
       res = res, labels = labels, variance = "cumexpvar", ...)
 }
-
 
 #' Scores plot for PCA
 #'
@@ -1107,29 +1122,34 @@ plotCumVariance.pca <- function(obj, type = "b", main = "Cumulative variance", x
 #' @param comp
 #' a value or vector with several values - number of components to show the plot for
 #' @param type
-#' type of the plot ('b', 'l', 'h')
+#' type of the plot ("p", "l", "b", "h")
 #' @param main
 #' main title for the plot
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param cgroup
-#' a vector with numeric values or a factor used for color grouping of plot points.
 #' @param show.labels
 #' logical, show or not labels for the plot objects
 #' @param show.legend
 #' logical, show or not a legend on the plot
+#' @param legend.position
+#' string, locatin of legend on the plot
 #' @param show.axes
 #' logical, show or not a axes lines crossing origin (0,0)
+#' @param res
+#' list with result objects to show the variance for
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
 #' @details
+#' If plot is created only for one result object (e.g. calibration set), then the behaviour and
+#' all settings for the scores plot are identical to \code{\link{plotScores.ldecomp}}. In this case
+#' you can show scores as a scatter, line or bar plot for any number of components.
+#'
+#' Otherwise (e.g. if model contains results for calibration and test set) the plot is a group
+#' plot created using \code{\link{mdaplotg}} method and only scatter plot can be used.
+#'
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotScores.pca <- function(obj, comp = c(1, 2), type = "p", main = "Scores", show.labels = F,
+plotScores.pca <- function(obj, comp = c(1, 2), type = "p", main = "Scores", show.labels = FALSE,
    show.legend = TRUE, legend.position = "topright", show.axes = TRUE,
    res = getModelRes(obj), ...) {
 
@@ -1202,106 +1222,127 @@ plotScores.pca <- function(obj, comp = c(1, 2), type = "p", main = "Scores", sho
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotResiduals.pca = function(obj, ncomp = NULL, norm = F, main = NULL, xlab = NULL, ylab = NULL,
-                             show.labels = F,  show.legend = T, show.limits = T,
-                             xlim = NULL, ylim = NULL,
-                             lim.col = c('#333333', '#333333'),
-                             lim.lwd = c(1, 1), lim.lty = c(2, 3),
-                             ...) {
+plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
+   cgroup = NULL, main = NULL, xlim = NULL, ylim = NULL, show.legend = TRUE, show.limits = TRUE,
+   lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
+   res = getModelRes(obj), ...) {
+
+   # get plot data
+   nres <- length(res)
+   plot_data <- list()
+   for (i in seq_len(nres)) {
+      plot_data[[names(res[i])]] <-
+         plotResiduals(res[[i]], ncomp = ncomp, norm = norm, log = log, show.plot = FALSE)
+   }
+
+   # get coordinates for critical limits
+   lim_data <- getLimitsCoordinates.pca(obj, ncomp = ncomp, norm = norm, log = log)
+
+   # compute x-axis limits (max of plot and critical limit coordinats + 5%)
+   if (is.null(xlim)) {
+      xlim <- c(0,
+         max(
+            sapply(plot_data, function(x) return(max(x[, 1]))),
+            max(lim_data$outliers[, 1])
+         )
+      ) * 1.05
+   }
+
+   # compute x-axis limits (max of plot and critical limit coordinats + 5%)
+   if (is.null(ylim)) {
+      ylim <- c(0,
+         max(
+            sapply(plot_data, function(x) return(max(x[, 2]))),
+            max(lim_data$outliers[, 2])
+         )
+      ) * 1.05
+   }
+
+   # generate values for cgroup if categories should be used
+   if (length(cgroup) == 1 && cgroup == "categories") {
+      cgroup <- categorize(obj, res[[1]], ncomp = ncomp)
+   }
+
+   # prepare main title
    if (is.null(main)) {
-      if (is.null(ncomp))
-         main = 'Residuals'
-      else
-         main = sprintf('Residuals (ncomp = %d)', ncomp)
+      main <- paste0("Residual distance (ncomp = ", ncomp, ")")
    }
 
-   if (is.null(ncomp))
-      ncomp = obj$ncomp.selected
-
-   if (ncomp > obj$ncomp || ncomp < 1)
-      stop('Wrong number of components!')
-
-   data = list()
-   data$cal = mda.cbind(
-      mda.subset(obj$calres$T2, select = ncomp),
-      mda.subset(obj$calres$Q, select = ncomp)
-   )
-
-   # set values for normalization of residuals if necessary
-   if (norm) {
-      T2.mean = obj$T2lim[3, ncomp]
-      Q.mean = obj$Qlim[3, ncomp]
-      if (is.null(xlab))
-         xlab = expression(paste('Hotelling ', T^2, ' distance (norm)'))
-      if (is.null(ylab))
-         ylab = 'Squared residual distance, Q (norm)'
+   # make plot
+   if (nres == 1) {
+      mdaplot(data = plot_data[[1]], type = "p", main = main, xlim = xlim, ylim = ylim,
+         cgroup = cgroup, ...)
    } else {
-      T2.mean = 1
-      Q.mean = 1
-      if (is.null(xlab))
-         xlab = expression(paste('Hotelling ', T^2, ' distance'))
-      if (is.null(ylab))
-         ylab = 'Squared residual distance, Q'
+      mdaplotg(data = plot_data, type = "p", main = main, xlim = xlim, ylim = ylim,
+         show.legend = show.legend, ...)
    }
 
-   data$cal[, 1] = data$cal[, 1] / T2.mean
-   data$cal[, 2] = data$cal[, 2] / Q.mean
-   x.max = max(data$cal[, 1])
-   y.max = max(data$cal[, 2])
-
-   if (!is.null(obj$cvres)) {
-      data$cv = mda.cbind(
-         obj$cvres$T2[, ncomp]/T2.mean,
-         obj$cvres$Q[ , ncomp]/Q.mean
-      )
-      x.max = max(x.max, data$cv[, 1])
-      y.max = max(y.max, data$cv[, 2])
-   }
-
-   if (!is.null(obj$testres)) {
-      data$test = mda.cbind(
-         obj$testres$T2[, ncomp]/T2.mean,
-         obj$testres$Q[ , ncomp]/Q.mean
-      )
-      x.max = max(x.max, data$test[, 1])
-      y.max = max(y.max, data$test[, 2])
-   }
-
-   if (show.limits == T) {
-      # get residual limits, correct if necessary and recalculate axes maximum limit
-      lim = cbind(obj$T2lim[1:2, ncomp], obj$Qlim[1:2, ncomp])
-      if (substr(obj$lim.type, 1, 2) != 'dd') {
-         lim[, 1] = lim[, 1] / T2.mean
-         lim[, 2] = lim[, 2] / Q.mean
-         x.max = max(x.max, lim[, 1])
-         y.max = max(y.max, lim[, 2])
-      } else {
-         lim[, 1] = lim[, 1] * T2.mean / Q.mean
-         lim[, 2] = lim[, 2] / Q.mean
-         x.max = 1.5 * x.max
-         y.max = 1.5 * y.max
-      }
-   }
-
-   # use computed max values for axes limits if user did not specify anything
-   if (is.null(xlim))
-      xlim = c(0, 1.2 * x.max)
-   if (is.null(ylim))
-      ylim = c(0, 1.2 * y.max)
-
-   # show plot
-   if (length(data) == 1) {
-      mdaplot(data[[1]], main = main, xlab = xlab, ylab = ylab,
-              show.labels = show.labels, xlim = xlim, ylim = ylim, ...)
-   } else {
-      mdaplotg(data, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
-               show.labels = show.labels, show.legend = show.legend, ...)
-   }
-
-   # show limits
    if (show.limits) {
-      ldecomp.plotLimits(lim, obj$lim.type, lim.col, lim.lwd, lim.lty)
+      lines(lim_data$extremes[, 1], lim_data$extremes[, 2],
+         col = lim.col[1], lty = lim.lty[1], lwd = lim.lwd[1])
+      lines(lim_data$outliers[, 1], lim_data$outliers[, 2],
+         col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
    }
+}
+
+getLimitsCoordinates.pca <- function(obj, ncomp, norm, log) {
+
+   # get parameters
+   h0 <- obj$T2lim[3, ncomp]
+   q0 <- obj$Qlim[3, ncomp]
+   Nh <- obj$T2lim[4, ncomp]
+   Nq <- obj$Qlim[4, ncomp]
+
+   if (obj$lim.type == "chisq") {
+
+      # quadratic limits
+      hE <- c(0, obj$T2lim[1, ncomp], obj$T2lim[1, ncomp])
+      hO <- c(0, obj$T2lim[2, ncomp], obj$T2lim[2, ncomp])
+
+      qE <- c(obj$Qlim[1, ncomp], obj$Qlim[1, ncomp], 0)
+      qO <- c(obj$Qlim[2, ncomp], obj$Qlim[2, ncomp], 0)
+
+      if (norm) {
+         qE <- qE / q0
+         qO <- qO / q0
+         hE <- hE / h0
+         hO <- hO / h0
+      }
+
+      return(list(
+         extremes = cbind(hE, qE),
+         outliers = cbind(hO, qO)
+      ))
+   }
+
+   ## slope and intercepts
+   eB <- obj$Qlim[1, ncomp]
+   oB <- obj$Qlim[2, ncomp]
+   eA <- oA <- -(q0 / h0) * (Nh / Nq)
+
+   hE <- seq(-0.95, -eB/eA, length.out = 100)
+   hO <- seq(-0.95, -oB/oA, length.out = 100)
+   qE <- eA * hE + eB
+   qO <- oA * hO + oB
+
+   if (norm) {
+      hE <- hE / h0
+      qE <- qE / q0
+      hO <- hO / h0
+      qO <- qO / q0
+   }
+
+   if (log) {
+      hE <- log(1 + hE)
+      qE <- log(1 + qE)
+      hO <- log(1 + hO)
+      qO <- log(1 + qO)
+   }
+
+   return(list(
+      extremes = cbind(hE, qE),
+      outliers = cbind(hO, qO)
+   ))
 }
 
 #' Loadings plot for PCA

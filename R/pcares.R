@@ -174,7 +174,7 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected,
 
    # if no plot required - return plot series object
    if (!show.plot) {
-      return(plotseries(plot_data, type = "p", labels = labels, ...))
+      return(plot_data)
    }
 
    # set up main title for the plot

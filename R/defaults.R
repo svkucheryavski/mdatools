@@ -51,25 +51,40 @@ plotProbabilities = function(obj, ...) {
 #' other parameters
 #'
 #' @export
-getProbabilities = function(obj, ...) {
+getProbabilities <- function(obj, ...) {
    UseMethod("getProbabilities")
 }
 
-#' Set residual distance limits for PCA model
+#' Set residual distance limits
 #'
 #' @description
 #' Calculates and set critical limits for residuals of PCA model
 #'
 #' @param obj
-#' a SIMCA model
+#' a model object
 #' @param ...
 #' other parameters
 #'
 #' @export
-setDistanceLimits = function(obj, ...) {
+setDistanceLimits <- function(obj, ...) {
    UseMethod("setDistanceLimits")
 }
 
+
+#' Show residual distance limits
+#'
+#' @description
+#' Calculates and set critical limits for residuals of PCA model
+#'
+#' @param obj
+#' a model object
+#' @param ...
+#' other parameters
+#'
+#' @export
+showDistanceLimits <- function(obj, ...) {
+   UseMethod("showDistanceLimits")
+}
 
 #' Shows extreme plot for SIMCA model
 #'
@@ -413,8 +428,7 @@ plotYVariance = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotBiplot = function(obj, ...)
-{
+plotBiplot <- function(obj, ...) {
    UseMethod("plotBiplot")
 }
 
@@ -429,8 +443,7 @@ plotBiplot = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotScores = function(obj, ...)
-{
+plotScores <- function(obj, ...) {
    UseMethod("plotScores")
 }
 
