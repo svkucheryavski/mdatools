@@ -184,6 +184,7 @@ splitPlotData <- function(data, type) {
    if (type == "p" && ncol(data) == 1) {
       # if data has only one column add y values in front
       data <- cbind(attrs$yaxis.values, data)
+      colnames(data)[1] <- if (is.null(attrs$yaxis.name)) "Objects" else attrs$yaxis.name
    }
 
    if (type %in%  c("p", "d")) {
