@@ -615,7 +615,6 @@ plotErrorbars <- function(ps, col = ps$col, pch = 16, lwd = 1, cex = 1, ...) {
    points(x, y[1, ], col = col, pch = pch, cex = cex, ...)
 }
 
-
 #' Show plot series as bars
 #'
 #'
@@ -822,7 +821,6 @@ plotConvexHull <- function(p, lwd = 1, lty = 1, opacity = 0) {
    )
 }
 
-
 #' Add confidence ellipse or convex hull for group of points
 #'
 #' @param p
@@ -878,7 +876,6 @@ plotPointsShape <- function(p, lwd, lty, opacity, shape_function, ...) {
    sapply(seq_len(length(d)), plot_function)
    invisible(NULL)
 }
-
 
 #' Add regression line for data points
 #'

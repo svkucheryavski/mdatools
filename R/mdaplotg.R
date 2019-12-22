@@ -408,8 +408,8 @@ mdaplotg <- function(
    col <- mdaplotg.processParam(col, "col", mdaplot.areColors, ngroups)
 
    # get plot data for each group
-   ps <- list()
-   for (i in 1:ngroups) {
+   ps <- vector("list", ngroups)
+   for (i in seq_len(ngroups)) {
       ps[[i]] <- plotseries(data[[i]], type = type[i], col = col[i], opacity <- opacity[i],
          labels = labels)
    }
@@ -450,7 +450,7 @@ mdaplotg <- function(
    nbarplots <- sum(type == "h")
 
    # make a plot for each group
-   for (i in 1:ngroups) {
+   for (i in seq_len(ngroups)) {
 
       # decide if x values should be forced as group index
       force.x.values <- if (type[i] == "h") c(i, nbarplots) else NA

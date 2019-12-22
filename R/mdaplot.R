@@ -155,16 +155,17 @@ mdaplot.showColorbar <- function(cgroup, colmap = "default", lab.col = "darkgray
    y <- lim[4] - (h + 0.1 * h);
 
    # show colorbar and define coordinates for labels
-   for (i in 1:ncol) {
+   for (i in seq_len(ncol)) {
       rect(shift + x + w * (i - 1), y, x + w * i, y - h, col = col[i], border = NA)
       labels[i, ] <- c(x + w * (i - 1), y - h)
    }
 
    # add last value or shift coordinates if labels shall be centered
-   if (nrow(labels) > i)
+   if (nrow(labels) > i) {
       labels[i + 1, ] <- c(x + w * i, y - h)
-   else
+   } else {
       labels[, 1] <- labels[, 1] + w / 2
+   }
 
    # show labels for colorbar regions
    text(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col,
@@ -232,9 +233,8 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
       ngroups <- 1
    }
 
-   # define palette (if colmap has more than one value - take it as palette)
-   palette <- if (length(colmap) > 1) colmap else switch(colmap,
-      # gray scale based
+   # list with currently supported color maps
+   colmaps <- list(
       "gray" = c(
          "#E8E8E8", "#D6D6D6", "#C4C4C4", "#B2B2B2",
          "#9A9A9A", "#808080", "#484848", "#101010"
@@ -250,11 +250,14 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
          "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F"
       ),
       # current default
-      c(
+      "default" = c(
          "#2679B2", "#1C9AA8", "#379531",
          "#EED524", "#FB7F28", "#D22C2F"
       )
    )
+
+   # define palette (if colmap has more than one value - take it as palette)
+   palette <- if (length(colmap) > 1) colmap else colmaps[[colmap]]
 
    if (!all(mdaplot.areColors(palette))) {
       stop("Parameter 'colmap' must contains valid color values or name of palette.")
@@ -721,16 +724,16 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #'
 #' @export
 mdaplot <- function(data = NULL, ps = NULL, type = "p",
-      pch = 16, col = NULL, bg = par("bg"), bwd = 0.8, border = NA, lty = 1, lwd = 1, cex = 1,
-      cgroup = NULL, xlim = NULL, ylim = NULL, colmap = "default", labels = NULL,
-      main = NULL, xlab = NULL, ylab = NULL, show.labels = FALSE,
-      show.colorbar = !is.null(cgroup), show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
-      grid.col = "lightgray", show.axes = TRUE, xticks = NULL, yticks = NULL,
-      xticklabels = NULL, yticklabels = NULL,
-      xlas = 0, ylas = 0, lab.col = "darkgray", lab.cex = 0.65,
-      show.excluded = FALSE, col.excluded = "#E0E0E0", nbins = 60,
-      colramp = mdaplot.getColors, force.x.values = NA, opacity = 1,
-      pch.colinv = FALSE, ...) {
+   pch = 16, col = NULL, bg = par("bg"), bwd = 0.8, border = NA, lty = 1, lwd = 1, cex = 1,
+   cgroup = NULL, xlim = NULL, ylim = NULL, colmap = "default", labels = NULL,
+   main = NULL, xlab = NULL, ylab = NULL, show.labels = FALSE,
+   show.colorbar = !is.null(cgroup), show.lines = FALSE, show.grid = TRUE, grid.lwd = 0.5,
+   grid.col = "lightgray", show.axes = TRUE, xticks = NULL, yticks = NULL,
+   xticklabels = NULL, yticklabels = NULL,
+   xlas = 0, ylas = 0, lab.col = "darkgray", lab.cex = 0.65,
+   show.excluded = FALSE, col.excluded = "#E0E0E0", nbins = 60,
+   colramp = mdaplot.getColors, force.x.values = NA, opacity = 1,
+   pch.colinv = FALSE, ...) {
 
    if (is.null(ps)) {
       # get the data for plot
@@ -781,7 +784,8 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
       "b" = plotLines(ps, pch = pch, lwd = lwd, cex = cex, show.excluded = show.excluded,
          col.excluded = col.excluded, ...),
       "h" = plotBars(ps, bwd = bwd, border = border, force.x.values = force.x.values, ...),
-      "e" = plotErrorbars(ps, pch = pch, lwd = lwd, cex = cex, ...)
+      "e" = plotErrorbars(ps, pch = pch, lwd = lwd, cex = cex, ...),
+      stop("Wrong plot type.")
    )
 
    # show lines if needed
