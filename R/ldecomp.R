@@ -96,7 +96,7 @@ plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance
    labels = "values", show.plot = TRUE, ...) {
 
    return(
-      plotVariance(ob, variance = "cumexpvar", main = main, xlab = xlab, ylab = ylab,
+      plotVariance(obj, variance = "cumexpvar", main = main, xlab = xlab, ylab = ylab,
             type = type, show.labels = show.labels, labels = labels, show.plot = show.plot, ...)
    )
 }
@@ -129,7 +129,7 @@ plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance
 #'
 #' @export
 plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", main = "Variance",
-   xlab = "Components", ylab = "Explained variance, %", show.labels = F, labels = "values",
+   xlab = "Components", ylab = "Explained variance, %", show.labels = FALSE, labels = "values",
    show.plot = TRUE, ...) {
 
    if (!show.plot) {
@@ -137,7 +137,7 @@ plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", main = "V
    }
 
    return(
-      mdaplot(obj[[variance]], main = main, xticks = 1:obj$ncomp, xlab = xlab, ylab = ylab,
+      mdaplot(obj[[variance]], main = main, xticks = seq_len(obj$ncomp), xlab = xlab, ylab = ylab,
            show.labels = show.labels, labels = labels, type = type, ...)
    )
 }
@@ -443,7 +443,7 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
    Q <- matrix(0, nrow = nobj, ncol = ncomp)
 
    # calculate distances and model power for each possible number of components in model
-   for (i in 1:ncomp) {
+   for (i in seq_len(ncomp)) {
       res <- residuals
       if (i < ncomp) {
          res <- res +
