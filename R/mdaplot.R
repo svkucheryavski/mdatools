@@ -172,7 +172,6 @@ mdaplot.showColorbar <- function(cgroup, colmap = "default", lab.col = "darkgray
       cex = lab.cex)
 }
 
-
 #' Plot lines
 #'
 #' @description
@@ -779,7 +778,7 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
       "p" = plotScatter(ps, pch.colinv = pch.colinv, pch = pch, bg = bg, lwd = lwd, cex = cex,
          col.excluded = col.excluded, show.excluded = show.excluded, ...),
       "d" = plotDensity(ps, nbins = nbins, colmap = colmap),
-      "l" = plotLines(ps, pch = pch, lwd = lwd, cex = cex, show.excluded = show.excluded,
+      "l" = plotLines(ps, pch = pch, lwd = lwd, lty = lty, cex = cex, show.excluded = show.excluded,
          col.excluded = col.excluded, ...),
       "b" = plotLines(ps, pch = pch, lwd = lwd, cex = cex, show.excluded = show.excluded,
          col.excluded = col.excluded, ...),
