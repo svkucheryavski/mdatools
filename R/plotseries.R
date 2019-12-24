@@ -582,6 +582,35 @@ plotLines <- function(ps, col = ps$col, lty = 1, lwd = 1, cex = 1,
    }
 }
 
+plotYYLines <- function(ps, col = mdaplot.getColors(2), type = "l", lty = 1, lwd = 1, cex = 1,
+   pch = (if (type == "b") 16 else NA), legend.position = "topright",
+   ylim = list(range(ps$y_values[1, ]), range(ps$y_values[2, ])),
+   legend = rownames(ps$y_values)[1:2],
+   xlab = attr(ps$x_values, "name"), ...) {
+
+   if (nrow(ps$y_values) != 2) {
+      stop("Two rows of data values are required to make YY line plot.")
+   }
+
+   y1 <- ps$y_values[1, , drop = FALSE]
+   y2 <- ps$y_values[2, , drop = FALSE]
+   x <- ps$x_values
+
+   par(mar = c(5, 5, 5, 5))
+   plot(x, y1, type = type, col = col[1], ylim = ylim[[1]], ylab = legend[1], lty = lty, lwd = lwd,
+      cex = cex, pch = pch, xlab = xlab, ...)
+   mdaplotg.showLegend(legend, col = col, pch = pch, lty = lty, lwd = lwd,
+      cex = 0.9,
+      position = legend.position)
+
+   par(new=TRUE)
+   plot(x, y2, type = type, col = col[2], axes = FALSE, ylim = ylim[[2]], xlab = NA, ylab = NA,
+      lty = lty, lwd = lwd, cex = cex, pch = pch, ...)
+   axis(side = 4)
+   mtext(side = 4, line = 2, legend[2], cex = 0.9)
+}
+
+
 #' Show plot series as error bars
 #'
 #' @param ps
