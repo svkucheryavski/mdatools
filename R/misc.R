@@ -908,22 +908,6 @@ ddrobust.param <- function(U, ncomp, alpha, gamma) {
    return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
 }
 
-#' Returns list with all model results available (cal, cv and tes)
-#'
-#' @param model
-#' object with model
-#'
-#' @export
-getModelRes <- function(model) {
-   res <- list(
-      "cal" = model$calres,
-      "cv" = model$cvres,
-      "test" = model$testres
-   )
-
-   return(res[sapply(res, function(x) !is.null(x))])
-}
-
 #' Imitation of fprinf() function
 #'
 #' @param ...

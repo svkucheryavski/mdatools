@@ -203,7 +203,7 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected,
 #' other arguments
 #'
 #' @export
-plot.pcares <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, show.labels = T, ...) {
+plot.pcares <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, show.labels = TRUE, ...) {
    par(mfrow = c(2, 2))
    plotScores(x, comp = comp, show.labels = show.labels, ...)
    plotResiduals(x, ncomp, show.labels = show.labels, ...)
@@ -211,7 +211,6 @@ plot.pcares <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, show.labels
    plotCumVariance(x, type = "h", show.labels = show.labels, ...)
    par(mfrow = c(1, 1))
 }
-
 
 #' Summary method for PCA results object
 #'
@@ -227,7 +226,6 @@ plot.pcares <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, show.labels
 summary.pcares <- function(object, ...) {
    summary.ldecomp(object, "Summary for PCA results", ...)
 }
-
 
 #' Print method for PCA results object
 #'
