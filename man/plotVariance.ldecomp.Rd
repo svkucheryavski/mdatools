@@ -7,10 +7,11 @@
 \method{plotVariance}{ldecomp}(
   obj,
   type = "b",
+  variance = "expvar",
   main = "Variance",
   xlab = "Components",
   ylab = "Explained variance, \%",
-  show.labels = F,
+  show.labels = FALSE,
   labels = "values",
   show.plot = TRUE,
   ...
@@ -20,6 +21,8 @@
 \item{obj}{object of \code{ldecomp} class.}
 
 \item{type}{type of the plot}
+
+\item{variance}{string, which variance to make the plot for ("expvar", "cumexpvar")}
 
 \item{main}{main title for the plot}
 

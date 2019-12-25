@@ -170,6 +170,7 @@ Methods for \code{pca} objects:
 \tabular{ll}{
    \code{plot.pca} \tab makes an overview of PCA model with four plots.\cr
    \code{summary.pca} \tab shows some statistics for the model.\cr
+   \code{categorize.pca} \tab categorize data rows as "normal", "extreme" or "outliers".\cr
    \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
    \code{\link{setDistanceLimits.pca}} \tab set critical limits for residuals\cr
    \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr
@@ -177,7 +178,8 @@ Methods for \code{pca} objects:
    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
    \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
-   \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
+   \code{\link{plotResiduals.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
+   \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr
 }
 
 Most of the methods for plotting data are also available for PCA results (\code{\link{pcares}})

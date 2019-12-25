@@ -7,11 +7,11 @@
 \method{selectCompNum}{pca}(obj, ncomp, ...)
 }
 \arguments{
+\item{obj}{PCA model (object of class \code{pca})}
+
 \item{ncomp}{number of components to select}
 
 \item{...}{other parameters if any}
-
-\item{model}{PCA model (object of class \code{pca})}
 }
 \value{
 the same model with selected number of components

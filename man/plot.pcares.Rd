@@ -4,7 +4,7 @@
 \alias{plot.pcares}
 \title{Plot method for PCA results object}
 \usage{
-\method{plot}{pcares}(x, comp = c(1, 2), ncomp = x$ncomp.selected, show.labels = T, ...)
+\method{plot}{pcares}(x, comp = c(1, 2), ncomp = x$ncomp.selected, show.labels = TRUE, ...)
 }
 \arguments{
 \item{x}{PCA results (object of class \code{pcares})}

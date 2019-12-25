@@ -7,19 +7,23 @@
 mdaplotg.showLegend(
   legend,
   col,
+  pt.bg = NA,
   pch = NULL,
   lty = NULL,
   lwd = NULL,
   cex = 1,
   bty = "o",
   position = "topright",
-  plot = TRUE
+  plot = TRUE,
+  ...
 )
 }
 \arguments{
 \item{legend}{vector with text elements for the legend items}
 
 \item{col}{vector with color values for the legend items}
+
+\item{pt.bg}{vector with background colors for the legend items (e.g. for pch = 21:25)}
 
 \item{pch}{vector with marker symbols for the legend items}
 
@@ -34,6 +38,8 @@ mdaplotg.showLegend(
 \item{position}{legend position ("topright", "topleft', "bottomright", "bottomleft", "top", "bottom")}
 
 \item{plot}{logical, show legend or just calculate and return its size}
+
+\item{...}{other parameters}
 }
 \description{
 Shows a legend for plot elements or their groups.

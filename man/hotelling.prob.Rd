@@ -11,7 +11,7 @@ hotelling.prob(u, ncomp, nobj)
 
 \item{ncomp}{number of components}
 
-\item{obj}{number of objects in calibration set}
+\item{nobj}{number of objects in calibration set}
 }
 \description{
 Calculate probabilities for distance values and given parameters using Hotelling T2 distribution

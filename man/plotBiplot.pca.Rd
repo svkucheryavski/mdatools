@@ -15,7 +15,7 @@
   show.labels = FALSE,
   show.axes = TRUE,
   show.excluded = FALSE,
-  lab.col = c("#90A0D0", "#D09090"),
+  lab.col = adjustcolor(col, alpha.f = 0.5),
   ...
 )
 }

@@ -6,9 +6,9 @@
 \usage{
 pca.mvreplace(
   x,
-  center = T,
-  scale = F,
-  maxncomp = 7,
+  center = TRUE,
+  scale = FALSE,
+  maxncomp = 10,
   expvarlim = 0.95,
   covlim = 10^-6,
   maxiter = 100

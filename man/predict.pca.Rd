@@ -17,5 +17,5 @@
 PCA results (an object of class \code{pcares})
 }
 \description{
-Applies PCA model to a new data.
+Applies PCA model to a new data set.
 }
