@@ -805,3 +805,153 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
 
    invisible(ps)
 }
+
+#' Create line plot with double y-axis
+#'
+#' @description
+#' \code{mdaplotyy} create line plot for two plot series and uses separate y-axis for each.
+#'
+#' @param data
+#' a matrix or a data.frame with two rows of values.
+#' @param type
+#' type of the plot ("l" or "b").
+#' @param col
+#' a color for markers or lines (same as \code{plot} parameter) for each series.
+#' @param lty
+#' line type for each series (two values)
+#' @param lwd
+#' line width for each series (two values)
+#' @param pch
+#' a character for markers (same as \code{plot} parameter) for each series (two values).
+#' @param cex
+#' scale factor for the markers
+#' @param xlim
+#' limits for the x axis (if NULL, will be calculated automatically).
+#' @param ylim
+#' limits for the y axis, either list with two vectors (one for each series) or NULL.
+#' @param main
+#' an overall title for the plot (same as \code{plot} parameter).
+#' @param xlab
+#' a title for the x axis (same as \code{plot} parameter).
+#' @param ylab
+#' a title for each of the two y axis (as a vector of two text values).
+#' @param labels
+#' a vector with text labels for data points or one of the following: "names", "indices", "values".
+#' @param show.labels
+#' logical, show or not labels for the data objects.
+#' @param lab.cex
+#' size for data point labels.
+#' @param lab.col
+#' color for data point labels.
+#' @param show.grid
+#' logical, show or not a grid for the plot.
+#' @param grid.lwd
+#' line thinckness (width) for the grid.
+#' @param grid.col
+#' line color for the grid.
+#' @param xticks
+#' values for x ticks.
+#' @param xticklabels
+#' labels for x ticks.
+#' @param xlas
+#' orientation of xticklabels.
+#' @param ylas
+#' orientation of yticklabels (will be applied to both y axes).
+#' @param show.legend
+#' logical show legend with name of each plot series or not
+#' @param legend.position
+#' position of legend if it must be shown
+#' @param legend
+#' values for the legend
+#' @param ...
+#' other plotting arguments.
+#'
+#' @details
+#' This plot has properties both \code{mdaplot} and \code{mdaplotg}, so when you specify color,
+#' line properties etc. you have to do it for both plot series.
+#'
+#' @author
+#' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
+#'
+#' @seealso
+#' \code{\link{mdaplotg}} - to make plots for several sets of data objects (groups of objects).
+#'
+#' @examples
+#' # See all examples in the tutorial.
+#'
+#' @export
+mdaplotyy <- function(data, type = "l", col = mdaplot.getColors(2), lty = c(1, 1),
+   lwd = c(1, 1), pch = (if (type == "b") c(16, 16) else c(NA, NA)), cex = 1,
+   xlim = NULL, ylim = NULL, main = attr(data, "name"), xlab = attr(data, "xaxis.name"),
+   ylab = rownames(data), labels = "values", show.labels = FALSE, lab.cex = 0.65,
+   lab.col = "darkgray", show.grid = TRUE, grid.lwd = 0.5, grid.col = "lightgray",
+   xticks = NULL, xticklabels = NULL, xlas = 0, ylas = 0, show.legend = TRUE,
+   legend.position = "topright", legend = ylab, ...) {
+
+   if (!(type %in% c("l", "b"))) {
+      stop("YY line plot can only be made for type 'l' or 'b'.")
+   }
+
+   if (nrow(data) != 2) {
+      stop("Matrix with two rows is required to make YY line plot.")
+   }
+
+   if (length(ylab) != 2) {
+      stop("Y-axis label ('ylab') should be specified for both axes.")
+   }
+
+   if (length(col) != 2 || length(lty) != 2 || length(lwd) != 2 || length(pch) != 2) {
+      stop("Color and line properties should be specified for both series.")
+   }
+
+   # create plot series
+   ps1 <- plotseries(mda.subset(data, subset = 1), type = type, labels = labels, col = col[1])
+   ps2 <- plotseries(mda.subset(data, subset = 2), type = type, labels = labels, col = col[2])
+
+   # get limits for first series
+   xlim <- mdaplot.getXAxisLim(ps1, xlim = xlim, show.labels = show.labels)
+   ylim1 <- mdaplot.getYAxisLim(ps1, ylim = ylim[[1]], show.labels = show.labels,
+      show.colorbar = TRUE)
+
+   # check and prepare xticklabels
+   xticklabels <- mdaplot.getXTickLabels(xticklabels, xticks, NULL)
+   xticks <- mdaplot.getXTicks(xticks, xlim, ps1$x_values, type)
+
+   # check and prepare yticklabels
+   yticklabels <- mdaplot.getYTickLabels(NULL, NULL, NULL)
+   yticks <- mdaplot.getYTicks(NULL, ylim1, ps1$y_values, type)
+
+   # define title and labels
+   if (is.null(main)) main <- ps1$name
+
+   # make an empty plot with proper limits and axis labels
+   mdaplot.plotAxes(xticklabels = xticklabels, yticklabels = yticklabels, xticks = xticks,
+      yticks = yticks, xlim = xlim, ylim = ylim1, main = main, xlab = xlab, ylab = ylab[1],
+      xlas = xlas, ylas = ylas, show.grid = show.grid, grid.lwd = grid.lwd, grid.col = grid.col
+   )
+
+   # show first series
+   par(mar = c(5, 5, 5, 5))
+   plotLines(ps1, col = col[1], lty = lty[1], lwd = lwd[1], cex = cex, pch = pch[1], ...)
+   if (show.labels) {
+      showLabels(ps1, show.excluded = FALSE, col = lab.col, cex = lab.cex)
+   }
+
+   # second series
+   ylim2 <- mdaplot.getYAxisLim(ps2, ylim = ylim[[2]], show.labels = show.labels)
+   par(new = TRUE)
+   plot(ps2$x_values, ps2$y_values[1, ], type = type, col = col[2], axes = FALSE, xlab = NA,
+      xlim = xlim, ylab = NA, ylim = ylim2, lty = lty[2], lwd = lwd[2], cex = cex, pch = pch[2],
+      ...)
+   axis(side = 4, las = ylas)
+   mtext(side = 4, line = 2, ylab[2], cex = 0.9)
+
+   if (show.labels) {
+      showLabels(ps2, show.excluded = FALSE, col = lab.col, cex = lab.cex)
+   }
+
+   if (show.legend) {
+      mdaplotg.showLegend(legend, col = col, pch = pch, lty = lty, lwd = lwd, cex = 0.9,
+         position = legend.position)
+   }
+}
