@@ -139,7 +139,7 @@ test_that("print() and summary() produce output", {
 dev.off()
 
 # just output to check in txt file
-sink("output.txt", append=FALSE, split=FALSE)
+sink("output-pcares.txt", append=FALSE, split=FALSE)
 print(m$calres)
-summary(m$calres)
+print(summary(m$calres))
 sink()

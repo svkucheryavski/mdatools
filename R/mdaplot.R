@@ -900,7 +900,7 @@ mdaplotyy <- function(data, type = "l", col = mdaplot.getColors(2), lty = c(1, 1
       stop("Y-axis label ('ylab') should be specified for both axes.")
    }
 
-   if (length(col) != 2 || length(lty) != 2 || length(lwd) != 2 || length(pch) != 2) {
+   if (length(col) != 2 || length(lty) != 2 || length(lwd) != 2 || length(pch) != 2) {
       stop("Color and line properties should be specified for both series.")
    }
 

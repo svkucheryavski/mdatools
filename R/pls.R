@@ -411,6 +411,7 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
    } else {
       nobj.cv = 0
    }
+
    ncomp = min(ncol(x), nrow(x) - 1 - nobj.cv, ncomp)
 
    # compute model and redefine ncomp

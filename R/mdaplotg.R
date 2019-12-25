@@ -23,8 +23,10 @@
 #' legend position ("topright", "topleft', "bottomright", "bottomleft", "top", "bottom")
 #' @param plot
 #' logical, show legend or just calculate and return its size
+#' @param ...
+#' other parameters
 #'
-mdaplotg.showLegend <- function(legend, col, pt.bg = NULL, pch = NULL, lty = NULL, lwd = NULL,
+mdaplotg.showLegend <- function(legend, col, pt.bg = NA, pch = NULL, lty = NULL, lwd = NULL,
    cex = 1, bty = "o", position = "topright", plot = TRUE, ...) {
    # which positions need multiple columns
    onecolpos <- c("topright", "topleft", "bottomright", "bottomleft")

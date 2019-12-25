@@ -124,6 +124,7 @@
 #' \tabular{ll}{
 #'    \code{plot.pca} \tab makes an overview of PCA model with four plots.\cr
 #'    \code{summary.pca} \tab shows some statistics for the model.\cr
+#'    \code{categorize.pca} \tab categorize data rows as "normal", "extreme" or "outliers".\cr
 #'    \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
 #'    \code{\link{setDistanceLimits.pca}} \tab set critical limits for residuals\cr
 #'    \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr
@@ -131,7 +132,8 @@
 #'    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
 #'    \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
 #'    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
-#'    \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
+#'    \code{\link{plotResiduals.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
+#'    \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr
 #' }
 #'
 #' Most of the methods for plotting data are also available for PCA results (\code{\link{pcares}})
@@ -1631,12 +1633,14 @@ plotDistDoF <- function(obj, type = "b", main = "Degrees of freedom",
 #' color for tolerance ellipse
 #' @param legend.position
 #' position of the legend
+#' @param ...
+#' other arguments
 #'
 #' @export
-plotExtreme <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.selected,
+plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.selected,
    main = "Extreme plot", xlab = "Expected", ylab = "Observed", pch = rep(21, length(comp)),
    bg = mdaplot.getColors(length(comp)), col = rep("white", length(comp)), lwd = 0.25,
-   ellipse.col = "#bbddff", legend.position = "bottomright", ...) {
+   ellipse.col = "#cceeff", legend.position = "bottomright", ...) {
 
    if (min(comp) < 1 || max(comp) > obj$ncomp) {
       stop("Wrong value for parameter 'ncomp'.")
@@ -1644,6 +1648,8 @@ plotExtreme <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.selected,
 
    # function to compute probabilities based on distances and distribution parameters
    getProbabilities <- function(T2, Q, T2lim, Qlim, ncomp) {
+      q <- Q[, ncomp]
+      h <- T2[, ncomp]
 
       # if chisq / hotelling
       if (obj$lim.type == "chisq") {
@@ -1653,7 +1659,7 @@ plotExtreme <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.selected,
                rbind(
                   chisq.prob(q, Qlim[3:4, ncomp]),
                   hotelling.prob(h, ncomp, nobj)
-               ), 2, min
+               ), 2, max
             )
          )
       }
@@ -1664,7 +1670,7 @@ plotExtreme <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.selected,
       q0 <- obj$Qlim[3, ncomp]
       Nq <- round(obj$Qlim[4, ncomp])
 
-      f <- Nh * T2[, ncomp] / h0 + Nq * Q[, ncomp] / q0
+      f <- Nh * h / h0 + Nq * q / q0
       return(pchisq(f, Nh + Nq))
    }
 
@@ -1702,11 +1708,12 @@ plotExtreme <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.selected,
       p <- getProbabilities(T2, Q, obj$T2lim, obj$Qlim, comp[i])
       p_mat <- matrix((1 - p), ncol = nobj, nrow = nobj)
       observed <- colSums(p_mat < alpha_mat)
-      points(expected, observed, pch = pch[i], cex = 1.2, lwd = 0.25, col = col[i], bg = bg[i])
+      points(expected, observed, pch = pch[i], lwd = lwd, cex = 1.2, col = col[i], bg = bg[i])
    }
 
    legend <- paste0(comp, " PC", ifelse(comp > 1, "s", ""))
-   mdaplotg.showLegend(legend, pt.bg = bg, col = col, pch = pch, position = legend.position)
+   mdaplotg.showLegend(legend, pt.bg = bg, lty = NA, col = col, pch = pch, lwd = lwd,
+      position = legend.position)
 }
 
 

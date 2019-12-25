@@ -398,26 +398,27 @@ x.test <- simdata$spectra.t
 attr(x.cal, "xaxis.name") <- attr(x.test, "xaxis.name") <- "Wavenumbers, cm-1"
 attr(x.cal, "xaxis.values") <- attr(x.test, "xaxis.values") <- 10^7 / simdata$wavelength
 
-m <- pca(x.cal, 4, x.test = x.test)
+ms <- pca(x.cal, 4, x.test = x.test)
 
 par(mfrow = c(1, 1))
 plot.new()
 text(0, 0, "PCA - spectral data (simdata)", pos = 4)
 
 par(mfrow = c(2, 2))
-expect_silent(plot(m))
+expect_silent(plot(ms))
 
 par(mfrow = c(2, 2))
-expect_silent(plotLoadings(m, type = "l"))
-expect_silent(plotLoadings(m, type = "l", ncomp = 1))
-expect_silent(plotScores(m))
-expect_silent(plotScores(m, type = "l", ncomp = 1, res = list(m$calres)))
+expect_silent(plotLoadings(ms, type = "l"))
+expect_silent(plotLoadings(ms, type = "l", ncomp = 1))
+expect_silent(plotScores(ms))
+expect_silent(plotScores(ms, type = "l", ncomp = 1, res = list(ms$calres)))
 
 par(mfrow = c(2, 2))
-expect_silent(plotResiduals(m))
-expect_silent(plotResiduals(m, ncomp = 2))
-expect_silent(plotResiduals(m, ncomp = 2, log = T))
-expect_silent(plotResiduals(m, ncomp = 4, log = T, cgroup = "categories", res = list("cal" = m$calres)))
+expect_silent(plotResiduals(ms))
+expect_silent(plotResiduals(ms, ncomp = 2))
+expect_silent(plotResiduals(ms, ncomp = 2, log = T))
+expect_silent(plotResiduals(ms, ncomp = 4, log = T, cgroup = "categories",
+   res = list("cal" = ms$calres)))
 
 
 #########################################
@@ -496,12 +497,74 @@ test_that("DoF plot for both distances with Simdata data", {
    expect_silent(plotDistDoF(m2, type = "l", lty = c(1, 2), lwd = c(1, 2), col = c("red", "red")))
 })
 
-dev.off()
-
-
 #########################################
 # Block 8: Extreme plots                    #
 #########################################
 
-m1 <- pca(x1, 10, scale = TRUE)
-m2 <- pca(simdata$spectra.c, 10)
+context("pca: extreme plots")
+
+tf <- function(model, name) {
+
+   par(mfrow = c(1, 1))
+   plot.new()
+   text(0, 0, paste0("PCA - extreme plots - ", name), pos = 4)
+
+   # basic extreme plots
+   par(mfrow = c(2, 2))
+   test_name <- "extreme plot works fine with default settings"
+   test_that(test_name, {
+      expect_silent(plotExtreme(model))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotExtreme(model, comp = 1:3, pch = 21:23))
+      expect_silent(plotExtreme(model, comp = 1:2, bg = c("red", "green")))
+      expect_silent(plotExtreme(model, pch = 1, lwd = 1, col = "orange"))
+   })
+
+   # extreme plots for test set
+   if (!is.null(model$res[["test"]])) {
+      test_name <- "extreme plot works fine with manual result object"
+      test_that(test_name, {
+         expect_silent(plotExtreme(model, res = model$res[["test"]]))
+         mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+         expect_silent(plotExtreme(model, res = model$res[["test"]], comp = 1:3, pch = 21:23))
+         expect_silent(plotExtreme(model, res = model$res[["test"]], comp = 1:2, bg = c("red", "green")))
+         expect_silent(plotExtreme(model, res = model$res[["test"]], pch = 1, lwd = 1, col = "orange"))
+      })
+   }
+
+   # ddrobust extreme plots
+   model <- setDistanceLimits(model, lim.type = "ddrobust")
+   par(mfrow = c(2, 2))
+   test_name <- "extreme plot works fine with ddrobust lim type"
+   test_that(test_name, {
+      expect_silent(plotExtreme(model))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotExtreme(model, comp = 1:3, pch = 21:23))
+      expect_silent(plotExtreme(model, comp = 1:2, bg = c("red", "green")))
+      expect_silent(plotExtreme(model, pch = 1, lwd = 1, col = "orange"))
+   })
+
+   # chisq extreme plots
+   model <- setDistanceLimits(model, lim.type = "chisq")
+   par(mfrow = c(2, 2))
+   test_name <- "extreme plot works fine with chisq lim type"
+   test_that(test_name, {
+      expect_silent(plotExtreme(model))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotExtreme(model, comp = 1:3, pch = 21:23))
+      expect_silent(plotExtreme(model, comp = 1:2, bg = c("red", "green")))
+      expect_silent(plotExtreme(model, pch = 1, lwd = 1, col = "orange"))
+   })
+
+}
+
+
+tf(ms, "spectral data")
+dev.off()
+
+
+# just output to check in txt file
+sink("output-pca.txt", append=FALSE, split=FALSE)
+print(ms)
+print(summary(ms))
+sink()

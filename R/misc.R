@@ -824,8 +824,8 @@ chisq.crit <- function(param, alpha = 0.05, gamma = 0.01) {
 #'
 #' @export
 chisq.prob <- function(u, param){
-   u0 <- param$u0
-   Nu <- param$Nu
+   u0 <- param[1]
+   Nu <- param[2]
 
    DoF <- floor(Nu)
    DoF[DoF == 0] <- 1
