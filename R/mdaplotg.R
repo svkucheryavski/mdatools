@@ -7,6 +7,8 @@
 #' vector with text elements for the legend items
 #' @param col
 #' vector with color values for the legend items
+#' @param pt.bg
+#' vector with background colors for the legend items (e.g. for pch = 21:25)
 #' @param pch
 #' vector with marker symbols for the legend items
 #' @param lty
@@ -22,8 +24,8 @@
 #' @param plot
 #' logical, show legend or just calculate and return its size
 #'
-mdaplotg.showLegend <- function(legend, col, pch = NULL, lty = NULL, lwd = NULL, cex = 1,
-                              bty = "o", position = "topright", plot = TRUE) {
+mdaplotg.showLegend <- function(legend, col, pt.bg = NULL, pch = NULL, lty = NULL, lwd = NULL,
+   cex = 1, bty = "o", position = "topright", plot = TRUE, ...) {
    # which positions need multiple columns
    onecolpos <- c("topright", "topleft", "bottomright", "bottomleft")
    multcolpos <- c("top", "bottom", "right", "left")
@@ -44,9 +46,9 @@ mdaplotg.showLegend <- function(legend, col, pch = NULL, lty = NULL, lwd = NULL,
    inset <- c(0.02, 0.02 * (dx / dy))
 
    # show legend
-   legend(position, legend, col = col, pch = pch, lty = lty, pt.cex = cex, lwd = lwd,
+   legend(position, legend, col = col, pt.bg = pt.bg, pch = pch, lty = lty, pt.cex = cex, lwd = lwd,
           cex = 0.85, plot = plot, inset = inset, bg = "white", box.lwd = 0.75, box.col = "gray",
-          ncol = ncol)
+          ncol = ncol, ...)
 
 }
 
