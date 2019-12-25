@@ -1,5 +1,5 @@
 #####################################################
-# Tests for basic functionality of ldecomp() class  #
+# Tests for plotting methods of ldecomp() class     #
 #####################################################
 
 pdf(file = "test_ldecomp_plots.pdf")
