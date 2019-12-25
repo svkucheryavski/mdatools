@@ -12,4 +12,5 @@ tests/plots/*.txt
 tests/matlab
 tests/matlab/*
 
+linting.R
 mdatools.Rproj
