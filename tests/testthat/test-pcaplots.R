@@ -2,7 +2,7 @@
 # Tests for basic functionality of plot() class  #
 #####################################################
 
-pdf(file = "test_pca_plots.pdf")
+
 
 # prepare cases
 
@@ -26,11 +26,14 @@ m3 <- pca(x3, 10, scale = T, x.test = x3.test)
 
 ## combine all together
 x <- list(x1, x2, x3)
+x.test <- list(NULL, x2.test, x3.test)
 m <- list("full" = m1, "full + test" = m2, "excluded + test" = m3)
 
 
+pdf(file = "test_pca_plots.pdf", pointsize = 10)
+
 #########################################
-# Block 1: Variance plot                  #
+# Block 1: Variance plot                #
 #########################################
 
 context("pca: variance plots")
@@ -39,24 +42,28 @@ tf <- function(model, name) {
 
    par(mfrow = c(1, 1))
    plot.new()
-   text(0, 0, paste0("PCA - variance plot - ", name), pos = 4)
+   text(0, 0, paste0("PCA - variance plots - ", name), pos = 4)
 
    # basic variance plots
-   expect_silent({
-      par(mfrow = c(2, 2))
-      plotVariance(model)
-      plotVariance(model, type = "h", show.labels = T)
-      plotVariance(model, show.labels = T, col = c("red", "green"))
-      plotVariance(model, res = list("cal" = model$calres))
+   par(mfrow = c(2, 2))
+   test_name <- "variance plot works fine with different settings"
+   test_that(test_name, {
+      expect_silent(plotVariance(model))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotVariance(model, type = "h", show.labels = T))
+      expect_silent(plotVariance(model, show.labels = T, col = c("red", "green")))
+      expect_silent(plotVariance(model, res = list("cal" = model$res[["cal"]])))
    })
 
    # basic cumulative plots
-   expect_silent({
-      par(mfrow = c(2, 2))
-      plotCumVariance(model)
-      plotCumVariance(model, type = "h", show.labels = T)
-      plotCumVariance(model, show.labels = T, col = c("red", "green"))
-      plotCumVariance(model, res = list("cal" = model$calres))
+   par(mfrow = c(2, 2))
+   test_name <- "cumulative variance plot works fine with different settings"
+   test_that(test_name, {
+      expect_silent(plotCumVariance(model))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotCumVariance(model, type = "h", show.labels = T))
+      expect_silent(plotCumVariance(model, show.labels = T, col = c("red", "green")))
+      expect_silent(plotCumVariance(model, res = list("cal" = model$res[["cal"]])))
    })
 
 }
@@ -65,69 +72,436 @@ for (i in seq_len(length(m))) {
    tf(m[[i]], names(m)[[i]])
 }
 
-dev.off()
-stop()
-
 #########################################
 # Block 2: Scores plot                  #
 #########################################
 
 context("pca: scores plots")
 
-tf <- function(model, x.cal) {
+tf <- function(model, x.cal, name) {
+   par(mfrow = c(1, 1))
+   plot.new()
+   text(0, 0, paste0("PCA - score plots - ", name), pos = 4)
 
    # basic plots (scatter)
-   expect_silent({
-      par(mfrow = c(2, 2))
-      plotScores(model)
-      plotScores(model, c(1, 3))
-      plotScores(model, c(1, 3), show.labels = T, col = c("red", "green"))
-      plotScores(model, c(1, 3), res = list("cal" = model$calres))
+   par(mfrow = c(2, 2))
+   test_name <- "scores plot works fine with basic settings"
+   test_that(test_name, {
+      expect_silent(plotScores(model))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotScores(model, c(1, 3)))
+      expect_silent(plotScores(model, c(1, 3), show.labels = T, col = c("red", "green")))
+      expect_silent(plotScores(model, c(1, 3), res = list("cal" = model$res[["cal"]])))
    })
 
-   # basic plots (scatter, one components)
-   expect_silent({
-      par(mfrow = c(2, 2))
-      plotScores(model, 1)
-      plotScores(model, 2)
-      plotScores(model, 2, show.labels = T, col = c("red", "green"))
-      plotScores(model, 2, res = list("cal" = model$calres))
+   # basic plots (scatter, one component)
+   par(mfrow = c(2, 2))
+   test_name <- "scatter plot for single component"
+   test_that(test_name, {
+      expect_silent(plotScores(model, 1))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotScores(model, 2))
+      expect_silent(plotScores(model, 2, show.labels = T, col = c("red", "green")))
+      expect_silent(plotScores(model, 2, res = list("cal" = model$res[["cal"]])))
    })
 
-   # basic plots (line plot, two components)
-   expect_silent({
+   # line and bar plots
+   if (length(model$res) > 1) {
+      test_name <- "line and bar plot can nt be made if more than one result object is available"
+      test_that(test_name, {
+            expect_error(plotScores(model, c(1, 3), type = "l"))
+            expect_error(plotScores(model, c(1, 3), type = "h"))
+            expect_error(plotScores(model, c(1, 3), type = "b"))
+      })
+   }
+
+   if (length(model$res) == 1) {
       par(mfrow = c(2, 2))
-      plotScores(model, type = "l")
-      plotScores(model, c(1, 3), type = "l")
-      plotScores(model, c(1, 3), type = "l", show.labels = T, col = c("red", "green"))
-      plotScores(model, c(1, 3), type = "l", res = list("cal" = model$calres))
-   })
+      test_name <- "line and bar plot for one component"
+      test_that(test_name, {
+         expect_silent(plotScores(model, 1, type = "l"))
+         mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+         expect_silent(plotScores(model, 2, type = "l"))
+         expect_silent(plotScores(model, 1, type = "b"))
+         expect_silent(plotScores(model, 1, type = "h"))
+      })
+
+      par(mfrow = c(2, 2))
+      test_name <- "line and bar plot for two or three components"
+      test_that(test_name, {
+         expect_silent(plotScores(model, c(1, 2), type = "l"))
+         mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+         expect_silent(plotScores(model, c(1, 2), type = "h"))
+         expect_silent(plotScores(model, c(1, 2, 3), type = "h"))
+         expect_silent(plotScores(model, c(1, 2), type = "b"))
+      })
+   }
 
    # playing with legend
-   expect_silent({
-      par(mfrow = c(2, 2))
-      plotScores(model, show.legend = FALSE)
-      plotScores(model, c(1, 3), legend.position = "top")
-      plotScores(model, c(1, 3), show.labels = T, legend.position = "topleft")
-      plotScores(model, c(1, 3), legend.position = "bottom", res = list("cal" = model$calres))
+   par(mfrow = c(2, 2))
+   test_name <- "legend position can be changed or hidden"
+   test_that(test_name, {
+      expect_silent(plotScores(model, show.legend = FALSE))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotScores(model, c(1, 3), legend.position = "top"))
+      expect_silent(plotScores(model, c(1, 3), show.labels = T, legend.position = "topleft"))
+      expect_silent(plotScores(model, c(1, 3), legend.position = "bottom"))
    })
 
    # show hidden values
-   expect_silent({
-      par(mfrow = c(2, 2))
-      plotScores(model, show.excluded = TRUE)
-      plotScores(model, c(1, 3), show.excluded = TRUE)
-      plotScores(model, c(1, 3), show.excluded = TRUE, show.labels = T, col = "red")
-      plotScores(model, c(1, 3), show.excluded = TRUE, res = list("cal" = model$calres))
+   par(mfrow = c(2, 2))
+   test_name <- "hidden values can be shown"
+   test_that(test_name, {
+      expect_silent(plotScores(model, show.excluded = TRUE))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotScores(model, c(1, 3), show.excluded = TRUE))
+      expect_silent(plotScores(model, c(1, 3), show.excluded = TRUE, show.labels = T, col = "red"))
+      expect_silent(plotScores(model, c(1, 3), show.excluded = TRUE, res = list("cal" = model$res[["cal"]])))
+   })
+}
+
+for (i in seq_along(m)) {
+   tf(m[[i]], x[[i]], names(m)[[i]])
+}
+
+#########################################
+# Block 3: Residual distance plot       #
+#########################################
+
+context("pca: residual distance plots")
+
+tf <- function(x.cal, x.test, name) {
+
+   m1 <- pca(x.cal, 4, scale = T, x.test = x.test)
+   m2 <- pca(x.cal, 4, scale = T, x.test = x.test, lim.type = "ddmoments", alpha = 0.1, gamma = 0.05)
+   m3 <- pca(x.cal, 4, scale = T, x.test = x.test, lim.type = "chisq")
+   m4 <- pca(x.cal, 4, scale = T, x.test = x.test, lim.type = "ddrobust")
+
+   par(mfrow = c(1, 1))
+   plot.new()
+   text(0, 0, paste0("PCA - residual distance plots - ", name), pos = 4)
+
+   # basic plots (scatter)
+   par(mfrow = c(2, 2))
+   test_name <- "residual distance plot with default settings work fine"
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2))
+      expect_silent(plotResiduals(m3))
+      expect_silent(plotResiduals(m4))
    })
 
-   # show hidden values
+   par(mfrow = c(2, 2))
+   test_name <- "residual distance plot work fine with labels and ncomp value"
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, show.labels = T))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, ncomp = 2, show.labels = T))
+      expect_silent(plotResiduals(m3, ncomp = 2, show.labels = T))
+      expect_silent(plotResiduals(m4, ncomp = 2, show.labels = T))
+   })
+
+   par(mfrow = c(2, 2))
+   test_name <- "residual distance plot can show color groups by categories"
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, show.labels = T, cgroup = "categories"))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, show.labels = T, cgroup = "categories"))
+      expect_silent(plotResiduals(m3, show.labels = T, cgroup = "categories"))
+      expect_silent(plotResiduals(m4, show.labels = T, cgroup = "categories"))
+   })
+
+   par(mfrow = c(2, 2))
+   test_name <- "residual distance plot can work with log transform"
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, show.labels = T, log = T, cgroup = "categories"))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, show.labels = T, log = T, cgroup = "categories"))
+      expect_warning(plotResiduals(m3, show.labels = T, log = T, cgroup = "categories"))
+      expect_silent(plotResiduals(m4, show.labels = T, log = T, cgroup = "categories"))
+   })
+
+   par(mfrow = c(2, 2))
+   test_name <- "residual distance plot can work without normaliszation"
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, show.labels = T, norm = F, cgroup = "categories"))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, show.labels = T, norm = F, cgroup = "categories"))
+      expect_silent(plotResiduals(m3, show.labels = T, norm = F, cgroup = "categories"))
+      expect_silent(plotResiduals(m4, show.labels = T, norm = F, cgroup = "categories"))
+   })
+
+   par(mfrow = c(2, 2))
+   test_name <- "residual distance plot can hide limits"
+   test_that("residual distance plot can hide limits", {
+      expect_silent(plotResiduals(m1, show.labels = T, cgroup = "categories", show.limits = F))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, show.labels = T, cgroup = "categories", show.limits = F))
+      expect_silent(plotResiduals(m3, show.labels = T, cgroup = "categories", show.limits = F))
+      expect_silent(plotResiduals(m4, show.labels = T, cgroup = "categories", show.limits = F))
+   })
+
+   par(mfrow = c(2, 2))
+   test_name <- "residual distance plot can be used with manual title and axis labels"
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, main = "Distances", xlab = "T2", ylab = "Q"))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, main = "Distances", xlab = "T2", ylab = "Q"))
+      expect_silent(plotResiduals(m3, main = "Distances", xlab = "T2", ylab = "Q"))
+      expect_silent(plotResiduals(m4, main = "Distances", xlab = "T2", ylab = "Q"))
+   })
+
+   par(mfrow = c(2, 2))
+   test_name <- "residual distance plot can show excluded values"
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, show.excluded = T))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, show.excluded = T))
+      expect_silent(plotResiduals(m3, show.excluded = T))
+      expect_silent(plotResiduals(m4, show.excluded = T))
+   })
 
 }
 
 for (i in seq_len(length(m))) {
-   tf(m[[i]], x[[i]])
+   tf(x[[i]], x.test[[i]], names(m)[[i]])
 }
+
+
+#########################################
+# Block 4: Loadings plot                #
+#########################################
+
+context("pca: loadings plots")
+
+tf <- function(model, x.cal, name) {
+   par(mfrow = c(1, 1))
+   plot.new()
+   text(0, 0, paste0("PCA - loadings plots - ", name), pos = 4)
+
+   # basic plots (scatter)
+   par(mfrow = c(2, 2))
+   test_name <- "loadings plot works fine with basic settings"
+   test_that(test_name, {
+      expect_silent(plotLoadings(model))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotLoadings(model, c(1, 3)))
+      expect_silent(plotLoadings(model, c(1, 3), show.labels = T, col = c("red", "green")))
+      expect_silent(plotLoadings(model, 1))
+   })
+
+
+   par(mfrow = c(2, 2))
+   test_name <- "line and bar plot for one component"
+   test_that(test_name, {
+      expect_silent(plotLoadings(model, 1, type = "l"))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotLoadings(model, 2, type = "l"))
+      expect_silent(plotLoadings(model, 1, type = "b"))
+      expect_silent(plotLoadings(model, 1, type = "h"))
+   })
+
+   par(mfrow = c(2, 2))
+   test_name <- "line and bar plot for one component and labels"
+   test_that(test_name, {
+      expect_silent(plotLoadings(model, 1, type = "l", show.labels = T))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotLoadings(model, 2, type = "l", show.labels = T))
+      expect_silent(plotLoadings(model, 1, type = "b", show.labels = T))
+      expect_silent(plotLoadings(model, 1, type = "h", show.labels = T))
+   })
+
+   par(mfrow = c(2, 2))
+   test_name <- "line and bar plot for one component and xticklabels"
+   test_that(test_name, {
+      expect_silent(plotLoadings(model, 1, type = "l", xticks = 1:ncol(x.cal), xlas = 2, xticklabels = colnames(x.cal)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotLoadings(model, 2, type = "l", xticks = 1:ncol(x.cal), xlas = 2, xticklabels = colnames(x.cal)))
+      expect_silent(plotLoadings(model, 1, type = "b", xticks = 1:ncol(x.cal), xlas = 2, xticklabels = colnames(x.cal)))
+      expect_silent(plotLoadings(model, 1, type = "h", xticks = 1:ncol(x.cal), xlas = 2, xticklabels = colnames(x.cal)))
+   })
+
+   par(mfrow = c(2, 2))
+   test_name <- "line and bar plot for two or three components"
+   test_that(test_name, {
+      expect_silent(plotLoadings(model, c(1, 2), type = "l"))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotLoadings(model, c(1, 2), type = "h"))
+      expect_silent(plotLoadings(model, c(1, 2, 3), type = "h"))
+      expect_silent(plotLoadings(model, c(1, 2), type = "b"))
+   })
+
+   # playing with legend
+   par(mfrow = c(2, 2))
+   test_name <- "legend position can be changed or hidden"
+   test_that(test_name, {
+      expect_silent(plotLoadings(model, type = "l", show.legend = FALSE))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotLoadings(model, c(1, 2), type = "l", legend.position = "top"))
+      expect_silent(plotLoadings(model, c(1, 2), type = "l", show.labels = T, legend.position = "topleft"))
+      expect_silent(plotLoadings(model, c(1, 2), type = "h", legend.position = "bottom"))
+   })
+
+   # show hidden values
+   par(mfrow = c(2, 2))
+   test_name <- "hidden values can be shown"
+   test_that(test_name, {
+      expect_silent(plotLoadings(model, show.excluded = TRUE))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotLoadings(model, c(1, 3), show.excluded = TRUE))
+      expect_silent(plotLoadings(model, c(1, 3), show.excluded = TRUE, show.labels = T, col = "red"))
+      expect_silent(plotLoadings(model, c(1, 3), type = "l", show.excluded = TRUE))
+   })
+}
+
+for (i in seq_along(m)) {
+   tf(m[[i]], x[[i]], names(m)[[i]])
+}
+
+#########################################
+# Block 5: Biplot plot                #
+#########################################
+
+context("pca: biplots")
+
+tf <- function(model, x.cal, name) {
+   par(mfrow = c(1, 1))
+   plot.new()
+   text(0, 0, paste0("PCA - biplots - ", name), pos = 4)
+
+   # basic plots (scatter)
+   par(mfrow = c(2, 2))
+   test_name <- "biplot works fine with basic settings"
+   test_that(test_name, {
+      expect_silent(plotBiplot(model))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotBiplot(model, c(1, 3), show.labels = T))
+      expect_silent(plotBiplot(model, c(1, 3), lty = 2, lwd = 2))
+      expect_silent(plotBiplot(model, c(1, 3), show.labels = T, col = c("red", "green")))
+      expect_error(plotBiplot(model, 1))
+   })
+}
+
+for (i in seq_along(m)) {
+   tf(m[[i]], x[[i]], names(m)[[i]])
+}
+
+
+#########################################
+# Block 6: PCA for spectral data        #
+#########################################
+
+data(simdata)
+x.cal <- simdata$spectra.c
+x.test <- simdata$spectra.t
+attr(x.cal, "xaxis.name") <- attr(x.test, "xaxis.name") <- "Wavenumbers, cm-1"
+attr(x.cal, "xaxis.values") <- attr(x.test, "xaxis.values") <- 10^7 / simdata$wavelength
+
+m <- pca(x.cal, 4, x.test = x.test)
+
+par(mfrow = c(1, 1))
+plot.new()
+text(0, 0, "PCA - spectral data (simdata)", pos = 4)
+
+par(mfrow = c(2, 2))
+expect_silent(plot(m))
+
+par(mfrow = c(2, 2))
+expect_silent(plotLoadings(m, type = "l"))
+expect_silent(plotLoadings(m, type = "l", ncomp = 1))
+expect_silent(plotScores(m))
+expect_silent(plotScores(m, type = "l", ncomp = 1, res = list(m$calres)))
+
+par(mfrow = c(2, 2))
+expect_silent(plotResiduals(m))
+expect_silent(plotResiduals(m, ncomp = 2))
+expect_silent(plotResiduals(m, ncomp = 2, log = T))
+expect_silent(plotResiduals(m, ncomp = 4, log = T, cgroup = "categories", res = list("cal" = m$calres)))
+
+
+#########################################
+# Block 7: DoF plots                    #
+#########################################
+
+m1 <- pca(x1, 10, scale = TRUE)
+m2 <- pca(simdata$spectra.c, 10)
+
+context("pca: DoF plots for T2")
+
+par(mfrow = c(1, 1))
+plot.new()
+text(0, 0, "PCA - DoF plot for T2 distance", pos = 4)
+
+# basic variance plots
+par(mfrow = c(2, 2))
+test_that("DoF plot for T2 distance with People data", {
+   expect_silent(plotT2DoF(m1))
+   expect_silent(plotT2DoF(m1, type = "h", show.labels = T))
+   expect_silent(plotT2DoF(m1, type = "b", col = "red"))
+   expect_silent(plotT2DoF(m1, type = "l", lty = 2, lwd = 2, col = "green"))
+})
+
+par(mfrow = c(2, 2))
+test_that("DoF plot for T2 distance with Simdata data", {
+   expect_silent(plotT2DoF(m2))
+   expect_silent(plotT2DoF(m2, type = "h", show.labels = T))
+   expect_silent(plotT2DoF(m2, type = "b", col = "red"))
+   expect_silent(plotT2DoF(m2, type = "l", lty = 2, lwd = 2, col = "green"))
+})
+
+context("pca: DoF plots for Q")
+
+par(mfrow = c(1, 1))
+plot.new()
+text(0, 0, "PCA - DoF plot for Q distance", pos = 4)
+
+# basic variance plots
+par(mfrow = c(2, 2))
+test_that("DoF plot for Q distance with People data", {
+   expect_silent(plotQDoF(m1))
+   expect_silent(plotQDoF(m1, type = "h", show.labels = T))
+   expect_silent(plotQDoF(m1, type = "b", col = "red"))
+   expect_silent(plotQDoF(m1, type = "l", lty = 2, lwd = 2, col = "green"))
+})
+
+par(mfrow = c(2, 2))
+test_that("DoF plot for Q distance with Simdata data", {
+   expect_silent(plotQDoF(m2))
+   expect_silent(plotQDoF(m2, type = "h", show.labels = T))
+   expect_silent(plotQDoF(m2, type = "b", col = "red"))
+   expect_silent(plotQDoF(m2, type = "l", lty = 2, lwd = 2, col = "green"))
+})
+
+context("pca: DoF plots for both T2 and Q")
+
+par(mfrow = c(1, 1))
+plot.new()
+text(0, 0, "PCA - DoF plot for both distances", pos = 4)
+
+# basic variance plots
+par(mfrow = c(2, 2))
+test_that("DoF plot for both distances with People data", {
+   expect_silent(plotDistDoF(m1))
+   expect_silent(plotDistDoF(m1, type = "l", show.labels = T))
+   expect_silent(plotDistDoF(m1, type = "b", col = c("red", "blue")))
+   expect_silent(plotDistDoF(m1, type = "l", lty = c(1, 2), lwd = c(1, 2), col = c("red", "red")))
+})
+
+par(mfrow = c(2, 2))
+test_that("DoF plot for both distances with Simdata data", {
+   expect_silent(plotDistDoF(m2))
+   expect_silent(plotDistDoF(m2, type = "l", show.labels = T))
+   expect_silent(plotDistDoF(m2, type = "b", col = c("red", "blue")))
+   expect_silent(plotDistDoF(m2, type = "l", lty = c(1, 2), lwd = c(1, 2), col = c("red", "red")))
+})
 
 dev.off()
 
+
+#########################################
+# Block 8: Extreme plots                    #
+#########################################
+
+m1 <- pca(x1, 10, scale = TRUE)
+m2 <- pca(simdata$spectra.c, 10)
