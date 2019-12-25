@@ -1,5 +1,5 @@
 ################################
-# Tests for PCA class methods  #
+# Tests for pca class methods  #
 ################################
 
 ## create several datasets with different layout based on People data
@@ -33,10 +33,10 @@ x <- list(x1, x2, x3, x4, x5, x6, x7)
 
 
 ########################################################
-# Block 1: testing methods implementing PCA algorithms #
+# Block 1: testing methods implementing pca algorithms #
 ########################################################
 
-context('PCA: testing different algorithms')
+context('pca: testing different algorithms')
 
 ## testing function for testing results of one model
 tf <- function(x, f) {
@@ -100,7 +100,7 @@ test_that("SVD and NIPALS gives similar results works correctly", {
 # Block 2: testing pca.run() method  #
 ######################################
 
-context("PCA: testing pca.run()")
+context("pca: testing pca.run()")
 
 ## testing function for comparing pca.run() results with algorithms
 tf <- function(x, f1, method, rand, tol = 10^-6) {
@@ -149,7 +149,7 @@ test_that("pca.run works correctly with rand (nipals)", {
 # Block 3: testing pca.cal() method  #
 ######################################
 
-context("PCA: testing pca.cal()")
+context("pca: testing pca.cal()")
 
 
 ## setup two datasets - one without attributes and with
@@ -186,7 +186,13 @@ tf <- function(x, ncomp, center, scale) {
 
    expect_equivalent(dim(m$loadings), c(ncol(x), ncomp))
    expect_equivalent(rownames(m$loadings), colnames(x))
-   expect_equivalent(attr(m$loadings, "yaxis.name"), attr(x, "xaxis.name"))
+
+   if (is.null(attr(x, "xaxis.name"))) {
+      expect_equivalent(attr(m$loadings, "yaxis.name"), "Variables")
+   } else {
+      expect_equivalent(attr(m$loadings, "yaxis.name"), attr(x, "xaxis.name"))
+   }
+
    expect_equivalent(attr(m$loadings, "yaxis.values"), attr(x, "xaxis.values"))
 
    if (length(attrs$exclcols) > 0) {
@@ -362,7 +368,7 @@ test_that("pca.cal calculates limit parameters correctly (excluded data)", {
 x <- people
 m <- pca.cal(x, 11, center = TRUE, scale = TRUE, method = "svd")
 
-context("PCA: testing getQlimits()")
+context("pca: testing getQlimits()")
 
 test_that("getQLimits() works fine (chisq)", {
 
@@ -443,7 +449,7 @@ test_that("getQLimits() works fine (ddrobust)", {
    expect_equivalent(Qlim2[1:2, ], expQlim2, tolerance = 10^-5)
 })
 
-context('PCA: testing getT2limits()')
+context('pca: testing getT2limits()')
 
 test_that("getT2Limits() works fine (chisq)", {
 
@@ -541,7 +547,7 @@ tf <- function(m, outliers, extremes) {
    expect_equivalent(which(categorize(m, m$calres, 5) == "extreme"), extremes[[3]])
 }
 
-context("PCA: testing categorize()")
+context("pca: testing categorize()")
 
 x <- people
 m <- pca(x, 11, scale = TRUE)
@@ -666,7 +672,7 @@ tf <- function(x, ncomp) {
    expect_output(print(m))
 }
 
-context("PCA: testing pca()")
+context("pca: testing pca()")
 
 # full data
 x <- people
@@ -697,8 +703,8 @@ tf <- function(x, x.test, ncomp) {
    expect_equal(m$calres, predict(m, x))
    expect_equal(m$testres, predict(m, x.test))
 
-   # getModelres returns correct output
-   expect_equivalent(getModelRes(m) , list("cal" = m$calres, "test" = m$testres))
+   # model$res returns correct list
+   expect_equivalent(m$res , list("cal" = m$calres, "test" = m$testres))
 
    # dimension of limits is correct
    expect_equal(dim(m$Qlim), c(4, ncomp))
@@ -719,7 +725,7 @@ tf <- function(x, x.test, ncomp) {
    expect_output(print(m))
 }
 
-context("PCA: testing pca() for test set")
+context("pca: testing pca() for test set")
 
 # full data
 ind <- seq(1, 32, by = 4)
@@ -740,3 +746,40 @@ tf(x, x.test, 1)
 tf(x, x.test, 5)
 tf(x, x.test, 10)
 
+
+#########################################
+# Block 8: testing pca.mvreplace()      #
+#########################################
+
+
+data(people)
+
+context("pca: test pca.mvreplace() function")
+
+test_that("for simple dataset it can reconstruct values in full", {
+   data <- odata <- matrix(c(1:10, 2 * (1:10), 3 * (1:10)), ncol = 3)
+   data[3, 1] <- data[7, 3] <- NA
+   expect_equivalent(odata, pca.mvreplace(data), tolerance = 10^-2)
+   expect_equivalent(odata, pca.mvreplace(data, scale = TRUE), tolerance = 10^-2)
+})
+
+test_that("if too many values are missing it returns error", {
+   data <- people
+   data[seq(1, 32, by = 4), ] <- NA
+   expect_error(pca.mvreplace(data))
+   expect_error(pca.mvreplace(data, scale = T))
+})
+
+test_that("for people data it can partially reconstruct the values", {
+   data <- odata <- people
+   data[c(3, 10), 1] <- NA
+   data[c(25, 32), 2] <- NA
+   data[c(5, 10, 15), 11] <- NA
+   data[c(14), 12] <- NA
+
+   expect_equivalent(
+      odata,
+      pca.mvreplace(data, scale = T),
+      tolerance = 0.1
+   )
+})
