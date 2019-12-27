@@ -322,7 +322,7 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
 #' Returns a vector with two limits.
 #'
 mdaplot.getXAxisLim <- function(ps, xlim, show.labels = FALSE, show.lines = FALSE,
-   show.excluded = FALSE, bwd = NULL) {
+   show.excluded = FALSE, bwd = 0.8) {
 
    # if user provided limits for x - use them
    if (!is.null(xlim)) return(xlim)
@@ -750,6 +750,7 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
       xlim <- mdaplot.getXAxisLim(ps, xlim = xlim, show.labels = show.labels,
          show.excluded = show.excluded, show.lines = show.lines,
          bwd = (if (type == "h") bwd else NULL))
+
       ylim <- mdaplot.getYAxisLim(ps, ylim = ylim, show.excluded = show.excluded,
          show.lines = show.lines, show.labels = show.labels, show.colorbar = show.colorbar)
 

@@ -84,6 +84,11 @@ mdaplotg.prepareData <- function(data, type, groupby) {
          stop("Group plot with matrix or data frame can be made only for types 'h', 'l' and 'b'.")
       }
 
+      # add fake row names
+      if (is.null(rownames(data))) {
+         rownames(data) <- seq_len(nrow(data))
+      }
+
       # split data into a list of subsets for each group
       data_list <- list()
       for (i in seq_len(nrow(data))) {
@@ -193,7 +198,7 @@ mdaplotg.getLegend <- function(ps, data.names, legend = NULL) {
 #' @return
 #' vector with two values
 #'
-mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.position) {
+mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.position, bwd = NULL) {
 
    # if user provided xlim values - use them
    if (!is.null(xlim)) {
@@ -203,7 +208,7 @@ mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.positi
    # function which returns xlim values for given plotseries
    f <- function(p) {
       return(
-         mdaplot.getXAxisLim(p, xlim = NULL, show.excluded = show.excluded)
+         mdaplot.getXAxisLim(p, xlim = NULL, show.excluded = show.excluded, bwd = bwd)
       )
    }
 
@@ -419,7 +424,7 @@ mdaplotg <- function(
    }
 
    # get axis limits
-   xlim <- mdaplotg.getXLim(ps, xlim, show.excluded, show.legend, legend.position)
+   xlim <- mdaplotg.getXLim(ps, xlim, show.excluded, show.legend, legend.position, bwd = bwd)
    ylim <- mdaplotg.getYLim(ps, ylim, show.excluded, show.legend, legend.position, show.labels)
 
    # check and prepare xticklabels
