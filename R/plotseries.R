@@ -452,8 +452,8 @@ getDataLabels <- function(ps, labels = NULL) {
 
    # if nothing above works - use names as labels
    x_values_excluded <- ps$x_values_excluded
-   labels <- names(x_values)
-   labels_excluded <- if (ps$type == "p") names(x_values_excluded) else NULL
+   labels <- rownames(y_values)
+   labels_excluded <- if (ps$type == "p") rownames(ps$y_values_excluded) else NULL
    return(list(labels = labels, labels_excluded = labels_excluded))
 }
 
