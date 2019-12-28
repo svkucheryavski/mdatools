@@ -292,7 +292,7 @@ showPredictions.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 #'
 #' @export
 plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, type = "h",
-   main = sprintf('Class probabilities, %s (ncomp = %d)', obj$classnames[[nc]], ncomp),
+   main = sprintf("Class probabilities, %s (ncomp = %d)", obj$classnames[[nc]], ncomp),
    xlab = "Objects", ylab = "Probability", ylim = c(0, 1.1), show.lines = c(NA, 0.5), ...) {
 
    if (is.null(obj$p.pred)) {
@@ -319,7 +319,7 @@ plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, 
 #' @param nc
 #' if there are several classes, which class to make the plot for (NULL - summary for all classes).
 #' @param ...
-#' most of the graphical parameters from \code{\link{mdaplot}} function can be used.
+#' other parameters for \code{\link{plotPerformance.classres})
 #'
 #' @details
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
@@ -340,7 +340,7 @@ plotSensitivity.classres <- function(obj, ...) {
 #' @param nc
 #' if there are several classes, which class to make the plot for (NULL - summary for all classes).
 #' @param ...
-#' most of the graphical parameters from \code{\link{mdaplot}} function can be used.
+#' other parameters for \code{\link{plotPerformance.classres})
 #'
 #' @details
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
@@ -361,7 +361,7 @@ plotSpecificity.classres <- function(obj, ...) {
 #' @param nc
 #' if there are several classes, which class to make the plot for (NULL - summary for all classes).
 #' @param ...
-#' most of the graphical parameters from \code{\link{mdaplot}} function can be used.
+#' other parameters for \code{\link{plotPerformance.classres})
 #'
 #' @details
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
@@ -370,7 +370,6 @@ plotSpecificity.classres <- function(obj, ...) {
 plotMisclassified.classres = function(obj, ...) {
    return(plotPerformance(obj, param = "misclassified", ...))
 }
-
 
 #' Performance plot for classification results
 #'
@@ -382,18 +381,20 @@ plotMisclassified.classres = function(obj, ...) {
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
 #' @param nc
 #' if there are several classes, which class to make the plot for.
-#' @param param
-#' which performance parameter to make the plot for.
 #' @param type
 #' type of the plot
-#' @param main
-#' main title for the plot
+#' @param param
+#' which performance parameter to make the plot for (can be a vector with several values).
 #' @param xlab
 #' label for x axis
 #' @param ylab
 #' label for y axis
 #' @param ylim
 #' vector with two values - limits for y axis
+#' @param xticks
+#' vector with x-axis tick values
+#' @param show.plot
+#' logical, shall plot be created or just plot series object is needed
 #' @param ...
 #' most of the graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
@@ -402,8 +403,7 @@ plotMisclassified.classres = function(obj, ...) {
 #'
 #' @export
 plotPerformance.classres <- function(obj, nc = 1, type = "h",
-   param = c("sensitivity", "specificity", "misclassified"),
-   main = sprintf("Classification performance (%s)", obj$classnames[[nc]]), xlab = "Components",
+   param = c("sensitivity", "specificity", "misclassified"), xlab = "Components",
    ylab = "", ylim = c(0, 1.1), xticks = 1:obj$ncomp, show.plot = TRUE, ...) {
 
    # prepare plot data
@@ -413,14 +413,14 @@ plotPerformance.classres <- function(obj, nc = 1, type = "h",
    }
    rownames(plot_data) <- param
    colnames(plot_data) <- colnames(obj$tp)
+   attr(plot_data, "name") <- sprintf("Classification performance (%s)", obj$classnames[[nc]])
 
    # if no plot needed return the plat data
    if (!show.plot) {
       return(plot_data)
    }
 
-   mdaplotg(plot_data, type = type, main = main, xticks = xticks,
-      xlab = xlab, ylim = ylim, ylab = ylab, ...)
+   mdaplotg(plot_data, type = type, xticks = xticks, xlab = xlab, ylim = ylim, ylab = ylab, ...)
 }
 
 #' Prediction plot for classification results
@@ -431,19 +431,13 @@ plotPerformance.classres <- function(obj, nc = 1, type = "h",
 #' @param obj
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
 #' @param nc
-#' if there are several classes, which class to make the plot for (NULL - summary for all classes).
+#' vector with classes to show predictions for.
 #' @param ncomp
-#' which number of components to make the plot for (one value, if NULL - model selected number will
-#' be used).
-#' This parameter shal not be used for multiclass models or results as predictions in this case are
-#'  only
-#' for optimal number of components
-#' @param type
-#' type of the plot
-#' @param main
-#' main title for the plot
+#' model complexity (number of components) to make the plot for.
 #' @param ylab
 #' label for y axis
+#' @param show.plot
+#' logical, shall plot be created or just plot series object is needed
 #' @param ...
 #' most of the graphical parameters from \code{\link{mdaplotg}} or \code{\link{mdaplot}} function
 #' can be used.
@@ -453,7 +447,7 @@ plotPerformance.classres <- function(obj, nc = 1, type = "h",
 #'
 #' @export
 plotPredictions.classres <- function(obj, nc = 1:obj$nclasses, ncomp = obj$ncomp.selected,
-   type = "p", ylab = "", show.plot = TRUE, ...) {
+   ylab = "", show.plot = TRUE, ...) {
 
    # prepare data and attributes
    attrs <- mda.getattr(obj$c.pred)
@@ -505,18 +499,17 @@ plotPredictions.classres <- function(obj, nc = 1:obj$nclasses, ncomp = obj$ncomp
 #' Plot function for classification results
 #'
 #' @description
-#' Generic plot function for classification results. Shows predicted class values.
+#' Generic plot function for classification results.
+#' Alias for \code{\link{plotPrediction.classres}}.
 #'
 #' @param x
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
-#' @param nc
-#' if there are several classes, which class to make the plot for (NULL - summary for all classes).
 #' @param ...
-#' other arguments
+#' other arguments for \code{plotPrediction()} method.
 #'
 #' @export
-plot.classres <- function(x, nc = NULL, ...){
-   plotPredictions.classres(x, nc = nc, ...)
+plot.classres <- function(x, ...){
+   plotPredictions.classres(x, ...)
 }
 
 #' as.matrix method for classification results
@@ -589,7 +582,7 @@ print.classres <- function(x, str = "Classification results (class classres)\nMa
 #' @param object
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
 #' @param ncomp
-#' which number of components to make the plot for .
+#' which number of components to make the plot for.
 #' @param nc
 #' vector with class numbers to show the summary for.
 #' @param ...
