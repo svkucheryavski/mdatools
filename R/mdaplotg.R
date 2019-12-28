@@ -28,9 +28,10 @@
 #'
 mdaplotg.showLegend <- function(legend, col, pt.bg = NA, pch = NULL, lty = NULL, lwd = NULL,
    cex = 1, bty = "o", position = "topright", plot = TRUE, ...) {
+
    # which positions need multiple columns
-   onecolpos <- c("topright", "topleft", "bottomright", "bottomleft")
-   multcolpos <- c("top", "bottom", "right", "left")
+   onecolpos <- c("topright", "topleft", "bottomright", "bottomleft", "right", "left")
+   multcolpos <- c("top", "bottom")
 
    if (!(position %in% c(onecolpos, multcolpos))) {
       stop("Wrong values for 'legend.position' argument!")
