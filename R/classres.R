@@ -452,82 +452,53 @@ plotPerformance.classres <- function(obj, nc = 1, type = "h",
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 #'
 #' @export
-plotPredictions.classres <- function(obj, nc = NULL, ncomp = NULL, type = 'p',
-                                    main = NULL, ylab = '', ...) {
+plotPredictions.classres <- function(obj, nc = 1:obj$nclasses, ncomp = obj$ncomp.selected,
+   type = "p", ylab = "", show.plot = TRUE, ...) {
 
-   if (is.null(obj))
-      stop('No classification results were provided!')
+   # prepare data and attributes
+   attrs <- mda.getattr(obj$c.pred)
+   c.pred <- as.matrix(obj$c.pred[, ncomp, nc])
+   row_ind <- 1:nrow(c.pred)
 
-   # get classnames
-   classnames = dimnames(obj$c.pred)[[3]]
+   class_names <- obj$classnames[nc]
+   class_numbers <- seq_along(nc) + 1
 
-   # if vector with class number was not provided show plot for all of them
-   if (is.null(nc))
-      nc = 1:obj$nclasses
+   # multiply classes to integers starting from 2 (1 will be for none)
+   plot_data <- (c.pred > 0) %*% (if (length(nc) == 1) class_numbers else diag(class_numbers))
 
-   # if vector with names were provided instead of numbers - convert to numbers
-   if (is.character(nc))
-      nc = which(classnames %in% nc)
+   # fine those which were not classified as members of any class (none)
+   plot_data <- cbind(rowSums(plot_data) == 0, plot_data)
 
-   # take unique values and check correctness
-   nc = unique(nc)
-   if (length(nc) == 0 || min(nc)< 1 || max(nc) > dim(obj$c.pred)[3])
-      stop('Incorrect class numbers or names!')
-   nclasses = length(nc)
+   # unfold matrix with class numbers and merge with row indices
+   plot_data <- cbind(row_ind, as.numeric(plot_data))
 
-   # set main title
-   if (is.null(main)) {
-      main = 'Predictions'
-      if (!is.null(ncomp) && length(ncomp) == 1)
-         main = sprintf('%s (ncomp = %d)', main, ncomp)
+   # remove rows with zeros as class number
+   plot_data <- plot_data[plot_data[, 2] > 0, , drop = FALSE]
+
+   # add row names and exclude hidden rows
+   if (is.null(attrs$yaxis.name)) attrs$yaxis.name <- "Objects"
+   plot_data <- mda.exclrows(plot_data, plot_data[, 1] %in% attrs$exclrows)
+   rownames(plot_data) <- rownames(c.pred)[plot_data[, 1]]
+   colnames(plot_data) <- c(attrs$yaxis.name, "Classes")
+   attr(plot_data, "name") <- sprintf("Predictions (ncomp = %d)", ncomp)
+
+   if (!show.plot) {
+      return(plot_data)
    }
 
-   ncomp = getSelectedComponents.classres(obj, ncomp)
-
-   if (max(ncomp) > dim(obj$c.pred)[2])
-      stop('Wrong value for ncomp parameter!')
-
-   # extract predicted values for particular component
-   attrs = mda.getattr(obj$c.pred)
-   c.pred = as.matrix(obj$c.pred[, ncomp, nc])
-
-   if (nclasses > 1) {
-      # prepare matrix for the results
-      pdata = matrix(0, nrow = nrow(c.pred), ncol = nclasses + 1)
-      # find objects that were not classified for any of the class and set rows = 1 in first column
-      pdata[, 1] = apply(c.pred, 1, function(x)(all(x == -1)))
-      # set values for the other
-      for (i in 1:nclasses)
-         pdata[, i + 1] = (c.pred[, i] == 1) * (i + 1)
-      # unfold the matrix
-      dim(pdata) = NULL
-      # add evector with indices of objects
-      pdata = cbind(rep(1:nrow(c.pred), nclasses + 1), pdata)
-      # remove all rows with zeros in the second column
-      pdata = pdata[pdata[, 2] != 0, ]
-      # assign proper rownames
-      rownames(pdata) = rownames(c.pred)[pdata[, 1]]
-      # assign other attributes
-      pdata = mda.setattr(pdata, attrs)
-      # exclude rows
-      attr(pdata, 'exclrows') = NULL
-      pdata = mda.exclrows(pdata, pdata[, 1] %in% attrs$exclrows)
-      row.ind = pdata[, 1]
-   } else {
-      pdata = cbind((1:nrow(c.pred)), (c.pred == 1) + 1)
-      pdata = mda.setattr(pdata, attrs)
-   }
-
-   colnames(pdata) = c(ifelse(is.null(attrs$yaxis.name), 'Objects', attrs$yaxis.name), 'Classes')
+   ylim <- c(0.8, max(class_numbers) + 0.2)
+   yticks <- c(1, class_numbers)
+   yticklabels <- c("None", class_names)
 
    if (is.null(obj$c.ref)) {
-      mdaplot(pdata, type = 'p', main = main, ylab = ylab, yticks = c(1:(nclasses + 1)),
-              yticklabels = c('None', classnames[nc]), ylim = c(0.8, nclasses + 1.2), ...)
+      return(
+         mdaplot(plot_data, type = "p", ylab = ylab, yticks = yticks,
+            yticklabels = yticklabels, ylim = ylim, ...)
+      )
    } else {
-      pdata.g = as.factor(obj$c.ref[pdata[, 1]])
-      mdaplotg(pdata, type = 'p', main = main, ylab = ylab, yticks = c(1:(nclasses + 1)),
-               groupby = pdata.g,
-              yticklabels = c('None', classnames[nc]), ylim = c(0.8, nclasses + 1.2), ...)
+      groupby <- as.factor(obj$c.ref[plot_data[, 1]])
+      mdaplotg(plot_data, type = "p", ylab = ylab, yticks = yticks,
+            groupby = groupby, yticklabels = yticklabels, ylim = ylim, ...)
    }
 }
 
@@ -628,7 +599,7 @@ print.classres <- function(x, str = "Classification results (class classres)\nMa
 summary.classres <- function(object, ncomp = object$ncomp.selected,
    nc = seq_len(object$nclasses), ...) {
 
-   cat("\nClassifiation results (class classres) summary\n")
+   cat("\nClassification results (class classres) summary\n")
 
    if (is.null(object$c.ref)) {
       cat("No reference data provided to calculate prediction performance.")
