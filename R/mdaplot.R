@@ -328,7 +328,7 @@ mdaplot.getXAxisLim <- function(ps, xlim, show.labels = FALSE, show.lines = FALS
    if (!is.null(xlim)) return(xlim)
 
    # x axis limits in case of bar plot
-   if (!is.null(bwd) && bwd > 0) {
+   if (ps$type == "h") {
       values <- ps$x_values
       bwd <- if (length(values) == 1) 2 * bwd else bwd * min(diff(values))
       return(c(min(values) - bwd / 2, max(values) + bwd / 2))

@@ -198,7 +198,8 @@ mdaplotg.getLegend <- function(ps, data.names, legend = NULL) {
 #' @return
 #' vector with two values
 #'
-mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.position, bwd = NULL) {
+mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, show.labels,
+   legend.position, bwd = NULL) {
 
    # if user provided xlim values - use them
    if (!is.null(xlim)) {
@@ -208,7 +209,8 @@ mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.positi
    # function which returns xlim values for given plotseries
    f <- function(p) {
       return(
-         mdaplot.getXAxisLim(p, xlim = NULL, show.excluded = show.excluded, bwd = bwd)
+         mdaplot.getXAxisLim(p, xlim = NULL, show.labels = show.labels,
+            show.excluded = show.excluded, bwd = bwd)
       )
    }
 
@@ -232,7 +234,6 @@ mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, legend.positi
 
    return(xlim)
 }
-
 
 #' Compute y-axis limits for mdaplotg
 #'
@@ -424,8 +425,8 @@ mdaplotg <- function(
    }
 
    # get axis limits
-   xlim <- mdaplotg.getXLim(ps, xlim, show.excluded, show.legend, legend.position, bwd = bwd)
    ylim <- mdaplotg.getYLim(ps, ylim, show.excluded, show.legend, legend.position, show.labels)
+   xlim <- mdaplotg.getXLim(ps, xlim, show.excluded, show.legend, show.labels, legend.position, bwd)
 
    # check and prepare xticklabels
    xticklabels <- mdaplot.getXTickLabels(xticklabels, xticks, NULL)
