@@ -615,7 +615,7 @@ pca.mvreplace <- function(x, center = TRUE, scale = FALSE, maxncomp = 10, expvar
 
       # get and trancate scores and loadings and reestimate the values
       scoresp <- scores
-      loadings <- res$loadings[, 1:ncomp]
+      loadings <- res$loadings[, seq_len(ncomp)]
       scores <- x %*% loadings
       x_new <- tcrossprod(scores, loadings)
 
@@ -629,7 +629,7 @@ pca.mvreplace <- function(x, center = TRUE, scale = FALSE, maxncomp = 10, expvar
       if (n > 2) {
          # calculate difference between scores for convergence
          ncompcond <- min(ncol(scores), ncol(scoresp))
-         cond <- sum((scores[, 1:ncompcond] - scoresp[, 1:ncompcond])^2)
+         cond <- sum((scores[, seq_len(ncompcond)] - scoresp[, seq_len(ncompcond)])^2)
       }
 
       n <- n + 1
@@ -709,11 +709,13 @@ getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
 pca.svd <- function(x, ncomp = min(ncol(x), nrow(x) - 1)) {
 
    s <- svd(x, nu = ncomp, nv = ncomp)
+   lambda <- s$d[seq_len(ncomp)]
+
    return(
       list(
          loadings = s$v,
-         scores = s$u %*% diag(s$d)[1:ncomp, 1:ncomp],
-         eigenvals = s$d[1:ncomp]^2 / (nrow(x) - 1),
+         scores = s$u %*% diag(lambda, ncomp, ncomp),
+         eigenvals = lambda^2 / (nrow(x) - 1),
          ncomp = ncomp
       )
    )

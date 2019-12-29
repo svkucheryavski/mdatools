@@ -454,7 +454,7 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
       }
 
       Q[, i] <- rowSums(res^2)
-      T2[, i] <- rowSums(scoresn[, 1:i, drop = F]^2)
+      T2[, i] <- rowSums(scoresn[, seq_len(i), drop = F]^2)
    }
 
    # set attributes for Q
