@@ -79,98 +79,6 @@ classres <- function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = 1) {
    return(obj)
 }
 
-#' Calculation of  classification performance parameters
-#'
-#' @description
-#' Calculates and returns performance parameters for classification result (e.g. number of false
-#' negatives, false positives, sn, specificity, etc.).
-#'
-#' @param c.ref
-#' reference class values for objects (vector with numeric or text values)
-#' @param c.pred
-#' predicted class values for objects (array nobj x ncomponents x nclasses)
-#'
-#' @return
-#' Returns a list with following fields:
-#' \tabular{ll}{
-#'    \code{$fn} \tab number of false negatives (nclasses x ncomponents) \cr
-#'    \code{$fp} \tab number of false positives (nclasses x ncomponents) \cr
-#'    \code{$tp} \tab number of true positives (nclasses x ncomponents) \cr
-#'    \code{$sensitivity} \tab sn values (nclasses x ncomponents) \cr
-#'    \code{$specificity} \tab specificity values (nclasses x ncomponents) \cr
-#'    \code{$specificity} \tab ms ratio values (nclasses x ncomponents) \cr
-#' }
-#'
-#' @details
-#' The function is called automatically when a classification result with reference values is
-#' created, for example when applying a \code{plsda} or \code{simca} models.
-#'
-classres.getClassificationPerformance <- function(c.ref, c.pred) {
-
-   if (is.null(c.ref) || is.null(c.pred)) {
-      stop("Both reference and predicted class values are required.")
-   }
-
-   if (length(c.ref) != dim(c.pred)[1]) {
-      stop("Number of objects in reference and predicted results should be the same.")
-   }
-
-   # remove excluded rows for correct calculation of performance
-   dim(c.ref) <- NULL
-   attrs <- mda.getattr(c.pred)
-   if (length(attrs$exclrows) > 0) {
-      c.pred <- c.pred[-attrs$exclrows, , , drop = F]
-      c.ref <- c.ref[-attrs$exclrows]
-   }
-
-   nobj <- dim(c.pred)[1]
-   ncomp <- dim(c.pred)[2]
-   nclasses <- dim(c.pred)[3]
-
-   tp <- matrix(0, nrow = nclasses, ncol = ncomp)
-   fp <- matrix(0, nrow = nclasses, ncol = ncomp)
-   fn <- matrix(0, nrow = nclasses, ncol = ncomp)
-   tn <- matrix(0, nrow = nclasses, ncol = ncomp)
-
-   # compute main performance indicators
-   classnames <- dimnames(c.pred)[[3]]
-   for (i in seq_len(nclasses)) {
-      fn[i, ] <- colSums((c.ref == classnames[i]) & (c.pred[, , i, drop = F] == -1))
-      fp[i, ] <- colSums((c.ref != classnames[i]) & (c.pred[, , i, drop = F] == 1))
-      tp[i, ] <- colSums((c.ref == classnames[i]) & (c.pred[, , i, drop = F] == 1))
-      tn[i, ] <- colSums((c.ref != classnames[i]) & (c.pred[, , i, drop = F] == -1))
-   }
-
-   # compute main statistics
-   sn <- tp / (tp + fn)
-   sp <- tn / (tn + fp)
-   ms <- (fp + fn) / (tp + tn + fp + fn)
-
-   # add row with summary for all classes
-   sn <- rbind(sn, colSums(tp) / colSums(tp + fn))
-   sp <- rbind(sp, colSums(tn) / colSums(tn + fp))
-   ms <- rbind(ms, colSums(fp + fn) / colSums(tp + tn + fp + fn))
-
-   # add names
-   row_names <- dimnames(c.pred)[[3]]
-   col_names <- dimnames(c.pred)[[2]]
-   rownames(fn) <- rownames(fp) <- rownames(tp) <- rownames(tn) <- row_names
-   colnames(fn) <- colnames(fp) <- colnames(tp) <- colnames(sn) <- colnames(sp) <- col_names
-   rownames(sn) <- rownames(sp) <- rownames(ms) <- c(row_names, "Total")
-
-   return(
-      list(
-         "fn" = fn,
-         "fp" = fp,
-         "tp" = tp,
-         "tn" = tn,
-         "sensitivity" = sn,
-         "specificity" = sp,
-         "misclassified" = ms
-      )
-   )
-}
-
 #' Confusion matrix for classification results
 #'
 #' @details
@@ -263,6 +171,209 @@ showPredictions.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
    print(pred)
 }
 
+#' as.matrix method for classification results
+#'
+#' @description
+#' Generic \code{as.matrix} function for classification results. Returns matrix with performance
+#' values for specific class.
+#'
+#' @param x
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param ncomp
+#' model complexity (number of components) to show the parameters for.
+#' @param nc
+#' if there are several classes, which class to show the parameters for.
+#' @param ...
+#' other arguments
+#'
+#' @export
+as.matrix.classres <- function(x, ncomp = NULL, nc = 1, ...) {
+
+   if (is.null(x$c.ref)) return()
+   res <- cbind(
+      x$tp[nc, ], x$fp[nc, ], x$tn[nc, ], x$fn[nc, ],
+      round(x$specificity[nc, ], 3),
+      round(x$sensitivity[nc, ], 3),
+      round(1 - x$misclassified[nc, ], 3)
+   )
+
+   if (!is.null(ncomp)) res <- res[ncomp, , drop = FALSE]
+   colnames(res) <- c("TP", "FP", "TN", "FN", "Specificity", "Sensitivity", "Accuracy")
+   if (any(is.na(x$specificity))) res <- res[, -5]
+
+   return(res)
+}
+
+#' Print information about classification result object
+#'
+#' @description
+#' Generic \code{print} function for classification results. Prints information about major fields
+#' of the object.
+#'
+#' @param x
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param str
+#' User specified text (e.g. to be used for particular method, like PLS-DA, etc).
+#' @param ...
+#' other arguments
+#'
+#' @export
+print.classres <- function(x, str = "Classification results (class classres)\nMajor fields:", ...) {
+
+   if (nchar(str) > 0) fprintf("\n%s\n", str)
+
+   cat("$c.pred - predicted class values\n")
+
+   if (!is.null(x$c.ref)) {
+      cat("$c.ref - reference (true) class values\n")
+      cat("$tp - number of true positives\n")
+      cat("$tn - number of true negatives\n")
+      cat("$fp - number of false positives\n")
+      cat("$fn - number of false negatives\n")
+      cat("$specificity - specificity of predictions\n")
+      cat("$sensitivity - sn of predictions\n")
+      cat("$misclassified - misclassification ratio for predictions\n")
+   }
+}
+
+#' Summary statistics about classification result object
+#'
+#' @description
+#' Generic \code{summary} function for classification results. Prints performance values for the
+#' results.
+#'
+#' @param object
+#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param ncomp
+#' which number of components to make the plot for.
+#' @param nc
+#' vector with class numbers to show the summary for.
+#' @param ...
+#' other arguments
+#'
+#' @export
+summary.classres <- function(object, ncomp = object$ncomp.selected,
+   nc = seq_len(object$nclasses), ...) {
+
+   cat("\nClassification results (class classres) summary\n")
+
+   if (is.null(object$c.ref)) {
+      cat("No reference data provided to calculate prediction performance.")
+      return()
+   }
+
+   fprintf("\nNumber of selected components: %d", ncomp)
+   fprintf("\nNumber of classes: %d\n", object$nclasses)
+
+   for (i in nc) {
+      fprintf("\nClass '%s':\n", object$classnames[[i]])
+      print(as.matrix.classres(object, nc = i))
+   }
+
+   cat("\n")
+}
+
+################################
+#  Static methods              #
+################################
+
+#' Calculation of  classification performance parameters
+#'
+#' @description
+#' Calculates and returns performance parameters for classification result (e.g. number of false
+#' negatives, false positives, sn, specificity, etc.).
+#'
+#' @param c.ref
+#' reference class values for objects (vector with numeric or text values)
+#' @param c.pred
+#' predicted class values for objects (array nobj x ncomponents x nclasses)
+#'
+#' @return
+#' Returns a list with following fields:
+#' \tabular{ll}{
+#'    \code{$fn} \tab number of false negatives (nclasses x ncomponents) \cr
+#'    \code{$fp} \tab number of false positives (nclasses x ncomponents) \cr
+#'    \code{$tp} \tab number of true positives (nclasses x ncomponents) \cr
+#'    \code{$sensitivity} \tab sn values (nclasses x ncomponents) \cr
+#'    \code{$specificity} \tab specificity values (nclasses x ncomponents) \cr
+#'    \code{$specificity} \tab ms ratio values (nclasses x ncomponents) \cr
+#' }
+#'
+#' @details
+#' The function is called automatically when a classification result with reference values is
+#' created, for example when applying a \code{plsda} or \code{simca} models.
+#'
+classres.getClassificationPerformance <- function(c.ref, c.pred) {
+
+   if (is.null(c.ref) || is.null(c.pred)) {
+      stop("Both reference and predicted class values are required.")
+   }
+
+   if (length(c.ref) != dim(c.pred)[1]) {
+      stop("Number of objects in reference and predicted results should be the same.")
+   }
+
+   # remove excluded rows for correct calculation of performance
+   dim(c.ref) <- NULL
+   attrs <- mda.getattr(c.pred)
+   if (length(attrs$exclrows) > 0) {
+      c.pred <- c.pred[-attrs$exclrows, , , drop = F]
+      c.ref <- c.ref[-attrs$exclrows]
+   }
+
+   nobj <- dim(c.pred)[1]
+   ncomp <- dim(c.pred)[2]
+   nclasses <- dim(c.pred)[3]
+
+   tp <- matrix(0, nrow = nclasses, ncol = ncomp)
+   fp <- matrix(0, nrow = nclasses, ncol = ncomp)
+   fn <- matrix(0, nrow = nclasses, ncol = ncomp)
+   tn <- matrix(0, nrow = nclasses, ncol = ncomp)
+
+   # compute main performance indicators
+   classnames <- dimnames(c.pred)[[3]]
+   for (i in seq_len(nclasses)) {
+      fn[i, ] <- colSums((c.ref == classnames[i]) & (c.pred[, , i, drop = F] == -1))
+      fp[i, ] <- colSums((c.ref != classnames[i]) & (c.pred[, , i, drop = F] == 1))
+      tp[i, ] <- colSums((c.ref == classnames[i]) & (c.pred[, , i, drop = F] == 1))
+      tn[i, ] <- colSums((c.ref != classnames[i]) & (c.pred[, , i, drop = F] == -1))
+   }
+
+   # compute main statistics
+   sn <- tp / (tp + fn)
+   sp <- tn / (tn + fp)
+   ms <- (fp + fn) / (tp + tn + fp + fn)
+
+   # add row with summary for all classes
+   sn <- rbind(sn, colSums(tp) / colSums(tp + fn))
+   sp <- rbind(sp, colSums(tn) / colSums(tn + fp))
+   ms <- rbind(ms, colSums(fp + fn) / colSums(tp + tn + fp + fn))
+
+   # add names
+   row_names <- dimnames(c.pred)[[3]]
+   col_names <- dimnames(c.pred)[[2]]
+   rownames(fn) <- rownames(fp) <- rownames(tp) <- rownames(tn) <- row_names
+   colnames(fn) <- colnames(fp) <- colnames(tp) <- colnames(sn) <- colnames(sp) <- col_names
+   rownames(sn) <- rownames(sp) <- rownames(ms) <- c(row_names, "Total")
+
+   return(
+      list(
+         "fn" = fn,
+         "fp" = fp,
+         "tp" = tp,
+         "tn" = tn,
+         "sensitivity" = sn,
+         "specificity" = sp,
+         "misclassified" = ms
+      )
+   )
+}
+
+
+################################
+#  Plotting methods            #
+################################
+
 #' Plot for class belonging probability
 #'
 #' @description
@@ -306,7 +417,6 @@ plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, 
    return(mdaplot(obj$p.pred[, ncomp, nc], show.lines = show.lines, type = type,
       ylim = ylim, xlab = xlab, ylab = ylab, main = main, ...))
 }
-
 
 #' Sensitivity plot for classification results
 #'
@@ -510,100 +620,4 @@ plotPredictions.classres <- function(obj, nc = 1:obj$nclasses, ncomp = obj$ncomp
 #' @export
 plot.classres <- function(x, ...){
    plotPredictions.classres(x, ...)
-}
-
-#' as.matrix method for classification results
-#'
-#' @description
-#' Generic \code{as.matrix} function for classification results. Returns matrix with performance
-#' values for specific class.
-#'
-#' @param x
-#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
-#' @param ncomp
-#' model complexity (number of components) to show the parameters for.
-#' @param nc
-#' if there are several classes, which class to show the parameters for.
-#' @param ...
-#' other arguments
-#'
-#' @export
-as.matrix.classres <- function(x, ncomp = NULL, nc = 1, ...) {
-
-   if (is.null(x$c.ref)) return()
-   res <- cbind(x$tp[nc, ], x$fp[nc, ], x$tn[nc, ], x$fn[nc, ],
-      round(x$specificity[nc, ], 3), round(x$sensitivity[nc, ], 3))
-
-   if (!is.null(ncomp)) res <- res[ncomp, , drop = FALSE]
-   colnames(res) <- c("TP", "FP", "TN", "FN", "Spec", "Sens")
-   if (any(is.na(x$specificity))) res <- res[, -5]
-
-   return(res)
-}
-
-#' Print information about classification result object
-#'
-#' @description
-#' Generic \code{print} function for classification results. Prints information about major fields
-#' of the object.
-#'
-#' @param x
-#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
-#' @param str
-#' User specified text (e.g. to be used for particular method, like PLS-DA, etc).
-#' @param ...
-#' other arguments
-#'
-#' @export
-print.classres <- function(x, str = "Classification results (class classres)\nMajor fields:", ...) {
-
-   if (nchar(str) > 0) fprintf("\n%s\n", str)
-
-   cat("$c.pred - predicted class values\n")
-
-   if (!is.null(x$c.ref)) {
-      cat("$c.ref - reference (true) class values\n")
-      cat("$tp - number of true positives\n")
-      cat("$tn - number of true negatives\n")
-      cat("$fp - number of false positives\n")
-      cat("$fn - number of false negatives\n")
-      cat("$specificity - specificity of predictions\n")
-      cat("$sensitivity - sn of predictions\n")
-      cat("$misclassified - misclassification ratio for predictions\n")
-   }
-}
-
-#' Summary statistics about classification result object
-#'
-#' @description
-#' Generic \code{summary} function for classification results. Prints performance values for the
-#' results.
-#'
-#' @param object
-#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
-#' @param ncomp
-#' which number of components to make the plot for.
-#' @param nc
-#' vector with class numbers to show the summary for.
-#' @param ...
-#' other arguments
-#'
-#' @export
-summary.classres <- function(object, ncomp = object$ncomp.selected,
-   nc = seq_len(object$nclasses), ...) {
-
-   cat("\nClassification results (class classres) summary\n")
-
-   if (is.null(object$c.ref)) {
-      cat("No reference data provided to calculate prediction performance.")
-      return()
-   }
-
-   fprintf("\nNumber of selected components: %d", ncomp)
-   fprintf("\nNumber of classes: %d\n", object$nclasses)
-
-   for (i in nc) {
-      fprintf("\nClass '%s':\n", object$classnames[[i]])
-      print(as.matrix.classres(object, nc = i))
-   }
 }

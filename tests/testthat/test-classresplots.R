@@ -1,6 +1,7 @@
 #####################################################
 # Tests for plotting methods of classres() class    #
 #####################################################
+
 rm(list  = ls())
 # mock data
 
@@ -50,7 +51,6 @@ res <- list(
    "exclrows + one class" = res3,
    "exclrows + one comp + one class" = res3
 )
-
 
 pdf(file = "test_classres_plots.pdf")
 sink("output-classres.txt", append = FALSE, split = FALSE)
