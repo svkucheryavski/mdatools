@@ -1,5 +1,5 @@
 #####################################################
-# Tests for basic functionality of pcares() class  #
+# Tests for plotting methods of pcares() class      #
 #####################################################
 
 pdf(file = "test_pcares_plots.pdf")
@@ -8,14 +8,7 @@ data(people)
 x <- people
 m <- pca(x, scale = TRUE, ncomp = 10)
 
-par(mfrow = c(2, 2))
-plotResiduals(m$calres)
-plotResiduals(m$calres, 1, show.labels = T)
-plotResiduals(m$calres, 2, show.labels = T, colmap = c("red", "green"))
-plotResiduals(m$calres, 3, cgroup = x[, 1], show.labels = T, colmap = c("red", "green"), pch = 17)
-
-
-context('pcares: residual distance plots')
+context("pcares: residual distance plots")
 
 test_that("residuals plot works fine in general.", {
    expect_silent({

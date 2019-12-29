@@ -69,6 +69,7 @@ getPCARes <- function(X, ncomp) {
       eigenvals = eigenvals, totvar = sum(X_cal^2)))
 }
 
+data(people)
 x <- people
 x <- prep.autoscale(x, center = TRUE, scale = TRUE)
 m <- getPCARes(x, 5)
