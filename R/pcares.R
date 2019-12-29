@@ -95,10 +95,10 @@ pcares <- function(...) {
    # Creates an object of pcares class. In fact the class is a wrapper for ldecomp and
    # uses its methods and attributes.
 
-   res <- ldecomp(...)
-   class(res) <- c("pcares", "ldecomp")
+   obj <- ldecomp(...)
+   class(obj) <- c("pcares", "ldecomp")
 
-   return(res)
+   return(obj)
 }
 
 #' Residual distance plot
