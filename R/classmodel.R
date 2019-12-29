@@ -6,13 +6,13 @@
 #' text with class name in case of logical reference values
 #'
 #' @export
-classmodel.processReferenceValues <- function(c.ref, classname = NULL) {
+classmodel.processRefValues <- function(c.ref, classname = NULL) {
 
    if (is.null(c.ref) || is.factor(c.ref)) return(c.ref)
    attrs <- mda.getattr(c.ref)
 
    if (is.logical(c.ref)) {
-      return(mda.setattr(as.factor(ifelse(c.ref, model$classname, "None")), attrs))
+      return(mda.setattr(as.factor(ifelse(c.ref, classname, "None")), attrs))
    }
 
    if (is.character(c.ref)) {
@@ -161,4 +161,3 @@ plotPerformance.classmodel <- function(obj, nc = 1, param = "misclassified", typ
    mdaplotg(plot_data, type = type, main = main, xticks = xticks, xlab = xlab, ylab = ylab,
       ylim = ylim, ...)
 }
-

@@ -81,7 +81,7 @@ tf <- function(res, tp, tn, fp, fn, classnames, ncomp) {
 
 # 1. only c.pred, no c.ref
 context("classres: no reference data")
-expect_error(classres.getClassificationPerformance(NULL, c.pred))
+expect_error(classres.getPerformance(NULL, c.pred))
 
 # 2. c.ref and c.pred have different classes
 
@@ -92,7 +92,7 @@ fn <- rbind(c(6, 5, 6), c(5, 8, 8))
 tn <- rbind(c(11, 7, 6), c(11, 13, 9))
 fp <- rbind(c(9, 13, 14), c(9, 7, 11))
 
-res <- classres.getClassificationPerformance(c.ref, c.pred)
+res <- classres.getPerformance(c.ref, c.pred)
 tf(res, tp, tn, fp, fn, classnames, ncomp)
 
 # 3. c.ref and c.pred have same classes
@@ -103,7 +103,7 @@ fn <- rbind(c(6, 5, 6), c(5, 8, 8))
 tn <- rbind(c(4, 5, 2), c(4, 5, 4))
 fp <- rbind(c(6, 5, 8), c(6, 5, 6))
 
-res <- classres.getClassificationPerformance(c.ref[1:20], c.pred[1:20, , ])
+res <- classres.getPerformance(c.ref[1:20], c.pred[1:20, , ])
 tf(res, tp, tn, fp, fn, classnames, ncomp)
 
 # 4. same as #2 but with excluded rows
@@ -119,7 +119,7 @@ fn <- rbind(c(5, 4, 5), c(4, 6, 6))
 tn <- rbind(c(11, 6, 4), c(9, 12, 9))
 fp <- rbind(c(6, 11, 13), c(9, 6, 9))
 
-res <- classres.getClassificationPerformance(c.ref, c.predexcl)
+res <- classres.getPerformance(c.ref, c.predexcl)
 tf(res, tp, tn, fp, fn, classnames, ncomp)
 
 # 5. same as #4 but with only one component
@@ -135,7 +135,7 @@ fn <- rbind(c(5), c(4))
 tn <- rbind(c(11), c(9))
 fp <- rbind(c(6), c(9))
 
-res <- classres.getClassificationPerformance(c.ref, c.predexcl)
+res <- classres.getPerformance(c.ref, c.predexcl)
 tf(res, tp, tn, fp, fn, classnames, ncomp = 1)
 
 # 6. same as #4 but with only one class
@@ -151,7 +151,7 @@ fn <- rbind(c(5, 4, 5))
 tn <- rbind(c(11, 6, 4))
 fp <- rbind(c(6, 11, 13))
 
-res <- classres.getClassificationPerformance(c.ref, c.predexcl)
+res <- classres.getPerformance(c.ref, c.predexcl)
 tf(res, tp, tn, fp, fn, classnames[[1]], ncomp)
 
 # 7. same as #4 but with only one class and one component
@@ -167,7 +167,7 @@ fn <- rbind(c(5))
 tn <- rbind(c(11))
 fp <- rbind(c(6))
 
-res <- classres.getClassificationPerformance(c.ref, c.predexcl)
+res <- classres.getPerformance(c.ref, c.predexcl)
 tf(res, tp, tn, fp, fn, classnames[[1]], ncomp = 1)
 
 # 8. test classres() constructor
@@ -178,7 +178,7 @@ context("classres: constructor")
 c.predexcl <- c.pred
 attr(c.predexcl, "exclrows") <- excluded_rows
 
-res <- classres.getClassificationPerformance(c.ref, c.predexcl)
+res <- classres.getPerformance(c.ref, c.predexcl)
 classres <- classres(c.predexcl, c.ref)
 tf(classres, res$tp, res$tn, res$fp, res$fn, classnames, ncomp)
 

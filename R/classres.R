@@ -53,7 +53,7 @@ classres <- function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = 1) {
    }
 
    obj <- list()
-   obj$c.ref <- if(!is.null(c.ref)) as.factor(c.ref)
+   obj$c.ref <- if (!is.null(c.ref)) as.factor(c.ref)
    obj$c.pred <- c.pred
    obj$p.pred <- p.pred
    obj$nclasses <- dim(c.pred)[3]
@@ -69,7 +69,7 @@ classres <- function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = 1) {
    obj$ncomp.selected <- ncomp.selected
 
    if (!is.null(c.ref)) {
-      obj <- c(obj, classres.getClassificationPerformance(c.ref, c.pred))
+      obj <- c(obj, classres.getPerformance(c.ref, c.pred))
    }
 
 
@@ -110,7 +110,7 @@ getConfusionMatrix.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 
    # remove excluded rows
    if (length(attrs$exclrows) > 0) {
-      c.pred <- c.pred[-attrs$exclrows, , ,drop = FALSE]
+      c.pred <- c.pred[-attrs$exclrows, , , drop = FALSE]
       c.ref <- c.ref[-attrs$exclrows]
    }
 
@@ -153,22 +153,12 @@ getConfusionMatrix.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 #' @export
 showPredictions.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 
-   if (obj$nclasses == 1) {
-      pred = obj$c.pred[ , ncomp[1], , drop = F]
-   } else {
-      if (length(ncomp) == 1)
-         ncomp = matrix(ncomp, nrow = 1, ncol = obj$nclasses)
-
-      pred = NULL
-      for (i in seq_len(obj$nclasses)) {
-         pred = cbind(pred, obj$c.pred[, ncomp[i], i, drop = F])
-      }
-   }
-
-   dim(pred) <- c(nrow(pred), obj$nclasses)
-   dimnames(pred) <- list(dimnames(obj$c.pred)[[1]], dimnames(obj$c.pred)[[3]])
+   pred <- obj$c.pred[, ncomp, ]
+   dim(pred) <- dim(obj$c.pred)[c(1, 3)]
+   dimnames(pred) <- dimnames(obj$c.pred)[c(1, 3)]
 
    print(pred)
+   cat("\n")
 }
 
 #' as.matrix method for classification results
@@ -303,7 +293,7 @@ summary.classres <- function(object, ncomp = object$ncomp.selected,
 #' The function is called automatically when a classification result with reference values is
 #' created, for example when applying a \code{plsda} or \code{simca} models.
 #'
-classres.getClassificationPerformance <- function(c.ref, c.pred) {
+classres.getPerformance <- function(c.ref, c.pred) {
 
    if (is.null(c.ref) || is.null(c.pred)) {
       stop("Both reference and predicted class values are required.")
@@ -321,7 +311,6 @@ classres.getClassificationPerformance <- function(c.ref, c.pred) {
       c.ref <- c.ref[-attrs$exclrows]
    }
 
-   nobj <- dim(c.pred)[1]
    ncomp <- dim(c.pred)[2]
    nclasses <- dim(c.pred)[3]
 
@@ -477,7 +466,7 @@ plotSpecificity.classres <- function(obj, ...) {
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 #'
 #' @export
-plotMisclassified.classres = function(obj, ...) {
+plotMisclassified.classres <- function(obj, ...) {
    return(plotPerformance(obj, param = "misclassified", ...))
 }
 
@@ -618,6 +607,6 @@ plotPredictions.classres <- function(obj, nc = seq_len(obj$nclasses), ncomp = ob
 #' other arguments for \code{plotPrediction()} method.
 #'
 #' @export
-plot.classres <- function(x, ...){
+plot.classres <- function(x, ...) {
    plotPredictions.classres(x, ...)
 }
