@@ -190,6 +190,7 @@ splitPlotData <- function(data, type) {
    if (type %in%  c("p", "d")) {
       # scatter or density plot - take first and second columns as x and y
       x_values <- data[, 1]
+      names(x_values) <- rownames(data)
       attr(x_values, "name") <- colnames(data)[1]
       y_values <- data[, 2, drop = FALSE]
       attr(y_values, "name") <- colnames(data)[2]
@@ -451,9 +452,8 @@ getDataLabels <- function(ps, labels = NULL) {
    }
 
    # if nothing above works - use names as labels
-   x_values_excluded <- ps$x_values_excluded
-   labels <- rownames(y_values)
-   labels_excluded <- if (ps$type == "p") rownames(ps$y_values_excluded) else NULL
+   labels <- names(x_values)
+   labels_excluded <- if (ps$type == "p") names(ps$x_values_excluded) else NULL
    return(list(labels = labels, labels_excluded = labels_excluded))
 }
 
