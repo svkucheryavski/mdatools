@@ -31,8 +31,8 @@ classmodel.processReferenceValues <- function(c.ref, classname = NULL) {
 #' a classification model (object of class \code{simca}, \code{plsda}, etc.). if \code{NULL} value
 #' is specified, the result will be selected automatically by checking the nearest available from
 #' test, cv and calibration results.
-#' @param res
-#' which result to make the plot for (\code{"cal"}, \code{"cv"} or \code{"test"}).
+#' @param res.name
+#' name of result object to make the plot for ("test", "cv" or "cal").
 #' @param nc
 #' vector with class numbers to make the plot for.
 #' @param ncomp
@@ -44,23 +44,24 @@ classmodel.processReferenceValues <- function(c.ref, classname = NULL) {
 #' See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 #'
 #' @export
-plotPredictions.classmodel <- function(obj, res = NULL, nc = 1:obj$nclasses,
-   ncomp = obj$ncomp.selected, ...) {
+plotPredictions.classmodel <- function(obj, res.name = NULL, nc = seq_len(obj$nclasses),
+   ncomp = obj$ncomp.selected, main = NULL, ...) {
 
-   if (!is.null(res)) {
-      plotPredictions.cassres(res, nc = nc, ncomp = ncomp, ...)
-      return()
+   if (is.null(res.name)) {
+      res_names <- c("test", "cv", "cal")
+      name_ind <- which(res_names %in% names(obj$res[!sapply(obj$res, is.null)]))[1]
+      res.name <- res_names[name_ind]
    }
 
-   for (resname in c("test", "cv", "cal")) {
-      res <- obj$res[[resname]]
-      if (is.null(res)) continue
-      plotPredictions.classres(res, nc = nc, ncomp = ncomp, ...)
-      return()
+   res <- obj$res[[res.name]]
+   if (is.null(res)) {
+      stop("Wong value for 'res.name' parameter.")
    }
 
-   stop("Wong value for 'res' parameter.")
+   if (is.null(main)) main <- sprintf("Predictions (%s, ncomp = %d)", res.name, ncomp)
+   plotPredictions.classres(res, nc = nc, ncomp = ncomp, main = main, ...)
 }
+
 
 #' Specificity plot for classification model
 #'
@@ -145,10 +146,10 @@ plotMisclassified.classmodel <- function(obj, ...) {
 #' most of the graphical parameters from \code{\link{mdaplotg}} function can be used.
 #'
 #' @export
-plotPerformance.classmodel <- function(obj, nc = 1, param = "specificity", type = "h",
+plotPerformance.classmodel <- function(obj, nc = 1, param = "misclassified", type = "h",
    xlab = "Components", ylab = "", ylim = c(0, 1.15),
    main = sprintf("%s for %s (ncomp = %d)", param, obj$classnames[[nc]], ncomp),
-   xticks = seq_len(dim(obj$c.pred)[2]), ...) {
+   xticks = seq_len(dim(obj$res[["cal"]]$c.pred)[2]), ...) {
 
    res_names <- names(obj$res)
    plot_data <- list()

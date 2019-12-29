@@ -514,7 +514,7 @@ plotMisclassified.classres = function(obj, ...) {
 #' @export
 plotPerformance.classres <- function(obj, nc = 1, type = "h",
    param = c("sensitivity", "specificity", "misclassified"), xlab = "Components",
-   ylab = "", ylim = c(0, 1.1), xticks = seq_len(dim(obj$c.pred[2])), show.plot = TRUE, ...) {
+   ylab = "", ylim = c(0, 1.1), xticks = seq_len(dim(obj$c.pred)[2]), show.plot = TRUE, ...) {
 
    # prepare plot data
    plot_data <- matrix(0, nrow = length(param), ncol = obj$ncomp)
@@ -563,12 +563,11 @@ plotPredictions.classres <- function(obj, nc = seq_len(obj$nclasses), ncomp = ob
    attrs <- mda.getattr(obj$c.pred)
    c.pred <- as.matrix(obj$c.pred[, ncomp, nc])
    row_ind <- seq_len(nrow(c.pred))
-
    class_names <- obj$classnames[nc]
    class_numbers <- seq_along(nc) + 1
 
    # multiply classes to integers starting from 2 (1 will be for none)
-   plot_data <- (c.pred > 0) %*% diag(class_numbers, nc, nc)
+   plot_data <- (c.pred > 0) %*% diag(class_numbers, length(nc), length(nc))
 
    # fine those which were not classified as members of any class (none)
    plot_data <- cbind(rowSums(plot_data) == 0, plot_data)
