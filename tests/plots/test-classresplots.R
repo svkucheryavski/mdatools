@@ -181,6 +181,8 @@ for (i in seq_along(res)) {
    print(res[[i]])
    summary(res[[i]])
    showPredictions(res[[i]])
+   print(getConfusionMatrix(res[[i]], 1))
+
 }
 
 dev.off()

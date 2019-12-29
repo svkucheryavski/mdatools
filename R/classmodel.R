@@ -148,7 +148,7 @@ plotMisclassified.classmodel <- function(obj, ...) {
 #' @export
 plotPerformance.classmodel <- function(obj, nc = 1, param = "misclassified", type = "h",
    xlab = "Components", ylab = "", ylim = c(0, 1.15),
-   main = sprintf("%s for %s (ncomp = %d)", param, obj$classnames[[nc]], ncomp),
+   main = sprintf("%s for %s", param, obj$classnames[[nc]]),
    xticks = seq_len(dim(obj$res[["cal"]]$c.pred)[2]), ...) {
 
    res_names <- names(obj$res)

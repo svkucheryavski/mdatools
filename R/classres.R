@@ -521,6 +521,7 @@ plotPerformance.classres <- function(obj, nc = 1, type = "h",
    for (i in seq_along(param)) {
       plot_data[i, ] <- obj[[param[i]]][nc, ]
    }
+
    rownames(plot_data) <- param
    colnames(plot_data) <- colnames(obj$tp)
    attr(plot_data, "name") <- sprintf("Classification performance (%s)", obj$classnames[[nc]])
