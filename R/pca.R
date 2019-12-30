@@ -281,6 +281,8 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
    obj$lim.type <- lim.type
 
    for (i in seq_along(obj$res)) {
+      # this is needed for SIMCA where cv result do not have PCA part
+      if (!("pcares" %in% class(obj$res[[i]]))) next
       attr(obj$res[[i]]$Q, "u0") <- obj$Qlim[, 3]
       attr(obj$res[[i]]$T2, "u0") <- obj$T2lim[, 3]
    }
@@ -289,6 +291,40 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
    obj$testres <- obj$res[["test"]]
 
    return(obj)
+}
+
+#' Probabilities for residual distances
+#'
+#' @details
+#' Computes p-value for every object being from the same populaion as calibration set
+#' based on its orthogonal and score distances.
+#'
+#' @param obj
+#' object with PCA model
+#' @param ncomp
+#' number of components to compute the probability for
+#' @param q
+#' vector with squared orthogonal distances for given number of components
+#' @param h
+#' vector with score distances for given number of components
+#'
+#' @export
+getProbabilities.pca <- function(obj, ncomp, q, h) {
+
+   # if chisq / hotelling
+   if (obj$lim.type == "chisq") {
+      nobj <- obj$T2lim[4, ncomp]
+      return(pmin(chisq.prob(q, obj$Qlim[3:4, ncomp]), hotelling.prob(h, ncomp, nobj)))
+   }
+
+   # if data driven
+   h0 <- obj$T2lim[3, ncomp]
+   Nh <- round(obj$T2lim[4, ncomp])
+   q0 <- obj$Qlim[3, ncomp]
+   Nq <- round(obj$Qlim[4, ncomp])
+
+   f <- Nh * h / h0 + Nq * q / q0
+   return(pchisq(f, Nh + Nq))
 }
 
 #' Categorize PCA results based on orthogonal and score distances.
@@ -661,7 +697,7 @@ pca.mvreplace <- function(x, center = TRUE, scale = FALSE, maxncomp = 10, expvar
 #' distribution for generating random numbers, 'unif' or 'norm'
 #'
 #' @import stats
-getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
+pca.getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
 
    if (is.null(rand)) {
       return(X)
@@ -691,7 +727,6 @@ getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
 
    return(crossprod(Q, X))
 }
-
 
 #' Singular Values Decomposition based PCA algorithm
 #'
@@ -803,7 +838,7 @@ pca.run <- function(x, ncomp, method, rand = NULL) {
    )
 
    # use proper function to compute scores, loadings and eigenvalues
-   res <- f(getB(x, k = ncomp, rand = rand), ncomp)
+   res <- f(pca.getB(x, k = ncomp, rand = rand), ncomp)
 
    # recompute scores and eigenvalues if randomized algorithm was used
    if (!is.null(rand)) {
@@ -1018,6 +1053,8 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
    DoF[DoF < 1] <- 1
    DoF[DoF > 250] <- 250
 
+   if (lim.type == "chisq") DoF <- pT2$nobj
+
    lim <- switch(lim.type,
       "chisq" = hotelling.crit(pT2$nobj, 1:model$ncomp, alpha, gamma),
       "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
@@ -1035,7 +1072,6 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
 
    return(lim)
 }
-
 
 ################################
 #  Plotting methods            #
@@ -1076,6 +1112,8 @@ plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Compone
    ylab = "Explained variance, %", show.legend = TRUE, labels = "values", res = obj$res,
    variance = "expvar", ...) {
 
+   res <- getRes(res, "ldecomp")
+
    if (length(res) == 1) {
       return(
          plotVariance(res[[1]], type = type, main = main, xlab = xlab, ylab = ylab,
@@ -1083,10 +1121,12 @@ plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Compone
       )
    }
 
-   nres <- length(res)
-   plot_data <- matrix(0, nres, obj$ncomp)
-   for (i in seq_len(nres)) {
-      plot_data[i, ] <- plotVariance(res[[i]], type = type, variance = variance, show.plot = FALSE)
+   plot_data <- NULL
+   for (r in res) {
+      plot_data <- rbind(
+         plot_data,
+         plotVariance(r, type = type, variance = variance, show.plot = FALSE)
+      )
    }
 
    colnames(plot_data) <- colnames(obj$loadings)
@@ -1170,6 +1210,8 @@ plotCumVariance.pca <- function(obj, type = "b", main = "Cumulative variance",
 #' @export
 plotScores.pca <- function(obj, comp = c(1, 2), type = "p", main = "Scores", show.labels = FALSE,
    show.legend = TRUE, legend.position = "topright", show.axes = TRUE, res = obj$res, ...) {
+
+   res <- getRes(res, "ldecomp")
 
    if (length(res) == 1) {
       return(
@@ -1266,6 +1308,8 @@ plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
    xlim = NULL, ylim = NULL, show.legend = TRUE, show.limits = TRUE,
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    res = obj$res, ...) {
+
+   res <- getRes(res, "ldecomp")
 
    if (norm && obj$lim.type == "chisq") {
       warning("Normalization of distance values can not be used for lim.type='chisq'.")
@@ -1604,7 +1648,6 @@ plotDistDoF <- function(obj, type = "b", main = "Degrees of freedom",
    mdaplotyy(plot_data, type = type, main = main, labels = labels, ylab = ylab, ...)
 }
 
-
 #' Extreme plot
 #'
 #' @description
@@ -1648,34 +1691,6 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
       stop("Wrong value for parameter 'ncomp'.")
    }
 
-   # function to compute probabilities based on distances and distribution parameters
-   getProbabilities <- function(T2, Q, T2lim, Qlim, ncomp) {
-      q <- Q[, ncomp]
-      h <- T2[, ncomp]
-
-      # if chisq / hotelling
-      if (obj$lim.type == "chisq") {
-         nobj <- Qlim[4, ncomp]
-         return(
-            apply(
-               rbind(
-                  chisq.prob(q, Qlim[3:4, ncomp]),
-                  hotelling.prob(h, ncomp, nobj)
-               ), 2, max
-            )
-         )
-      }
-
-      # if data driven
-      h0 <- obj$T2lim[3, ncomp]
-      Nh <- round(obj$T2lim[4, ncomp])
-      q0 <- obj$Qlim[3, ncomp]
-      Nq <- round(obj$Qlim[4, ncomp])
-
-      f <- Nh * h / h0 + Nq * q / q0
-      return(pchisq(f, Nh + Nq))
-   }
-
    # remove excluded values if any
    T2 <- res$T2
    Q <- res$Q
@@ -1707,7 +1722,7 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
    # show the plints
    alpha_mat <- matrix(alpha, byrow = TRUE, ncol = nobj, nrow = nobj)
    for (i in seq_along(comp)) {
-      p <- getProbabilities(T2, Q, obj$T2lim, obj$Qlim, comp[i])
+      p <- getProbabilities.pca(obj, comp[i], Q[, comp[i]], T2[, comp[i]])
       p_mat <- matrix((1 - p), ncol = nobj, nrow = nobj)
       observed <- colSums(p_mat < alpha_mat)
       points(expected, observed, pch = pch[i], lwd = lwd, cex = 1.2, col = col[i], bg = bg[i])
@@ -1717,7 +1732,6 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
    mdaplotg.showLegend(legend, pt.bg = bg, lty = NA, col = col, pch = pch, lwd = lwd,
       position = legend.position)
 }
-
 
 #' Model overview plot for PCA
 #'

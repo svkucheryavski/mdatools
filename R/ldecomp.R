@@ -303,11 +303,17 @@ print.ldecomp <- function(x, str = NULL, ...) {
 #' other arguments
 #'
 #' @export
-as.matrix.ldecomp <- function(x, ...) {
-   data <- cbind(x$expvar, x$cumexpvar)
-   rownames(data) <- colnames(x$Q)
-   colnames(data) <- c("Expvar", "Cumexpvar")
-   return(data)
+as.matrix.ldecomp <- function(x, ncomp = NULL, ...) {
+
+   out <- cbind(x$expvar, x$cumexpvar)
+   rownames(out) <- colnames(x$Q)
+   colnames(out) <- c("Expvar", "Cumexpvar")
+
+   if (!is.null(ncomp)) {
+      out <- out[ncomp, , drop = FALSE]
+   }
+
+   return(out)
 }
 
 #' Summary statistics for linear decomposition

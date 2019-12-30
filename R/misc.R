@@ -917,3 +917,32 @@ ddrobust.param <- function(U, ncomp, alpha, gamma) {
 fprintf <- function(...) {
    cat(sprintf(...))
 }
+
+#' Return list with valid results
+#'
+#' @param obj
+#' object with PCA model
+getRes <- function(res, classname = "ldecomp") {
+
+   if (!is.list(res)) {
+      stop("Parameter 'res' should be a list with result objects.")
+   }
+
+   res <- res[sapply(res, function(x) classname %in% class(x))]
+
+   if (length(res) == 0) {
+      stop("No valid results provided.")
+   }
+
+   return(res)
+}
+
+#' Capitalize text or vector with text values
+#'
+#' @param str
+#' text of vector with text values
+#'
+#' @export
+capitalize <- function(str) {
+   return(sapply(str,  function(s) paste0(toupper(substring(s, 1,1)), substring(s, 2))))
+}

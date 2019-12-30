@@ -187,9 +187,10 @@ as.matrix.classres <- function(x, ncomp = NULL, nc = 1, ...) {
       round(1 - x$misclassified[nc, ], 3)
    )
 
+   res[is.nan(res)] <- NA
+
    if (!is.null(ncomp)) res <- res[ncomp, , drop = FALSE]
    colnames(res) <- c("TP", "FP", "TN", "FN", "Specificity", "Sensitivity", "Accuracy")
-   if (any(is.na(x$specificity))) res <- res[, -5]
 
    return(res)
 }
