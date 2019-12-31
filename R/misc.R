@@ -875,7 +875,7 @@ ddmoments.param <- function(U) {
 
    u0 <- apply(U, 2, mean)
    su <- apply(U, 2, sd)
-   Nu <- 2 * (u0/su)^2
+   Nu <- 2 * (u0 / su)^2
 
    return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
 }
@@ -900,7 +900,7 @@ ddrobust.param <- function(U, ncomp, alpha, gamma) {
    Su <- apply(U, 2, IQR)
 
    RM <- Su / Mu
-   Nu <- round(exp((1.380948*log(2.68631 / RM)) ^ 1.185785))
+   Nu <- round(exp((1.380948 * log(2.68631 / RM)) ^ 1.185785))
    Nu[RM > 2.685592117] <- 1
    Nu[RM < 0.194565995] <- 100
 

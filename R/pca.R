@@ -314,7 +314,7 @@ getProbabilities.pca <- function(obj, ncomp, q, h) {
    # if chisq / hotelling
    if (obj$lim.type == "chisq") {
       nobj <- obj$T2lim[4, ncomp]
-      return(pmin(chisq.prob(q, obj$Qlim[3:4, ncomp]), hotelling.prob(h, ncomp, nobj)))
+      return(pmax(chisq.prob(q, obj$Qlim[3:4, ncomp]), hotelling.prob(h, ncomp, nobj)))
    }
 
    # if data driven
@@ -1073,6 +1073,7 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
    return(lim)
 }
 
+
 ################################
 #  Plotting methods            #
 ################################
@@ -1294,32 +1295,18 @@ plotScores.pca <- function(obj, comp = c(1, 2), type = "p", main = "Scores", sho
 #'
 #' The function can show distance values normalised (h/h0 and q/q0) as well as with log
 #' transformation (log(1 + h/h0), log(1 + q/q0)). The latter is useful if distribution of the
-#' points is skewed and most of them are densely located around bottom left corner. However, this
-#' two options work only if data driven method is used for computing critical limits for the
-#' distances ("ddmoments" or "ddrobust"). If you selected other methods (e.g. "chisq"), the
-#' distance values will always be shown as is, without normalization and transformation.
+#' points is skewed and most of them are densely located around bottom left corner.
 #'
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
 plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
-   norm = (if (obj$lim.type == "chisq") FALSE else TRUE), cgroup = NULL,
-   main = (paste0("Residual distance (ncomp = ", ncomp, ")")),
+   norm = TRUE, cgroup = NULL, main = (paste0("Residual distance (ncomp = ", ncomp, ")")),
    xlim = NULL, ylim = NULL, show.legend = TRUE, show.limits = TRUE,
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    res = obj$res, ...) {
 
    res <- getRes(res, "ldecomp")
-
-   if (norm && obj$lim.type == "chisq") {
-      warning("Normalization of distance values can not be used for lim.type='chisq'.")
-      norm <- FALSE
-   }
-
-   if (log && obj$lim.type == "chisq") {
-      warning("Log transform of distance values can not be used for lim.type='chisq'.")
-      log <- FALSE
-   }
 
    if (is.null(names(res))) {
       stop("Please, specify names for result objects.")
@@ -1399,21 +1386,18 @@ getLimitsCoordinates.pca <- function(obj, ncomp, norm, log) {
       qE <- c(obj$Qlim[1, ncomp], obj$Qlim[1, ncomp], 0)
       qO <- c(obj$Qlim[2, ncomp], obj$Qlim[2, ncomp], 0)
 
-      return(list(
-         extremes = cbind(hE, qE),
-         outliers = cbind(hO, qO)
-      ))
+   } else {
+
+      ## slope and intercepts
+      eB <- obj$Qlim[1, ncomp]
+      oB <- obj$Qlim[2, ncomp]
+      eA <- oA <- -1 * (q0 / h0) * (Nh / Nq)
+
+      hE <- seq(-0.95, -eB / eA, length.out = 100)
+      hO <- seq(-0.95, -oB / oA, length.out = 100)
+      qE <- eA * hE + eB
+      qO <- oA * hO + oB
    }
-
-   ## slope and intercepts
-   eB <- obj$Qlim[1, ncomp]
-   oB <- obj$Qlim[2, ncomp]
-   eA <- oA <- -1 * (q0 / h0) * (Nh / Nq)
-
-   hE <- seq(-0.95, -eB / eA, length.out = 100)
-   hO <- seq(-0.95, -oB / oA, length.out = 100)
-   qE <- eA * hE + eB
-   qO <- oA * hO + oB
 
    if (norm) {
       hE <- hE / h0
@@ -1691,6 +1675,10 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
       stop("Wrong value for parameter 'ncomp'.")
    }
 
+   if (is.null(res$T2)) {
+      stop("Wrong value for 'res' parameter.")
+   }
+
    # remove excluded values if any
    T2 <- res$T2
    Q <- res$Q
@@ -1701,7 +1689,7 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
    }
 
    nobj <- nrow(T2)
-   expected <- 1:nobj
+   expected <- seq_len(nobj)
 
    # show axes, grid and diagonal
    par(mar = c(5, 4, 4, 2) + 0.1)
@@ -1721,11 +1709,11 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
 
    # show the plints
    alpha_mat <- matrix(alpha, byrow = TRUE, ncol = nobj, nrow = nobj)
-   for (i in seq_along(comp)) {
-      p <- getProbabilities.pca(obj, comp[i], Q[, comp[i]], T2[, comp[i]])
+   for (j in seq_along(comp)) {
+      p <- getProbabilities.pca(obj, comp[j], Q[, comp[j]], T2[, comp[j]])
       p_mat <- matrix((1 - p), ncol = nobj, nrow = nobj)
       observed <- colSums(p_mat < alpha_mat)
-      points(expected, observed, pch = pch[i], lwd = lwd, cex = 1.2, col = col[i], bg = bg[i])
+      points(expected, observed, pch = pch[j], lwd = lwd, cex = 1.2, col = col[j], bg = bg[j])
    }
 
    legend <- paste0(comp, " PC", ifelse(comp > 1, "s", ""))

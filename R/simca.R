@@ -167,7 +167,7 @@ simca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x), 20),
    }
 
    # apply model to test set if provided
-   if (!is.null(x.test)){
+   if (!is.null(x.test)) {
       # if classes are not provided we assume the object are from the same class
       if (is.null(c.test)) c.test <- as.factor(rep(classname, nrow(x.test)))
       model$res[["test"]] <- predict.simca(model, x.test, c.ref = c.test)
@@ -176,7 +176,6 @@ simca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x), 20),
 
    model
 }
-
 
 #' Probabilities of class belonging for PCA/SIMCA results
 #'
@@ -196,7 +195,7 @@ simca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x), 20),
 #' @export
 getProbabilities.simca <- function(obj, ncomp, q, h) {
 
-   p <- function(x, alpha){ ifelse((p <- (1 - x) / alpha * 0.5) > 1, 1, p) }
+   p <- function(x, alpha) ifelse((p <- (1 - x) / alpha * 0.5) > 1, 1, p)
    return(p(getProbabilities.pca(obj, ncomp, q, h), obj$alpha))
 }
 
@@ -223,13 +222,13 @@ getProbabilities.simca <- function(obj, ncomp, q, h) {
 #' See examples in help for \code{\link{simca}} function.
 #'
 #' @export
-predict.simca = function(object, x, c.ref = NULL, cal = FALSE, ...) {
+predict.simca <- function(object, x, c.ref = NULL, cal = FALSE, ...) {
 
    # get PCA results
    pca.res <- predict.pca(object, x)
 
    # do classification and set attributes
-   class.res <- simca.classify(object, pca.res, c.ref)
+   class.res <- classify.simca(object, pca.res, c.ref)
    return(simcares(pca.res, class.res))
 }
 
@@ -249,10 +248,10 @@ predict.simca = function(object, x, c.ref = NULL, cal = FALSE, ...) {
 #' @details
 #' This is a service function for SIMCA class, do not use it manually.
 #'
-simca.classify <- function(obj, pca.res, c.ref = NULL) {
+classify.simca <- function(obj, pca.res, c.ref = NULL) {
 
    # check reference values
-   c.ref <- classmodel.processRefValues(c.ref, object$classnames)
+   c.ref <- classmodel.processRefValues(c.ref, obj$classnames[[1]])
 
    ncomp <- obj$ncomp
    nobj <- nrow(pca.res$Q)
@@ -305,7 +304,7 @@ simca.classify <- function(obj, pca.res, c.ref = NULL) {
 #' @return
 #' object of class \code{simcares} with results of cross-validation
 #'
-crossval.simca = function(obj, x, cv) {
+crossval.simca <- function(obj, x, cv) {
    ncomp <- obj$ncomp
 
    # convert data to a matrix
@@ -333,7 +332,7 @@ crossval.simca = function(obj, x, cv) {
    # loop over segments
    for (iRep in seq_len(nrep)) {
       for (iSeg in seq_len(nseg)) {
-         ind <- na.exclude(idx[iSeg, ,iRep])
+         ind <- na.exclude(idx[iSeg, , iRep])
 
          if (length(ind) > 0) {
             x.cal <- x[-ind, , drop = F]
@@ -425,7 +424,7 @@ plot.simca <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...) {
 #' other arguments
 #'
 #' @export
-summary.simca = function(object, ...) {
+summary.simca <- function(object, ...) {
 
    fprintf("\nSIMCA model for class '%s' summary\n\n", object$classname)
 
@@ -473,33 +472,25 @@ summary.simca = function(object, ...) {
 #' other arguments
 #'
 #' @export
-print.simca = function(x, ...) {
-   obj = x
+print.simca <- function(x, ...) {
+   cat("\nSIMCA one class model (class simca)\n")
 
-   cat('\nSIMCA one class model (class simca)\n')
+   cat("\nCall:\n")
+   print(x$call)
 
-   cat('\nCall:\n')
-   print(obj$call)
-
-   cat('\nMajor fields:\n')
-   cat('$classname - name of the class\n')
-   cat('$alpha - significance level\n')
-   cat('$ncomp - number of calculated components\n')
-   cat('$ncomp.selected - number of selected components\n')
-   cat('$loadings - matrix with loadings\n')
-   cat('$eigenvals - eigenvalues for components\n')
-   cat('$center - values for centering data\n')
-   cat('$scale - values for scaling data\n')
-   cat('$info - information about the model\n')
-   cat('$cv - number of segments for cross-validation\n')
-   cat('$calres - results (scores, etc) for calibration set\n')
-
-   if (!is.null(obj$cvres)) {
-      cat('$cvres - results for cross-validation\n')
-   }
-
-   if (!is.null(obj$testres)) {
-      cat('$testres - results for test set\n')
-   }
+   cat("\nMajor fields:\n")
+   cat("$info - information about the model\n")
+   cat("$classname - name of the class\n")
+   cat("$ncomp - number of calculated components\n")
+   cat("$ncomp.selected - number of selected components\n")
+   cat("$loadings - matrix with loadings\n")
+   cat("$eigenvals - eigenvalues for components\n")
+   cat("$center - values for centering data\n")
+   cat("$scale - values for scaling data\n")
+   cat("$alpha - significance level for critical limits\n")
+   cat("$gamma - significance level for outlier limits\n")
+   cat("$Qlim - critical values and parameters for orthogonal distances\n")
+   cat("$T2lim - critical values and parameters for score distances\n")
+   cat("$cv - cross-validation parameters\n")
+   cat("$res - list with result objects ('cal', 'cv', 'test'\n")
 }
-

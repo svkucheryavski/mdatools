@@ -77,6 +77,14 @@ for (i in seq_along(models)) {
       expect_silent(plotScores(m, type = "b", res = calres))
    })
 
+   test_that("extreme plot works well", {
+      par(mfrow = c(2, 2))
+      expect_silent(plotExtreme(m))
+      expect_silent(plotExtreme(m, comp = 2, show.labels = T))
+      expect_silent(plotExtreme(m, comp = 1:3))
+      expect_silent(plotExtreme(m, comp = 1:2, col = c("red", "green")))
+   })
+
    test_that("residuals plot works well", {
       res <- list("cal" = m$res[["cal"]])
       par(mfrow = c(2, 2))
@@ -176,34 +184,62 @@ for (i in seq_along(models)) {
    showPredictions(res)
 }
 
-
 dev.off()
 sink()
 
 
-## prepare datasets
-data(iris)
-ind.test <- seq(2, nrow(iris), by = 2)
+# code for manual comparison  with DDSIMCA GUI - not uses as real tests
 
-x.cal <- iris[-ind.test, 1:4]
-x.cal1 <- x.cal[1:25, ]
-x.cal2 <- x.cal[26:50, ]
-x.cal3 <- x.cal[51:75, ]
+if (FALSE) {
 
-classnames <- levels(iris[, 5])
-x.test <- iris[ind.test, 1:4]
-c.test <- iris[ind.test, 5]
+   ## prepare datasets
+   rm(list = ls())
+   data(iris)
+   ind.test <- seq(2, nrow(iris), by = 2)
 
-## create models
-m1 <- simca(x.cal1, classnames[1], 3, cv = 1, scale = F, lim.type = "chisq")
-summary(m1)
-summary.pca(m1)
-plotResiduals(m1, show.labels = T, labels = "indices", cgroup = "categories")
-plotExtreme(m1)
+   x.cal <- iris[-ind.test, 1:4]
+   x.cal1 <- x.cal[1:25, ]
+   x.cal2 <- x.cal[26:50, ]
+   x.cal3 <- x.cal[51:75, ]
 
-r <- predict(m1, x.test, c.test)
-summary(r)
-plotResiduals(m1, res = list(new = r),
-   log = T, show.labels = T, labels = "indices", cgroup = c.test)
+   classnames <- levels(iris[, 5])
+   x.test <- iris[ind.test, 1:4]
+   c.test <- iris[ind.test, 5]
 
-plotExtreme(m1, res = r)
+   ## test for ddmoments
+   m <- simca(x.cal1, classnames[1], 3, scale = F, lim.type = "ddmoments")
+   plotResiduals(m, show.labels = T, labels = "indices", cgroup = "categories", log = T)
+   plotExtreme(m)
+   summary.pca(m)
+   summary(m)
+
+   r <- predict(m, x.test, c.test)
+   plotResiduals(m, res = list(new = r), show.labels = T, labels = "indices", cgroup = c.test, log = T)
+   plotExtreme(m, res = r)
+   summary(r)
+
+   ## test for ddrobust
+   m <- simca(x.cal1, classnames[1], 3, scale = F, lim.type = "ddrobust")
+   plotResiduals(m, show.labels = T, labels = "indices", cgroup = "categories", log = T)
+   plotExtreme(m)
+   summary.pca(m)
+   summary(m)
+
+   r <- predict(m, x.test, c.test)
+   plotResiduals(m, res = list(new = r), show.labels = T, labels = "indices", cgroup = c.test, log = T)
+   plotExtreme(m, res = r)
+   summary(r)
+
+   ## test for chisq
+   m <- simca(x.cal1, classnames[1], 3, scale = F, lim.type = "chisq")
+   plotResiduals(m, show.labels = T, labels = "indices", cgroup = "categories", log = T)
+   plotExtreme(m)
+   summary.pca(m)
+   summary(m)
+
+   r <- predict(m, x.test, c.test)
+   plotResiduals(m, res = list(new = r), show.labels = T, labels = "indices", cgroup = c.test, log = T)
+   plotExtreme(m, res = r)
+   summary(r)
+
+}

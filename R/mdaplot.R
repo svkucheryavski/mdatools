@@ -925,6 +925,8 @@ mdaplotyy <- function(data, type = "l", col = mdaplot.getColors(2), lty = c(1, 1
    # define title and labels
    if (is.null(main)) main <- ps1$name
 
+   par(mar = c(5, 5, 5, 5))
+
    # make an empty plot with proper limits and axis labels
    mdaplot.plotAxes(xticklabels = xticklabels, yticklabels = yticklabels, xticks = xticks,
       yticks = yticks, xlim = xlim, ylim = ylim1, main = main, xlab = xlab, ylab = ylab[1],
@@ -932,7 +934,6 @@ mdaplotyy <- function(data, type = "l", col = mdaplot.getColors(2), lty = c(1, 1
    )
 
    # show first series
-   par(mar = c(5, 5, 5, 5))
    plotLines(ps1, col = col[1], lty = lty[1], lwd = lwd[1], cex = cex, pch = pch[1], ...)
    if (show.labels) {
       showLabels(ps1, show.excluded = FALSE, col = lab.col, cex = lab.cex)
@@ -955,4 +956,6 @@ mdaplotyy <- function(data, type = "l", col = mdaplot.getColors(2), lty = c(1, 1
       mdaplotg.showLegend(legend, col = col, pch = pch, lty = lty, lwd = lwd, cex = 0.9,
          position = legend.position)
    }
+
+   par(mar = c(5.1, 4.1, 4.1, 2.1))
 }

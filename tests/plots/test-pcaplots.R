@@ -218,7 +218,7 @@ tf <- function(x.cal, x.test, name) {
       expect_silent(plotResiduals(m1, show.labels = T, log = T, cgroup = "categories"))
       mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
       expect_silent(plotResiduals(m2, show.labels = T, log = T, cgroup = "categories"))
-      expect_warning(plotResiduals(m3, show.labels = T, log = T, cgroup = "categories"))
+      expect_silent(plotResiduals(m3, show.labels = T, log = T, cgroup = "categories"))
       expect_silent(plotResiduals(m4, show.labels = T, log = T, cgroup = "categories"))
    })
 

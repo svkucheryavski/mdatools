@@ -84,7 +84,7 @@
 #' @export
 simcares <- function(class.res, pca.res = NULL) {
    res <- c(pca.res, class.res)
-   class(res) <- c("simcares", "classres", if(!is.null(pca.res)) c("pcares", "ldecomp"))
+   class(res) <- c("simcares", "classres", if (!is.null(pca.res)) c("pcares", "ldecomp"))
    return(res)
 }
 
