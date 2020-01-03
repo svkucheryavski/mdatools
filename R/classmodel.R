@@ -45,7 +45,7 @@ classmodel.processRefValues <- function(c.ref, classname = NULL) {
 #'
 #' @export
 plotPredictions.classmodel <- function(obj, res.name = NULL, nc = seq_len(obj$nclasses),
-   ncomp = obj$ncomp.selected, main = NULL, ...) {
+   ncomp = NULL, main = NULL, ...) {
 
    if (is.null(res.name)) {
       res_names <- c("test", "cv", "cal")
@@ -58,10 +58,13 @@ plotPredictions.classmodel <- function(obj, res.name = NULL, nc = seq_len(obj$nc
       stop("Wong value for 'res.name' parameter.")
    }
 
+   if (is.null(ncomp)) {
+      ncomp <- res$ncomp.selected
+   }
+
    if (is.null(main)) main <- sprintf("Predictions (%s, ncomp = %d)", res.name, ncomp)
    plotPredictions.classres(res, nc = nc, ncomp = ncomp, main = main, ...)
 }
-
 
 #' Specificity plot for classification model
 #'
@@ -98,7 +101,6 @@ plotSpecificity.classmodel <- function(obj, ...) {
 plotSensitivity.classmodel <- function(obj, ...) {
    plotPerformance(obj, param = "sensitivity", ...)
 }
-
 
 #' Misclassified ratio plot for classification model
 #'

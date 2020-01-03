@@ -327,6 +327,24 @@ getProbabilities.pca <- function(obj, ncomp, q, h) {
    return(pchisq(f, Nh + Nq))
 }
 
+#' Returns matrix with original calibration data
+#'
+#' @param obj
+#' object with PCA model
+getCalibrationData.pca <- function(obj) {
+   x <- obj$res[["cal"]]$scores %*% t(obj$loadings) + obj$res[["cal"]]$residuals
+
+   if (!is.logical(obj$scale) && length(obj$scale) == ncol(x)) {
+      x <- sweep(x, 2, obj$scale, "*")
+   }
+
+   if (!is.logical(obj$center) && length(obj$center) == ncol(x)) {
+      x <- sweep(x, 2, obj$center, "+")
+   }
+
+   return(x)
+}
+
 #' Categorize PCA results based on orthogonal and score distances.
 #'
 #' @description

@@ -177,19 +177,18 @@ showPredictions.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 #' other arguments
 #'
 #' @export
-as.matrix.classres <- function(x, ncomp = NULL, nc = 1, ...) {
+as.matrix.classres <- function(x, ncomp = seq_len(x$ncomp), nc = 1, ...) {
 
    if (is.null(x$c.ref)) return()
+
    res <- cbind(
-      x$tp[nc, ], x$fp[nc, ], x$tn[nc, ], x$fn[nc, ],
-      round(x$specificity[nc, ], 3),
-      round(x$sensitivity[nc, ], 3),
-      round(1 - x$misclassified[nc, ], 3)
+      x$tp[nc, ncomp], x$fp[nc, ncomp], x$tn[nc, ncomp], x$fn[nc, ncomp],
+      round(x$specificity[nc, ncomp], 3),
+      round(x$sensitivity[nc, ncomp], 3),
+      round(1 - x$misclassified[nc, ncomp], 3)
    )
 
    res[is.nan(res)] <- NA
-
-   if (!is.null(ncomp)) res <- res[ncomp, , drop = FALSE]
    colnames(res) <- c("TP", "FP", "TN", "FN", "Specificity", "Sensitivity", "Accuracy")
 
    return(res)
@@ -236,7 +235,7 @@ print.classres <- function(x, str = "Classification results (class classres)\nMa
 #' @param object
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
 #' @param ncomp
-#' which number of components to make the plot for.
+#' which number of components to make the plot for (use NULL to show results for all available).
 #' @param nc
 #' vector with class numbers to show the summary for.
 #' @param ...
@@ -256,12 +255,19 @@ summary.classres <- function(object, ncomp = object$ncomp.selected,
    fprintf("\nNumber of selected components: %d", ncomp)
    fprintf("\nNumber of classes: %d\n", object$nclasses)
 
-   for (i in nc) {
-      fprintf("\nClass '%s':\n", object$classnames[[i]])
-      print(as.matrix.classres(object, nc = i))
+   # short results for one component
+   if (length(ncomp) == 1) {
+      print(as.matrix.classres(object, nc = nc, ncomp = ncomp))
+      cat("\n")
+      return()
    }
 
-   cat("\n")
+   # detailed results for several components
+   for (i in nc) {
+      fprintf("\nClass '%s':\n", object$classnames[[i]])
+      print(as.matrix.classres(object, nc = i, ncomp = ncomp))
+   }
+
 }
 
 ################################
