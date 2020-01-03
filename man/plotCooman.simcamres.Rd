@@ -7,12 +7,9 @@
 \method{plotCooman}{simcamres}(
   obj,
   nc = c(1, 2),
-  type = "p",
   main = "Cooman's plot",
-  xlab = NULL,
-  ylab = NULL,
-  show.limits = T,
-  legend = NULL,
+  cgroup = obj$c.ref,
+  show.plot = TRUE,
   ...
 )
 }
@@ -21,17 +18,9 @@
 
 \item{nc}{vector with two values - classes (SIMCA models) to show the plot for}
 
-\item{type}{type of the plot}
-
 \item{main}{main plot title}
 
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{show.limits}{logical, show or not lines with statistical limits for the residuals}
-
-\item{legend}{vector with legend items}
+\item{show.plot}{logical, show plot or just return plot data}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
@@ -39,5 +28,6 @@
 Shows a Cooman's plot for a pair of SIMCA models
 }
 \details{
-See examples in help for \code{\link{simcamres}} function.
+The plot is similar to \code{\link{plotCooman.simcam}} but shows points only for this result
+object and does not show critical limits (which are part of a model).
 }

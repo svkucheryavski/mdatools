@@ -4,7 +4,15 @@
 \alias{mdaplotg.getXLim}
 \title{Compute x-axis limits for mdaplotg}
 \usage{
-mdaplotg.getXLim(ps, xlim, show.excluded, show.legend, legend.position)
+mdaplotg.getXLim(
+  ps,
+  xlim,
+  show.excluded,
+  show.legend,
+  show.labels,
+  legend.position,
+  bwd = NULL
+)
 }
 \arguments{
 \item{ps}{list with plotseries}

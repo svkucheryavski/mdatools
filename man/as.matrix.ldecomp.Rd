@@ -4,7 +4,7 @@
 \alias{as.matrix.ldecomp}
 \title{as.matrix method for ldecomp object}
 \usage{
-\method{as.matrix}{ldecomp}(x, ...)
+\method{as.matrix}{ldecomp}(x, ncomp = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{ldecomp}}

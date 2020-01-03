@@ -4,7 +4,7 @@
 \alias{getConfusionMatrix.classres}
 \title{Confusion matrix for classification results}
 \usage{
-\method{getConfusionMatrix}{classres}(obj, ncomp = NULL, ...)
+\method{getConfusionMatrix}{classres}(obj, ncomp = obj$ncomp.selected, ...)
 }
 \arguments{
 \item{obj}{classification results (object of class \code{simcares}, \code{simcamres}, etc)}

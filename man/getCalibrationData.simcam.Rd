@@ -12,7 +12,7 @@
 \item{...}{other arguments}
 }
 \description{
-Get data, used for calibration of the SIMCAM model.
+Get data, used for calibration of the SIMCAM individual models and combine to one dataset.
 }
 \details{
 See examples in help for \code{\link{simcam}} function.

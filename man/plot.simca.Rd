@@ -4,7 +4,7 @@
 \alias{plot.simca}
 \title{Model overview plot for SIMCA}
 \usage{
-\method{plot}{simca}(x, ncomp = NULL, ...)
+\method{plot}{simca}(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...)
 }
 \arguments{
 \item{x}{a SIMCA model (object of class \code{simca})}

@@ -6,39 +6,35 @@
 \usage{
 \method{plotPerformance}{classres}(
   obj,
-  nc = NULL,
-  ncomp = obj$ncomp.selected,
-  param = "all",
+  nc = 1,
   type = "h",
-  legend = NULL,
-  main = NULL,
+  param = c("sensitivity", "specificity", "misclassified"),
   xlab = "Components",
   ylab = "",
   ylim = c(0, 1.1),
+  xticks = seq_len(dim(obj$c.pred)[2]),
+  show.plot = TRUE,
   ...
 )
 }
 \arguments{
 \item{obj}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
 
-\item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
-
-\item{ncomp}{number of components to make the plot for}
-
-\item{param}{which performance parameter to make the plot for (\code{'sensitivity'}, \code{'specificity'},
-\code{'misclassified'}, \code{'all'}).}
+\item{nc}{if there are several classes, which class to make the plot for.}
 
 \item{type}{type of the plot}
 
-\item{legend}{vector with legend items}
-
-\item{main}{main title for the plot}
+\item{param}{which performance parameter to make the plot for (can be a vector with several values).}
 
 \item{xlab}{label for x axis}
 
 \item{ylab}{label for y axis}
 
 \item{ylim}{vector with two values - limits for y axis}
+
+\item{xticks}{vector with x-axis tick values}
+
+\item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of the graphical parameters from \code{\link{mdaplot}} function can be used.}
 }

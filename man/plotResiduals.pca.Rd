@@ -8,7 +8,7 @@
   obj,
   ncomp = obj$ncomp.selected,
   log = FALSE,
-  norm = (if (obj$lim.type == "chisq") FALSE else TRUE),
+  norm = TRUE,
   cgroup = NULL,
   main = (paste0("Residual distance (ncomp = ", ncomp, ")")),
   xlim = NULL,
@@ -73,10 +73,7 @@ distances in groups, and adds corresponding legend.
 
 The function can show distance values normalised (h/h0 and q/q0) as well as with log
 transformation (log(1 + h/h0), log(1 + q/q0)). The latter is useful if distribution of the
-points is skewed and most of them are densely located around bottom left corner. However, this
-two options work only if data driven method is used for computing critical limits for the
-distances ("ddmoments" or "ddrobust"). If you selected other methods (e.g. "chisq"), the
-distance values will always be shown as is, without normalization and transformation.
+points is skewed and most of them are densely located around bottom left corner.
 
 See examples in help for \code{\link{pca}} function.
 }

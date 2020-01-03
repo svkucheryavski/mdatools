@@ -9,9 +9,9 @@
   ncomp = obj$ncomp.selected,
   nc = 1,
   type = "h",
+  main = sprintf("Class probabilities, \%s (ncomp = \%d)", obj$classnames[[nc]], ncomp),
   xlab = "Objects",
   ylab = "Probability",
-  main = NULL,
   ylim = c(0, 1.1),
   show.lines = c(NA, 0.5),
   ...
@@ -26,11 +26,11 @@
 
 \item{type}{type of the plot}
 
+\item{main}{main plot title}
+
 \item{xlab}{label for x axis}
 
 \item{ylab}{label for y axis}
-
-\item{main}{main plot title}
 
 \item{ylim}{vector with limits for y-axis}
 

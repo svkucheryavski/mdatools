@@ -4,7 +4,7 @@
 \alias{showPredictions.classres}
 \title{Show predicted class values}
 \usage{
-\method{showPredictions}{classres}(obj, ncomp = NULL, ...)
+\method{showPredictions}{classres}(obj, ncomp = obj$ncomp.selected, ...)
 }
 \arguments{
 \item{obj}{object with classification results (e.g. \code{plsdares} or \code{simcamres}).}

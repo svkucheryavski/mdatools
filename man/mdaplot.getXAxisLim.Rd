@@ -10,7 +10,7 @@ mdaplot.getXAxisLim(
   show.labels = FALSE,
   show.lines = FALSE,
   show.excluded = FALSE,
-  bwd = NULL
+  bwd = 0.8
 )
 }
 \arguments{
