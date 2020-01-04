@@ -946,3 +946,17 @@ getRes <- function(res, classname = "ldecomp") {
 capitalize <- function(str) {
    return(sapply(str,  function(s) paste0(toupper(substring(s, 1,1)), substring(s, 2))))
 }
+
+#' Replicate matric x
+#'
+#' @param x
+#' original matrix
+#' @param nrows
+#' number of times replicate matrix row wise
+#' @param ncols
+#' number of times replicate matrix columns wise
+#'
+#' @export
+repmat <- function(x, nrows, ncols = nrows) {
+   return(matrix(1, nrows, ncols) %x% x)
+}

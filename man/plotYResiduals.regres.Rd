@@ -4,7 +4,14 @@
 \alias{plotYResiduals.regres}
 \title{Residuals plot for regression results}
 \usage{
-\method{plotYResiduals}{regres}(obj, ny = 1, ncomp = NULL, show.line = T, ...)
+\method{plotYResiduals}{regres}(
+  obj,
+  ny = 1,
+  ncomp = obj$ncomp.selected,
+  show.lines = c(NA, 0),
+  show.plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{regression results (object of class \code{regres})}
@@ -13,7 +20,9 @@
 
 \item{ncomp}{complexity of model (e.g. number of components) to show the plot for}
 
-\item{show.line}{logical, show or not zero line on the plot}
+\item{show.lines}{allows to show the horisontal line at y = 0}
+
+\item{show.plot}{logical, show plot or just return plot data}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }

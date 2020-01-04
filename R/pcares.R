@@ -122,7 +122,7 @@ pcares <- function(...) {
 #' @param main
 #' main title for the plot
 #' @param show.plot
-#' logical, shall plot be created or just plot series object is needed
+#' logical, show plot or just return plot data
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'

@@ -7,13 +7,14 @@
 \method{plotPredictions}{regres}(
   obj,
   ny = 1,
-  ncomp = NULL,
-  show.line = T,
-  show.stat = F,
+  ncomp = obj$ncomp.selected,
+  show.line = TRUE,
+  show.stat = FALSE,
   stat.col = "#606060",
   stat.cex = 0.85,
-  axes.equal = T,
-  col = mdaplot.getColors(1),
+  xlim = NULL,
+  ylim = NULL,
+  axes.equal = TRUE,
   ...
 )
 }
@@ -34,9 +35,9 @@
 
 \item{axes.equal}{logical, make limits for x and y axes equal or not}
 
-\item{col}{color for the plot objects.}
-
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
+
+\item{col}{color for the plot objects.}
 }
 \description{
 Shows plot with predicted y values.

@@ -31,7 +31,7 @@
 
 \item{main}{main title for the plot}
 
-\item{show.plot}{logical, shall plot be created or just plot series object is needed}
+\item{show.plot}{logical, show plot or just return plot data}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
 }
