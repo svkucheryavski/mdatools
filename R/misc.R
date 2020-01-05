@@ -165,7 +165,7 @@ mda.show = function(x, n = 50) {
    }
 
    if (!is.null(excl.rows))
-      x = x[-excl.rows, ]
+      x = x[-excl.rows, , drop = FALSE]
 
    if (!is.null(excl.cols))
       x = x[, -excl.cols, drop = FALSE]
@@ -173,7 +173,7 @@ mda.show = function(x, n = 50) {
    if (n > nrow(x))
       n = nrow(x)
 
-   show(x[1:n, ])
+   show(x[1:n, , drop = FALSE])
 }
 
 #' A wrapper for subset() method with proper set of attributed
