@@ -439,7 +439,7 @@ mdaplotg <- function(
 
    # define main title if not provided (either as "name" or as "name" attr of first dataset)
    main <- if (is.null(main)) name else main
-   main <- if (is.null(main)) ps[[1]]$data_attrs[["name"]] else main
+   main <- if (is.null(main)) ps[[1]]$name else main
 
    # define labels for axes
    xlab <- if (is.null(xlab)) attr(ps[[1]]$x_values, "name", exact = TRUE) else xlab
