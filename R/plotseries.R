@@ -40,7 +40,7 @@
 plotseries <- function(data, type, cgroup = NULL, col = NULL, opacity = 1,
    colmap = "default", labels = NULL) {
 
-   if (is.null(data)) {
+   if (is.null(data) || length(data) == 0) {
       stop("Seems you forgot to provide data values (vector, matrix of data frame).")
    }
 
@@ -638,6 +638,8 @@ plotErrorbars <- function(ps, col = ps$col, pch = 16, lwd = 1, cex = 1, ...) {
 plotBars <- function(ps, col = ps$col, bwd = 0.8, border = NA, force.x.values = NA) {
    x <- ps$x_values
    y <- ps$y_values[1, ]
+
+   bwd <- if (length(x) > 1) min(diff(x)) * bwd else x * bwd
 
    # correct x_values if they were forced by bwd
    if (is.numeric(force.x.values)) {
