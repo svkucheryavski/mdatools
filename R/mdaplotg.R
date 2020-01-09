@@ -494,4 +494,6 @@ mdaplotg <- function(
          position = legend.position
       )
    }
+
+   return(invisible(ps))
 }
