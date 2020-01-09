@@ -26,6 +26,10 @@
 #' @export
 regres <- function(y.pred, y.ref = NULL, ncomp.selected = 1) {
 
+   if (is.null(y.pred) || length(dim(y.pred)) != 3) {
+      stop("Parameter 'y.pred' should be a 3-way array.")
+   }
+
    if (ncomp.selected > dim(y.pred)[2]) {
       stop("Wrong value for 'ncomp.selected' parameter.")
    }
@@ -64,8 +68,8 @@ regres <- function(y.pred, y.ref = NULL, ncomp.selected = 1) {
 as.matrix.regres <- function(x, ncomp = seq_len(x$ncomp), ny = 1, ...) {
    if (is.null(x$y.ref)) return()
 
-   out <- cbind(obj$r2[ny, ncomp], obj$rmse[ny, ncomp], obj$slope[ny, ncomp],
-      obj$bias[ny, ncomp], obj$rpd[ny, ncomp])
+   out <- cbind(x$r2[ny, ncomp], x$rmse[ny, ncomp], x$slope[ny, ncomp],
+      x$bias[ny, ncomp], x$rpd[ny, ncomp])
 
    colnames(out) <- c("R2", "RMSE", "Slope", "Bias", "RPD")
    rownames(out) <- ncomp
@@ -187,7 +191,6 @@ regress.addattrs <- function(stat, attrs, name) {
 
    return(stat)
 }
-
 
 #' Error of prediction
 #'
@@ -322,8 +325,8 @@ plotPredictions.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected, show
       plot_data <- matrix(obj$y.pred[, ncomp, ny], ncol = 1)
       attr(plot_data, "xaxis.name") <- colnames(plot_data) <-
          paste0(obj$respnames[ny], ", predicted")
-      attr(plot_data, "yaxis.name") <- attr(y.pred, "yaxis.name")
-      attr(plot_data, "yaxis.values") <- attr(y.pred, "yaxis.values")
+      attr(plot_data, "yaxis.name") <- attr(obj$y.pred, "yaxis.name")
+      attr(plot_data, "yaxis.values") <- attr(obj$y.pred, "yaxis.values")
    } else {
       plot_data <- cbind(obj$y.ref[, ny], obj$y.pred[, ncomp, ny])
       colnames(plot_data) <- c(
@@ -384,7 +387,7 @@ plotPredictions.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected, show
 #' other plot parameters (see \code{mdaplot} for details)
 #'
 #' @export
-plotYResiduals.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
+plotResiduals.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
    show.lines = c(NA, 0), show.plot = TRUE, ...) {
 
    if (is.null(obj$y.ref)) {
@@ -448,7 +451,6 @@ plotRMSE.regres <- function(obj, ny = 1, type = "h", xticks = seq_len(obj$ncomp)
 
    return(mdaplot(plot_data, type = type, xticks = xticks, ...))
 }
-
 
 #' Plot method for regression results
 #'

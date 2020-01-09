@@ -29,7 +29,7 @@
 #' \code{\link{plot.regcoeffs}}.
 #'
 #' @export
-regcoeffs <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
+regcoeffs <- function(coeffs, ci.coeffs = NULL, use.mean = FALSE) {
 
    if (is.null(dim(coeffs)) || length(dim(coeffs)) != 3) {
       stop("Coefficients must be provided as 3-way array.")
@@ -251,6 +251,7 @@ regcoeffs.getStats <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
    }
 
    # get attributes and prepare arrays
+   nseg <- dim(ci.coeffs)[4]
    dim_names <- dimnames(coeffs)
    DoF <- dim(ci.coeffs)[4] - 1
    attrs <- mda.getattr(coeffs)
