@@ -149,17 +149,12 @@ plotMisclassified.classmodel <- function(obj, ...) {
 #'
 #' @export
 plotPerformance.classmodel <- function(obj, nc = 1, param = "misclassified", type = "h",
-   xlab = "Components", ylab = "", ylim = c(0, 1.15),
-   main = sprintf("%s for %s", param, obj$classnames[[nc]]),
-   xticks = seq_len(dim(obj$res[["cal"]]$c.pred)[2]), ...) {
+   ylab = "", ylim = c(0, 1.15), xticks = seq_len(dim(obj$res$cal$c.pred)[2]), res = obj$res, ...) {
 
-   res_names <- names(obj$res)
-   plot_data <- list()
-   for (i in seq_along(obj$res)) {
-      plot_data[[res_names[i]]] <- plotPerformance.classres(obj$res[[i]], nc = nc, type = type,
-         param = param, show.plot = FALSE)
+   if (length(param) != 1) {
+      stop("Specify which paramete you want to make the plot for.")
    }
 
-   mdaplotg(plot_data, type = type, main = main, xticks = xticks, xlab = xlab, ylab = ylab,
-      ylim = ylim, ...)
+   plot_data <- lapply(res, plotPerformance, nc = nc, param = param, show.plot = FALSE)
+   mdaplotg(plot_data, type = type, xticks = xticks, ylab = ylab, ylim = ylim, ...)
 }

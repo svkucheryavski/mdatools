@@ -277,10 +277,10 @@ print.regmodel <- function(x, ...) {
 #'
 #' @export
 plotRMSE.regmodel <- function(obj, ny = 1, type = "h", xticks = seq_len(obj$ncomp),
-   main = "RMSE", ylab = sprintf("RMSE (%s)", obj$coeffs$respnames[ny]), res = obj$res, ...) {
+   res = obj$res, ...) {
 
    plot_data <- lapply(res, plotRMSE, ny = ny, show.plot = FALSE)
-   mdaplotg(plot_data, type = type, xticks = xticks, main = main, ylab = ylab, ...)
+   mdaplotg(plot_data, type = type, xticks = xticks, ...)
 }
 
 #' Predictions plot for regression model

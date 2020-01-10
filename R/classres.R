@@ -399,7 +399,6 @@ classres.getPerformance <- function(c.ref, c.pred) {
 #'
 #' @export
 plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, type = "h",
-   main = sprintf("Class probabilities, %s (ncomp = %d)", obj$classnames[[nc]], ncomp),
    xlab = "Objects", ylab = "Probability", ylim = c(0, 1.1), show.lines = c(NA, 0.5), ...) {
 
    if (is.null(obj$p.pred)) {
@@ -410,8 +409,13 @@ plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, 
       stop("Wrong value for argument 'nc'.")
    }
 
-   return(mdaplot(obj$p.pred[, ncomp, nc], show.lines = show.lines, type = type,
-      ylim = ylim, xlab = xlab, ylab = ylab, main = main, ...))
+   plot_data <- obj$p.pred[, ncomp, nc]
+   cname <- obj$classnames[[nc]]
+   attr(plot_data, "name") <- sprintf("Class probabilities, %s (ncomp = %d)", cname, ncomp)
+   attr(plot_data, "yaxis.name") <- "Probability"
+   attr(plot_data, "xaxis.name") <- attr(obj$c.pred, "yaxis.name")
+
+   return(mdaplot(plot_data, show.lines = show.lines, type = type, ylim = ylim, ...))
 }
 
 #' Sensitivity plot for classification results
@@ -503,25 +507,26 @@ plotMisclassified.classres <- function(obj, ...) {
 #'
 #' @export
 plotPerformance.classres <- function(obj, nc = 1, type = "h",
-   param = c("sensitivity", "specificity", "misclassified"), xlab = "Components",
-   ylab = "", ylim = c(0, 1.1), xticks = seq_len(dim(obj$c.pred)[2]), show.plot = TRUE, ...) {
+   param = c("sensitivity", "specificity", "misclassified"),
+   ylab = "", ylim = c(0, 1.1), xticks = seq_len(obj$ncomp), show.plot = TRUE, ...) {
 
    # prepare plot data
-   plot_data <- matrix(0, nrow = length(param), ncol = obj$ncomp)
-   for (i in seq_along(param)) {
-      plot_data[i, ] <- obj[[param[i]]][nc, ]
-   }
+   plot_data <- do.call(rbind, lapply(obj[param], function(x) x[nc, , drop = FALSE]))
 
+   attr(plot_data, "name") <- sprintf(
+      if (length(param) == 1) capitalize(param) else "Classification performance (%s)",
+      obj$classnames[[nc]]
+   )
+
+   attr(plot_data, "xaxis.name") <- "Components"
    rownames(plot_data) <- param
-   colnames(plot_data) <- colnames(obj$tp)
-   attr(plot_data, "name") <- sprintf("Classification performance (%s)", obj$classnames[[nc]])
 
    # if no plot needed return the plat data
    if (!show.plot) {
       return(plot_data)
    }
 
-   mdaplotg(plot_data, type = type, xticks = xticks, xlab = xlab, ylim = ylim, ylab = ylab, ...)
+   mdaplotg(plot_data, type = type, xticks = xticks, ylim = ylim, ylab = ylab, ...)
 }
 
 #' Prediction plot for classification results

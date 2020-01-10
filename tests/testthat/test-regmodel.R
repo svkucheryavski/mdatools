@@ -47,14 +47,15 @@ predict.testmodel <- function(obj, x, y = NULL) {
    return(regres(y.pred = y.pred, y.ref = y, ncomp.selected = 1))
 }
 
-esport(predict.testmodel)
-data(people)
 # we remove sex several other variables to ret rid of collinearity
+data(people)
 x <- people[, -c(4, 1, 3, 9, 10, 11)]
 y <- people[,  4, drop = FALSE]
 
 m <- test.cal(x, y, center = TRUE, scale = TRUE)
 r <- predict(m, x)
+
+assign("predict.testmodel", predict.testmodel, envir = .GlobalEnv)
 
 # tests for performance statistics
 context(sprintf("regmodel: cross-validation"))

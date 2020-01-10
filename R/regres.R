@@ -366,7 +366,6 @@ plotPredictions.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected, show
    return(invisible(p))
 }
 
-
 #' Residuals plot for regression results
 #'
 #' @description
@@ -410,7 +409,6 @@ plotResiduals.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
    return(mdaplot(plot_data, type = "p", show.lines = show.lines, ...))
 }
 
-
 #' RMSE plot for regression results
 #'
 #' @description
@@ -442,8 +440,8 @@ plotRMSE.regres <- function(obj, ny = 1, type = "h", xticks = seq_len(obj$ncomp)
    }
 
    plot_data <- mda.subset(obj$rmse, ny)
-   attr(plot_data, "yaxis.name") <- "RMSE"
-   attr(plot_data, "name") <- paste0("RMSE (", obj$respnames[ny], ")")
+   attr(plot_data, "yaxis.name") <- paste0("RMSE (", obj$respnames[ny], ")")
+   attr(plot_data, "name") <- "RMSE"
 
    if (!show.plot) {
       return(plot_data)
