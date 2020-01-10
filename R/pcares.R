@@ -115,20 +115,13 @@ pcares <- function(...) {
 #' logical, if TRUE disance values be normalized (u/u0)
 #' @param log
 #' logical, if TRUE, then log(1 + u) transformation is applied
-#' @param show.labels
-#' logical, show or not labels for the plot objects
-#' @param labels
-#' what to show as labels if necessary
-#' @param main
-#' main title for the plot
 #' @param show.plot
 #' logical, show plot or just return plot data
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected,
-   norm = TRUE, log = FALSE, show.labels = FALSE, labels = "names", main = NULL,
+plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
    show.plot = TRUE, ...) {
 
    # function for transforming distances
@@ -171,19 +164,15 @@ plotResiduals.pcares <- function(obj, ncomp = obj$ncomp.selected,
       paste0("Score distance, ", lxlab),
       paste0("Orthogonal distance, ", lylab)
    )
+   attr(plot_data, "name") <- sprintf("Residuals (ncomp = %d)", ncomp)
 
    # if no plot required - return plot series object
    if (!show.plot) {
       return(plot_data)
    }
 
-   # set up main title for the plot
-   if (is.null(main)) {
-      main <- if (is.null(ncomp)) "Residuals" else sprintf("Residuals (ncomp = %d)", ncomp)
-   }
-
    # show plot
-   return(mdaplot(plot_data, main = main, show.labels = show.labels, labels = labels, ...))
+   return(mdaplot(plot_data, ...))
 }
 
 #' Plot method for PCA results object

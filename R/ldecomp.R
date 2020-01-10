@@ -91,13 +91,12 @@ ldecomp <- function(scores, loadings, residuals, eigenvals, ncomp.selected = nco
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance",
-   xlab = "Components", ylab = "Explained variance, %", show.labels = FALSE,
+plotCumVariance.ldecomp <- function(obj, type = "b",
    labels = "values", show.plot = TRUE, ...) {
 
    return(
-      plotVariance(obj, variance = "cumexpvar", main = main, xlab = xlab, ylab = ylab,
-            type = type, show.labels = show.labels, labels = labels, show.plot = show.plot, ...)
+      plotVariance(obj, variance = "cumexpvar", type = type, labels = labels,
+         show.plot = show.plot, ...)
    )
 }
 
@@ -128,17 +127,15 @@ plotCumVariance.ldecomp <- function(obj, type = "b", main = "Cumulative variance
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", main = "Variance",
-   xlab = "Components", ylab = "Explained variance, %", show.labels = FALSE, labels = "values",
-   show.plot = TRUE, ...) {
+plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", labels = "values",
+   xticks = seq_len(obj$ncomp), show.plot = TRUE, ...) {
 
    if (!show.plot) {
       return(obj[[variance]])
    }
 
    return(
-      mdaplot(obj[[variance]], main = main, xticks = seq_len(obj$ncomp), xlab = xlab, ylab = ylab,
-           show.labels = show.labels, labels = labels, type = type, ...)
+      mdaplot(obj[[variance]], xticks = xticks, labels = labels, type = type, ...)
    )
 }
 
@@ -173,13 +170,13 @@ plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", main = "V
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p", xlab = NULL,
-   ylab = NULL, show.labels = FALSE, labels = "names", show.legend = TRUE, show.axes = TRUE,
+plotScores.ldecomp <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE,
    show.plot = TRUE, ...) {
 
    # get scores for given components and generate column names with explained variance
    plot_data <- mda.subset(obj$scores, select = comp)
    colnames(plot_data) <- paste0("Comp ", comp, " (", round(obj$expvar[comp], 2), "%)")
+   attr(plot_data, "name") <- "Scores"
 
    # if no plot required - return plot series object
    if (!show.plot) {
@@ -194,19 +191,16 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), main = "Scores", type = "p",
 
    # scatter plot
    if (type == "p") {
-      p <- mdaplot(plot_data, type = type, show.labels = show.labels, labels = labels,
-         show.lines = show.lines, main = main, xlab = xlab, ylab = ylab, ...)
-
+      p <- mdaplot(plot_data, type = type, show.lines = show.lines, ...)
       return(invisible(p))
    }
 
    # line or bar plot
-   if (is.null(ylab)) ylab <- "Score value"
-   if (type == "h") show.lines <- FALSE
-
-   return(mdaplotg(mda.t(plot_data), type = type, show.labels = show.labels, labels = labels,
-      show.lines = show.lines, show.legend = show.legend, main = main, xlab = xlab,
-      ylab = ylab, ...))
+   #if (is.null(ylab)) ylab <- "Score value"
+   #if (type == "h") show.lines <- FALSE
+   plot_data <- mda.t(plot_data)
+   attr(plot_data, "yaxis.name") <- "Score"
+   return(mdaplotg(plot_data, type = type, show.lines = show.lines, ...))
 }
 
 #' Residual distance plot
@@ -392,6 +386,11 @@ ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
    expvar <- c(cumexpvar[1], diff(cumexpvar))
 
    names(cumexpvar) <- names(expvar) <- colnames(Q)
+   attr(expvar, "name") <- "Variance"
+   attr(cumexpvar, "name") <- "Cumulative variance"
+   attr(expvar, "xaxis.name") <- attr(cumexpvar, "xaxis.name") <- "Components"
+   attr(expvar, "yaxis.name") <- attr(cumexpvar, "yaxis.name") <- "Explained variance, %"
+
    return(list(expvar = expvar, cumexpvar = cumexpvar))
 }
 

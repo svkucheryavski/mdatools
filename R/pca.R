@@ -1116,10 +1116,10 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
 #' logical, show or not a legend on the plot
 #' @param labels
 #' what to use as labels (if \code{show.labels = TRUE})
-#' @param res
-#' list with result objects to show the variance for
 #' @param variance
 #' which variance to show
+#' @param res
+#' list with result objects to show the variance for
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1127,31 +1127,12 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Components",
-   ylab = "Explained variance, %", show.legend = TRUE, labels = "values", res = obj$res,
-   variance = "expvar", ...) {
+plotVariance.pca <- function(obj, type = "b", labels = "values", variance = "expvar",
+   xticks = seq_len(obj$ncomp), res = obj$res, ...) {
 
    res <- getRes(res, "ldecomp")
-
-   if (length(res) == 1) {
-      return(
-         plotVariance(res[[1]], type = type, main = main, xlab = xlab, ylab = ylab,
-            variance = variance, labels = labels, ...)
-      )
-   }
-
-   plot_data <- NULL
-   for (r in res) {
-      plot_data <- rbind(
-         plot_data,
-         plotVariance(r, type = type, variance = variance, show.plot = FALSE)
-      )
-   }
-
-   colnames(plot_data) <- colnames(obj$loadings)
-   rownames(plot_data) <- names(res)
-   mdaplotg(plot_data, main = main, xlab = xlab, xticks = 1:obj$ncomp, ylab = ylab,
-            show.legend = show.legend, labels = labels, type = type, ...)
+   plot_data <- lapply(res, plotVariance, variance = variance, show.plot = FALSE)
+   mdaplotg(plot_data, xticks = xticks, labels = labels, type = type, ...)
 }
 
 #' Cumulative explained variance plot for PCA model
@@ -1161,20 +1142,8 @@ plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Compone
 #'
 #' @param obj
 #' a PCA model (object of class \code{pca})
-#' @param type
-#' type of the plot ("b", "l", "h")
-#' @param main
-#' main title for the plot
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param show.legend
-#' logical, show or not a legend on the plot
-#' @param labels
-#' what to use as labels (if \code{show.labels = TRUE})
-#' @param res
-#' list with result objects to show the variance for
+#' @param legend.position
+#' position of the legend
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1182,12 +1151,8 @@ plotVariance.pca <- function(obj, type = "b", main = "Variance", xlab = "Compone
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotCumVariance.pca <- function(obj, type = "b", main = "Cumulative variance",
-   xlab = "Components", ylab = "Explained variance, %", show.legend = TRUE, labels = "values",
-   res = obj$res, ...) {
-
-   plotVariance(obj, type = type, main = main, xlab = xlab, show.legend = show.legend,
-      res = res, labels = labels, variance = "cumexpvar", ...)
+plotCumVariance.pca <- function(obj, legend.position = "bottomright", ...) {
+   plotVariance(obj, variance = "cumexpvar", legend.position = legend.position, ...)
 }
 
 #' Scores plot for PCA model
@@ -1227,28 +1192,16 @@ plotCumVariance.pca <- function(obj, type = "b", main = "Cumulative variance",
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotScores.pca <- function(obj, comp = c(1, 2), type = "p", main = "Scores", show.labels = FALSE,
-   show.legend = TRUE, legend.position = "topright", show.axes = TRUE, res = obj$res, ...) {
+plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE, res = obj$res, ...) {
 
    res <- getRes(res, "ldecomp")
-
    if (length(res) == 1) {
-      return(
-         plotScores(res[[1]], comp = comp, type = type, main = main,
-            show.labels = show.labels, ...)
-      )
-   }
-
-   plot_data <- list()
-   for (i in seq_along(res)) {
-      plot_data[[names(res[i])]] <-
-         plotScores(res[[i]], comp = comp, type = type, show.plot = FALSE)
+      return(plotScores(res[[1]], comp = comp, type = type, ...))
    }
 
    if (type != "p") {
       stop("You have several result objects in model, only scatter plot is available for scores.")
    }
-
 
    # set up values for showing axes lines
    show.lines <- FALSE
@@ -1256,8 +1209,8 @@ plotScores.pca <- function(obj, comp = c(1, 2), type = "p", main = "Scores", sho
       show.lines <- if (length(comp) == 2 && type == "p") c(0, 0) else c(NA, 0)
    }
 
-   mdaplotg(data = plot_data, main = main, show.labels = show.labels, show.legend = show.legend,
-      legend.position = legend.position, show.lines = show.lines, ...)
+   plot_data <- lapply(res, plotScores, comp = comp, type = type, show.plot = FALSE)
+   mdaplotg(plot_data, type = type, show.lines = show.lines, ...)
 }
 
 #' Residuals distance plot for PCA model
@@ -1319,30 +1272,19 @@ plotScores.pca <- function(obj, comp = c(1, 2), type = "p", main = "Scores", sho
 #'
 #' @export
 plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
-   norm = TRUE, cgroup = NULL, main = (paste0("Residual distance (ncomp = ", ncomp, ")")),
-   xlim = NULL, ylim = NULL, show.legend = TRUE, show.limits = TRUE,
+   norm = TRUE, cgroup = NULL,
+   xlim = NULL, ylim = NULL, show.limits = TRUE,
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    res = obj$res, ...) {
 
-   res <- getRes(res, "ldecomp")
-
-   if (is.null(names(res))) {
-      stop("Please, specify names for result objects.")
-   }
-
    getLim <- function(lim, pd, ld, dim, show.limits) {
       if (!(is.null(lim) && show.limits)) return(lim)
-      return(
-         c(0, max(sapply(pd, function(x) return(max(x[, dim]))), ld$outliers[, dim])) * 1.05
-      )
+      return(c(0, max(sapply(pd, function(x) max(x[, dim])), ld$outliers[, dim])) * 1.05)
    }
 
    # get plot data
-   plot_data <- list()
-   for (i in seq_along(res)) {
-      plot_data[[names(res)[i]]] <-
-         plotResiduals(res[[i]], ncomp = ncomp, norm = norm, log = log, show.plot = FALSE)
-   }
+   res <- getRes(res, "ldecomp")
+   plot_data <- lapply(res, plotResiduals, ncomp = ncomp, norm = norm, log = log, show.plot = FALSE)
 
    # get coordinates for critical limits
    lim_data <- getLimitsCoordinates.pca(obj, ncomp = ncomp, norm = norm, log = log)
@@ -1356,11 +1298,9 @@ plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
 
    # make plot
    if (length(plot_data) == 1) {
-      mdaplot(data = plot_data[[1]], type = "p", main = main, xlim = xlim, ylim = ylim,
-         cgroup = cgroup, ...)
+      mdaplot(data = plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, ...)
    } else {
-      mdaplotg(data = plot_data, type = "p", main = main, xlim = xlim, ylim = ylim,
-         show.legend = show.legend, ...)
+      mdaplotg(data = plot_data, type = "p", xlim = xlim, ylim = ylim, ...)
    }
 
    # show critical limits
@@ -1464,10 +1404,11 @@ getLimitsCoordinates.pca <- function(obj, ncomp, norm, log) {
 #'
 #' @export
 plotLoadings.pca <- function(obj, comp = c(1, 2), type = (if (length(comp == 2)) "p" else "l"),
-   main = "Loadings", show.labels = FALSE, show.legend = TRUE, show.axes = TRUE, ...) {
+   show.legend = TRUE, show.axes = TRUE, ...) {
 
    plot_data <- mda.subset(obj$loadings, select = comp)
    colnames(plot_data) <- paste0("Comp ", comp, " (", round(obj$res[["cal"]]$expvar[comp], 2), "%)")
+   attr(plot_data, "name") <- "Loadings"
 
    # set up values for showing axes lines
    show.lines <- FALSE
@@ -1476,14 +1417,12 @@ plotLoadings.pca <- function(obj, comp = c(1, 2), type = (if (length(comp == 2))
    }
 
    if (type == "p") {
-      return(
-         mdaplot(plot_data, type = type, show.labels = show.labels, show.lines = show.lines,
-            main = main, ...)
-      )
+      return(mdaplot(plot_data, type = type, show.lines = show.lines, ...))
    }
 
-   mdaplotg(mda.t(plot_data), show.legend = show.legend, type = type, show.labels = show.labels,
-      show.lines = show.lines, main = main, ...)
+   plot_data <- mda.t(plot_data)
+   attr(plot_data, "yaxis.name") <- "Loading"
+   mdaplotg(plot_data, show.legend = show.legend, type = type, show.lines = show.lines, ...)
 }
 
 #' PCA biplot
@@ -1547,7 +1486,6 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
    segments(0, 0, loadings[, 1], loadings[, 2], col = col[2], lty = lty, lwd = lwd)
 }
 
-
 #' Degrees of freedom plot for score distance (Nh)
 #'
 #' @description
@@ -1558,14 +1496,10 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
 #' a PCA model (object of class \code{pca})
 #' @param type
 #' type of the plot ("b", "l", "h")
-#' @param main
-#' main title for the plot
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
 #' @param labels
 #' what to show as data points labels
+#' @param xticks
+#' vector with tick values for x-axis
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1573,12 +1507,17 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
 #' Work only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
-plotT2DoF <- function(obj, type = "b", main = "Degrees of freedom", xlab = "Components",
-   ylab = "Nh", labels = "values", ...) {
+plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...) {
+
+   if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
+      stop("This plot can not be made for selected 'lim.type' method.")
+   }
 
    plot_data <- mda.subset(obj$T2lim, subset = 4)
-   mdaplot(plot_data, main = main, xlab = xlab, xticks = 1:obj$ncomp, ylab = ylab,
-      labels = labels, type = type, ...)
+   attr(plot_data, "name") <- "Degrees of freedom"
+   attr(plot_data, "xaxis.name") <- attr(obj$loadings, "xaxis.name")
+   attr(plot_data, "yaxis.name") <- "Nh"
+   mdaplot(plot_data, xticks = xticks, labels = labels, type = type, ...)
 }
 
 #' Degrees of freedom plot for orthogonal distance (Nh)
@@ -1591,14 +1530,10 @@ plotT2DoF <- function(obj, type = "b", main = "Degrees of freedom", xlab = "Comp
 #' a PCA model (object of class \code{pca})
 #' @param type
 #' type of the plot ("b", "l", "h")
-#' @param main
-#' main title for the plot
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
 #' @param labels
 #' what to show as data points labels
+#' @param xticks
+#' vector with tick values for x-axis
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1606,12 +1541,17 @@ plotT2DoF <- function(obj, type = "b", main = "Degrees of freedom", xlab = "Comp
 #' Work only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
-plotQDoF <- function(obj, type = "b", main = "Degrees of freedom", xlab = "Components",
-   ylab = "Nq", labels = "values", ...) {
+plotQDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...) {
+
+   if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
+      stop("This plot can not be made for selected 'lim.type' method.")
+   }
 
    plot_data <- mda.subset(obj$Qlim, subset = 4)
-   mdaplot(plot_data, main = main, xlab = xlab, xticks = 1:obj$ncomp, ylab = ylab,
-      labels = labels, type = type, ...)
+   attr(plot_data, "name") <- "Degrees of freedom"
+   attr(plot_data, "xaxis.name") <- attr(obj$loadings, "xaxis.name")
+   attr(plot_data, "yaxis.name") <- "Nq"
+   mdaplot(plot_data, type = type, labels = labels, xticks = xticks, ...)
 }
 
 #' Degrees of freedom plot for both distances
@@ -1624,12 +1564,10 @@ plotQDoF <- function(obj, type = "b", main = "Degrees of freedom", xlab = "Compo
 #' a PCA model (object of class \code{pca})
 #' @param type
 #' type of the plot ("b", "l", "h")
-#' @param main
-#' main title for the plot
-#' @param ylab
-#' label for y axis
 #' @param labels
 #' what to show as data points labels
+#' @param xticks
+#' vector with tick values for x-axis
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1637,17 +1575,21 @@ plotQDoF <- function(obj, type = "b", main = "Degrees of freedom", xlab = "Compo
 #' Work only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
-plotDistDoF <- function(obj, type = "b", main = "Degrees of freedom",
-   ylab = c("Nh", "Nq"), labels = "values", ...) {
+plotDistDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...) {
+
+   if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
+      stop("This plot can not be made for selected 'lim.type' method.")
+   }
 
    plot_data <- rbind(
       mda.subset(obj$T2lim, subset = 4),
       mda.subset(obj$Qlim, subset = 4)
    )
-   rownames(plot_data) <- ylab
-   attr(plot_data, "xaxis.name") <- attr(obj$loadings, "xaxis.name")
 
-   mdaplotyy(plot_data, type = type, main = main, labels = labels, ylab = ylab, ...)
+   rownames(plot_data) <- c("Nh", "Nq")
+   attr(plot_data, "xaxis.name") <- attr(obj$loadings, "xaxis.name")
+   attr(plot_data, "name") <- "Degrees of freedom"
+   mdaplotyy(plot_data, type = type, labels = labels, xticks = xticks, ...)
 }
 
 #' Extreme plot

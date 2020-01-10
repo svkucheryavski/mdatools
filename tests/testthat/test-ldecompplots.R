@@ -54,7 +54,7 @@ getPCARes <- function(X, ncomp) {
    scores <- X %*% loadings
    residuals <- X - tcrossprod(scores, loadings)
 
-   scores <- mda.setattr(scores, mda.getattr(X), type = 'row')
+   scores <- mda.setattr(scores, mda.getattr(X), type = "row")
    residuals <- mda.setattr(residuals, mda.getattr(X))
 
    attr(loadings, "exclrows") <- attr(X, "exclcols")
@@ -92,6 +92,15 @@ test_that("scores plot works fine with different attributes.", {
       plotScores(obj, c(1, 2), cgroup = x[, 1], show.labels = T, show.axes = F)
       plotScores(obj, 1, show.labels = T, cgroup = x[, "Sex"], colmap = c("red", "green"), pch = 17)
    })
+
+   expect_silent({
+      par(mfrow = c(2, 2))
+      plotScores(obj, type = "l")
+      plotScores(obj, c(1, 3), type = "h", show.labels = T)
+      plotScores(obj, c(1, 2), type = "b", show.labels = T, show.axes = F)
+      plotScores(obj, 1, type = "l", show.labels = T, colmap = c("red", "green"), pch = 17)
+   })
+
 })
 
 test_that("scores plot works fine with cgroup and convex hulls.", {

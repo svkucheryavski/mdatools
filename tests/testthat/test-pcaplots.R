@@ -50,7 +50,7 @@ tf <- function(model, name) {
       expect_silent(plotVariance(model))
       mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
       expect_silent(plotVariance(model, type = "h", show.labels = T))
-      expect_silent(plotVariance(model, show.labels = T, col = c("red", "green")))
+      expect_silent(plotVariance(model, show.labels = T, col = c("red", "green")[seq_along(model$res)]))
       expect_silent(plotVariance(model, res = list("cal" = model$res[["cal"]])))
    })
 
@@ -61,7 +61,7 @@ tf <- function(model, name) {
       expect_silent(plotCumVariance(model))
       mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
       expect_silent(plotCumVariance(model, type = "h", show.labels = T))
-      expect_silent(plotCumVariance(model, show.labels = T, col = c("red", "green")))
+      expect_silent(plotCumVariance(model, show.labels = T, col = c("red", "green")[seq_along(model$res)]))
       expect_silent(plotCumVariance(model, res = list("cal" = model$res[["cal"]])))
    })
 
@@ -82,6 +82,8 @@ tf <- function(model, x.cal, name) {
    plot.new()
    text(0, 0, paste0("PCA - score plots - ", name), pos = 4)
 
+   col = c("red", "green")[seq_along(model$res)]
+
    # basic plots (scatter)
    par(mfrow = c(2, 2))
    test_name <- "scores plot works fine with basic settings"
@@ -89,7 +91,7 @@ tf <- function(model, x.cal, name) {
       expect_silent(plotScores(model))
       mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
       expect_silent(plotScores(model, c(1, 3)))
-      expect_silent(plotScores(model, c(1, 3), show.labels = T, col = c("red", "green")))
+      expect_silent(plotScores(model, c(1, 3), show.labels = T, col = col))
       expect_silent(plotScores(model, c(1, 3), res = list("cal" = model$res[["cal"]])))
    })
 
@@ -100,7 +102,7 @@ tf <- function(model, x.cal, name) {
       expect_silent(plotScores(model, 1))
       mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
       expect_silent(plotScores(model, 2))
-      expect_silent(plotScores(model, 2, show.labels = T, col = c("red", "green")))
+      expect_silent(plotScores(model, 2, show.labels = T, col = col))
       expect_silent(plotScores(model, 2, res = list("cal" = model$res[["cal"]])))
    })
 
@@ -137,15 +139,17 @@ tf <- function(model, x.cal, name) {
    }
 
    # playing with legend
-   par(mfrow = c(2, 2))
-   test_name <- "legend position can be changed or hidden"
-   test_that(test_name, {
-      expect_silent(plotScores(model, show.legend = FALSE))
-      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
-      expect_silent(plotScores(model, c(1, 3), legend.position = "top"))
-      expect_silent(plotScores(model, c(1, 3), show.labels = T, legend.position = "topleft"))
-      expect_silent(plotScores(model, c(1, 3), legend.position = "bottom"))
-   })
+   if (length(model$res) > 1) {
+      par(mfrow = c(2, 2))
+      test_name <- "legend position can be changed or hidden"
+      test_that(test_name, {
+         expect_silent(plotScores(model, show.legend = FALSE))
+         mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+         expect_silent(plotScores(model, c(1, 3), legend.position = "top"))
+         expect_silent(plotScores(model, c(1, 3), show.labels = T, legend.position = "topleft"))
+         expect_silent(plotScores(model, c(1, 3), legend.position = "bottom"))
+      })
+   }
 
    # show hidden values
    par(mfrow = c(2, 2))

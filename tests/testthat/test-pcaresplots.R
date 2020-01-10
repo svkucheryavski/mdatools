@@ -80,6 +80,15 @@ test_that("scores plot works fine with different attributes.", {
       plotScores(m$calres, c(1, 2), cgroup = x[, 1], show.labels = T, show.colorbar = F, show.axes = F)
       plotScores(m$calres, 1, show.labels = T, colmap = c("red", "green"), pch = 17)
    })
+
+   expect_silent({
+      par(mfrow = c(2, 2))
+      plotScores(m$calres, type = "l")
+      plotScores(m$calres, c(1, 3), type = "h", show.labels = T)
+      plotScores(m$calres, c(1, 2), type = "h", cgroup = x[1, ], show.labels = T, show.axes = F)
+      plotScores(m$calres, 1, type = "l", show.labels = T, colmap = c("red", "green"), pch = 17)
+   })
+
 })
 
 
