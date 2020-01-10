@@ -29,7 +29,7 @@
 #' \code{\link{plot.regcoeffs}}.
 #'
 #' @export
-regcoeffs <- function(coeffs, ci.coeffs = NULL, use.mean = FALSE) {
+regcoeffs <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 
    if (is.null(dim(coeffs)) || length(dim(coeffs)) != 3) {
       stop("Coefficients must be provided as 3-way array.")
