@@ -181,6 +181,72 @@ getRegcoeffs.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, full 
 }
 
 
+#' Summary method for regression model object
+#'
+#' @description
+#' Shows performance statistics for the model.
+#'
+#' @param object
+#' a regression model (object of class \code{regmodel})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param ny
+#' which y variables to show the summary for (can be a vector)
+#' @param ...
+#' other arguments
+#'
+#' @export
+summary.regmodel <- function(object, ncomp = object$ncomp.selected,
+   ny = seq_len(object$res$cal$nresp), res = object$res, ...) {
+
+   if (length(ncomp) != 1 || ncomp < 1 || ncomp > dim(object$res[["cal"]]$y.pred)[2]) {
+      stop("Wrong value for 'ncomp' parameter.")
+   }
+
+   cat("\nRegression model (class regmodel) summary\n")
+   cat("\nPerformance and validation:\n")
+   fprintf("Number of selected components: %d\n", ncomp)
+
+   for (y in ny) {
+      sum_data <- do.call(rbind, lapply(res, as.matrix, ny = y, ncomp = ncomp))
+      rownames(sum_data) <- capitalize(names(res))
+
+      sum_data[, "R2"] <- round(sum_data[, "R2"], 3)
+      sum_data[, "RMSE"] <- mdaplot.formatValues(sum_data[, "RMSE"], round.only = T)
+      sum_data[, "Slope"] <- round(sum_data[, "Slope"], 3)
+      sum_data[, "Bias"] <- round(sum_data[, "Bias"], 4)
+      sum_data[, "RPD"] <- round(sum_data[, "RPD"], 1)
+
+      attr(sum_data, "name") <- sprintf("\nResponse variable #%d (%s)", y, res[[1]]$respnames[y])
+      mda.show(sum_data)
+   }
+   cat("\n")
+}
+
+#' Print method for PLS model object
+#'
+#' @description
+#' Prints information about the object structure
+#'
+#' @param x
+#' a regression model (object of class \code{regmodel})
+#' @param ...
+#' other arguments
+#'
+#' @export
+print.regmodel <- function(x, ...) {
+   cat("\nRegression model (class regmodel)\n")
+   cat("\nCall:\n")
+   print(x$call)
+   cat("\nMajor fields:\n")
+   cat("$ncomp - number of calculated components\n")
+   cat("$ncomp.selected - number of selected components\n")
+   cat("$coeffs - object (regcoeffs) with regression coefficients\n")
+   cat("$res - list with result objects\n")
+   cat("\nTry summary(model) and plot(model) to see the model performance.\n")
+}
+
+
 ################################
 #  Plotting methods            #
 ################################
@@ -306,69 +372,4 @@ plotYResiduals.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, sho
 #' @export
 plotRegcoeffs.regmodel <- function(obj, ...) {
    plot(obj$coeffs, ...)
-}
-
-#' Summary method for regression model object
-#'
-#' @description
-#' Shows performance statistics for the model.
-#'
-#' @param object
-#' a regression model (object of class \code{regmodel})
-#' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
-#' @param ny
-#' which y variables to show the summary for (can be a vector)
-#' @param ...
-#' other arguments
-#'
-#' @export
-summary.regmodel <- function(object, ncomp = object$ncomp.selected,
-   ny = seq_len(object$res$cal$nresp), res = object$res, ...) {
-
-   if (length(ncomp) != 1 || ncomp < 1 || ncomp > dim(object$res[["cal"]]$y.pred)[2]) {
-      stop("Wrong value for 'ncomp' parameter.")
-   }
-
-   cat("\nRegression model (class regmodel) summary\n")
-   cat("\nPerformance and validation:\n")
-   fprintf("Number of selected components: %d\n", ncomp)
-
-   for (y in ny) {
-      sum_data <- do.call(rbind, lapply(res, as.matrix, ny = y, ncomp = ncomp))
-      rownames(sum_data) <- capitalize(names(res))
-
-      sum_data[, "R2"] <- round(sum_data[, "R2"], 3)
-      sum_data[, "RMSE"] <- mdaplot.formatValues(sum_data[, "RMSE"], round.only = T)
-      sum_data[, "Slope"] <- round(sum_data[, "Slope"], 3)
-      sum_data[, "Bias"] <- round(sum_data[, "Bias"], 4)
-      sum_data[, "RPD"] <- round(sum_data[, "RPD"], 1)
-
-      attr(sum_data, "name") <- sprintf("\nResponse variable #%d (%s)", y, res[[1]]$respnames[y])
-      mda.show(sum_data)
-   }
-   cat("\n")
-}
-
-#' Print method for PLS model object
-#'
-#' @description
-#' Prints information about the object structure
-#'
-#' @param x
-#' a regression model (object of class \code{regmodel})
-#' @param ...
-#' other arguments
-#'
-#' @export
-print.regmodel <- function(x, ...) {
-   cat("\nRegression model (class regmodel)\n")
-   cat("\nCall:\n")
-   print(x$call)
-   cat("\nMajor fields:\n")
-   cat("$ncomp - number of calculated components\n")
-   cat("$ncomp.selected - number of selected components\n")
-   cat("$coeffs - object (regcoeffs) with regression coefficients\n")
-   cat("$res - list with result objects\n")
-   cat("\nTry summary(model) and plot(model) to see the model performance.\n")
 }
