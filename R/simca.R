@@ -424,7 +424,7 @@ plot.simca <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...) {
 #' other arguments
 #'
 #' @export
-summary.simca <- function(object, ...) {
+summary.simca <- function(object, ncomp = object$ncomp.selected, res = object$res, ...) {
 
    fprintf("\nSIMCA model for class '%s' summary\n\n", object$classname)
 
@@ -445,19 +445,15 @@ summary.simca <- function(object, ...) {
       fprintf("Excluded coumns: %d\n", length(object$exclcols))
    }
 
-   fprintf("\nNumber of selected components: %d\n", object$ncomp.selected)
+   fprintf("\nNumber of components: %d\n", ncomp)
    fprintf("Type of limits: %s\n", object$lim.type)
    fprintf("Alpha: %s\n", object$alpha)
    fprintf("Gamma: %s\n", object$gamma)
    cat("\n")
 
-   summary_data <- NULL
-   for (r in object$res) {
-      summary_data <- rbind(summary_data, as.matrix.simcares(r, ncomp = object$ncomp.selected))
-   }
-
-   rownames(summary_data) <- capitalize(names(object$res))
-   print(summary_data)
+   sum_data <- do.call(rbind, lapply(res, as.matrix, ncomp = ncomp))
+   rownames(sum_data) <- capitalize(names(res))
+   print(sum_data)
    cat("\n")
 }
 
