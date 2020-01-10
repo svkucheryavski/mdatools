@@ -2,6 +2,9 @@
 # Tests for simca and simcares class methods  #
 ###############################################
 
+pdf(file = "../plots/test_simcam_plots.pdf")
+sink("../plots/output-simcam.txt", append = FALSE, split = FALSE)
+
 data(iris)
 x1 <- iris[1:25, 1:4]
 x2 <- iris[101:125, 1:4]
@@ -38,9 +41,6 @@ m3 <- setDistanceLimits(m3, lim.type = "ddrobust", alpha = 0.05)
 
 
 m <- simcam(list(m1, m2, m3), info = "Test SIMCAM methods")
-
-pdf(file = "test_simcam_plots.pdf")
-sink("output-simcam.txt", append = FALSE, split = FALSE)
 
 context("simcam: main plots")
 
@@ -157,6 +157,7 @@ test_that("confusion matrix returns an error", {
    expect_error(getConfusionMatrix(res))
 })
 
-dev.off()
-sink()
-
+teardown({
+   dev.off()
+   sink()
+})

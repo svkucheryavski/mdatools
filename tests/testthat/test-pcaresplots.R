@@ -2,7 +2,8 @@
 # Tests for plotting methods of pcares() class      #
 #####################################################
 
-pdf(file = "test_pcares_plots.pdf")
+pdf(file = "../plots/test_pcares_plots.pdf")
+sink("../plots/output-pcares.txt", append = FALSE, split = FALSE)
 
 data(people)
 x <- people
@@ -129,10 +130,11 @@ test_that("print() and summary() produce output", {
    expect_silent(plot(m$calres, comp = c(1, 3), ncomp = 4, show.labels = T))
 })
 
-dev.off()
-
 # just output to check in txt file
-sink("output-pcares.txt", append=FALSE, split=FALSE)
 print(m$calres)
 print(summary(m$calres))
-sink()
+
+teardown({
+   dev.off()
+   sink()
+})

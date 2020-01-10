@@ -2,7 +2,7 @@
 # Tests for new features for mdaplot() and related methods  #
 #############################################################
 
-pdf(file = "test_mdaplots2.pdf")
+pdf(file = "../plots/test_mdaplot2.pdf")
 
 par(mfrow = c(2, 2))
 
@@ -296,4 +296,6 @@ test_that("density plot works as expected with main parameters", {
    expect_silent(tf(d, nbins = 50, colmap = c("blue", "green", "red")))
 })
 
-dev.off()
+teardown({
+   dev.off()
+})

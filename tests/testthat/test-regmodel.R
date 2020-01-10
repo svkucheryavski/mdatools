@@ -47,6 +47,7 @@ predict.testmodel <- function(obj, x, y = NULL) {
    return(regres(y.pred = y.pred, y.ref = y, ncomp.selected = 1))
 }
 
+esport(predict.testmodel)
 data(people)
 # we remove sex several other variables to ret rid of collinearity
 x <- people[, -c(4, 1, 3, 9, 10, 11)]

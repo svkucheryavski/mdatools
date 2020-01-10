@@ -2,6 +2,10 @@
 # Tests for simca and simcares class methods  #
 ###############################################
 
+
+pdf(file = "../plots/test_simca_plots.pdf")
+sink("../plots/output-simca.txt", append = FALSE, split = FALSE)
+
 ## prepare datasets
 data(iris)
 ind.test <- seq(2, nrow(iris), by = 2)
@@ -28,9 +32,6 @@ m3 <- simca(x.cal3, classnames[3], 4, cv = list("rand", 5, 10), x.test = x.test,
 m3 <- selectCompNum(m3, 3)
 m3 <- setDistanceLimits(m3, lim.type = "ddrobust", alpha = 0.05)
 
-
-pdf(file = "test_simca_plots.pdf")
-sink("output-simca.txt", append = FALSE, split = FALSE)
 
 models <- list("se" = m1, "ve" = m2, "vi" = m3)
 for (i in seq_along(models)) {
@@ -184,10 +185,6 @@ for (i in seq_along(models)) {
    showPredictions(res)
 }
 
-dev.off()
-sink()
-
-
 # code for manual comparison  with DDSIMCA GUI - not uses as real tests
 
 if (FALSE) {
@@ -243,3 +240,8 @@ if (FALSE) {
    summary(r)
 
 }
+
+teardown({
+   dev.off()
+   sink()
+})

@@ -3,6 +3,8 @@
 #####################################################
 
 
+pdf(file = "../plots/test_pca_plots.pdf")
+sink("../plots/output-pca.txt", append = FALSE, split = FALSE)
 
 # prepare cases
 
@@ -28,9 +30,6 @@ m3 <- pca(x3, 10, scale = T, x.test = x3.test)
 x <- list(x1, x2, x3)
 x.test <- list(NULL, x2.test, x3.test)
 m <- list("full" = m1, "full + test" = m2, "excluded + test" = m3)
-
-
-pdf(file = "test_pca_plots.pdf", pointsize = 10)
 
 #########################################
 # Block 1: Variance plot                #
@@ -560,11 +559,13 @@ tf <- function(model, name) {
 
 
 tf(ms, "spectral data")
-dev.off()
 
 
 # just output to check in txt file
-sink("output-pca.txt", append=FALSE, split=FALSE)
 print(ms)
 print(summary(ms))
-sink()
+
+teardown({
+   dev.off()
+   sink()
+})

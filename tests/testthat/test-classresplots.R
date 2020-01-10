@@ -2,7 +2,9 @@
 # Tests for plotting methods of classres() class    #
 #####################################################
 
-rm(list  = ls())
+pdf(file = "../plots/test_classres_plots.pdf")
+sink("../plots/output-classres.txt", append = FALSE, split = FALSE)
+
 # mock data
 
 ## reference values
@@ -51,9 +53,6 @@ res <- list(
    "exclrows + one class" = res3,
    "exclrows + one comp + one class" = res3
 )
-
-pdf(file = "test_classres_plots.pdf")
-sink("output-classres.txt", append = FALSE, split = FALSE)
 
 for (i in seq_along(res)) {
 
@@ -185,5 +184,8 @@ for (i in seq_along(res)) {
 
 }
 
-dev.off()
-sink()
+
+teardown({
+   dev.off()
+   sink()
+})

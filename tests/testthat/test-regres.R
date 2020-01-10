@@ -166,20 +166,20 @@ for (i in seq_along(test_data)) {
    })
 
    test_that("Residuals plot works correctly", {
-      pd <- plotYResiduals(res, show.plot = FALSE)
+      pd <- plotResiduals(res, show.plot = FALSE)
       expect_equivalent(pd, cbind(td$y.ref[, 1], -td$y.err[, ncomp.selected, 1]))
       expect_equal(attr(pd, "exclrows"), exclrows)
 
-      pd <- plotYResiduals(res, ny = nresp, ncomp = ncomp, show.plot = FALSE)
+      pd <- plotResiduals(res, ny = nresp, ncomp = ncomp, show.plot = FALSE)
       expect_equivalent(pd, cbind(td$y.ref[, nresp], -td$y.err[, ncomp, nresp]))
       expect_equal(attr(pd, "exclrows"), exclrows)
 
       par(mfrow = c(2, 2))
-      expect_silent(plotYResiduals(res, main = case_name))
-      expect_silent(plotYResiduals(res, show.labels = T))
-      expect_silent(plotYResiduals(res, show.labels = T, show.line = F))
-      expect_silent(plotYResiduals(res, ncomp = ncomp, ny = nresp, col = "red", show.excluded = T))
-      expect_error(plotYResiduals(res, ny = 1:2))
+      expect_silent(plotResiduals(res, main = case_name))
+      expect_silent(plotResiduals(res, show.labels = T))
+      expect_silent(plotResiduals(res, show.labels = T, show.line = F))
+      expect_silent(plotResiduals(res, ncomp = ncomp, ny = nresp, col = "red", show.excluded = T))
+      expect_error(plotResiduals(res, ny = 1:2))
    })
 
    test_that("RMSE plot works correctly", {

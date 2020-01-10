@@ -2,6 +2,9 @@
 # Tests for classmodel class methods  #
 #######################################
 
+pdf(file = "../plots/test_classmodel_plots.pdf")
+sink("../plots/output-classmodel.txt", append = FALSE, split = FALSE)
+
 # mock data
 
 ## reference values
@@ -60,8 +63,6 @@ m3$res <- list(
    "cal" = classres(c.pred.cal, c.ref.cal)
 )
 
-pdf(file = "test_classmodel_plots.pdf")
-
 for (m in list(m1, m2, m3)) {
 
    context(sprintf("classmodel: plots for model with %s", m$name))
@@ -87,4 +88,16 @@ for (m in list(m1, m2, m3)) {
    })
 }
 
-dev.off()
+## test output sinked to external file
+# TODO: implement print and summary for classmodel
+print(m1)
+print(m2)
+print(m3)
+print(summary(m1))
+print(summary(m2))
+print(summary(m3))
+
+teardown({
+   dev.off()
+   sink()
+})
