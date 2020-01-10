@@ -323,7 +323,7 @@ crossval.simca <- function(obj, x, cv) {
 
    # get matrix with indices for cv segments
    nobj <- nrow(x)
-   idx <- crossval(nobj, cv)
+   idx <- crossval(cv, nobj)
    nseg <- nrow(idx);
    nrep <- dim(idx)[3]
 
