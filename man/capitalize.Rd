@@ -4,11 +4,17 @@
 \alias{capitalize}
 \title{Capitalize text or vector with text values}
 \usage{
-capitalize(str)
+capitalize(s)
+
+capitalize(s)
 }
 \arguments{
+\item{s}{string or vector of strings}
+
 \item{str}{text of vector with text values}
 }
 \description{
 Capitalize text or vector with text values
+
+Capitalize first letter of sting (or vector of strings)
 }

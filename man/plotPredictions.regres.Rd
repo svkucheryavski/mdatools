@@ -15,6 +15,7 @@
   xlim = NULL,
   ylim = NULL,
   axes.equal = TRUE,
+  show.plot = TRUE,
   ...
 )
 }
@@ -35,9 +36,9 @@
 
 \item{axes.equal}{logical, make limits for x and y axes equal or not}
 
-\item{...}{other plot parameters (see \code{mdaplot} for details)}
+\item{show.plot}{logical, show plot or just return plot data}
 
-\item{col}{color for the plot objects.}
+\item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
 \description{
 Shows plot with predicted y values.
