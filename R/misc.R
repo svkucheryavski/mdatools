@@ -960,18 +960,3 @@ capitalize <- function(str) {
 repmat <- function(x, nrows, ncols = nrows) {
    return(matrix(1, nrows, ncols) %x% x)
 }
-
-#' Capitalize first letter of sting (or vector of strings)
-#'
-#' @param s
-#' string or vector of strings
-#'
-#' @export
-capitalize <- function(s) {
-
-  if (length(s) == 1) {
-      return(paste0(toupper(substring(s, 1,1)), substring(s, 2)))
-  }
-
-  return(sapply(s, capitalize, simplify = "vector", USE.NAMES = FALSE))
-}
