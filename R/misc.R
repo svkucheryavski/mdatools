@@ -388,8 +388,7 @@ mda.t = function(x) {
 #' @export
 mda.exclrows = function(x, ind) {
 
-   if(is.null(ind))
-      return(x)
+   if(length(ind) < 1) return(x)
 
    excl.rows = attr(x, 'exclrows', exact = TRUE)
    nrows.tot = nrow(x)
@@ -455,8 +454,7 @@ mda.inclrows = function(x, ind) {
 #'
 #' @export
 mda.exclcols = function(x, ind) {
-   if(is.null(ind))
-      return(x)
+   if(length(ind) < 1) return(x)
 
    excl.cols = attr(x, 'exclcols', exact = TRUE)
    ncols.tot = ncol(x)

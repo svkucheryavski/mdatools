@@ -59,7 +59,6 @@ ldecomp <- function(scores, loadings, residuals, eigenvals, ncomp.selected = nco
    var <- ldecomp.getVariances(scores, loadings, residuals, dist$Q)
    obj <- c(obj, var)
 
-
    obj$call <- match.call()
    class(obj) <- "ldecomp"
 

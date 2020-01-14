@@ -321,6 +321,10 @@ plotPredictions.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected, show
       stop("You can show prediction plot only for one selected response variable.")
    }
 
+   if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
+      stop("Wrong value for ncomp argument.")
+   }
+
    if (is.null(obj$y.ref)) {
       plot_data <- matrix(obj$y.pred[, ncomp, ny], ncol = 1)
       attr(plot_data, "xaxis.name") <- colnames(plot_data) <-
@@ -397,6 +401,10 @@ plotResiduals.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
       stop("You can make residuals plot only for one selected response variable.")
    }
 
+   if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
+      stop("Wrong value for ncomp argument.")
+   }
+
    plot_data <- cbind(obj$y.ref[, ny], obj$y.ref[, ny] - obj$y.pred[, ncomp, ny])
    plot_data <- mda.setattr(plot_data, mda.getattr(obj$y.pred))
    colnames(plot_data) <- c(sprintf("%s, reference", obj$respnames[ny]), "Residuals")
@@ -428,8 +436,8 @@ plotResiduals.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
 #' other plot parameters (see \code{mdaplot} for details)
 #'
 #' @export
-plotRMSE.regres <- function(obj, ny = 1, type = "h", xticks = seq_len(obj$ncomp),
-   show.plot = TRUE, ...) {
+plotRMSE.regres <- function(obj, ny = 1, type = "b", xticks = seq_len(obj$ncomp),
+   labels = "values", show.plot = TRUE, ...) {
 
    if (is.null(obj$rmse)) {
       stop("RMSE values are not available.")
@@ -447,7 +455,7 @@ plotRMSE.regres <- function(obj, ny = 1, type = "h", xticks = seq_len(obj$ncomp)
       return(plot_data)
    }
 
-   return(mdaplot(plot_data, type = type, xticks = xticks, ...))
+   return(mdaplot(plot_data, type = type, xticks = xticks, labels = labels, ...))
 }
 
 #' Plot method for regression results
