@@ -75,8 +75,8 @@ mdaplotg.showLegend <- function(legend, col, pt.bg = NA, pch = NULL, lty = NULL,
 #'
 mdaplotg.prepareData <- function(data, type, groupby) {
 
-   # if already a list - do nothing
-   if (is.list(data) && !is.data.frame(data)) return(data)
+   # if already a list - remove NULL elements and return
+   if (is.list(data) && !is.data.frame(data)) return(data[!sapply(data, is.null)])
 
    if (is.null(groupby)) {
       # take every row of matrix or data frame as separate group
