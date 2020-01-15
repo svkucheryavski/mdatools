@@ -1272,8 +1272,7 @@ plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE, re
 #'
 #' @export
 plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
-   norm = TRUE, cgroup = NULL,
-   xlim = NULL, ylim = NULL, show.limits = TRUE,
+   norm = TRUE, cgroup = NULL, xlim = NULL, ylim = NULL, show.limits = TRUE,
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    res = obj$res, ...) {
 

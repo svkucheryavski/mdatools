@@ -23,7 +23,7 @@ regmodel <- function(...) {
 #' object of class \code{plsres} with results of cross-validation
 #'
 #' @export
-crossval.regmodel <- function(obj, x, y, cv, cal.fun, jack.knife = TRUE) {
+crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
 
    # get attributes
    x.attrs <- attributes(x)
@@ -51,7 +51,7 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun, jack.knife = TRUE) {
    ncomp <- obj$ncomp
 
    # get matrix with indices for cv segments
-   cv_ind <- crossval(cv, nobj, y)
+   cv_ind <- crossval(cv, nobj = nobj, resp = y[, 1])
    nseg <- nrow(cv_ind);
    nrep <- dim(cv_ind)[3]
 
@@ -71,13 +71,15 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun, jack.knife = TRUE) {
 
          # create a model
          m.loc <- cal.fun(xc, yc, obj$ncomp, method = obj$method, center = obj$center,
-            scale = obj$scale)
-         r.loc <- predict(m.loc, xt)
+            scale = obj$scale, cv = TRUE)
+         r.loc <- predict(m.loc, xt, cv = TRUE)
 
          # save results
          if (any(is.na(r.loc$y.pred))) stop()
          yp.cv[ind, , ] <- yp.cv[ind, , , drop = FALSE] + r.loc$y.pred
-         jk.coeffs[, , , is] <- jk.coeffs[, , , is] + m.loc$coeffs$values
+
+         jk.coeffs[, , , is] <- jk.coeffs[, , , is, drop = FALSE] +
+            array(m.loc$coeffs$values, dim = c(dim(m.loc$coeffs$values), 1))
       }
    }
 
@@ -100,7 +102,7 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun, jack.knife = TRUE) {
    )
 
    # make pls results and return
-   return(list(y.pred = yp.cv, jk.coeffs = jk.coeffs))
+   return(list(y.pred = yp.cv, y.ref = y, jk.coeffs = jk.coeffs))
 }
 
 #' Regression coefficients for PLS model'
@@ -180,7 +182,6 @@ getRegcoeffs.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, full 
    return(out)
 }
 
-
 #' Summary method for regression model object
 #'
 #' @description
@@ -251,6 +252,7 @@ print.regmodel <- function(x, ...) {
 #  Plotting methods            #
 ################################
 
+
 #' RMSE plot for regression model
 #'
 #' @description
@@ -276,11 +278,11 @@ print.regmodel <- function(x, ...) {
 #' @details
 #'
 #' @export
-plotRMSE.regmodel <- function(obj, ny = 1, type = "h", xticks = seq_len(obj$ncomp),
-   res = obj$res, ...) {
+plotRMSE.regmodel <- function(obj, ny = 1, type = "b", labels = "values",
+   xticks = seq_len(obj$ncomp), res = obj$res, ...) {
 
    plot_data <- lapply(res, plotRMSE, ny = ny, show.plot = FALSE)
-   mdaplotg(plot_data, type = type, xticks = xticks, ...)
+   mdaplotg(plot_data, type = type, xticks = xticks, labels = labels, ...)
 }
 
 #' Predictions plot for regression model

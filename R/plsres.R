@@ -283,7 +283,7 @@ print.plsres <- function(x, ...) {
 #'
 #' @export
 plotVariance.plsres <- function(obj, decomp = "xdecomp", variance = "expvar", ...) {
-   if (is.null(obj[[decomp]])) return(invisible(NULL))
+   if (is.null(obj[[decomp]])) return(NULL)
    return(plotVariance.ldecomp(obj[[decomp]], variance = variance, ...))
 }
 
@@ -426,7 +426,7 @@ plotXYScores.plsres <- function(obj, ncomp = 1, show.plot = TRUE, ...) {
       sprintf("Y-scores (Comp %d, %.2f%%)", ncomp, obj$ydecomp$expvar[ncomp])
    )
 
-   attr(plot_data, "name") <- "Scores"
+   attr(plot_data, "name") <- "Scores (XY)"
 
    if (!show.plot) {
       return(plot_data)
@@ -454,7 +454,7 @@ plotXYScores.plsres <- function(obj, ncomp = 1, show.plot = TRUE, ...) {
 #'
 #' @export
 plotXResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected,
-   main = sprintf('X-residuals (ncomp = %d)', ncomp), ...) {
+   main = sprintf("X-residuals (ncomp = %d)", ncomp), ...) {
 
    if (is.null(obj$xdecomp)) return(invisible(NULL))
 
@@ -462,6 +462,7 @@ plotXResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected,
       stop("Wrong value for ncomp argument.")
    }
 
+   # TODO: implement norm and log attributes support (u0 attribute for Q and T2)
    return(plotResiduals.ldecomp(obj$xdecomp, ncomp = ncomp, main = main, ...))
 }
 

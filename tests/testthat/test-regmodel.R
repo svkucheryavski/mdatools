@@ -3,36 +3,41 @@
 ######################################
 
 pdf(file = "../plots/test_regmodel_plots.pdf")
-sink("../plots/output-regmodel.txt", append = FALSE, split = FALSE)
 
 # create functions for cal and predict
-test.cal <- function(x, y, center, scale, ncomp = 1, method = "mlr") {
+test.cal <- function(x, y, center, scale, ncomp = 1, method = "mlr", cv = FALSE) {
 
    exclcols <- attr(x, "exclrows")
    x <- prep.autoscale(x, center = center, scale = scale)
    y <- prep.autoscale(y, center = center, scale = scale)
 
-   m <- lm(y ~ x)
-   coeffs <- array(m$coefficients[2:(ncol(x) + 1)], dim = c(ncol(x), 1, 1))
-   dimnames(coeffs) <- list(colnames(x), "Comp 1", "Y1")
+   fit <- lm(y ~ x)
+   coeffs <- array(fit$coefficients[2:(ncol(x) + 1)], dim = c(ncol(x), 1, 1))
+
    m <- list(
-      coeffs = regcoeffs(coeffs),
       center = center,
       scale = scale,
       xcenter = attr(x, "prep:center"),
       xscale = attr(x, "prep:scale"),
       ycenter = attr(y, "prep:center"),
       yscale = attr(y, "prep:scale"),
+      coeffs = regcoeffs(coeffs),
       method = method,
       ncomp = 1,
       ncomp.selected = 1
    )
-
    class(m) <- c("testmodel", "regmodel")
+
+   if (cv) {
+      return(m)
+   }
+
+   dimnames(coeffs) <- list(colnames(x), "Comp 1", "Y1")
+   m$coeffs = regcoeffs(coeffs)
    return(m)
 }
 
-predict.testmodel <- function(obj, x, y = NULL) {
+predict.testmodel <- function(obj, x, y = NULL, cv = FALSE) {
 
    x <- prep.autoscale(x, center = obj$xcenter, scale = obj$xscale)
    y.pred <- x %*% obj$coeffs$values
@@ -47,6 +52,8 @@ predict.testmodel <- function(obj, x, y = NULL) {
    return(regres(y.pred = y.pred, y.ref = y, ncomp.selected = 1))
 }
 
+assign("predict.testmodel", predict.testmodel, envir = .GlobalEnv)
+
 # we remove sex several other variables to ret rid of collinearity
 data(people)
 x <- people[, -c(4, 1, 3, 9, 10, 11)]
@@ -55,7 +62,6 @@ y <- people[,  4, drop = FALSE]
 m <- test.cal(x, y, center = TRUE, scale = TRUE)
 r <- predict(m, x)
 
-assign("predict.testmodel", predict.testmodel, envir = .GlobalEnv)
 
 # tests for performance statistics
 context(sprintf("regmodel: cross-validation"))
@@ -159,22 +165,32 @@ test_that("main plots works fine", {
    expect_silent(plotRegcoeffs(m, type = "b", col = c("red", "pink"), show.excluded = T, show.labels = T))
    expect_silent(plotRegcoeffs(m, type = "l", col = c("red", "pink"), show.excluded = T, show.labels = T))
 
+})
+
+sink("../plots/output-regmodel.txt", append = FALSE, split = FALSE)
+test_that("text outcome works fine", {
+   m <- test.cal(x, y, center = TRUE, scale = TRUE)
+   cvres <- crossval.regmodel(m, x, y, cv = 1, cal.fun = test.cal)
+   m$res <- list()
+   m$res[["cal"]] <- predict(m, x, y)
+   m$res[["cv"]] <- regres(cvres$y.pred, y)
+   m$coeffs <- regcoeffs(m$coeffs$values, cvres$jk.coeffs)
 
    # just to make prints to sink to check the output
    cat("\nOutput for getRegcoeffs():\n\n")
-   print(round(getRegcoeffs.regmodel(m, ncomp = 1, full = TRUE), 4))
-   print(round(getRegcoeffs.regmodel(m, ncomp = 1, full = TRUE, alpha = 0.10), 4))
-   print(round(getRegcoeffs.regmodel(m, ncomp = 1, full = FALSE), 4))
+   expect_output(print(round(getRegcoeffs.regmodel(m, ncomp = 1, full = TRUE), 4)))
+   expect_output(print(round(getRegcoeffs.regmodel(m, ncomp = 1, full = TRUE, alpha = 0.10), 4)))
+   expect_output(print(round(getRegcoeffs.regmodel(m, ncomp = 1, full = FALSE), 4)))
 
    # print and summary
-   summary(m)
-   summary(m, ny = 1)
-   summary(m, ny = 1, ncomp = 1)
-   summary(m, ny = 1, ncomp = 1, res = list("xres" = m$res$cal))
-   print(m)
+   expect_output(summary(m))
+   expect_output(summary(m, ny = 1))
+   expect_output(summary(m, ny = 1, ncomp = 1))
+   expect_output(summary(m, ny = 1, ncomp = 1, res = list("xres" = m$res$cal)))
+   expect_output(print(m))
 })
+sink()
 
 teardown({
    dev.off()
-   sink()
 })

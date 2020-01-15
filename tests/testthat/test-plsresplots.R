@@ -1,5 +1,5 @@
 ######################################
-# Tests for plsres class plots        #
+# Tests for plsres plotting methods  #
 ######################################
 
 pdf(file = "../plots/test_plsres_plots.pdf")
@@ -40,6 +40,10 @@ for (i in seq_along(datasets)) {
    d <- datasets[[i]]
    name <- names(datasets)[i]
    context(sprintf("plsres: test plots for %s", name))
+
+   par(mfrow = c(1, 1))
+   plot.new()
+   text(0, 0, paste0("PLS results - plots - ", name), pos = 4)
 
    m <- pls(d$xc, d$yc, ncomp = d$ncomp, center = d$center, scale = d$scale, cv = 10)
    r <- m$calres

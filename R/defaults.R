@@ -697,7 +697,21 @@ plotHist = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotCorr = function(obj, ...)
-{
+plotCorr <- function(obj, ...) {
    UseMethod("plotCorr")
+}
+
+#' Plot for PLS weights
+#'
+#' @details
+#' Generic function for weights
+#'
+#' @param obj
+#' a model or result object
+#' @param ...
+#' other arguments
+#'
+#' @export
+plotWeights <- function(obj, ...) {
+   UseMethod("plotWeights")
 }
