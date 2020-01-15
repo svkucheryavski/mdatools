@@ -9,9 +9,6 @@
   ncomp = obj$ncomp.selected,
   norm = TRUE,
   log = FALSE,
-  show.labels = FALSE,
-  labels = "names",
-  main = NULL,
   show.plot = TRUE,
   ...
 )
@@ -24,12 +21,6 @@
 \item{norm}{logical, if TRUE disance values be normalized (u/u0)}
 
 \item{log}{logical, if TRUE, then log(1 + u) transformation is applied}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
-
-\item{labels}{what to show as labels if necessary}
-
-\item{main}{main title for the plot}
 
 \item{show.plot}{logical, show plot or just return plot data}
 

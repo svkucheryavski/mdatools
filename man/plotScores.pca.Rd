@@ -8,10 +8,6 @@
   obj,
   comp = c(1, 2),
   type = "p",
-  main = "Scores",
-  show.labels = FALSE,
-  show.legend = TRUE,
-  legend.position = "topright",
   show.axes = TRUE,
   res = obj$res,
   ...
@@ -24,6 +20,12 @@
 
 \item{type}{type of the plot ("p", "l", "b", "h")}
 
+\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+
+\item{res}{list with result objects to show the variance for}
+
+\item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
 \item{main}{main title for the plot}
 
 \item{show.labels}{logical, show or not labels for the plot objects}
@@ -31,12 +33,6 @@
 \item{show.legend}{logical, show or not a legend on the plot}
 
 \item{legend.position}{string, locatin of legend on the plot}
-
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
-
-\item{res}{list with result objects to show the variance for}
-
-\item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
 Shows a scores plot for selected components.

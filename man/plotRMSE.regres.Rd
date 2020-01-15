@@ -7,8 +7,9 @@
 \method{plotRMSE}{regres}(
   obj,
   ny = 1,
-  type = "h",
+  type = "b",
   xticks = seq_len(obj$ncomp),
+  labels = "values",
   show.plot = TRUE,
   ...
 )

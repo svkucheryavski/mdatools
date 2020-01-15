@@ -4,7 +4,7 @@
 \alias{crossval.regmodel}
 \title{Cross-validation of a regression model}
 \usage{
-crossval.regmodel(obj, x, y, cv, cal.fun, jack.knife = TRUE)
+crossval.regmodel(obj, x, y, cv, cal.fun)
 }
 \arguments{
 \item{obj}{a regression model (object of class \code{regmodel})}

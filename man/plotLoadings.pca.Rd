@@ -8,8 +8,6 @@
   obj,
   comp = c(1, 2),
   type = (if (length(comp == 2)) "p" else "l"),
-  main = "Loadings",
-  show.labels = FALSE,
   show.legend = TRUE,
   show.axes = TRUE,
   ...
@@ -22,15 +20,15 @@
 
 \item{type}{type of the plot ('b', 'l', 'h')}
 
-\item{main}{main title for the plot}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
-
 \item{show.legend}{logical, show or not a legend on the plot}
 
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
+\item{main}{main title for the plot}
+
+\item{show.labels}{logical, show or not labels for the plot objects}
 }
 \description{
 Shows a loadings plot for selected components.

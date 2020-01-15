@@ -4,28 +4,16 @@
 \alias{plotQDoF}
 \title{Degrees of freedom plot for orthogonal distance (Nh)}
 \usage{
-plotQDoF(
-  obj,
-  type = "b",
-  main = "Degrees of freedom",
-  xlab = "Components",
-  ylab = "Nq",
-  labels = "values",
-  ...
-)
+plotQDoF(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
 
 \item{type}{type of the plot ("b", "l", "h")}
 
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
 \item{labels}{what to show as data points labels}
+
+\item{xticks}{vector with tick values for x-axis}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

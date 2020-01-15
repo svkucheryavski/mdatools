@@ -4,23 +4,7 @@
 \alias{pls.cal}
 \title{PLS model calibration}
 \usage{
-pls.cal(
-  x,
-  y,
-  ncomp,
-  center,
-  scale,
-  method,
-  cv,
-  alpha,
-  coeffs.ci,
-  coeffs.alpha,
-  info,
-  light,
-  exclcols = NULL,
-  exclrows = NULL,
-  ncomp.selcrit
-)
+pls.cal(x, y, ncomp, center, scale, method = "simpls", cv = FALSE)
 }
 \arguments{
 \item{x}{a matrix with x values (predictors)}
@@ -34,26 +18,6 @@ pls.cal(
 \item{scale}{logical, do standardization or not}
 
 \item{method}{algorithm for computing PLS model (only 'simpls' is supported so far)}
-
-\item{cv}{logical, does calibration for cross-validation or not}
-
-\item{alpha}{significance level for calculating statistical limits for residuals.}
-
-\item{coeffs.ci}{method to calculate p-values and confidence intervals for regression coefficients (so far only
-jack-knifing is availavle: \code{='jk'}).}
-
-\item{coeffs.alpha}{significance level for calculating confidence intervals for regression coefficients.}
-
-\item{info}{short text with information about the model.}
-
-\item{light}{run normal or light (faster) version of PLS without calculationg some performance statistics.}
-
-\item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values)}
-
-\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
-
-\item{ncomp.selcrit}{criterion for selecting optimal number of components (\code{'min'} for
-first local minimum of RMSECV and \code{'wold'} for Wold's rule.)}
 }
 \value{
 model

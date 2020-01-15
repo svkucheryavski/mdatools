@@ -7,9 +7,9 @@
 pls(
   x,
   y,
-  ncomp = 15,
-  center = T,
-  scale = F,
+  ncomp = min(nrow(x) - 1, ncol(x), 20),
+  center = TRUE,
+  scale = FALSE,
   cv = NULL,
   exclcols = NULL,
   exclrows = NULL,
@@ -17,10 +17,10 @@ pls(
   y.test = NULL,
   method = "simpls",
   alpha = 0.05,
-  coeffs.ci = NULL,
+  coeffs.ci = "jk",
   coeffs.alpha = 0.05,
   info = "",
-  light = F,
+  light = (ncol(x) > 300),
   ncomp.selcrit = "min"
 )
 }

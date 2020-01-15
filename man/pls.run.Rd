@@ -4,7 +4,7 @@
 \alias{pls.run}
 \title{Runs selected PLS algorithm}
 \usage{
-pls.run(x, y, ncomp, method, cv)
+pls.run(x, y, ncomp = min(nrow(x) - 1, ncol(x)), method = "simpls", cv = FALSE)
 }
 \arguments{
 \item{x}{a matrix with x values (predictors from calibration set)}

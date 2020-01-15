@@ -7,13 +7,7 @@
 \method{plotScores}{ldecomp}(
   obj,
   comp = c(1, 2),
-  main = "Scores",
   type = "p",
-  xlab = NULL,
-  ylab = NULL,
-  show.labels = FALSE,
-  labels = "names",
-  show.legend = TRUE,
   show.axes = TRUE,
   show.plot = TRUE,
   ...
@@ -24,25 +18,25 @@
 
 \item{comp}{which components to show the plot for (can be one value or vector with two values).}
 
-\item{main}{main title for the plot}
-
 \item{type}{type of the plot}
-
-\item{xlab}{label for x-axis.}
-
-\item{ylab}{label for y-axis.}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
-
-\item{labels}{what to show as labels}
-
-\item{show.legend}{logical, show or not a legend on the plot (needed in case of line or bar plot).}
 
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
 \item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
+
+\item{main}{main title for the plot}
+
+\item{xlab}{label for x-axis.}
+
+\item{ylab}{label for y-axis.}
+
+\item{show.legend}{logical, show or not a legend on the plot (needed in case of line or bar plot).}
+
+\item{show.labels}{logical, show or not labels for the plot objects}
+
+\item{labels}{what to show as labels}
 }
 \description{
 Shows a plot with scores values for data objects.

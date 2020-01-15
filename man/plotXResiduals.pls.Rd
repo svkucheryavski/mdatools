@@ -6,10 +6,9 @@
 \usage{
 \method{plotXResiduals}{pls}(
   obj,
-  ncomp = NULL,
-  main = NULL,
-  xlab = "T2",
-  ylab = "Squared residual distance (Q)",
+  ncomp = 1,
+  res = obj$res,
+  main = sprintf("X-residuals (ncomp = \%d)", ncomp),
   ...
 )
 }
@@ -18,11 +17,7 @@
 
 \item{ncomp}{how many components to use (if NULL - user selected optimal value will be used)}
 
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
+\item{res}{list with result objects to show the plot for (by defaul, model results are used)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

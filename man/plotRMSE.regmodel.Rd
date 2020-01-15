@@ -9,8 +9,6 @@
   ny = 1,
   type = "h",
   xticks = seq_len(obj$ncomp),
-  main = "RMSE",
-  ylab = sprintf("RMSE (\%s)", obj$coeffs$respnames[ny]),
   res = obj$res,
   ...
 )
@@ -24,13 +22,13 @@
 
 \item{xticks}{vector with ticks for x-axis values}
 
-\item{main}{main plot title}
-
-\item{ylab}{label for y axis}
-
 \item{res}{list with result objects}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
+\item{main}{main plot title}
+
+\item{ylab}{label for y axis}
 }
 \description{
 Shows plot with root mean squared error values vs. number of components for PLS model.

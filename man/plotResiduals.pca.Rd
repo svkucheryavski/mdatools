@@ -10,10 +10,8 @@
   log = FALSE,
   norm = TRUE,
   cgroup = NULL,
-  main = (paste0("Residual distance (ncomp = ", ncomp, ")")),
   xlim = NULL,
   ylim = NULL,
-  show.legend = TRUE,
   show.limits = TRUE,
   lim.col = c("darkgray", "darkgray"),
   lim.lwd = c(1, 1),
@@ -33,13 +31,9 @@
 
 \item{cgroup}{color grouping of plot points (works only if one result object is available)}
 
-\item{main}{main title for the plot}
-
 \item{xlim}{limits for x-axis}
 
 \item{ylim}{limits for y-axis}
-
-\item{show.legend}{logical, show or not a legend on the plot (needed if several result objects are available)}
 
 \item{show.limits}{logical, show or not lines/curves with critical limits for the distances}
 
@@ -52,6 +46,10 @@
 \item{res}{list with result objects to show the plot for (by defaul, model results are used)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
+\item{main}{main title for the plot}
+
+\item{show.legend}{logical, show or not a legend on the plot (needed if several result objects are available)}
 }
 \description{
 Shows a plot with score (T2, h) vs orthogonal (Q, q) distances and corresponding critical

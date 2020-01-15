@@ -4,7 +4,7 @@
 \alias{plotXYScores.plsres}
 \title{XY scores plot for PLS results}
 \usage{
-\method{plotXYScores}{plsres}(obj, ncomp = 1, ...)
+\method{plotXYScores}{plsres}(obj, ncomp = 1, show.plot = TRUE, ...)
 }
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}

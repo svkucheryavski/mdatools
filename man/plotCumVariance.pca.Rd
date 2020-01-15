@@ -4,34 +4,12 @@
 \alias{plotCumVariance.pca}
 \title{Cumulative explained variance plot for PCA model}
 \usage{
-\method{plotCumVariance}{pca}(
-  obj,
-  type = "b",
-  main = "Cumulative variance",
-  xlab = "Components",
-  ylab = "Explained variance, \%",
-  show.legend = TRUE,
-  labels = "values",
-  res = obj$res,
-  ...
-)
+\method{plotCumVariance}{pca}(obj, legend.position = "bottomright", ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
 
-\item{type}{type of the plot ("b", "l", "h")}
-
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{show.legend}{logical, show or not a legend on the plot}
-
-\item{labels}{what to use as labels (if \code{show.labels = TRUE})}
-
-\item{res}{list with result objects to show the variance for}
+\item{legend.position}{position of the legend}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

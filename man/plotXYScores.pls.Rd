@@ -4,18 +4,20 @@
 \alias{plotXYScores.pls}
 \title{XY scores plot for PLS}
 \usage{
-\method{plotXYScores}{pls}(obj, comp = 1, main = "XY scores", show.axes = T, ...)
+\method{plotXYScores}{pls}(obj, ncomp = 1, show.axes = T, res = obj$res, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
+\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+
+\item{res}{list with result objects to show the plot for (by defaul, model results are used)}
+
+\item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
 \item{comp}{which component to show the plot for}
 
 \item{main}{main plot title}
-
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
-
-\item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
 Shows plot with X vs. Y scores values for selected component.

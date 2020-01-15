@@ -9,10 +9,9 @@
   nc = 1,
   type = "h",
   param = c("sensitivity", "specificity", "misclassified"),
-  xlab = "Components",
   ylab = "",
   ylim = c(0, 1.1),
-  xticks = seq_len(dim(obj$c.pred)[2]),
+  xticks = seq_len(obj$ncomp),
   show.plot = TRUE,
   ...
 )
@@ -26,8 +25,6 @@
 
 \item{param}{which performance parameter to make the plot for (can be a vector with several values).}
 
-\item{xlab}{label for x axis}
-
 \item{ylab}{label for y axis}
 
 \item{ylim}{vector with two values - limits for y axis}
@@ -37,6 +34,8 @@
 \item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of the graphical parameters from \code{\link{mdaplot}} function can be used.}
+
+\item{xlab}{label for x axis}
 }
 \description{
 Makes a plot with classification performance parameters vs. model complexity (e.g. number of

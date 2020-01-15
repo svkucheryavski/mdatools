@@ -9,11 +9,10 @@
   nc = 1,
   param = "misclassified",
   type = "h",
-  xlab = "Components",
   ylab = "",
   ylim = c(0, 1.15),
-  main = sprintf("\%s for \%s", param, obj$classnames[[nc]]),
-  xticks = seq_len(dim(obj$res[["cal"]]$c.pred)[2]),
+  xticks = seq_len(dim(obj$res$cal$c.pred)[2]),
+  res = obj$res,
   ...
 )
 }
@@ -27,17 +26,17 @@ or \code{"misclassified"})}
 
 \item{type}{type of the plot}
 
-\item{xlab}{label for x axis}
-
 \item{ylab}{label for y axis}
 
 \item{ylim}{vector with two values - limits for y axis}
 
-\item{main}{main title for the plot}
-
 \item{xticks}{vector with tick values for x-axis}
 
 \item{...}{most of the graphical parameters from \code{\link{mdaplotg}} function can be used.}
+
+\item{xlab}{label for x axis}
+
+\item{main}{main title for the plot}
 }
 \description{
 Makes a plot with sensitivity values vs. model complexity (e.g. number of components)

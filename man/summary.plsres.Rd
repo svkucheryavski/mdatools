@@ -4,7 +4,7 @@
 \alias{summary.plsres}
 \title{summary method for PLS results object}
 \usage{
-\method{summary}{plsres}(object, ny = NULL, ncomp = NULL, ...)
+\method{summary}{plsres}(object, ny = seq_len(object$nresp), ncomp = NULL, ...)
 }
 \arguments{
 \item{object}{PLS results (object of class \code{plsres})}

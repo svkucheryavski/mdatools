@@ -7,9 +7,8 @@
 plotDistDoF(
   obj,
   type = "b",
-  main = "Degrees of freedom",
-  ylab = c("Nh", "Nq"),
   labels = "values",
+  xticks = seq_len(obj$ncomp),
   ...
 )
 }
@@ -18,11 +17,9 @@ plotDistDoF(
 
 \item{type}{type of the plot ("b", "l", "h")}
 
-\item{main}{main title for the plot}
-
-\item{ylab}{label for y axis}
-
 \item{labels}{what to show as data points labels}
+
+\item{xticks}{vector with tick values for x-axis}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

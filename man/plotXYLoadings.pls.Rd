@@ -4,18 +4,18 @@
 \alias{plotXYLoadings.pls}
 \title{XY loadings plot for PLS}
 \usage{
-\method{plotXYLoadings}{pls}(obj, comp = c(1, 2), main = "XY loadings", show.axes = F, ...)
+\method{plotXYLoadings}{pls}(obj, comp = c(1, 2), show.axes = TRUE, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
 \item{comp}{which components to show the plot for (one or vector with several values)}
 
-\item{main}{main plot title}
-
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
+\item{main}{main plot title}
 }
 \description{
 Shows plot with X and Y loading values for selected components.
