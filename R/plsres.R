@@ -170,14 +170,13 @@ as.matrix.plsres <- function(x, ncomp = NULL, ny = 1, ...) {
    ydecomp_res <- if (!is.null(x$ydecomp)) as.matrix(x$ydecomp) else matrix(NA, x$ncomp, 2)
 
    out <- cbind(
-      seq_len(x$ncomp),
       xdecomp_res,
       ydecomp_res,
       as.matrix.regres(x, ny = ny)
    )
 
-   rownames(out) <- seq_len(x$ncomp)
-   colnames(out)[1:5] <- c("Comp", "X expvar", "X cumexpvar", "Y expvar", "Y cumexpvar")
+   rownames(out) <- paste("Comp", seq_len(x$ncomp))
+   colnames(out)[1:4] <- c("X expvar", "X cumexpvar", "Y expvar", "Y cumexpvar")
 
    if (!is.null(ncomp)) {
       out <- out[ncomp, , drop = FALSE]
@@ -219,13 +218,12 @@ summary.plsres <- function(object, ny = seq_len(object$nresp), ncomp = NULL, ...
    for (y in ny) {
       fprintf("\nResponse variable %s:\n", dimnames(object$y.pred)[[3]][y])
       out <- as.matrix.plsres(object, ny = y, ncomp = ncomp)
-      if (!any(is.na(out[, 2:5]))) out[, 2:5] <- round(out[, 2:5], 3)
-      out[, 6] <- round(out[, 6], 3)
-      out[, 7] <- mdaplot.formatValues(out[, 7], round.only = T)
-      out[, 8] <- round(out[, 8], 3)
-      out[, 9] <- round(out[, 9], 4)
-      out[, 10] <- round(out[, 10], 2)
-
+      if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
+      out[, 5] <- round(out[, 5], 3)
+      out[, 6] <- mdaplot.formatValues(out[, 6], round.only = T)
+      out[, 7] <- round(out[, 7], 3)
+      out[, 8] <- round(out[, 8], 4)
+      out[, 9] <- round(out[, 9], 2)
       print(out)
    }
 }
