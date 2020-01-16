@@ -398,6 +398,56 @@ test_that("test constructor with test set", {
 })
 
 
+######################################
+# Block 5. Tests vipscores() method  #
+######################################
+
+context("pls: test vipscores()")
+
+for (i in seq_along(datasets)) {
+
+   d <- datasets[[i]]
+   name <- names(datasets)[i]
+   m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
+
+   xaxis.name <- if (is.null(attr(d$xc, "xaxis.name"))) "Predictors" else attr(d$xc, "xaxis.name")
+   #returns correct outcome
+   expect_silent(v <- vipscores(m))
+   expect_equal(dim(v), c(ncol(d$xc), 1))
+   expect_equal(attr(v, "yaxis.values"), attr(d$xc, "xaxis.values"))
+   expect_equal(attr(v, "yaxis.name"), xaxis.name)
+   expect_equal(attr(v, "exclrows"), attr(d$xc, "exclcols"))
+
+   # can work with different number of ny and components
+   expect_silent(v <- vipscores(m, ncomp = 1))
+   expect_silent(v <- vipscores(m, ny = ncol(d$yc), ncomp = m$ncomp))
+
+   # raise error if ny or ncomp are not correct
+   expect_error(vipscores(m, ny = 0))
+   expect_error(vipscores(m, ny = 10))
+   expect_error(vipscores(m, ny = 1:3))
+   expect_error(vipscores(m, ncomp = 0))
+   expect_error(vipscores(m, ncomp = 100))
+   expect_error(vipscores(m, ncomp = 1:3))
+
+   # check deprecated method
+   expect_warning(v1 <- getVIPScores(m))
+   expect_warning(v2 <- getVIPScores(m, ny = ncol(d$yc), ncomp = m$ncomp))
+   expect_equal(v1, vipscores(m))
+   expect_equal(v2, vipscores(m, ny = ncol(d$yc), ncomp = m$ncomp))
+
+   # send output to file for visual checking
+   print(v)
+}
+
+test_that("vipscores for people data (A = 4) identical to once computed in MATLAB", {
+   d <- datasets[[1]]
+   m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
+
+   vip <- as.matrix(read.csv("../matlab/pls-vipscores.csv", header = FALSE))
+   expect_equivalent(vipscores(m, ncomp = 4), vip, tolerance = 10^-4)
+})
+
 teardown({
    sink()
 })

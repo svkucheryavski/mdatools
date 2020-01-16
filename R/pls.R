@@ -244,6 +244,11 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    alpha = 0.05, coeffs.ci = "jk", coeffs.alpha = 0.05, info = "", light = (ncol(x) > 300),
    ncomp.selcrit = "min") {
 
+   # if y is a vector, convert it to matrix
+   if (is.null(dim(y))) {
+      dim(y) <- c(length(y), 1)
+   }
+
    # exclude columns if "exclcols" is provided
    if (length(exclcols) > 0) {
       x <- mda.exclcols(x, exclcols)
@@ -263,14 +268,14 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    # get calibration results
    model$res <- list()
    model$res[["cal"]] <- predict.pls(model, x, y)
-   model$res[["cal"]]$info <- "Calibration results"
+   model$res[["cal"]]$info <- "calibration results"
    model$calres <- model$res[["cal"]]
 
    # do cross-validation if needed
    if (!is.null(cv)) {
       cvres <- crossval.regmodel(model, x, y, cv, cal.fun = pls.cal)
       model$res[["cv"]] <- plsres(cvres$y.pred, cvres$y.ref, ncomp.selected = ncomp)
-      model$res[["cv"]]$info <- "Cross-validation results"
+      model$res[["cv"]]$info <- "cross-validation results"
       model$cvres <- model$res[["cv"]]
 
       if (coeffs.ci == "jk") {
@@ -281,17 +286,12 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    # do test set validation if provided
    if (!is.null(x.test) && !is.null(y.test)){
       model$res[["test"]] <- predict.pls(model, x.test, y.test)
-      model$res[["test"]]$info <- "Test set validation results"
+      model$res[["test"]]$info <- "test set validation results"
       model$testres <- model$res[["test"]]
    }
 
-   if (!light) {
-      # we calculate both for data without excluded rows and columns
-      # model$selratio <- pls.calculateSelectivityRatio(model, x)
-      # model$vipscores <- pls.calculateVIPScores(model)
-   }
-
    # select optimal number of components
+   model$cv <- cv
    model$ncomp.selcrit <- ncomp.selcrit
    model <- selectCompNum(model, selcrit = ncomp.selcrit)
    return(model)
@@ -588,6 +588,79 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
       plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected,
          xdecomp = xdecomp, ydecomp = ydecomp)
    )
+}
+
+#' Summary method for PLS model object
+#'
+#' @description
+#' Shows performance statistics for the model.
+#'
+#' @param object
+#' a PLS model (object of class \code{pls})
+#' @param ncomp
+#' how many components to count.
+#' @param ny
+#' which y variable to show the summary for (can be a vector)
+#' @param ...
+#' other arguments
+#'
+#' @export
+summary.pls <- function(object, ncomp = object$ncomp.selected,
+   ny = seq_len(nrow(object$yloadings)), ...) {
+
+   if (length(ncomp) != 1 || ncomp < 0 || ncomp > object$ncomp) {
+      stop("Wrong value for the 'ncomp' parameter.")
+   }
+
+   cat("\nPLS model (class pls) summary\n")
+   cat("-------------------------------\n")
+   fprintf("Number of selected components: %d\n", ncomp)
+   fprintf("Cross-validation: %s\n", crossval.str(object$cv))
+
+   cat("\n")
+   for (y in ny) {
+      fprintf("Response variable: %s\n", rownames(object$yloadings)[y])
+      out <- do.call(rbind, lapply(object$res, as.matrix, ncomp = ncomp))
+      rownames(out) <- capitalize(names(object$res))
+
+      if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
+      out[, 5] <- round(out[, 5], 3)
+      out[, 6] <- mdaplot.formatValues(out[, 6], round.only = T)
+      out[, 7] <- round(out[, 7], 3)
+      out[, 8] <- round(out[, 8], 4)
+      out[, 9] <- round(out[, 9], 2)
+
+      print(out[, -c(1, 3), drop = FALSE])
+      cat("\n")
+   }
+}
+
+#' Print method for PLS model object
+#'
+#' @description
+#' Prints information about the object structure
+#'
+#' @param x
+#' a PLS model (object of class \code{pls})
+#' @param ...
+#' other arguments
+#'
+#' @export
+print.pls <- function(x, ...) {
+   cat("\nPLS model (class pls)\n")
+   cat("\nCall:\n")
+   print(x$call)
+
+   cat("\nMajor fields:\n")
+   cat("$ncomp - number of calculated components\n")
+   cat("$ncomp.selected - number of selected components\n")
+   cat("$coeffs - object (regcoeffs) with regression coefficients\n")
+   cat("$xloadings - vector with x loadings\n")
+   cat("$yloadings - vector with y loadings\n")
+   cat("$weights - vector with weights\n")
+   cat("$res - list with results (calibration, cv, etc)\n")
+
+   cat("\nTry summary(model) and plot(model) to see the model performance.\n")
 }
 
 
@@ -923,6 +996,37 @@ plotXYLoadings.pls <- function(obj, comp = c(1, 2), show.axes = TRUE, ...) {
    mdaplotg(plot_data, type = "p", show.lines = show.lines, ...)
 }
 
+
+#' VIP scores plot for PLS model
+#'
+#' @description
+#' Shows a plot with VIP scores values for given number of components
+#' and response variable
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#'
+#' @param ny
+#' which response to get the values for (if y is multivariate)
+#' @param ncomp
+#' number of components to count
+#' @param type
+#' type of the plot
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' See \code{\link{vipscores}} for more details.
+#'
+#' @export
+plotVIPScores.pls <- function(obj, ny = 1, ncomp = obj$ncomp.selected, type = "l",
+   show.lines = c(1, NA), ...) {
+
+   vipscores <- vipscores(obj, ny = ny, ncomp = ncomp)
+   mdaplot(mda.t(vipscores), type = type, ...)
+}
+
+
 #' Model overview plot for PLS
 #'
 #' @description
@@ -1219,7 +1323,9 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
    xscores <- x %*% (fit$weights %*% solve(crossprod(fit$xloadings, fit$weights)))
    yscores <- as.matrix(y) %*% fit$yloadings
    xeigenvals <- colSums(xscores^2) / (xc.nrows - 1)
+   attr(xeigenvals, "DoF") <- (xc.nrows - 1)
    yeigenvals <- colSums(yscores^2) / (xc.nrows - 1)
+   attr(yeigenvals, "DoF") <- (xc.nrows - 1)
 
    # correct results related to predictors for missing columns in x
    # corresponding rows will be set to 0 and excluded
@@ -1290,6 +1396,107 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
    return(model)
 }
 
+#' VIP scores for PLS model
+#'
+#' @description
+#' Calculates VIP (Variable Importance in Projection) scores for predictors for given number
+#' of components and response variable.
+#'
+#' @param object
+#' a PLS model (object of class \code{pls})
+#' @param ny
+#' number of y-variable to make the calculations for
+#' @param ncomp
+#' number of components to count
+#'
+#' @return
+#' matrix \code{nvar x 1} with VIP score values
+#'
+#' @details
+#' May take some time in case of large number of predictors Returns results as a column-vector,
+#' with all necessary attributes inherited (e.g. xaxis.values, excluded variables, etc.). If you
+#' want to make a plot use for example: \code{mdaplot(mda.t(v), type = "l")}, where \code{v} is
+#' a vector with computed VIP scores. Or just try \code{\link{plotVIPScores.pls}}.
+#'
+#' @references
+#' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
+#'
+#' @export
+vipscores <- function(obj, ny = 1, ncomp = obj$ncomp.selected) {
+
+   if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
+      stop("Wrong value for the 'ncomp' parameter.")
+   }
+
+   if (length(ny) != 1 || ny < 1 || ny > nrow(obj$yloadings)) {
+      stop("Wong value for the 'ny' parameter.")
+   }
+
+   # subset needed model parameters
+   comp <- seq_len(ncomp)
+   weights <- obj$weights[, comp, drop = FALSE]
+   yloads <- obj$yloadings[ny, comp, drop = FALSE];
+
+   # get eigenvalues and multiply them to degrees of freedom
+   xeigenvals <- obj$xeigenvals[comp] * attr(obj$xeigenvals, "DoF")
+#   xeigenvals <- obj$xeigenvals[comp]
+
+   # get number and indices of variables and adjust dimension for regcoeffs
+   nvar <- nrow(weights)
+   var_ind <- seq_len(nvar)
+
+   # remove hidden variables
+   if (length(obj$exclcols) > 0) {
+      weights <- weights[-obj$exclcols, , drop = FALSE]
+      var_ind <- var_ind[-obj$exclcols]
+   }
+
+   # prepare matrix for vipscores
+   vipscores <- matrix(0, nrow = nvar, ncol = 1)
+
+   # normalize scores
+   wnorm <- weights %*% diag(1 / sqrt(colSums(weights^2)), nrow = ncomp, ncol = ncomp)
+
+   # compute sum of squares (weights) and VIP scores
+   ssq <- xeigenvals * colSums(yloads^2)
+   vipscores[var_ind, ] <- sqrt(nvar * wnorm^2 %*% (ssq / sum(ssq)))
+
+   rownames(vipscores) <- dimnames(obj$coeffs$values)[[1]]
+   colnames(vipscores) <- dimnames(obj$coeffs$values)[[3]][ny]
+
+   attr(vipscores, "exclrows") <- obj$exclcols
+   attr(vipscores, "yaxis.values") <- attr(obj$xloadings, "yaxis.values")
+   attr(vipscores, "yaxis.name") <- attr(obj$xloadings, "yaxis.name")
+   attr(vipscores, "xaxis.name") <- paste0("VIP (", colnames(vipscores)[1], ")")
+   attr(vipscores, "name") <- sprintf("VIP scores (ncomp = %d)", ncomp)
+
+   return(vipscores)
+}
+
+#' VIP scores for PLS model
+#'
+#' @description
+#' Returns vector with VIP scores values. This function is a proxy for \code{\link{vipscores}}
+#' and will be removed in future releases.
+#'
+#' @param object
+#' a PLS model (object of class \code{pls})
+#' @param ny
+#' number of y-variable to make the calculations for
+#' @param ncomp
+#' number of components to count
+#'
+#' @return
+#' matrix \code{nvar x 1} with VIP score values
+#'
+#' @export
+getVIPScores.pls <- function(obj, ny = 1, ncomp = obj$ncomp.selected, ...) {
+
+   warning("This function is deprecated and will be removed in future. Use 'vipscores()' insted.")
+   return(vipscores(obj, ny = ny, ncomp = ncomp))
+}
+
+
 # ! Stopped refactoring here
 
 
@@ -1310,7 +1517,8 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
 #' @return
 #' array \code{nvar x ncomp x ny} with selectivity ratio values
 #'
-pls.calculateSelectivityRatio = function(model, x) {
+pls.calculateSelectivityRatio <- function(obj, x) {
+
    ny = dim(model$coeffs$values)[3]
    ncomp = dim(model$coeffs$values)[2]
    nvar = ncol(x)
@@ -1352,90 +1560,8 @@ pls.calculateSelectivityRatio = function(model, x) {
 
    dimnames(selratio.out) = dimnames(model$coeffs$values)
    selratio.out = mda.setattr(selratio.out, attrs)
-   attr(selratio.out, 'name') = 'Selectivity ratio'
+   attr(selratio.out, "name") <- "Selectivity ratio"
    selratio.out
-}
-
-#' VIP scores calculation for PLS model
-#'
-#' @description
-#' Calculates VIP (Variable Importance in Projection) scores for each component and
-#' response variable in the PLS model
-#'
-#' @param object
-#' a PLS model (object of class \code{pls})
-#'
-#' @return
-#' matrix \code{nvar x ny} with VIP score values for selected number of components
-#'
-pls.calculateVIPScores = function(object) {
-
-   # get values
-   comp = object$ncomp.selected
-   coeffs = object$coeffs$values
-   w = object$weights[, 1:comp, drop = F]
-   xloads = object$xloadings[, 1:comp, drop = F];
-   xscores = object$calres$xdecomp$scores[, 1:comp, drop = F];
-
-   # remove hidden variables
-   attrs = mda.getattr(coeffs)
-   exclvars = attrs$exclrows
-   nexclvar = length(exclvars)
-   if (nexclvar > 0) {
-      coeffs = coeffs[-exclvars, , , drop = FALSE]
-      w = w[-exclvars, , drop = FALSE]
-      xloads = xloads[-exclvars, , drop = FALSE]
-   }
-
-   # remove hidden objects
-   if (length(attr(xscores, 'exclrows')) > 0)
-      xscores = xscores[-attr(xscores, 'exclrows'), , drop = FALSE]
-
-   ny = dim(coeffs)[3]
-   nvar = dim(coeffs)[1]
-   vipscores = matrix(0, nrow = nvar, ncol = ny)
-
-   # regression coefficients for working with scores instead of x
-   # T = X * WPW
-   # T * WPW' = X * WPW * WPW'
-   # T * WPW' * (WPW * WPW')^-1 = X
-   # YP = X * b
-   # YP = T * WPW' * (WPW * WPW')^-1 * b
-   # YP = T * bT, where bT = WPW' * (WPW * WPW)^-1 * b
-   wpw = (w %*% solve(t(xloads) %*% w))
-
-   # normalise weights
-   n = 1/sqrt(colSums(w^2))
-   if (comp == 1)
-      dim(n) = c(1, 1)
-   else
-      n = diag(n)
-   wnorm = w %*% n
-
-   for (y in 1:ny) {
-      b = coeffs[, comp, y, drop = F]
-      dim(b) = c(dim(b)[1], 1)
-
-      bscores = ( t(wpw) %*% pinv(wpw %*% t(wpw)) ) %*% b
-
-      TT = colSums(xscores^2)
-      dim(TT) = c(1, comp)
-      SS = bscores^2 * t(TT)
-      vipscores[, y] = nvar * wnorm^2 %*% as.matrix(SS) / sum(SS)
-   }
-
-   if (nexclvar > 0) {
-      vipscores.out = matrix(0, nrow = nvar + nexclvar, ncol = ny)
-      vipscores.out[-exclvars, ] = vipscores
-   } else {
-      vipscores.out = vipscores
-   }
-
-   rownames(vipscores.out) = dimnames(object$coeffs$values)[[1]]
-   colnames(vipscores.out) = dimnames(object$coeffs$values)[[3]]
-   vipscores.out = mda.setattr(vipscores.out, attrs)
-   attr(vipscores.out, 'name') = 'VIP scores'
-   vipscores.out
 }
 
 #' Selectivity ratio for PLS model
@@ -1475,59 +1601,7 @@ getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, ...) {
    selratio
 }
 
-#' VIP scores for PLS model
-#'
-#' @description
-#' Returns vector with VIP scores values for given number of components
-#' and response variable
-#'
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param ny
-#' which response to get the values for (if y is multivariate)
-#' @param ...
-#' other parameters
-#'
-#' @references
-#' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
-#'
-#' @return
-#' vector with VIP scores values
-#'
-#' @export
-getVIPScores.pls = function(obj, ny = 1, ...) {
-   return(mda.subset(obj$vipscores, select = ny))
-}
 
-#' VIP scores plot for PLS model
-#'
-#' @description
-#' Shows a plot with VIP scores values for given number of components
-#' and response variable
-#'
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param ny
-#' which response to get the values for (if y is multivariate)
-#' @param type
-#' type of the plot
-#' @param main
-#' main title for the plot
-#' @param ylab
-#' label for y axis
-#' @param ...
-#' other plot parameters (see \code{mdaplot} for details)
-#'
-#' @references
-#' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
-#'
-#' @export
-plotVIPScores.pls = function(obj, ny = 1, type = 'l', main = NULL, ylab = '', ...) {
-
-   main = getMainTitle(main, NULL, 'VIP scores')
-   vipscores = getVIPScores.pls(obj, ny)
-   mdaplot(mda.t(vipscores), type = type, main = main, ylab = ylab, ...)
-}
 
 #' Selectivity ratio plot for PLS model
 #'
@@ -1564,99 +1638,3 @@ plotSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, type = 'l',
 }
 
 
-#' Summary method for PLS model object
-#'
-#' @description
-#' Shows performance statistics for the model.
-#'
-#' @param object
-#' a PLS model (object of class \code{pls})
-#' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
-#' @param ny
-#' which y variable to show the summary for (if NULL, will be shown for all)
-#' @param ...
-#' other arguments
-#'
-#' @export
-summary.pls = function(object, ncomp = NULL, ny = NULL, ...) {
-   obj = object
-
-   if (is.null(ncomp))
-      ncomp = obj$ncomp.selected
-   else if (ncomp <= 0 || ncomp > obj$ncomp)
-      stop('Wrong value for number of components!')
-
-   if (is.null(ny))
-      ny = 1:ncol(obj$calres$y.ref)
-
-   cat('\nPLS model (class pls) summary\n')
-   cat('\nPerformance and validation:\n')
-   cat(sprintf('Number of selected components: %d\n', ncomp))
-
-   for (y in ny) {
-      if (ncol(obj$calres$y.ref) > 1)
-         cat(sprintf('\nResponse variable #%d (%s)\n', y, colnames(obj$calres$y.ref)[y]))
-
-      data = as.matrix(obj$calres, ncomp = ncomp, ny = y)
-      rownames(data) = 'Cal'
-
-      if (!is.null(obj$cvres)) {
-         data = rbind(data, as.matrix(obj$cvres, ncomp = ncomp, ny = y))
-         rownames(data)[nrow(data)] = 'CV'
-      }
-
-      if (!is.null(obj$testres)) {
-         data = rbind(data, as.matrix(obj$testres, ncomp = ncomp, ny = y))
-         rownames(data)[nrow(data)] = 'Test'
-      }
-
-      data = data[, -c(1, 3), drop = F]
-      data[, 1:2] = round(data[, 1:2], 2)
-      data[, 3] = round(data[, 3], 3)
-      data[, 4] = mdaplot.formatValues(data[, 4], round.only = T)
-      data[, 5] = round(data[, 5], 3)
-      data[, 6] = round(data[, 6], 4)
-      data[, 7] = round(data[, 7], 1)
-
-      print(data)
-   }
-   cat('\n')
-}
-
-#' Print method for PLS model object
-#'
-#' @description
-#' Prints information about the object structure
-#'
-#' @param x
-#' a PLS model (object of class \code{pls})
-#' @param ...
-#' other arguments
-#'
-#' @export
-print.pls = function(x, ...) {
-   obj = x
-
-   cat('\nPLS model (class pls)\n')
-   cat('\nCall:\n')
-   print(obj$call)
-   cat('\nMajor fields:\n')
-   cat('$ncomp - number of calculated components\n')
-   cat('$ncomp.selected - number of selected components\n')
-   cat('$coeffs - object (regcoeffs) with regression coefficients\n')
-   cat('$xloadings - vector with x loadings\n')
-   cat('$yloadings - vector with y loadings\n')
-   cat('$weights - vector with weights\n')
-   cat('$calres - results for calibration set\n')
-
-   if (!is.null(obj$cvres)) {
-      cat('$cvres - results for cross-validation\n')
-   }
-
-   if (!is.null(obj$testres)) {
-      cat('$testres - results for test set\n')
-   }
-
-   cat('\nTry summary(model) and plot(model) to see the model performance.\n')
-}
