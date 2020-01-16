@@ -123,24 +123,27 @@ crossval <- function(cv = 1, nobj = NULL, resp = NULL) {
 #' a string with the description text
 #'
 crossval.str <- function(cv) {
+
+   if (length(cv) == 0) return("none")
+
    if (is.numeric(cv)) {
       return(
-         if (cv == 1) "full cross-validation (leave one out)"
-         else sprintf("random cross-validation with %d segments", cv)
+         if (cv == 1) "full (leave one out)"
+         else sprintf("random with %.0f segments", cv)
       )
    }
 
    type <- cv[[1]]
    if (type == "loo") {
-      return("full cross-validation (leave one out)")
+      return("full (leave one out)")
    }
 
    if (type == "ven") {
-      return(sprintf("venetian blinds with %d segments", cv[[2]]))
+      return(sprintf("venetian blinds with %.0f segments", cv[[2]]))
    }
 
    return(
-      sprintf("random cross-validation with %d segments%s",
+      sprintf("random with %.0f segments%s",
          cv[[2]], if (length(cv) == 3) paste(" and", cv[[3]], "repetitions") else "")
    )
 }
