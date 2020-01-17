@@ -195,8 +195,6 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE
    }
 
    # line or bar plot
-   #if (is.null(ylab)) ylab <- "Score value"
-   #if (type == "h") show.lines <- FALSE
    plot_data <- mda.t(plot_data)
    attr(plot_data, "yaxis.name") <- "Score"
    return(mdaplotg(plot_data, type = type, show.lines = show.lines, ...))

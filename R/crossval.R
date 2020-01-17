@@ -65,9 +65,9 @@ crossval.getParams <- function(cv, nobj) {
 #' @param cv
 #' cross-validation settings, can be a number or a list. If cv is a number, it will be
 #' used as a number of segments for random cross-validation (if cv = 1, full cross-validation
-#' will be preformed), if it is a list, the following syntax can be used: cv = list('rand', nseg, nrep)
-#' for random repeated cross-validation with nseg segments and nrep repetitions or cv = list('ven', nseg)
-#' for systematic splits to nseg segments ('venetian blinds').
+#' will be preformed), if it is a list, the following syntax can be used:
+#' cv = list('rand', nseg, nrep) for random repeated cross-validation with nseg segments and nrep
+#' repetitions or cv = list('ven', nseg) for systematic splits to nseg segments ('venetian blinds').
 #'
 #' @return
 #' matrix with object indices for each segment
@@ -79,7 +79,7 @@ crossval <- function(cv = 1, nobj = NULL, resp = NULL) {
    if (is.null(nobj)) nobj <- length(resp)
 
    p <- crossval.getParams(cv = cv, nobj = nobj)
-   if ( !(p$type %in% c("rand", "ven", "loo"))) {
+   if (!(p$type %in% c("rand", "ven", "loo"))) {
       stop("Wrong name for cross-validation method.")
    }
 

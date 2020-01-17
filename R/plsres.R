@@ -515,7 +515,7 @@ plot.plsres <- function(x, ncomp = obj$ncomp.selected, ny = 1, show.labels = FAL
    if (is.null(x$y.ref)) {
       par(mfrow = c(1, 2))
       plotXResiduals(x, ...)
-      plotPredictions.plsres(x, ncomp = ncomp, ny = ny, ...)
+      plotPredictions.regres(x, ncomp = ncomp, ny = ny, ...)
       par(mfrow = c(1, 1))
       return()
    }
@@ -524,6 +524,6 @@ plot.plsres <- function(x, ncomp = obj$ncomp.selected, ny = 1, show.labels = FAL
    plotXResiduals(x, ncomp = ncomp, ...)
    plotYVariance(x, ...)
    plotRMSE(x, ny = ny, ...)
-   plotPredictions.plsres(x, ncomp = ncomp, ny = ny, ...)
+   plotPredictions.regres(x, ncomp = ncomp, ny = ny, ...)
    par(mfrow = c(1, 1))
 }

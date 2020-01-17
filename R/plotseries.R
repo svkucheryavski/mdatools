@@ -40,7 +40,7 @@
 plotseries <- function(data, type, cgroup = NULL, col = NULL, opacity = 1,
    colmap = "default", labels = NULL) {
 
-   if (is.null(data) || length(data) == 0) {
+   if (length(data) == 0) {
       stop("Seems you forgot to provide data values (vector, matrix of data frame).")
    }
 
