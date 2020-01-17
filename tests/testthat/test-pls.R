@@ -70,7 +70,7 @@ xc <- mda.exclcols(xc, c(1, 100:110))
 yc <- mda.exclrows(yc, c(1, 10, 20, 30, 40))
 attr(xc, "name") <- "Spectra, cal"
 attr(xc, "xaxis.name") <- "Wavelength, nm"
-attr(xc, "xaxis.values") <- simdata$Wavelength
+attr(xc, "xaxis.values") <- simdata$wavelength
 
 xt <- simdata$spectra.t
 yt <- simdata$conc.t
@@ -78,7 +78,7 @@ xt <- mda.exclrows(xt, c(15, 35))
 yt <- mda.exclrows(yt, c(15, 35))
 attr(xt, "name") <- "Spectra, val"
 attr(xt, "xaxis.name") <- "Wavelength, nm"
-attr(xt, "xaxis.values") <- simdata$Wavelength
+attr(xt, "xaxis.values") <- simdata$wavelength
 
 datasets[["spectra"]] <- list(xc = xc, yc = yc, xt = xt, yt = yt, center = T, scale = F, ncomp = 6)
 
@@ -411,30 +411,30 @@ for (i in seq_along(datasets)) {
    m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
 
    xaxis.name <- if (is.null(attr(d$xc, "xaxis.name"))) "Predictors" else attr(d$xc, "xaxis.name")
+
    #returns correct outcome
    expect_silent(v <- vipscores(m))
-   expect_equal(dim(v), c(ncol(d$xc), 1))
+   expect_equal(dim(v), c(ncol(d$xc), ncol(d$yc)))
+   expect_equal(rownames(v), colnames(d$xc))
+   expect_equal(colnames(v), colnames(d$yc))
    expect_equal(attr(v, "yaxis.values"), attr(d$xc, "xaxis.values"))
    expect_equal(attr(v, "yaxis.name"), xaxis.name)
    expect_equal(attr(v, "exclrows"), attr(d$xc, "exclcols"))
 
    # can work with different number of ny and components
    expect_silent(v <- vipscores(m, ncomp = 1))
-   expect_silent(v <- vipscores(m, ny = ncol(d$yc), ncomp = m$ncomp))
+   expect_silent(v <- vipscores(m, ncomp = m$ncomp))
 
    # raise error if ny or ncomp are not correct
-   expect_error(vipscores(m, ny = 0))
-   expect_error(vipscores(m, ny = 10))
-   expect_error(vipscores(m, ny = 1:3))
    expect_error(vipscores(m, ncomp = 0))
    expect_error(vipscores(m, ncomp = 100))
    expect_error(vipscores(m, ncomp = 1:3))
 
    # check deprecated method
    expect_warning(v1 <- getVIPScores(m))
-   expect_warning(v2 <- getVIPScores(m, ny = ncol(d$yc), ncomp = m$ncomp))
+   expect_warning(v2 <- getVIPScores(m, ncomp = m$ncomp))
    expect_equal(v1, vipscores(m))
-   expect_equal(v2, vipscores(m, ny = ncol(d$yc), ncomp = m$ncomp))
+   expect_equal(v2, vipscores(m, ncomp = m$ncomp))
 
    # send output to file for visual checking
    print(v)
@@ -447,6 +447,58 @@ test_that("vipscores for people data (A = 4) identical to once computed in MATLA
    vip <- as.matrix(read.csv("../matlab/pls-vipscores.csv", header = FALSE))
    expect_equivalent(vipscores(m, ncomp = 4), vip, tolerance = 10^-4)
 })
+
+
+######################################
+# Block 6. Tests selratio()  method  #
+######################################
+
+context("pls: test selratio()")
+
+for (i in seq_along(datasets)) {
+
+   d <- datasets[[i]]
+   name <- names(datasets)[i]
+   m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
+
+   xaxis.name <- if (is.null(attr(d$xc, "xaxis.name"))) "Predictors" else attr(d$xc, "xaxis.name")
+
+   #returns correct outcome
+   selratio(m)
+   expect_silent(v <- selratio(m))
+   expect_equal(dim(v), c(ncol(d$xc), ncol(d$yc)))
+   expect_equal(rownames(v), colnames(d$xc))
+   expect_equal(colnames(v), colnames(d$yc))
+   expect_equal(attr(v, "yaxis.values"), attr(d$xc, "xaxis.values"))
+   expect_equal(attr(v, "yaxis.name"), xaxis.name)
+   expect_equal(attr(v, "exclrows"), attr(d$xc, "exclcols"))
+
+   # can work with different number of ny and components
+   expect_silent(v <- selratio(m, ncomp = 1))
+   expect_silent(v <- selratio(m, ncomp = m$ncomp))
+
+   # raise error if ny or ncomp are not correct
+   expect_error(selratio(m, ncomp = 0))
+   expect_error(selratio(m, ncomp = 100))
+   expect_error(selratio(m, ncomp = 1:3))
+
+   # check deprecated method
+   expect_warning(v1 <- getSelectivityRatio(m))
+   expect_warning(v2 <- getSelectivityRatio(m, ncomp = m$ncomp))
+   expect_equal(v1, selratio(m))
+   expect_equal(v2, selratio(m, ncomp = m$ncomp))
+
+   # send output to file for visual checking
+   print(v)
+}
+
+#test_that("vipscores for people data (A = 4) identical to once computed in MATLAB", {
+#   d <- datasets[[1]]
+#   m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
+#
+#   vip <- as.matrix(read.csv("../matlab/pls-vipscores.csv", header = FALSE))
+#   expect_equivalent(vipscores(m, ncomp = 4), vip, tolerance = 10^-4)
+#})
 
 teardown({
    sink()
