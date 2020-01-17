@@ -2,7 +2,7 @@
 # Tests for pls plotting methods     #
 ######################################
 
-#pdf(file = "../plots/test_pls_plots.pdf")
+pdf(file = "../plots/test_pls_plots.pdf")
 
 # mock some data
 datasets <- list()
@@ -22,7 +22,7 @@ xc <- mda.exclcols(xc, c(1, 100:110))
 yc <- mda.exclrows(yc, c(1, 10, 20, 30, 40))
 attr(xc, "name") <- "Spectra, cal"
 attr(xc, "xaxis.name") <- "Wavelength, nm"
-attr(xc, "xaxis.values") <- simdata$Wavelength
+attr(xc, "xaxis.values") <- simdata$wavelength
 
 xt <- simdata$spectra.t
 yt <- simdata$conc.t
@@ -30,7 +30,7 @@ xt <- mda.exclrows(xt, c(15, 35))
 yt <- mda.exclrows(yt, c(15, 35))
 attr(xt, "name") <- "Spectra, val"
 attr(xt, "xaxis.name") <- "Wavelength, nm"
-attr(xt, "xaxis.values") <- simdata$Wavelength
+attr(xt, "xaxis.values") <- simdata$wavelength
 
 datasets[["spectra"]] <- list(xc = xc, yc = yc, xt = xt, yt = yt, center = T, scale = F, ncomp = 6)
 
@@ -127,6 +127,22 @@ for (i in seq_along(datasets)) {
       expect_silent(plotWeights(m2, c(1, 3), type = "p", show.labels = T))
    })
 
+   test_that("VIP scores plot works fine", {
+      par(mfrow = c(2, 2))
+      expect_silent(plotVIPScores(m1))
+      expect_silent(plotVIPScores(m2))
+      expect_silent(plotVIPScores(m1, ny = 1, type = "l", show.labels = T))
+      expect_silent(plotVIPScores(m2, ny = ncol(d$yc), ncomp = m2$ncomp, type = "h", show.labels = T))
+   })
+
+   test_that("Selectivity ratio plot works fine", {
+      par(mfrow = c(2, 2))
+      expect_silent(plotSelectivityRatio(m1))
+      expect_silent(plotSelectivityRatio(m2))
+      expect_silent(plotSelectivityRatio(m1, ny = 1, type = "l", show.labels = T))
+      expect_silent(plotSelectivityRatio(m2, ny = ncol(d$yc), ncomp = m2$ncomp, type = "h", show.labels = T))
+   })
+
    test_that("Regression coefficients  plot works fine", {
       par(mfrow = c(2, 2))
       expect_silent(plotRegcoeffs(m1))
@@ -164,6 +180,8 @@ for (i in seq_along(datasets)) {
       expect_silent(plot(m1))
       expect_silent(plot(m2, ny = ncol(d$yc), ncomp = 2))
    })
-
-
 }
+
+teardown({
+   dev.off()
+})
