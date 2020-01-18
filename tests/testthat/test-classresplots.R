@@ -152,19 +152,10 @@ for (i in seq_along(res)) {
    # classification results - labels
    par(mfrow = c(2, 2))
    test_that("prediction plot works correctly", {
-      expect_silent(plotPredictions(res[[i]], show.labels = T))
-      expect_silent(plotPredictions(res[[i]], nc = 1, show.labels = T, labels = "values"))
+      expect_silent(plotPredictions(res[[i]]))
+      expect_silent(plotPredictions(res[[i]], nc = 1, show.excluded = T, show.labels = T, labels = "values"))
       expect_silent(plotPredictions(res[[i]], show.labels = T, labels = "indices"))
       expect_silent(plotPredictions(res[[i]], show.labels = T, labels = "names"))
-   })
-
-   # classification results - legend position
-   par(mfrow = c(2, 2))
-   test_that("prediction plot works correctly", {
-      expect_silent(plotPredictions(res[[i]], show.excluded = T, show.labels = T, show.legend = F))
-      expect_silent(plotPredictions(res[[i]], nc = 1, legend.position = "top"))
-      expect_silent(plotPredictions(res[[i]], legend.position = "bottom"))
-      expect_silent(plotPredictions(res[[i]], legend.position = "left"))
    })
 
    test_that("prediction plot returns plot data if show.plot = FALSE", {

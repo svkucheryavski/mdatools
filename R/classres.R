@@ -181,9 +181,14 @@ as.matrix.classres <- function(x, ncomp = NULL, nc = 1, ...) {
 
    if (is.null(x$c.ref)) return()
 
+   if (length(nc) != 1) {
+      stop("Wrong value for 'nc' parameter.")
+   }
+
+   specificity <- if (is.null(x$specificity)) matrix(NA, x$nclasses, x$ncomp) else x$specificity
    out <- cbind(
       x$tp[nc, ], x$fp[nc, ], x$tn[nc, ], x$fn[nc, ],
-      round(x$specificity[nc, ], 3),
+      round(specificity[nc, ], 3),
       round(x$sensitivity[nc, ], 3),
       round(1 - x$misclassified[nc, ], 3)
    )
@@ -259,13 +264,6 @@ summary.classres <- function(object, ncomp = object$ncomp.selected,
 
    fprintf("\nNumber of selected components: %d", ncomp)
    fprintf("\nNumber of classes: %d\n", object$nclasses)
-
-   # short results for one component
-   if (length(ncomp) == 1) {
-      print(as.matrix.classres(object, nc = nc, ncomp = ncomp))
-      cat("\n")
-      return()
-   }
 
    # detailed results for several components
    for (i in nc) {
@@ -356,6 +354,9 @@ classres.getPerformance <- function(c.ref, c.pred) {
    rownames(fn) <- rownames(fp) <- rownames(tp) <- rownames(tn) <- row_names
    colnames(fn) <- colnames(fp) <- colnames(tp) <- colnames(sn) <- colnames(sp) <- col_names
    rownames(sn) <- rownames(sp) <- rownames(ms) <- c(row_names, "Total")
+
+   # in case of one class classifier set sensitivity NULL
+   if (all(is.na(sp))) sp <- NULL
 
    return(
       list(
@@ -517,6 +518,12 @@ plotPerformance.classres <- function(obj, nc = 1, type = "b",
 
    if (is.null(obj$c.ref)) {
       stop("No reference data available")
+   }
+
+   # check if parameters requested are not NULL
+   param <- param[param %in% sapply(names(obj), function(x) if (!is.null(obj[[x]])) x)]
+   if (length(param) == 0) {
+      stop("Performance parameteres you requested are not available in this result object.")
    }
 
    # prepare plot data

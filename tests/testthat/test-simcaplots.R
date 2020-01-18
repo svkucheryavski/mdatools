@@ -109,7 +109,7 @@ for (i in seq_along(models)) {
    test_that("performance plot works correctly", {
       expect_silent(plotPerformance(m))
       expect_silent(plotPerformance(m, type = "h"))
-      expect_silent(plotSpecificity(m))
+      expect_error(plotSpecificity(m))
       expect_silent(plotSensitivity(m))
    })
 

@@ -84,7 +84,7 @@ for (m in list(m1, m2, m3)) {
       expect_silent(plotPredictions(m))
       expect_silent(plotPredictions(m, col = c("red", "orange", "green"), show.labels = T))
       expect_silent(plotPredictions(m, res.name = "cal"))
-      expect_silent(plotPredictions(m, res.name = "cal", show.legend = F, show.excluded = T, show.labels = T))
+      expect_silent(plotPredictions(m, res.name = "cal", show.excluded = T, show.labels = T))
    })
 }
 

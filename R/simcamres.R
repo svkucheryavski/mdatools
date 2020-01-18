@@ -83,8 +83,12 @@ simcamres <- function(cres, pred.res) {
 #' @export
 as.matrix.simcamres <- function(x, nc = seq_len(x$nclasses)) {
    comp <- sapply(x$pred.res, function(r) r$ncomp.selected)
-   out <- as.matrix.classres(x, nc = nc)
+
+   #out <- do.call(rbind, lapply(x, as.matrix.classres))
+   out <- do.call(rbind, lapply(nc, function(n) as.matrix.classres(x, nc = n)))
    out <- cbind(comp, out)
+
+   rownames(out) <- x$classnames
    colnames(out)[1] <- "Ncomp"
    return(out)
 }

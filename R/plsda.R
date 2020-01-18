@@ -158,7 +158,7 @@ plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, sc
    # get reference y-values for regression
    y <- mda.df2mat(as.factor(c), full = TRUE)
    y <- y[, colnames(y) != "None", drop = FALSE]
-   y[y == 0] = -1
+   y[y == 0] <- -1
    colnames(y) <- classnames
    rownames(y) <- rownames(x)
 
@@ -252,7 +252,7 @@ plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, sc
 #' @export
 predict.plsda <- function(object, x, c.ref = NULL, ...) {
 
-   y.ref = NULL
+   y.ref <- NULL
    # prepare matrix with y-reference values according to classes used in the model
    if (!is.null(c.ref)) {
       attrs <- mda.getattr(c.ref)
@@ -389,7 +389,7 @@ summary.plsda <- function(object, ncomp = object$ncomp.selected,
 #' other arguments
 #'
 #' @export
-print.plsda = function(x, ...) {
+print.plsda <- function(x, ...) {
    cat("\nPLS-DA model (class plsda)\n")
    cat("\nCall:\n")
    print(x$call)
