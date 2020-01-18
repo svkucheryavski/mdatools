@@ -604,6 +604,7 @@ summary.pls <- function(object, ncomp = object$ncomp.selected,
 
    cat("\nPLS model (class pls) summary\n")
    cat("-------------------------------\n")
+   fprintf("Info: %s\n", object$info)
    fprintf("Number of selected components: %d\n", ncomp)
    fprintf("Cross-validation: %s\n", crossval.str(object$cv))
 
@@ -1015,7 +1016,7 @@ plotXYLoadings.pls <- function(obj, comp = c(1, 2), show.axes = TRUE, ...) {
 #' See \code{\link{vipscores}} for more details.
 #'
 #' @export
-plotVIPScores.pls <- function(obj, ny = seq_len(nrow(obj$yloadings)), ncomp = obj$ncomp.selected,
+plotVIPScores.pls <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
    type = "l", ...) {
 
    vipscores <- vipscores(obj, ncomp = ncomp)
@@ -1043,7 +1044,7 @@ plotVIPScores.pls <- function(obj, ny = seq_len(nrow(obj$yloadings)), ncomp = ob
 #' See \code{\link{vipscores}} for more details.
 #'
 #' @export
-plotSelectivityRatio.pls <- function(obj, ny = seq_len(nrow(obj$yloadings)),
+plotSelectivityRatio.pls <- function(obj, ny = 1,
    ncomp = obj$ncomp.selected, type = "l", ...) {
 
    selratio <- selratio(obj, ncomp = ncomp)
