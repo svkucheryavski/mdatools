@@ -65,14 +65,19 @@ regres <- function(y.pred, y.ref = NULL, ncomp.selected = 1) {
 #' other arguments
 #'
 #' @export
-as.matrix.regres <- function(x, ncomp = seq_len(x$ncomp), ny = 1, ...) {
+as.matrix.regres <- function(x, ncomp = NULL, ny = 1, ...) {
    if (is.null(x$y.ref)) return()
 
-   out <- cbind(x$r2[ny, ncomp], x$rmse[ny, ncomp], x$slope[ny, ncomp],
-      x$bias[ny, ncomp], x$rpd[ny, ncomp])
+   out <- cbind(x$r2[ny, ], x$rmse[ny, ], x$slope[ny, ],
+      x$bias[ny, ], x$rpd[ny, ])
 
    colnames(out) <- c("R2", "RMSE", "Slope", "Bias", "RPD")
-   rownames(out) <- ncomp
+   rownames(out) <- dimnames(x$y.pred)[[2]]
+
+   if (!is.null(ncomp)) {
+      out <- out[ncomp, , drop = FALSE]
+   }
+
    return(out)
 }
 
