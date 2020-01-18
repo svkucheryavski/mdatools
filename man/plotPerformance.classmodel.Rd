@@ -8,7 +8,7 @@
   obj,
   nc = 1,
   param = "misclassified",
-  type = "h",
+  type = "b",
   ylab = "",
   ylim = c(0, 1.15),
   xticks = seq_len(dim(obj$res$cal$c.pred)[2]),

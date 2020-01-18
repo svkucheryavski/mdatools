@@ -4,12 +4,12 @@
 \alias{as.matrix.plsdares}
 \title{as.matrix method for PLS-DA results}
 \usage{
-\method{as.matrix}{plsdares}(x, ncomp = NULL, nc = NULL, ...)
+\method{as.matrix}{plsdares}(x, ncomp = NULL, nc = 1, ...)
 }
 \arguments{
 \item{x}{PLS-DA results (object of class \code{plsdares})}
 
-\item{ncomp}{number of components to calculate the statistics for}
+\item{ncomp}{number of components to calculate the statistics for (if NULL gets for all components)}
 
 \item{nc}{for which class to calculate the statistics for}
 

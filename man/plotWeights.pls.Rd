@@ -4,10 +4,10 @@
 \alias{plotWeights.pls}
 \title{X loadings plot for PLS}
 \usage{
-plotWeights.pls(
+\method{plotWeights}{pls}(
   obj,
   comp = 1,
-  type = (if (ncol(obj$weights) < 20) "h" else "l"),
+  type = (if (nrow(obj$weights) < 20) "h" else "l"),
   show.axes = TRUE,
   show.legend = TRUE,
   ...
@@ -21,6 +21,8 @@ plotWeights.pls(
 \item{type}{type of the plot}
 
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+
+\item{show.legend}{logical, show or not a legend}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

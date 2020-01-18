@@ -4,7 +4,7 @@
 \alias{as.matrix.classres}
 \title{as.matrix method for classification results}
 \usage{
-\method{as.matrix}{classres}(x, ncomp = seq_len(x$ncomp), nc = 1, ...)
+\method{as.matrix}{classres}(x, ncomp = NULL, nc = 1, ...)
 }
 \arguments{
 \item{x}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}

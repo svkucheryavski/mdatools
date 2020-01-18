@@ -17,11 +17,11 @@
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{decomp}{which decomposition to use ('xdecomp' for x or 'ydecomp' for y)}
+\item{decomp}{which decomposition to use ("xdecomp" for x or "ydecomp" for y)}
 
-\item{variance}{which variance to use ('expvar', 'cumexpvar)}
+\item{variance}{which variance to use ("expvar", "cumexpvar")}
 
-\item{type}{type of the plot('b', 'l' or 'h')}
+\item{type}{type of the plot("b", "l" or "h")}
 
 \item{labels}{what to show as labels for plot objects.}
 

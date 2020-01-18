@@ -18,7 +18,7 @@
 \item{...}{other arguments}
 }
 \value{
-PLS results (an object of class \code{plsres})
+PLS results (an object of class \code{\link{plsres}})
 }
 \description{
 Applies PLS model to a new data set

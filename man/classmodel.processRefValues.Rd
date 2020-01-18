@@ -4,7 +4,7 @@
 \alias{classmodel.processRefValues}
 \title{Check reference class values and convert it to a factor if necessary}
 \usage{
-classmodel.processRefValues(c.ref, classname = NULL)
+classmodel.processRefValues(c.ref, classnames = NULL)
 }
 \arguments{
 \item{c.ref}{class reference values provided by user}

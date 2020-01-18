@@ -7,7 +7,8 @@
 \method{plotRMSE}{regmodel}(
   obj,
   ny = 1,
-  type = "h",
+  type = "b",
+  labels = "values",
   xticks = seq_len(obj$ncomp),
   res = obj$res,
   ...

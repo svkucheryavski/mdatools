@@ -7,7 +7,7 @@
 \method{plotPerformance}{classres}(
   obj,
   nc = 1,
-  type = "h",
+  type = "b",
   param = c("sensitivity", "specificity", "misclassified"),
   ylab = "",
   ylim = c(0, 1.1),

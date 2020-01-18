@@ -12,8 +12,8 @@ plsdares(plsres, cres)
 \item{cres}{Classification results for the data.}
 }
 \value{
-Returns an object of \code{plsdares} class with fields, inherited from \code{\link{classres}} and
-\code{\link{plsres}}.
+Returns an object of \code{plsdares} class with fields, inherited from \code{\link{classres}}
+and \code{\link{plsres}}.
 }
 \description{
 \code{plsdares} is used to store and visualize results of applying a PLS-DA model to a new data.
@@ -28,8 +28,8 @@ The object gives access to all PLS-DA results as well as to the plotting methods
 visualisation of the results. The \code{plsidares} class also inherits all properties and methods
 of \code{classres} and \code{plsres} classes.
 
-If no reference values provided, classification statistics will not be calculated and performance
-plots will not be available.
+If no reference values provided, classification statistics will not be calculated and
+performance plots will not be available.
 }
 \examples{
 ### Examples for PLS-DA results class
@@ -100,26 +100,35 @@ Methods, inherited from \code{\link{classres}} class:
 \tabular{ll}{
  \code{\link{showPredictions.classres}} \tab show table with predicted values.\cr
  \code{\link{plotPredictions.classres}} \tab makes plot with predicted values.\cr
- \code{\link{plotSensitivity.classres}} \tab makes plot with sensitivity vs. components values.\cr
- \code{\link{plotSpecificity.classres}} \tab makes plot with specificity vs. components values.\cr
+ \code{\link{plotSensitivity.classres}} \tab makes plot with sensitivity vs. components
+values.\cr
+ \code{\link{plotSpecificity.classres}} \tab makes plot with specificity vs. components
+values.\cr
  \code{\link{plotPerformance.classres}} \tab makes plot with both specificity and sensitivity
   values.\cr
 }
 
-Methods, inherited from \code{plsres} class:
+Methods for \code{plsres} objects:
 \tabular{ll}{
- \code{\link{plotPredictions.plsres}} \tab shows predicted vs. measured plot.\cr
- \code{\link{plotXScores.plsres}} \tab shows scores plot for x decomposition.\cr
- \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
- \code{\link{plotRMSE.regres}} \tab shows RMSE plot.\cr
- \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
- \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
- \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y
- decomposition.\cr
- \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y
- decomposition.\cr
- \code{\link{plotXResiduals.plsres}} \tab shows T2 vs. Q plot for x decomposition.\cr
- \code{\link{plotYResiduals.regres}} \tab shows residuals plot for y values.\cr
+   \code{print} \tab prints information about a \code{plsres} object.\cr
+   \code{\link{summary.plsres}} \tab shows performance statistics for the results.\cr
+   \code{\link{plot.plsres}} \tab shows plot overview of the results.\cr
+   \code{\link{plotXScores.plsres}} \tab shows scores plot for x decomposition.\cr
+   \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
+   \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
+   \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
+   \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y
+   decomposition.\cr
+   \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y
+   decomposition.\cr
+   \code{\link{plotXResiduals.plsres}} \tab shows T2 vs. Q plot for x decomposition.\cr
+}
+
+Methods inherited from \code{regres} class (parent class for \code{plsres}):
+\tabular{ll}{
+   \code{\link{plotPredictions.regres}} \tab shows predicted vs. measured plot.\cr
+   \code{\link{plotRMSE.regres}} \tab shows RMSE plot.\cr
+   \code{\link{plotYResiduals.regres}} \tab shows residuals plot for y values.\cr
 }
 
 See also \code{\link{plsda}} - a class for PLS-DA models, \code{\link{predict.plsda}} applying

@@ -11,6 +11,8 @@
 
 \item{type}{type of the plot("b", "l" or "h")}
 
+\item{main}{title for the plot}
+
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{

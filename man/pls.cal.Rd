@@ -18,6 +18,8 @@ pls.cal(x, y, ncomp, center, scale, method = "simpls", cv = FALSE)
 \item{scale}{logical, do standardization or not}
 
 \item{method}{algorithm for computing PLS model (only 'simpls' is supported so far)}
+
+\item{cv}{logical, is model calibrated during cross-validation or not}
 }
 \value{
 model

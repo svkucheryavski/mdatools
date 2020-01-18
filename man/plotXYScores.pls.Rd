@@ -9,15 +9,13 @@
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
+\item{ncomp}{which component to show the plot for}
+
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
 \item{res}{list with result objects to show the plot for (by defaul, model results are used)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{comp}{which component to show the plot for}
-
-\item{main}{main plot title}
 }
 \description{
 Shows plot with X vs. Y scores values for selected component.

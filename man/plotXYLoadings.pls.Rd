@@ -14,8 +14,6 @@
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{main}{main plot title}
 }
 \description{
 Shows plot with X and Y loading values for selected components.

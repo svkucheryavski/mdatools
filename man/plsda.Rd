@@ -7,9 +7,9 @@
 plsda(
   x,
   c,
-  ncomp = 15,
-  center = T,
-  scale = F,
+  ncomp = min(nrow(x) - 1, ncol(x), 20),
+  center = TRUE,
+  scale = FALSE,
   cv = NULL,
   exclcols = NULL,
   exclrows = NULL,
@@ -17,10 +17,7 @@ plsda(
   c.test = NULL,
   method = "simpls",
   alpha = 0.05,
-  coeffs.ci = NULL,
-  coeffs.alpha = 0.1,
   info = "",
-  light = F,
   ncomp.selcrit = "min",
   classname = NULL
 )
@@ -28,7 +25,7 @@ plsda(
 \arguments{
 \item{x}{matrix with predictors.}
 
-\item{c}{vector with class membership (should be either a factor with class names/numbers in case of 
+\item{c}{vector with class membership (should be either a factor with class names/numbers in case of
 multiple classes or a vector with logical values in case of one class model).}
 
 \item{ncomp}{maximum number of components to calculate.}
@@ -51,54 +48,47 @@ multiple classes or a vector with logical values in case of one class model).}
 
 \item{alpha}{significance level for calculating statistical limits for residuals.}
 
-\item{coeffs.ci}{method to calculate p-values and confidence intervals for regression coefficients (so far only 
-jack-knifing is availavle: \code{='jk'}).}
-
-\item{coeffs.alpha}{significance level for calculating confidence intervals for regression coefficients.}
-
 \item{info}{short text with information about the model.}
 
-\item{light}{run normal or light (faster) version of PLS without calculationg some performance statistics.}
-
-\item{ncomp.selcrit}{criterion for selecting optimal number of components (\code{'min'} for first local minimum of 
+\item{ncomp.selcrit}{criterion for selecting optimal number of components (\code{'min'} for first local minimum of
 RMSECV and \code{'wold'} for Wold's rule.)}
 
 \item{classname}{name (label) of class in case if PLS-DA is used for one-class discrimination model. In this case
 it is expected that parameter `c` will be a vector with logical values.}
 }
 \value{
-Returns an object of \code{plsda} class with following fields (most inherited from class 
+Returns an object of \code{plsda} class with following fields (most inherited from class
 \code{pls}):
-\item{ncomp }{number of components included to the model.} 
-\item{ncomp.selected }{selected (optimal) number of components.} 
-\item{xloadings }{matrix with loading values for x decomposition.} 
-\item{yloadings }{matrix with loading values for y (c)  decomposition.} 
-\item{weights }{matrix with PLS weights.} 
-\item{coeffs }{matrix with regression coefficients calculated for each component.}   
-\item{info }{information about the model, provided by user when build the model.} 
-\item{calres }{an object of class \code{\link{plsdares}} with PLS-DA results for a calibration 
-data.} 
-\item{testres }{an object of class \code{\link{plsdares}} with PLS-DA results for a test data, 
-if it was provided.} 
+\item{ncomp }{number of components included to the model.}
+\item{ncomp.selected }{selected (optimal) number of components.}
+\item{xloadings }{matrix with loading values for x decomposition.}
+\item{yloadings }{matrix with loading values for y (c)  decomposition.}
+\item{weights }{matrix with PLS weights.}
+\item{coeffs }{matrix with regression coefficients calculated for each component.}
+\item{info }{information about the model, provided by user when build the model.}
+\item{calres }{an object of class \code{\link{plsdares}} with PLS-DA results for a calibration
+data.}
+\item{testres }{an object of class \code{\link{plsdares}} with PLS-DA results for a test data,
+if it was provided.}
 \item{cvres }{an object of class \code{\link{plsdares}} with PLS-DA results for cross-validation,
 if this option was chosen.}
 }
 \description{
-\code{plsda} is used to calibrate, validate and use of partial least squares discrimination 
+\code{plsda} is used to calibrate, validate and use of partial least squares discrimination
 analysis (PLS-DA) model.
 }
 \details{
-The \code{plsda} class is based on \code{pls} with extra functions and plots covering 
-classification functionality. All plots for \code{pls} can be used. E.g. of you want to see the 
+The \code{plsda} class is based on \code{pls} with extra functions and plots covering
+classification functionality. All plots for \code{pls} can be used. E.g. of you want to see the
 real predicted values (y in PLS) instead of classes use \code{plotPredictions.pls(model)} instead
 of \code{plotPredictions(model)}.
 
-Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
-will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
-cross-validation will be preformed). If it is a list, the following syntax can be used: 
-\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
-segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
-to \code{nseg} segments ('venetian blinds').  
+Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
+will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
+cross-validation will be preformed). If it is a list, the following syntax can be used:
+\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg}
+segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits
+to \code{nseg} segments ('venetian blinds').
 
 Calculation of confidence intervals and p-values for regression coefficients are available
 only by jack-knifing so far. See help for \code{\link{regcoeffs}} objects for details.
@@ -112,7 +102,7 @@ library(mdatools)
 
 # make a calibration set from iris data (3 classes)
 # use names of classes as class vector
-x.cal = iris[seq(1, nrow(iris), 2), 1:4] 
+x.cal = iris[seq(1, nrow(iris), 2), 1:4]
 c.cal = iris[seq(1, nrow(iris), 2), 5]
 
 model = plsda(x.cal, c.cal, ncomp = 3, cv = 1, info = 'IRIS data example')
