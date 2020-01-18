@@ -6,13 +6,15 @@
 #' text with class name in case of logical reference values
 #'
 #' @export
-classmodel.processRefValues <- function(c.ref, classname = NULL) {
+classmodel.processRefValues <- function(c.ref, classnames = NULL) {
 
    if (is.null(c.ref) || is.factor(c.ref)) return(c.ref)
    attrs <- mda.getattr(c.ref)
 
    if (is.logical(c.ref)) {
-      return(mda.setattr(as.factor(ifelse(c.ref, classname, "None")), attrs))
+      if (length(classnames) > 1) stop("Logical class values can't be used with multiclass model.")
+      if (length(classnames) == 0) stop("Classname must be specified with logical class values.")
+      return(mda.setattr(as.factor(ifelse(c.ref, classnames, "None")), attrs))
    }
 
    if (is.character(c.ref)) {
@@ -148,7 +150,7 @@ plotMisclassified.classmodel <- function(obj, ...) {
 #' most of the graphical parameters from \code{\link{mdaplotg}} function can be used.
 #'
 #' @export
-plotPerformance.classmodel <- function(obj, nc = 1, param = "misclassified", type = "h",
+plotPerformance.classmodel <- function(obj, nc = 1, param = "misclassified", type = "b",
    ylab = "", ylim = c(0, 1.15), xticks = seq_len(dim(obj$res$cal$c.pred)[2]), res = obj$res, ...) {
 
    if (length(param) != 1) {

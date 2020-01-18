@@ -177,21 +177,26 @@ showPredictions.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 #' other arguments
 #'
 #' @export
-as.matrix.classres <- function(x, ncomp = seq_len(x$ncomp), nc = 1, ...) {
+as.matrix.classres <- function(x, ncomp = NULL, nc = 1, ...) {
 
    if (is.null(x$c.ref)) return()
 
-   res <- cbind(
-      x$tp[nc, ncomp], x$fp[nc, ncomp], x$tn[nc, ncomp], x$fn[nc, ncomp],
-      round(x$specificity[nc, ncomp], 3),
-      round(x$sensitivity[nc, ncomp], 3),
-      round(1 - x$misclassified[nc, ncomp], 3)
+   out <- cbind(
+      x$tp[nc, ], x$fp[nc, ], x$tn[nc, ], x$fn[nc, ],
+      round(x$specificity[nc, ], 3),
+      round(x$sensitivity[nc, ], 3),
+      round(1 - x$misclassified[nc, ], 3)
    )
 
-   res[is.nan(res)] <- NA
-   colnames(res) <- c("TP", "FP", "TN", "FN", "Specificity", "Sensitivity", "Accuracy")
+   out[is.nan(out)] <- NA
+   colnames(out) <- c("TP", "FP", "TN", "FN", "Spec.", "Sens.", "Accuracy")
+   rownames(out) <- dimnames(x$c.pred)[[2]]
 
-   return(res)
+   if (!is.null(ncomp)) {
+      out <- out[ncomp, , drop = FALSE]
+   }
+
+   return(out)
 }
 
 #' Print information about classification result object
@@ -506,9 +511,13 @@ plotMisclassified.classres <- function(obj, ...) {
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 #'
 #' @export
-plotPerformance.classres <- function(obj, nc = 1, type = "h",
+plotPerformance.classres <- function(obj, nc = 1, type = "b",
    param = c("sensitivity", "specificity", "misclassified"),
    ylab = "", ylim = c(0, 1.1), xticks = seq_len(obj$ncomp), show.plot = TRUE, ...) {
+
+   if (is.null(obj$c.ref)) {
+      stop("No reference data available")
+   }
 
    # prepare plot data
    plot_data <- do.call(rbind, lapply(obj[param], function(x) x[nc, , drop = FALSE]))
@@ -585,20 +594,24 @@ plotPredictions.classres <- function(obj, nc = seq_len(obj$nclasses), ncomp = ob
       return(plot_data)
    }
 
-   ylim <- c(0.8, max(class_numbers) + 0.2)
+   #ylim <- c(0.8, max(class_numbers) + 0.2)
    yticks <- c(1, class_numbers)
    yticklabels <- c("None", class_names)
 
-   if (is.null(obj$c.ref)) {
-      return(
-         mdaplot(plot_data, type = "p", ylab = ylab, yticks = yticks,
-            yticklabels = yticklabels, ylim = ylim, ...)
-      )
-   } else {
-      groupby <- as.factor(obj$c.ref[plot_data[, 1]])
-      mdaplotg(plot_data, type = "p", ylab = ylab, yticks = yticks,
-            groupby = groupby, yticklabels = yticklabels, ylim = ylim, ...)
-   }
+   cgroup <- if (!is.null(obj$c.ref)) as.factor(obj$c.ref[plot_data[, 1]])
+   mdaplot(plot_data, type = "p", ylab = ylab, yticks = yticks,
+      cgroup = cgroup, yticklabels = yticklabels, ...)
+
+   #if (is.null(obj$c.ref)) {
+   #   return(
+   #      mdaplot(plot_data, type = "p", ylab = ylab, yticks = yticks,
+   #         yticklabels = yticklabels, ylim = ylim, ...)
+   #   )
+   #} else {
+   #   groupby <- as.factor(obj$c.ref[plot_data[, 1]])
+   #   mdaplot(plot_data, type = "p", ylab = ylab, yticks = yticks,
+   #         cgroup = groupby, yticklabels = yticklabels, ylim = ylim, ...)
+   #}
 }
 
 #' Plot function for classification results
