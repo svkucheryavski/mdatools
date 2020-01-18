@@ -431,8 +431,9 @@ mdaplot.getYAxisLim <- function(ps, ylim, show.lines = FALSE, show.excluded = FA
    }
 
    # add an extra margin to y limit if colorbar must be shown
-   if (show.colorbar == T) {
-      ylim[2] <- ylim[2] + diff(ylim) * 0.15
+   if (show.colorbar) {
+      #print(ylim)
+      ylim[2] <- ylim[2] + diff(ylim) * 0.20
    }
 
    # add extra margins (3.5%)
