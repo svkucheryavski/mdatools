@@ -19,7 +19,7 @@ cc.vir <- cc.all == "virginica"
 cv.all <- iris[val.ind, 5]
 cv.vir <- cv.all == "virginica"
 
-context("PLS-DA with one class")
+context("plsda: one class model")
 
 test_that("calibration and cross-validation works fine", {
    expect_error(m <- plsda(Xc, cc.vir, 3, cv = 1))
@@ -65,7 +65,7 @@ test_that("predictions work fine", {
    print(res)
 })
 
-context("PLS-DA with multiple classes")
+context("plsda: multiple class model")
 
 test_that("calibration and cross-validation works fine", {
    expect_silent(m <- plsda(Xc, cc.all, 3, cv = 1))
