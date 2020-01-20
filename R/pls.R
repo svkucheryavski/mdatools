@@ -273,7 +273,7 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    # do cross-validation if needed
    if (!is.null(cv)) {
       cvres <- crossval.regmodel(model, x, y, cv, cal.fun = pls.cal)
-      model$res[["cv"]] <- plsres(cvres$y.pred, cvres$y.ref, ncomp.selected = ncomp)
+      model$res[["cv"]] <- plsres(cvres$y.pred, cvres$y.ref, ncomp.selected = model$ncomp)
       model$res[["cv"]]$info <- "cross-validation results"
       model$cvres <- model$res[["cv"]]
       model$coeffs <- regcoeffs(model$coeffs$values, cvres$jk.coeffs)
