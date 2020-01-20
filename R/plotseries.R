@@ -639,23 +639,30 @@ plotBars <- function(ps, col = ps$col, bwd = 0.8, border = NA, force.x.values = 
    x <- ps$x_values
    y <- ps$y_values[1, ]
 
-   bwd <- if (length(x) > 1) min(diff(x)) * bwd else x * bwd
+#   bwd <- if (length(x) > 1) min(diff(x)) * bwd else x * bwd
+   #bwd <- if (length(x) > 1) diff(x) * bwd else x * bwd
+   #if (length(bwd) != length(x)) bwd <- c(bwd[1], bwd)
+
+   if (length(x) > 1) {
+      bwd_left <- c(x[seq(2, length(x))] - x[seq(1, length(x) - 1)])
+      bwd_right <- -c(x[seq(1, length(x)-1)] - x[seq(2, length(x))])
+      bwd_left <- c(bwd_left[1], bwd_left) * bwd / 2
+      bwd_right <- c(bwd_right, bwd_right[length(bwd_right)]) * bwd / 2
+   } else {
+      bwd_left <- bwd_right <- bwd * x / 2
+   }
 
    # correct x_values if they were forced by bwd
    if (is.numeric(force.x.values)) {
       x <- x - bwd / 2 + (force.x.values[1] - 0.5) * bwd / force.x.values[2]
-      bwd <- bwd / force.x.values[2]
-   }
-
-   if (length(bwd) == 1) {
-      bwd <- matrix(bwd, ncol = length(x))
+      bwd_left <- bwd_right <- bwd / force.x.values[2] / 2
    }
 
    if (length(col) != length(y)) {
       col <- rep(col, length.out = length(y))
    }
 
-   rect(x - bwd / 2, 0, x + bwd / 2, y, col = col, border = border)
+   rect(x - bwd_left, 0, x + bwd_right, y, col = col, border = border)
 }
 
 #' Show plot series as density plot (using hex binning)
