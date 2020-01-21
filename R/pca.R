@@ -172,7 +172,7 @@
 #' @export
 pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
    exclrows = NULL, exclcols = NULL, x.test = NULL, method = "svd", rand = NULL,
-   lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "") {
+   lim.type = "jm", alpha = 0.05, gamma = 0.01, info = "") {
 
    # exclude columns if "exclcols" is provided
    if (length(exclcols) > 0) {
@@ -189,9 +189,6 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
    model$info <- info
    model$call <- match.call()
 
-   # set distance limits
-   model <- setDistanceLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
-
    # apply the model to calibration set
    model$res <- list()
    model$res[["cal"]] <- predict.pca(model, x)
@@ -202,6 +199,9 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
       model$res[["test"]] <- predict.pca(model, x.test)
       model$testres <- model$res[["test"]]
    }
+
+   # set distance limits
+   model <- setDistanceLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
 
    class(model) <- c("pca")
    return(model)
@@ -232,7 +232,7 @@ selectCompNum.pca <- function(obj, ncomp, ...) {
    obj$res[["cal"]]$ncomp.selected <- ncomp
    obj$calres <- obj$res[["cal"]]
 
-   if (!is.null(obj$testres)) {
+   if (!is.null(obj$res$test)) {
       obj$res[["test"]]$ncomp.selected <- ncomp
       obj$testres <- obj$res[["test"]]
    }
@@ -250,7 +250,7 @@ selectCompNum.pca <- function(obj, ncomp, ...) {
 #' @param obj
 #' object with PCA model
 #' @param lim.type
-#' type of limits ("chisq", "ddmoments", "ddrobust")
+#' type of limits ("jm", "chisq", "ddmoments", "ddrobust")
 #' @param alpha
 #' significance level for detection of extreme objects
 #' @param gamma
@@ -280,15 +280,15 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
    obj$gamma <- gamma
    obj$lim.type <- lim.type
 
-   for (i in seq_along(obj$res)) {
-      # this is needed for SIMCA where cv result do not have PCA part
-      if (!("pcares" %in% class(obj$res[[i]]))) next
-      attr(obj$res[[i]]$Q, "u0") <- obj$Qlim[, 3]
-      attr(obj$res[[i]]$T2, "u0") <- obj$T2lim[, 3]
-   }
-
+   attr(obj$res[["cal"]]$Q, "u0") <- obj$Qlim[3, ]
+   attr(obj$res[["cal"]]$T2, "u0") <- obj$T2lim[3, ]
    obj$calres <- obj$res[["cal"]]
-   obj$testres <- obj$res[["test"]]
+
+   if (!is.null(obj$res$test)) {
+      attr(obj$res[["test"]]$Q, "u0") <- obj$Qlim[3, ]
+      attr(obj$res[["test"]]$T2, "u0") <- obj$T2lim[3, ]
+      obj$testres <- obj$res[["test"]]
+   }
 
    return(obj)
 }
@@ -315,6 +315,11 @@ getProbabilities.pca <- function(obj, ncomp, q, h) {
    if (obj$lim.type == "chisq") {
       nobj <- obj$T2lim[4, ncomp]
       return(pmax(chisq.prob(q, obj$Qlim[3:4, ncomp]), hotelling.prob(h, ncomp, nobj)))
+   }
+
+   if (obj$lim.type == "jm") {
+      nobj <- obj$T2lim[4, ncomp]
+      return(pmax(jm.prob(q, attr(obj$Qlim, "eigenvals"), ncomp), hotelling.prob(h, ncomp, nobj)))
    }
 
    # if data driven
@@ -391,7 +396,7 @@ categorize.pca <- function(obj, res, ncomp = obj$ncomp.selected, ...) {
    nobj <- length(h)
 
    # if chisq / hotelling
-   if (obj$lim.type == "chisq") {
+   if (obj$lim.type %in% c("jm", "chisq")) {
       outliers_ind <- (h >= obj$T2lim[2, ncomp] | q >= obj$Qlim[2, ncomp])
       extremes_ind <- (h >= obj$T2lim[1, ncomp] | q >= obj$Qlim[1, ncomp])
       return(create_categories(nobj, extremes_ind, outliers_ind))
@@ -1026,20 +1031,31 @@ pca.getQLimits <- function(model, lim.type, alpha, gamma) {
 
    params <- model$limParams
    pQ <- if (regexpr("robust", lim.type) > 0) params$Q$robust else params$Q$moments
-   pT2 <- if (regexpr("robust", lim.type) > 0) params$T2$robust else params$T2$moments
 
-   DoF <- round(pQ$Nu)
-   DoF[DoF < 1] <- 1
-   DoF[DoF > 250] <- 250
+   if (lim.type == "jm") {
+      # methods based on Jackson-Mudholkar approach
+      lim <- jm.crit(model$res[["cal"]]$residuals, model$eigenvals, alpha, gamma)
+      eigenvals <- attr(lim, "eigenvals")
+      lim <- rbind(lim, pQ$u0, nrow(model$res[["cal"]]$residuals))
+      attr(lim, "eigenvals") <- eigenvals
 
-   lim <- switch(lim.type,
-      "chisq" = chisq.crit(pQ, alpha, gamma),
-      "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
-      "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
-      stop("Wrong value for 'lim.type' parameter.")
-   )
+   } else {
+      # methods based on chi-square distribution
+      pT2 <- if (regexpr("robust", lim.type) > 0) params$T2$robust else params$T2$moments
+      DoF <- round(pQ$Nu)
+      DoF[DoF < 1] <- 1
+      DoF[DoF > 250] <- 250
 
-   lim <- rbind(lim, pQ$u0, DoF)
+      lim <- switch(lim.type,
+         "chisq" = chisq.crit(pQ, alpha, gamma),
+         "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
+         "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
+         stop("Wrong value for 'lim.type' parameter.")
+      )
+
+      lim <- rbind(lim, pQ$u0, DoF)
+   }
+
    colnames(lim) <- colnames(model$loadings)
    rownames(lim) <- c("Extremes limits", "Outliers limits", "Mean", "DoF")
    attr(lim, "name") <- "Critical limits for orthogonal distances (Q)"
@@ -1071,10 +1087,11 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
    DoF[DoF < 1] <- 1
    DoF[DoF > 250] <- 250
 
-   if (lim.type == "chisq") DoF <- pT2$nobj
+   if (lim.type %in% c("jm", "chisq")) DoF <- pT2$nobj
 
    lim <- switch(lim.type,
-      "chisq" = hotelling.crit(pT2$nobj, 1:model$ncomp, alpha, gamma),
+      "jm" = ,
+      "chisq" = hotelling.crit(pT2$nobj, seq_len(model$ncomp), alpha, gamma),
       "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
       "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
       stop("Wrong value for 'lim.type' parameter.")
@@ -1192,7 +1209,8 @@ plotCumVariance.pca <- function(obj, legend.position = "bottomright", ...) {
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE, res = obj$res, ...) {
+plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE, res = obj$res,
+   show.legend = TRUE, ...) {
 
    res <- getRes(res, "ldecomp")
    if (length(res) == 1) {
@@ -1210,7 +1228,7 @@ plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE, re
    }
 
    plot_data <- lapply(res, plotScores, comp = comp, type = type, show.plot = FALSE)
-   mdaplotg(plot_data, type = type, show.lines = show.lines, ...)
+   mdaplotg(plot_data, type = type, show.lines = show.lines, show.legend = show.legend, ...)
 }
 
 #' Residuals distance plot for PCA model
@@ -1274,7 +1292,7 @@ plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE, re
 plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
    norm = TRUE, cgroup = NULL, xlim = NULL, ylim = NULL, show.limits = TRUE,
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
-   res = obj$res, ...) {
+   res = obj$res, show.legend = TRUE, ...) {
 
    getLim <- function(lim, pd, ld, dim, show.limits) {
       if (!(is.null(lim) && show.limits)) return(lim)
@@ -1299,7 +1317,8 @@ plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
    if (length(plot_data) == 1) {
       mdaplot(data = plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, ...)
    } else {
-      mdaplotg(data = plot_data, type = "p", xlim = xlim, ylim = ylim, ...)
+      mdaplotg(data = plot_data, type = "p", xlim = xlim, ylim = ylim,
+         show.legend = show.legend, ...)
    }
 
    # show critical limits
@@ -1334,7 +1353,7 @@ getLimitsCoordinates.pca <- function(obj, ncomp, norm, log) {
    Nh <- obj$T2lim[4, ncomp]
    Nq <- obj$Qlim[4, ncomp]
 
-   if (obj$lim.type == "chisq") {
+   if (obj$lim.type %in% c("jm", "chisq")) {
 
       # quadratic limits
       hE <- c(0, obj$T2lim[1, ncomp], obj$T2lim[1, ncomp])

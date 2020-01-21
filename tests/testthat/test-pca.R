@@ -366,9 +366,36 @@ test_that("pca.cal calculates limit parameters correctly (excluded data)", {
 ############################################################
 
 x <- people
-m <- pca.cal(x, 11, center = TRUE, scale = TRUE, method = "svd")
+m <- pca(x, 11, center = TRUE, scale = TRUE, method = "svd")
 
 context("pca: testing getQlimits()")
+
+test_that("getQLimits() works fine (jm)", {
+
+   # expected limits for alpha = 0.05 and gamma = 0.01
+   # computed using "residuallimit" function from PLS_Toolbox
+   expQlim1 <- rbind(
+      c(13.98208375, 8.91523789, 4.86682122, 1.81125667, 0.98188720, 0.57560902, 0.32312846,
+         0.18598893, 0.12950361, 0.06958773, 0.02625457),
+      c(37.92391547, 27.28432368, 18.46348557, 5.51382242, 2.82348737, 1.68333989, 0.89628978,
+         0.47263837, 0.37503680, 0.22537117, 0.09561530)
+   )
+
+   # expected limits for alpha = 0.10 and gamma = 0.05
+   # computed using "residuallimit" function from PLS_Toolbox
+   expQlim2 <- rbind(
+      c(11.08714606, 6.88643872, 3.62417784, 1.41387882, 0.77404080, 0.45201939, 0.25555116,
+         0.14863431, 0.09998945, 0.05180038, 0.01849205),
+      c(29.65164966, 20.68354357, 13.16120605, 4.16057052, 2.16549979, 1.28564550, 0.69582345,
+         0.37714904, 0.29044220, 0.17075224, 0.07133111)
+   )
+
+   Qlim1 <- pca.getQLimits(m, lim.type = "jm", alpha = 0.05, gamma = 0.01)
+   Qlim2 <- pca.getQLimits(m, lim.type = "jm", alpha = 0.10, gamma = 0.05)
+
+   expect_equivalent(Qlim1[1:2, ], expQlim1, tolerance = 10^-5)
+   expect_equivalent(Qlim2[1:2, ], expQlim2, tolerance = 10^-5)
+})
 
 test_that("getQLimits() works fine (chisq)", {
 
@@ -451,7 +478,7 @@ test_that("getQLimits() works fine (ddrobust)", {
 
 context('pca: testing getT2limits()')
 
-test_that("getT2Limits() works fine (chisq)", {
+test_that("getT2Limits() works fine (chisq and jm)", {
 
    # expected limits for alpha = 0.05 and gamma = 0.01
    # computed using "tsqlim" function from PLS_Toolbox
@@ -471,13 +498,15 @@ test_that("getT2Limits() works fine (chisq)", {
          47.90883728, 55.09430867, 63.21788003, 72.48520544)
    )
 
+   T2lim11 <- pca.getT2Limits(m, lim.type = "chisq", alpha = 0.05, gamma = 0.01)
+   T2lim21 <- pca.getT2Limits(m, lim.type = "chisq", alpha = 0.10, gamma = 0.05)
+   T2lim12 <- pca.getT2Limits(m, lim.type = "jm", alpha = 0.05, gamma = 0.01)
+   T2lim22 <- pca.getT2Limits(m, lim.type = "jm", alpha = 0.10, gamma = 0.05)
 
-
-   T2lim1 <- pca.getT2Limits(m, lim.type = "chisq", alpha = 0.05, gamma = 0.01)
-   T2lim2 <- pca.getT2Limits(m, lim.type = "chisq", alpha = 0.10, gamma = 0.05)
-
-   expect_equivalent(T2lim1[1:2, ], expT2lim1, tolerance = 10^-5)
-   expect_equivalent(T2lim2[1:2, ], expT2lim2, tolerance = 10^-5)
+   expect_equivalent(T2lim11[1:2, ], expT2lim1, tolerance = 10^-5)
+   expect_equivalent(T2lim21[1:2, ], expT2lim2, tolerance = 10^-5)
+   expect_equivalent(T2lim12[1:2, ], expT2lim1, tolerance = 10^-5)
+   expect_equivalent(T2lim22[1:2, ], expT2lim2, tolerance = 10^-5)
 })
 
 test_that("getT2Limits() works fine (ddmoments)", {

@@ -100,7 +100,7 @@ getPCARes <- function(X, ncomp) {
    colnames(scores) <- colnames(loadings) <- paste("Comp", 1:ncomp)
 
    return(list(scores = scores, loadings = loadings, residuals = residuals,
-      eigenvals = eigenvals, totvar = sum(X_cal^2)))
+      eigenvals = eigenvals, ncomp = ncomp, totvar = sum(X_cal^2)))
 }
 
 
@@ -113,6 +113,37 @@ context("misc: computing limits (chisq/hotelling, full data)")
 
 # in this case we use predefined values computed for full People data with autoscaling
 # the values we got from PLS_Toolbox and DD-SIMCA Toolbox
+
+
+test_that("critical limits for Q are correct (jm) full decomposition", {
+
+   # test for both full and partial decomposition
+   for (a in c(4, 12)) {
+      m <- getPCARes(X1$data, a)
+
+      # expected limits for alpha = 0.05 and gamma = 0.01
+      # computed using "residuallimit" function from PLS_Toolbox
+      expQlim1 <- rbind(
+         c(13.98208375, 8.91523789, 4.86682122, 1.81125667, 0.98188720, 0.57560902, 0.32312846,
+            0.18598893, 0.12950361, 0.06958773, 0.02625457, 0),
+         c(37.92391547, 27.28432368, 18.46348557, 5.51382242, 2.82348737, 1.68333989, 0.89628978,
+            0.47263837, 0.37503680, 0.22537117, 0.09561530, 0)
+      )
+
+      # expected limits for alpha = 0.10 and gamma = 0.05
+      # computed using "residuallimit" function from PLS_Toolbox
+      expQlim2 <- rbind(
+         c(11.08714606, 6.88643872, 3.62417784, 1.41387882, 0.77404080, 0.45201939, 0.25555116,
+            0.14863431, 0.09998945, 0.05180038, 0.01849205, 0),
+         c(29.65164966, 20.68354357, 13.16120605, 4.16057052, 2.16549979, 1.28564550, 0.69582345,
+            0.37714904, 0.29044220, 0.17075224, 0.07133111, 0)
+      )
+
+      expect_equivalent(jm.crit(m$residuals, m$eigenvals, 0.05, 0.01), expQlim1[, seq_len(a)], tolerance = 10^-5)
+      expect_equivalent(jm.crit(m$residuals, m$eigenvals, 0.10, 0.05), expQlim2[, seq_len(a)], tolerance = 10^-5)
+   }
+
+})
 
 m <- getPCARes(X1$data, 12)
 dist <- ldecomp.getDistances(m$scores, m$loadings, m$residuals, m$eigenvals)
@@ -174,7 +205,7 @@ test_that("critical limits for T2 are correct (hotelling)", {
    )
 
    nobj <- nrow(dist$T2)
-   ncomp <- 1:ncol(dist$T2)
+   ncomp <- seq_len(ncol(dist$T2))
    expect_equivalent(hotelling.crit(nobj, ncomp, 0.05, 0.01), expT2lim1, tolerance = 10^-5)
    expect_equivalent(hotelling.crit(nobj, ncomp, 0.10, 0.05), expT2lim2, tolerance = 10^-5)
 })

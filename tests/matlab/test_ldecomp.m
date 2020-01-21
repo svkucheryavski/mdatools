@@ -8,7 +8,7 @@ clc
 % algorithms: "chisq", "ddmoments", "ddrobust"
 % dataname: "full", "excluded"
 
-get_results("ddrobust", "excluded")
+get_results("jm", "full")
 
 function get_results(algorithm, dataname)
 
@@ -56,7 +56,7 @@ function get_results(algorithm, dataname)
 end
 
 
-function [Qlim, T2lim, extremes, outliers] = get_lim_pls(X, alpha, gamma)
+function [Qlim, T2lim, extremes, outliers] = get_lim_pls(X, alpha, gamma, algorithm)
 
    ncomp = size(X, 2) - 1;
 
@@ -75,10 +75,10 @@ function [Qlim, T2lim, extremes, outliers] = get_lim_pls(X, alpha, gamma)
       T2 = sum(U(:, 1:A).^2, 2);
 
       options = struct();
-      options.algorithm = "chi2";
+      options.algorithm = algorithm;
 
-      Qlim(1, A) = residuallimit(Q, 1 - alpha, options);
-      Qlim(2, A) = residuallimit(Q, (1 - gamma)^(1/numel(Q)), options);
+      Qlim(1, A) = residuallimit(E, 1 - alpha, options);
+      Qlim(2, A) = residuallimit(E, (1 - gamma)^(1/numel(Q)), options);
 
       T2lim(1, A) = tsqlim(numel(Q), A, 1 - alpha);
       T2lim(2, A) = tsqlim(numel(Q), A, (1 - gamma)^(1/numel(Q)));
@@ -123,8 +123,8 @@ function [Qlim, T2lim, extremes, outliers] = get_lim_dd(X, alpha, gamma, robust)
 end
 
 function [Qlim, T2lim, extremes, outliers] = get_lim(X, algorithm, alpha, gamma)
-   if algorithm == "chisq"
-      [Qlim, T2lim, extremes, outliers] = get_lim_pls(X, alpha, gamma);
+   if algorithm == "chi2" || algorithm == "jm"
+      [Qlim, T2lim, extremes, outliers] = get_lim_pls(X, alpha, gamma, algorithm);
    else
       [Qlim, T2lim, extremes, outliers] = get_lim_dd(X, alpha, gamma, (algorithm == "ddrobust"));
    end

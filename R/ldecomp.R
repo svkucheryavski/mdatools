@@ -474,3 +474,246 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
    # return the results
    return(list(Q = Q, T2 = T2))
 }
+
+
+###############################
+# Methods for critical limits #
+###############################
+
+#' Calculate critical limits for distance values using Jackson-Mudholkar approach
+#'
+#' @param residuals
+#' matrix with PCA residuals
+#' @param evals
+#' vector with eigenvalues for PCA components
+#' @param ncomp
+#' number of components (can be a vector)
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#'
+#' @return
+#' vector with four values: critical limits for given alpha and gamma, mean distance and DoF.
+#'
+#' @export
+jm.crit <- function(residuals, evals, alpha = 0.05, gamma = 0.01) {
+
+   # if not all eigenvalues available - ise residuals to compute the rest
+   ncomp <- length(evals)
+   nobj <- nrow(residuals)
+   max_ncomp <- min(nrow(residuals) - 1, ncol(residuals))
+   if (length(evals) < max_ncomp) {
+      evals <- c(evals, svd(residuals)$d[seq_len(max_ncomp - ncomp)]^2 / (nobj - 1))
+   }
+
+   # since it is residuals we do not need eigenvalue for PC1
+   evals <- evals[-1]
+   t1 <- rev(cumsum(rev(evals)))[seq_len(ncomp)]
+   t2 <- rev(cumsum(rev(evals)^2))[seq_len(ncomp)]
+   t3 <- rev(cumsum(rev(evals)^3))[seq_len(ncomp)]
+
+   h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2);
+   ifelse (h0 < 0.001, h0 <- 0.001, h0)
+
+   # inverse error function
+   erfinv <- function (x) qnorm((1 + x)/2)/sqrt(2)
+   gcl <- 1 - (1 - gamma)^(1 / nobj)
+   ca <- sqrt(2) * erfinv(c(1 - 2 * alpha, (1 - 2 * gcl)))
+
+   # compute h1 for alpha and gamma
+   h1a <- ca[1] * sqrt(2 * t2 * h0^2) / t1
+   h1g <- ca[2] * sqrt(2 * t2 * h0^2) / t1
+   h2 <- t2 * h0 * (h0 - 1) / (t1 ^ 2)
+
+   out <- rbind(
+      t1 * (1 + h1a + h2) ^ (1 / h0),
+      t1 * (1 + h1g + h2) ^ (1 / h0)
+   )
+
+   if (ncomp == max_ncomp) {
+      out[, max_ncomp] <- 0
+   }
+
+   attr(out, "eigenvals") <- evals
+   return(out)
+}
+
+jm.prob <- function(u, eigenvals, ncomp) {
+
+   erf <- function (x) 1 - pnorm(-x * sqrt(2)) * 2
+
+   t1 <- rev(cumsum(rev(eigenvals)))[ncomp]
+   t2 <- rev(cumsum(rev(eigenvals)^2))[ncomp]
+   t3 <- rev(cumsum(rev(eigenvals)^3))[ncomp]
+
+   h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2);
+   ifelse (h0 < 0.001, h0 <- 0.001, h0)
+
+   h1 <- (u / t1)^h0
+   h2 <- t2 * h0 * (h0 - 1) / t1^2
+   d <- t1 * (h1 - 1 - h2)/(sqrt(2 * t2) * h0)
+
+   return(0.5 * (1 + erf(d / sqrt(2))))
+}
+
+#' Calculate critical limits for distance values using Hotelling T2 distribution
+#'
+#' @param nobj
+#' number of objects in calibration set
+#' @param ncomp
+#' number of components
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#'
+#' @return
+#' vector with four values: critical limits for given alpha and gamma, mean distance and DoF.
+#'
+#' @export
+hotelling.crit <- function(nobj, ncomp, alpha = 0.05, gamma = 0.01) {
+   return(
+      rbind(
+         (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(1 - alpha, ncomp, (nobj - ncomp)),
+         (ncomp * (nobj - 1) / (nobj - ncomp)) * qf((1 - gamma) ^ (1 / nobj), ncomp, (nobj - ncomp))
+      )
+   )
+}
+
+#' Calculate probabilities for distance values and given parameters using Hotelling T2 distribution
+#'
+#' @param u
+#' vector with distances
+#' @param ncomp
+#' number of components
+#' @param nobj
+#' number of objects in calibration set
+#'
+#' @export
+hotelling.prob <- function(u, ncomp, nobj) {
+   return(pf(u * (nobj - ncomp) / (ncomp * (nobj - 1)), ncomp, (nobj - ncomp)))
+}
+
+#' Calculates critical limits for distance values using Chi-square distribution
+#'
+#' @description
+#' The method is based on Chi-squared distribution with DF = 2 * (m(u)/s(u)^2
+#'
+#' @param param
+#' matrix with distribution parameters
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#'
+#' @export
+chisq.crit <- function(param, alpha = 0.05, gamma = 0.01) {
+
+   u0 <- param$u0
+   nobj <- param$nobj
+   Nu <- param$Nu
+
+   DoF <- floor(Nu)
+   DoF <- ifelse(DoF < 1, 1, DoF)
+
+   return(
+      rbind(
+         qchisq(1 - alpha, DoF) * u0 / Nu,
+         qchisq((1 - gamma) ^ (1 / nobj), DoF) * u0 / Nu
+      )
+   )
+}
+
+#' Calculate probabilities for distance values using Chi-square distribution
+#'
+#' @param u
+#' vector with distances
+#' @param param
+#' vector with distribution parameters
+#'
+#' @export
+chisq.prob <- function(u, param) {
+   u0 <- param[1]
+   Nu <- param[2]
+
+   DoF <- floor(Nu)
+   DoF[DoF == 0] <- 1
+   return(pchisq(Nu * u / u0, DoF))
+}
+
+#' Calculates critical limits for distance values using Data Driven moments approach
+#'
+#' @param paramQ
+#' matrix with parameters for distribution of Q distances
+#' @param paramT2
+#' matrix with parameters for distribution of T2 distances
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#'
+#' @export
+dd.crit <- function(paramQ, paramT2, alpha = 0.05, gamma = 0.01) {
+
+   nobj <- paramQ$nobj
+   Nq <- round(paramQ$Nu)
+   Nq[Nq < 1] <- 1
+   Nq[Nq > 250] <- 250
+
+   Nh <- round(paramT2$Nu)
+   Nh[Nh < 1] <- 1
+   Nh[Nh > 250] <- 250
+
+   return(
+      rbind(
+         qchisq(1 - alpha, Nq + Nh),
+         qchisq((1 - gamma) ^ (1 / nobj), Nq + Nh)
+      )
+   )
+}
+
+#' Calculates critical limits for distance values using Data Driven moments approach
+#'
+#' @param U
+#' matrix or vector with distance values
+#'
+#' @export
+ddmoments.param <- function(U) {
+
+   if (is.null(dim(U))) dim(U) <- c(length(U), 1)
+
+   u0 <- apply(U, 2, mean)
+   su <- apply(U, 2, sd)
+   Nu <- 2 * (u0 / su)^2
+
+   return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
+}
+
+#' Calculates critical limits for distance values using Data Driven robust approach
+#'
+#' @param U
+#' matrix or vector with distance values
+#' @param ncomp
+#' number of components
+#' @param alpha
+#' significance level for extreme objects
+#' @param gamma
+#' significance level for outliers
+#'
+#' @export
+ddrobust.param <- function(U, ncomp, alpha, gamma) {
+
+   if (is.null(dim(U))) dim(U) <- c(length(U), 1)
+
+   Mu <- apply(U, 2, median)
+   Su <- apply(U, 2, IQR)
+
+   RM <- Su / Mu
+   Nu <- round(exp((1.380948 * log(2.68631 / RM)) ^ 1.185785))
+   Nu[RM > 2.685592117] <- 1
+   Nu[RM < 0.194565995] <- 100
+
+   u0 <- 0.5 * Nu * (Mu / qchisq(0.50, Nu) + Su / (qchisq(0.75, Nu) - qchisq(0.25, Nu)))
+   return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
+}

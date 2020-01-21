@@ -62,13 +62,15 @@ for (i in seq_along(models)) {
       expect_silent(plotCumVariance(m, type = "h", show.labels = T))
    })
 
-   test_that("DoF plot works well", {
-      par(mfrow = c(2, 2))
-      expect_silent(plotQDoF(m))
-      expect_silent(plotT2DoF(m, type = "l", show.labels = T))
-      expect_silent(plotDistDoF(m))
-      expect_silent(plotDistDoF(m, type = "l", show.labels = T))
-   })
+   if (m$lim.type != "jm") {
+      test_that("DoF plot works well", {
+         par(mfrow = c(2, 2))
+         expect_silent(plotQDoF(m))
+         expect_silent(plotT2DoF(m, type = "l", show.labels = T))
+         expect_silent(plotDistDoF(m))
+         expect_silent(plotDistDoF(m, type = "l", show.labels = T))
+      })
+   }
 
    test_that("scores plot works well", {
       par(mfrow = c(2, 2))
@@ -115,7 +117,7 @@ for (i in seq_along(models)) {
 
    # classification results
    par(mfrow = c(2, 2))
-   test_that("probabilities plot works correctly", {
+   test_that("predictions and probabilities plot works correctly", {
       expect_silent(plotPredictions(m))
       expect_silent(plotPredictions(m, ncomp = 1, pch = 1))
       expect_silent(plotProbabilities(m$calres))

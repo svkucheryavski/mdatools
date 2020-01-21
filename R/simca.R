@@ -138,7 +138,7 @@
 #' par(mfrow = c(1, 1))
 #'
 #' @export
-simca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x), 20),
+simca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x) - 1, 20),
    x.test = NULL, c.test = NULL, cv = NULL, ...) {
 
    if (!is.character(classname)) {
@@ -148,6 +148,9 @@ simca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x), 20),
    if (length(classname) > 20) {
       stop("Argument 'classname' must have up to 20 symbols.")
    }
+
+   # correct number of components
+   ncomp = min(nrow(x) - 1, ncol(x) - 1 - length(attr(x, "exclcols")), ncomp)
 
    # calibrate model
    model <- pca(x, ncomp = ncomp, ...)
@@ -339,11 +342,8 @@ crossval.simca <- function(obj, x, cv) {
             x.val <- x[ind, , drop = F]
 
             # calibrate PCA model and set distance limits
-            m.loc <- pca.cal(x.cal, obj$ncomp, center = obj$center, scale = obj$scale,
-               method = obj$method, rand = obj$rand)
-
-            # set distance limits
-            m.loc <- setDistanceLimits(m.loc, lim.type = obj$lim.type, alpha = obj$alpha,
+            m.loc <- pca(x.cal, obj$ncomp, center = obj$center, scale = obj$scale,
+               method = obj$method, rand = obj$rand, lim.type = obj$lim.type, alpha = obj$alpha,
                gamma = obj$gamma)
 
             # make prediction for validation subset

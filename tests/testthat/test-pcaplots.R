@@ -2,7 +2,6 @@
 # Tests for basic functionality of plot() class  #
 #####################################################
 
-
 pdf(file = "../plots/test_pca_plots.pdf")
 sink("../plots/output-pca.txt", append = FALSE, split = FALSE)
 
@@ -176,8 +175,8 @@ context("pca: residual distance plots")
 tf <- function(x.cal, x.test, name) {
 
    m1 <- pca(x.cal, 4, scale = T, x.test = x.test)
-   m2 <- pca(x.cal, 4, scale = T, x.test = x.test, lim.type = "ddmoments", alpha = 0.1, gamma = 0.05)
-   m3 <- pca(x.cal, 4, scale = T, x.test = x.test, lim.type = "chisq")
+   m2 <- pca(x.cal, 4, scale = T, x.test = x.test, lim.type = "chisq")
+   m3 <- pca(x.cal, 4, scale = T, x.test = x.test, lim.type = "ddmoments", alpha = 0.1, gamma = 0.05)
    m4 <- pca(x.cal, 4, scale = T, x.test = x.test, lim.type = "ddrobust")
 
    par(mfrow = c(1, 1))
@@ -428,8 +427,8 @@ expect_silent(plotResiduals(ms, ncomp = 4, log = T, cgroup = "categories",
 # Block 7: DoF plots                    #
 #########################################
 
-m1 <- pca(x1, 10, scale = TRUE)
-m2 <- pca(simdata$spectra.c, 10)
+m1 <- pca(x1, 10, scale = TRUE, lim.type = "ddmoments")
+m2 <- pca(simdata$spectra.c, 10, lim.type = "ddmoments")
 
 context("pca: DoF plots for T2")
 
