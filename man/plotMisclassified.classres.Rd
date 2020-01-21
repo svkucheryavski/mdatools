@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{obj}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
+
+\item{...}{other parameters for \code{\link{plotPerformance.classres}}}
 }
 \description{
 Makes a plot with ms ratio values vs. model complexity (e.g. number of components) for

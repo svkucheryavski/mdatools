@@ -6,7 +6,7 @@
 \usage{
 \method{plotSelection}{ipls}(
   obj,
-  glob.ncomp = NULL,
+  glob.ncomp = obj$gm$ncomp.selected,
   main = "iPLS results",
   xlab = obj$xaxis.name,
   ylab = "RMSECV",

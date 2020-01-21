@@ -10,6 +10,7 @@
   type = "p",
   show.axes = TRUE,
   res = obj$res,
+  show.legend = TRUE,
   ...
 )
 }
@@ -24,13 +25,13 @@
 
 \item{res}{list with result objects to show the variance for}
 
+\item{show.legend}{logical, show or not a legend on the plot}
+
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 
 \item{main}{main title for the plot}
 
 \item{show.labels}{logical, show or not labels for the plot objects}
-
-\item{show.legend}{logical, show or not a legend on the plot}
 
 \item{legend.position}{string, locatin of legend on the plot}
 }

@@ -20,7 +20,7 @@ categorize <- function(obj, ...) {
 #' other parameters.
 #'
 #' @export
-getConfusionMatrix = function(obj, ...) {
+getConfusionMatrix <- function(obj, ...) {
    UseMethod("getConfusionMatrix")
 }
 
@@ -36,7 +36,7 @@ getConfusionMatrix = function(obj, ...) {
 #' other parameters
 #'
 #' @export
-plotProbabilities = function(obj, ...) {
+plotProbabilities <- function(obj, ...) {
    UseMethod("plotProbabilities")
 }
 
@@ -70,7 +70,6 @@ setDistanceLimits <- function(obj, ...) {
    UseMethod("setDistanceLimits")
 }
 
-
 #' Show residual distance limits
 #'
 #' @description
@@ -97,7 +96,7 @@ showDistanceLimits <- function(obj, ...) {
 #' other parameters
 #'
 #' @export
-plotExtreme = function(obj, ...) {
+plotExtreme <- function(obj, ...) {
    UseMethod("plotExtreme")
 }
 
@@ -112,7 +111,7 @@ plotExtreme = function(obj, ...) {
 #' other parameters
 #'
 #' @export
-getRegcoeffs = function(obj, ...) {
+getRegcoeffs <- function(obj, ...) {
    UseMethod("getRegcoeffs")
 }
 
@@ -127,7 +126,7 @@ getRegcoeffs = function(obj, ...) {
 #' other parameters
 #'
 #' @export
-plotVIPScores = function(obj, ...) {
+plotVIPScores <- function(obj, ...) {
    UseMethod("plotVIPScores")
 }
 
@@ -142,7 +141,7 @@ plotVIPScores = function(obj, ...) {
 #' other parameters
 #'
 #' @export
-getVIPScores = function(obj, ...) {
+getVIPScores <- function(obj, ...) {
    UseMethod("getVIPScores")
 }
 
@@ -157,7 +156,7 @@ getVIPScores = function(obj, ...) {
 #' other parameters
 #'
 #' @export
-plotSelectivityRatio = function(obj, ...) {
+plotSelectivityRatio <- function(obj, ...) {
    UseMethod("plotSelectivityRatio")
 }
 
@@ -172,7 +171,7 @@ plotSelectivityRatio = function(obj, ...) {
 #' other parameters
 #'
 #' @export
-getSelectivityRatio = function(obj, ...) {
+getSelectivityRatio <- function(obj, ...) {
    UseMethod("getSelectivityRatio")
 }
 
@@ -189,7 +188,7 @@ getSelectivityRatio = function(obj, ...) {
 #' other arguments
 #'
 #' @export
-selectCompNum = function(obj, ncomp = NULL, ...) {
+selectCompNum <- function(obj, ncomp = NULL, ...) {
    UseMethod("selectCompNum")
 }
 
@@ -204,8 +203,7 @@ selectCompNum = function(obj, ncomp = NULL, ...) {
 #' other arguments
 #'
 #' @export
-plotCooman = function(obj, ...)
-{
+plotCooman <- function(obj, ...) {
    UseMethod("plotCooman")
 }
 
@@ -220,8 +218,7 @@ plotCooman = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotModelDistance = function(obj, ...)
-{
+plotModelDistance <- function(obj, ...) {
    UseMethod("plotModelDistance")
 }
 
@@ -236,8 +233,7 @@ plotModelDistance = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotDiscriminationPower = function(obj, ...)
-{
+plotDiscriminationPower <- function(obj, ...) {
    UseMethod("plotDiscriminationPower")
 }
 
@@ -252,8 +248,7 @@ plotDiscriminationPower = function(obj, ...)
 #' other arguments
 #'
 #' @export
-getCalibrationData = function(obj, ...)
-{
+getCalibrationData <- function(obj, ...) {
    UseMethod("getCalibrationData")
 }
 
@@ -268,8 +263,7 @@ getCalibrationData = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotModellingPower = function(obj, ...)
-{
+plotModellingPower <- function(obj, ...) {
    UseMethod("plotModellingPower")
 }
 
@@ -284,9 +278,8 @@ plotModellingPower = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotMisclassified = function(obj, ...)
-{
-   UseMethod('plotMisclassified')
+plotMisclassified <- function(obj, ...) {
+   UseMethod("plotMisclassified")
 }
 
 #' Specificity plot
@@ -300,8 +293,7 @@ plotMisclassified = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotSpecificity = function(obj, ...)
-{
+plotSpecificity <- function(obj, ...) {
    UseMethod("plotSpecificity")
 }
 
@@ -316,8 +308,7 @@ plotSpecificity = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotSensitivity = function(obj, ...)
-{
+plotSensitivity <- function(obj, ...) {
    UseMethod("plotSensitivity")
 }
 
@@ -332,8 +323,7 @@ plotSensitivity = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotPerformance = function(obj, ...)
-{
+plotPerformance <- function(obj, ...) {
    UseMethod("plotPerformance")
 }
 
@@ -348,8 +338,7 @@ plotPerformance = function(obj, ...)
 #' other arguments
 #'
 #' @export
-showPredictions = function(obj, ...)
-{
+showPredictions <- function(obj, ...) {
    UseMethod("showPredictions")
 }
 
@@ -364,8 +353,7 @@ showPredictions = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotXResiduals = function(obj, ...)
-{
+plotXResiduals <- function(obj, ...) {
    UseMethod("plotXResiduals")
 }
 
@@ -380,8 +368,7 @@ plotXResiduals = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotYResiduals = function(obj, ...)
-{
+plotYResiduals <- function(obj, ...) {
    UseMethod("plotYResiduals")
 }
 
@@ -396,8 +383,7 @@ plotYResiduals = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotXVariance = function(obj, ...)
-{
+plotXVariance <- function(obj, ...) {
    UseMethod("plotXVariance")
 }
 
@@ -412,8 +398,7 @@ plotXVariance = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotYVariance = function(obj, ...)
-{
+plotYVariance <- function(obj, ...) {
    UseMethod("plotYVariance")
 }
 
@@ -458,8 +443,7 @@ plotScores <- function(obj, ...) {
 #' other arguments
 #'
 #' @export
-plotXScores = function(obj, ...)
-{
+plotXScores <- function(obj, ...) {
    UseMethod("plotXScores")
 }
 
@@ -474,8 +458,7 @@ plotXScores = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotXYScores = function(obj, ...)
-{
+plotXYScores <- function(obj, ...) {
    UseMethod("plotXYScores")
 }
 
@@ -490,8 +473,7 @@ plotXYScores = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotSelection = function(obj, ...)
-{
+plotSelection <- function(obj, ...) {
    UseMethod("plotSelection")
 }
 
@@ -506,8 +488,7 @@ plotSelection = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotRMSE = function(obj, ...)
-{
+plotRMSE <- function(obj, ...) {
    UseMethod("plotRMSE")
 }
 
@@ -522,8 +503,7 @@ plotRMSE = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotCumVariance = function(obj, ...)
-{
+plotCumVariance <- function(obj, ...) {
    UseMethod("plotCumVariance")
 }
 
@@ -538,8 +518,7 @@ plotCumVariance = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotXCumVariance = function(obj, ...)
-{
+plotXCumVariance <- function(obj, ...) {
    UseMethod("plotXCumVariance")
 }
 
@@ -554,8 +533,7 @@ plotXCumVariance = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotYCumVariance = function(obj, ...)
-{
+plotYCumVariance <- function(obj, ...) {
    UseMethod("plotYCumVariance")
 }
 
@@ -570,8 +548,7 @@ plotYCumVariance = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotLoadings = function(obj, ...)
-{
+plotLoadings <- function(obj, ...) {
    UseMethod("plotLoadings")
 }
 
@@ -586,8 +563,7 @@ plotLoadings = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotPredictions = function(obj, ...)
-{
+plotPredictions <- function(obj, ...) {
    UseMethod("plotPredictions")
 }
 
@@ -602,8 +578,7 @@ plotPredictions = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotRegcoeffs = function(obj, ...)
-{
+plotRegcoeffs <- function(obj, ...) {
    UseMethod("plotRegcoeffs")
 }
 
@@ -633,8 +608,7 @@ plotResiduals <- function(obj, ...) {
 #' other arguments
 #'
 #' @export
-plotVariance = function(obj, ...)
-{
+plotVariance <- function(obj, ...) {
    UseMethod("plotVariance")
 }
 
@@ -649,8 +623,7 @@ plotVariance = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotXLoadings = function(obj, ...)
-{
+plotXLoadings <- function(obj, ...) {
    UseMethod("plotXLoadings")
 }
 
@@ -665,8 +638,7 @@ plotXLoadings = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotXYLoadings = function(obj, ...)
-{
+plotXYLoadings <- function(obj, ...) {
    UseMethod("plotXYLoadings")
 }
 
@@ -681,8 +653,7 @@ plotXYLoadings = function(obj, ...)
 #' other arguments
 #'
 #' @export
-plotHist = function(obj, ...)
-{
+plotHist <- function(obj, ...) {
    UseMethod("plotHist")
 }
 

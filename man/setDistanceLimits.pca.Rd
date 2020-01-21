@@ -15,7 +15,7 @@
 \arguments{
 \item{obj}{object with PCA model}
 
-\item{lim.type}{type of limits ("chisq", "ddmoments", "ddrobust")}
+\item{lim.type}{type of limits ("jm", "chisq", "ddmoments", "ddrobust")}
 
 \item{alpha}{significance level for detection of extreme objects}
 

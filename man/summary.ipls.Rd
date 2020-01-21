@@ -4,7 +4,7 @@
 \alias{summary.ipls}
 \title{Summary for iPLS results}
 \usage{
-\method{summary}{ipls}(object, glob.ncomp = NULL, ...)
+\method{summary}{ipls}(object, glob.ncomp = object$gm$ncomp.selected, ...)
 }
 \arguments{
 \item{object}{a iPLS (object of class \code{ipls})}

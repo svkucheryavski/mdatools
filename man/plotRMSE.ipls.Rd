@@ -6,7 +6,7 @@
 \usage{
 \method{plotRMSE}{ipls}(
   obj,
-  glob.ncomp = NULL,
+  glob.ncomp = obj$gm$ncomp.selected,
   main = "RMSE development",
   xlab = "Iterations",
   ylab = "RMSECV",

@@ -14,7 +14,7 @@ pca(
   x.test = NULL,
   method = "svd",
   rand = NULL,
-  lim.type = "ddmoments",
+  lim.type = "jm",
   alpha = 0.05,
   gamma = 0.01,
   info = ""
@@ -99,16 +99,17 @@ are good options, which give quite almost precise solution but much faster.
 
 There are several ways to calculate critical limits for orthogonal (Q, q) and score (T2, h)
 distances. In \code{mdatools} you can specify one of the following methods via parameter
-\code{lim.type}: \code{"chisq"} - method based on chi-square distribution [4],
-\code{"ddmoments"} and \code{"ddrobust"} - related to data driven method proposed by Pomerantsev
-and Rodionova [5]. The \code{"ddmoments"} is based on method of moments for estimation of
-distribution parameters (also known as "classical" approach) while \code{"ddrobust"} is
-based in robust estimation.
+\code{lim.type}: \code{"jm"} Jackson-Mudholkar approach [3], \code{"chisq"} - method based on
+chi-square distribution [4], \code{"ddmoments"} and \code{"ddrobust"} - related to data
+driven method proposed in [5]. The \code{"ddmoments"} is based on method of moments for
+estimation of distribution parameters (also known as "classical" approach) while
+\code{"ddrobust"} is based in robust estimation.
 
-If \code{lim.type="chisq"} is used, only limits for Q-distances are computed based on chi-square
-distribution. Corresponding limits for T2-distances are computed using Hotelling's T-squared
-distribution. The methods utilizing the data driven approach calculate limits for both
-distances bases on chi-square distribution and parameters estimated from the calibration data.
+If \code{lim.type="chisq"} or \code{lim.type="jm"} is used, only limits for Q-distances are
+computed based on corresponding approach, limits for T2-distances are computed using
+Hotelling's T-squared distribution. The methods utilizing the data driven approach calculate
+limits for combination of the distances bases on chi-square distribution and parameters
+estimated from the calibration data.
 
 The critical limits are calculated for a significance level defined by parameter \code{'alpha'}.
 You can also specify another parameter, \code{'gamma'}, which is used to calculate acceptance
@@ -160,9 +161,10 @@ algorithms for constructing approximate matrix decompositions. SIAM Review, 53 (
 217-288.
 2. S. Kucheryavskiy, Blessing of randomness against the curse of dimensionality,
 Journal of Chemometrics, 32 (2018).
-3. A.L. Pomerantsev, Acceptance areas for multivariate classification derived by projection
+3. J.E. Jackson, A User's Guide to Principal Components, John Wiley & Sons, New York, NY (1991).
+4. A.L. Pomerantsev, Acceptance areas for multivariate classification derived by projection
 methods, Journal of Chemometrics, 22 (2008) pp. 601-609.
-4. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
+5. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
 Journal of Chemometrics, 28 (2014) pp. 429-438.
 }
 \seealso{
@@ -174,12 +176,20 @@ Methods for \code{pca} objects:
    \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
    \code{\link{setDistanceLimits.pca}} \tab set critical limits for residuals\cr
    \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr
+}
+
+Plotting methods for \code{pca} objects:
+\tabular{ll}{
    \code{\link{plotScores.pca}} \tab shows scores plot.\cr
    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
    \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
    \code{\link{plotResiduals.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
+   \code{\link{plotBiplot.pca}} \tab shows bi-plot.\cr
    \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr
+   \code{\link{plotT2DoF.pca}} \tab plot with degrees of freedom for score distance.\cr
+   \code{\link{plotQDoF.pca}} \tab plot with degrees of freedom for orthogonal distance.\cr
+   \code{\link{plotDistDoF.pca}} \tab plot with degrees of freedom for both distances.\cr
 }
 
 Most of the methods for plotting data are also available for PCA results (\code{\link{pcares}})

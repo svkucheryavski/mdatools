@@ -433,7 +433,7 @@ plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, 
 #' @param obj
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
 #' @param ...
-#' other parameters for \code{\link{plotPerformance.classres})
+#' other parameters for \code{\link{plotPerformance.classres}}
 #'
 #' @details
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
@@ -452,7 +452,7 @@ plotSensitivity.classres <- function(obj, ...) {
 #' @param obj
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
 #' @param ...
-#' other parameters for \code{\link{plotPerformance.classres})
+#' other parameters for \code{\link{plotPerformance.classres}}
 #'
 #' @details
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
@@ -471,7 +471,7 @@ plotSpecificity.classres <- function(obj, ...) {
 #' @param obj
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
 #' @param ...
-#' other parameters for \code{\link{plotPerformance.classres})
+#' other parameters for \code{\link{plotPerformance.classres}}
 #'
 #' @details
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.

@@ -8,9 +8,9 @@ ipls(
   x,
   y,
   glob.ncomp = 10,
-  center = T,
-  scale = F,
-  cv = 10,
+  center = TRUE,
+  scale = FALSE,
+  cv = list("ven", 10),
   exclcols = NULL,
   exclrows = NULL,
   int.ncomp = glob.ncomp,
@@ -20,7 +20,7 @@ ipls(
   int.niter = NULL,
   ncomp.selcrit = "min",
   method = "forward",
-  silent = F
+  silent = FALSE
 )
 }
 \arguments{

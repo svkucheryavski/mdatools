@@ -7,7 +7,7 @@
 simca(
   x,
   classname,
-  ncomp = min(nrow(x) - 1, ncol(x), 20),
+  ncomp = min(nrow(x) - 1, ncol(x) - 1, 20),
   x.test = NULL,
   c.test = NULL,
   cv = NULL,
@@ -151,4 +151,7 @@ Methods, inherited from \code{\link{pca}} class:
  \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
  \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
 }
+}
+\author{
+Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }
