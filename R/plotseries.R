@@ -639,13 +639,9 @@ plotBars <- function(ps, col = ps$col, bwd = 0.8, border = NA, force.x.values = 
    x <- ps$x_values
    y <- ps$y_values[1, ]
 
-#   bwd <- if (length(x) > 1) min(diff(x)) * bwd else x * bwd
-   #bwd <- if (length(x) > 1) diff(x) * bwd else x * bwd
-   #if (length(bwd) != length(x)) bwd <- c(bwd[1], bwd)
-
    if (length(x) > 1) {
       bwd_left <- c(x[seq(2, length(x))] - x[seq(1, length(x) - 1)])
-      bwd_right <- -c(x[seq(1, length(x)-1)] - x[seq(2, length(x))])
+      bwd_right <- -c(x[seq(1, length(x) - 1)] - x[seq(2, length(x))])
       bwd_left <- c(bwd_left[1], bwd_left) * bwd / 2
       bwd_right <- c(bwd_right, bwd_right[length(bwd_right)]) * bwd / 2
    } else {
