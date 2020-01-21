@@ -601,24 +601,12 @@ plotPredictions.classres <- function(obj, nc = seq_len(obj$nclasses), ncomp = ob
       return(plot_data)
    }
 
-   #ylim <- c(0.8, max(class_numbers) + 0.2)
    yticks <- c(1, class_numbers)
    yticklabels <- c("None", class_names)
 
    cgroup <- if (!is.null(obj$c.ref)) as.factor(obj$c.ref[plot_data[, 1]])
    mdaplot(plot_data, type = "p", ylab = ylab, yticks = yticks,
       cgroup = cgroup, yticklabels = yticklabels, ...)
-
-   #if (is.null(obj$c.ref)) {
-   #   return(
-   #      mdaplot(plot_data, type = "p", ylab = ylab, yticks = yticks,
-   #         yticklabels = yticklabels, ylim = ylim, ...)
-   #   )
-   #} else {
-   #   groupby <- as.factor(obj$c.ref[plot_data[, 1]])
-   #   mdaplot(plot_data, type = "p", ylab = ylab, yticks = yticks,
-   #         cgroup = groupby, yticklabels = yticklabels, ylim = ylim, ...)
-   #}
 }
 
 #' Plot function for classification results
