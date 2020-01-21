@@ -104,6 +104,9 @@
 #'  \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
 #' }
 #'
+#' @author
+#' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
+#'
 #' @examples
 #' ## make a SIMCA model for Iris setosa class with full cross-validation
 #' library(mdatools)
