@@ -153,7 +153,7 @@ simca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x) - 1, 20),
    }
 
    # correct number of components
-   ncomp = min(nrow(x) - 1, ncol(x) - 1 - length(attr(x, "exclcols")), ncomp)
+   ncomp <- min(nrow(x) - 1, ncol(x) - 1 - length(attr(x, "exclcols")), ncomp)
 
    # calibrate model
    model <- pca(x, ncomp = ncomp, ...)

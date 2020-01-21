@@ -514,11 +514,11 @@ jm.crit <- function(residuals, evals, alpha = 0.05, gamma = 0.01) {
    t3 <- rev(cumsum(rev(evals)^3))[seq_len(ncomp)]
 
    h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2);
-   ifelse (h0 < 0.001, h0 <- 0.001, h0)
+   ifelse(h0 < 0.001, h0 <- 0.001, h0)
 
    # inverse error function
-   erfinv <- function (x) qnorm((1 + x)/2)/sqrt(2)
-   gcl <- 1 - (1 - gamma)^(1 / nobj)
+   erfinv <- function(x) qnorm((1 + x) / 2) / sqrt(2)
+   gcl <- 1 - (1 - gamma) ^ (1 / nobj)
    ca <- sqrt(2) * erfinv(c(1 - 2 * alpha, (1 - 2 * gcl)))
 
    # compute h1 for alpha and gamma
@@ -541,18 +541,18 @@ jm.crit <- function(residuals, evals, alpha = 0.05, gamma = 0.01) {
 
 jm.prob <- function(u, eigenvals, ncomp) {
 
-   erf <- function (x) 1 - pnorm(-x * sqrt(2)) * 2
+   erf <- function(x) 1 - pnorm(-x * sqrt(2)) * 2
 
    t1 <- rev(cumsum(rev(eigenvals)))[ncomp]
    t2 <- rev(cumsum(rev(eigenvals)^2))[ncomp]
    t3 <- rev(cumsum(rev(eigenvals)^3))[ncomp]
 
    h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2);
-   ifelse (h0 < 0.001, h0 <- 0.001, h0)
+   ifelse(h0 < 0.001, h0 <- 0.001, h0)
 
    h1 <- (u / t1)^h0
    h2 <- t2 * h0 * (h0 - 1) / t1^2
-   d <- t1 * (h1 - 1 - h2)/(sqrt(2 * t2) * h0)
+   d <- t1 * (h1 - 1 - h2) / (sqrt(2 * t2) * h0)
 
    return(0.5 * (1 + erf(d / sqrt(2))))
 }
