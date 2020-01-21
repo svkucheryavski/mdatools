@@ -180,14 +180,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
    colnames(int.limits) <- c("Left", "Right")
 
    # define number of iterations
-   int.niter <- if(!is.null(int.niter) || int.num < 30) int.num else 30
-
-   # correct maximum number of components for interval models
-   nobj.cv <- 0
-   if (!is.logical(cv)) {
-      nseg <- if (is.numeric(cv)) cv else cv[[2]]
-      nobj.cv <- if (nseg == 1) 1 else ceiling(nrow(x) / nseg)
-   }
+   int.niter <- if (!is.null(int.niter) || int.num < 30) int.num else 30
 
    # build an object
    obj <- list(
@@ -320,7 +313,7 @@ ipls.forward <- function(x, y, obj) {
    selind <- NULL
    rmse <- Inf
    for (i in seq_len(obj$int.niter)) {
-      if (!obj$silent) fprintf('Iteration %3d/%3d... ', i, obj$int.niter)
+      if (!obj$silent) fprintf("Iteration %3d/%3d... ", i, obj$int.niter)
 
       sel <- NULL
       for (l in int.nonselected) {
@@ -395,7 +388,7 @@ ipls.forward <- function(x, y, obj) {
 #' @param obj
 #' object with initial settings for iPLS algorithm
 #'
-ipls.backward = function(x, y, obj) {
+ipls.backward <- function(x, y, obj) {
 
    # define vectors with status, selected and non-selected intervals
    int.selected <- seq_len(obj$int.num)
@@ -450,7 +443,7 @@ ipls.backward = function(x, y, obj) {
 
          # if first round, build a data frame with statistics for each interval
          if (i == 1) {
-            glob.stat = rbind(glob.stat, data.frame(
+            glob.stat <- rbind(glob.stat, data.frame(
                "n" = l,
                "start" = obj$int.limits[l, 1],
                "end" = obj$int.limits[l, 2],
@@ -462,7 +455,7 @@ ipls.backward = function(x, y, obj) {
 
          # if last two intervals are left keep them both
          if (length(int.selected) == 2) {
-            int.stat = rbind(int.stat, data.frame(
+            int.stat <- rbind(int.stat, data.frame(
                "n" = l,
                "start" = obj$int.limits[l, 1],
                "end" = obj$int.limits[l, 2],
@@ -610,7 +603,7 @@ plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "
    text(mids,  matrix(0.05 * ylim[2], ncol = length(mids)), ncomp,
       col = rgb(0.4, 0.4, 0.4), cex = 0.85)
 
-   dx <- diff(xlim)/50
+   dx <- diff(xlim) / 50
    abline(h = obj$gm$cvres$rmse[1, glob.ncomp], lty = 2, col = rgb(0.5, 0.5, 0.5))
    text(xlim[2] + dx, obj$gm$cvres$rmse[1, glob.ncomp], glob.ncomp, cex = 0.85,
         col = rgb(0.3, 0.3, 0.3), font = 2, pos = 3)

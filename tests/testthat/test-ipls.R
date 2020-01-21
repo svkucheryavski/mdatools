@@ -2,9 +2,11 @@
 # Tests for ipls() methods  #
 #############################
 
-# Prepare datasets
+pdf(file = "../plots/test_ipls_plots.pdf")
+sink("../plots/output-ipls.txt", append = FALSE, split = FALSE)
 
-# mock some data
+
+# Prepare datasets
 datasets <- list()
 
 ## small data no names no extra arguments
@@ -33,14 +35,6 @@ attr(xt, "xaxis.name") <- "Wavelength, nm"
 attr(xt, "xaxis.values") <- simdata$wavelength
 
 datasets[["spectra"]] <- list(xc = xc, yc = yc, xt = xt, yt = yt, center = T, scale = F, ncomp = 6)
-
-
-i = 1
-d <- datasets[[i]]
-name <- names(datasets)[i]
-m1 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
-      center = d$center, scale = d$scale, int.num = 10)
-plot(m1)
 
 context("ipls: test forward method")
 
@@ -75,6 +69,14 @@ for (i in seq_along(datasets)) {
    expect_silent(plotRMSE(m2))
    expect_silent(plotRMSE(m3))
 
+   cat("\nOutput for forward iPLS\n\n")
+   summary(m1)
+   summary(m2)
+   summary(m3)
+
+   print(m1)
+   print(m2)
+   print(m3)
 }
 
 context("ipls: test backward method")
@@ -110,4 +112,17 @@ for (i in seq_along(datasets)) {
    expect_silent(plotRMSE(m2))
    expect_silent(plotRMSE(m3))
 
+   cat("\nOutput for backward iPLS\n\n")
+   summary(m1)
+   summary(m2)
+   summary(m3)
+
+   print(m1)
+   print(m2)
+   print(m3)
 }
+
+teardown({
+   dev.off()
+   sink()
+})
