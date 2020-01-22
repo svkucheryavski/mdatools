@@ -252,16 +252,16 @@ context("pls: compare pedict.pls() outcome with known values")
 
 test_that("predictions for people data are correct", {
    # model
-   f <- system.file("tests", "matlab", "pls-xloadings.csv", package = "mdatools")
+   f <- system.file("testdata", "pls-xloadings.csv", package = "mdatools")
    xloadings <- read.csv(f, header = FALSE)
 
-   f <- system.file("tests", "matlab", "pls-yloadings.csv", package = "mdatools")
+   f <- system.file("testdata", "pls-yloadings.csv", package = "mdatools")
    yloadings <- read.csv(f, header = FALSE)
 
-   f <- system.file("tests", "matlab", "pls-weights.csv", package = "mdatools")
+   f <- system.file("testdata", "pls-weights.csv", package = "mdatools")
    weights <- read.csv(f, header = FALSE)
 
-   f <- system.file("tests", "matlab", "pls-coeffs.csv", package = "mdatools")
+   f <- system.file("testdata", "pls-coeffs.csv", package = "mdatools")
    coeffs <- read.csv(f, header = FALSE)
 
    xc <- people[, -4]
@@ -273,20 +273,25 @@ test_that("predictions for people data are correct", {
    expect_equivalent(obj$coeffs$values[, 4, ], as.matrix(coeffs), tolerance = 10^-5)
 
    # predictions
-   f <- system.file("tests", "matlab", "pls-xscores.csv", package = "mdatools")
+   f <- system.file("testdata", "pls-xscores.csv", package = "mdatools")
    xscores <- read.csv(f, header = FALSE)
+   print(f)
 
-   f <- system.file("tests", "matlab", "pls-yscores.csv", package = "mdatools")
+   f <- system.file("testdata", "pls-yscores.csv", package = "mdatools")
    yscores <- read.csv(f, header = FALSE)
+   print(f)
 
-   f <- system.file("tests", "matlab", "pls-xres.csv", package = "mdatools")
+   f <- system.file("testdata", "pls-xres.csv", package = "mdatools")
    xresid <- read.csv(f, header = FALSE)
+   print(f)
 
-   f <- system.file("tests", "matlab", "pls-yres.csv", package = "mdatools")
-   yresid <- read.csv("../matlab/pls-yres.csv", header = FALSE)
+   f <- system.file("testdata", "pls-yres.csv", package = "mdatools")
+   yresid <- read.csv(f, header = FALSE)
+   print(f)
 
-   f <- system.file("tests", "matlab", "pls-expvar.csv", package = "mdatools")
+   f <- system.file("testdata", "pls-expvar.csv", package = "mdatools")
    expvar <- read.csv(f, header = FALSE)
+   print(f)
 
    res <- predict(obj, xc, yc)
    expect_equivalent(res$xdecomp$scores, as.matrix(xscores), tolerance = 10^-4)
@@ -336,8 +341,8 @@ for (i in seq_along(datasets)) {
 
    expect_warning(m <- pls(d$xc, d$yc, ncomp = ncomp))
    fprintf("\n\nCalibration (%s): -------\n", name)
-   summary(m)
-   summary(m$calres)
+   #summary(m)
+   #summary(m$calres)
 
    test_that("test constructor with cross-validation", {
       for (cv in list(1, list("rand", 4), list("rand", 4, 4), list("ven", 8))) {
@@ -370,9 +375,9 @@ for (i in seq_along(datasets)) {
 
          # summary
          fprintf("\n\nCross-validation (%s): -------\n", name)
-         summary(m)
-         summary(m$calres)
-         summary(m$cvres)
+         #summary(m)
+         #summary(m$calres)
+         #summary(m$cvres)
       }
    })
 }
@@ -468,7 +473,7 @@ test_that("vipscores for people data (A = 4) identical to once computed in MATLA
    d <- datasets[[1]]
    m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
 
-   f <- system.file("tests", "matlab", "pls-vipscores.csv", package = "mdatools")
+   f <- system.file("testdata", "pls-vipscores.csv", package = "mdatools")
    vip <- read.csv(f, header = FALSE)
    expect_equivalent(vipscores(m, ncomp = 4), as.matrix(vip), tolerance = 10^-4)
 })
