@@ -5,20 +5,19 @@ Multivariate Data Analysis Tools
 ![GitHub All Releases](https://img.shields.io/github/downloads/svkucheryavski/mdatools/total?color=blue&logo=Github&style=flat-square "Downloads from GitHub")
 [![codecov](https://codecov.io/gh/svkucheryavski/mdatools/branch/0.10.0/graph/badge.svg?style=flat-square)](https://codecov.io/gh/svkucheryavski/mdatools)
 
-*mdatools* is an R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for [Chemometrics](http://en.wikipedia.org/wiki/Chemometrics). It was created for an introductory PhD course on Chemometrics given at Section of Chemical Engineering, Aalborg University. 
+*mdatools* is an R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for [Chemometrics](http://en.wikipedia.org/wiki/Chemometrics). It was created for an introductory PhD course on Chemometrics given at Section of Chemical Engineering, Aalborg University.
 
 The general idea of the package is to collect most widespread chemometric methods and give a similar "user interface" (or rather API) for using them. So if a user knows how to make a model and visualize results for one method, he or she can easily do this for the others.
 
-For more details and examples read a [Bookdown tutorial](http://svkucheryavski.github.io/mdatools/). 
+For more details and examples read a [Bookdown tutorial](http://svkucheryavski.github.io/mdatools/).
 
 What is new
 -----------
 
-Latest release (0.10.0) is available from GitHub and CRAN (from 1.12.2019). It contains improved plotting tools and additional instruments for assessing PCA model complexity. A lot of code was refactored and new tests have been added to ensure correctness and stability. The Bookdown tutorial has been also revised significantly. 
+Latest release (0.10.0) is available via GitHub (released *26.01.2019*). It contains a lot of improvements and most of code has been refactored. Check full [list of changes](NEWS.md) carefully as it can lead to a (although very small) incompatibility. The Bookdown tutorial has been also revised significantly. This version will be released on CRAN at the end of February.
 
-Starting from this release, several badges added to the top of this file. The first shows current build status, which makes the use of Git Hub hosted developer version more secure. If build is passing it means that the code currently available in master branch passes all CRAN checks and internal tests. Other badges show number of downloads from CRAN and GitHub as well as how much of code is currently covered with tests. 
+Starting from this release, several badges added to the top of this file. The first shows current build status, which makes the use of Git Hub hosted developer version more secure. If build is passing it means that the code currently available in master branch passes all CRAN checks and internal tests. Other badges show number of downloads from CRAN and GitHub as well as how much of code is currently covered with tests.
 
-A full list of changes is available [here](NEWS.md)
 
 How to install
 --------------

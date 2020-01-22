@@ -1,10 +1,7 @@
 v.0.10.0
 ========
 
-Many changes, but most of them are under the hood. Code has been refactored significantly in order
-to improve its efficiency and make future support easier. Some functionality has been re-written
-from the scratch. However, **most** of the code is backward compatible, which means your
-scripts should have no problem to run on this version. However, some parameters have been removed and this can lean to occasional error and warning messages. All details are shown below.
+Many changes have been done in this version, but most of them are under the hood. Code has been refactored significantly in order to improve its efficiency and make future support easier. Some functionality has been re-written from the scratch. **Most** of the code is backward compatible, which means your scripts should have no problem to run on this version. However, some parameters have been removed and this can lead to occasional errors and warning messages. All details are shown below.
 
 Another important change is the way cross-validation works. From this version, cross-validation
 is used only for computing performance statistics, e.g. error of predictions in PLS or
@@ -20,8 +17,7 @@ Below is more detailed list of changes. The tutorial has been updated accordingl
 
 ## Breaking changes
 
-Here are changes incompatible with previous versions and can potentially lead to error messages
-in previously written code.
+Here are changes which can potentially lead to error messages in previously written code.
 
 * Method `plotModellingPower()` is no longer available (was used for SIMCA models).
 
@@ -33,11 +29,7 @@ object to show the predictions for. In old versions the name of results were `"c
 `"testres"`. From this version they have been changed to `"cal"`, `"cv"` and `"test"`
 correspondingly.
 
-* In PLS-DA there was a possibility to show predictions not for classification results but for PLS
-predictions using the following code: `plotPredictions(structure(model, class = "pls"))`. From
-this version you should use `plotPredictions(structure(model, class = "regmodel"))` instead,
-as the `plotPredictions()` function has been moved from `pls` class to its parent, more
-general class, `regmodel()`.
+* In PLS-DA there was a possibility to show predictions not for classification results but for regression model the PLS-DA is built upon using the following code: `plotPredictions(structure(model, class = "pls"))`. From this version you should use `plotPredictions(structure(model, class = "regmodel"))` instead, as the `plotPredictions()` function for regression has been moved from `pls` class to its parent, more general class, `regmodel()`.
 
 * In methods `plotCorr()` and `plotHist()` for randomization test, parameter `comp` has been
 renamed to `ncomp`. Parameter `comp` assumes a possibility to specify several values as vector,
