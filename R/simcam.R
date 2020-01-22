@@ -195,6 +195,8 @@ getCalibrationData.simcam <- function(obj, ...) {
 #'
 #' @param object
 #' a SIMCAM model (object of class \code{simcam})
+#' @param nc
+#' number of class to show summary for (can be vector)
 #' @param ...
 #' other arguments
 #'
@@ -417,7 +419,7 @@ simcam.getPerformanceStats <- function(models, classnames) {
 #'
 #' # show the model distance plot with distance values as labels
 #' # note, that distance between setosa and setosa is 0.938
-#' plotModelDistance(m, show.labels = T, labels = "values")
+#' plotModelDistance(m, show.labels = TRUE, labels = "values")
 #'
 #' @export
 plotModelDistance.simcam <- function(obj, nc = 1, type = "h", xticks = seq_len(obj$nclasses),
@@ -464,7 +466,7 @@ plotDiscriminationPower.simcam <- function(obj, nc = c(1, 2), type = "h",
    main = paste0("Discrimination power: ", obj$classnames[nc[1]], " vs. ", obj$classname[nc[2]]),
    xlab = attr(obj$dispower, "xaxis.name"), ylab = "", ...) {
 
-   if (length(nc) != 2 || min(nc) < 1 || max(nc) > obj$nclasses) {
+   if (length(nc) != 2 || min(nc) < 1 || max(nc) > obj$nclasses) {
       stop("Wrong values for 'nc' parameter.")
    }
 
@@ -489,6 +491,14 @@ plotDiscriminationPower.simcam <- function(obj, nc = c(1, 2), type = "h",
 #' a SIMCAM model (object of class \code{simcam})
 #' @param nc
 #' vector with two values - classes (SIMCA models) to show the plot for
+#' @param res
+#' list with results to show the plot for
+#' @param groupby
+#' factor to use for grouping points on the plot
+#' @param main
+#' title of the plot
+#' @param show.limits
+#' logical, show or not critical limits
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -511,7 +521,7 @@ plotCooman.simcam <- function(obj, nc = c(1, 2), res = list("cal" = obj$res[["ca
       stop("Parameter 'res' should be list with 'simcamres' objects.")
    }
 
-   if (length(nc) != 2 || min(nc) < 1 || max(nc) > obj$nclasses) {
+   if (length(nc) != 2 || min(nc) < 1 || max(nc) > obj$nclasses) {
       stop("Wrong values for 'nc' parameter.")
    }
 

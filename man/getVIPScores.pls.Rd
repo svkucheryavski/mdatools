@@ -10,6 +10,8 @@
 \item{obj}{a PLS model (object of class \code{pls})}
 
 \item{ncomp}{number of components to count}
+
+\item{...}{other parameters}
 }
 \value{
 matrix \code{nvar x 1} with VIP score values

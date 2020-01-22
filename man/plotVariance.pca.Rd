@@ -23,17 +23,11 @@
 
 \item{variance}{which variance to show}
 
+\item{xticks}{vector with ticks for x-axis}
+
 \item{res}{list with result objects to show the variance for}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{show.legend}{logical, show or not a legend on the plot}
 }
 \description{
 Shows a plot with explained variance or cumulative explained variance for components.

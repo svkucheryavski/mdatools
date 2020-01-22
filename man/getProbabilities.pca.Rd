@@ -4,7 +4,7 @@
 \alias{getProbabilities.pca}
 \title{Probabilities for residual distances}
 \usage{
-\method{getProbabilities}{pca}(obj, ncomp, q, h)
+\method{getProbabilities}{pca}(obj, ncomp, q, h, ...)
 }
 \arguments{
 \item{obj}{object with PCA model}
@@ -14,6 +14,8 @@
 \item{q}{vector with squared orthogonal distances for given number of components}
 
 \item{h}{vector with score distances for given number of components}
+
+\item{...}{other parameters}
 }
 \description{
 Probabilities for residual distances

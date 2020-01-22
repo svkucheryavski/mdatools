@@ -19,6 +19,14 @@
 
 \item{nc}{vector with two values - classes (SIMCA models) to show the plot for}
 
+\item{res}{list with results to show the plot for}
+
+\item{groupby}{factor to use for grouping points on the plot}
+
+\item{main}{title of the plot}
+
+\item{show.limits}{logical, show or not critical limits}
+
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{

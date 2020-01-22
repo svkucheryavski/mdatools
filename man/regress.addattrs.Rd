@@ -9,7 +9,9 @@ regress.addattrs(stat, attrs, name)
 \arguments{
 \item{stat}{matrix with statistics}
 
-\item{err}{array with error of predictions}
+\item{attrs}{attributes from error matrix}
+
+\item{name}{name of statistic}
 }
 \description{
 Add names and attributes to matrix with statistics

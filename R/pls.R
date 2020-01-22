@@ -97,7 +97,6 @@
 #'
 #' Plotting methods for \code{pls} objects:
 #' \tabular{ll}{
-#'  \code{\link{plotRegcoeffs.pls}} \tab shows regression coefficients plot.\cr
 #'  \code{\link{plotXScores.pls}} \tab shows scores plot for x decomposition.\cr
 #'  \code{\link{plotXYScores.pls}} \tab shows scores plot for x and y decomposition.\cr
 #'  \code{\link{plotXLoadings.pls}} \tab shows loadings plot for x decomposition.\cr
@@ -591,6 +590,8 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
 #' how many components to count.
+#' @param ny
+#' which y variables to show the summary for (can be a vector)
 #' @param ...
 #' other arguments
 #'
@@ -882,10 +883,10 @@ plotXResiduals.pls <- function(obj, ncomp = 1, res = obj$res,
 #' which components to show the plot for (one or vector with several values)
 #' @param type
 #' type of the plot
-#' @param main
-#' main plot title
 #' @param show.axes
 #' logical, show or not a axes lines crossing origin (0,0)
+#' @param show.legend
+#' logical, show or not legend on the plot (when it is available)
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1062,8 +1063,6 @@ plotSelectivityRatio.pls <- function(obj, ny = 1,
 #' how many components to use (if NULL - user selected optimal value will be used)
 #' @param ny
 #' which y variable to show the summary for (if NULL, will be shown for all)
-#' @param show.labels
-#' logical, show or not labels for the plot objects
 #' @param show.legend
 #' logical, show or not a legend on the plot
 #' @param ...
@@ -1504,6 +1503,8 @@ vipscores <- function(obj, ncomp = obj$ncomp.selected) {
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
 #' number of components to count
+#' @param ...
+#' other parameters
 #'
 #' @return
 #' matrix \code{nvar x 1} with VIP score values
@@ -1523,8 +1524,6 @@ getVIPScores.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
 #'
 #' @param obj
 #' a PLS model (object of class \code{pls})
-#' @param x
-#' predictors for calibration set (as provided to \code{pls()} function)
 #' @param ncomp
 #' number of components to count
 #'
@@ -1536,7 +1535,7 @@ getVIPScores.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
 #'
 selratio <- function(obj, ncomp = obj$ncomp.selected) {
 
-   if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
+   if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
       stop("Wrong value for the 'ncomp' parameter.")
    }
 
@@ -1606,8 +1605,6 @@ selratio <- function(obj, ncomp = obj$ncomp.selected) {
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
 #' number of components to get the values for (if NULL user selected as optimal will be used)
-#' @param ny
-#' which response to get the values for (if y is multivariate)
 #' @param ...
 #' other parameters
 #'
@@ -1618,7 +1615,7 @@ selratio <- function(obj, ncomp = obj$ncomp.selected) {
 #' vector with selectivity ratio values
 #'
 #' @export
-getSelectivityRatio.pls <- function(obj, ncomp = obj$ncomp.selected) {
+getSelectivityRatio.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
    warning("This function is deprecated and will be removed in future. Use 'selratio()' insted.")
    return(selratio(obj, ncomp = ncomp))
 }

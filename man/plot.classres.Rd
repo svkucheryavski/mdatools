@@ -9,9 +9,9 @@
 \arguments{
 \item{x}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
 
-\item{...}{other arguments for \code{plotPrediction()} method.}
+\item{...}{other arguments for \code{plotPredictions()} method.}
 }
 \description{
 Generic plot function for classification results.
-Alias for \code{\link{plotPrediction.classres}}.
+Alias for \code{\link{plotPredictions.classres}}.
 }

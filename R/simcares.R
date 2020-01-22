@@ -2,10 +2,10 @@
 #'
 #'  @description
 #' \code{simcares} is used to store results for SIMCA one-class classification.
-#' @param pres
-#' results of PCA decomposition of data (class \code{pcares}).
-#' @param cres
+#' @param class.res
 #' results of classification (class \code{classres}).
+#' @param pca.res
+#' results of PCA decomposition of data (class \code{pcares}).
 #'
 #' @details
 #' Class \code{simcares} inherits all properties and methods of class \code{\link{pcares}}, and

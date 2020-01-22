@@ -96,7 +96,7 @@ as.matrix.regres <- function(x, ncomp = NULL, ny = 1, ...) {
 #' other arguments
 #'
 #' @export
-summary.regres <- function(object, ncomp = obj$ncomp.selected, ny = seq_len(object$nresp), ...) {
+summary.regres <- function(object, ncomp = object$ncomp.selected, ny = seq_len(object$nresp), ...) {
 
    cat("\nRegression results (class regres) summary\n")
    if (is.null(object$y.ref)) {
@@ -184,8 +184,10 @@ regres.getPerformanceStats <- function(y.pred, y.ref) {
 #'
 #' @param stat
 #' matrix with statistics
-#' @param err
-#' array with error of predictions
+#' @param attrs
+#' attributes from error matrix
+#' @param name
+#' name of statistic
 #'
 regress.addattrs <- function(stat, attrs, name) {
 
@@ -306,6 +308,10 @@ regres.slope <- function(y.pred, y.ref) {
 #' color of text in legend with statistics
 #' @param stat.cex
 #' size of text in legend with statistics
+#' @param xlim
+#' limits for x-axis (if NULL will be computed automatically)
+#' @param ylim
+#' limits for y-axis (if NULL will be computed automatically)
 #' @param axes.equal
 #' logical, make limits for x and y axes equal or not
 #' @param show.plot
@@ -435,6 +441,8 @@ plotResiduals.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
 #' type of the plot
 #' @param xticks
 #' vector with ticks for x-axis
+#' @param labels
+#' what to use as labels ("names", "values" or "indices")
 #' @param show.plot
 #' logical, show plot or just return plot data
 #' @param ...
@@ -470,6 +478,8 @@ plotRMSE.regres <- function(obj, ny = 1, type = "b", xticks = seq_len(obj$ncomp)
 #'
 #' @param x
 #' regression results (object of class \code{regres})
+#' @param ...
+#' other arguments
 #'
 #' @export
 plot.regres <- function(x, ...) {

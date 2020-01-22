@@ -16,8 +16,6 @@
 \item{show.legend}{logical, show or not a legend on the plot}
 
 \item{...}{other arguments}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
 }
 \description{
 Shows a set of plots (x residuals, regression coefficients, RMSE and predictions) for PLS model.

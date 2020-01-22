@@ -67,13 +67,13 @@
 #'    \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y
 #'    decomposition.\cr
 #'    \code{\link{plotXResiduals.plsres}} \tab shows T2 vs. Q plot for x decomposition.\cr
+#'    \code{\link{plotYResiduals.plsres}} \tab shows residuals plot for y values.\cr
 #' }
 #'
 #' Methods inherited from \code{regres} class (parent class for \code{plsres}):
 #' \tabular{ll}{
 #'    \code{\link{plotPredictions.regres}} \tab shows predicted vs. measured plot.\cr
 #'    \code{\link{plotRMSE.regres}} \tab shows RMSE plot.\cr
-#'    \code{\link{plotYResiduals.regres}} \tab shows residuals plot for y values.\cr
 #' }
 #'
 #' See also \code{\link{pls}} - a class for PLS models.
@@ -277,8 +277,10 @@ print.plsres <- function(x, ...) {
 #'
 #' @param obj
 #' PLS results (object of class \code{plsres})
-#' @param main
-#' main plot title
+#' @param decomp
+#' which dcomposition to use ("xdecomp" or "ydecomp")
+#' @param variance
+#' which variance to use ("expvar", "cumexpvar")
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
@@ -403,6 +405,8 @@ plotXScores.plsres <- function(obj, comp = c(1, 2), main = "Scores (X)", ...) {
 #' PLS results (object of class \code{plsres})
 #' @param ncomp
 #' which component to show the plot for
+#' @param show.plot
+#' logical, show plot or just return plot data
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
@@ -516,7 +520,7 @@ plotYResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected,
 #' See examples in help for \code{\link{plsres}} function.
 #'
 #' @export
-plot.plsres <- function(x, ncomp = obj$ncomp.selected, ny = 1, show.labels = FALSE, ...) {
+plot.plsres <- function(x, ncomp = x$ncomp.selected, ny = 1, show.labels = FALSE, ...) {
 
    if (is.null(x$y.ref)) {
       par(mfrow = c(1, 2))

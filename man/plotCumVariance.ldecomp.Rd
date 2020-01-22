@@ -16,14 +16,6 @@
 \item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
-
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
 }
 \description{
 Shows a plot with cumulative explained variance vs. number of components.

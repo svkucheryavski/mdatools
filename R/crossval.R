@@ -68,6 +68,8 @@ crossval.getParams <- function(cv, nobj) {
 #' will be preformed), if it is a list, the following syntax can be used:
 #' cv = list('rand', nseg, nrep) for random repeated cross-validation with nseg segments and nrep
 #' repetitions or cv = list('ven', nseg) for systematic splits to nseg segments ('venetian blinds').
+#' @param resp
+#' vector with response values to use in case of venetian blinds
 #'
 #' @return
 #' matrix with object indices for each segment

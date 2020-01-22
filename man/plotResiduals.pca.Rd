@@ -49,8 +49,6 @@
 \item{show.legend}{logical, show or not a legend on the plot (needed if several result objects are available)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{main}{main title for the plot}
 }
 \description{
 Shows a plot with score (T2, h) vs orthogonal (Q, q) distances and corresponding critical

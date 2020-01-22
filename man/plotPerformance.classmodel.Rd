@@ -32,11 +32,9 @@ or \code{"misclassified"})}
 
 \item{xticks}{vector with tick values for x-axis}
 
+\item{res}{list with result objects to show the plot for}
+
 \item{...}{most of the graphical parameters from \code{\link{mdaplotg}} function can be used.}
-
-\item{xlab}{label for x axis}
-
-\item{main}{main title for the plot}
 }
 \description{
 Makes a plot with sensitivity values vs. model complexity (e.g. number of components)

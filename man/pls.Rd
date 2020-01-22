@@ -227,7 +227,6 @@ Main methods for \code{pls} objects:
 
 Plotting methods for \code{pls} objects:
 \tabular{ll}{
- \code{\link{plotRegcoeffs.pls}} \tab shows regression coefficients plot.\cr
  \code{\link{plotXScores.pls}} \tab shows scores plot for x decomposition.\cr
  \code{\link{plotXYScores.pls}} \tab shows scores plot for x and y decomposition.\cr
  \code{\link{plotXLoadings.pls}} \tab shows loadings plot for x decomposition.\cr

@@ -4,7 +4,7 @@
 \alias{summary.regres}
 \title{summary method for regression results object}
 \usage{
-\method{summary}{regres}(object, ncomp = obj$ncomp.selected, ny = seq_len(object$nresp), ...)
+\method{summary}{regres}(object, ncomp = object$ncomp.selected, ny = seq_len(object$nresp), ...)
 }
 \arguments{
 \item{object}{regression results (object of class \code{regres})}

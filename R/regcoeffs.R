@@ -31,7 +31,7 @@
 #' @export
 regcoeffs <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 
-   if (is.null(dim(coeffs)) || length(dim(coeffs)) != 3) {
+   if (is.null(dim(coeffs)) || length(dim(coeffs)) != 3) {
       stop("Coefficients must be provided as 3-way array.")
    }
 
@@ -58,25 +58,27 @@ regcoeffs <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 #' returns matrix with confidence intervals for regression coeffocoents
 #' for given response number and number of components.
 #'
-#' @param obj
+#' @param object
 #' regression coefficients object (class \code{regcoeffs})
+#' @param parm
+#' not used, needed for compatiility with general method
+#' @param level
+#' confidence level
 #' @param ncomp
 #' number of components (one value)
 #' @param ny
 #' index of response variable (one value)
-#' @param level
-#' confidence level
 #' @param ...
 #' other arguments
 #'
 #' @export
-confint.regcoeffs <- function(obj, ncomp = 1, ny = 1, level = 0.95, ...) {
+confint.regcoeffs <- function(object, parm = NULL, level = 0.95, ncomp = 1, ny = 1, ...) {
 
    if (length(ncomp) != 1) {
       stop("Parameter 'ncomp' should be just one value.")
    }
 
-   if (ncomp < 1 || ncomp > dim(obj$values)[2]) {
+   if (ncomp < 1 || ncomp > dim(object$values)[2]) {
       stop("Wrong value for parameter 'ncomp'.")
    }
 
@@ -84,21 +86,21 @@ confint.regcoeffs <- function(obj, ncomp = 1, ny = 1, level = 0.95, ...) {
       stop("Parameter 'ny' should be just one value.")
    }
 
-   if (ny < 1 || ny > dim(obj$values)[3]) {
+   if (ny < 1 || ny > dim(object$values)[3]) {
       stop("Wrong value for parameter 'ny'.")
    }
 
    alpha <- 1 - level
-   t <- -qt(alpha / 2, obj$DoF)
-   ci <- repmat(obj$se[, ncomp, ny], 1, 2) %*% diag(c(-t, t)) +
-      repmat(obj$values[, ncomp, ny], 1, 2)
+   t <- -qt(alpha / 2, object$DoF)
+   ci <- repmat(object$se[, ncomp, ny], 1, 2) %*% diag(c(-t, t)) +
+      repmat(object$values[, ncomp, ny], 1, 2)
 
-   if (length(attr(obj$values, "exclrows"))) {
-      ci[attr(obj$values, "exclrows"), ] <- 0
+   if (length(attr(object$values, "exclrows"))) {
+      ci[attr(object$values, "exclrows"), ] <- 0
    }
 
-   ci <- mda.setattr(ci, mda.getattr(obj$values))
-   rownames(ci) <- dimnames(obj$values)[[1]]
+   ci <- mda.setattr(ci, mda.getattr(object$values))
+   rownames(ci) <- dimnames(object$values)[[1]]
    colnames(ci) <- paste0(round(c(alpha / 2, alpha / 2 + level) * 100, 1), "%")
    attr(ci, "name") <- "Confidence interval"
 
@@ -246,7 +248,7 @@ regcoeffs.getStats <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 
    if (is.null(ci.coeffs)) return()
 
-   if (is.null(dim(ci.coeffs)) || length(dim(ci.coeffs)) != 4) {
+   if (is.null(dim(ci.coeffs)) || length(dim(ci.coeffs)) != 4) {
       stop("Coefficients for distribution statistics must be provided as 4-way array.")
    }
 

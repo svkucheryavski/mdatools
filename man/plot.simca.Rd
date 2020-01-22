@@ -9,7 +9,9 @@
 \arguments{
 \item{x}{a SIMCA model (object of class \code{simca})}
 
-\item{ncomp}{how many components to use (if NULL - user selected optimal value will be used)}
+\item{comp}{which components to show on scores and loadings plot}
+
+\item{ncomp}{how many components to use for residuals plot}
 
 \item{...}{other arguments}
 }

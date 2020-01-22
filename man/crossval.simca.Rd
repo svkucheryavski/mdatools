@@ -12,10 +12,6 @@ crossval.simca(obj, x, cv)
 \item{x}{a matrix with x values (predictors from calibration set)}
 
 \item{cv}{number of segments (if cv = 1, full cross-validation will be used)}
-
-\item{center}{logical, do mean centering or not}
-
-\item{scale}{logical, do standardization or not}
 }
 \value{
 object of class \code{simcares} with results of cross-validation

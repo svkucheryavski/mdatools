@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{x}{regression results (object of class \code{regres})}
+
+\item{...}{other arguments}
 }
 \description{
 Plot method for regression results

@@ -16,6 +16,8 @@
 
 \item{ncomp}{how many components to count.}
 
+\item{ny}{which y variables to show the summary for (can be a vector)}
+
 \item{...}{other arguments}
 }
 \description{

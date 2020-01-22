@@ -2,13 +2,13 @@
 #'
 #' @param c.ref
 #' class reference values provided by user
-#' @param classname
+#' @param classnames
 #' text with class name in case of logical reference values
 #'
 #' @export
 classmodel.processRefValues <- function(c.ref, classnames = NULL) {
 
-   if (is.null(c.ref) || is.factor(c.ref)) return(c.ref)
+   if (is.null(c.ref) || is.factor(c.ref)) return(c.ref)
    attrs <- mda.getattr(c.ref)
 
    if (is.logical(c.ref)) {
@@ -39,6 +39,8 @@ classmodel.processRefValues <- function(c.ref, classnames = NULL) {
 #' vector with class numbers to make the plot for.
 #' @param ncomp
 #' what number of components to make the plot for.
+#' @param main
+#' title of the plot (if NULL will be set automatically)
 #' @param ...
 #' most of the graphical parameters from \code{\link{mdaplotg}} function can be used.
 #'
@@ -136,16 +138,14 @@ plotMisclassified.classmodel <- function(obj, ...) {
 #' or \code{"misclassified"})
 #' @param type
 #' type of the plot
-#' @param xlab
-#' label for x axis
 #' @param ylab
 #' label for y axis
 #' @param ylim
 #' vector with two values - limits for y axis
-#' @param main
-#' main title for the plot
 #' @param xticks
 #' vector with tick values for x-axis
+#' @param res
+#' list with result objects to show the plot for
 #' @param ...
 #' most of the graphical parameters from \code{\link{mdaplotg}} function can be used.
 #'

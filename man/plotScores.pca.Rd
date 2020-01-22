@@ -9,8 +9,8 @@
   comp = c(1, 2),
   type = "p",
   show.axes = TRUE,
-  res = obj$res,
   show.legend = TRUE,
+  res = obj$res,
   ...
 )
 }
@@ -23,17 +23,11 @@
 
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
-\item{res}{list with result objects to show the variance for}
-
 \item{show.legend}{logical, show or not a legend on the plot}
 
+\item{res}{list with result objects to show the variance for}
+
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{main}{main title for the plot}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
-
-\item{legend.position}{string, locatin of legend on the plot}
 }
 \description{
 Shows a scores plot for selected components.

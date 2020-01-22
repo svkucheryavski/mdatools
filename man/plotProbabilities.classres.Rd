@@ -9,8 +9,6 @@
   ncomp = obj$ncomp.selected,
   nc = 1,
   type = "h",
-  xlab = "Objects",
-  ylab = "Probability",
   ylim = c(0, 1.1),
   show.lines = c(NA, 0.5),
   ...
@@ -25,17 +23,11 @@
 
 \item{type}{type of the plot}
 
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
 \item{ylim}{vector with limits for y-axis}
 
 \item{show.lines}{shows a horizontal line at p = 0.5}
 
 \item{...}{most of the graphical parameters from \code{\link{mdaplot}} function can be used.}
-
-\item{main}{main plot title}
 }
 \description{
 Makes a plot with class belonging probabilities for each object of the classification results.

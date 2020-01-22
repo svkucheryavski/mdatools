@@ -16,8 +16,6 @@ regmodel <- function(...) {
 #' number of segments (if cv = 1, full cross-validation will be used)
 #' @param cal.fun
 #' reference to function for model calibration
-#' @param jack.knife
-#' logical, do jack-knifing or not
 #'
 #' @return
 #' object of class \code{plsres} with results of cross-validation
@@ -190,9 +188,11 @@ getRegcoeffs.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, full 
 #' @param object
 #' a regression model (object of class \code{regmodel})
 #' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
+#' number of components to show summary for
 #' @param ny
 #' which y variables to show the summary for (can be a vector)
+#' @param res
+#' list of results to show summary for
 #' @param ...
 #' other arguments
 #'
@@ -264,18 +264,14 @@ print.regmodel <- function(x, ...) {
 #' number of response variable to make the plot for (if y is multivariate)
 #' @param type
 #' type of the plot("b", "l" or "h")
+#' @param labels
+#' what to show as labels (vector or name, e.g. "names", "values", "indices")
 #' @param xticks
 #' vector with ticks for x-axis values
-#' @param main
-#' main plot title
-#' @param ylab
-#' label for y axis
 #' @param res
 #' list with result objects
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
 #'
 #' @export
 plotRMSE.regmodel <- function(obj, ny = 1, type = "b", labels = "values",
@@ -296,8 +292,6 @@ plotRMSE.regmodel <- function(obj, ny = 1, type = "b", labels = "values",
 #' how many components to use (if NULL - user selected optimal value will be used)
 #' @param ny
 #' number of response variable to make the plot for (if y is multivariate)
-#' @param main
-#' main plot title
 #' @param legend.position
 #' position of legend on the plot (if shown)
 #' @param show.line
@@ -306,8 +300,6 @@ plotRMSE.regmodel <- function(obj, ny = 1, type = "b", labels = "values",
 #' list with result objects
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
 #'
 #' @export
 plotPredictions.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1,
@@ -345,8 +337,6 @@ plotPredictions.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1,
 #' list with result objects
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
 #'
 #' @export
 plotYResiduals.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, show.lines = c(NA, 0),

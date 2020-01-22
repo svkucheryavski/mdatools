@@ -25,10 +25,6 @@
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{main}{main title for the plot}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
 }
 \description{
 Shows a loadings plot for selected components.

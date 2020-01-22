@@ -141,9 +141,9 @@
 #'    \code{\link{plotResiduals.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
 #'    \code{\link{plotBiplot.pca}} \tab shows bi-plot.\cr
 #'    \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr
-#'    \code{\link{plotT2DoF.pca}} \tab plot with degrees of freedom for score distance.\cr
-#'    \code{\link{plotQDoF.pca}} \tab plot with degrees of freedom for orthogonal distance.\cr
-#'    \code{\link{plotDistDoF.pca}} \tab plot with degrees of freedom for both distances.\cr
+#'    \code{\link{plotT2DoF}} \tab plot with degrees of freedom for score distance.\cr
+#'    \code{\link{plotQDoF}} \tab plot with degrees of freedom for orthogonal distance.\cr
+#'    \code{\link{plotDistDoF}} \tab plot with degrees of freedom for both distances.\cr
 #' }
 #'
 #' Most of the methods for plotting data are also available for PCA results (\code{\link{pcares}})
@@ -317,9 +317,11 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
 #' vector with squared orthogonal distances for given number of components
 #' @param h
 #' vector with score distances for given number of components
+#' @param ...
+#' other parameters
 #'
 #' @export
-getProbabilities.pca <- function(obj, ncomp, q, h) {
+getProbabilities.pca <- function(obj, ncomp, q, h, ...) {
 
    # if chisq / hotelling
    if (obj$lim.type == "chisq") {
@@ -1133,18 +1135,12 @@ pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
 #' a PCA model (object of class \code{pca})
 #' @param type
 #' type of the plot ("b", "l", "h")
-#' @param main
-#' main title for the plot
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param show.legend
-#' logical, show or not a legend on the plot
 #' @param labels
 #' what to use as labels (if \code{show.labels = TRUE})
 #' @param variance
 #' which variance to show
+#' @param xticks
+#' vector with ticks for x-axis
 #' @param res
 #' list with result objects to show the variance for
 #' @param ...
@@ -1193,16 +1189,10 @@ plotCumVariance.pca <- function(obj, legend.position = "bottomright", ...) {
 #' a value or vector with several values - number of components to show the plot for
 #' @param type
 #' type of the plot ("p", "l", "b", "h")
-#' @param main
-#' main title for the plot
-#' @param show.labels
-#' logical, show or not labels for the plot objects
-#' @param show.legend
-#' logical, show or not a legend on the plot
-#' @param legend.position
-#' string, locatin of legend on the plot
 #' @param show.axes
 #' logical, show or not a axes lines crossing origin (0,0)
+#' @param show.legend
+#' logical, show or not a legend on the plot
 #' @param res
 #' list with result objects to show the variance for
 #' @param ...
@@ -1219,8 +1209,8 @@ plotCumVariance.pca <- function(obj, legend.position = "bottomright", ...) {
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE, res = obj$res,
-   show.legend = TRUE, ...) {
+plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE,
+   show.legend = TRUE, res = obj$res, ...) {
 
    res <- getRes(res, "ldecomp")
    if (length(res) == 1) {
@@ -1257,8 +1247,6 @@ plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE, re
 #' logical, normalize distance values or not (see details)
 #' @param cgroup
 #' color grouping of plot points (works only if one result object is available)
-#' @param main
-#' main title for the plot
 #' @param xlim
 #' limits for x-axis
 #' @param ylim
@@ -1416,10 +1404,6 @@ getLimitsCoordinates.pca <- function(obj, ncomp, norm, log) {
 #' a value or vector with several values - number of components to show the plot for
 #' @param type
 #' type of the plot ('b', 'l', 'h')
-#' @param main
-#' main title for the plot
-#' @param show.labels
-#' logical, show or not labels for the plot objects
 #' @param show.legend
 #' logical, show or not a legend on the plot
 #' @param show.axes

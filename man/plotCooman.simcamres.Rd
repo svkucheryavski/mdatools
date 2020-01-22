@@ -20,6 +20,8 @@
 
 \item{main}{main plot title}
 
+\item{cgroup}{vector of values to use for color grouping of plot points}
+
 \item{show.plot}{logical, show plot or just return plot data}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}

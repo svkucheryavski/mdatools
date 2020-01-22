@@ -132,9 +132,9 @@ par(mfrow = c(1, 1))
 ## 3. Show both class and y values predictions
 par(mfrow = c(2, 2))
 plotPredictions(model)
-plotPredictions(model, res = 'calres', ncomp = 2, nc = 2)
-plotPredictions(structure(model, class = "pls"))
-plotPredictions(structure(model, class = "pls"), ncomp = 2, ny = 2)
+plotPredictions(model, res = "cal", ncomp = 2, nc = 2)
+plotPredictions(structure(model, class = "regmodel"))
+plotPredictions(structure(model, class = "regmodel"), ncomp = 2, ny = 2)
 par(mfrow = c(1, 1))
 
 ## 4. All plots from ordinary PLS can be used, e.g.:

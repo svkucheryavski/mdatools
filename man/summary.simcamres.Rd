@@ -9,6 +9,8 @@
 \arguments{
 \item{object}{SIMCAM results (object of class \code{simcamres})}
 
+\item{nc}{number of class to show summary for (can be vector)}
+
 \item{...}{other arguments}
 }
 \description{

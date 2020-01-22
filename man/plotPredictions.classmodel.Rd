@@ -24,6 +24,8 @@ test, cv and calibration results.}
 
 \item{ncomp}{what number of components to make the plot for.}
 
+\item{main}{title of the plot (if NULL will be set automatically)}
+
 \item{...}{most of the graphical parameters from \code{\link{mdaplotg}} function can be used.}
 }
 \description{

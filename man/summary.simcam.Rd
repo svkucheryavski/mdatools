@@ -9,6 +9,8 @@
 \arguments{
 \item{object}{a SIMCAM model (object of class \code{simcam})}
 
+\item{nc}{number of class to show summary for (can be vector)}
+
 \item{...}{other arguments}
 }
 \description{

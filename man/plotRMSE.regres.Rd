@@ -23,6 +23,8 @@
 
 \item{xticks}{vector with ticks for x-axis}
 
+\item{labels}{what to use as labels ("names", "values" or "indices")}
+
 \item{show.plot}{logical, show plot or just return plot data}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}

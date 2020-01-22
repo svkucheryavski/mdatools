@@ -77,6 +77,6 @@ m <- simcam(list(m1, m2))
 
 # show the model distance plot with distance values as labels
 # note, that distance between setosa and setosa is 0.938
-plotModelDistance(m, show.labels = T, labels = "values")
+plotModelDistance(m, show.labels = TRUE, labels = "values")
 
 }

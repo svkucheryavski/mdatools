@@ -16,8 +16,6 @@ crossval.regmodel(obj, x, y, cv, cal.fun)
 \item{cv}{number of segments (if cv = 1, full cross-validation will be used)}
 
 \item{cal.fun}{reference to function for model calibration}
-
-\item{jack.knife}{logical, do jack-knifing or not}
 }
 \value{
 object of class \code{plsres} with results of cross-validation

@@ -14,6 +14,8 @@ cv = list('rand', nseg, nrep) for random repeated cross-validation with nseg seg
 repetitions or cv = list('ven', nseg) for systematic splits to nseg segments ('venetian blinds').}
 
 \item{nobj}{number of objects in a dataset}
+
+\item{resp}{vector with response values to use in case of venetian blinds}
 }
 \value{
 matrix with object indices for each segment

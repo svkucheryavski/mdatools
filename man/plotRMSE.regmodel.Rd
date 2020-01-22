@@ -21,19 +21,14 @@
 
 \item{type}{type of the plot("b", "l" or "h")}
 
+\item{labels}{what to show as labels (vector or name, e.g. "names", "values", "indices")}
+
 \item{xticks}{vector with ticks for x-axis values}
 
 \item{res}{list with result objects}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{main}{main plot title}
-
-\item{ylab}{label for y axis}
 }
 \description{
 Shows plot with root mean squared error values vs. number of components for PLS model.
-}
-\details{
-
 }

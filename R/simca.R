@@ -10,32 +10,14 @@
 #' short text (up to 20 symbols) with class name.
 #' @param ncomp
 #' maximum number of components to calculate.
-#' @param center
-#' logical, do mean centering of data or not.
-#' @param scale
-#' logical, do sdandardization of data or not.
 #' @param cv
 #' cross-validation settings (see details).
-#' @param exclrows
-#' rows to be excluded from calculations (numbers, names or vector with logical values)
-#' @param exclcols
-#' columns to be excluded from calculations (numbers, names or vector with logical values)
 #' @param x.test
 #' a numerical matrix with test data.
 #' @param c.test
 #' a vector with classes of test data objects (can be text with names of classes or logical).
-#' @param method
-#' method to compute principal components.
-#' @param rand
-#' vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)
-#' @param lim.type
-#' which method to use for calculation of critical limits for residuals (see details)
-#' @param alpha
-#' significance level for calculating critical limits for T2 and Q residuals.
-#' @param gamma
-#' significance level for calculating outlier limits for T2 and Q residuals.
-#' @param info
-#' text with information about the model.
+#' @param ...
+#' any other parameters suitable for \code{\link{pca}} method.
 #'
 #' @details
 #' SIMCA is in fact PCA model with additional functionality, so \code{simca} class inherits most
@@ -83,7 +65,6 @@
 #'  \code{summary.simca} \tab shows summary statistics for the model.\cr
 #'  \code{plot.simca} \tab makes an overview of SIMCA model with four plots.\cr
 #'  \code{\link{predict.simca}} \tab applies SIMCA model to a new data.\cr
-#'  \code{\link{plotModellingPower.simca}} \tab shows plot with modelling power of variables.\cr
 #' }
 #'
 #' Methods, inherited from \code{classmodel} class:
@@ -197,9 +178,11 @@ simca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x) - 1, 20),
 #' vector with squared orthogonal distances for given number of components
 #' @param h
 #' vector with score distances for given number of components
+#' @param ...
+#' other parameters
 #'
 #' @export
-getProbabilities.simca <- function(obj, ncomp, q, h) {
+getProbabilities.simca <- function(obj, ncomp, q, h, ...) {
 
    p <- function(x, alpha) ifelse((p <- (1 - x) / alpha * 0.5) > 1, 1, p)
    return(p(getProbabilities.pca(obj, ncomp, q, h), obj$alpha))
@@ -245,8 +228,10 @@ predict.simca <- function(object, x, c.ref = NULL, cal = FALSE, ...) {
 #'
 #' @param obj
 #' a SIMCA model (object of class \code{simca})
-#' @param res
+#' @param pca.res
 #' results of projection data to PCA space
+#' @param c.ref
+#' vector with class reference values
 #'
 #' @return
 #' vector with predicted class values (\code{c.pred})
@@ -302,10 +287,6 @@ classify.simca <- function(obj, pca.res, c.ref = NULL) {
 #' a matrix with x values (predictors from calibration set)
 #' @param cv
 #' number of segments (if cv = 1, full cross-validation will be used)
-#' @param center
-#' logical, do mean centering or not
-#' @param scale
-#' logical, do standardization or not
 #'
 #' @return
 #' object of class \code{simcares} with results of cross-validation
@@ -398,8 +379,10 @@ crossval.simca <- function(obj, x, cv) {
 #'
 #' @param x
 #' a SIMCA model (object of class \code{simca})
+#' @param comp
+#' which components to show on scores and loadings plot
 #' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
+#' how many components to use for residuals plot
 #' @param ...
 #' other arguments
 #'
@@ -410,7 +393,7 @@ crossval.simca <- function(obj, x, cv) {
 plot.simca <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...) {
    par(mfrow = c(2, 2))
    plotScores(x, comp, ...)
-   plotLoadings(x, ncomp = ncomp, ...)
+   plotLoadings(x, ncomp = comp, ...)
    plotResiduals(x, ncomp = ncomp, ...)
    plotCumVariance(x, ...)
    par(mfrow = c(1, 1))
@@ -423,6 +406,10 @@ plot.simca <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...) {
 #'
 #' @param object
 #' a SIMCA model (object of class \code{simca})
+#' @param ncomp
+#' number of components to show summary for
+#' @param res
+#' list of result objects to show summary for
 #' @param ...
 #' other arguments
 #'

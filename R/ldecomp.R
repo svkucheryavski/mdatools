@@ -74,14 +74,6 @@ ldecomp <- function(scores, loadings, residuals, eigenvals, ncomp.selected = nco
 #' object of \code{ldecomp} class.
 #' @param type
 #' type of the plot
-#' @param main
-#' main title for the plot
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param show.labels
-#' logical, show or not labels for the plot objects
 #' @param labels
 #' what to show as labels for plot objects
 #' @param show.plot
@@ -90,8 +82,7 @@ ldecomp <- function(scores, loadings, residuals, eigenvals, ncomp.selected = nco
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotCumVariance.ldecomp <- function(obj, type = "b",
-   labels = "values", show.plot = TRUE, ...) {
+plotCumVariance.ldecomp <- function(obj, type = "b", labels = "values", show.plot = TRUE, ...) {
 
    return(
       plotVariance(obj, variance = "cumexpvar", type = type, labels = labels,
@@ -108,18 +99,12 @@ plotCumVariance.ldecomp <- function(obj, type = "b",
 #' object of \code{ldecomp} class.
 #' @param type
 #' type of the plot
-#' @param main
-#' main title for the plot
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param show.labels
-#' logical, show or not labels for plot objects.
-#' @param labels
-#' what to show as labels for plot objects.
 #' @param variance
 #' string, which variance to make the plot for ("expvar", "cumexpvar")
+#' @param labels
+#' what to show as labels for plot objects.
+#' @param xticks
+#' vector with ticks for x-axis
 #' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
@@ -129,9 +114,7 @@ plotCumVariance.ldecomp <- function(obj, type = "b",
 plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", labels = "values",
    xticks = seq_len(obj$ncomp), show.plot = TRUE, ...) {
 
-   if (!show.plot) {
-      return(obj[[variance]])
-   }
+   if (!show.plot) return(obj[[variance]])
 
    return(
       mdaplot(obj[[variance]], xticks = xticks, labels = labels, type = type, ...)
@@ -147,20 +130,8 @@ plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", labels = 
 #' object of \code{ldecomp} class.
 #' @param comp
 #' which components to show the plot for (can be one value or vector with two values).
-#' @param main
-#' main title for the plot
 #' @param type
 #' type of the plot
-#' @param xlab
-#' label for x-axis.
-#' @param ylab
-#' label for y-axis.
-#' @param show.legend
-#' logical, show or not a legend on the plot (needed in case of line or bar plot).
-#' @param show.labels
-#' logical, show or not labels for the plot objects
-#' @param labels
-#' what to show as labels
 #' @param show.axes
 #' logical, show or not a axes lines crossing origin (0,0)
 #' @param show.plot
@@ -290,6 +261,8 @@ print.ldecomp <- function(x, str = NULL, ...) {
 #'
 #' @param x
 #' object of class \code{ldecomp}
+#' @param ncomp
+#' number of components to get the result for (if NULL will return for each available)
 #' @param ...
 #' other arguments
 #'
@@ -486,8 +459,6 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
 #' matrix with PCA residuals
 #' @param evals
 #' vector with eigenvalues for PCA components
-#' @param ncomp
-#' number of components (can be a vector)
 #' @param alpha
 #' significance level for extreme objects
 #' @param gamma

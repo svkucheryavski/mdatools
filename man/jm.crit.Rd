@@ -14,8 +14,6 @@ jm.crit(residuals, evals, alpha = 0.05, gamma = 0.01)
 \item{alpha}{significance level for extreme objects}
 
 \item{gamma}{significance level for outliers}
-
-\item{ncomp}{number of components (can be a vector)}
 }
 \value{
 vector with four values: critical limits for given alpha and gamma, mean distance and DoF.

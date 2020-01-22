@@ -28,12 +28,7 @@
 \item{res}{list with result objects}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
-
-\item{main}{main plot title}
 }
 \description{
 Shows plot with predicted vs. reference (measured) y values for selected components.
-}
-\details{
-
 }

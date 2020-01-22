@@ -9,7 +9,9 @@ classify.simca(obj, pca.res, c.ref = NULL)
 \arguments{
 \item{obj}{a SIMCA model (object of class \code{simca})}
 
-\item{res}{results of projection data to PCA space}
+\item{pca.res}{results of projection data to PCA space}
+
+\item{c.ref}{vector with class reference values}
 }
 \value{
 vector with predicted class values (\code{c.pred})

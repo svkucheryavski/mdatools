@@ -27,25 +27,7 @@ simca(
 
 \item{cv}{cross-validation settings (see details).}
 
-\item{center}{logical, do mean centering of data or not.}
-
-\item{scale}{logical, do sdandardization of data or not.}
-
-\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
-
-\item{exclcols}{columns to be excluded from calculations (numbers, names or vector with logical values)}
-
-\item{method}{method to compute principal components.}
-
-\item{rand}{vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)}
-
-\item{lim.type}{which method to use for calculation of critical limits for residuals (see details)}
-
-\item{alpha}{significance level for calculating critical limits for T2 and Q residuals.}
-
-\item{gamma}{significance level for calculating outlier limits for T2 and Q residuals.}
-
-\item{info}{text with information about the model.}
+\item{...}{any other parameters suitable for \code{\link{pca}} method.}
 }
 \value{
 Returns an object of \code{simca} class with following fields:
@@ -131,7 +113,6 @@ Methods for \code{simca} objects:
  \code{summary.simca} \tab shows summary statistics for the model.\cr
  \code{plot.simca} \tab makes an overview of SIMCA model with four plots.\cr
  \code{\link{predict.simca}} \tab applies SIMCA model to a new data.\cr
- \code{\link{plotModellingPower.simca}} \tab shows plot with modelling power of variables.\cr
 }
 
 Methods, inherited from \code{classmodel} class:

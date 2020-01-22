@@ -34,6 +34,10 @@
 
 \item{stat.cex}{size of text in legend with statistics}
 
+\item{xlim}{limits for x-axis (if NULL will be computed automatically)}
+
+\item{ylim}{limits for y-axis (if NULL will be computed automatically)}
+
 \item{axes.equal}{logical, make limits for x and y axes equal or not}
 
 \item{show.plot}{logical, show plot or just return plot data}

@@ -62,7 +62,7 @@ classres <- function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = 1) {
 
    # check that ncomp.selected is correct
    if (is.null(ncomp.selected)) ncomp.selected <- obj$ncomp
-   if (ncomp.selected < 1 || ncomp.selected > obj$ncomp) {
+   if (ncomp.selected < 1 || ncomp.selected > obj$ncomp) {
       stop("Wrong value for 'ncomp.selected' parameer.")
    }
 
@@ -305,7 +305,7 @@ summary.classres <- function(object, ncomp = object$ncomp.selected,
 #'
 classres.getPerformance <- function(c.ref, c.pred) {
 
-   if (is.null(c.ref) || is.null(c.pred)) {
+   if (is.null(c.ref) || is.null(c.pred)) {
       stop("Both reference and predicted class values are required.")
    }
 
@@ -390,12 +390,6 @@ classres.getPerformance <- function(c.ref, c.pred) {
 #' if there are several classes, which class to make the plot for.
 #' @param type
 #' type of the plot
-#' @param main
-#' main plot title
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
 #' @param ylim
 #' vector with limits for y-axis
 #' @param show.lines
@@ -405,7 +399,7 @@ classres.getPerformance <- function(c.ref, c.pred) {
 #'
 #' @export
 plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, type = "h",
-   xlab = "Objects", ylab = "Probability", ylim = c(0, 1.1), show.lines = c(NA, 0.5), ...) {
+   ylim = c(0, 1.1), show.lines = c(NA, 0.5), ...) {
 
    if (is.null(obj$p.pred)) {
       stop("No probability values are available.")
@@ -495,8 +489,6 @@ plotMisclassified.classres <- function(obj, ...) {
 #' type of the plot
 #' @param param
 #' which performance parameter to make the plot for (can be a vector with several values).
-#' @param xlab
-#' label for x axis
 #' @param ylab
 #' label for y axis
 #' @param ylim
@@ -613,12 +605,12 @@ plotPredictions.classres <- function(obj, nc = seq_len(obj$nclasses), ncomp = ob
 #'
 #' @description
 #' Generic plot function for classification results.
-#' Alias for \code{\link{plotPrediction.classres}}.
+#' Alias for \code{\link{plotPredictions.classres}}.
 #'
 #' @param x
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
 #' @param ...
-#' other arguments for \code{plotPrediction()} method.
+#' other arguments for \code{plotPredictions()} method.
 #'
 #' @export
 plot.classres <- function(x, ...) {

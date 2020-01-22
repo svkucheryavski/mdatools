@@ -4,16 +4,18 @@
 \alias{confint.regcoeffs}
 \title{Confidence intervals for regression coefficients}
 \usage{
-\method{confint}{regcoeffs}(obj, ncomp = 1, ny = 1, level = 0.95, ...)
+\method{confint}{regcoeffs}(object, parm = NULL, level = 0.95, ncomp = 1, ny = 1, ...)
 }
 \arguments{
-\item{obj}{regression coefficients object (class \code{regcoeffs})}
+\item{object}{regression coefficients object (class \code{regcoeffs})}
+
+\item{parm}{not used, needed for compatiility with general method}
+
+\item{level}{confidence level}
 
 \item{ncomp}{number of components (one value)}
 
 \item{ny}{index of response variable (one value)}
-
-\item{level}{confidence level}
 
 \item{...}{other arguments}
 }

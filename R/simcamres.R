@@ -3,10 +3,10 @@
 #' @description
 #' \code{simcamres} is used to store results for SIMCA multiclass classification.
 #'
-#' @param class.res
+#' @param cres
 #' results of classification (class \code{classres}).
-#' @param pca.res
-#' prediction results from each model (as pcares)
+#' @param pred.res
+#' list with prediction results from each model (pcares objects)
 #'
 #' @details
 #' Class \code{simcamres} inherits all properties and methods of class \code{\link{classres}}, plus
@@ -42,7 +42,6 @@
 #' \tabular{ll}{
 #'  \code{print.simcamres} \tab shows information about the object.\cr
 #'  \code{summary.simcamres} \tab shows statistics for results of classification.\cr
-#'  \code{\link{plotResiduals.simcamres}} \tab makes Q vs. T2 residuals plot.\cr
 #'  \code{\link{plotCooman.simcamres}} \tab makes Cooman's plot.\cr
 #' }
 #'
@@ -81,7 +80,7 @@ simcamres <- function(cres, pred.res) {
 #' other arguments
 #'
 #' @export
-as.matrix.simcamres <- function(x, nc = seq_len(x$nclasses)) {
+as.matrix.simcamres <- function(x, nc = seq_len(x$nclasses), ...) {
    comp <- sapply(x$pred.res, function(r) r$ncomp.selected)
 
    out <- do.call(rbind, lapply(nc, function(n) as.matrix.classres(x, nc = n)))
@@ -99,6 +98,8 @@ as.matrix.simcamres <- function(x, nc = seq_len(x$nclasses)) {
 #'
 #' @param object
 #' SIMCAM results (object of class \code{simcamres})
+#' @param nc
+#' number of class to show summary for (can be vector)
 #' @param ...
 #' other arguments
 #'
@@ -150,6 +151,8 @@ print.simcamres <- function(x, ...) {
 #' vector with two values - classes (SIMCA models) to show the plot for
 #' @param main
 #' main plot title
+#' @param cgroup
+#' vector of values to use for color grouping of plot points
 #' @param show.plot
 #' logical, show plot or just return plot data
 #' @param ...
@@ -196,8 +199,8 @@ plotCooman.simcamres <- function(obj, nc = c(1, 2), main = "Cooman's plot",
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
 #' @param nc
 #' vector with classes to show predictions for.
-#' @param ylab
-#' label for y axis
+#' @param main
+#' title of the plot
 #' @param ...
 #' most of the graphical parameters from \code{\link{mdaplotg}} or \code{\link{mdaplot}} function
 #' can be used.

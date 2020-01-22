@@ -29,6 +29,3 @@
 \description{
 Shows plot with y residuals (predicted vs. reference values) for selected components.
 }
-\details{
-
-}

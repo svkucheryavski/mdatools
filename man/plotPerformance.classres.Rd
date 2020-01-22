@@ -34,8 +34,6 @@
 \item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of the graphical parameters from \code{\link{mdaplot}} function can be used.}
-
-\item{xlab}{label for x axis}
 }
 \description{
 Makes a plot with classification performance parameters vs. model complexity (e.g. number of

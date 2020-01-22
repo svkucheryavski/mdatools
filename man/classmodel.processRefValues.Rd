@@ -9,7 +9,7 @@ classmodel.processRefValues(c.ref, classnames = NULL)
 \arguments{
 \item{c.ref}{class reference values provided by user}
 
-\item{classname}{text with class name in case of logical reference values}
+\item{classnames}{text with class name in case of logical reference values}
 }
 \description{
 Check reference class values and convert it to a factor if necessary

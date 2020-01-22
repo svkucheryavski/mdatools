@@ -4,7 +4,7 @@
 \alias{as.matrix.simcamres}
 \title{as.matrix method for SIMCAM results}
 \usage{
-\method{as.matrix}{simcamres}(x, nc = seq_len(x$nclasses))
+\method{as.matrix}{simcamres}(x, nc = seq_len(x$nclasses), ...)
 }
 \arguments{
 \item{x}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}

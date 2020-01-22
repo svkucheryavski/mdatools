@@ -9,9 +9,11 @@
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}
 
-\item{...}{other plot parameters (see \code{mdaplot} for details)}
+\item{decomp}{which dcomposition to use ("xdecomp" or "ydecomp")}
 
-\item{main}{main plot title}
+\item{variance}{which variance to use ("expvar", "cumexpvar")}
+
+\item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
 \description{
 Shows plot with explained X variance vs. number of components.

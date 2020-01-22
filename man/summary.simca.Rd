@@ -9,6 +9,10 @@
 \arguments{
 \item{object}{a SIMCA model (object of class \code{simca})}
 
+\item{ncomp}{number of components to show summary for}
+
+\item{res}{list of result objects to show summary for}
+
 \item{...}{other arguments}
 }
 \description{

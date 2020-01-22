@@ -11,10 +11,10 @@
 
 \item{nc}{vector with classes to show predictions for.}
 
+\item{main}{title of the plot}
+
 \item{...}{most of the graphical parameters from \code{\link{mdaplotg}} or \code{\link{mdaplot}} function
 can be used.}
-
-\item{ylab}{label for y axis}
 }
 \description{
 Makes a plot with predicted class values for classification results.

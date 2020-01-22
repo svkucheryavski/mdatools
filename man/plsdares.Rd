@@ -75,8 +75,8 @@ par(mfrow = c(1, 1))
 par(mfrow = c(2, 2))
 plotPredictions(res)
 plotPredictions(res, ncomp = 2, nc = 2)
-plotPredictions(structure(res, class = "plsres"))
-plotPredictions(structure(res, class = "plsres"), ncomp = 2, ny = 2)
+plotPredictions(structure(res, class = "regres"))
+plotPredictions(structure(res, class = "regres"), ncomp = 2, ny = 2)
 par(mfrow = c(1, 1))
 
 ## 4. All plots from ordinary PLS results can be used, e.g.:
@@ -122,13 +122,13 @@ Methods for \code{plsres} objects:
    \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y
    decomposition.\cr
    \code{\link{plotXResiduals.plsres}} \tab shows T2 vs. Q plot for x decomposition.\cr
+   \code{\link{plotYResiduals.plsres}} \tab shows residuals plot for y values.\cr
 }
 
 Methods inherited from \code{regres} class (parent class for \code{plsres}):
 \tabular{ll}{
    \code{\link{plotPredictions.regres}} \tab shows predicted vs. measured plot.\cr
    \code{\link{plotRMSE.regres}} \tab shows RMSE plot.\cr
-   \code{\link{plotYResiduals.regres}} \tab shows residuals plot for y values.\cr
 }
 
 See also \code{\link{plsda}} - a class for PLS-DA models, \code{\link{predict.plsda}} applying

@@ -193,8 +193,12 @@ mdaplotg.getLegend <- function(ps, data.names, legend = NULL) {
 #' logical, will excluded values also be shown
 #' @param show.legend
 #' will legend be shown on the plot
+#' @param show.labels
+#' will labels be shown on the plot
 #' @param legend.position
 #' position of legend on the plot (if shown)
+#' @param bwd
+#' size of bar for bar plot
 #'
 #' @return
 #' vector with two values

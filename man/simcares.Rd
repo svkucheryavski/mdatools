@@ -7,9 +7,9 @@
 simcares(class.res, pca.res = NULL)
 }
 \arguments{
-\item{pres}{results of PCA decomposition of data (class \code{pcares}).}
+\item{class.res}{results of classification (class \code{classres}).}
 
-\item{cres}{results of classification (class \code{classres}).}
+\item{pca.res}{results of PCA decomposition of data (class \code{pcares}).}
 }
 \value{
 Returns an object (list) of class \code{simcares} with the same fields as \code{\link{pcares}}

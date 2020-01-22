@@ -719,7 +719,7 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #'
 #' @importFrom grDevices axisTicks dev.cur
 #' @importFrom graphics abline axis grid hist image lines matlines par
-#' @importFrom graphics plot plot.new points rasterImage rect segments text
+#' @importFrom graphics plot plot.new points rasterImage rect segments text mtext
 #'
 #' @export
 mdaplot <- function(data = NULL, ps = NULL, type = "p",

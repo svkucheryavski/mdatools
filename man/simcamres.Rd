@@ -7,9 +7,9 @@
 simcamres(cres, pred.res)
 }
 \arguments{
-\item{class.res}{results of classification (class \code{classres}).}
+\item{cres}{results of classification (class \code{classres}).}
 
-\item{pca.res}{prediction results from each model (as pcares)}
+\item{pred.res}{list with prediction results from each model (pcares objects)}
 }
 \value{
 Returns an object (list) of class \code{simcamres} with the same fields as \code{\link{classres}}
@@ -52,7 +52,6 @@ Methods for \code{simcamres} objects:
 \tabular{ll}{
  \code{print.simcamres} \tab shows information about the object.\cr
  \code{summary.simcamres} \tab shows statistics for results of classification.\cr
- \code{\link{plotResiduals.simcamres}} \tab makes Q vs. T2 residuals plot.\cr
  \code{\link{plotCooman.simcamres}} \tab makes Cooman's plot.\cr
 }
 

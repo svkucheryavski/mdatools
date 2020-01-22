@@ -7,7 +7,9 @@
 getRes(res, classname = "ldecomp")
 }
 \arguments{
-\item{obj}{object with PCA model}
+\item{res}{list with results}
+
+\item{classname}{name of class (for result object) to look for}
 }
 \description{
 Return list with valid results

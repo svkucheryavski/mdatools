@@ -9,6 +9,8 @@
 \arguments{
 \item{x}{object of class \code{ldecomp}}
 
+\item{ncomp}{number of components to get the result for (if NULL will return for each available)}
+
 \item{...}{other arguments}
 }
 \description{

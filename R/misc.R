@@ -707,8 +707,12 @@ fprintf <- function(...) {
 
 #' Return list with valid results
 #'
-#' @param obj
-#' object with PCA model
+#' @param res
+#' list with results
+#' @param classname
+#' name of class (for result object) to look for
+#'
+#' @export
 getRes <- function(res, classname = "ldecomp") {
 
    if (!is.list(res)) {

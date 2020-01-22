@@ -23,7 +23,11 @@ mdaplotg.getXLim(
 
 \item{show.legend}{will legend be shown on the plot}
 
+\item{show.labels}{will labels be shown on the plot}
+
 \item{legend.position}{position of legend on the plot (if shown)}
+
+\item{bwd}{size of bar for bar plot}
 }
 \value{
 vector with two values

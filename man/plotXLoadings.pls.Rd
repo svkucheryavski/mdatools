@@ -22,9 +22,9 @@
 
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
-\item{...}{other plot parameters (see \code{mdaplotg} for details)}
+\item{show.legend}{logical, show or not legend on the plot (when it is available)}
 
-\item{main}{main plot title}
+\item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
 Shows plot with X loading values for selected components.

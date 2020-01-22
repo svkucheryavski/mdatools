@@ -15,9 +15,11 @@
 \arguments{
 \item{object}{a regression model (object of class \code{regmodel})}
 
-\item{ncomp}{how many components to use (if NULL - user selected optimal value will be used)}
+\item{ncomp}{number of components to show summary for}
 
 \item{ny}{which y variables to show the summary for (can be a vector)}
+
+\item{res}{list of results to show summary for}
 
 \item{...}{other arguments}
 }
