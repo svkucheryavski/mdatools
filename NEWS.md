@@ -1,19 +1,109 @@
 v.0.10.0
 ========
 
-## General 
-* a lot of code has been refactored and improved (with backward compatibility)
+Many changes, but most of them are under the hood. Code has been refactored significantly in order
+to improve its efficiency and make future support easier. Some functionality has been re-written
+from the scratch. However, **most** of the code is backward compatible, which means your
+scripts should have no problem to run on this version. However, some parameters have been removed and this can lean to occasional error and warning messages. All details are shown below.
+
+Another important change is the way cross-validation works. From this version, cross-validation
+is used only for computing performance statistics, e.g. error of predictions in PLS or
+classification error in SIMCA or PLS-DA. Decomposition results, such as explained variance
+or residual distances are not computed for cross-validation anymore. It was a bad idea from the beginning, as the way it was implemented is not fully correct — distances and variances measured
+for different local models should not be compared directly.
+
+Finally all model results (calibration, cross-validation and test set validation), are now combined
+into a single list, `model$res`. This makes a lot of things easier. However, the old way of
+accessing the result objects (e.g. `model$calres` or `model$cvres`) still works.
+
+Below is more detailed list of changes. The tutorial has been updated accordingly.
+
+## Breaking changes
+
+Here are changes incompatible with previous versions and can potentially lead to error messages
+in previously written code.
+
+* Method `plotModellingPower()` is no longer available (was used for SIMCA models).
+
+* Method `plotResiduals()` is no longer available for SIMCAM models (multiclass SIMCA), use
+corresponding for individual models instead.
+
+* When you make prediction plot for any classification model, you should specify name of result
+object to show the predictions for. In old versions the name of results were `"calres"`, `"cvres"`,
+`"testres"`. From this version they have been changed to `"cal"`, `"cv"` and `"test"`
+correspondingly.
+
+* In PLS-DA there was a possibility to show predictions not for classification results but for PLS
+predictions using the following code: `plotPredictions(structure(model, class = "pls"))`. From
+this version you should use `plotPredictions(structure(model, class = "regmodel"))` instead,
+as the `plotPredictions()` function has been moved from `pls` class to its parent, more
+general class, `regmodel()`.
+
+* In methods `plotCorr()` and `plotHist()` for randomization test, parameter `comp` has been
+renamed to `ncomp`. Parameter `comp` assumes a possibility to specify several values as vector,
+while `ncomp` assumes only one value, which is the case for these two plots.
+
+
+## General
 * code coverage with tests has been extended significantly
-* added Travis CI integration so you can see how safe it is to install the latest GitHub version 
+* added Travis CI integration so you can see how safe it is to install the latest GitHub version
+
 ## Plotting functions
-* `mdaplot()` now returns plot data, which can be used for extra options (e.g. adding convex hull, etc.)
-* new more contrast default colormap for plots (use `colmap="old"` if you do not like it)
-* new method `add_convex_hull()` adds convex hull for groups of points on scatter plots 
-* new method `add_confidence_ellipse()` adds confidence ellipse for groups of points on scatter plots
+* `mdaplot()` now returns plot data, which can be used for extra options (e.g. add convex hull, etc.)
+* new, more contrast default color map for plots (use `colmap="old"` if you don't like it)
+* new method `plotConvexHull()` adds convex hull for groups of points on any scatter plot
+* new method `plotConfidenceEllipse()` adds confidence ellipse for groups of points on any scatter plot
 * parameter `opacity` can now be used with `mdaplotg()` plots and be different for each group
-* both `mdaplot()` and `mdaplotg()` based plots now can take parameters `grid.col` and `grid.lwd`
+* both `mdaplot()` and `mdaplotg()` based plots now can take parameters `grid.col` and `grid.lwd` for tuning the grid look
 * better handling of scatter plots with `pch=21...25` using `col` and `bg` parameters
-* faster bar plot in case of many variables
+* density plot (`type="d"`) is now based on hexagonal binning - very fast for large data (>100 000 rows)
+* new method `mdaplotyy()` to create a line plot for two line series with separate y-axis for each
+* much faster bar plot in case of many variables
+
+## PCA
+Biggest change which can potentially lead to some issues with your old code is that
+cross-validation is no more available for PCA, for the reasons written above. Alternatively
+several new methods for assessing model complexity have been added.
+
+Other changes:
+* modeling power is no longer available in PCA/SIMCA results.
+* added new tools for assessing complexity of model (e.g. DoF plots, see tutorial for details)
+* more options available for analysis of residual distances (e.g marking objects as extremes, etc.)
+* method `setResLimits()` is renamed to `setDistanceLimits()` and has an extra parameter, `lim.type` which allows to change the method for critical limits calculation without rebuilding the PCA model itself.
+* extended output for `summary()` of PCA model including DoF for distances (*Nh* and *Nq*)
+* `plotExtreme()` is now also available for PCA model (was used only for SIMCA models before)
+* for most of PCA model plots you can now provide list with result objects to show the plot for. This makes possible to combine, for example, results from calibration set and new predictions on the same plot
+* you can add convex hull or confidence ellipse to groups of points on scores plot made for result object
+
+## SIMCA/SIMCAM
+* calculation of distance between models has been corrected
+* model distance plot now shows model/class names as x-tick labels by default
+* `plotResiduals.simcam()` and `plotResiduals.simcamres ()` are not available anymore (both were a shortcut for `plotResiduals.simca()` which was superfluous
+* summary information now is shown as a single matrix with extra column containing number of selected components in each model
+
+## Regression coefficients (class `refcoeffs`)
+* added a new method `confint()` which returns confidence interval (if Jack-Knifing was used)
+* minor improvements to regression coefficients plot (e.g. logical parameter `show.line` is replaced with `show.lines` from `mdaplot()`)
+
+## PLS regression
+The PLS calibration has been simplified, thus selectivity ratio and VIP scores are not computed
+automatically when PLS model is created. This makes the calibration faster and makes parameter
+`light` unnecessary (removed). Also Jack-Knifing is used every time you apply cross-validation,
+there is no need to specify parameters `coeffs.alpha` and `coeffs.ci` anymore (both parameters
+have been removed). It does not lead to any additional computational time and therefore it
+was decided to do it automatically.
+
+Other changes are listed below:
+
+* `summary()` output has been slightly improved
+* new method `plotWeights()` for creating plot with PLS weights
+* selectivity ratio values can be computed on demand by using new function `selratio()`
+* function `getSelectivityRatio()` is deprecated and show warning (use `selratio()` instead)
+* function `plotSelectivityRatio()` computes the ratio values first, which makes it a bit slower
+* VIP scores values can be computed on demand by using new function `vipscores()`
+* function `getVIPScores()` is deprecated and show warning (use `vipscores()` instead)
+* function `plotVIPScores()` computes the score values first, which makes it a bit slower
+
 
 
 v.0.9.6
@@ -62,7 +152,7 @@ v.0.9.0
 * added `plotExtreme()` method for SIMCA models
 * added `setResLimits()` method for PCA/SIMCA models
 * added `plotProbabilities()` method for SIMCA results
-* added `getConfusionMatrix()` method for classification results  
+* added `getConfusionMatrix()` method for classification results
 * added option to show prediction statistics using `plotPrediction()` for PLS results
 * added option to use equal axes limits in `plotPrediction()` for PLS results
 * the tutorial has been amended and extended correspondingly
@@ -72,9 +162,9 @@ v.0.8.4
 * small improvements to calculation of statistics for regression coefficients
 * `pls.getRegCoeffs()` now also returns standard error and confidence intervals calculated for unstandardized variables
 * new method `summary()` for object with regression coefficients (`regcoeffs`)
-* fixed a bug with double labels on regression coefficients plot with confidence intervals 
-* fixed a bug in some PLS plots where labels for cross-validated results forced to be numbers 
-* when using `mdaplot` for data frame with one or more factor columns, the factors are now transofrmed to dummy variables (before it led to an error) 
+* fixed a bug with double labels on regression coefficients plot with confidence intervals
+* fixed a bug in some PLS plots where labels for cross-validated results forced to be numbers
+* when using `mdaplot` for data frame with one or more factor columns, the factors are now transofrmed to dummy variables (before it led to an error)
 
 v.0.8.3
 =======
@@ -107,12 +197,12 @@ v.0.8.0
 * biplot is now available for PCA models (`plotBiplot()`)
 * scores plot for PCA model can be now also shown with color grouping (`cgroup`) if no there is no test set
 * cross-validation in PCA and PLS has been improved to make it faster
-* added a posibility to exclude selected rows and columns from calculations 
+* added a posibility to exclude selected rows and columns from calculations
 * added support for images (check tutorial)
 
 v.0.7.2
 =======
-* corrected a typo in title of selectivity ratio plot 
+* corrected a typo in title of selectivity ratio plot
 * `prep.autoscale()` now do not scale columns with coefficient of variation below given threshold
 
 v.0.7.1
@@ -148,7 +238,7 @@ v.0.6.1
 v.0.6.0
 ========
 * randomization test for PLS has been added, see `?randtest`
-* systematic and repeated random cross-validation are available, see `?crossval` 
+* systematic and repeated random cross-validation are available, see `?crossval`
 * fixed bug with labels on bar plot with confidence intervals
 * fixed bug in PLS when using maximum number of components lead to NA values in weights
 
@@ -181,7 +271,7 @@ v. 0.4.0
 ========
 * New `classres` class for representation and visualisation of classification results
 * in PCA model, limits for T2 and Q2 now are calculated for all available components
-* in PCA results, limits for T2 and Q2 calculated for a model are kept and shown on residuals plot 
+* in PCA results, limits for T2 and Q2 calculated for a model are kept and shown on residuals plot
 * added parameters `xticklabels` and `yticklabels` to `mdaplot` and `mdaplotg` functions
 * New `simca` and `simcares` classes for one-class SIMCA model and results
 * New `simcam` and `simcamres` classes for multiclass SIMCA model and results
@@ -205,8 +295,8 @@ you need to do in your code if you used mdatools PLS before: `selectNumComp(mode
 of `pls.selectncomp(model, ncomp)`, `test.x` ad `test.y` instead of `Xt` and `yt`, finally separate logical
 arguments `center` and `scale` are used instead of previously used `autoscale`. By default `scale = F` and `center = T`.
 * PLS and all related methods are now well documented (see `?pls`)
-* plotting tools for all classes and methods were rewritten completely. Now all plotting methods 
-use either `mdaplot` or `mdaplotg` functions, which extend basic functionality of R plots. For example, 
-they allow to make color groups and colorbar legend, calculate limits automatically depending on 
+* plotting tools for all classes and methods were rewritten completely. Now all plotting methods
+use either `mdaplot` or `mdaplotg` functions, which extend basic functionality of R plots. For example,
+they allow to make color groups and colorbar legend, calculate limits automatically depending on
 elements on a plot, make automatic legend and many other things.
 
