@@ -56,7 +56,7 @@ m.vi = simca(x.vi, classname = "virginica")
 m.vi = selectCompNum(m.vi, 2)
 
 m.ve = simca(x.ve, classname = "versicolor")
-m.ve = selectCompNum(x.ve, 1)
+m.ve = selectCompNum(m.ve, 1)
 
 # combine models into SIMCAM objects, show statistics and plots
 m = simcam(list(m.se, m.vi, m.ve), info = "simcam model for Iris data")
