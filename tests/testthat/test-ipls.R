@@ -2,9 +2,15 @@
 # Tests for ipls() methods  #
 #############################
 
-pdf(file = "../plots/test_ipls_plots.pdf")
-sink("../plots/output-ipls.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
 
+teardown({
+   dev.off()
+   sink()
+})
 
 # Prepare datasets
 datasets <- list()
@@ -52,31 +58,37 @@ for (i in seq_along(datasets)) {
 
    expect_output(m1 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp, center = d$center,
       scale = d$scale, int.num = 10))
-   expect_output(m2 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp, center = d$center,
-      scale = d$scale, int.width = 4))
-   expect_output(m3 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp, center = d$center,
-      scale = d$scale, int.width = 2))
+
+   if (ncol(d$xc) < 20) {
+      expect_output(m2 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp,
+         center = d$center, scale = d$scale, int.width = 1))
+   } else {
+      expect_output(m2 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp,
+         center = d$center, scale = d$scale, int.width = 20))
+   }
+   #expect_output(m3 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp, center = d$center,
+   #   scale = d$scale, int.width = 2))
 
    expect_output(summary(m1))
    expect_output(summary(m2))
-   expect_output(summary(m3))
+   #expect_output(summary(m3))
 
    expect_silent(plot(m1))
    expect_silent(plot(m2))
-   expect_silent(plot(m3))
+   #expect_silent(plot(m3))
 
    expect_silent(plotRMSE(m1))
    expect_silent(plotRMSE(m2))
-   expect_silent(plotRMSE(m3))
+   #expect_silent(plotRMSE(m3))
 
    cat("\nOutput for forward iPLS\n\n")
    summary(m1)
    summary(m2)
-   summary(m3)
+   #summary(m3)
 
    print(m1)
    print(m2)
-   print(m3)
+   #print(m3)
 }
 
 context("ipls: test backward method")
@@ -95,34 +107,36 @@ for (i in seq_along(datasets)) {
 
    expect_output(m1 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
       center = d$center, scale = d$scale, int.num = 10))
-   expect_output(m2 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
-      center = d$center, scale = d$scale, int.width = 4))
-   expect_output(m3 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
-      center = d$center, scale = d$scale, int.width = 2))
+
+   if (ncol(d$xc) < 20) {
+      expect_output(m2 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
+         center = d$center, scale = d$scale, int.width = 1))
+   } else {
+      expect_output(m2 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
+         center = d$center, scale = d$scale, int.width = 20))
+   }
+
+   #expect_output(m3 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
+   #   center = d$center, scale = d$scale, int.width = 2))
 
    expect_output(summary(m1))
    expect_output(summary(m2))
-   expect_output(summary(m3))
+   #expect_output(summary(m3))
 
    expect_silent(plot(m1))
    expect_silent(plot(m2))
-   expect_silent(plot(m3))
+   #expect_silent(plot(m3))
 
    expect_silent(plotRMSE(m1))
    expect_silent(plotRMSE(m2))
-   expect_silent(plotRMSE(m3))
+   #expect_silent(plotRMSE(m3))
 
    cat("\nOutput for backward iPLS\n\n")
    summary(m1)
    summary(m2)
-   summary(m3)
+   #summary(m3)
 
    print(m1)
    print(m2)
-   print(m3)
+   #print(m3)
 }
-
-teardown({
-   dev.off()
-   sink()
-})

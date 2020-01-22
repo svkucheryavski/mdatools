@@ -2,8 +2,15 @@
 # Tests for plsres plotting methods  #
 ######################################
 
-pdf(file = "../plots/test_plsres_plots.pdf")
-sink("../plots/output-plsres.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 # mock some data
 datasets <- list()
@@ -165,8 +172,3 @@ for (i in seq_along(datasets)) {
    print(r)
    summary(r)
 }
-
-teardown({
-   dev.off()
-   sink()
-})

@@ -2,8 +2,15 @@
 # Tests for classmodel class methods  #
 #######################################
 
-pdf(file = "../plots/test_classmodel_plots.pdf")
-sink("../plots/output-classmodel.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 # mock data
 
@@ -97,7 +104,3 @@ print(summary(m1))
 print(summary(m2))
 print(summary(m3))
 
-teardown({
-   dev.off()
-   sink()
-})

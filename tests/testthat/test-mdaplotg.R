@@ -2,7 +2,15 @@
 # Block 1: using matrix as data source plus groupby parameter  #
 ################################################################
 
-pdf(file = "../plots/test_mdaplotg.pdf")
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 context("mdaplotg: plots with matrix as data and groupby parameter")
 par(mfrow = c(2, 2))
@@ -423,7 +431,3 @@ test_that("providing data as matrix works for line and bar plots only", {
    expect_error(tf(type = "p"))
 })
 
-
-teardown({
-   dev.off()
-})

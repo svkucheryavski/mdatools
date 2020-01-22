@@ -33,7 +33,7 @@ function get_results(algorithm, dataname)
    for sl = 1:2
       fprintf("\n\nAlpha = %.2f gamma = %.2f\n", alpha(sl), gamma(sl))
       fprintf("*****************************\n")
-      [Qlim, T2lim extremes, outliers] = get_lim(X, algorithm, alpha(sl), gamma(sl));
+      [Qlim, T2lim, extremes, outliers] = get_lim(X, algorithm, alpha(sl), gamma(sl));
 
       fprintf("\nQ limits: alpha = %.2f gamma = %.2f\n", alpha(sl), gamma(sl))
       fprintf("%.8f, ", Qlim(1, :)); fprintf("\n")
@@ -60,7 +60,7 @@ function [Qlim, T2lim, extremes, outliers] = get_lim_pls(X, alpha, gamma, algori
 
    ncomp = size(X, 2) - 1;
 
-   [U, S, P] = svd(X);
+   [~, ~, P] = svd(X);
    T = X * P;
    U = bsxfun(@rdivide, T, sqrt(sum(T.^2) / (size(T, 1) - 1)));
 

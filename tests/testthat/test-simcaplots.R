@@ -2,9 +2,15 @@
 # Tests for simca and simcares class methods  #
 ###############################################
 
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
 
-pdf(file = "../plots/test_simca_plots.pdf")
-sink("../plots/output-simca.txt", append = FALSE, split = FALSE)
+teardown({
+   dev.off()
+   sink()
+})
 
 ## prepare datasets
 data(iris)
@@ -242,8 +248,3 @@ if (FALSE) {
    summary(r)
 
 }
-
-teardown({
-   dev.off()
-   sink()
-})

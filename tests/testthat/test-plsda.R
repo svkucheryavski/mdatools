@@ -1,7 +1,14 @@
 # new tests on top
 
-pdf(file = "../plots/test_plsda_plots.pdf")
-sink("../plots/output-plsda.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 ## prepare datasets
 data(iris)
@@ -102,9 +109,4 @@ test_that("predictions work fine", {
    cat("\nOutput for predictions with factor as reference\n")
    summary(res)
    print(res)
-})
-
-teardown({
-   dev.off()
-   sink()
 })

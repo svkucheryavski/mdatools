@@ -2,8 +2,15 @@
 # Tests for basic functionality of plot() class  #
 #####################################################
 
-pdf(file = "../plots/test_pca_plots.pdf")
-sink("../plots/output-pca.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 # prepare cases
 
@@ -567,8 +574,3 @@ tf(ms, "spectral data")
 # just output to check in txt file
 print(ms)
 print(summary(ms))
-
-teardown({
-   dev.off()
-   sink()
-})

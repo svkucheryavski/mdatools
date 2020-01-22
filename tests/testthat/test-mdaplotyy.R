@@ -3,7 +3,15 @@
 # Tests for basic functionality of mdaplotyy()      #
 #####################################################
 
-pdf(file = "../plots/test_mdaplotyy.pdf")
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 data(people)
 
@@ -66,9 +74,4 @@ test_that("legend and its position can be changed", {
    expect_silent(mdaplotyy(plot_data, legend = c("11", "22")))
    expect_silent(mdaplotyy(plot_data, legend.position = "top"))
    expect_silent(mdaplotyy(plot_data, legend.position = "bottom"))
-})
-
-
-teardown({
-   dev.off()
 })

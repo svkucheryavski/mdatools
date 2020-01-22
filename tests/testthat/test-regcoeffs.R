@@ -2,8 +2,15 @@
 # Tests for regcoeffs class methods  #
 ######################################
 
-pdf(file = "../plots/test_regcoeffs_plots.pdf")
-sink("../plots/output-regcoeffs.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 # create several datasets
 
@@ -223,8 +230,3 @@ for (i in seq_along(test_data)) {
    })
 
 }
-
-teardown({
-   dev.off()
-   sink()
-})

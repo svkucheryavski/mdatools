@@ -2,8 +2,15 @@
 # Tests for plotting methods of classres() class    #
 #####################################################
 
-pdf(file = "../plots/test_classres_plots.pdf")
-sink("../plots/output-classres.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 # mock data
 
@@ -174,9 +181,3 @@ for (i in seq_along(res)) {
    print(getConfusionMatrix(res[[i]], 1))
 
 }
-
-
-teardown({
-   dev.off()
-   sink()
-})

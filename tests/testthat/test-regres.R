@@ -2,8 +2,15 @@
 # Tests for regres class methods  #
 ###################################
 
-pdf(file = "../plots/test_regres_plots.pdf")
-sink("../plots/output-regres.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 # create several datasets
 
@@ -228,9 +235,3 @@ for (i in seq_along(test_data)) {
       expect_error(plotPredictions(res, ny = 1:2))
    })
 }
-
-
-teardown({
-   dev.off()
-   sink()
-})

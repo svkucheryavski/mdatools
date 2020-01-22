@@ -2,7 +2,15 @@
 # Tests for pls plotting methods     #
 ######################################
 
-pdf(file = "../plots/test_pls_plots.pdf")
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 # mock some data
 datasets <- list()
@@ -181,7 +189,3 @@ for (i in seq_along(datasets)) {
       expect_silent(plot(m2, ny = ncol(d$yc), ncomp = 2))
    })
 }
-
-teardown({
-   dev.off()
-})

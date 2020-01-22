@@ -2,8 +2,15 @@
 # Tests for plotting methods of ldecomp() class     #
 #####################################################
 
-pdf(file = "../plots/test_ldecomp_plots.pdf")
-sink("../plots/output-ldecomp.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 # function to get scores, loadings and residuals from data
 getPCARes <- function(X, ncomp) {
@@ -171,9 +178,4 @@ test_that("variance plot works fine.", {
       plotCumVariance(obj, type = "h", col = "red", show.labels = TRUE)
       plotCumVariance(obj, type = "h", col = "red", show.labels = TRUE, labels = "names")
    })
-})
-
-teardown({
-   dev.off()
-   sink()
 })

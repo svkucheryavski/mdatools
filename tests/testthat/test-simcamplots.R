@@ -2,8 +2,15 @@
 # Tests for simca and simcares class methods  #
 ###############################################
 
-pdf(file = "../plots/test_simcam_plots.pdf")
-sink("../plots/output-simcam.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 data(iris)
 x1 <- iris[1:25, 1:4]
@@ -155,9 +162,4 @@ showPredictions(res)
 
 test_that("confusion matrix returns an error", {
    expect_error(getConfusionMatrix(res))
-})
-
-teardown({
-   dev.off()
-   sink()
 })

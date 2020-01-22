@@ -2,7 +2,15 @@
 # Tests for new features for mdaplot() and related methods  #
 #############################################################
 
-pdf(file = "../plots/test_mdaplot2.pdf")
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 par(mfrow = c(2, 2))
 
@@ -294,8 +302,4 @@ test_that("density plot works as expected with main parameters", {
    expect_silent(tf(d, nbins = 10, colmap = "gray"))
    expect_silent(tf(d, nbins = 100, colmap = "jet"))
    expect_silent(tf(d, nbins = 50, colmap = c("blue", "green", "red")))
-})
-
-teardown({
-   dev.off()
 })

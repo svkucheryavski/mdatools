@@ -2,7 +2,15 @@
 # Tests for pls class methods        #
 ######################################
 
-sink("../plots/output-pls.txt", append = FALSE, split = FALSE)
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 #################################################
 # Block 1. Tests pls.run() using random values  #
@@ -244,10 +252,17 @@ context("pls: compare pedict.pls() outcome with known values")
 
 test_that("predictions for people data are correct", {
    # model
-   xloadings <- read.csv("../matlab/pls-xloadings.csv", header = FALSE)
-   yloadings <- read.csv("../matlab/pls-yloadings.csv", header = FALSE)
-   weights <- read.csv("../matlab/pls-weights.csv", header = FALSE)
-   coeffs <- read.csv("../matlab/pls-coeffs.csv", header = FALSE)
+   f <- system.file("tests", "matlab", "pls-xloadings.csv", package = "mdatools")
+   xloadings <- read.csv(f, header = FALSE)
+
+   f <- system.file("tests", "matlab", "pls-yloadings.csv", package = "mdatools")
+   yloadings <- read.csv(f, header = FALSE)
+
+   f <- system.file("tests", "matlab", "pls-weights.csv", package = "mdatools")
+   weights <- read.csv(f, header = FALSE)
+
+   f <- system.file("tests", "matlab", "pls-coeffs.csv", package = "mdatools")
+   coeffs <- read.csv(f, header = FALSE)
 
    xc <- people[, -4]
    yc <- people[, 4, drop = F]
@@ -258,11 +273,20 @@ test_that("predictions for people data are correct", {
    expect_equivalent(obj$coeffs$values[, 4, ], as.matrix(coeffs), tolerance = 10^-5)
 
    # predictions
-   xscores <- read.csv("../matlab/pls-xscores.csv", header = FALSE)
-   yscores <- read.csv("../matlab/pls-yscores.csv", header = FALSE)
-   xresid <- read.csv("../matlab/pls-xres.csv", header = FALSE)
+   f <- system.file("tests", "matlab", "pls-xscores.csv", package = "mdatools")
+   xscores <- read.csv(f, header = FALSE)
+
+   f <- system.file("tests", "matlab", "pls-yscores.csv", package = "mdatools")
+   yscores <- read.csv(f, header = FALSE)
+
+   f <- system.file("tests", "matlab", "pls-xres.csv", package = "mdatools")
+   xresid <- read.csv(f, header = FALSE)
+
+   f <- system.file("tests", "matlab", "pls-yres.csv", package = "mdatools")
    yresid <- read.csv("../matlab/pls-yres.csv", header = FALSE)
-   expvar <- read.csv("../matlab/pls-expvar.csv", header = FALSE)
+
+   f <- system.file("tests", "matlab", "pls-expvar.csv", package = "mdatools")
+   expvar <- read.csv(f, header = FALSE)
 
    res <- predict(obj, xc, yc)
    expect_equivalent(res$xdecomp$scores, as.matrix(xscores), tolerance = 10^-4)
@@ -444,8 +468,9 @@ test_that("vipscores for people data (A = 4) identical to once computed in MATLA
    d <- datasets[[1]]
    m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
 
-   vip <- as.matrix(read.csv("../matlab/pls-vipscores.csv", header = FALSE))
-   expect_equivalent(vipscores(m, ncomp = 4), vip, tolerance = 10^-4)
+   f <- system.file("tests", "matlab", "pls-vipscores.csv", package = "mdatools")
+   vip <- read.csv(f, header = FALSE)
+   expect_equivalent(vipscores(m, ncomp = 4), as.matrix(vip), tolerance = 10^-4)
 })
 
 
@@ -499,7 +524,3 @@ for (i in seq_along(datasets)) {
 #   vip <- as.matrix(read.csv("../matlab/pls-vipscores.csv", header = FALSE))
 #   expect_equivalent(vipscores(m, ncomp = 4), vip, tolerance = 10^-4)
 #})
-
-teardown({
-   sink()
-})

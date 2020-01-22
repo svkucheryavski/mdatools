@@ -2,7 +2,15 @@
 # Tests for regmodel class methods   #
 ######################################
 
-pdf(file = "../plots/test_regmodel_plots.pdf")
+setup({
+   pdf(file = tempfile(fileext = ".pdf"))
+   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
 
 # create functions for cal and predict
 test.cal <- function(x, y, center, scale, ncomp = 1, method = "mlr", cv = FALSE) {
@@ -167,7 +175,6 @@ test_that("main plots works fine", {
 
 })
 
-sink("../plots/output-regmodel.txt", append = FALSE, split = FALSE)
 test_that("text outcome works fine", {
    m <- test.cal(x, y, center = TRUE, scale = TRUE)
    cvres <- crossval.regmodel(m, x, y, cv = 1, cal.fun = test.cal)
@@ -188,9 +195,4 @@ test_that("text outcome works fine", {
    expect_output(summary(m, ny = 1, ncomp = 1))
    expect_output(summary(m, ny = 1, ncomp = 1, res = list("xres" = m$res$cal)))
    expect_output(print(m))
-})
-sink()
-
-teardown({
-   dev.off()
 })
