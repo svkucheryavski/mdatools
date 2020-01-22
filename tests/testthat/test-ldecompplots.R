@@ -86,7 +86,7 @@ context("ldecomp: plots")
 
 test_that("scores plot can return plot data.", {
    pd <- plotScores(obj, c(1, 3), show.plot = FALSE)
-   expect_equal(class(pd), "matrix")
+   expect_true("matrix" %in% class(pd))
    expect_equivalent(pd[, 1], obj$scores[, 1])
    expect_equivalent(pd[, 2], obj$scores[, 3])
 })
@@ -133,7 +133,7 @@ test_that("scores plot works fine with cgroup and convex hulls.", {
 
 test_that("residuals plot can return plot data.", {
    pd <- plotResiduals(obj, ncomp = 4, show.plot = FALSE)
-   expect_equal(class(pd), "matrix")
+   expect_true("matrix" %in% class(pd))
    expect_equivalent(pd[, 1], obj$T2[, 4])
    expect_equivalent(pd[, 2], obj$Q[, 4])
 })

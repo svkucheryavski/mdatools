@@ -58,13 +58,13 @@ test_that("residuals plot works well with categorize coloring.", {
 
 test_that("residuals plot returns correct plot data.", {
    pd <- plotResiduals(m$calres, ncomp = 4, show.plot = FALSE)
-   expect_equal(class(pd), "matrix")
+   expect_true("matrix" %in% class(pd))
    expect_equivalent(pd[, 1], m$calres$T2[, 4] / m$T2lim[3, 4])
    expect_equivalent(pd[, 2], m$calres$Q[, 4] / m$Qlim[3, 4])
 
    pd <- plotResiduals(m$calres, ncomp = 4, log = TRUE, show.plot = FALSE, col = "#00AAFFFF",
       labels = "values")
-   expect_equal(class(pd), "matrix")
+   expect_true("matrix" %in% class(pd))
    expect_equivalent(pd[, 1], log(1 + m$calres$T2[, 4]/m$T2lim[3, 4]))
    expect_equivalent(pd[, 2], log(1 + m$calres$Q[, 4]/m$Qlim[3, 4]))
 })
@@ -74,7 +74,7 @@ context('pcares: scores plots')
 
 test_that("scores plot can return plot data.", {
    pd <- plotScores(m$calres, c(1, 3), show.plot = FALSE)
-   expect_equal(class(pd), "matrix")
+   expect_true("matrix" %in% class(pd))
    expect_equivalent(pd[, 1], m$calres$scores[, 1])
    expect_equivalent(pd[, 2], m$calres$scores[, 3])
 })
