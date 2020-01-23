@@ -1,17 +1,15 @@
 v.0.10.0
 ========
 
-Many changes have been done in this version, but most of them are under the hood. Code has been refactored significantly in order to improve its efficiency and make future support easier. Some functionality has been re-written from the scratch. **Most** of the code is backward compatible, which means your scripts should have no problem to run on this version. However, some parameters have been removed and this can lead to occasional errors and warning messages. All details are shown below.
+Many changes have been made in this version, but most of them are under the hood. Code has been refactored significantly in order to improve its efficiency and make future support easier. Some functionality has been re-written from the scratch. **Most** of the code is backward compatible, which means your old scripts should have no problem to run with this version. However, some changes are incompatible and this can lead to occasional errors and warning messages. All details are shown below, pay a special attention to **breaking changes** part.
 
-Another important change is the way cross-validation works. From this version, cross-validation
-is used only for computing performance statistics, e.g. error of predictions in PLS or
-classification error in SIMCA or PLS-DA. Decomposition results, such as explained variance
-or residual distances are not computed for cross-validation anymore. It was a bad idea from the beginning, as the way it was implemented is not fully correct — distances and variances measured
-for different local models should not be compared directly.
+Another important thing is the way cross-validation works starting from this version. It was decided to use cross-validation only for computing performance statistics, e.g. error of predictions in PLS or classification error in SIMCA or PLS-DA. Decomposition results, such as explained variance
+or residual distances are not computed for cross-validation anymore. It was a bad idea from the beginning, as the way it has been implemented is not fully correct — distances and variances measured
+for different local models should not be compared directly. After a long consideration it was decided to implement this part in a more correct and conservative way.
 
-Finally all model results (calibration, cross-validation and test set validation), are now combined
-into a single list, `model$res`. This makes a lot of things easier. However, the old way of
-accessing the result objects (e.g. `model$calres` or `model$cvres`) still works.
+Finally, all model results (calibration, cross-validation and test set validation), are now combined
+into a single list, e.g. `model$res`. This makes a lot of things easier. However, the old way of
+accessing the result objects (e.g. `model$calres` or `model$cvres`) still works, so you can access e.g. calibration results both using `model$res$cal` and `model$calres`, so this change will not break the compatibility.
 
 Below is more detailed list of changes. The tutorial has been updated accordingly.
 
@@ -19,83 +17,85 @@ Below is more detailed list of changes. The tutorial has been updated accordingl
 
 Here are changes which can potentially lead to error messages in previously written code.
 
+* Cross-validation results are no more available for PCA (as mentioned above), so any use of `model$cvres` object for PCA model will lead to an error. For the same reason `pca()` does not take the `cv` parameter anymore.
+
 * Method `plotModellingPower()` is no longer available (was used for SIMCA models).
 
 * Method `plotResiduals()` is no longer available for SIMCAM models (multiclass SIMCA), use
-corresponding for individual models instead.
+corresponding method for individual models instead.
+
+* Selectivity ratio and VIP scores are not a part of PLS model anymore. This is done to make the calibration of models faster. Use `selratio()` and `vipscores()` to compute them. Functions `plotSelectivityRatio()` and `plotVIPScores()` are still available but they both compute the values first, which may take a bit of time on large datasets. This change makes parameter `light` superfluous and it is no more supported in `pls()`.
+
+* Other two parameters, which is no more needed when you use `pls()`, are `coeffs.ci` and `coeffs.alpha`. Jack-Knifing based confidence intervals for regression coefficients now automatically computed every time you use cross-validation. You can specify the significance level for the intervals when you either visualize them using `plot.regcoeffs()` or `plotRegcoeffs()` for PLS model or when you get the values by using `getRegcoeffs()`.
 
 * When you make prediction plot for any classification model, you should specify name of result
 object to show the predictions for. In old versions the name of results were `"calres"`, `"cvres"`,
 `"testres"`. From this version they have been changed to `"cal"`, `"cv"` and `"test"`
 correspondingly.
 
-* In PLS-DA there was a possibility to show predictions not for classification results but for regression model the PLS-DA is built upon using the following code: `plotPredictions(structure(model, class = "pls"))`. From this version you should use `plotPredictions(structure(model, class = "regmodel"))` instead, as the `plotPredictions()` function for regression has been moved from `pls` class to its parent, more general class, `regmodel()`.
+* In PLS-DA there was a possibility to show predictions not for classification results but for regression model the PLS-DA is built upon using the following code: `plotPredictions(structure(model, class = "pls"))`. From this version you should use `plotPredictions(structure(model, class = "regmodel"))` instead, as the `plotPredictions()` function for regression has been moved from `pls` class to its parent, more general class, `regmodel`.
 
 * In methods `plotCorr()` and `plotHist()` for randomization test, parameter `comp` has been
-renamed to `ncomp`. Parameter `comp` assumes a possibility to specify several values as vector,
+renamed to `ncomp`. Parameter `comp` assumes a possibility to specify several values as a vector,
 while `ncomp` assumes only one value, which is the case for these two plots.
+
+* In regression coefficients plot logical parameter `show.line` has been replaced with more general `show.lines` from `mdaplot()`.
 
 
 ## General
-* code coverage with tests has been extended significantly
-* added Travis CI integration so you can see how safe it is to install the latest GitHub version
+* Code coverage with tests has been extended significantly.
+* Added Travis CI integration so you can see how safe it is to install the latest GitHub version.
 
 ## Plotting functions
-* `mdaplot()` now returns plot data, which can be used for extra options (e.g. add convex hull, etc.)
-* new, more contrast default color map for plots (use `colmap="old"` if you don't like it)
-* new method `plotConvexHull()` adds convex hull for groups of points on any scatter plot
-* new method `plotConfidenceEllipse()` adds confidence ellipse for groups of points on any scatter plot
-* parameter `opacity` can now be used with `mdaplotg()` plots and be different for each group
-* both `mdaplot()` and `mdaplotg()` based plots now can take parameters `grid.col` and `grid.lwd` for tuning the grid look
-* better handling of scatter plots with `pch=21...25` using `col` and `bg` parameters
-* density plot (`type="d"`) is now based on hexagonal binning - very fast for large data (>100 000 rows)
-* new method `mdaplotyy()` to create a line plot for two line series with separate y-axis for each
-* much faster bar plot in case of many variables
+* `mdaplot()` now returns object with plot data (`plotseries` class), which can be used for extra options (e.g. adding convex hull).
+* New, more contrast default color palette for plots (use `colmap="old"` if you don't like it).
+* New method `plotConvexHull()` adds convex hull for groups of points on any scatter plot.
+* New method `plotConfidenceEllipse()` adds confidence ellipse for groups of points on any scatter plot.
+* Parameter `opacity` can now be used with `mdaplotg()` plots and be different for each group.
+* Both `mdaplot()` and `mdaplotg()` based plots now can take parameters `grid.col` and `grid.lwd` for tuning the grid look.
+* Better handling of scatter plots with `pch=21...25` using `col` and `bg` parameters.
+* Density plot (`type="d"`) is now based on hexagonal binning - very fast for large data (>100 000 rows).
+* New method `mdaplotyy()` to create a line plot for two line series with separate y-axis for each.
+* Bar plot is now much faster in case of many variables.
 
 ## PCA
-Biggest change which can potentially lead to some issues with your old code is that
-cross-validation is no more available for PCA, for the reasons written above. Alternatively
-several new methods for assessing model complexity have been added.
+As mentioned above, the biggest change which can potentially lead to some issues with your old code is that cross-validation is no more available for PCA models.
 
 Other changes:
-* modeling power is no longer available in PCA/SIMCA results.
-* added new tools for assessing complexity of model (e.g. DoF plots, see tutorial for details)
-* more options available for analysis of residual distances (e.g marking objects as extremes, etc.)
-* method `setResLimits()` is renamed to `setDistanceLimits()` and has an extra parameter, `lim.type` which allows to change the method for critical limits calculation without rebuilding the PCA model itself.
-* extended output for `summary()` of PCA model including DoF for distances (*Nh* and *Nq*)
-* `plotExtreme()` is now also available for PCA model (was used only for SIMCA models before)
-* for most of PCA model plots you can now provide list with result objects to show the plot for. This makes possible to combine, for example, results from calibration set and new predictions on the same plot
-* you can add convex hull or confidence ellipse to groups of points on scores plot made for result object
+* Added new tools for assessing complexity of model (e.g. DoF plots, see tutorial for details).
+* More options available for analysis of residual distances (e.g marking objects as extremes, etc.).
+* Method `setResLimits()` is renamed to `setDistanceLimits()` and has an extra parameter, `lim.type` which allows to change the method for critical limits calculation without rebuilding the PCA model itself.
+* Extended output for `summary()` of PCA model including DoF for distances (*Nh* and *Nq*).
+* `plotExtreme()` is now also available for PCA model (was used only for SIMCA models before).
+* For most of PCA model plots you can now provide list with result objects to show the plot for. This makes possible to combine, for example, results from calibration set and new predictions on the same plot.
+* You can add convex hull or confidence ellipse to groups of points on scores plot made for result object.
+* New method `categorize()` is available for PCA model and results allowing to categorize objects as "regular", "extreme" or "outliers" based on residual distances and corresponding critical limits.
 
 ## SIMCA/SIMCAM
-* calculation of distance between models has been corrected
-* model distance plot now shows model/class names as x-tick labels by default
-* `plotResiduals.simcam()` and `plotResiduals.simcamres ()` are not available anymore (both were a shortcut for `plotResiduals.simca()` which was superfluous
-* summary information now is shown as a single matrix with extra column containing number of selected components in each model
+
+* Calculation of distance between models has been corrected.
+* Model distance plot now shows model/class names as x-tick labels by default.
+* `plotResiduals.simcam()` and `plotResiduals.simcamres ()` are not available anymore (both were a shortcut for `plotResiduals.simca()` which was superfluous.
+* Summary information now is shown as a single matrix with extra column containing number of selected components in each model.
 
 ## Regression coefficients (class `refcoeffs`)
-* added a new method `confint()` which returns confidence interval (if Jack-Knifing was used)
-* minor improvements to regression coefficients plot (e.g. logical parameter `show.line` is replaced with `show.lines` from `mdaplot()`)
+* Added a new method `confint()` which returns confidence interval (if corresponding statistics are available).
+* Minor improvements to regression coefficients plot (e.g. logical parameter `show.line` is replaced with `show.lines` from `mdaplot()`).
 
 ## PLS regression
-The PLS calibration has been simplified, thus selectivity ratio and VIP scores are not computed
-automatically when PLS model is created. This makes the calibration faster and makes parameter
-`light` unnecessary (removed). Also Jack-Knifing is used every time you apply cross-validation,
-there is no need to specify parameters `coeffs.alpha` and `coeffs.ci` anymore (both parameters
-have been removed). It does not lead to any additional computational time and therefore it
-was decided to do it automatically.
+As mentioned above, the PLS calibration has been simplified, thus selectivity ratio and VIP scores are not computed automatically when PLS model is created. This makes the calibration faster and makes parameter `light` unnecessary (removed). Also Jack-Knifing is used every time you apply cross-validation, there is no need to specify parameters `coeffs.alpha` and `coeffs.ci` anymore (both parameters have been removed). It does not lead to any additional computational time and therefore it was decided to do it automatically.
 
 Other changes are listed below:
 
-* `summary()` output has been slightly improved
-* new method `plotWeights()` for creating plot with PLS weights
-* selectivity ratio values can be computed on demand by using new function `selratio()`
-* function `getSelectivityRatio()` is deprecated and show warning (use `selratio()` instead)
-* function `plotSelectivityRatio()` computes the ratio values first, which makes it a bit slower
-* VIP scores values can be computed on demand by using new function `vipscores()`
-* function `getVIPScores()` is deprecated and show warning (use `vipscores()` instead)
-* function `plotVIPScores()` computes the score values first, which makes it a bit slower
-
+* `summary()` output has been slightly improved.
+* New method `plotWeights()` for creating plot with PLS weights.
+* Selectivity ratio values can be computed on demand by using new function `selratio()`.
+* Function `getSelectivityRatio()` is deprecated and shows warning (use `selratio()` instead).
+* Function `plotSelectivityRatio()` computes the ratio values first, which makes it a bit slower.
+* VIP scores values can be computed on demand by using new function `vipscores()`.
+* Function `getVIPScores()` is deprecated and shows warning (use `vipscores()` instead).
+* Function `plotVIPScores()` computes the score values first, which makes it a bit slower.
+* Systematic cross-validation (`"ven"`) now takes into account the order of response values, so there is no need to order data rows in advance.
 
 
 v.0.9.6

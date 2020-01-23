@@ -32,8 +32,7 @@
 #'
 #' @details
 #'
-#' Note, that from v. 0.10.0 cross-validation as well as "jm" method for computing residual
-#' distance critical limits are not more supported in PCA.
+#' Note, that from v. 0.10.0 cross-validation is no more supported in PCA.
 #'
 #' If number of components is not specified, a minimum of number of objects - 1 and number of
 #' variables in calibration set is used. One can also specified an optimal number of component,
@@ -110,11 +109,15 @@
 #' 1. N. Halko, P.G. Martinsson, J.A. Tropp. Finding structure with randomness: probabilistic
 #' algorithms for constructing approximate matrix decompositions. SIAM Review, 53 (2010) pp.
 #' 217-288.
+#'
 #' 2. S. Kucheryavskiy, Blessing of randomness against the curse of dimensionality,
 #' Journal of Chemometrics, 32 (2018).
+#'
 #' 3. J.E. Jackson, A User's Guide to Principal Components, John Wiley & Sons, New York, NY (1991).
+#'
 #' 4. A.L. Pomerantsev, Acceptance areas for multivariate classification derived by projection
 #' methods, Journal of Chemometrics, 22 (2008) pp. 601-609.
+#'
 #' 5. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
 #' Journal of Chemometrics, 28 (2014) pp. 429-438.
 #'
