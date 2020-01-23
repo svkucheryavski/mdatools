@@ -26,7 +26,7 @@ corresponding method for individual models instead.
 
 * Selectivity ratio and VIP scores are not a part of PLS model anymore. This is done to make the calibration of models faster. Use `selratio()` and `vipscores()` to compute them. Functions `plotSelectivityRatio()` and `plotVIPScores()` are still available but they both compute the values first, which may take a bit of time on large datasets. This change makes parameter `light` superfluous and it is no more supported in `pls()`.
 
-* Other two parameters, which is no more needed when you use `pls()`, are `coeffs.ci` and `coeffs.alpha`. Jack-Knifing based confidence intervals for regression coefficients now automatically computed every time you use cross-validation. You can specify the significance level for the intervals when you either visualize them using `plot.regcoeffs()` or `plotRegcoeffs()` for PLS model or when you get the values by using `getRegcoeffs()`.
+* Other two parameters, which are no more needed when you use `pls()`, are `coeffs.ci` and `coeffs.alpha`. Jack-Knifing based confidence intervals for regression coefficients now automatically computed every time you use cross-validation. You can specify the significance level for the intervals when you either visualize them using `plot.regcoeffs()` or `plotRegcoeffs()` for PLS model or when you get the values by using `getRegcoeffs()`.
 
 * When you make prediction plot for any classification model, you should specify name of result
 object to show the predictions for. In old versions the name of results were `"calres"`, `"cvres"`,
@@ -78,7 +78,7 @@ Other changes:
 * `plotResiduals.simcam()` and `plotResiduals.simcamres ()` are not available anymore (both were a shortcut for `plotResiduals.simca()` which was superfluous.
 * Summary information now is shown as a single matrix with extra column containing number of selected components in each model.
 
-## Regression coefficients (class `refcoeffs`)
+## Regression coefficients (class `regcoeffs`)
 * Added a new method `confint()` which returns confidence interval (if corresponding statistics are available).
 * Minor improvements to regression coefficients plot (e.g. logical parameter `show.line` is replaced with `show.lines` from `mdaplot()`).
 
