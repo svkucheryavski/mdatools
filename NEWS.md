@@ -62,6 +62,7 @@ while `ncomp` assumes only one value, which is the case for these two plots.
 As mentioned above, the biggest change which can potentially lead to some issues with your old code is that cross-validation is no more available for PCA models.
 
 Other changes:
+* Default value for `lim.type` parameter is `"ddmoments"` (before it was `"jm"`). This changes default method for computing critical limits for orthogonal and score distances.
 * Added new tools for assessing complexity of model (e.g. DoF plots, see tutorial for details).
 * More options available for analysis of residual distances (e.g marking objects as extremes, etc.).
 * Method `setResLimits()` is renamed to `setDistanceLimits()` and has an extra parameter, `lim.type` which allows to change the method for critical limits calculation without rebuilding the PCA model itself.
@@ -96,6 +97,7 @@ Other changes are listed below:
 * Function `getVIPScores()` is deprecated and shows warning (use `vipscores()` instead).
 * Function `plotVIPScores()` computes the score values first, which makes it a bit slower.
 * Systematic cross-validation (`"ven"`) now takes into account the order of response values, so there is no need to order data rows in advance.
+* From this version critical limits are computed for orthogonal and score distances in decomposition of x-data (predictors). It is done using similar to PCA way and same methods, which can be specified by `lim.type` parameter (default value `"ddsimca"`). X-residuals plot show the limits.
 
 
 v.0.9.6

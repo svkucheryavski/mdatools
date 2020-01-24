@@ -17,9 +17,9 @@
   lim.col = c("darkgray", "darkgray"),
   lim.lwd = c(1, 1),
   lim.lty = c(2, 3),
-  res = obj$res,
   show.legend = TRUE,
   legend.position = "topright",
+  res = obj$res,
   ...
 )
 }
@@ -31,6 +31,8 @@
 \item{norm}{logical, normalize distance values or not (see details)}
 
 \item{log}{logical, apply log tranformation to the distances or not (see details)}
+
+\item{main}{title for the plot}
 
 \item{cgroup}{color grouping of plot points (works only if one result object is available)}
 
@@ -46,9 +48,11 @@
 
 \item{lim.lty}{vector with two values - line type for extreme and outlier limits}
 
-\item{res}{list with result objects to show the plot for (by defaul, model results are used)}
-
 \item{show.legend}{logical, show or not a legend on the plot (needed if several result objects are available)}
+
+\item{legend.position}{position of legend (if shown)}
+
+\item{res}{list with result objects to show the plot for (by defaul, model results are used)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
