@@ -14,7 +14,7 @@ pca(
   x.test = NULL,
   method = "svd",
   rand = NULL,
-  lim.type = "jm",
+  lim.type = "ddmoments",
   alpha = 0.05,
   gamma = 0.01,
   info = ""

@@ -4,12 +4,12 @@
 \alias{jm.crit}
 \title{Calculate critical limits for distance values using Jackson-Mudholkar approach}
 \usage{
-jm.crit(residuals, evals, alpha = 0.05, gamma = 0.01)
+jm.crit(residuals, eigenvals, alpha = 0.05, gamma = 0.01)
 }
 \arguments{
 \item{residuals}{matrix with PCA residuals}
 
-\item{evals}{vector with eigenvalues for PCA components}
+\item{eigenvals}{vector with eigenvalues for PCA components}
 
 \item{alpha}{significance level for extreme objects}
 
