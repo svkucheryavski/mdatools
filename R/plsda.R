@@ -27,8 +27,12 @@
 #' vector with reference class values for test set (same format as calibration values).
 #' @param method
 #' method for calculating PLS model.
+#' @param lim.type
+#' which method to use for calculation of critical limits for residual distances (see details)
 #' @param alpha
-#' significance level for calculating statistical limits for residuals.
+#' significance level for extreme limits for T2 and Q disances.
+#' @param gamma
+#' significance level for outlier limits for T2 and Q distances.
 #' @param info
 #' short text with information about the model.
 #' @param ncomp.selcrit
@@ -148,7 +152,8 @@
 #' @export
 plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
    cv = NULL, exclcols = NULL, exclrows = NULL, x.test = NULL, c.test = NULL, method = "simpls",
-   alpha = 0.05, info = "", ncomp.selcrit = "min", classname = NULL) {
+   lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "", ncomp.selcrit = "min",
+   classname = NULL) {
 
    # check vector with class values and adjust if necessary
    c <- classmodel.processRefValues(c, classname)
@@ -212,6 +217,12 @@ plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, sc
    model$res[["cal"]]$info <- "calibration results"
    model$calres <- model$res[["cal"]]
 
+   # compute critical limit parameters
+   model$limParams <- ldecomp.getLimParams(
+      model$res[["cal"]]$xdecomp$Q,
+      model$res[["cal"]]$xdecomp$T2
+   )
+
    # assign cross-validation results to the model (so they are under calibration)
    model$res[["cv"]] <- cvres
    model$cvres <- model$res[["cv"]]
@@ -225,6 +236,10 @@ plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, sc
 
    model$ncomp.selcrit <- ncomp.selcrit
    model <- selectCompNum(model, selcrit = ncomp.selcrit)
+
+   # set distance limits
+   model <- setDistanceLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
+
    model$cv <- cv
    return(model)
 }

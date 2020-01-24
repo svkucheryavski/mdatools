@@ -85,7 +85,6 @@ Methods for \code{pcares} objects:
 \tabular{ll}{
  \code{print.pcares} \tab shows information about the object.\cr
  \code{summary.pcares} \tab shows statistics for the PCA results.\cr
- \code{\link{plotResiduals.pcares}} \tab makes Q vs. T2 distance plot.\cr
 }
 
 Methods, inherited from \code{\link{ldecomp}} class:
@@ -93,6 +92,7 @@ Methods, inherited from \code{\link{ldecomp}} class:
  \code{\link{plotScores.ldecomp}} \tab makes scores plot.\cr
  \code{\link{plotVariance.ldecomp}} \tab makes explained variance plot.\cr
  \code{\link{plotCumVariance.ldecomp}} \tab makes cumulative explained variance plot.\cr
+ \code{\link{plotResiduals.ldecomp}} \tab makes Q vs. T2 distance plot.\cr
 }
 
 Check also \code{\link{pca}} and \code{\link{ldecomp}}.

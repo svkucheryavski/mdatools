@@ -13,7 +13,7 @@ ldecomp.getT2Limits(lim.type, alpha, gamma, params)
 
 \item{gamma}{significance level for outlier limits.}
 
-\item{decomp}{results of latent variable decomposition (ldecomp object)}
+\item{params}{distribution parameters returned by ldecomp.getLimParams}
 }
 \description{
 Compute critical limits for score distances (T2)

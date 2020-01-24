@@ -16,7 +16,9 @@ plsda(
   x.test = NULL,
   c.test = NULL,
   method = "simpls",
+  lim.type = "ddmoments",
   alpha = 0.05,
+  gamma = 0.01,
   info = "",
   ncomp.selcrit = "min",
   classname = NULL
@@ -46,7 +48,11 @@ multiple classes or a vector with logical values in case of one class model).}
 
 \item{method}{method for calculating PLS model.}
 
-\item{alpha}{significance level for calculating statistical limits for residuals.}
+\item{lim.type}{which method to use for calculation of critical limits for residual distances (see details)}
+
+\item{alpha}{significance level for extreme limits for T2 and Q disances.}
+
+\item{gamma}{significance level for outlier limits for T2 and Q distances.}
 
 \item{info}{short text with information about the model.}
 

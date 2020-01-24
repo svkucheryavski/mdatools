@@ -19,6 +19,7 @@ ldecomp.plotResiduals(
   lim.lwd = c(1, 1),
   lim.lty = c(2, 3),
   show.legend = TRUE,
+  legend.position = "topright",
   ...
 )
 }
@@ -49,7 +50,9 @@ ldecomp.plotResiduals(
 
 \item{lim.lty}{vector with two values - line type for extreme and outlier limits}
 
-\item{show.legend}{logical, show or not a legend on the plot (needed if several result objects are available)}
+\item{show.legend}{logical, show or not legend on the plot (if more than one result object)}
+
+\item{legend.position}{if legend must be shown, where it should be}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

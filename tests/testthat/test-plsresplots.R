@@ -108,11 +108,11 @@ for (i in seq_along(datasets)) {
 
    test_that("X-residuals plot can return plot data", {
       pd_exp <- cbind(r$xdecomp$T2[, r$ncomp.selected], r$xdecomp$Q[, r$ncomp.selected])
-      expect_equivalent(plotXResiduals(r, show.plot = F), pd_exp)
+      expect_equivalent(plotXResiduals(r, norm = F, show.plot = F), pd_exp)
       expect_null(plotXResiduals(m$cvres, show.plot = F))
 
       pd_exp <- cbind(r$xdecomp$T2[, 1], r$xdecomp$Q[, 1])
-      expect_equivalent(plotXResiduals(r, ncomp = 1, show.plot = F), pd_exp)
+      expect_equivalent(plotXResiduals(r, ncomp = 1, norm = F, show.plot = F), pd_exp)
       expect_null(plotXResiduals(m$cvres, ncomp = 1, show.plot = F))
    })
 

@@ -7,7 +7,7 @@
 \method{plotResiduals}{ldecomp}(
   obj,
   ncomp = obj$ncomp.selected,
-  norm = TRUE,
+  norm = FALSE,
   log = FALSE,
   show.labels = FALSE,
   labels = "names",
@@ -20,6 +20,10 @@
 
 \item{ncomp}{number of components to show the plot for (if NULL, selected by model value will be used).}
 
+\item{norm}{logical, normalize distance values or not (see details)}
+
+\item{log}{logical, apply log tranformation to the distances or not (see details)}
+
 \item{show.labels}{logical, show or not labels for the plot objects}
 
 \item{labels}{what to show as labels if necessary}
@@ -27,8 +31,6 @@
 \item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
-
-\item{main}{main title for the plot}
 }
 \description{
 Shows a plot with orthogonal (Q, q) vs. score (T2, h) distances for data objects.

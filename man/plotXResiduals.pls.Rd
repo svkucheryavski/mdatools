@@ -2,30 +2,59 @@
 % Please edit documentation in R/pls.R
 \name{plotXResiduals.pls}
 \alias{plotXResiduals.pls}
-\title{X residuals plot for PLS}
+\title{Residual distance plot for decomposition of X data}
 \usage{
 \method{plotXResiduals}{pls}(
   obj,
-  ncomp = 1,
-  res = obj$res,
+  ncomp = obj$ncomp.selected,
+  norm = TRUE,
+  log = FALSE,
   main = sprintf("X-residuals (ncomp = \%d)", ncomp),
+  cgroup = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  show.limits = TRUE,
+  lim.col = c("darkgray", "darkgray"),
+  lim.lwd = c(1, 1),
+  lim.lty = c(2, 3),
+  res = obj$res,
+  show.legend = TRUE,
+  legend.position = "topright",
   ...
 )
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{how many components to use (if NULL - user selected optimal value will be used)}
+\item{ncomp}{how many components to use (by default optimal value selected for the model will be used)}
+
+\item{norm}{logical, normalize distance values or not (see details)}
+
+\item{log}{logical, apply log tranformation to the distances or not (see details)}
+
+\item{cgroup}{color grouping of plot points (works only if one result object is available)}
+
+\item{xlim}{limits for x-axis}
+
+\item{ylim}{limits for y-axis}
+
+\item{show.limits}{logical, show or not lines/curves with critical limits for the distances}
+
+\item{lim.col}{vector with two values - line color for extreme and outlier limits}
+
+\item{lim.lwd}{vector with two values - line width for extreme and outlier limits}
+
+\item{lim.lty}{vector with two values - line type for extreme and outlier limits}
 
 \item{res}{list with result objects to show the plot for (by defaul, model results are used)}
 
-\item{main}{main plot title}
+\item{show.legend}{logical, show or not a legend on the plot (needed if several result objects are available)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
-Shows a plot with Q residuals vs. Hotelling T2 values for PLS decomposition of x data.
+Shows a plot with orthogonal distance vs score distance for PLS decomposition of X data.
 }
 \details{
-See examples in help for \code{\link{pls}} function.
+The function is almost identical to \code{\link{plotResiduals.pca}}.
 }

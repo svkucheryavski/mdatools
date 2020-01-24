@@ -7,6 +7,8 @@
 \method{plotXResiduals}{plsres}(
   obj,
   ncomp = obj$ncomp.selected,
+  norm = TRUE,
+  log = FALSE,
   main = sprintf("X-residuals (ncomp = \%d)", ncomp),
   ...
 )
@@ -15,6 +17,10 @@
 \item{obj}{PLS results (object of class \code{plsres})}
 
 \item{ncomp}{how many components to use (if NULL - user selected optimal value will be used)}
+
+\item{norm}{logical, normalize distance values or not (see details)}
+
+\item{log}{logical, apply log tranformation to the distances or not (see details)}
 
 \item{main}{main title for the plot}
 

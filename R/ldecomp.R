@@ -180,12 +180,14 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE
 #' object of \code{ldecomp} class.
 #' @param ncomp
 #' number of components to show the plot for (if NULL, selected by model value will be used).
+#' @param norm
+#' logical, normalize distance values or not (see details)
+#' @param log
+#' logical, apply log tranformation to the distances or not (see details)
 #' @param show.labels
 #' logical, show or not labels for the plot objects
 #' @param labels
 #' what to show as labels if necessary
-#' @param main
-#' main title for the plot
 #' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
@@ -756,10 +758,6 @@ ldecomp.getLimParams <- function(Q, T2) {
 
 #' Compute critical limits for orthogonal distances (Q)
 #'
-#' @param decomp
-#' results of latent variable decomposition (ldecomp object)
-#' @param eigenvals
-#' egenvalues for the components used to decompose the data
 #' @param lim.type
 #' which method to use for calculation of critical limits for residuals
 #' @param alpha
@@ -768,6 +766,10 @@ ldecomp.getLimParams <- function(Q, T2) {
 #' significance level for outlier limits.
 #' @param params
 #' distribution parameters returned by ldecomp.getLimParams
+#' @param residuals
+#' matrix with residuals (E)
+#' @param eigenvals
+#' egenvalues for the components used to decompose the data
 #'
 #' @export
 ldecomp.getQLimits <- function(lim.type, alpha, gamma, params, residuals, eigenvals) {
@@ -812,14 +814,14 @@ ldecomp.getQLimits <- function(lim.type, alpha, gamma, params, residuals, eigenv
 
 #' Compute critical limits for score distances (T2)
 #'
-#' @param decomp
-#' results of latent variable decomposition (ldecomp object)
 #' @param lim.type
 #' which method to use for calculation ("chisq", "ddmoments", "ddrobust")
 #' @param alpha
 #' significance level for extreme limits.
 #' @param gamma
 #' significance level for outlier limits.
+#' @param params
+#' distribution parameters returned by ldecomp.getLimParams
 #'
 ldecomp.getT2Limits <- function(lim.type, alpha, gamma, params) {
 
@@ -854,8 +856,10 @@ ldecomp.getT2Limits <- function(lim.type, alpha, gamma, params) {
 
 #' Compute coordinates of lines or curves with critical limits
 #'
-#' @param obj
-#' object of class \code{pca}
+#' @param Qlim
+#' matrix with critical limits for orthogonal distances
+#' @param T2lim
+#' matrix with critical limits for score distances
 #' @param ncomp
 #' number of components for computing the coordinates
 #' @param norm
@@ -952,6 +956,10 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log) {
 #' vector with two values - line width for extreme and outlier limits
 #' @param lim.lty
 #' vector with two values - line type for extreme and outlier limits
+#' @param show.legend
+#' logical, show or not legend on the plot (if more than one result object)
+#' @param legend.position
+#' if legend must be shown, where it should be
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -976,7 +984,7 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log) {
 ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE,
    norm = FALSE, cgroup = NULL, xlim = NULL, ylim = NULL, show.limits = TRUE,
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
-   show.legend = TRUE, ...) {
+   show.legend = TRUE, legend.position = "topright", ...) {
 
    getPlotLim <- function(lim, pd, ld, dim, show.limits) {
       if (!(is.null(lim) && show.limits)) return(lim)
@@ -999,7 +1007,8 @@ ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE,
    if (length(plot_data) == 1) {
       mdaplot(plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, ...)
    } else {
-      mdaplotg(plot_data, type = "p", xlim = xlim, ylim = ylim, show.legend = show.legend, ...)
+      mdaplotg(plot_data, type = "p", xlim = xlim, ylim = ylim, show.legend = show.legend,
+         legend.position = legend.position, ...)
    }
 
    # show critical limits

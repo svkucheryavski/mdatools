@@ -26,8 +26,12 @@
 #' matrix with responses for test set.
 #' @param method
 #' algorithm for computing PLS model (only 'simpls' is supported so far)
+#' @param lim.type
+#' which method to use for calculation of critical limits for residual distances (see details)
 #' @param alpha
-#' significance level for calculating critical limits for residual distances.
+#' significance level for extreme limits for T2 and Q disances.
+#' @param gamma
+#' significance level for outlier limits for T2 and Q distances.
 #' @param info
 #' short text with information about the model.
 #' @param ncomp.selcrit
@@ -240,7 +244,7 @@
 #' @export
 pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
    cv = NULL, exclcols = NULL, exclrows = NULL, x.test = NULL, y.test = NULL, method = "simpls",
-   alpha = 0.05, info = "", ncomp.selcrit = "min") {
+   info = "", ncomp.selcrit = "min", lim.type = "ddmoments", alpha = 0.05, gamma = 0.01) {
 
    # if y is a vector, convert it to matrix
    if (is.null(dim(y))) {
@@ -269,6 +273,12 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    model$res[["cal"]]$info <- "calibration results"
    model$calres <- model$res[["cal"]]
 
+   # compute critical limit parameters
+   model$limParams <- ldecomp.getLimParams(
+      model$res[["cal"]]$xdecomp$Q,
+      model$res[["cal"]]$xdecomp$T2
+   )
+
    # do cross-validation if needed
    if (!is.null(cv)) {
       cvres <- crossval.regmodel(model, x, y, cv, cal.fun = pls.cal)
@@ -289,6 +299,10 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    model$cv <- cv
    model$ncomp.selcrit <- ncomp.selcrit
    model <- selectCompNum(model, selcrit = ncomp.selcrit)
+
+   # set distance limits
+   model <- setDistanceLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
+
    return(model)
 }
 
@@ -421,6 +435,60 @@ selectCompNum.pls <- function(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ..
    }
 
    obj$call <- match.call()
+   return(obj)
+}
+
+#' Compute and set statistical limits for Q and T2 residual distances.
+#'
+#' @description
+#' Computes statisticsl limits for Q and T2 residual distances (based on calibration set)
+#' and assign the calculated values as model properties. The method also categorizes objects
+#' from calibration and test set accordingly (see \code{categorize.pca} for details).
+#'
+#' @param obj
+#' object with PLS model
+#' @param lim.type
+#' type of limits ("jm", "chisq", "ddmoments", "ddrobust")
+#' @param alpha
+#' significance level for detection of extreme objects
+#' @param gamma
+#' significance level for detection of outliers (for data driven approach)
+#' @param ...
+#' other arguments
+#'
+#' @details
+#'
+#' The limits can be accessed as fields of model objects: \code{$Qlim} and \code{$T2lim}. Each
+#' is a matrix with four rows and \code{ncomp} columns. First row contains critical limits for
+#' extremes, second row - for outliers, third row contains mean value for corresponding distance
+#' (or its robust estimate in case of \code{lim.type = "ddrobust"}) and last row contains the
+#' degrees of freedom.
+#'
+#' @return
+#' Object models with the two fields updated.
+#'
+#' @export
+setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alpha,
+   gamma = obj$gamma, ...) {
+
+   obj$T2lim <- ldecomp.getT2Limits(lim.type, alpha, gamma, obj$limParams)
+   obj$Qlim <- ldecomp.getQLimits(lim.type, alpha, gamma, obj$limParams,
+      obj$res[["cal"]]$xdecomp$residuals, obj$xeigenvals)
+
+   obj$alpha <- alpha
+   obj$gamma <- gamma
+   obj$lim.type <- lim.type
+
+   attr(obj$res[["cal"]]$xdecomp$Q, "u0") <- obj$Qlim[3, ]
+   attr(obj$res[["cal"]]$xdecomp$T2, "u0") <- obj$T2lim[3, ]
+   obj$calres <- obj$res[["cal"]]
+
+   if (!is.null(obj$res$test)) {
+      attr(obj$res[["test"]]$xdecomp$Q, "u0") <- obj$Qlim[3, ]
+      attr(obj$res[["test"]]$xdecomp$T2, "u0") <- obj$T2lim[3, ]
+      obj$testres <- obj$res[["test"]]
+   }
+
    return(obj)
 }
 
@@ -574,6 +642,10 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
    # create xdecomp object
    xdecomp <- ldecomp(scores = xscores, residuals = xresiduals, loadings = object$xloadings,
       eigenvals = object$xeigenvals, ncomp.selected = object$ncomp.selected)
+
+   # add u0 parameters as arguments, so the residuals can be normalized
+   attr(xdecomp$Q, "u0") <- object$Qlim[3, ]
+   attr(xdecomp$T2, "u0") <- object$T2lim[3, ]
 
    return(
       plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected,
@@ -843,33 +915,60 @@ plotXYScores.pls <- function(obj, ncomp = 1, show.axes = T,  res = obj$res, ...)
    mdaplotg(plot_data, show.lines = show.lines, type = "p", ...)
 }
 
-#' X residuals plot for PLS
+#' Residual distance plot for decomposition of X data
 #'
 #' @description
-#' Shows a plot with Q residuals vs. Hotelling T2 values for PLS decomposition of x data.
+#' Shows a plot with orthogonal distance vs score distance for PLS decomposition of X data.
 #'
 #' @param obj
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
+#' how many components to use (by default optimal value selected for the model will be used)
+#' @param log
+#' logical, apply log tranformation to the distances or not (see details)
+#' @param norm
+#' logical, normalize distance values or not (see details)
+#' @param cgroup
+#' color grouping of plot points (works only if one result object is available)
+#' @param xlim
+#' limits for x-axis
+#' @param ylim
+#' limits for y-axis
+#' @param show.legend
+#' logical, show or not a legend on the plot (needed if several result objects are available)
+#' @param show.limits
+#' logical, show or not lines/curves with critical limits for the distances
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier limits
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier limits
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier limits
+#' @param main
+#' title for the plot
+#' @param legend.position
+#' position of legend (if shown)
 #' @param res
 #' list with result objects to show the plot for (by defaul, model results are used)
-#' @param main
-#' main plot title
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
 #' @details
-#' See examples in help for \code{\link{pls}} function.
+#' The function is almost identical to \code{\link{plotResiduals.pca}}.
 #'
 #' @export
-plotXResiduals.pls <- function(obj, ncomp = 1, res = obj$res,
-   main = sprintf("X-residuals (ncomp = %d)", ncomp), ...) {
+plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
+   main = sprintf("X-residuals (ncomp = %d)", ncomp), cgroup = NULL, xlim = NULL, ylim = NULL,
+   show.limits = TRUE, lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
+   show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
 
-   # TODO: implement norm and log attributes support (u0 attribute for Q and T2)
-   # TODO: implement showing residual limits
-   plot_data <- lapply(res, plotXResiduals, ncomp = ncomp, show.plot = FALSE)
-   mdaplotg(plot_data, type = "p", main = main, ...)
+   # get xdecomp from list with result objects
+   res <- lapply(res, function(x) if ("ldecomp" %in% class(x$xdecomp)) x$xdecomp)
+   res <- res[!sapply(res, is.null)]
+
+   ldecomp.plotResiduals(res, obj$Qlim, obj$T2lim, ncomp = ncomp, log = log, norm = norm,
+      cgroup = cgroup, xlim = xlim, ylim = ylim, show.limits = show.limits, lim.col = lim.col,
+      lim.lwd = lim.lwd, show.legend = show.legend, main = main, ...)
 }
 
 #' X loadings plot for PLS

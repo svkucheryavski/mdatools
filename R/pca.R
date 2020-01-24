@@ -1148,7 +1148,7 @@ plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE,
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
 #' @details
-#' The function is a bit more advanced version of \code{\link{plotResiduals.pcares}}. It allows to
+#' The function is a bit more advanced version of \code{\link{plotResiduals.ldecomp}}. It allows to
 #' show distance values for several result objects (e.g. calibration and test set or calibration
 #' and new prediction set) as well as display the correspondng critical limits in form of lines
 #' or curves.

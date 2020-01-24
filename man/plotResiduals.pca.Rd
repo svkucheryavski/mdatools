@@ -55,7 +55,7 @@ Shows a plot with score (T2, h) vs orthogonal (Q, q) distances and corresponding
 limits for given number of components.
 }
 \details{
-The function is a bit more advanced version of \code{\link{plotResiduals.pcares}}. It allows to
+The function is a bit more advanced version of \code{\link{plotResiduals.ldecomp}}. It allows to
 show distance values for several result objects (e.g. calibration and test set or calibration
 and new prediction set) as well as display the correspondng critical limits in form of lines
 or curves.

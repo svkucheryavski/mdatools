@@ -452,6 +452,10 @@ plotXYScores.plsres <- function(obj, ncomp = 1, show.plot = TRUE, ...) {
 #' PLS results (object of class \code{plsres})
 #' @param ncomp
 #' how many components to use (if NULL - user selected optimal value will be used)
+#' @param norm
+#' logical, normalize distance values or not (see details)
+#' @param log
+#' logical, apply log tranformation to the distances or not (see details)
 #' @param main
 #' main title for the plot
 #' @param ...
@@ -461,7 +465,7 @@ plotXYScores.plsres <- function(obj, ncomp = 1, show.plot = TRUE, ...) {
 #' See examples in help for \code{\link{plsres}} function.
 #'
 #' @export
-plotXResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected,
+plotXResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
    main = sprintf("X-residuals (ncomp = %d)", ncomp), ...) {
 
    if (is.null(obj$xdecomp)) return(invisible(NULL))
@@ -470,8 +474,8 @@ plotXResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected,
       stop("Wrong value for ncomp argument.")
    }
 
-   # TODO: implement norm and log attributes support (u0 attribute for Q and T2)
-   return(plotResiduals.ldecomp(obj$xdecomp, ncomp = ncomp, main = main, ...))
+   return(plotResiduals.ldecomp(obj$xdecomp, ncomp = ncomp, main = main,
+      norm = norm, log = log, ...))
 }
 
 #' Y residuals plot for PLS results

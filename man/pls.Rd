@@ -16,9 +16,11 @@ pls(
   x.test = NULL,
   y.test = NULL,
   method = "simpls",
-  alpha = 0.05,
   info = "",
-  ncomp.selcrit = "min"
+  ncomp.selcrit = "min",
+  lim.type = "ddmoments",
+  alpha = 0.05,
+  gamma = 0.01
 )
 }
 \arguments{
@@ -44,12 +46,16 @@ pls(
 
 \item{method}{algorithm for computing PLS model (only 'simpls' is supported so far)}
 
-\item{alpha}{significance level for calculating critical limits for residual distances.}
-
 \item{info}{short text with information about the model.}
 
 \item{ncomp.selcrit}{criterion for selecting optimal number of components (\code{'min'} for
 first local minimum of RMSECV and \code{'wold'} for Wold's rule.)}
+
+\item{lim.type}{which method to use for calculation of critical limits for residual distances (see details)}
+
+\item{alpha}{significance level for extreme limits for T2 and Q disances.}
+
+\item{gamma}{significance level for outlier limits for T2 and Q distances.}
 }
 \value{
 Returns an object of \code{pls} class with following fields:

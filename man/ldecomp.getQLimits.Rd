@@ -15,9 +15,9 @@ ldecomp.getQLimits(lim.type, alpha, gamma, params, residuals, eigenvals)
 
 \item{params}{distribution parameters returned by ldecomp.getLimParams}
 
-\item{eigenvals}{egenvalues for the components used to decompose the data}
+\item{residuals}{matrix with residuals (E)}
 
-\item{decomp}{results of latent variable decomposition (ldecomp object)}
+\item{eigenvals}{egenvalues for the components used to decompose the data}
 }
 \description{
 Compute critical limits for orthogonal distances (Q)
