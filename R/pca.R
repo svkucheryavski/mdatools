@@ -185,7 +185,7 @@
 #' @export
 pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
    exclrows = NULL, exclcols = NULL, x.test = NULL, method = "svd", rand = NULL,
-   lim.type = "jm", alpha = 0.05, gamma = 0.01, info = "") {
+   lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "") {
 
    # exclude columns if "exclcols" is provided
    if (length(exclcols) > 0) {
@@ -206,6 +206,9 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
    model$res <- list()
    model$res[["cal"]] <- predict.pca(model, x)
    model$calres <- model$res[["cal"]]
+
+   # compute critical limit parameters
+   model$limParams <- ldecomp.getLimParams(model$res[["cal"]]$Q, model$res[["cal"]]$T2)
 
    # apply model to test set if provided
    if (!is.null(x.test)) {
@@ -286,8 +289,9 @@ selectCompNum.pca <- function(obj, ncomp, ...) {
 setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alpha,
    gamma = obj$gamma, ...) {
 
-   obj$Qlim <- pca.getQLimits(obj, lim.type, alpha = alpha, gamma = gamma)
-   obj$T2lim <- pca.getT2Limits(obj, lim.type, alpha = alpha, gamma = gamma)
+   obj$T2lim <- ldecomp.getT2Limits(lim.type, alpha, gamma, obj$limParams)
+   obj$Qlim <- ldecomp.getQLimits(lim.type, alpha, gamma, obj$limParams,
+      obj$res[["cal"]]$residuals, obj$eigenvals)
 
    obj$alpha <- alpha
    obj$gamma <- gamma
@@ -937,12 +941,7 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
    ncomp <- min(ncomp, ncols, nrows - 1)
 
    # prepare data for model calibration and cross-validation
-   x_cal <- x
-
-   # remove excluded rows
-   if (length(attrs$exclrows) > 0) {
-      x_cal <- x_cal[-attrs$exclrows, , drop = F]
-   }
+   x_cal <- mda.purgeRows(x)
 
    # autoscale and save the mean and std values for predictions
    x_cal <- prep.autoscale(x_cal, center = center, scale = scale)
@@ -950,9 +949,7 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
    model$scale <- attr(x_cal, "prep:scale")
 
    # remove excluded columns
-   if (length(attrs$exclcols) > 0) {
-      x_cal <- x_cal[, -attrs$exclcols, drop = F]
-   }
+   x_cal <- mda.purgeCols(x_cal)
 
    # compute loadings, scores and eigenvalues for data without excluded elements
    res <- pca.run(x_cal, ncomp, method, rand)
@@ -988,9 +985,6 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
    model$eigenvals <- res$eigenvals
    names(model$eigenvals) <- colnames(loadings)
 
-   # compute parameters for distance critical limits
-   model$limParams <- pca.getLimParams(res)
-
    # finalize model
    model$method <- method
    model$rand <- rand
@@ -1005,122 +999,6 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
    class(model) <- "pca"
 
    return(model)
-}
-
-#' Compute parameters for critical limits based on calibration results
-#'
-#' @param res
-#' results returned by \code{pca.run()}
-#'
-pca.getLimParams <- function(res) {
-
-   dist <- ldecomp.getDistances(res$scores, res$loadings, res$residuals, res$eigenvals)
-   return(
-      list(
-         "T2" = list(
-            "moments" = ddmoments.param(dist$T2),
-            "robust" = ddrobust.param(dist$T2),
-            "nobj" = nrow(res$scores)
-         ),
-         "Q" = list(
-            "moments" = ddmoments.param(dist$Q),
-            "robust" = ddrobust.param(dist$Q),
-            "nobj" = nrow(res$scores)
-         )
-      )
-   )
-}
-
-#' Compute critical limits for orthogonal distances (Q)
-#'
-#' @param model
-#' PCA model
-#' @param lim.type
-#' which method to use for calculation of critical limits for residuals (see details)
-#' @param alpha
-#' significance level for extreme limits.
-#' @param gamma
-#' significance level for outlier limits.
-#'
-pca.getQLimits <- function(model, lim.type, alpha, gamma) {
-
-   params <- model$limParams
-   pQ <- if (regexpr("robust", lim.type) > 0) params$Q$robust else params$Q$moments
-
-   if (lim.type == "jm") {
-      # methods based on Jackson-Mudholkar approach
-      lim <- jm.crit(model$res[["cal"]]$residuals, model$eigenvals, alpha, gamma)
-      eigenvals <- attr(lim, "eigenvals")
-      lim <- rbind(lim, pQ$u0, nrow(model$res[["cal"]]$residuals))
-      attr(lim, "eigenvals") <- eigenvals
-
-   } else {
-      # methods based on chi-square distribution
-      pT2 <- if (regexpr("robust", lim.type) > 0) params$T2$robust else params$T2$moments
-      DoF <- round(pQ$Nu)
-      DoF[DoF < 1] <- 1
-      DoF[DoF > 250] <- 250
-
-      lim <- switch(lim.type,
-         "chisq" = chisq.crit(pQ, alpha, gamma),
-         "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
-         "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
-         stop("Wrong value for 'lim.type' parameter.")
-      )
-
-      lim <- rbind(lim, pQ$u0, DoF)
-   }
-
-   colnames(lim) <- colnames(model$loadings)
-   rownames(lim) <- c("Extremes limits", "Outliers limits", "Mean", "DoF")
-   attr(lim, "name") <- "Critical limits for orthogonal distances (Q)"
-   attr(lim, "alpha") <- alpha
-   attr(lim, "gamma") <- gamma
-   attr(lim, "lim.type") <- lim.type
-
-   return(lim)
-}
-
-#' Compute critical limits for score distances (T2)
-#'
-#' @param model
-#' PCA model
-#' @param lim.type
-#' which method to use for calculation ("chisq", "ddmoments", "ddrobust")
-#' @param alpha
-#' significance level for extreme limits.
-#' @param gamma
-#' significance level for outlier limits.
-#'
-pca.getT2Limits <- function(model, lim.type, alpha, gamma) {
-
-   params <- model$limParams
-   pQ <- if (regexpr("robust", lim.type) > 0) params$Q$robust else params$Q$moments
-   pT2 <- if (regexpr("robust", lim.type) > 0) params$T2$robust else params$T2$moments
-
-   DoF <- round(pT2$Nu)
-   DoF[DoF < 1] <- 1
-   DoF[DoF > 250] <- 250
-
-   if (lim.type %in% c("jm", "chisq")) DoF <- pT2$nobj
-
-   lim <- switch(lim.type,
-      "jm" = ,
-      "chisq" = hotelling.crit(pT2$nobj, seq_len(model$ncomp), alpha, gamma),
-      "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
-      "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
-      stop("Wrong value for 'lim.type' parameter.")
-   )
-
-   lim <- rbind(lim, pT2$u0, DoF)
-   colnames(lim) <- colnames(model$loadings)
-   rownames(lim) <- c("Extremes limits", "Outliers limits", "Mean", "DoF")
-   attr(lim, "name") <- "Critical limits for score distances (T2)"
-   attr(lim, "alpha") <- alpha
-   attr(lim, "gamma") <- gamma
-   attr(lim, "lim.type") <- lim.type
-
-   return(lim)
 }
 
 
@@ -1295,105 +1173,15 @@ plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    res = obj$res, show.legend = TRUE, ...) {
 
-   getLim <- function(lim, pd, ld, dim, show.limits) {
-      if (!(is.null(lim) && show.limits)) return(lim)
-      return(c(0, max(sapply(pd, function(x) max(x[, dim])), ld$outliers[, dim])) * 1.05)
-   }
-
-   # get plot data
-   res <- getRes(res, "ldecomp")
-   plot_data <- lapply(res, plotResiduals, ncomp = ncomp, norm = norm, log = log, show.plot = FALSE)
-
-   # get coordinates for critical limits
-   lim_data <- getLimitsCoordinates.pca(obj, ncomp = ncomp, norm = norm, log = log)
-   xlim <- getLim(xlim, plot_data, lim_data, 1, show.limits)
-   ylim <- getLim(ylim, plot_data, lim_data, 2, show.limits)
 
    # generate values for cgroup if categories should be used
    if (length(cgroup) == 1 && cgroup == "categories") {
       cgroup <- categorize(obj, res[[1]], ncomp = ncomp)
    }
 
-   # make plot
-   if (length(plot_data) == 1) {
-      mdaplot(data = plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, ...)
-   } else {
-      mdaplotg(data = plot_data, type = "p", xlim = xlim, ylim = ylim,
-         show.legend = show.legend, ...)
-   }
-
-   # show critical limits
-   if (show.limits) {
-      lines(lim_data$extremes[, 1], lim_data$extremes[, 2],
-         col = lim.col[1], lty = lim.lty[1], lwd = lim.lwd[1])
-      lines(lim_data$outliers[, 1], lim_data$outliers[, 2],
-         col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
-   }
-}
-
-#' Compute coordinates of lines or curves with critical limits
-#'
-#' @param obj
-#' object of class \code{pca}
-#' @param ncomp
-#' number of components for computing the coordinates
-#' @param norm
-#' logical, shall distance values be normalized or not
-#' @param log
-#' logical, shall log transformation be applied or not
-#'
-#' @return
-#' list with two matrices (x and y coordinates of corresponding limits)
-#'
-#' @export
-getLimitsCoordinates.pca <- function(obj, ncomp, norm, log) {
-
-   # get parameters
-   h0 <- obj$T2lim[3, ncomp]
-   q0 <- obj$Qlim[3, ncomp]
-   Nh <- obj$T2lim[4, ncomp]
-   Nq <- obj$Qlim[4, ncomp]
-
-   if (obj$lim.type %in% c("jm", "chisq")) {
-
-      # quadratic limits
-      hE <- c(0, obj$T2lim[1, ncomp], obj$T2lim[1, ncomp])
-      hO <- c(0, obj$T2lim[2, ncomp], obj$T2lim[2, ncomp])
-
-      qE <- c(obj$Qlim[1, ncomp], obj$Qlim[1, ncomp], 0)
-      qO <- c(obj$Qlim[2, ncomp], obj$Qlim[2, ncomp], 0)
-
-   } else {
-
-      ## slope and intercepts
-      eB <- obj$Qlim[1, ncomp]
-      oB <- obj$Qlim[2, ncomp]
-      eA <- oA <- -1 * (q0 / h0) * (Nh / Nq)
-
-      hE <- seq(-0.95, -eB / eA, length.out = 100)
-      hO <- seq(-0.95, -oB / oA, length.out = 100)
-      qE <- eA * hE + eB
-      qO <- oA * hO + oB
-   }
-
-   if (norm) {
-      hE <- hE / h0
-      qE <- qE / q0
-      hO <- hO / h0
-      qO <- qO / q0
-   }
-
-   if (log) {
-      hE <- log(1 + hE)
-      qE <- log(1 + qE)
-      hO <- log(1 + hO)
-      qO <- log(1 + qO)
-   }
-
-   return(list(
-      extremes = cbind(hE, qE),
-      outliers = cbind(hO, qO)
-   ))
+   ldecomp.plotResiduals(res, obj$Qlim, obj$T2lim, ncomp = ncomp, log = log, norm = norm,
+      cgroup = cgroup, xlim = xlim, ylim = ylim, show.limits = show.limits, lim.col = lim.col,
+      lim.lwd = lim.lwd, show.legend = show.legend, ...)
 }
 
 #' Loadings plot for PCA model

@@ -218,10 +218,9 @@ test_that("pca.cal works fine with full data", {
    }
 })
 
-test_that("pca.cal calculates limit parameters correctly (full data)", {
+test_that("pca() calculates limit parameters correctly (full data)", {
    for (x in list(x1, x2)) {
-      m <- pca.cal(x, 11, center = TRUE, scale = TRUE, method = "svd")
-
+      m <- pca(x, 11, center = TRUE, scale = TRUE, method = "svd")
       # parameters computed using DDSimca Toolbox
       # using people data, autoscaled
 
@@ -258,24 +257,24 @@ test_that("pca.cal calculates limit parameters correctly (full data)", {
       )
 
       # check parameters for Q residuals (moments)
-      expect_equal(m$limParams$Q$moments$u0, momentsParamsQ$u0, tolerance = 10^-5)
-      expect_equal(round(m$limParams$Q$moments$Nu), momentsParamsQ$Nu)
-      expect_equal(m$limParams$Q$moments$nobj, momentsParamsQ$nobj)
+      expect_equivalent(m$limParams$Q$moments$u0, momentsParamsQ$u0, tolerance = 10^-5)
+      expect_equivalent(round(m$limParams$Q$moments$Nu), momentsParamsQ$Nu)
+      expect_equivalent(m$limParams$Q$moments$nobj, momentsParamsQ$nobj)
 
       # check parameters for Q residuals (robust)
-      expect_equal(m$limParams$Q$robust$u0, robustParamsQ$u0, tolerance = 10^-5)
-      expect_equal(round(m$limParams$Q$robust$Nu), robustParamsQ$Nu)
-      expect_equal(m$limParams$Q$robust$nobj, robustParamsQ$nobj)
+      expect_equivalent(m$limParams$Q$robust$u0, robustParamsQ$u0, tolerance = 10^-5)
+      expect_equivalent(round(m$limParams$Q$robust$Nu), robustParamsQ$Nu)
+      expect_equivalent(m$limParams$Q$robust$nobj, robustParamsQ$nobj)
 
       # check parameters for T2 residuals (moments)
-      expect_equal(m$limParams$T2$moments$u0, momentsParamsT2$u0, tolerance = 10^-5)
-      expect_equal(round(m$limParams$T2$moments$Nu), momentsParamsT2$Nu)
-      expect_equal(m$limParams$T2$moments$nobj, momentsParamsT2$nobj)
+      expect_equivalent(m$limParams$T2$moments$u0, momentsParamsT2$u0, tolerance = 10^-5)
+      expect_equivalent(round(m$limParams$T2$moments$Nu), momentsParamsT2$Nu)
+      expect_equivalent(m$limParams$T2$moments$nobj, momentsParamsT2$nobj)
 
       # check parameters for T2 residuals (robust)
-      expect_equal(m$limParams$T2$robust$u0, robustParamsT2$u0, tolerance = 10^-5)
-      expect_equal(round(m$limParams$T2$robust$Nu), robustParamsT2$Nu)
-      expect_equal(m$limParams$T2$robust$nobj, robustParamsT2$nobj)
+      expect_equivalent(m$limParams$T2$robust$u0, robustParamsT2$u0, tolerance = 10^-5)
+      expect_equivalent(round(m$limParams$T2$robust$Nu), robustParamsT2$Nu)
+      expect_equivalent(m$limParams$T2$robust$nobj, robustParamsT2$nobj)
 
    }
 })
@@ -298,9 +297,9 @@ test_that("pca.cal works fine with excluded data", {
    }
 })
 
-test_that("pca.cal calculates limit parameters correctly (excluded data)", {
+test_that("pca() calculates limit parameters correctly (excluded data)", {
    for (x in list(x2)) {
-      m <- pca.cal(x, 9, center = TRUE, scale = TRUE, method = "svd")
+      m <- pca(x, 9, center = TRUE, scale = TRUE, method = "svd")
 
       # parameters computed using DDSimca Toolbox
       # using people data, autoscaled
@@ -338,24 +337,24 @@ test_that("pca.cal calculates limit parameters correctly (excluded data)", {
       )
 
       # check parameters for Q residuals (moments)
-      expect_equal(m$limParams$Q$moments$u0, momentsParamsQ$u0, tolerance = 10^-5)
-      expect_equal(round(m$limParams$Q$moments$Nu), momentsParamsQ$Nu)
-      expect_equal(m$limParams$Q$moments$nobj, momentsParamsQ$nobj)
+      expect_equivalent(m$limParams$Q$moments$u0, momentsParamsQ$u0, tolerance = 10^-5)
+      expect_equivalent(round(m$limParams$Q$moments$Nu), momentsParamsQ$Nu)
+      expect_equivalent(m$limParams$Q$moments$nobj, momentsParamsQ$nobj)
 
       # check parameters for Q residuals (robust)
-      expect_equal(m$limParams$Q$robust$u0, robustParamsQ$u0, tolerance = 10^-5)
-      expect_equal(round(m$limParams$Q$robust$Nu), robustParamsQ$Nu)
-      expect_equal(m$limParams$Q$robust$nobj, robustParamsQ$nobj)
+      expect_equivalent(m$limParams$Q$robust$u0, robustParamsQ$u0, tolerance = 10^-5)
+      expect_equivalent(round(m$limParams$Q$robust$Nu), robustParamsQ$Nu)
+      expect_equivalent(m$limParams$Q$robust$nobj, robustParamsQ$nobj)
 
       # check parameters for T2 residuals (moments)
-      expect_equal(m$limParams$T2$moments$u0, momentsParamsT2$u0, tolerance = 10^-5)
-      expect_equal(round(m$limParams$T2$moments$Nu), momentsParamsT2$Nu)
-      expect_equal(m$limParams$T2$moments$nobj, momentsParamsT2$nobj)
+      expect_equivalent(m$limParams$T2$moments$u0, momentsParamsT2$u0, tolerance = 10^-5)
+      expect_equivalent(round(m$limParams$T2$moments$Nu), momentsParamsT2$Nu)
+      expect_equivalent(m$limParams$T2$moments$nobj, momentsParamsT2$nobj)
 
       # check parameters for T2 residuals (robust)
-      expect_equal(m$limParams$T2$robust$u0, robustParamsT2$u0, tolerance = 10^-5)
-      expect_equal(round(m$limParams$T2$robust$Nu), robustParamsT2$Nu)
-      expect_equal(m$limParams$T2$robust$nobj, robustParamsT2$nobj)
+      expect_equivalent(m$limParams$T2$robust$u0, robustParamsT2$u0, tolerance = 10^-5)
+      expect_equivalent(round(m$limParams$T2$robust$Nu), robustParamsT2$Nu)
+      expect_equivalent(m$limParams$T2$robust$nobj, robustParamsT2$nobj)
 
    }
 })
@@ -390,8 +389,8 @@ test_that("getQLimits() works fine (jm)", {
          0.37714904, 0.29044220, 0.17075224, 0.07133111)
    )
 
-   Qlim1 <- pca.getQLimits(m, lim.type = "jm", alpha = 0.05, gamma = 0.01)
-   Qlim2 <- pca.getQLimits(m, lim.type = "jm", alpha = 0.10, gamma = 0.05)
+   Qlim1 <- ldecomp.getQLimits("jm", 0.05, 0.01, m$limParams, m$res$cal$residuals, m$eigenvals)
+   Qlim2 <- ldecomp.getQLimits("jm", 0.10, 0.05, m$limParams, m$res$cal$residuals, m$eigenvals)
 
    expect_equivalent(Qlim1[1:2, ], expQlim1, tolerance = 10^-5)
    expect_equivalent(Qlim2[1:2, ], expQlim2, tolerance = 10^-5)
@@ -417,8 +416,8 @@ test_that("getQLimits() works fine (chisq)", {
          0.30492357, 0.24896808, 0.12254836, 0.12097776)
    )
 
-   Qlim1 <- pca.getQLimits(m, lim.type = "chisq", alpha = 0.05, gamma = 0.01)
-   Qlim2 <- pca.getQLimits(m, lim.type = "chisq", alpha = 0.10, gamma = 0.05)
+   Qlim1 <- ldecomp.getQLimits("chisq", 0.05, 0.01, m$limParams, m$res[["cal"]]$residuals, m$eigenvals)
+   Qlim2 <- ldecomp.getQLimits("chisq", 0.10, 0.05, m$limParams, m$res[["cal"]]$residuals, m$eigenvals)
 
    expect_equivalent(Qlim1[1:2, ], expQlim1, tolerance = 10^-5)
    expect_equivalent(Qlim2[1:2, ], expQlim2, tolerance = 10^-5)
@@ -444,8 +443,8 @@ test_that("getQLimits() works fine (ddmoments)", {
          0.59298052, 0.70910047, 0.37375866, 0.25678138)
    )
 
-   Qlim1 <- pca.getQLimits(m, lim.type = "ddmoments", alpha = 0.05, gamma = 0.01)
-   Qlim2 <- pca.getQLimits(m, lim.type = "ddmoments", alpha = 0.10, gamma = 0.05)
+   Qlim1 <- ldecomp.getQLimits("ddmoments", 0.05, 0.01, m$limParams, m$res[["cal"]]$residuals, m$eigenvals)
+   Qlim2 <- ldecomp.getQLimits("ddmoments", 0.10, 0.05, m$limParams, m$res[["cal"]]$residuals, m$eigenvals)
    expect_equivalent(Qlim1[1:2, ], expQlim1, tolerance = 10^-5)
    expect_equivalent(Qlim2[1:2, ], expQlim2, tolerance = 10^-5)
 })
@@ -470,8 +469,8 @@ test_that("getQLimits() works fine (ddrobust)", {
          1.03535183, 0.54485629, 0.32446297, 0.13598882)
    )
 
-   Qlim1 <- pca.getQLimits(m, lim.type = "ddrobust", alpha = 0.05, gamma = 0.01)
-   Qlim2 <- pca.getQLimits(m, lim.type = "ddrobust", alpha = 0.10, gamma = 0.05)
+   Qlim1 <- ldecomp.getQLimits("ddrobust", 0.05, 0.01, m$limParams, m$res[["cal"]]$residuals, m$eigenvals)
+   Qlim2 <- ldecomp.getQLimits("ddrobust", 0.10, 0.05, m$limParams, m$res[["cal"]]$residuals, m$eigenvals)
    expect_equivalent(Qlim1[1:2, ], expQlim1, tolerance = 10^-5)
    expect_equivalent(Qlim2[1:2, ], expQlim2, tolerance = 10^-5)
 })
@@ -498,10 +497,10 @@ test_that("getT2Limits() works fine (chisq and jm)", {
          47.90883728, 55.09430867, 63.21788003, 72.48520544)
    )
 
-   T2lim11 <- pca.getT2Limits(m, lim.type = "chisq", alpha = 0.05, gamma = 0.01)
-   T2lim21 <- pca.getT2Limits(m, lim.type = "chisq", alpha = 0.10, gamma = 0.05)
-   T2lim12 <- pca.getT2Limits(m, lim.type = "jm", alpha = 0.05, gamma = 0.01)
-   T2lim22 <- pca.getT2Limits(m, lim.type = "jm", alpha = 0.10, gamma = 0.05)
+   T2lim11 <- ldecomp.getT2Limits("chisq", 0.05, 0.01, m$limParams)
+   T2lim21 <- ldecomp.getT2Limits("chisq", 0.10, 0.05, m$limParams)
+   T2lim12 <- ldecomp.getT2Limits("jm", 0.05, 0.01, m$limParams)
+   T2lim22 <- ldecomp.getT2Limits("jm", 0.10, 0.05, m$limParams)
 
    expect_equivalent(T2lim11[1:2, ], expT2lim1, tolerance = 10^-5)
    expect_equivalent(T2lim21[1:2, ], expT2lim2, tolerance = 10^-5)
@@ -529,8 +528,8 @@ test_that("getT2Limits() works fine (ddmoments)", {
          28.57084459, 27.54040088, 28.05172743, 26.87301266)
    )
 
-   T2lim1 <- pca.getT2Limits(m, lim.type = "ddmoments", alpha = 0.05, gamma = 0.01)
-   T2lim2 <- pca.getT2Limits(m, lim.type = "ddmoments", alpha = 0.10, gamma = 0.05)
+   T2lim1 <- ldecomp.getT2Limits("ddmoments", 0.05, 0.01, m$limParams)
+   T2lim2 <- ldecomp.getT2Limits("ddmoments", 0.10, 0.05, m$limParams)
    expect_equivalent(T2lim1[1:2, ], expT2lim1, tolerance = 10^-5)
    expect_equivalent(T2lim2[1:2, ], expT2lim2, tolerance = 10^-5)
 })
@@ -555,8 +554,8 @@ test_that("getT2Limits() works fine (ddrobust)", {
          18.10055980, 20.93381524, 28.27613333, 25.95977002)
    )
 
-   T2lim1 <- pca.getT2Limits(m, lim.type = "ddrobust", alpha = 0.05, gamma = 0.01)
-   T2lim2 <- pca.getT2Limits(m, lim.type = "ddrobust", alpha = 0.10, gamma = 0.05)
+   T2lim1 <- ldecomp.getT2Limits("ddrobust", 0.05, 0.01, m$limParams)
+   T2lim2 <- ldecomp.getT2Limits("ddrobust", 0.10, 0.05, m$limParams)
    expect_equivalent(T2lim1[1:2, ], expT2lim1, tolerance = 10^-5)
    expect_equivalent(T2lim2[1:2, ], expT2lim2, tolerance = 10^-5)
 })

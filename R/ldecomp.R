@@ -192,33 +192,59 @@ plotScores.ldecomp <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected,
-   show.labels = FALSE, labels = "names", main = NULL, show.plot = TRUE, ...) {
+plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected, norm = FALSE, log = FALSE,
+   show.labels = FALSE, labels = "names", show.plot = TRUE, ...) {
 
    attrs <- mda.getattr(obj$Q)
 
+  # function for transforming distances
+   transform <- function(u, u0, norm, log) {
+      if (norm) u <- u / u0
+      if (log) u <- log(1 + u)
+      return(u)
+   }
+
+   # function for creating labels depending on transformation
+   get_label <- function(lab, norm, log) {
+      if (norm) lab <- paste0(lab, "/", lab, "0")
+      if (log) lab <- paste0("log(1 + ", lab, ")")
+      return(lab)
+   }
+
+   # get scale factors
+   h0 <- if (!is.null(attr(obj$T2, "u0"))) attr(obj$T2, "u0")[[ncomp]]
+   q0 <- if (!is.null(attr(obj$Q, "u0"))) attr(obj$Q, "u0")[[ncomp]]
+
+   # check that scaling values exist
+   if (norm && (is.null(h0) || is.null(q0))) {
+      warning("Can not normalize distances as scaling values are absent.")
+      norm <- FALSE
+   }
+
    # prepare plot data
-   h <- obj$T2[, ncomp]
-   q <- obj$Q[, ncomp]
+   h <- transform(obj$T2[, ncomp], h0, norm, log)
+   q <- transform(obj$Q[, ncomp], q0, norm, log)
+
+   # default values for local labels
+   lxlab <- get_label("h", norm, log)
+   lylab <- get_label("q", norm, log)
 
    # combine everything to dataset and assign attributes
    plot_data <- mda.cbind(h, q)
-   plot_data <- mda.setattr(plot_data, attrs, "row")
+   plot_data <- mda.setattr(plot_data, mda.getattr(obj$Q), "row")
    rownames(plot_data) <- rownames(obj$Q)
-   colnames(plot_data) <- c("Score distance, h", "Orthogonal distance, q")
+   colnames(plot_data) <- c(
+      paste0("Score distance, ", lxlab),
+      paste0("Orthogonal distance, ", lylab)
+   )
+
+   attr(plot_data, "name") <- sprintf("Residuals (ncomp = %d)", ncomp)
 
    # if no plot required - return plot series object
-   if (!show.plot) {
-      return(plot_data)
-   }
-
-   # set up main title for the plot
-   if (is.null(main)) {
-      main <- if (is.null(ncomp)) "Residuals" else sprintf("Residuals (ncomp = %d)", ncomp)
-   }
+   if (!show.plot) return(plot_data)
 
    # show plot
-   return(mdaplot(plot_data, main = main, show.labels = show.labels, labels = labels, ...))
+   return(mdaplot(plot_data, ...))
 }
 
 #' Print method for linear decomposition
@@ -457,7 +483,7 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
 #'
 #' @param residuals
 #' matrix with PCA residuals
-#' @param evals
+#' @param eigenvals
 #' vector with eigenvalues for PCA components
 #' @param alpha
 #' significance level for extreme objects
@@ -468,21 +494,21 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
 #' vector with four values: critical limits for given alpha and gamma, mean distance and DoF.
 #'
 #' @export
-jm.crit <- function(residuals, evals, alpha = 0.05, gamma = 0.01) {
+jm.crit <- function(residuals, eigenvals, alpha = 0.05, gamma = 0.01) {
 
    # if not all eigenvalues available - ise residuals to compute the rest
-   ncomp <- length(evals)
+   ncomp <- length(eigenvals)
    nobj <- nrow(residuals)
    max_ncomp <- min(nrow(residuals) - 1, ncol(residuals))
-   if (length(evals) < max_ncomp) {
-      evals <- c(evals, svd(residuals)$d[seq_len(max_ncomp - ncomp)]^2 / (nobj - 1))
+   if (length(eigenvals) < max_ncomp) {
+      eigenvals <- c(eigenvals, svd(residuals)$d[seq_len(max_ncomp - ncomp)]^2 / (nobj - 1))
    }
 
    # since it is residuals we do not need eigenvalue for PC1
-   evals <- evals[-1]
-   t1 <- rev(cumsum(rev(evals)))[seq_len(ncomp)]
-   t2 <- rev(cumsum(rev(evals)^2))[seq_len(ncomp)]
-   t3 <- rev(cumsum(rev(evals)^3))[seq_len(ncomp)]
+   eigenvals <- eigenvals[-1]
+   t1 <- rev(cumsum(rev(eigenvals)))[seq_len(ncomp)]
+   t2 <- rev(cumsum(rev(eigenvals)^2))[seq_len(ncomp)]
+   t3 <- rev(cumsum(rev(eigenvals)^3))[seq_len(ncomp)]
 
    h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2);
    ifelse(h0 < 0.001, h0 <- 0.001, h0)
@@ -506,10 +532,20 @@ jm.crit <- function(residuals, evals, alpha = 0.05, gamma = 0.01) {
       out[, max_ncomp] <- 0
    }
 
-   attr(out, "eigenvals") <- evals
+   attr(out, "eigenvals") <- eigenvals
    return(out)
 }
 
+#' Calculate probabilities for distance values and given parameters using Hotelling T2 distribution
+#'
+#' @param u
+#' vector with distances
+#' @param eigenvals
+#' vector with eigenvalues for PCA components
+#' @param ncomp
+#' number of components
+#'
+#' @export
 jm.prob <- function(u, eigenvals, ncomp) {
 
    erf <- function(x) 1 - pnorm(-x * sqrt(2)) * 2
@@ -687,4 +723,290 @@ ddrobust.param <- function(U, ncomp, alpha, gamma) {
 
    u0 <- 0.5 * Nu * (Mu / qchisq(0.50, Nu) + Su / (qchisq(0.75, Nu) - qchisq(0.25, Nu)))
    return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
+}
+
+#' Compute parameters for critical limits based on calibration results
+#'
+#' @param T2
+#' matrix with T2 distances
+#' @param Q
+#' matrix with Q distances
+#'
+#' @export
+ldecomp.getLimParams <- function(Q, T2) {
+
+   T2 <- mda.purgeRows(T2)
+   Q <- mda.purgeRows(Q)
+
+   return(
+      list(
+         "T2" = list(
+            "moments" = ddmoments.param(T2),
+            "robust" = ddrobust.param(T2),
+            "nobj" = nrow(T2)
+         ),
+         "Q" = list(
+            "moments" = ddmoments.param(Q),
+            "robust" = ddrobust.param(Q),
+            "nobj" = nrow(Q)
+         )
+      )
+   )
+}
+
+#' Compute critical limits for orthogonal distances (Q)
+#'
+#' @param decomp
+#' results of latent variable decomposition (ldecomp object)
+#' @param eigenvals
+#' egenvalues for the components used to decompose the data
+#' @param lim.type
+#' which method to use for calculation of critical limits for residuals
+#' @param alpha
+#' significance level for extreme limits.
+#' @param gamma
+#' significance level for outlier limits.
+#' @param params
+#' distribution parameters returned by ldecomp.getLimParams
+#'
+#' @export
+ldecomp.getQLimits <- function(lim.type, alpha, gamma, params, residuals, eigenvals) {
+
+   pQ <- if (regexpr("robust", lim.type) > 0) params$Q$robust else params$Q$moments
+   ncomp <- length(pQ$u0)
+
+   if (lim.type == "jm") {
+      # methods based on Jackson-Mudholkar approach
+      residuals <- mda.purge(residuals)
+      lim <- jm.crit(residuals, eigenvals, alpha, gamma)
+      eigenvals <- attr(lim, "eigenvals")
+      lim <- rbind(lim, pQ$u0, nrow(residuals))
+      attr(lim, "eigenvals") <- eigenvals
+
+   } else {
+      # methods based on chi-square distribution
+      pT2 <- if (regexpr("robust", lim.type) > 0) params$T2$robust else params$T2$moments
+      DoF <- round(pQ$Nu)
+      DoF[DoF < 1] <- 1
+      DoF[DoF > 250] <- 250
+
+      lim <- switch(lim.type,
+         "chisq" = chisq.crit(pQ, alpha, gamma),
+         "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
+         "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
+         stop("Wrong value for 'lim.type' parameter.")
+      )
+
+      lim <- rbind(lim, pQ$u0, DoF)
+   }
+
+   colnames(lim) <- paste("Comp", seq_len(ncomp))
+   rownames(lim) <- c("Extremes limits", "Outliers limits", "Mean", "DoF")
+   attr(lim, "name") <- "Critical limits for orthogonal distances (Q)"
+   attr(lim, "alpha") <- alpha
+   attr(lim, "gamma") <- gamma
+   attr(lim, "lim.type") <- lim.type
+
+   return(lim)
+}
+
+#' Compute critical limits for score distances (T2)
+#'
+#' @param decomp
+#' results of latent variable decomposition (ldecomp object)
+#' @param lim.type
+#' which method to use for calculation ("chisq", "ddmoments", "ddrobust")
+#' @param alpha
+#' significance level for extreme limits.
+#' @param gamma
+#' significance level for outlier limits.
+#'
+ldecomp.getT2Limits <- function(lim.type, alpha, gamma, params) {
+
+   pQ <- if (regexpr("robust", lim.type) > 0) params$Q$robust else params$Q$moments
+   pT2 <- if (regexpr("robust", lim.type) > 0) params$T2$robust else params$T2$moments
+   ncomp <- length(pT2$u0)
+
+   DoF <- round(pT2$Nu)
+   DoF[DoF < 1] <- 1
+   DoF[DoF > 250] <- 250
+
+   if (lim.type %in% c("jm", "chisq")) DoF <- pT2$nobj
+
+   lim <- switch(lim.type,
+      "jm" = ,
+      "chisq" = hotelling.crit(pT2$nobj, seq_len(ncomp), alpha, gamma),
+      "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
+      "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
+      stop("Wrong value for 'lim.type' parameter.")
+   )
+
+   lim <- rbind(lim, pT2$u0, DoF)
+   colnames(lim) <- paste("Comp", seq_len(ncomp))
+   rownames(lim) <- c("Extremes limits", "Outliers limits", "Mean", "DoF")
+   attr(lim, "name") <- "Critical limits for score distances (T2)"
+   attr(lim, "alpha") <- alpha
+   attr(lim, "gamma") <- gamma
+   attr(lim, "lim.type") <- lim.type
+
+   return(lim)
+}
+
+#' Compute coordinates of lines or curves with critical limits
+#'
+#' @param obj
+#' object of class \code{pca}
+#' @param ncomp
+#' number of components for computing the coordinates
+#' @param norm
+#' logical, shall distance values be normalized or not
+#' @param log
+#' logical, shall log transformation be applied or not
+#'
+#' @return
+#' list with two matrices (x and y coordinates of corresponding limits)
+#'
+#' @export
+ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log) {
+
+   # get parameters
+   h0 <- T2lim[3, ncomp]
+   q0 <- Qlim[3, ncomp]
+   Nh <- T2lim[4, ncomp]
+   Nq <- Qlim[4, ncomp]
+   lim.type <- attr(Qlim, "lim.type")
+
+   if (lim.type %in% c("jm", "chisq")) {
+
+      # quadratic limits
+      hE <- c(0, T2lim[1, ncomp], T2lim[1, ncomp])
+      hO <- c(0, T2lim[2, ncomp], T2lim[2, ncomp])
+
+      qE <- c(Qlim[1, ncomp], Qlim[1, ncomp], 0)
+      qO <- c(Qlim[2, ncomp], Qlim[2, ncomp], 0)
+
+   } else {
+
+      ## slope and intercepts
+      eB <- Qlim[1, ncomp]
+      oB <- Qlim[2, ncomp]
+      eA <- oA <- -1 * (q0 / h0) * (Nh / Nq)
+
+      hE <- seq(-0.95, -eB / eA, length.out = 100)
+      hO <- seq(-0.95, -oB / oA, length.out = 100)
+      qE <- eA * hE + eB
+      qO <- oA * hO + oB
+   }
+
+   if (norm) {
+      hE <- hE / h0
+      qE <- qE / q0
+      hO <- hO / h0
+      qO <- qO / q0
+   }
+
+   if (log) {
+      hE <- log(1 + hE)
+      qE <- log(1 + qE)
+      hO <- log(1 + hO)
+      qO <- log(1 + qO)
+   }
+
+   return(list(
+      extremes = cbind(hE, qE),
+      outliers = cbind(hO, qO)
+   ))
+}
+
+#' Residuals distance plot for a set of ldecomp objects
+#'
+#' @description
+#' Shows a plot with score (T2, h) vs orthogonal (Q, q) distances and corresponding critical
+#' limits for given number of components.
+#'
+#' @param res
+#' list with result objects to show the plot for
+#' @param Qlim
+#' matrix with critical limits for orthogonal distance
+#' @param T2lim
+#' matrix with critical limits for score distance
+#' @param ncomp
+#' how many components to use (by default optimal value selected for the model will be used)
+#' @param log
+#' logical, apply log tranformation to the distances or not (see details)
+#' @param norm
+#' logical, normalize distance values or not (see details)
+#' @param cgroup
+#' color grouping of plot points (works only if one result object is available)
+#' @param xlim
+#' limits for x-axis (if NULL will be computed automatically)
+#' @param ylim
+#' limits for y-axis (if NULL will be computed automatically)
+#' @param show.legend
+#' logical, show or not a legend on the plot (needed if several result objects are available)
+#' @param show.limits
+#' logical, show or not lines/curves with critical limits for the distances
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier limits
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier limits
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier limits
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' The function is a bit more advanced version of \code{\link{plotResiduals.ldecomp}}. It allows to
+#' show distance values for several result objects (e.g. calibration and test set or calibration
+#' and new prediction set) as well as display the correspondng critical limits in form of lines
+#' or curves.
+#'
+#' Depending on how many result objects your model has or how many you specified manually,
+#' using the \code{res} parameter, the plot behaves in a bit different way.
+#'
+#' If only one result object is provided, then it allows to colorise the points using \code{cgroup}
+#' parameter. If two or more result objects are provided, then the function show
+#' distances in groups, and adds corresponding legend.
+#'
+#' The function can show distance values normalised (h/h0 and q/q0) as well as with log
+#' transformation (log(1 + h/h0), log(1 + q/q0)). The latter is useful if distribution of the
+#' points is skewed and most of them are densely located around bottom left corner.
+#'
+#' @export
+ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE,
+   norm = FALSE, cgroup = NULL, xlim = NULL, ylim = NULL, show.limits = TRUE,
+   lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
+   show.legend = TRUE, ...) {
+
+   getPlotLim <- function(lim, pd, ld, dim, show.limits) {
+      if (!(is.null(lim) && show.limits)) return(lim)
+      return(c(0, max(sapply(pd, function(x) max(x[, dim])), ld$outliers[, dim])) * 1.05)
+   }
+
+   # keep only ojects of class "ldecomp" in result list
+   res <- getRes(res, "ldecomp")
+
+   # compute plot data for each result object
+   plot_data <- lapply(res, plotResiduals.ldecomp, ncomp = ncomp, norm = norm, log = log,
+      show.plot = FALSE)
+
+   # get coordinates for critical limits
+   lim_data <- ldecomp.getLimitsCoordinates(Qlim, T2lim, ncomp = ncomp, norm = norm, log = log)
+   xlim <- getPlotLim(xlim, plot_data, lim_data, 1, show.limits)
+   ylim <- getPlotLim(ylim, plot_data, lim_data, 2, show.limits)
+
+   # make plot
+   if (length(plot_data) == 1) {
+      mdaplot(plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, ...)
+   } else {
+      mdaplotg(plot_data, type = "p", xlim = xlim, ylim = ylim, show.legend = show.legend, ...)
+   }
+
+   # show critical limits
+   if (show.limits) {
+      lines(lim_data$extremes[, 1], lim_data$extremes[, 2],
+         col = lim.col[1], lty = lim.lty[1], lwd = lim.lwd[1])
+      lines(lim_data$outliers[, 1], lim_data$outliers[, 2],
+         col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
+   }
 }
