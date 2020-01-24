@@ -655,6 +655,49 @@ mda.df2mat <- function(x, full = FALSE) {
    return(x)
 }
 
+#' Removes excluded (hidden) rows from data
+#'
+#' @param data
+#' data frame or matrix with data
+#'
+#' @export
+mda.purgeRows <- function(data) {
+   attrs <- mda.getattr(data)
+   if (length(attrs$exclrows) == 0) return(data)
+   new_data <- data[-attrs$exclrows, , drop = FALSE]
+   attrs$yaxis.values <- if (!is.null(attrs$yaxis.values)) attrs$yaxis.values[-attrs$exclrows]
+   attrs$exclrows <- NULL
+   new_data <- mda.setattr(new_data, attrs)
+   return(new_data)
+}
+
+#' Removes excluded (hidden) colmns from data
+#'
+#' @param data
+#' data frame or matrix with data
+#'
+#' @export
+mda.purgeCols <- function(data) {
+   attrs <- mda.getattr(data)
+   if (length(attrs$exclcols) == 0) return(data)
+
+   new_data <- data[, -attrs$exclcols, drop = FALSE]
+   attrs$xaxis.values <- if (!is.null(attrs$xaxis.values)) attrs$xaxis.values[-attrs$exclcols]
+   attrs$exclcols <- NULL
+   new_data <- mda.setattr(new_data, attrs)
+   return(new_data)
+}
+
+#' Removes excluded (hidden) rows and colmns from data
+#'
+#' @param data
+#' data frame or matrix with data
+#'
+#' @export
+mda.purge <- function(data) {
+   return(mda.purgeCols(mda.purgeRows(data)))
+}
+
 #' Get selected components
 #'
 #' @description
