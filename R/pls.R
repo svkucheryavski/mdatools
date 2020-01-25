@@ -274,9 +274,10 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    model$calres <- model$res[["cal"]]
 
    # compute critical limit parameters
-   model$limParams <- ldecomp.getLimParams(
-      model$res[["cal"]]$xdecomp$Q,
-      model$res[["cal"]]$xdecomp$T2
+   model$limParams <- list(
+      "Q" = ldecomp.getLimParams(model$res[["cal"]]$xdecomp$Q),
+      "T2" = ldecomp.getLimParams(model$res[["cal"]]$xdecomp$T2),
+      "Z" = ldecomp.getLimParams(model$res[["cal"]]$ydecomp$Q)
    )
 
    # do cross-validation if needed

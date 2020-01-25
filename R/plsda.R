@@ -218,9 +218,10 @@ plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, sc
    model$calres <- model$res[["cal"]]
 
    # compute critical limit parameters
-   model$limParams <- ldecomp.getLimParams(
-      model$res[["cal"]]$xdecomp$Q,
-      model$res[["cal"]]$xdecomp$T2
+   model$limParams <- list(
+      "Q" = ldecomp.getLimParams(model$res[["cal"]]$xdecomp$Q),
+      "T2" = ldecomp.getLimParams(model$res[["cal"]]$xdecomp$T2),
+      "Z" = ldecomp.getLimParams(model$res[["cal"]]$ydecomp$Q)
    )
 
    # assign cross-validation results to the model (so they are under calibration)

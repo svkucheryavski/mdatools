@@ -729,29 +729,19 @@ ddrobust.param <- function(U, ncomp, alpha, gamma) {
 
 #' Compute parameters for critical limits based on calibration results
 #'
-#' @param T2
-#' matrix with T2 distances
-#' @param Q
-#' matrix with Q distances
+#' @param U
+#' matrix with residual distances
 #'
 #' @export
-ldecomp.getLimParams <- function(Q, T2) {
+ldecomp.getLimParams <- function(U) {
 
-   T2 <- mda.purgeRows(T2)
-   Q <- mda.purgeRows(Q)
+   U <- mda.purgeRows(U)
 
    return(
       list(
-         "T2" = list(
-            "moments" = ddmoments.param(T2),
-            "robust" = ddrobust.param(T2),
-            "nobj" = nrow(T2)
-         ),
-         "Q" = list(
-            "moments" = ddmoments.param(Q),
-            "robust" = ddrobust.param(Q),
-            "nobj" = nrow(Q)
-         )
+         "moments" = ddmoments.param(U),
+         "robust" = ddrobust.param(U),
+         "nobj" = nrow(U)
       )
    )
 }

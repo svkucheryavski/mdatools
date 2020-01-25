@@ -208,7 +208,10 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
    model$calres <- model$res[["cal"]]
 
    # compute critical limit parameters
-   model$limParams <- ldecomp.getLimParams(model$res[["cal"]]$Q, model$res[["cal"]]$T2)
+   model$limParams <- list(
+      "Q" = ldecomp.getLimParams(model$res[["cal"]]$Q),
+      "T2" = ldecomp.getLimParams(model$res[["cal"]]$T2)
+   )
 
    # apply model to test set if provided
    if (!is.null(x.test)) {
