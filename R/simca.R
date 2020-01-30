@@ -393,7 +393,7 @@ crossval.simca <- function(obj, x, cv) {
 plot.simca <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...) {
    par(mfrow = c(2, 2))
    plotScores(x, comp, ...)
-   plotLoadings(x, ncomp = comp, ...)
+   plotLoadings(x, comp = comp, ...)
    plotResiduals(x, ncomp = ncomp, ...)
    plotCumVariance(x, ...)
    par(mfrow = c(1, 1))
