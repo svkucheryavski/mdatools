@@ -433,8 +433,8 @@ plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, 
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 #'
 #' @export
-plotSensitivity.classres <- function(obj, ...) {
-   return(plotPerformance(obj, param = "sensitivity", ...))
+plotSensitivity.classres <- function(obj, legend.position = "bottomright", ...) {
+   return(plotPerformance(obj, param = "sensitivity", legend.position = legend.position, ...))
 }
 
 #' Specificity plot for classification results
@@ -452,8 +452,8 @@ plotSensitivity.classres <- function(obj, ...) {
 #' See examples in description of \code{\link{plsdares}}, \code{\link{simcamres}}, etc.
 #'
 #' @export
-plotSpecificity.classres <- function(obj, ...) {
-   return(plotPerformance(obj, param = "specificity", ...))
+plotSpecificity.classres <- function(obj, legend.position = "bottomright", ...) {
+   return(plotPerformance(obj, param = "specificity", legend.position = legend.position, ...))
 }
 
 #' Misclassified ratio plot for classification results
@@ -489,6 +489,8 @@ plotMisclassified.classres <- function(obj, ...) {
 #' type of the plot
 #' @param param
 #' which performance parameter to make the plot for (can be a vector with several values).
+#' @param labels
+#' what to show as labels for plot objects.
 #' @param ylab
 #' label for y axis
 #' @param ylim
@@ -505,7 +507,7 @@ plotMisclassified.classres <- function(obj, ...) {
 #'
 #' @export
 plotPerformance.classres <- function(obj, nc = 1, type = "b",
-   param = c("sensitivity", "specificity", "misclassified"),
+   param = c("sensitivity", "specificity", "misclassified"), labels = "values",
    ylab = "", ylim = c(0, 1.1), xticks = seq_len(obj$ncomp), show.plot = TRUE, ...) {
 
    if (is.null(obj$c.ref)) {
@@ -534,7 +536,7 @@ plotPerformance.classres <- function(obj, nc = 1, type = "b",
       return(plot_data)
    }
 
-   mdaplotg(plot_data, type = type, xticks = xticks, ylim = ylim, ylab = ylab, ...)
+   mdaplotg(plot_data, type = type, xticks = xticks, ylim = ylim, ylab = ylab, labels = labels, ...)
 }
 
 #' Prediction plot for classification results

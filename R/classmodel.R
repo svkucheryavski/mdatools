@@ -84,8 +84,8 @@ plotPredictions.classmodel <- function(obj, res.name = NULL, nc = seq_len(obj$nc
 #' See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 #'
 #' @export
-plotSpecificity.classmodel <- function(obj, ...) {
-   plotPerformance(obj, param = "specificity", ...)
+plotSpecificity.classmodel <- function(obj, legend.position = "bottomright", ...) {
+   plotPerformance(obj, param = "specificity", legend.position = legend.position, ...)
 }
 
 #' Sensitivity plot for classification model
@@ -102,8 +102,8 @@ plotSpecificity.classmodel <- function(obj, ...) {
 #' See examples in description of \code{\link{plsda}}, \code{\link{simca}} or \code{\link{simcam}}.
 #'
 #' @export
-plotSensitivity.classmodel <- function(obj, ...) {
-   plotPerformance(obj, param = "sensitivity", ...)
+plotSensitivity.classmodel <- function(obj, legend.position = "bottomright", ...) {
+   plotPerformance(obj, param = "sensitivity", legend.position = legend.position, ...)
 }
 
 #' Misclassified ratio plot for classification model
@@ -138,6 +138,8 @@ plotMisclassified.classmodel <- function(obj, ...) {
 #' or \code{"misclassified"})
 #' @param type
 #' type of the plot
+#' @param labels
+#' what to show as labels for plot objects.
 #' @param ylab
 #' label for y axis
 #' @param ylim
@@ -151,12 +153,13 @@ plotMisclassified.classmodel <- function(obj, ...) {
 #'
 #' @export
 plotPerformance.classmodel <- function(obj, nc = 1, param = "misclassified", type = "b",
-   ylab = "", ylim = c(0, 1.15), xticks = seq_len(dim(obj$res$cal$c.pred)[2]), res = obj$res, ...) {
+   labels = "values", ylab = "", ylim = c(0, 1.15),
+   xticks = seq_len(dim(obj$res$cal$c.pred)[2]), res = obj$res, ...) {
 
    if (length(param) != 1) {
       stop("Specify which paramete you want to make the plot for.")
    }
 
    plot_data <- lapply(res, plotPerformance, nc = nc, param = param, show.plot = FALSE)
-   mdaplotg(plot_data, type = type, xticks = xticks, ylab = ylab, ylim = ylim, ...)
+   mdaplotg(plot_data, type = type, xticks = xticks, ylab = ylab, ylim = ylim, labels = labels, ...)
 }
