@@ -401,7 +401,7 @@ categorize.pca <- function(obj, res, ncomp = obj$ncomp.selected, ...) {
       categories <- rep(1, nobj)
       categories[extremes_ind] <- 2
       categories[outliers_ind] <- 3
-      return(factor(categories, levels = 1:3, labels = c("normal", "extreme", "outlier")))
+      return(factor(categories, levels = 1:3, labels = c("regular", "extreme", "outlier")))
    }
 
    # get distance values for selected number of components
@@ -472,7 +472,7 @@ predict.pca <- function(object, x, ...) {
 
    # set names
    rownames(scores) <- rownames(residuals) <- attrs$dimnames[[1]]
-   colnames(scores) <- colnames(loadings)
+   colnames(scores) <- colnames(object$loadings)
    colnames(residuals) <- attrs$dimnames[[2]]
 
    # set attributes
