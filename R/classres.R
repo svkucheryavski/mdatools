@@ -131,6 +131,13 @@ getConfusionMatrix.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
    out[, obj$nclasses + 1] <- table(c.ref[none], exclude = FALSE)
    rownames(out) <- ref.classes
    colnames(out) <- c(obj$classnames, "None")
+
+   # reorder the table to match class name order in results
+   ind1 <- match(colnames(out), rownames(out))
+   ind1 <- ind1[!is.na(ind1)]
+   ind2 <- seq_len(nrow(out))[-ind1]
+   out <- out[c(ind1, ind2), , drop = FALSE]
+
    return(out)
 }
 
