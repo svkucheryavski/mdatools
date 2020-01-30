@@ -4,12 +4,10 @@
 \alias{ldecomp.getLimParams}
 \title{Compute parameters for critical limits based on calibration results}
 \usage{
-ldecomp.getLimParams(Q, T2)
+ldecomp.getLimParams(U)
 }
 \arguments{
-\item{Q}{matrix with Q distances}
-
-\item{T2}{matrix with T2 distances}
+\item{U}{matrix with residual distances}
 }
 \description{
 Compute parameters for critical limits based on calibration results

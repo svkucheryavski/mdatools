@@ -42,7 +42,6 @@ mdaplot(
   show.excluded = FALSE,
   col.excluded = "#E0E0E0",
   nbins = 60,
-  colramp = mdaplot.getColors,
   force.x.values = NA,
   opacity = 1,
   pch.colinv = FALSE,
@@ -124,8 +123,6 @@ mdaplot(
 
 \item{nbins}{if scatter density plot is shown, number of segments to split the plot area into.
 (see also ?smoothScatter)}
-
-\item{colramp}{Colramp function for density scatter plot.}
 
 \item{force.x.values}{vector with corrected x-values for a bar plot (do not specify this manually).}
 
