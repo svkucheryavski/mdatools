@@ -667,8 +667,6 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #' @param nbins
 #' if scatter density plot is shown, number of segments to split the plot area into.
 #' (see also ?smoothScatter)
-#' @param colramp
-#' Colramp function for density scatter plot.
 #' @param force.x.values
 #' vector with corrected x-values for a bar plot (do not specify this manually).
 #' @param opacity
@@ -730,8 +728,8 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
    grid.col = "lightgray", show.axes = TRUE, xticks = NULL, yticks = NULL,
    xticklabels = NULL, yticklabels = NULL,
    xlas = 0, ylas = 0, lab.col = "darkgray", lab.cex = 0.65,
-   show.excluded = FALSE, col.excluded = "#E0E0E0", nbins = 60,
-   colramp = mdaplot.getColors, force.x.values = NA, opacity = 1,
+   show.excluded = FALSE, col.excluded = "#C0C0C0", nbins = 60,
+   force.x.values = NA, opacity = 1,
    pch.colinv = FALSE, ...) {
 
    if (is.null(ps)) {
