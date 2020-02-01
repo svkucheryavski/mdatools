@@ -339,7 +339,7 @@ regcoeffs.getStats <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 #'
 #' @export
 plot.regcoeffs <- function(x, ncomp = 1, ny = 1, type = (if (x$nvar > 30) "l" else "h"),
-   col = c(mdaplot.getColors(1), "lightgray"), show.lines = c(NA, 0), show.ci = TRUE,
+   col = c(mdaplot.getColors(1), "lightgray"), show.lines = c(NA, 0), show.ci = FALSE,
    alpha = 0.05, ...) {
 
    if (length(ncomp) != 1) {
