@@ -301,12 +301,16 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
    obj$lim.type <- lim.type
 
    attr(obj$res[["cal"]]$Q, "u0") <- obj$Qlim[3, ]
+   attr(obj$res[["cal"]]$Q, "Nu") <- obj$Qlim[4, ]
    attr(obj$res[["cal"]]$T2, "u0") <- obj$T2lim[3, ]
+   attr(obj$res[["cal"]]$T2, "Nu") <- obj$T2lim[4, ]
    obj$calres <- obj$res[["cal"]]
 
    if (!is.null(obj$res$test)) {
       attr(obj$res[["test"]]$Q, "u0") <- obj$Qlim[3, ]
+      attr(obj$res[["test"]]$Q, "Nu") <- obj$Qlim[4, ]
       attr(obj$res[["test"]]$T2, "u0") <- obj$T2lim[3, ]
+      attr(obj$res[["test"]]$T2, "Nu") <- obj$T2lim[4, ]
       obj$testres <- obj$res[["test"]]
    }
 
@@ -377,7 +381,7 @@ getCalibrationData.pca <- function(obj) {
 #' @description
 #' The method compares score and orthogonal distances of PCA results from \code{res} with
 #' critical limits computed for the PCA model and categorizes the corresponding objects as
-#' "normal", "extreme" or "outlier".
+#' "regular", "extreme" or "outlier".
 #'
 #' @param obj
 #' object with PCA model
@@ -395,7 +399,7 @@ getCalibrationData.pca <- function(obj) {
 #' vector (factor) with results of categorization.
 #'
 #' @export
-categorize.pca <- function(obj, res, ncomp = obj$ncomp.selected, ...) {
+categorize.pca <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, ...) {
 
    create_categories <- function(nobj, extremes_ind, outliers_ind) {
       categories <- rep(1, nobj)
@@ -489,7 +493,9 @@ predict.pca <- function(object, x, ...) {
    # create and return the results object
    res <- pcares(scores, object$loadings, residuals, object$eigenvals, object$ncomp.selected)
    attr(res$Q, "u0") <- object$Qlim[3, ]
+   attr(res$Q, "Nu") <- object$Qlim[4, ]
    attr(res$T2, "u0") <- object$T2lim[3, ]
+   attr(res$T2, "Nu") <- object$T2lim[4, ]
 
    return(res)
 }
