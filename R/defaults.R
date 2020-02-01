@@ -675,7 +675,7 @@ plotCorr <- function(obj, ...) {
 #' Plot for PLS weights
 #'
 #' @details
-#' Generic function for weights
+#' Generic function for weight plot
 #'
 #' @param obj
 #' a model or result object
@@ -685,4 +685,19 @@ plotCorr <- function(obj, ...) {
 #' @export
 plotWeights <- function(obj, ...) {
    UseMethod("plotWeights")
+}
+
+#' Plot for XY-residuals
+#'
+#' @details
+#' Generic function for XY-residuals plot
+#'
+#' @param obj
+#' a model or result object
+#' @param ...
+#' other arguments
+#'
+#' @export
+plotXYResiduals <- function(obj, ...) {
+   UseMethod("plotXYResiduals")
 }
