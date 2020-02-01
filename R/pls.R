@@ -475,18 +475,33 @@ setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
    obj$T2lim <- ldecomp.getT2Limits(lim.type, alpha, gamma, obj$limParams)
    obj$Qlim <- ldecomp.getQLimits(lim.type, alpha, gamma, obj$limParams,
       obj$res[["cal"]]$xdecomp$residuals, obj$xeigenvals)
+   obj$Zlim <- pls.getZLimits(lim.type, alpha, gamma, obj$limParams)
 
    obj$alpha <- alpha
    obj$gamma <- gamma
    obj$lim.type <- lim.type
 
    attr(obj$res[["cal"]]$xdecomp$Q, "u0") <- obj$Qlim[3, ]
+   attr(obj$res[["cal"]]$xdecomp$Q, "Nu") <- obj$Qlim[4, ]
+
    attr(obj$res[["cal"]]$xdecomp$T2, "u0") <- obj$T2lim[3, ]
+   attr(obj$res[["cal"]]$xdecomp$T2, "Nu") <- obj$T2lim[4, ]
+
+   attr(obj$res[["cal"]]$ydecomp$Q, "u0") <- obj$Zlim[3, ]
+   attr(obj$res[["cal"]]$ydecomp$Q, "Nu") <- obj$Zlim[4, ]
+
    obj$calres <- obj$res[["cal"]]
 
    if (!is.null(obj$res$test)) {
       attr(obj$res[["test"]]$xdecomp$Q, "u0") <- obj$Qlim[3, ]
+      attr(obj$res[["test"]]$xdecomp$Q, "Nu") <- obj$Qlim[4, ]
+
       attr(obj$res[["test"]]$xdecomp$T2, "u0") <- obj$T2lim[3, ]
+      attr(obj$res[["test"]]$xdecomp$T2, "Nu") <- obj$T2lim[4, ]
+
+      attr(obj$res[["test"]]$ydecomp$Q, "u0") <- obj$Zlim[3, ]
+      attr(obj$res[["test"]]$ydecomp$Q, "Nu") <- obj$Zlim[4, ]
+
       obj$testres <- obj$res[["test"]]
    }
 
@@ -644,14 +659,101 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
    xdecomp <- ldecomp(scores = xscores, residuals = xresiduals, loadings = object$xloadings,
       eigenvals = object$xeigenvals, ncomp.selected = object$ncomp.selected)
 
-   # add u0 parameters as arguments, so the residuals can be normalized
+   # add u0 and Nu parameters as arguments, so the residuals can be normalized
    attr(xdecomp$Q, "u0") <- object$Qlim[3, ]
+   attr(xdecomp$Q, "Nu") <- object$Qlim[4, ]
+
    attr(xdecomp$T2, "u0") <- object$T2lim[3, ]
+   attr(xdecomp$T2, "Nu") <- object$T2lim[4, ]
+
+   if (!is.null(ydecomp)) {
+      attr(ydecomp$Q, "u0") <- object$Zlim[3, ]
+      attr(ydecomp$Q, "Nu") <- object$Zlim[4, ]
+   }
 
    return(
       plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected,
          xdecomp = xdecomp, ydecomp = ydecomp)
    )
+}
+
+#' Categorize PLS results based on total distance.
+#'
+#' @description
+#' The method uses full distance for decomposition of X-data and squared Y-residuals of PLS results
+#' from \code{res} with critical limits computed for the PLS model and categorizes the
+#' corresponding objects as "regular", "extreme" or "outlier".
+#'
+#' @param obj
+#' object with PCA model
+#' @param res
+#' object with PCA results
+#' @param ncomp
+#' number of components to use for the categorization
+#' @param ...
+#' other parameters
+#'
+#' @details
+#' The method does not categorize hidden values if any. It is based on the approach described in
+#' [1] and works only if data driven approach is used for computing critical limits.
+#'
+#' @return
+#' vector (factor) with results of categorization.
+#'
+#' @references
+#' 1. Rodionova O. Ye., Pomerantsev A. L. Detection of Outliers in Projection-Based Modeling.
+#' Analytical Chemistry (2020, in publish). doi: 10.1021/acs.analchem.9b04611
+#'
+#' @export
+categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, ...) {
+
+   create_categories <- function(nobj, extremes_ind, outliers_ind) {
+      categories <- rep(1, nobj)
+      categories[extremes_ind] <- 2
+      categories[outliers_ind] <- 3
+      return(factor(categories, levels = 1:3, labels = c("regular", "extreme", "outlier")))
+   }
+
+   # if not data driven - quit
+   if (!(obj$lim.type %in% c("ddmoments", "ddrobust"))) {
+      stop("categorize.pls() works only with data driven limit types ('ddoments' or 'ddrobust').")
+   }
+
+   # get distance values for selected number of components
+   h <- res$xdecomp$T2[, ncomp]
+   q <- res$xdecomp$Q[, ncomp]
+   z <- res$ydecomp$Q[, ncomp]
+
+   # remove excluded values if any
+   rows_excluded <- attr(res$xdecomp$Q, "exclrows")
+   if (length(rows_excluded) > 0) {
+      h <- h[-rows_excluded]
+      q <- q[-rows_excluded]
+      z <- z[-rows_excluded]
+   }
+
+   # get scale factors
+   h0 <- if (!is.null(attr(res$xdecomp$T2, "u0"))) attr(res$xdecomp$T2, "u0")[[ncomp]]
+   q0 <- if (!is.null(attr(res$xdecomp$Q, "u0"))) attr(res$xdecomp$Q, "u0")[[ncomp]]
+   z0 <- if (!is.null(attr(res$ydecomp$Q, "u0"))) attr(res$ydecomp$Q, "u0")[[ncomp]]
+
+   # get DoF factors
+   Nh <- if (!is.null(attr(res$xdecomp$T2, "Nu"))) attr(res$xdecomp$T2, "Nu")[[ncomp]]
+   Nq <- if (!is.null(attr(res$xdecomp$Q, "Nu"))) attr(res$xdecomp$Q, "Nu")[[ncomp]]
+   Nz <- if (!is.null(attr(res$ydecomp$Q, "Nu"))) attr(res$ydecomp$Q, "Nu")[[ncomp]]
+
+   # compute total distance and DoF for it
+   g <- Nh * h / h0 + Nq * q / q0 + Nz * z / z0
+   Ng <- Nh + Nq + Nz
+   nobj <- length(g)
+
+   # compute limits for total distance
+   ext_lim <- qchisq(1 - obj$alpha, Ng)
+   out_lim <- qchisq((1 - obj$gamma)^(1/nobj), Ng)
+
+   outliers_ind <- g > out_lim
+   extremes_ind <- g > ext_lim & g < out_lim
+   return(create_categories(nobj, extremes_ind, outliers_ind))
 }
 
 #' Summary method for PLS model object
@@ -970,6 +1072,108 @@ plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log
    ldecomp.plotResiduals(res, obj$Qlim, obj$T2lim, ncomp = ncomp, log = log, norm = norm,
       cgroup = cgroup, xlim = xlim, ylim = ylim, show.limits = show.limits, lim.col = lim.col,
       lim.lwd = lim.lwd, show.legend = show.legend, main = main, ...)
+}
+
+#' Residual XY-distance plot
+#'
+#' @description
+#' Shows a plot with full X-distance (f) vs. orthogonal Y-distance (z) for PLS model results.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param ncomp
+#' how many components to use (by default optimal value selected for the model will be used)
+#' @param log
+#' logical, apply log tranformation to the distances or not (see details)
+#' @param norm
+#' logical, normalize distance values or not (see details)
+#' @param cgroup
+#' color grouping of plot points (works only if one result object is available)
+#' @param xlim
+#' limits for x-axis
+#' @param ylim
+#' limits for y-axis
+#' @param show.legend
+#' logical, show or not a legend on the plot (needed if several result objects are available)
+#' @param show.limits
+#' logical, show or not lines/curves with critical limits for the distances
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier limits
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier limits
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier limits
+#' @param main
+#' title for the plot
+#' @param legend.position
+#' position of legend (if shown)
+#' @param res
+#' list with result objects to show the plot for (by defaul, model results are used)
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' The function presents a way to identify extreme objects and outliers based on both full distance
+#' for X-decomposition (known as f) and squared residual distance for Y-decomposition (z). The
+#' approach has been proposed in [1].
+#'
+#' The plot is available only if data driven methods (classic or robust) have been used for
+#' computing of critical limits.
+#'
+#' @references
+#' 1. Rodionova O. Ye., Pomerantsev A. L. Detection of Outliers in Projection-Based Modeling.
+#' Analytical Chemistry (2020, in publish). doi: 10.1021/acs.analchem.9b04611
+#'
+#' @export
+plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
+   main = sprintf("XY-residuals (ncomp = %d)", ncomp), cgroup = NULL, xlim = NULL, ylim = NULL,
+   show.limits = TRUE, lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
+   show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
+
+   if (!(obj$lim.type %in% c("ddmoments", "ddrobust"))) {
+      stop("plotXYResiduals() works only with data driven limit types ('ddoments' or 'ddrobust')")
+   }
+
+   # generate values for cgroup if categories should be used
+   if (length(cgroup) == 1 && cgroup == "categories") {
+      cgroup <- categorize(obj, res[[1]], ncomp = ncomp)
+   }
+
+   # get xdecomp from list with result objects
+   res <- lapply(res, function(x) if ("ldecomp" %in% class(x$xdecomp)) x)
+   res <- res[!sapply(res, is.null)]
+
+   getPlotLim <- function(lim, pd, ld, dim, show.limits) {
+      if (!(is.null(lim) && show.limits)) return(lim)
+      return(c(0, max(sapply(pd, function(x) max(x[, dim])), ld$outliers[, dim])) * 1.05)
+   }
+
+   # compute plot data for each result object
+   plot_data <- lapply(res, plotXYResiduals.plsres, ncomp = ncomp, norm = norm, log = log,
+      show.plot = FALSE)
+
+   # get coordinates for critical limits
+   lim_data <- pls.getLimitsCoordinates(obj$Qlim, obj$T2lim, obj$Zlim,
+      ncomp = ncomp, nobj = obj$limParams$Q$moments$nobj, norm = norm, log = log)
+
+   xlim <- getPlotLim(xlim, plot_data, lim_data, 1, show.limits)
+   ylim <- getPlotLim(ylim, plot_data, lim_data, 2, show.limits)
+
+   # make plot
+   if (length(plot_data) == 1) {
+      mdaplot(plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, ...)
+   } else {
+      mdaplotg(plot_data, type = "p", xlim = xlim, ylim = ylim, show.legend = show.legend,
+         legend.position = legend.position, ...)
+   }
+
+   # show critical limits
+   if (show.limits) {
+      lines(lim_data$extremes[, 1], lim_data$extremes[, 2],
+         col = lim.col[1], lty = lim.lty[1], lwd = lim.lwd[1])
+      lines(lim_data$outliers[, 1], lim_data$outliers[, 2],
+         col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
+   }
 }
 
 #' X loadings plot for PLS
@@ -1633,6 +1837,7 @@ getVIPScores.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
 #' @return
 #' array \code{nvar x ncomp x ny} with selectivity ratio values
 #'
+#' @export
 selratio <- function(obj, ncomp = obj$ncomp.selected) {
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
@@ -1718,4 +1923,117 @@ selratio <- function(obj, ncomp = obj$ncomp.selected) {
 getSelectivityRatio.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
    warning("This function is deprecated and will be removed in future. Use 'selratio()' insted.")
    return(selratio(obj, ncomp = ncomp))
+}
+
+#' Compute critical limits for orthogonal distances (Q)
+#'
+#' @param lim.type
+#' which method to use for calculation of critical limits for residuals
+#' @param alpha
+#' significance level for extreme limits.
+#' @param gamma
+#' significance level for outlier limits.
+#' @param params
+#' distribution parameters returned by ldecomp.getLimParams
+#'
+#' @export
+pls.getZLimits <- function(lim.type, alpha, gamma, params) {
+
+   if (!(lim.type %in% c("ddmoments", "ddrobust"))) {
+      return(NULL)
+   }
+
+   pZ <- if (regexpr("robust", lim.type) > 0) params$Z$robust else params$Z$moments
+   DoF <- round(pZ$Nu)
+   DoF[DoF < 1] <- 1
+   DoF[DoF > 250] <- 250
+
+   ncomp <- length(pZ$u0)
+   lim <- rbind(0, 0, pZ$u0, DoF)
+
+   colnames(lim) <- paste("Comp", seq_len(ncomp))
+   rownames(lim) <- c("Extremes limits", "Outliers limits", "Mean", "DoF")
+   attr(lim, "name") <- "Critical limits for orthogonal distance (Z)"
+   attr(lim, "alpha") <- alpha
+   attr(lim, "gamma") <- gamma
+   attr(lim, "lim.type") <- lim.type
+
+   return(lim)
+}
+
+#' Compute coordinates of lines or curves with critical limits
+#'
+#' @param Qlim
+#' matrix with critical limits for orthogonal distances (X)
+#' @param T2lim
+#' matrix with critical limits for score distances (X)
+#' @param Zlim
+#' matrix with critical limits for orthogonal distances (Y)
+#' @param ncomp
+#' number of components for computing the coordinates
+#' @param norm
+#' logical, shall distance values be normalized or not
+#' @param log
+#' logical, shall log transformation be applied or not
+#'
+#' @return
+#' list with two matrices (x and y coordinates of corresponding limits)
+#'
+#' @export
+pls.getLimitsCoordinates <- function(Qlim, T2lim, Zlim, nobj, ncomp, norm, log) {
+
+   # get DoF
+   Nh <- T2lim[4, ncomp]
+   Nq <- Qlim[4, ncomp]
+   Nz <- Zlim[4, ncomp]
+   Nf <- Nq + Nh
+
+   # get scaling factor
+   h0 <- T2lim[3, ncomp]
+   q0 <- Qlim[3, ncomp]
+   z0 <- Zlim[3, ncomp]
+   f0 <- Nf
+
+   # process degrees of freedom for (Z)
+   Nz <- round(Nz)
+   Nz[Nz < 1] <- 1
+   Nz[Nz > 250] <- 250
+
+   # process degrees of freedom for (F)
+   Nf <- round(Nf)
+   Nf[Nf < 1] <- 1
+   Nf[Nf > 250] <- 250
+
+   # get limit parameters
+   alpha <- attr(Qlim, "alpha")
+   gamma <- attr(Qlim, "gamma")
+
+   ## slope and intercepts
+   eB <- qchisq(1 - alpha, Nf + Nz) / Nz * z0
+   oB <- qchisq((1 - gamma) ^ (1 / nobj), Nf + Nz) / Nz * z0
+   eA <- oA <- -1 * (z0 / f0) * (Nf / Nz)
+
+   fE <- seq(-0.95, -eB / eA, length.out = 100)
+   fO <- seq(-0.95, -oB / oA, length.out = 100)
+   zE <- eA * fE + eB
+   zO <- oA * fO + oB
+
+   if (norm) {
+      fE <- fE / f0
+      zE <- zE / z0
+      fO <- fO / f0
+      zO <- zO / z0
+   }
+
+   if (log) {
+      fE <- log(1 + fE)
+      zE <- log(1 + zE)
+      fO <- log(1 + fO)
+      zO <- log(1 + zO)
+   }
+
+   return(list(
+      extremes = cbind(fE, zE),
+      outliers = cbind(fO, zO)
+   ))
 }
