@@ -476,7 +476,6 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
    return(list(Q = Q, T2 = T2))
 }
 
-
 ###############################
 # Methods for critical limits #
 ###############################
@@ -813,6 +812,7 @@ ldecomp.getQLimits <- function(lim.type, alpha, gamma, params, residuals, eigenv
 #' @param params
 #' distribution parameters returned by ldecomp.getLimParams
 #'
+#' @export
 ldecomp.getT2Limits <- function(lim.type, alpha, gamma, params) {
 
    pQ <- if (regexpr("robust", lim.type) > 0) params$Q$robust else params$Q$moments
