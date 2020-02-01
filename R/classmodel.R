@@ -77,6 +77,8 @@ plotPredictions.classmodel <- function(obj, res.name = NULL, nc = seq_len(obj$nc
 #'
 #' @param obj
 #' classification model (object of class \code{plsda}, \code{simca}, etc.).
+#' @param legend.position
+#' position of the legend (as in \code{mdaplotg}).
 #' @param ...
 #' parameters for \code{\link{plotPerformance.classmodel}} function.
 #'
@@ -95,6 +97,8 @@ plotSpecificity.classmodel <- function(obj, legend.position = "bottomright", ...
 #'
 #' @param obj
 #' classification model (object of class \code{plsda}, \code{simca}, etc.).
+#' @param legend.position
+#' position of the legend (as in \code{mdaplotg}).
 #' @param ...
 #' parameters for \code{\link{plotPerformance.classmodel}} function.
 #'

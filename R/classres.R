@@ -433,6 +433,8 @@ plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, 
 #'
 #' @param obj
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param legend.position
+#' position of the legend (as in \code{mdaplotg}).
 #' @param ...
 #' other parameters for \code{\link{plotPerformance.classres}}
 #'
@@ -452,6 +454,8 @@ plotSensitivity.classres <- function(obj, legend.position = "bottomright", ...) 
 #'
 #' @param obj
 #' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' @param legend.position
+#' position of the legend (as in \code{mdaplotg}).
 #' @param ...
 #' other parameters for \code{\link{plotPerformance.classres}}
 #'
