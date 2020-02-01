@@ -358,10 +358,12 @@ plotYResiduals.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, sho
 #'
 #' @param obj
 #' a regression model (object of class \code{regmodel})
+#' @param ncomp
+#' number of components to show the plot for
 #' @param ...
 #' other plot parameters (see \code{link{plot.regcoeffs}} for details)
 #'
 #' @export
-plotRegcoeffs.regmodel <- function(obj, ...) {
-   plot(obj$coeffs, ...)
+plotRegcoeffs.regmodel <- function(obj, ncomp = obj$ncomp.selected, ...) {
+   plot(obj$coeffs, ncomp = ncomp, ...)
 }
