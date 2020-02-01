@@ -4,10 +4,12 @@
 \alias{plotSpecificity.classres}
 \title{Specificity plot for classification results}
 \usage{
-\method{plotSpecificity}{classres}(obj, ...)
+\method{plotSpecificity}{classres}(obj, legend.position = "bottomright", ...)
 }
 \arguments{
 \item{obj}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
+
+\item{legend.position}{position of the legend (as in \code{mdaplotg}).}
 
 \item{...}{other parameters for \code{\link{plotPerformance.classres}}}
 }

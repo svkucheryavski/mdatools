@@ -40,7 +40,7 @@ mdaplot(
   lab.col = "darkgray",
   lab.cex = 0.65,
   show.excluded = FALSE,
-  col.excluded = "#E0E0E0",
+  col.excluded = "#C0C0C0",
   nbins = 60,
   force.x.values = NA,
   opacity = 1,

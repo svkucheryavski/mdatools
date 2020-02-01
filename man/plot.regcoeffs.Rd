@@ -11,7 +11,7 @@
   type = (if (x$nvar > 30) "l" else "h"),
   col = c(mdaplot.getColors(1), "lightgray"),
   show.lines = c(NA, 0),
-  show.ci = TRUE,
+  show.ci = FALSE,
   alpha = 0.05,
   ...
 )

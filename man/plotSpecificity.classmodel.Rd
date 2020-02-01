@@ -4,10 +4,12 @@
 \alias{plotSpecificity.classmodel}
 \title{Specificity plot for classification model}
 \usage{
-\method{plotSpecificity}{classmodel}(obj, ...)
+\method{plotSpecificity}{classmodel}(obj, legend.position = "bottomright", ...)
 }
 \arguments{
 \item{obj}{classification model (object of class \code{plsda}, \code{simca}, etc.).}
+
+\item{legend.position}{position of the legend (as in \code{mdaplotg}).}
 
 \item{...}{parameters for \code{\link{plotPerformance.classmodel}} function.}
 }

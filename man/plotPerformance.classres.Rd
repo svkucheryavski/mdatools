@@ -9,6 +9,7 @@
   nc = 1,
   type = "b",
   param = c("sensitivity", "specificity", "misclassified"),
+  labels = "values",
   ylab = "",
   ylim = c(0, 1.1),
   xticks = seq_len(obj$ncomp),
@@ -24,6 +25,8 @@
 \item{type}{type of the plot}
 
 \item{param}{which performance parameter to make the plot for (can be a vector with several values).}
+
+\item{labels}{what to show as labels for plot objects.}
 
 \item{ylab}{label for y axis}
 

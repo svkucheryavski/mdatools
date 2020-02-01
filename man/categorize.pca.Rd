@@ -4,7 +4,7 @@
 \alias{categorize.pca}
 \title{Categorize PCA results based on orthogonal and score distances.}
 \usage{
-\method{categorize}{pca}(obj, res, ncomp = obj$ncomp.selected, ...)
+\method{categorize}{pca}(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, ...)
 }
 \arguments{
 \item{obj}{object with PCA model}
@@ -21,7 +21,7 @@ vector (factor) with results of categorization.
 \description{
 The method compares score and orthogonal distances of PCA results from \code{res} with
 critical limits computed for the PCA model and categorizes the corresponding objects as
-"normal", "extreme" or "outlier".
+"regular", "extreme" or "outlier".
 }
 \details{
 The method does not categorize hidden values if any.

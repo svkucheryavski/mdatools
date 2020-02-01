@@ -4,10 +4,12 @@
 \alias{plotRegcoeffs.regmodel}
 \title{Regression coefficient plot for regression model}
 \usage{
-\method{plotRegcoeffs}{regmodel}(obj, ...)
+\method{plotRegcoeffs}{regmodel}(obj, ncomp = obj$ncomp.selected, ...)
 }
 \arguments{
 \item{obj}{a regression model (object of class \code{regmodel})}
+
+\item{ncomp}{number of components to show the plot for}
 
 \item{...}{other plot parameters (see \code{link{plot.regcoeffs}} for details)}
 }

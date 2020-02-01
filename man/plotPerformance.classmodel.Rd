@@ -9,6 +9,7 @@
   nc = 1,
   param = "misclassified",
   type = "b",
+  labels = "values",
   ylab = "",
   ylim = c(0, 1.15),
   xticks = seq_len(dim(obj$res$cal$c.pred)[2]),
@@ -25,6 +26,8 @@
 or \code{"misclassified"})}
 
 \item{type}{type of the plot}
+
+\item{labels}{what to show as labels for plot objects.}
 
 \item{ylab}{label for y axis}
 
