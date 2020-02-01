@@ -541,3 +541,91 @@ plot.plsres <- function(x, ncomp = x$ncomp.selected, ny = 1, show.labels = FALSE
    plotPredictions.regres(x, ncomp = ncomp, ny = ny, ...)
    par(mfrow = c(1, 1))
 }
+
+#' Residual distance plot
+#'
+#' @description
+#' Shows a plot with orthogonal (Q, q) vs. score (T2, h) distances for data objects.
+#'
+#' @param obj
+#' object of \code{ldecomp} class.
+#' @param ncomp
+#' number of components to show the plot for (if NULL, selected by model value will be used).
+#' @param norm
+#' logical, normalize distance values or not (see details)
+#' @param log
+#' logical, apply log tranformation to the distances or not (see details)
+#' @param show.labels
+#' logical, show or not labels for the plot objects
+#' @param labels
+#' what to show as labels if necessary
+#' @param show.plot
+#' logical, shall plot be created or just plot series object is needed
+#' @param ...
+#' most of graphical parameters from \code{\link{mdaplot}} function can be used.
+#'
+#' @export
+plotXYResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
+   show.labels = FALSE, labels = "names", show.plot = TRUE, ...) {
+
+   attrs <- mda.getattr(obj$xdecomp$Q)
+
+  # function for transforming distances
+   transform <- function(u, u0, norm, log) {
+      if (norm) u <- u / u0
+      if (log) u <- log(1 + u)
+      return(u)
+   }
+
+   # function for creating labels depending on transformation
+   get_label <- function(lab, norm, log) {
+      if (norm) lab <- paste0(lab, "/", lab, "0")
+      if (log) lab <- paste0("log(1 + ", lab, ")")
+      return(lab)
+   }
+
+   # get scale factors
+   h0 <- if (!is.null(attr(obj$xdecomp$T2, "u0"))) attr(obj$xdecomp$T2, "u0")[[ncomp]]
+   q0 <- if (!is.null(attr(obj$xdecomp$Q, "u0"))) attr(obj$xdecomp$Q, "u0")[[ncomp]]
+   z0 <- if (!is.null(attr(obj$ydecomp$Q, "u0"))) attr(obj$ydecomp$Q, "u0")[[ncomp]]
+
+   # get DoF factors
+   Nh <- if (!is.null(attr(obj$xdecomp$T2, "Nu"))) attr(obj$xdecomp$T2, "Nu")[[ncomp]]
+   Nq <- if (!is.null(attr(obj$xdecomp$Q, "Nu"))) attr(obj$xdecomp$Q, "Nu")[[ncomp]]
+   Nz <- if (!is.null(attr(obj$ydecomp$Q, "Nu"))) attr(obj$ydecomp$Q, "Nu")[[ncomp]]
+
+   # get distances
+   h <- obj$xdecomp$T2[, ncomp]
+   q <- obj$xdecomp$Q[, ncomp]
+   z <- obj$ydecomp$Q[, ncomp]
+
+   # compute full distance for X
+   f <- Nh * h / h0 + Nq * q / q0
+   Nf <- f0 <- Nh + Nq
+
+   # prepare plot data
+   f <- transform(f, f0, norm, log)
+   z <- transform(z, z0, norm, log)
+
+   # default values for local labels
+   lxlab <- get_label("f", norm, log)
+   lylab <- get_label("z", norm, log)
+
+   # combine everything to dataset and assign attributes
+   plot_data <- mda.cbind(f, z)
+   plot_data <- mda.setattr(plot_data, mda.getattr(obj$xdecomp$Q), "row")
+
+   rownames(plot_data) <- rownames(obj$xdecomp$Q)
+   colnames(plot_data) <- c(
+      paste0("Full X-distance, ", lxlab),
+      paste0("Y-distance, ", lylab)
+   )
+
+   attr(plot_data, "name") <- sprintf("XY residuals (ncomp = %d)", ncomp)
+
+   # if no plot required - return plot series object
+   if (!show.plot) return(plot_data)
+
+   # show plot
+   return(mdaplot(plot_data, ...))
+}
