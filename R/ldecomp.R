@@ -233,7 +233,7 @@ plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected, norm = FALSE,
 
    # combine everything to dataset and assign attributes
    plot_data <- mda.cbind(h, q)
-   plot_data <- mda.setattr(plot_data, mda.getattr(obj$Q), "row")
+   plot_data <- mda.setattr(plot_data, attrs, "row")
    rownames(plot_data) <- rownames(obj$Q)
    colnames(plot_data) <- c(
       paste0("Score distance, ", lxlab),

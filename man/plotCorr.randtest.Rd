@@ -4,7 +4,14 @@
 \alias{plotCorr.randtest}
 \title{Correlation plot for randomization test results}
 \usage{
-\method{plotCorr}{randtest}(obj, ncomp = obj$ncomp.selected, ylim = NULL, ...)
+\method{plotCorr}{randtest}(
+  obj,
+  ncomp = obj$ncomp.selected,
+  ylim = NULL,
+  xlab = expression(r^2),
+  ylab = "Test statistic",
+  ...
+)
 }
 \arguments{
 \item{obj}{results of randomization test (object of class `randtest`)}
@@ -12,6 +19,10 @@
 \item{ncomp}{number of component to make the plot for}
 
 \item{ylim}{limits for y axis}
+
+\item{xlab}{label for x-axis}
+
+\item{ylab}{label for y-axis}
 
 \item{...}{other optional arguments}
 }

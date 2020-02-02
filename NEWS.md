@@ -41,6 +41,7 @@ while `ncomp` assumes only one value, which is the case for these two plots.
 
 * In regression coefficients plot logical parameter `show.line` has been replaced with more general `show.lines` from `mdaplot()`.
 
+* `plotPredictions()` method for models and results is now based on `mdaplot` (not `mdaplotg()` as  before) and does not support arguments for e.g. legend position, etc.
 
 ## General
 * Code coverage with tests has been extended significantly.

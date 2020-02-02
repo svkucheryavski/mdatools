@@ -14,10 +14,6 @@ pls.getZLimits(lim.type, alpha, gamma, params)
 \item{gamma}{significance level for outlier limits.}
 
 \item{params}{distribution parameters returned by ldecomp.getLimParams}
-
-\item{residuals}{matrix with residuals (E)}
-
-\item{eigenvals}{egenvalues for the components used to decompose the data}
 }
 \description{
 Compute critical limits for orthogonal distances (Q)

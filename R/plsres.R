@@ -592,7 +592,6 @@ plotXYResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE,
    # get DoF factors
    Nh <- if (!is.null(attr(obj$xdecomp$T2, "Nu"))) attr(obj$xdecomp$T2, "Nu")[[ncomp]]
    Nq <- if (!is.null(attr(obj$xdecomp$Q, "Nu"))) attr(obj$xdecomp$Q, "Nu")[[ncomp]]
-   Nz <- if (!is.null(attr(obj$ydecomp$Q, "Nu"))) attr(obj$ydecomp$Q, "Nu")[[ncomp]]
 
    # get distances
    h <- obj$xdecomp$T2[, ncomp]
@@ -601,7 +600,7 @@ plotXYResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE,
 
    # compute full distance for X
    f <- Nh * h / h0 + Nq * q / q0
-   Nf <- f0 <- Nh + Nq
+   f0 <- Nh + Nq
 
    # prepare plot data
    f <- transform(f, f0, norm, log)
@@ -613,7 +612,7 @@ plotXYResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE,
 
    # combine everything to dataset and assign attributes
    plot_data <- mda.cbind(f, z)
-   plot_data <- mda.setattr(plot_data, mda.getattr(obj$xdecomp$Q), "row")
+   plot_data <- mda.setattr(plot_data, attrs, "row")
 
    rownames(plot_data) <- rownames(obj$xdecomp$Q)
    colnames(plot_data) <- c(

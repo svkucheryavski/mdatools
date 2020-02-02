@@ -636,6 +636,8 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
       ydecomp <- ldecomp(scores = xscores, loadings = object$yloadings, residuals = yresiduals,
             eigenvals = object$yeigenvals, ncomp.selected = object$ncomp.selected)
       ydecomp$scores <- yscores
+      attr(ydecomp$Q, "u0") <- object$Zlim[3, ]
+      attr(ydecomp$Q, "Nu") <- object$Zlim[4, ]
    }
 
    # unscale predicted y values
@@ -665,11 +667,6 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 
    attr(xdecomp$T2, "u0") <- object$T2lim[3, ]
    attr(xdecomp$T2, "Nu") <- object$T2lim[4, ]
-
-   if (!is.null(ydecomp)) {
-      attr(ydecomp$Q, "u0") <- object$Zlim[3, ]
-      attr(ydecomp$Q, "Nu") <- object$Zlim[4, ]
-   }
 
    return(
       plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected,
@@ -749,7 +746,7 @@ categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
 
    # compute limits for total distance
    ext_lim <- qchisq(1 - obj$alpha, Ng)
-   out_lim <- qchisq((1 - obj$gamma)^(1/nobj), Ng)
+   out_lim <- qchisq((1 - obj$gamma) ^ (1 / nobj), Ng)
 
    outliers_ind <- g > out_lim
    extremes_ind <- g > ext_lim & g < out_lim
@@ -1969,6 +1966,8 @@ pls.getZLimits <- function(lim.type, alpha, gamma, params) {
 #' matrix with critical limits for score distances (X)
 #' @param Zlim
 #' matrix with critical limits for orthogonal distances (Y)
+#' @param nobj
+#' number of objects to compute the limits for
 #' @param ncomp
 #' number of components for computing the coordinates
 #' @param norm
@@ -1989,8 +1988,6 @@ pls.getLimitsCoordinates <- function(Qlim, T2lim, Zlim, nobj, ncomp, norm, log) 
    Nf <- Nq + Nh
 
    # get scaling factor
-   h0 <- T2lim[3, ncomp]
-   q0 <- Qlim[3, ncomp]
    z0 <- Zlim[3, ncomp]
    f0 <- Nf
 
