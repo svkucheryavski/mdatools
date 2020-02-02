@@ -388,8 +388,8 @@ summary.plsda <- function(object, ncomp = object$ncomp.selected,
       if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
       out[, 1:4] <- round(out[, 1:4], 2)
       print(out[, -c(1, 3), drop = FALSE])
+      cat("\n")
    }
-   cat("\n")
 }
 
 #' Print method for PLS-DA model object

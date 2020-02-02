@@ -211,6 +211,10 @@ plotHist.randtest <- function(obj, ncomp = obj$ncomp.selected, bwd = 0.9, ...) {
 #' number of component to make the plot for
 #' @param ylim
 #' limits for y axis
+#' @param xlab
+#' label for x-axis
+#' @param ylab
+#' label for y-axis
 #' @param ...
 #' other optional arguments
 #'
@@ -218,7 +222,8 @@ plotHist.randtest <- function(obj, ncomp = obj$ncomp.selected, bwd = 0.9, ...) {
 #' See examples in help for \code{\link{randtest}} function.
 #'
 #' @export
-plotCorr.randtest <- function(obj, ncomp = obj$ncomp.selected, ylim = NULL, ...) {
+plotCorr.randtest <- function(obj, ncomp = obj$ncomp.selected, ylim = NULL,
+   xlab = expression(r^2), ylab = "Test statistic", ...) {
 
    plot_data <- list(
       "perm" = cbind(obj$corrperm[, ncomp]^2, obj$statperm[, ncomp]),
@@ -235,7 +240,8 @@ plotCorr.randtest <- function(obj, ncomp = obj$ncomp.selected, ylim = NULL, ...)
 
    attr(plot_data[[1]], "name") <- sprintf("Permutations (ncomp = %d)", ncomp)
    colnames(plot_data[[1]]) <- c(expression(r^2), "Test statistic")
-   mdaplotg(plot_data, type = "p", ylim = ylim, legend.position = "bottomright", ...)
+   mdaplotg(plot_data, type = "p", ylim = ylim, xlab = xlab, ylab = ylab,
+      legend.position = "bottomright", ...)
 
    fit_data <- rbind(apply(plot_data[[1]], 2, mean), plot_data[[2]])
    lines(fit_data[, 1], fit_data[, 2], col = rgb(0.6, 0.6, 0.6), lty = 2, lwd = 0.75)
