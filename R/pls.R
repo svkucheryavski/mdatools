@@ -729,15 +729,27 @@ categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
       z <- z[-rows_excluded]
    }
 
-   # get scale factors
-   h0 <- if (!is.null(attr(res$xdecomp$T2, "u0"))) attr(res$xdecomp$T2, "u0")[[ncomp]]
-   q0 <- if (!is.null(attr(res$xdecomp$Q, "u0"))) attr(res$xdecomp$Q, "u0")[[ncomp]]
-   z0 <- if (!is.null(attr(res$ydecomp$Q, "u0"))) attr(res$ydecomp$Q, "u0")[[ncomp]]
+   # get DoF
+   Nh <- obj$T2lim[4, ncomp]
+   Nq <- obj$Qlim[4, ncomp]
+   Nz <- obj$Zlim[4, ncomp]
+   Nf <- Nq + Nh
 
-   # get DoF factors
-   Nh <- if (!is.null(attr(res$xdecomp$T2, "Nu"))) attr(res$xdecomp$T2, "Nu")[[ncomp]]
-   Nq <- if (!is.null(attr(res$xdecomp$Q, "Nu"))) attr(res$xdecomp$Q, "Nu")[[ncomp]]
-   Nz <- if (!is.null(attr(res$ydecomp$Q, "Nu"))) attr(res$ydecomp$Q, "Nu")[[ncomp]]
+   # get scale factor
+   h0 <- obj$T2lim[3, ncomp]
+   q0 <- obj$Qlim[3, ncomp]
+   z0 <- obj$Zlim[3, ncomp]
+   f0 <- Nq + Nh
+
+   # process degrees of freedom for (Z)
+   Nz <- round(Nz)
+   Nz[Nz < 1] <- 1
+   Nz[Nz > 250] <- 250
+
+   # process degrees of freedom for (F)
+   Nf <- round(Nf)
+   Nf[Nf < 1] <- 1
+   Nf[Nf > 250] <- 250
 
    # compute total distance and DoF for it
    g <- Nh * h / h0 + Nq * q / q0 + Nz * z / z0

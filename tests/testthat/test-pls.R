@@ -529,3 +529,58 @@ for (i in seq_along(datasets)) {
 #   vip <- as.matrix(read.csv("../matlab/pls-vipscores.csv", header = FALSE))
 #   expect_equivalent(vipscores(m, ncomp = 4), vip, tolerance = 10^-4)
 #})
+
+#########################################
+# Block 7. Tests for outlier detection  #
+#########################################
+
+context("pls: xy residuals and categorization")
+
+test_that("XY-residual limits are computed correctly", {
+
+   # test for people data
+   d <- datasets[[1]]
+   m1 <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 1)
+   m2 <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 1, lim.type = "ddrobust")
+   m3 <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 1, lim.type = "chisq")
+
+   expect_null(m3$Zlim)
+   expect_equal(dim(m1$Zlim), c(4, d$ncomp))
+   expect_equal(dim(m2$Zlim), c(4, d$ncomp))
+
+   c1 <- categorize(m1, m1$res$cal)
+   c2 <- categorize(m2, m2$res$cal)
+
+   par(mfrow = c(1, 2))
+   plotXYResiduals(m1, show.labels = T)
+   plotXYResiduals(m2, show.labels = T)
+
+   expect_error(c3 <- categorize(m3, m1$res$cal))
+   expect_equal(sum(c1 == "extreme"), 1)
+   expect_equal(sum(c1 == "outlier"), 0)
+
+   expect_equal(sum(c2 == "extreme"), 4)
+   expect_equal(sum(c2 == "outlier"), 1)
+
+   # make two outliers and test again
+   d <- datasets[[1]]
+   d$yc[9] <- 25
+   d$xc[1, 1] <- 115
+
+   m1 <- pls(d$xc, d$yc, 4, center = d$center, scale = d$scale, cv = 1)
+   m2 <- pls(d$xc, d$yc, 4, center = d$center, scale = d$scale, cv = 1, lim.type = "ddrobust")
+
+   c1 <- categorize(m1, m1$res$cal, ncomp = 2)
+   c2 <- categorize(m2, m1$res$cal, ncomp = 2)
+
+   par(mfrow = c(1, 2))
+   plotXYResiduals(m1, show.labels = T, ncomp = 2)
+   plotXYResiduals(m2, show.labels = T, ncomp = 2)
+
+   expect_equal(sum(c1 == "extreme"), 3)
+   expect_equal(sum(c1 == "outlier"), 0)
+
+   expect_equal(sum(c2 == "extreme"), 2)
+   expect_equal(sum(c2 == "outlier"), 2)
+
+})
