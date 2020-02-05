@@ -9,7 +9,7 @@ Multivariate Data Analysis Tools
 
 The general idea of the package is to collect most widespread chemometric methods and give a similar "user interface" (or rather API) for using them. So if a user knows how to make a model and visualize results for one method, he or she can easily do this for the others.
 
-For more details and examples read a [Bookdown tutorial](http://svkucheryavski.github.io/mdatools/).
+For more details and examples read a [Bookdown tutorial](http://mdatools.com/docs/).
 
 If you want to cite the package, please use the following: Sergey Kucheryavskiy, *mdatools – R package for chemometrics*, Chemometrics and Intelligent Laboratory Systems, Volume 198,
 2020 (DOI: [10.1016/j.chemolab.2020.103937](https://doi.org/10.1016/j.chemolab.2020.103937)).
