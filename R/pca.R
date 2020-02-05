@@ -429,9 +429,9 @@ categorize.pca <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
 
    # if data driven
    h0 <- obj$T2lim[3, ncomp]
-   Nh <- round(obj$T2lim[4, ncomp])
+   Nh <- obj$T2lim[4, ncomp]
    q0 <- obj$Qlim[3, ncomp]
-   Nq <- round(obj$Qlim[4, ncomp])
+   Nq <- obj$Qlim[4, ncomp]
 
    f <- Nh * h / h0 + Nq * q / q0
    outliers_ind <- f > (obj$T2lim[2, ncomp] * Nh / h0)
