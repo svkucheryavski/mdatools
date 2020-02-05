@@ -80,7 +80,7 @@ Other changes:
 * `plotResiduals.simcam()` and `plotResiduals.simcamres ()` are not available anymore (both were a shortcut for `plotResiduals.simca()` which was superfluous.
 * Summary information now is shown as a single matrix with extra column containing number of selected components in each model.
 
-## Regression coefficients (class `regcoeffs`)
+## Regression coefficients
 * Added a new method `confint()` which returns confidence interval (if corresponding statistics are available).
 * Minor improvements to regression coefficients plot (e.g. logical parameter `show.line` is replaced with `show.lines` from `mdaplot()`).
 
