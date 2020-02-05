@@ -262,9 +262,8 @@ selectCompNum.pca <- function(obj, ncomp, ...) {
 #' Compute and set statistical limits for Q and T2 residual distances.
 #'
 #' @description
-#' Computes statisticsl limits for Q and T2 residual distances (based on calibration set)
-#' and assign the calculated values as model properties. The method also categorizes objects
-#' from calibration and test set accordingly (see \code{categorize.pca} for details).
+#' Computes statisticsl limits for orthogonal and score distances (based on calibration set)
+#' and assign the calculated values as model properties.
 #'
 #' @param obj
 #' object with PCA model

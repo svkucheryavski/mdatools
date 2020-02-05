@@ -27,9 +27,8 @@
 Object models with the two fields updated.
 }
 \description{
-Computes statisticsl limits for Q and T2 residual distances (based on calibration set)
-and assign the calculated values as model properties. The method also categorizes objects
-from calibration and test set accordingly (see \code{categorize.pca} for details).
+Computes statisticsl limits for orthogonal and score distances (based on calibration set)
+and assign the calculated values as model properties.
 }
 \details{
 The limits can be accessed as fields of model objects: \code{$Qlim} and \code{$T2lim}. Each

@@ -2,7 +2,7 @@
 % Please edit documentation in R/pls.R
 \name{categorize.pls}
 \alias{categorize.pls}
-\title{Categorize PLS results based on total distance.}
+\title{Categorize data rows based on PLS results and critical limits for total distance.}
 \usage{
 \method{categorize}{pls}(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, ...)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/pls.R
 \name{setDistanceLimits.pls}
 \alias{setDistanceLimits.pls}
-\title{Compute and set statistical limits for Q and T2 residual distances.}
+\title{Compute and set statistical limits for residual distances.}
 \usage{
 \method{setDistanceLimits}{pls}(
   obj,
@@ -24,17 +24,17 @@
 \item{...}{other arguments}
 }
 \value{
-Object models with the two fields updated.
+Object models with the three fields updated.
 }
 \description{
-Computes statisticsl limits for Q and T2 residual distances (based on calibration set)
-and assign the calculated values as model properties. The method also categorizes objects
-from calibration and test set accordingly (see \code{categorize.pca} for details).
+Computes statisticsl limits for orthogonal and score distances (x-decomposition) and
+orthogonal distance (y-decomposition) based on calibration set and assign the calculated
+values as model properties.
 }
 \details{
-The limits can be accessed as fields of model objects: \code{$Qlim} and \code{$T2lim}. Each
-is a matrix with four rows and \code{ncomp} columns. First row contains critical limits for
-extremes, second row - for outliers, third row contains mean value for corresponding distance
-(or its robust estimate in case of \code{lim.type = "ddrobust"}) and last row contains the
-degrees of freedom.
+The limits can be accessed as fields of model objects: \code{$Qlim}, \code{$T2lim}, and
+\code{$Zlim}. Each is a matrix with four rows and \code{ncomp} columns. In case of limits
+for x-decomposition, first row contains critical limits for extremes, second row - for outliers,
+third row contains mean value for corresponding distances (or its robust estimate in case of
+\code{lim.type = "ddrobust"}) and last row contains the degrees of freedom.
 }

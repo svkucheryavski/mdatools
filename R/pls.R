@@ -95,6 +95,9 @@
 #'  \code{\link{pls.simpls}} \tab implementation of SIMPLS algorithm.\cr
 #'  \code{\link{predict.pls}} \tab applies PLS model to a new data.\cr
 #'  \code{\link{selectCompNum.pls}} \tab set number of optimal components in the model.\cr
+#'  \code{\link{setDistanceLimits.pls}} \tab allows to change parameters for critical limits.\cr
+#'  \code{\link{categorize.pls}} \tab categorize data rows similar to
+#'    \code{\link{categorize.pca}}.\cr
 #'  \code{\link{selratio}} \tab computes matrix with selectivity ratio values.\cr
 #'  \code{\link{vipscores}} \tab computes matrix with VIP scores values.\cr
 #' }
@@ -111,7 +114,8 @@
 #'  decomposition.\cr
 #'  \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y
 #'  decomposition.\cr
-#'  \code{\link{plotXResiduals.pls}} \tab shows T2 vs. Q plot for x decomposition.\cr
+#'  \code{\link{plotXResiduals.pls}} \tab shows distance/residuals plot for x decomposition.\cr
+#'  \code{\link{plotXYResiduals.pls}} \tab shows joint distance plot for x and y decomposition.\cr
 #'  \code{\link{plotWeights.pls}} \tab shows plot with weights.\cr
 #'  \code{\link{plotSelectivityRatio.pls}} \tab shows plot with selectivity ratio values.\cr
 #'  \code{\link{plotVIPScores.pls}} \tab shows plot with VIP scores values.\cr
@@ -439,12 +443,12 @@ selectCompNum.pls <- function(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ..
    return(obj)
 }
 
-#' Compute and set statistical limits for Q and T2 residual distances.
+#' Compute and set statistical limits for residual distances.
 #'
 #' @description
-#' Computes statisticsl limits for Q and T2 residual distances (based on calibration set)
-#' and assign the calculated values as model properties. The method also categorizes objects
-#' from calibration and test set accordingly (see \code{categorize.pca} for details).
+#' Computes statisticsl limits for orthogonal and score distances (x-decomposition) and
+#' orthogonal distance (y-decomposition) based on calibration set and assign the calculated
+#' values as model properties.
 #'
 #' @param obj
 #' object with PLS model
@@ -459,14 +463,14 @@ selectCompNum.pls <- function(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ..
 #'
 #' @details
 #'
-#' The limits can be accessed as fields of model objects: \code{$Qlim} and \code{$T2lim}. Each
-#' is a matrix with four rows and \code{ncomp} columns. First row contains critical limits for
-#' extremes, second row - for outliers, third row contains mean value for corresponding distance
-#' (or its robust estimate in case of \code{lim.type = "ddrobust"}) and last row contains the
-#' degrees of freedom.
+#' The limits can be accessed as fields of model objects: \code{$Qlim}, \code{$T2lim}, and
+#' \code{$Zlim}. Each is a matrix with four rows and \code{ncomp} columns. In case of limits
+#' for x-decomposition, first row contains critical limits for extremes, second row - for outliers,
+#' third row contains mean value for corresponding distances (or its robust estimate in case of
+#' \code{lim.type = "ddrobust"}) and last row contains the degrees of freedom.
 #'
 #' @return
-#' Object models with the two fields updated.
+#' Object models with the three fields updated.
 #'
 #' @export
 setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alpha,
@@ -674,7 +678,7 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
    )
 }
 
-#' Categorize PLS results based on total distance.
+#' Categorize data rows based on PLS results and critical limits for total distance.
 #'
 #' @description
 #' The method uses full distance for decomposition of X-data and squared Y-residuals of PLS results

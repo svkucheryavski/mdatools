@@ -227,6 +227,9 @@ Main methods for \code{pls} objects:
  \code{\link{pls.simpls}} \tab implementation of SIMPLS algorithm.\cr
  \code{\link{predict.pls}} \tab applies PLS model to a new data.\cr
  \code{\link{selectCompNum.pls}} \tab set number of optimal components in the model.\cr
+ \code{\link{setDistanceLimits.pls}} \tab allows to change parameters for critical limits.\cr
+ \code{\link{categorize.pls}} \tab categorize data rows similar to
+   \code{\link{categorize.pca}}.\cr
  \code{\link{selratio}} \tab computes matrix with selectivity ratio values.\cr
  \code{\link{vipscores}} \tab computes matrix with VIP scores values.\cr
 }
@@ -243,7 +246,8 @@ Plotting methods for \code{pls} objects:
  decomposition.\cr
  \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y
  decomposition.\cr
- \code{\link{plotXResiduals.pls}} \tab shows T2 vs. Q plot for x decomposition.\cr
+ \code{\link{plotXResiduals.pls}} \tab shows distance/residuals plot for x decomposition.\cr
+ \code{\link{plotXYResiduals.pls}} \tab shows joint distance plot for x and y decomposition.\cr
  \code{\link{plotWeights.pls}} \tab shows plot with weights.\cr
  \code{\link{plotSelectivityRatio.pls}} \tab shows plot with selectivity ratio values.\cr
  \code{\link{plotVIPScores.pls}} \tab shows plot with VIP scores values.\cr

@@ -70,8 +70,8 @@ Other changes:
 * Extended output for `summary()` of PCA model including DoF for distances (*Nh* and *Nq*).
 * `plotExtreme()` is now also available for PCA model (was used only for SIMCA models before).
 * For most of PCA model plots you can now provide list with result objects to show the plot for. This makes possible to combine, for example, results from calibration set and new predictions on the same plot.
-* You can add convex hull or confidence ellipse to groups of points on scores plot made for result object.
-* New method `categorize()` is available for PCA model and results allowing to categorize objects as "regular", "extreme" or "outliers" based on residual distances and corresponding critical limits.
+* You can now add convex hull or confidence ellipse to groups of points on scores or residuals plot made for a result object.
+* New method `categorize()` allowing to categorize data rows as "regular", "extreme" or "outliers" based on residual distances and corresponding critical limits.
 
 ## SIMCA/SIMCAM
 
@@ -99,6 +99,8 @@ Other changes are listed below:
 * Function `plotVIPScores()` computes the score values first, which makes it a bit slower.
 * Systematic cross-validation (`"ven"`) now takes into account the order of response values, so there is no need to order data rows in advance.
 * From this version critical limits are computed for orthogonal and score distances in decomposition of x-data (predictors). It is done using similar to PCA way and same methods, which can be specified by `lim.type` parameter (default value `"ddsimca"`). X-residuals plot show the limits.
+* New method `plotXYResiduals()` showing distance/residuals plot for both X (full distance) and Y.
+* New method `categorize()` allowing to categorize data rows based on PLS results and critical limits computed for X- and Y-distance.
 
 
 v.0.9.6
