@@ -3,15 +3,13 @@ v.0.10.0
 
 Many changes have been made in this version, but most of them are under the hood. Code has been refactored significantly in order to improve its efficiency and make future support easier. Some functionality has been re-written from the scratch. **Most** of the code is backward compatible, which means your old scripts should have no problem to run with this version. However, some changes are incompatible and this can lead to occasional errors and warning messages. All details are shown below, pay a special attention to **breaking changes** part.
 
-Another important thing is the way cross-validation works starting from this version. It was decided to use cross-validation only for computing performance statistics, e.g. error of predictions in PLS or classification error in SIMCA or PLS-DA. Decomposition results, such as explained variance
-or residual distances are not computed for cross-validation anymore. It was a bad idea from the beginning, as the way it has been implemented is not fully correct — distances and variances measured
-for different local models should not be compared directly. After a long consideration it was decided to implement this part in a more correct and conservative way.
+Another important thing is the way cross-validation works starting from this version. It was decided to use cross-validation only for computing performance statistics, e.g. error of predictions in PLS or classification error in SIMCA or PLS-DA. Decomposition results, such as explained variance or residual distances are not computed for cross-validation anymore. It was a bad idea from the beginning, as the way it has been implemented is not fully correct — distances and variances measured for different local models should not be compared directly. After a long consideration it was decided to implement this part in a more correct and conservative way.
 
 Finally, all model results (calibration, cross-validation and test set validation), are now combined
-into a single list, e.g. `model$res`. This makes a lot of things easier. However, the old way of
-accessing the result objects (e.g. `model$calres` or `model$cvres`) still works, so you can access e.g. calibration results both using `model$res$cal` and `model$calres`, so this change will not break the compatibility.
+into a single list, `model$res`. This makes a lot of things easier. However, the old way of
+accessing the result objects (e.g. `model$calres` or `model$cvres`) still works, you can access e.g. calibration results both using `model$res$cal` and `model$calres`, so this change will not break the compatibility.
 
-Below is more detailed list of changes. The tutorial has been updated accordingly.
+Below is more detailed list of changes. The [tutorial](http://mdatools.com/docs/) has been updated accordingly.
 
 ## Breaking changes
 
@@ -45,7 +43,7 @@ while `ncomp` assumes only one value, which is the case for these two plots.
 
 ## General
 * Code coverage with tests has been extended significantly.
-* Added Travis CI integration so you can see how safe it is to install the latest GitHub version.
+* Added Travis CI integration so you can see how safe it is to install the latest GitHub version. Every time I push a new version to GitHub repository Travis will test and check the code similarly how it is done on CRAN and if check passed, you will see `build:passed` on bage in GitHub
 
 ## Plotting functions
 * `mdaplot()` now returns object with plot data (`plotseries` class), which can be used for extra options (e.g. adding convex hull).
