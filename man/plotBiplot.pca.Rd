@@ -4,10 +4,20 @@
 \alias{plotBiplot.pca}
 \title{PCA biplot}
 \usage{
-\method{plotBiplot}{pca}(obj, comp = c(1, 2), pch = c(16, NA),
-  col = mdaplot.getColors(2), main = "Biplot", lty = 1, lwd = 1,
-  show.labels = FALSE, show.axes = TRUE, show.excluded = FALSE,
-  lab.col = c("#90A0D0", "#D09090"), ...)
+\method{plotBiplot}{pca}(
+  obj,
+  comp = c(1, 2),
+  pch = c(16, NA),
+  col = mdaplot.getColors(2),
+  main = "Biplot",
+  lty = 1,
+  lwd = 1,
+  show.labels = FALSE,
+  show.axes = TRUE,
+  show.excluded = FALSE,
+  lab.col = adjustcolor(col, alpha.f = 0.5),
+  ...
+)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}

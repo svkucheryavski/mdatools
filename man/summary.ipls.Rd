@@ -4,7 +4,7 @@
 \alias{summary.ipls}
 \title{Summary for iPLS results}
 \usage{
-\method{summary}{ipls}(object, glob.ncomp = NULL, ...)
+\method{summary}{ipls}(object, glob.ncomp = object$gm$ncomp.selected, ...)
 }
 \arguments{
 \item{object}{a iPLS (object of class \code{ipls})}
@@ -20,6 +20,6 @@ Shows statistics and algorithm parameters for iPLS results.
 The method shows information on the algorithm parameters as well as a table with selected or
 excluded interval. The table has the following columns: 'step' showing on which iteration
 an interval was selected or excluded, 'start and 'end' show variable indices for the interval,
-'nComp' is a number of components used in a model, 'RMSE' is RMSECV for the model and 'R2' is 
+'nComp' is a number of components used in a model, 'RMSE' is RMSECV for the model and 'R2' is
 coefficient of determination for the same model.
 }

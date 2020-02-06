@@ -4,27 +4,27 @@
 \alias{plotPredictions.classres}
 \title{Prediction plot for classification results}
 \usage{
-\method{plotPredictions}{classres}(obj, nc = NULL, ncomp = NULL,
-  type = "p", main = NULL, ylab = "", ...)
+\method{plotPredictions}{classres}(
+  obj,
+  nc = seq_len(obj$nclasses),
+  ncomp = obj$ncomp.selected,
+  ylab = "",
+  show.plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
 
-\item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
+\item{nc}{vector with classes to show predictions for.}
 
-\item{ncomp}{which number of components to make the plot for (one value, if NULL - model selected number will 
-be used).
-This parameter shal not be used for multiclass models or results as predictions in this case are 
- only
-for optimal number of components}
-
-\item{type}{type of the plot}
-
-\item{main}{main title for the plot}
+\item{ncomp}{model complexity (number of components) to make the plot for.}
 
 \item{ylab}{label for y axis}
 
-\item{...}{most of the graphical parameters from \code{\link{mdaplotg}} or \code{\link{mdaplot}} function 
+\item{show.plot}{logical, shall plot be created or just plot series object is needed}
+
+\item{...}{most of the graphical parameters from \code{\link{mdaplotg}} or \code{\link{mdaplot}} function
 can be used.}
 }
 \description{

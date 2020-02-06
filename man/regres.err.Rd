@@ -4,12 +4,12 @@
 \alias{regres.err}
 \title{Error of prediction}
 \usage{
-regres.err(y.ref, y.pred)
+regres.err(y.pred, y.ref)
 }
 \arguments{
-\item{y.ref}{vector with reference values}
-
 \item{y.pred}{matrix with predicted values}
+
+\item{y.ref}{vector with reference values}
 }
 \description{
 Calculates array of differences between predicted and reference values.

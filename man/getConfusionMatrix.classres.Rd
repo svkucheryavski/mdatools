@@ -4,7 +4,7 @@
 \alias{getConfusionMatrix.classres}
 \title{Confusion matrix for classification results}
 \usage{
-\method{getConfusionMatrix}{classres}(obj, ncomp = NULL, ...)
+\method{getConfusionMatrix}{classres}(obj, ncomp = obj$ncomp.selected, ...)
 }
 \arguments{
 \item{obj}{classification results (object of class \code{simcares}, \code{simcamres}, etc)}
@@ -15,7 +15,7 @@
 }
 \description{
 The columns of the matrix correspond to classification results, rows - to the real classes. In
-case of soft classification with multiple classes (e.g. SIMCAM) sum of values for every row 
+case of soft classification with multiple classes (e.g. SIMCAM) sum of values for every row
 will not correspond to the total number of class members as the same object can be classified
 as a member of several classes or non of them.
 }

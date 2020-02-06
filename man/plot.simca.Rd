@@ -4,12 +4,14 @@
 \alias{plot.simca}
 \title{Model overview plot for SIMCA}
 \usage{
-\method{plot}{simca}(x, ncomp = NULL, ...)
+\method{plot}{simca}(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...)
 }
 \arguments{
 \item{x}{a SIMCA model (object of class \code{simca})}
 
-\item{ncomp}{how many components to use (if NULL - user selected optimal value will be used)}
+\item{comp}{which components to show on scores and loadings plot}
+
+\item{ncomp}{how many components to use for residuals plot}
 
 \item{...}{other arguments}
 }

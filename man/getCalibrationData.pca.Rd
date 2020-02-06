@@ -2,15 +2,13 @@
 % Please edit documentation in R/pca.R
 \name{getCalibrationData.pca}
 \alias{getCalibrationData.pca}
-\title{Get calibration data}
+\title{Returns matrix with original calibration data}
 \usage{
-\method{getCalibrationData}{pca}(obj, ...)
+\method{getCalibrationData}{pca}(obj)
 }
 \arguments{
-\item{obj}{PCA model (object of class \code{pca})}
-
-\item{...}{other parameters}
+\item{obj}{object with PCA model}
 }
 \description{
-Get data, used for calibration of the PCA model
+Returns matrix with original calibration data
 }

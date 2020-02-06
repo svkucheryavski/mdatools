@@ -4,8 +4,7 @@
 \alias{plot.plsda}
 \title{Model overview plot for PLS-DA}
 \usage{
-\method{plot}{plsda}(x, ncomp = NULL, nc = 1, show.legend = T,
-  show.labels = F, ...)
+\method{plot}{plsda}(x, ncomp = x$ncomp.selected, nc = 1, show.legend = TRUE, ...)
 }
 \arguments{
 \item{x}{a PLS-DA model (object of class \code{plsda})}
@@ -16,12 +15,10 @@
 
 \item{show.legend}{logical, show or not a legend on the plot}
 
-\item{show.labels}{logical, show or not labels for the plot objects}
-
 \item{...}{other arguments}
 }
 \description{
-Shows a set of plots (x residuals, regression coefficients, misclassification ratio and 
+Shows a set of plots (x residuals, regression coefficients, misclassification ratio and
 predictions) for PLS-DA model.
 }
 \details{

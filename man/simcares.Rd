@@ -2,20 +2,17 @@
 % Please edit documentation in R/simcares.R
 \name{simcares}
 \alias{simcares}
-\title{Results of SIMCA one-class classification
- 
- @description 
-\code{simcares} is used to store results for SIMCA one-class classification.}
+\title{Results of SIMCA one-class classification}
 \usage{
-simcares(pres, cres)
+simcares(class.res, pca.res = NULL)
 }
 \arguments{
-\item{pres}{results of PCA decomposition of data (class \code{pcares}).}
+\item{class.res}{results of classification (class \code{classres}).}
 
-\item{cres}{results of classification (class \code{classres}).}
+\item{pca.res}{results of PCA decomposition of data (class \code{pcares}).}
 }
 \value{
-Returns an object (list) of class \code{simcares} with the same fields as \code{\link{pcares}} 
+Returns an object (list) of class \code{simcares} with the same fields as \code{\link{pcares}}
 plus extra fields, inherited from \code{\link{classres}}:
 \item{c.pred}{predicted class values (+1 or -1).}
 \item{c.ref}{reference (true) class values if provided.}
@@ -28,18 +25,16 @@ The following fields are available only if reference values were provided.
 \item{sensitivity}{sensitivity of predictions.}
 }
 \description{
-Results of SIMCA one-class classification
- 
- @description 
+@description
 \code{simcares} is used to store results for SIMCA one-class classification.
 }
 \details{
-Class \code{simcares} inherits all properties and methods of class \code{\link{pcares}}, and 
-has additional properties and functions for representing of classification results, inherited 
+Class \code{simcares} inherits all properties and methods of class \code{\link{pcares}}, and
+has additional properties and functions for representing of classification results, inherited
 from class \code{\link{classres}}.
-  
-There is no need to create a \code{simcares} object manually, it is created automatically when 
-build a SIMCA model (see \code{\link{simca}}) or apply the model to a new data (see 
+
+There is no need to create a \code{simcares} object manually, it is created automatically when
+build a SIMCA model (see \code{\link{simca}}) or apply the model to a new data (see
 \code{\link{predict.simca}}). The object can be used to show summary and plots for the results.
 }
 \examples{
@@ -49,7 +44,7 @@ library(mdatools)
 data = iris[, 1:4]
 class = iris[, 5]
 
-# take first 30 objects of setosa as calibration set 
+# take first 30 objects of setosa as calibration set
 se = data[1:30, ]
 
 # make SIMCA model and apply to test set
@@ -80,14 +75,13 @@ Methods for \code{simcares} objects:
 Methods, inherited from \code{\link{classres}} class:
 \tabular{ll}{
  \code{\link{showPredictions.classres}} \tab show table with predicted values.\cr
- \code{\link{plotPredictions.classres}} \tab makes plot with predicted values.\cr
- \code{\link{plotSensitivity.classres}} \tab makes plot with sensitivity vs. components values.\cr
- \code{\link{plotSpecificity.classres}} \tab makes plot with specificity vs. components values.\cr
- \code{\link{plotPerformance.classres}} \tab makes plot with both specificity and sensitivity 
- values.\cr
+ \code{\link{plotPredictions.classres}} \tab predicted classes plot.\cr
+ \code{\link{plotSensitivity.classres}} \tab sensitivity plot.\cr
+ \code{\link{plotSpecificity.classres}} \tab specificity plot.\cr
+ \code{\link{plotPerformance.classres}} \tab performance plot.\cr
 }
 
-Methods, inherited from \code{\link{ldecomp}} class:   
+Methods, inherited from \code{\link{ldecomp}} class:
 \tabular{ll}{
  \code{\link{plotResiduals.ldecomp}} \tab makes Q2 vs. T2 residuals plot.\cr
  \code{\link{plotScores.ldecomp}} \tab makes scores plot.\cr

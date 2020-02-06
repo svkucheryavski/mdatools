@@ -1,98 +1,93 @@
 #' Partial Least Squares regression
 #'
-#' @description 
-#' \code{pls} is used to calibrate, validate and use of partial least squares (PLS) 
+#' @description
+#' \code{pls} is used to calibrate, validate and use of partial least squares (PLS)
 #' regression model.
-#' 
+#'
 #' @param x
 #' matrix with predictors.
-#' @param y  
+#' @param y
 #' matrix with responses.
 #' @param ncomp
 #' maximum number of components to calculate.
-#' @param center   
+#' @param center
 #' logical, center or not predictors and response values.
-#' @param scale   
+#' @param scale
 #' logical, scale (standardize) or not predictors and response values.
-#' @param cv  
+#' @param cv
 #' cross-validation settings (see details).
 #' @param exclcols
 #' columns of x to be excluded from calculations (numbers, names or vector with logical values)
 #' @param exclrows
 #' rows to be excluded from calculations (numbers, names or vector with logical values)
-#' @param x.test   
+#' @param x.test
 #' matrix with predictors for test set.
-#' @param y.test  
+#' @param y.test
 #' matrix with responses for test set.
 #' @param method
 #' algorithm for computing PLS model (only 'simpls' is supported so far)
-#' @param alpha   
-#' significance level for calculating statistical limits for residuals.
-#' @param coeffs.ci   
-#' method to calculate p-values and confidence intervals for regression coefficients (so far only 
-#' jack-knifing is availavle: \code{='jk'}).
-#' @param coeffs.alpha   
-#' significance level for calculating confidence intervals for regression coefficients.
-#' @param info   
+#' @param lim.type
+#' which method to use for calculation of critical limits for residual distances (see details)
+#' @param alpha
+#' significance level for extreme limits for T2 and Q disances.
+#' @param gamma
+#' significance level for outlier limits for T2 and Q distances.
+#' @param info
 #' short text with information about the model.
-#' @param light   
-#' run normal or light (faster) version of PLS without calculationg some performance statistics.
-#' @param ncomp.selcrit  
-#' criterion for selecting optimal number of components (\code{'min'} for 
+#' @param ncomp.selcrit
+#' criterion for selecting optimal number of components (\code{'min'} for
 #' first local minimum of RMSECV and \code{'wold'} for Wold's rule.)
-#' 
-#' @return 
-#' Returns an object of \code{pls} class with following fields:
-#' \item{ncomp }{number of components included to the model.} 
-#' \item{ncomp.selected }{selected (optimal) number of components.} 
-#' \item{xloadings }{matrix with loading values for x decomposition.} 
-#' \item{yloadings }{matrix with loading values for y decomposition.} 
-#' \item{weights }{matrix with PLS weights.} 
-#' \item{selratio }{array with selectivity ratio values.} 
-#' \item{vipscores }{matrix with VIP scores values.} 
-#' \item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated 
-#' for each component.}   
-#' \item{info }{information about the model, provided by user when build the model.} 
-#' \item{calres }{an object of class \code{\link{plsres}} with PLS results for a calibration data.} 
-#' \item{testres }{an object of class \code{\link{plsres}} with PLS results for a test data, if it 
-#' was provided.} 
-#' \item{cvres }{an object of class \code{\link{plsres}} with PLS results for cross-validation, if 
-#' this option was chosen.} 
 #'
-#' @details 
-#' So far only SIMPLS method [1] is available, more coming soon. Implementation works both with one
+#' @return
+#' Returns an object of \code{pls} class with following fields:
+#' \item{ncomp }{number of components included to the model.}
+#' \item{ncomp.selected }{selected (optimal) number of components.}
+#' \item{xcenter }{vector with values used to center the predictors (x).}
+#' \item{ycenter }{vector with values used to center the responses (y).}
+#' \item{xscale }{vector with values used to scale the predictors (x).}
+#' \item{yscale }{vector with values used to scale the responses (y).}
+#' \item{xloadings }{matrix with loading values for x decomposition.}
+#' \item{yloadings }{matrix with loading values for y decomposition.}
+#' \item{xeigenvals }{vector with eigenvalues of components (variance of x-scores).}
+#' \item{yeigenvals }{vector with eigenvalues of components (variance of y-scores).}
+#' \item{weights }{matrix with PLS weights.}
+#' \item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated
+#' for each component.}
+#' \item{info }{information about the model, provided by user when build the model.}
+#' \item{cv }{information cross-validation method used (if any).}
+#' \item{res }{a list with result objects (e.g. calibration, cv, etc.)}
+#'
+#' @details
+#' So far only SIMPLS method [1] is available. Implementation works both with one
 #' and multiple response variables.
 #'
-#' Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) as a minimum of 
-#' number of objects - 1, number of x variables and the default or provided value. Regression 
+#' Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) as a minimum of
+#' number of objects - 1, number of x variables and the default or provided value. Regression
 #' coefficients, predictions and other results are calculated for each set of components from 1
-#' to \code{ncomp}: 1, 1:2, 1:3, etc. The optimal number of components, (\code{ncomp.selected}), 
-#' is found using Wold's R criterion, but can be adjusted by user using function
-#' (\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all 
-#' default operations - predictions, plots, etc. 
+#' to \code{ncomp}: 1, 1:2, 1:3, etc. The optimal number of components, (\code{ncomp.selected}),
+#' is found using first local minumum, but can be also forced to user defined value using function
+#' (\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all
+#' default operations - predictions, plots, etc.
 #'
-#' Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
-#' will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
-#' cross-validation will be preformed). If it is a list, the following syntax can be used: 
-#' \code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
-#' segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
-#' to \code{nseg} segments ('venetian blinds').  
+#' Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
+#' will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
+#' cross-validation will be preformed). If it is a list, the following syntax can be used:
+#' \code{cv = list("rand", nseg, nrep)} for random repeated cross-validation with \code{nseg}
+#' segments and \code{nrep} repetitions or \code{cv = list("ven", nseg)} for systematic splits
+#' to \code{nseg} segments ('venetian blinds').
 #'
-#' Selectivity ratio [2] and VIP scores [3] are calculated for any PLS model authomatically, however
-#' while selectivity ratio values are calculated for all computed components, the VIP scores are 
-#' computed only for selected components (to save calculation time) and recalculated every time when 
-#' \code{selectCompNum()} is called for the model. 
-#' 
-#' Calculation of confidence intervals and p-values for regression coefficients are available
-#' only by jack-knifing so far. See help for \code{\link{regcoeffs}} objects for details. 
+#' Calculation of confidence intervals and p-values for regression coefficients can by done
+#' based on Jack-Knifing resampling. This is done automatically if cross-validation is used.
+#' However it is recommended to use at least 10 segments for stable JK result. See help for
+#' \code{\link{regcoeffs}} objects for more details.
 #'
-#' @references     
+#' @references
 #' 1. S. de Jong, Chemometrics and Intelligent Laboratory Systems 18 (1993) 251-263.
 #' 2. Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), 35-48.
 #' 3. Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), 103-112.
 #'
-#' @seealso    
-#' Methods for \code{pls} objects:
+#' @seealso
+#' Main methods for \code{pls} objects:
 #' \tabular{ll}{
 #'  \code{print} \tab prints information about a \code{pls} object.\cr
 #'  \code{\link{summary.pls}} \tab shows performance statistics for the model.\cr
@@ -100,80 +95,92 @@
 #'  \code{\link{pls.simpls}} \tab implementation of SIMPLS algorithm.\cr
 #'  \code{\link{predict.pls}} \tab applies PLS model to a new data.\cr
 #'  \code{\link{selectCompNum.pls}} \tab set number of optimal components in the model.\cr
-#'  \code{\link{plotPredictions.pls}} \tab shows predicted vs. measured plot.\cr
-#'  \code{\link{plotRegcoeffs.pls}} \tab shows regression coefficients plot.\cr      
+#'  \code{\link{setDistanceLimits.pls}} \tab allows to change parameters for critical limits.\cr
+#'  \code{\link{categorize.pls}} \tab categorize data rows similar to
+#'    \code{\link{categorize.pca}}.\cr
+#'  \code{\link{selratio}} \tab computes matrix with selectivity ratio values.\cr
+#'  \code{\link{vipscores}} \tab computes matrix with VIP scores values.\cr
+#' }
+#'
+#' Plotting methods for \code{pls} objects:
+#' \tabular{ll}{
 #'  \code{\link{plotXScores.pls}} \tab shows scores plot for x decomposition.\cr
 #'  \code{\link{plotXYScores.pls}} \tab shows scores plot for x and y decomposition.\cr
 #'  \code{\link{plotXLoadings.pls}} \tab shows loadings plot for x decomposition.\cr
 #'  \code{\link{plotXYLoadings.pls}} \tab shows loadings plot for x and y decomposition.\cr
-#'  \code{\link{plotRMSE.pls}} \tab shows RMSE plot.\cr
 #'  \code{\link{plotXVariance.pls}} \tab shows explained variance plot for x decomposition.\cr
 #'  \code{\link{plotYVariance.pls}} \tab shows explained variance plot for y decomposition.\cr
-#'  \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for y 
+#'  \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for y
 #'  decomposition.\cr
-#'  \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y 
+#'  \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y
 #'  decomposition.\cr
-#'  \code{\link{plotXResiduals.pls}} \tab shows T2 vs. Q plot for x decomposition.\cr
-#'  \code{\link{plotYResiduals.pls}} \tab shows residuals plot for y values.\cr
+#'  \code{\link{plotXResiduals.pls}} \tab shows distance/residuals plot for x decomposition.\cr
+#'  \code{\link{plotXYResiduals.pls}} \tab shows joint distance plot for x and y decomposition.\cr
+#'  \code{\link{plotWeights.pls}} \tab shows plot with weights.\cr
 #'  \code{\link{plotSelectivityRatio.pls}} \tab shows plot with selectivity ratio values.\cr
 #'  \code{\link{plotVIPScores.pls}} \tab shows plot with VIP scores values.\cr
-#'  \code{\link{getSelectivityRatio.pls}} \tab returns vector with selectivity ratio values.\cr
-#'  \code{\link{getVIPScores.pls}} \tab returns vector with VIP scores values.\cr
-#'  \code{\link{getRegcoeffs.pls}} \tab returns matrix with regression coefficients.\cr
 #' }
-#'      
-#' Most of the methods for plotting data (except loadings and regression coefficients) are also 
-#' available for PLS results 
-#' (\code{\link{plsres}}) objects. There is also a randomization test for PLS-regression 
-#' (\code{\link{randtest}}).   
 #'
-#' @author 
+#' Methods inherited from \code{regmodel} object (parent class for \code{pls}):
+#' \tabular{ll}{
+#'  \code{\link{plotPredictions.regmodel}} \tab shows predicted vs. measured plot.\cr
+#'  \code{\link{plotRMSE.regmodel}} \tab shows RMSE plot.\cr
+#'  \code{\link{plotYResiduals.regmodel}} \tab shows residuals plot for y values.\cr
+#'  \code{\link{getRegcoeffs.regmodel}} \tab returns matrix with regression coefficients.\cr
+#' }
+#'
+#' Most of the methods for plotting data (except loadings and regression coefficients) are also
+#' available for PLS results (\code{\link{plsres}}) objects. There is also a randomization test
+#' for PLS-regression (\code{\link{randtest}}) and implementation of interval PLS algorithm
+#' for variable selection (\code{\link{ipls}})
+#'
+#' @author
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
 #'
 #' @examples
 #' ### Examples of using PLS model class
-#' library(mdatools)   
-#'   
-#' ## 1. Make a PLS model for concentration of first component 
-#' ## using full-cross validation and automatic detection of 
+#' library(mdatools)
+#'
+#' ## 1. Make a PLS model for concentration of first component
+#' ## using full-cross validation and automatic detection of
 #' ## optimal number of components and show an overview
-#' 
+#'
 #' data(simdata)
 #' x = simdata$spectra.c
 #' y = simdata$conc.c[, 1]
-#' 
+#'
 #' model = pls(x, y, ncomp = 8, cv = 1)
 #' summary(model)
 #' plot(model)
-#' 
-#' ## 2. Make a PLS model for concentration of first component 
+#'
+#' ## 2. Make a PLS model for concentration of first component
 #' ## using test set and 10 segment cross-validation and show overview
-#' 
+#'
 #' data(simdata)
 #' x = simdata$spectra.c
 #' y = simdata$conc.c[, 1]
 #' x.t = simdata$spectra.t
 #' y.t = simdata$conc.t[, 1]
-#' 
+#'
 #' model = pls(x, y, ncomp = 8, cv = 10, x.test = x.t, y.test = y.t)
 #' model = selectCompNum(model, 2)
 #' summary(model)
 #' plot(model)
-#' 
-#' ## 3. Make a PLS model for concentration of first component 
+#'
+#' ## 3. Make a PLS model for concentration of first component
 #' ## using only test set validation and show overview
-#' 
+#'
 #' data(simdata)
 #' x = simdata$spectra.c
 #' y = simdata$conc.c[, 1]
 #' x.t = simdata$spectra.t
 #' y.t = simdata$conc.t[, 1]
-#' 
+#'
 #' model = pls(x, y, ncomp = 6, x.test = x.t, y.test = y.t)
 #' model = selectCompNum(model, 2)
 #' summary(model)
 #' plot(model)
-#' 
+#'
 #' ## 4. Show variance and error plots for a PLS model
 #' par(mfrow = c(2, 2))
 #' plotXCumVariance(model, type = 'h')
@@ -181,7 +188,7 @@
 #' plotRMSE(model)
 #' plotRMSE(model, type = 'h', show.labels = TRUE)
 #' par(mfrow = c(1, 1))
-#' 
+#'
 #' ## 5. Show scores plots for a PLS model
 #' par(mfrow = c(2, 2))
 #' plotXScores(model)
@@ -189,7 +196,7 @@
 #' plotXYScores(model)
 #' plotXYScores(model, comp = 2, show.labels = TRUE)
 #' par(mfrow = c(1, 1))
-#' 
+#'
 #' ## 6. Show loadings and coefficients plots for a PLS model
 #' par(mfrow = c(2, 2))
 #' plotXLoadings(model)
@@ -197,7 +204,7 @@
 #' plotXYLoadings(model, comp = c(1, 2), legend.position = 'topleft')
 #' plotRegcoeffs(model)
 #' par(mfrow = c(1, 1))
-#' 
+#'
 #' ## 7. Show predictions and residuals plots for a PLS model
 #' par(mfrow = c(2, 2))
 #' plotXResiduals(model, show.label = TRUE)
@@ -205,314 +212,1205 @@
 #' plotPredictions(model)
 #' plotPredictions(model, ncomp = 4, xlab = 'C, reference', ylab = 'C, predictions')
 #' par(mfrow = c(1, 1))
-#' 
+#'
 #' ## 8. Selectivity ratio and VIP scores plots
 #' par(mfrow = c(2, 2))
 #' plotSelectivityRatio(model)
 #' plotSelectivityRatio(model, ncomp = 1)
 #' par(mfrow = c(1, 1))
-#' 
+#'
 #' ## 9. Variable selection with selectivity ratio
 #' selratio = getSelectivityRatio(model)
 #' selvar = !(selratio < 8)
-#' 
+#'
 #' xsel = x[, selvar]
 #' modelsel = pls(xsel, y, ncomp = 6, cv = 1)
 #' modelsel = selectCompNum(modelsel, 3)
-#' 
+#'
 #' summary(model)
 #' summary(modelsel)
-#' 
+#'
 #' ## 10. Calculate average spectrum and show the selected variables
 #' i = 1:ncol(x)
 #' ms = apply(x, 2, mean)
-#' 
+#'
 #' par(mfrow = c(2, 2))
-#' 
+#'
 #' plot(i, ms, type = 'p', pch = 16, col = 'red', main = 'Original variables')
 #' plotPredictions(model)
-#' 
+#'
 #' plot(i, ms, type = 'p', pch = 16, col = 'lightgray', main = 'Selected variables')
 #' points(i[selvar], ms[selvar], col = 'red', pch = 16)
 #' plotPredictions(modelsel)
-#' 
+#'
 #' par(mfrow = c(1, 1))
-#' 
-#' @export   
-pls = function(x, y, ncomp = 15, center = T, scale = F, cv = NULL, exclcols = NULL, exclrows = NULL,
-               x.test = NULL, y.test = NULL, method = 'simpls', alpha = 0.05, coeffs.ci = NULL, 
-               coeffs.alpha = 0.05, info = '', light = F, 
-               ncomp.selcrit = 'min') {
-   
-   # build a model and apply to calibration set
-   model = pls.cal(x, y, ncomp, center = center, scale = scale, method = method, 
-                   coeffs.ci = coeffs.ci,coeffs.alpha = coeffs.alpha, info = info, light = light, 
-                   alpha = alpha, cv = cv, exclcols = exclcols, exclrows = exclrows, 
-                   ncomp.selcrit = ncomp.selcrit)
-   
-   # do test set validation if provided
-   if (!is.null(x.test) && !is.null(y.test)){
-      model$testres = predict.pls(model, x.test, y.test)
+#'
+#' @export
+pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
+   cv = NULL, exclcols = NULL, exclrows = NULL, x.test = NULL, y.test = NULL, method = "simpls",
+   info = "", ncomp.selcrit = "min", lim.type = "ddmoments", alpha = 0.05, gamma = 0.01) {
+
+   # if y is a vector, convert it to matrix
+   if (is.null(dim(y))) {
+      dim(y) <- c(length(y), 1)
    }
-   
+
+   # exclude columns if "exclcols" is provided
+   if (length(exclcols) > 0) {
+      x <- mda.exclcols(x, exclcols)
+   }
+
+   # exclude rows if "exclrows" is provided
+   if (length(exclrows) > 0) {
+      x <- mda.exclrows(x, exclrows)
+      y <- mda.exclrows(y, exclrows)
+   }
+
+   # build a model and apply to calibration set
+   model <- pls.cal(x, y, ncomp, center = center, scale = scale, method = method)
+   model$info <- info
+   model$call <- match.call()
+
+   # get calibration results
+   model$res <- list()
+   model$res[["cal"]] <- predict.pls(model, x, y)
+   model$res[["cal"]]$info <- "calibration results"
+   model$calres <- model$res[["cal"]]
+
+   # compute critical limit parameters
+   model$limParams <- list(
+      "Q" = ldecomp.getLimParams(model$res[["cal"]]$xdecomp$Q),
+      "T2" = ldecomp.getLimParams(model$res[["cal"]]$xdecomp$T2),
+      "Z" = ldecomp.getLimParams(model$res[["cal"]]$ydecomp$Q)
+   )
+
+   # do cross-validation if needed
+   if (!is.null(cv)) {
+      cvres <- crossval.regmodel(model, x, y, cv, cal.fun = pls.cal)
+      model$res[["cv"]] <- plsres(cvres$y.pred, cvres$y.ref, ncomp.selected = model$ncomp)
+      model$res[["cv"]]$info <- "cross-validation results"
+      model$cvres <- model$res[["cv"]]
+      model$coeffs <- regcoeffs(model$coeffs$values, cvres$jk.coeffs)
+   }
+
+   # do test set validation if provided
+   if (!is.null(x.test) && !is.null(y.test)) {
+      model$res[["test"]] <- predict.pls(model, x.test, y.test)
+      model$res[["test"]]$info <- "test set validation results"
+      model$testres <- model$res[["test"]]
+   }
+
    # select optimal number of components
-   model = selectCompNum(model)
-   model
+   model$cv <- cv
+   model$ncomp.selcrit <- ncomp.selcrit
+   model <- selectCompNum(model, selcrit = ncomp.selcrit)
+
+   # set distance limits
+   model <- setDistanceLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
+
+   return(model)
 }
 
-#' PLS model calibration
-#' 
+#' Select optimal number of components for PLS model
+#'
 #' @description
-#' Calibrates (builds) a PLS model for given data and parameters
-#' 
+#' Allows user to select optimal number of components for PLS model
+#'
+#' @param obj
+#' PLS model (object of class \code{pls})
+#' @param ncomp
+#' number of components to select
+#' @param selcrit
+#' criterion for selecting optimal number of components (\code{'min'} for
+#' first local minimum of RMSECV and \code{'wold'} for Wold's rule.)
+#' @param ...
+#' other parameters if any
+#'
+#' @return
+#' the same model with selected number of components
+#'
+#' @details
+#'
+#' The method sets \code{ncomp.selected} parameter for the model and return it back. The parameter
+#' points out to the optimal number of components in the model. You can either specify it manually,
+#' as argument \code{ncomp}, or use one of the algorithms for automatic selection.
+#'
+#' Automatic selection by default based on cross-validation statistics. If no cross-validation
+#' results are found in the model, the method will use test set validation results. If they are
+#' not available as well, the model will use calibration results and give a warning as in this case
+#' the selected number of components will lead to overfitted model.
+#'
+#' There are two algorithms for automatic selection you can chose between: either first local
+#' minimum of RMSE (`selcrit="min"`) or Wold's rule (`selcrit="wold"`).
+#'
+#' The first local minimum criterion finds at which component, A, error of prediction starts
+#' raising and selects (A - 1) as the optimal number. The Wold's criterion finds which component A
+#' does not make error smaller at least by 5% comparing to the previous value and selects (A - 1)
+#' as the optimal number.
+#'
+#' If model is PLS2 model (has several response variables) the method computes optimal number of
+#' components for each response and returns the smallest value. For example, if for the first
+#' response 2 components give the smallest error and for the second response this number is 3,
+#' A = 2 will be selected as a final result.
+#'
+#' It is not recommended to use automatic selection for real applications, always investigate
+#' your model (via RMSE, Y-variance plot, regression coefficients) to make correct decision.
+#'
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+selectCompNum.pls <- function(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ...) {
+
+   # returns index based on Wold's R criterion
+   # finds first number of components which does not make error smaller by 5%
+   # comparing to the previous value
+   fWold <- function(press, ncomp) {
+      r <- press[, 2:ncomp, drop = FALSE] / press[, 1:(ncomp - 1), drop = FALSE]
+      return(which(r > 0.95, arr.ind = TRUE))
+   }
+
+   # returns index based on first local minimum
+   fMin <- function(press, ncomp) {
+      r <- press[, 2:ncomp, drop = FALSE] - press[, 1:(ncomp - 1), drop = FALSE]
+      return(which(r > 0, arr.ind = TRUE))
+   }
+
+   # returns number of components based on PRESS and index values
+   f <- function(res, indFun) {
+      press <- res$rmse^2 * nrow(res$y.pred)
+      ncomp <- ncol(press)
+
+      # if number of components is 2 - for every row find which component
+      # gives smallest error and take the smallest number
+      if (ncomp < 3) return(min(apply(press, 1, which.min)))
+
+      # otherwise use dedicated function
+      ind <- indFun(press, ncomp)
+
+      return((if (length(ind) == 0) ncomp else min(ind[, 2])))
+   }
+
+   # if only one component in the model do nothing
+   if (obj$ncomp == 1) return(obj)
+
+   # if user provided ncomp use it
+   if (!is.null(ncomp)) selcrit <- ""
+
+   # get name of first result available in the sequence
+   name <- intersect(c("cv", "test", "cal"), names(obj$res))[1]
+   res <- obj$res[[name]]
+
+   if (name == "cal") {
+      warning("No validation results were found.")
+   }
+
+   # estimate number of optimal components
+   if (is.null(selcrit)) selcrit <- ""
+   ncomp <- switch(selcrit,
+      "wold" = f(res, fWold),
+      "min" = f(res, fMin),
+      ncomp
+   )
+
+   # if NULL - somthing went wrong
+   if (is.null(ncomp)) {
+      stop("Can not estimate correct number of PLS components.")
+   }
+
+   # if not, check that value is meaningful
+   if (ncomp > obj$ncomp || ncomp < 0) {
+      stop("Wrong number of selected components.")
+   }
+
+   # correct number of model and calibration results
+   obj$ncomp.selected <- ncomp
+   obj$res[["cal"]]$ncomp.selected <- ncomp
+   obj$calres <- obj$res[["cal"]]
+
+   # correct number of components for cross-validation results
+   if (!is.null(obj$res[["cv"]])) {
+      obj$res[["cv"]]$ncomp.selected <- ncomp
+      obj$cvres <- obj$res[["cv"]]
+   }
+
+   # correct number of components for test set results
+   if (!is.null(obj$res[["test"]])) {
+      obj$res[["test"]]$ncomp.selected <- ncomp
+      obj$testres <- obj$res[["test"]]
+   }
+
+   obj$call <- match.call()
+   return(obj)
+}
+
+#' Compute and set statistical limits for residual distances.
+#'
+#' @description
+#' Computes statisticsl limits for orthogonal and score distances (x-decomposition) and
+#' orthogonal distance (y-decomposition) based on calibration set and assign the calculated
+#' values as model properties.
+#'
+#' @param obj
+#' object with PLS model
+#' @param lim.type
+#' type of limits ("jm", "chisq", "ddmoments", "ddrobust")
+#' @param alpha
+#' significance level for detection of extreme objects
+#' @param gamma
+#' significance level for detection of outliers (for data driven approach)
+#' @param ...
+#' other arguments
+#'
+#' @details
+#'
+#' The limits can be accessed as fields of model objects: \code{$Qlim}, \code{$T2lim}, and
+#' \code{$Zlim}. Each is a matrix with four rows and \code{ncomp} columns. In case of limits
+#' for x-decomposition, first row contains critical limits for extremes, second row - for outliers,
+#' third row contains mean value for corresponding distances (or its robust estimate in case of
+#' \code{lim.type = "ddrobust"}) and last row contains the degrees of freedom.
+#'
+#' @return
+#' Object models with the three fields updated.
+#'
+#' @export
+setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alpha,
+   gamma = obj$gamma, ...) {
+
+   obj$T2lim <- ldecomp.getT2Limits(lim.type, alpha, gamma, obj$limParams)
+   obj$Qlim <- ldecomp.getQLimits(lim.type, alpha, gamma, obj$limParams,
+      obj$res[["cal"]]$xdecomp$residuals, obj$xeigenvals)
+   obj$Zlim <- pls.getZLimits(lim.type, alpha, gamma, obj$limParams)
+
+   obj$alpha <- alpha
+   obj$gamma <- gamma
+   obj$lim.type <- lim.type
+
+   attr(obj$res[["cal"]]$xdecomp$Q, "u0") <- obj$Qlim[3, ]
+   attr(obj$res[["cal"]]$xdecomp$Q, "Nu") <- obj$Qlim[4, ]
+
+   attr(obj$res[["cal"]]$xdecomp$T2, "u0") <- obj$T2lim[3, ]
+   attr(obj$res[["cal"]]$xdecomp$T2, "Nu") <- obj$T2lim[4, ]
+
+   attr(obj$res[["cal"]]$ydecomp$Q, "u0") <- obj$Zlim[3, ]
+   attr(obj$res[["cal"]]$ydecomp$Q, "Nu") <- obj$Zlim[4, ]
+
+   obj$calres <- obj$res[["cal"]]
+
+   if (!is.null(obj$res$test)) {
+      attr(obj$res[["test"]]$xdecomp$Q, "u0") <- obj$Qlim[3, ]
+      attr(obj$res[["test"]]$xdecomp$Q, "Nu") <- obj$Qlim[4, ]
+
+      attr(obj$res[["test"]]$xdecomp$T2, "u0") <- obj$T2lim[3, ]
+      attr(obj$res[["test"]]$xdecomp$T2, "Nu") <- obj$T2lim[4, ]
+
+      attr(obj$res[["test"]]$ydecomp$Q, "u0") <- obj$Zlim[3, ]
+      attr(obj$res[["test"]]$ydecomp$Q, "Nu") <- obj$Zlim[4, ]
+
+      obj$testres <- obj$res[["test"]]
+   }
+
+   return(obj)
+}
+
+#' PLS predictions
+#'
+#' @description
+#' Applies PLS model to a new data set
+#'
+#' @param object
+#' a PLS model (object of class \code{pls})
 #' @param x
 #' a matrix with x values (predictors)
 #' @param y
-#' a matrix with y values (responses)
-#' @param ncomp
-#' number of components to calculate
-#' @param center
-#' logical, do mean centering or not
-#' @param scale
-#' logical, do standardization or not
-#' @param method
-#' algorithm for computing PLS model (only 'simpls' is supported so far)
+#' a matrix with reference y values (responses)
 #' @param cv
-#' logical, does calibration for cross-validation or not
-#' @param alpha   
-#' significance level for calculating statistical limits for residuals.
-#' @param coeffs.ci   
-#' method to calculate p-values and confidence intervals for regression coefficients (so far only 
-#' jack-knifing is availavle: \code{='jk'}).
-#' @param coeffs.alpha   
-#' significance level for calculating confidence intervals for regression coefficients.
-#' @param info   
-#' short text with information about the model.
-#' @param light   
-#' run normal or light (faster) version of PLS without calculationg some performance statistics.
-#' @param exclcols
-#' columns of x to be excluded from calculations (numbers, names or vector with logical values)
-#' @param exclrows
-#' rows to be excluded from calculations (numbers, names or vector with logical values)
-#' @param ncomp.selcrit  
-#' criterion for selecting optimal number of components (\code{'min'} for 
-#' first local minimum of RMSECV and \code{'wold'} for Wold's rule.)
-#' 
-#' @return model
-#' an object with calibrated PLS model
-#' 
-pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coeffs.alpha, info, 
-                   light, exclcols = NULL, exclrows = NULL, ncomp.selcrit) {   
-   # prepare empty list for model object
-   model = list()
-   
-   # get attributes
-   x.attrs = mda.getattr(x)
-   y.attrs = mda.getattr(y)
-   
-   # if y is a vector convert it to a matrix
-   if (is.null(dim(y)))
-      y = matrix(y, ncol = 1)
-   
-   # check dimensions
-   if (nrow(x) != nrow(y))
-      stop('Number of rows for predictos and responses should be the same!')
-   
-   # exclude rows and columns if necessary
-   if (length(exclcols) > 0) {
-      x = mda.exclcols(x, exclcols)
-      x.attrs$exclcols = attr(x, 'exclcols')
-   }
-   
-   if (length(exclrows) > 0) {
-      x = mda.exclrows(x, exclrows)
-      y = mda.exclrows(y, exclrows)
-      x.attrs$exclrows = attr(x, 'exclrows')
-      y.attrs$exclrows = attr(y, 'exclrows')
-   }
-   
-   # convert data to a matrix 
-   x = mda.df2mat(x)
-   y = mda.df2mat(y)
-   x.nrows = nrow(x)
-   x.ncols = ncol(x)
-   y.ncols = ncol(y)
-   
-   # check if data has missing values
-   if (any(is.na(x)))
-      stop('Predictors have missing values, try to fix this using pca.mvreplace.')
-   if (any(is.na(y)))
-      stop('Responses have missing values, try to fix this using pca.mvreplace.')
-   
-   # set column names for predictors if missing   
-   if (is.null(colnames(y)))
-      colnames(y) = paste('y', 1:ncol(y), sep = '')
-   
-   # correct x-axis name
-   if (is.null(x.attrs$xaxis.name))
-      x.attrs$xaxis.name = 'Variables'
-   if (is.null(x.attrs$yaxis.name))
-      x.attrs$yaxis.name = 'Objects'
-   
-   # correct maximum number of components
-   ncols = x.ncols - length(x.attrs$exclcols) 
-   nrows = x.nrows - length(x.attrs$exclrows) 
-   ncomp = min(ncomp, ncols, nrows - 1)
-   
-   # prepare data for model calibration and cross-validation
-   x.cal = x
-   y.cal = y
-   
-   # check excluded rows
-   #if (length(x.attrs$exclrows) != length(y.attrs$exclrows) || 
-   #     any(x.attrs$exclrows != y.attrs$exclrows))
-   #   stop('Excluded rows in response and predictors matrices are not the same!')
-   
-   # remove excluded rows 
-   if (length(x.attrs$exclrows) > 0) {
-      x.cal = x.cal[-x.attrs$exclrows, , drop = F]
-      y.cal = y.cal[-x.attrs$exclrows, , drop = F]
-   }
-   
-   # autoscale and save the mean and std values for predictions 
-   x.cal = prep.autoscale(x.cal, center = center, scale = scale)
-   model$xcenter = attr(x.cal, 'prep:center')
-   model$xscale = attr(x.cal, 'prep:scale')
-   
-   y.cal = prep.autoscale(y.cal, center = center, scale = scale)
-   model$ycenter = attr(y.cal, 'prep:center')
-   model$yscale = attr(y.cal, 'prep:scale')
-   
-   # remove excluded columns
-   if (length(x.attrs$exclcols) > 0)
-      x.cal = x.cal[, -x.attrs$exclcols, drop = F]
-   if (length(y.attrs$exclcols) > 0)
-      y.cal = y.cal[, -y.attrs$exclcols, drop = F]
-   
-   # set LOO cross-validation if jack.knife is selected
-   jack.knife = F
-   if (!is.null(coeffs.ci) && coeffs.ci == 'jk') {
-      jack.knife = T
-      if (is.null(cv))    
-         cv = 1      
-   }   
-   
-   # correct maximum number of components
-   if (!is.null(cv)) {
-      if (!is.numeric(cv))
-         nseg = cv[[2]]
-      else
-         nseg = cv
-      
-      if (nseg == 1)
-         nobj.cv = 1
-      else
-         nobj.cv = ceiling(nrow(x)/nseg)  
-   } else {   
-      nobj.cv = 0
-   }
-   ncomp = min(ncol(x), nrow(x) - 1 - nobj.cv, ncomp)
+#' logical, shall predictions be made for cross-validation procedure or not
+#' @param ...
+#' other arguments
+#'
+#' @return
+#' PLS results (an object of class \code{\link{plsres}})
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 
-   # compute model and redefine ncomp
-   res = pls.run(x.cal, y.cal, method = method, ncomp = ncomp, cv = FALSE)
-   ncomp = res$ncomp
-   
-   # correct results related to predictors for missing columns in x 
-   # corresponding rows will be set to 0 and excluded
-   xloadings = matrix(0, nrow = x.ncols, ncol = ncomp)
-   weights = matrix(0, nrow = x.ncols, ncol = ncomp)
-   coeffs = array(0, dim = c(x.ncols, ncomp, ncol(y.cal)))
-   if (length(x.attrs$exclcols) > 0) {
-      xloadings[-x.attrs$exclcols, ] = res$xloadings
-      xloadings = mda.exclrows(xloadings, x.attrs$exclcols)      
-      weights[-x.attrs$exclcols, ] = res$weights
-      weights = mda.exclrows(weights, x.attrs$exclcols)      
-      coeffs[-x.attrs$exclcols, , ] = res$coeffs
-      coeffs = mda.exclrows(coeffs, x.attrs$exclcols)      
-   } else {
-      xloadings = res$xloadings
-      weights = res$weights
-      coeffs = res$coeffs
+   # get names
+   prednames <- rownames(object$xloadings)
+   respnames <- rownames(object$yloadings)
+   objnames <- rownames(x)
+
+   # preprocess x and calculate scores, total and full variance
+   x.attrs <- mda.getattr(x)
+   y.attrs <- mda.getattr(y)
+
+   # set names for y-axis (rows if it is empty)
+   if (is.null(x.attrs$yaxis.name)) {
+      x.attrs$yaxis.name <- "Objects"
    }
-   
-   # set names and attributes 
-   rownames(xloadings) = rownames(weights) = colnames(x)
-   colnames(xloadings) = colnames(weights) = paste('Comp', 1:ncomp)
-   attr(xloadings, 'name') = 'X loadings'
-   attr(xloadings, 'xaxis.name') = attr(weights, 'xaxis.name') = 
-      attr(coeffs, 'xaxis.name') = 'Components'
-   attr(xloadings, 'yaxis.name') = attr(weights, 'yaxis.name') = 
-      attr(coeffs, 'yaxis.name') = x.attrs$xaxis.name
-   attr(xloadings, 'yaxis.values') = attr(weights, 'yaxis.values') = 
-      attr(coeffs, 'yaxis.values') = x.attrs$xaxis.values
-   
-   # do the same for response related results
-   yloadings = matrix(0, nrow = y.ncols, ncol = ncomp)
-   if (length(y.attrs$exclcols) > 0) {
-      yloadings[-y.attrs$exclcols, ] = res$xloadings
-      yloadings = mda.exclrows(xloadings, y.attrs$exclcols)      
-   } else {
-      yloadings = res$yloadings
+
+   # convert to matrices
+   x <- mda.df2mat(x)
+   y <- mda.df2mat(y)
+
+   # get dimensions
+   nresp <- dim(object$coeffs$values)[3]
+   ncomp <- dim(object$coeffs$values)[2]
+
+   # check dimensions of predictors
+   if (ncol(x) != dim(object$coeffs$values)[1]) {
+      stop("Wrong number of columns in matrix with predictors (x).")
    }
-   
-   # set names and attributes 
-   dimnames(coeffs) = list(colnames(x), colnames(xloadings), colnames(y))
-   rownames(yloadings) = colnames(y)
-   colnames(yloadings) = colnames(xloadings)
-   attr(yloadings, 'name') = 'Y loadings'
-   attr(yloadings, 'xaxis.name') = 'Components'
-   attr(yloadings, 'yaxis.name') = y.attrs$xaxis.name
-   attr(yloadings, 'yaxis.values') = y.attrs$xaxis.values
-   
-   # set up model parameters
-   model$xloadings = xloadings
-   model$yloadings = yloadings
-   model$weights = weights
-   model$coeffs = regcoeffs(coeffs)
-   model$method = method
-   model$xtnorm = sqrt(colSums(res$xscores ^ 2)/(nrow(res$xscores) - 1))   
-   model$ytnorm = sqrt(colSums(res$yscores ^ 2)/(nrow(res$yscores) - 1))   
-   model$ncomp = ncomp
-   model$alpha = alpha   
-   model$light = light
-   model$info = info
-   model$exclrows = x.attrs$exclrows
-   model$exclcols = x.attrs$exclcols
-   model$cv = cv
-   model$ncomp.selcrit = ncomp.selcrit
-   model$coeffs.ci = coeffs.ci
-   model$coeffs.alpha = coeffs.alpha
-   
-   model$call = match.call()
-   class(model) = "pls"
-   
-   # do predictions for calibration set
-   model$calres = predict.pls(model, x, y)
-   
-   
-   # do cross-validation if needed
-   if (!is.null(cv)) {   
-      res = pls.crossval(model, x, y, cv, center = center, scale = scale, method = method, 
-                         jack.knife = jack.knife)    
-      if (jack.knife == T) {   
-         model$coeffs = regcoeffs(model$coeffs$values, res$jkcoeffs)
-         res[['jkcoeffs']] = NULL
-         model$cvres = res
-      } else {
-         model$cvres = res;
-      }   
+
+   # autoscale x
+   x <- prep.autoscale(x, center = object$xcenter, scale = object$xscale)
+
+   # compute x scores and residuals
+   xscores <- x %*% (object$weights %*% solve(crossprod(object$xloadings, object$weights)))
+   xresiduals <- x - tcrossprod(xscores, object$xloadings)
+
+   # set attributes
+   xscores <- mda.setattr(xscores, x.attrs, "row")
+   xresiduals <- mda.setattr(xresiduals, x.attrs)
+   attr(xscores, "name") <- "X-scores"
+   attr(xscores, "xaxis.name") <- "Components"
+   attr(xresiduals, "name") <- "Residuals"
+
+   # set names
+   rownames(xscores) <- rownames(xresiduals) <- objnames
+   colnames(xscores) <- colnames(object$xloadings)
+   colnames(xresiduals) <- prednames
+
+   # make predictions
+   yp <- apply(object$coeffs$values, 3, function(x, y)(y %*% x), x)
+   dim(yp) <- c(nrow(x), ncomp, dim(object$coeffs$values)[3])
+
+   # if reference values are provided calculate and set up names for ydecomp
+   y.ref <- NULL
+   ydecomp <- NULL
+   if (!is.null(y)) {
+
+      if (is.null(dim(y))) dim(y) <- c(length(y), 1)
+
+      if (nrow(x) != nrow(y)) {
+         stop("Matrices with predictors (x) and response (y) should have the same number of rows.")
+      }
+
+      if (ncol(y) != nresp) {
+         stop("Wrong number of columns in matrix with response values (y).")
+      }
+
+      # keep the original y values as reference
+      y.ref <- y
+
+      # autoscale y-values
+      y <- prep.autoscale(y, center = object$ycenter, scale = object$yscale)
+
+      # compute and orthogonalize y-scores
+      yscores <- as.matrix(y) %*% object$yloadings
+      for (a in seq_len(ncomp)) {
+         for (n in 1:2) {
+            for (j in seq_len(a - 1)) {
+               yscores[, a] <- yscores[, a] -
+                  tcrossprod(xscores[, j], yscores[, a]) %*% xscores[, j]
+            }
+         }
+      }
+
+      # compute y-residuals
+      yresiduals <- y - yp[, ncomp, ]
+
+      # set names
+      rownames(yscores) <- rownames(yresiduals) <- objnames
+      colnames(yscores) <- colnames(object$yloadings)
+      colnames(yresiduals) <- respnames
+
+      # set attributes
+      yscores <- mda.setattr(yscores, x.attrs, "row")
+      yresiduals <- mda.setattr(yresiduals, y.attrs)
+      attr(yscores, "exclrows") <- attr(yresiduals, "exclrows") <- x.attrs$exclrows
+      attr(yscores, "name") <- "Y-scores"
+      attr(yscores, "xaxis.name") <- "Components"
+      attr(yresiduals, "name") <- "Residuals"
+
+      # create ydecomp object (we use xscores as residuals for different components are computed
+      # as xscores %*% t(yloadings)), but then we assign correct residuals
+      ydecomp <- ldecomp(scores = xscores, loadings = object$yloadings, residuals = yresiduals,
+            eigenvals = object$yeigenvals, ncomp.selected = object$ncomp.selected)
+      ydecomp$scores <- yscores
+      attr(ydecomp$Q, "u0") <- object$Zlim[3, ]
+      attr(ydecomp$Q, "Nu") <- object$Zlim[4, ]
    }
-   
-   if (!light) {  
-      # we calculate both for data without excluded rows and columns
-      model$selratio = pls.calculateSelectivityRatio(model, x.cal)
+
+   # unscale predicted y values
+   yp <- if (is.numeric(object$yscale)) sweep(yp, 3, object$yscale, "*") else yp
+
+   # uncenter predicted y values
+   yp <- if (is.numeric(object$ycenter)) sweep(yp, 3, object$ycenter, "+") else yp
+
+   # if predictions for cross-validation - return
+   if (cv) {
+      return(list(y.pred = yp))
    }
-   
-   model
+
+   # set up all attributes and names
+   yp <- mda.setattr(yp, x.attrs, "row")
+   attr(yp, "exclrows") <- x.attrs$exclrows
+   attr(yp, "name") <- "Response values, predicted"
+   dimnames(yp) <- c(list(rownames(x)), dimnames(object$coeffs$values)[2:3])
+
+   # create xdecomp object
+   xdecomp <- ldecomp(scores = xscores, residuals = xresiduals, loadings = object$xloadings,
+      eigenvals = object$xeigenvals, ncomp.selected = object$ncomp.selected)
+
+   # add u0 and Nu parameters as arguments, so the residuals can be normalized
+   attr(xdecomp$Q, "u0") <- object$Qlim[3, ]
+   attr(xdecomp$Q, "Nu") <- object$Qlim[4, ]
+
+   attr(xdecomp$T2, "u0") <- object$T2lim[3, ]
+   attr(xdecomp$T2, "Nu") <- object$T2lim[4, ]
+
+   return(
+      plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected,
+         xdecomp = xdecomp, ydecomp = ydecomp)
+   )
 }
 
+#' Categorize data rows based on PLS results and critical limits for total distance.
+#'
+#' @description
+#' The method uses full distance for decomposition of X-data and squared Y-residuals of PLS results
+#' from \code{res} with critical limits computed for the PLS model and categorizes the
+#' corresponding objects as "regular", "extreme" or "outlier".
+#'
+#' @param obj
+#' object with PCA model
+#' @param res
+#' object with PCA results
+#' @param ncomp
+#' number of components to use for the categorization
+#' @param ...
+#' other parameters
+#'
+#' @details
+#' The method does not categorize hidden values if any. It is based on the approach described in
+#' [1] and works only if data driven approach is used for computing critical limits.
+#'
+#' @return
+#' vector (factor) with results of categorization.
+#'
+#' @references
+#' 1. Rodionova O. Ye., Pomerantsev A. L. Detection of Outliers in Projection-Based Modeling.
+#' Analytical Chemistry (2020, in publish). doi: 10.1021/acs.analchem.9b04611
+#'
+#' @export
+categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, ...) {
+
+   create_categories <- function(nobj, extremes_ind, outliers_ind) {
+      categories <- rep(1, nobj)
+      categories[extremes_ind] <- 2
+      categories[outliers_ind] <- 3
+      return(factor(categories, levels = 1:3, labels = c("regular", "extreme", "outlier")))
+   }
+
+   # if not data driven - quit
+   if (!(obj$lim.type %in% c("ddmoments", "ddrobust"))) {
+      stop("categorize.pls() works only with data driven limit types ('ddoments' or 'ddrobust').")
+   }
+
+   # get distance values for selected number of components
+   h <- res$xdecomp$T2[, ncomp]
+   q <- res$xdecomp$Q[, ncomp]
+   z <- res$ydecomp$Q[, ncomp]
+
+   # remove excluded values if any
+   rows_excluded <- attr(res$xdecomp$Q, "exclrows")
+   if (length(rows_excluded) > 0) {
+      h <- h[-rows_excluded]
+      q <- q[-rows_excluded]
+      z <- z[-rows_excluded]
+   }
+
+   # get DoF
+   Nh <- obj$T2lim[4, ncomp]
+   Nq <- obj$Qlim[4, ncomp]
+   Nz <- obj$Zlim[4, ncomp]
+   Nf <- Nq + Nh
+
+   # get scale factor
+   h0 <- obj$T2lim[3, ncomp]
+   q0 <- obj$Qlim[3, ncomp]
+   z0 <- obj$Zlim[3, ncomp]
+   f0 <- Nq + Nh
+
+   # process degrees of freedom for (Z)
+   Nz <- round(Nz)
+   Nz[Nz < 1] <- 1
+   Nz[Nz > 250] <- 250
+
+   # process degrees of freedom for (F)
+   Nf <- round(Nf)
+   Nf[Nf < 1] <- 1
+   Nf[Nf > 250] <- 250
+
+   # compute total distance and DoF for it
+   g <- Nh * h / h0 + Nq * q / q0 + Nz * z / z0
+   Ng <- Nh + Nq + Nz
+   nobj <- length(g)
+
+   # compute limits for total distance
+   ext_lim <- qchisq(1 - obj$alpha, Ng)
+   out_lim <- qchisq((1 - obj$gamma) ^ (1 / nobj), Ng)
+
+   outliers_ind <- g > out_lim
+   extremes_ind <- g > ext_lim & g < out_lim
+   return(create_categories(nobj, extremes_ind, outliers_ind))
+}
+
+#' Summary method for PLS model object
+#'
+#' @description
+#' Shows performance statistics for the model.
+#'
+#' @param object
+#' a PLS model (object of class \code{pls})
+#' @param ncomp
+#' how many components to count.
+#' @param ny
+#' which y variables to show the summary for (can be a vector)
+#' @param ...
+#' other arguments
+#'
+#' @export
+summary.pls <- function(object, ncomp = object$ncomp.selected,
+   ny = seq_len(nrow(object$yloadings)), ...) {
+
+   if (length(ncomp) != 1 || ncomp < 0 || ncomp > object$ncomp) {
+      stop("Wrong value for the 'ncomp' parameter.")
+   }
+
+   cat("\nPLS model (class pls) summary\n")
+   cat("-------------------------------\n")
+   fprintf("Info: %s\n", object$info)
+   fprintf("Number of selected components: %d\n", ncomp)
+   fprintf("Cross-validation: %s\n", crossval.str(object$cv))
+
+   cat("\n")
+   for (y in ny) {
+      fprintf("Response variable: %s\n", rownames(object$yloadings)[y])
+      out <- do.call(rbind, lapply(object$res, as.matrix, ncomp = ncomp))
+      rownames(out) <- capitalize(names(object$res))
+
+      if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
+      out[, 5] <- round(out[, 5], 3)
+      out[, 6] <- mdaplot.formatValues(out[, 6], round.only = T)
+      out[, 7] <- round(out[, 7], 3)
+      out[, 8] <- round(out[, 8], 4)
+      out[, 9] <- round(out[, 9], 2)
+
+      print(out[, -c(1, 3), drop = FALSE])
+      cat("\n")
+   }
+}
+
+#' Print method for PLS model object
+#'
+#' @description
+#' Prints information about the object structure
+#'
+#' @param x
+#' a PLS model (object of class \code{pls})
+#' @param ...
+#' other arguments
+#'
+#' @export
+print.pls <- function(x, ...) {
+   cat("\nPLS model (class pls)\n")
+   cat("\nCall:\n")
+   print(x$call)
+
+   cat("\nMajor fields:\n")
+   cat("$ncomp - number of calculated components\n")
+   cat("$ncomp.selected - number of selected components\n")
+   cat("$coeffs - object (regcoeffs) with regression coefficients\n")
+   cat("$xloadings - vector with x loadings\n")
+   cat("$yloadings - vector with y loadings\n")
+   cat("$weights - vector with weights\n")
+   cat("$res - list with results (calibration, cv, etc)\n")
+
+   cat("\nTry summary(model) and plot(model) to see the model performance.\n")
+}
+
+
+################################
+#  Plotting methods            #
+################################
+
+
+#' Explained X variance plot for PLS
+#'
+#' @description
+#' Shows plot with explained X variance vs. number of components.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param type
+#' type of the plot("b", "l" or "h")
+#' @param main
+#' title for the plot
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plotXVariance.pls <- function(obj, type = "b", main = "Variance (X)", ...) {
+   plotVariance(obj, decomp = "xdecomp", type = type, main = main, ...)
+}
+
+#' Explained Y variance plot for PLS
+#'
+#' @description
+#' Shows plot with explained Y variance vs. number of components.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param type
+#' type of the plot("b", "l" or "h")
+#' @param main
+#' title for the plot
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plotYVariance.pls <- function(obj, type = "b", main = "Variance (Y)", ...) {
+   plotVariance(obj, decomp = "ydecomp", type = type, main = main, ...)
+}
+
+#' Cumulative explained X variance plot for PLS
+#'
+#' @description
+#' Shows plot with cumulative explained X variance vs. number of components.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param type
+#' type of the plot("b", "l" or "h")
+#' @param main
+#' title for the plot
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plotXCumVariance.pls <- function(obj, type = "b", main = "Cumulative variance (X)", ...) {
+   plotVariance(obj, decomp = "xdecomp", variance = "cumexpvar", type = type, main = main, ...)
+}
+
+#' Cumulative explained Y variance plot for PLS
+#'
+#' @description
+#' Shows plot with cumulative explained Y variance vs. number of components.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param type
+#' type of the plot("b", "l" or "h")
+#' @param main
+#' title for the plot
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plotYCumVariance.pls <- function(obj, type = "b", main = "Cumulative variance (Y)", ...) {
+   plotVariance(obj, decomp = "ydecomp", variance = "cumexpvar", type = type, main = main, ...)
+}
+
+#' Variance plot for PLS
+#'
+#' @description
+#' Shows plot with variance values vs. number of components.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param decomp
+#' which decomposition to use ("xdecomp" for x or "ydecomp" for y)
+#' @param variance
+#' which variance to use ("expvar", "cumexpvar")
+#' @param type
+#' type of the plot("b", "l" or "h")
+#' @param labels
+#' what to show as labels for plot objects.
+#' @param res
+#' list with result objects to show the plot for (by defaul, model results are used)
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plotVariance.pls <- function(obj, decomp = "xdecomp", variance = "expvar", type = "b",
+   labels = "values", res = obj$res, ...) {
+
+   plot_data <- lapply(res, plotVariance, decomp = decomp, variance = variance, show.plot = FALSE)
+   mdaplotg(plot_data, labels = labels, type = type, ...)
+}
+
+#' X scores plot for PLS
+#'
+#' @description
+#' Shows plot with X scores values for selected components.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param comp
+#' which components to show the plot for (one or vector with several values)
+#' @param show.axes
+#' logical, show or not a axes lines crossing origin (0,0)
+#' @param main
+#' main plot title
+#' @param res
+#' list with result objects to show the plot for (by defaul, model results are used)
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plotXScores.pls <- function(obj, comp = c(1, 2), show.axes = T,  main = "Scores (X)",
+   res = obj$res, ...) {
+
+
+   # set up values for showing axes lines
+   show.lines <- FALSE
+   if (show.axes) {
+      show.lines <- if (length(comp) == 2) c(0, 0) else c(NA, 0)
+   }
+
+   plot_data <- lapply(res, plotXScores, comp = comp, type = "p", show.plot = FALSE)
+   mdaplotg(plot_data, show.lines = show.lines, type = "p", main = main, ...)
+}
+
+#' XY scores plot for PLS
+#'
+#' @description
+#' Shows plot with X vs. Y scores values for selected component.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param ncomp
+#' which component to show the plot for
+#' @param show.axes
+#' logical, show or not a axes lines crossing origin (0,0)
+#' @param res
+#' list with result objects to show the plot for (by defaul, model results are used)
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plotXYScores.pls <- function(obj, ncomp = 1, show.axes = T,  res = obj$res, ...) {
+
+   show.lines <- if (show.axes) c(0, 0) else FALSE
+   plot_data <- lapply(res, plotXYScores, ncomp = ncomp, type = "p", show.plot = FALSE)
+   mdaplotg(plot_data, show.lines = show.lines, type = "p", ...)
+}
+
+#' Residual distance plot for decomposition of X data
+#'
+#' @description
+#' Shows a plot with orthogonal distance vs score distance for PLS decomposition of X data.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param ncomp
+#' how many components to use (by default optimal value selected for the model will be used)
+#' @param log
+#' logical, apply log tranformation to the distances or not (see details)
+#' @param norm
+#' logical, normalize distance values or not (see details)
+#' @param cgroup
+#' color grouping of plot points (works only if one result object is available)
+#' @param xlim
+#' limits for x-axis
+#' @param ylim
+#' limits for y-axis
+#' @param show.legend
+#' logical, show or not a legend on the plot (needed if several result objects are available)
+#' @param show.limits
+#' logical, show or not lines/curves with critical limits for the distances
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier limits
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier limits
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier limits
+#' @param main
+#' title for the plot
+#' @param legend.position
+#' position of legend (if shown)
+#' @param res
+#' list with result objects to show the plot for (by defaul, model results are used)
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' The function is almost identical to \code{\link{plotResiduals.pca}}.
+#'
+#' @export
+plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
+   main = sprintf("X-distances (ncomp = %d)", ncomp), cgroup = NULL, xlim = NULL, ylim = NULL,
+   show.limits = TRUE, lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
+   show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
+
+   # get xdecomp from list with result objects
+   res <- lapply(res, function(x) if ("ldecomp" %in% class(x$xdecomp)) x$xdecomp)
+   res <- res[!sapply(res, is.null)]
+
+   ldecomp.plotResiduals(res, obj$Qlim, obj$T2lim, ncomp = ncomp, log = log, norm = norm,
+      cgroup = cgroup, xlim = xlim, ylim = ylim, show.limits = show.limits, lim.col = lim.col,
+      lim.lwd = lim.lwd, show.legend = show.legend, main = main, ...)
+}
+
+#' Residual XY-distance plot
+#'
+#' @description
+#' Shows a plot with full X-distance (f) vs. orthogonal Y-distance (z) for PLS model results.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param ncomp
+#' how many components to use (by default optimal value selected for the model will be used)
+#' @param log
+#' logical, apply log tranformation to the distances or not (see details)
+#' @param norm
+#' logical, normalize distance values or not (see details)
+#' @param cgroup
+#' color grouping of plot points (works only if one result object is available)
+#' @param xlim
+#' limits for x-axis
+#' @param ylim
+#' limits for y-axis
+#' @param show.legend
+#' logical, show or not a legend on the plot (needed if several result objects are available)
+#' @param show.limits
+#' logical, show or not lines/curves with critical limits for the distances
+#' @param lim.col
+#' vector with two values - line color for extreme and outlier limits
+#' @param lim.lwd
+#' vector with two values - line width for extreme and outlier limits
+#' @param lim.lty
+#' vector with two values - line type for extreme and outlier limits
+#' @param main
+#' title for the plot
+#' @param legend.position
+#' position of legend (if shown)
+#' @param res
+#' list with result objects to show the plot for (by defaul, model results are used)
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' The function presents a way to identify extreme objects and outliers based on both full distance
+#' for X-decomposition (known as f) and squared residual distance for Y-decomposition (z). The
+#' approach has been proposed in [1].
+#'
+#' The plot is available only if data driven methods (classic or robust) have been used for
+#' computing of critical limits.
+#'
+#' @references
+#' 1. Rodionova O. Ye., Pomerantsev A. L. Detection of Outliers in Projection-Based Modeling.
+#' Analytical Chemistry (2020, in publish). doi: 10.1021/acs.analchem.9b04611
+#'
+#' @export
+plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
+   main = sprintf("XY-distances (ncomp = %d)", ncomp), cgroup = NULL, xlim = NULL, ylim = NULL,
+   show.limits = TRUE, lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
+   show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
+
+   if (!(obj$lim.type %in% c("ddmoments", "ddrobust"))) {
+      stop("plotXYResiduals() works only with data driven limit types ('ddoments' or 'ddrobust')")
+   }
+
+   # generate values for cgroup if categories should be used
+   if (length(cgroup) == 1 && cgroup == "categories") {
+      cgroup <- categorize(obj, res[[1]], ncomp = ncomp)
+   }
+
+   # get xdecomp from list with result objects
+   res <- lapply(res, function(x) if ("ldecomp" %in% class(x$xdecomp)) x)
+   res <- res[!sapply(res, is.null)]
+
+   getPlotLim <- function(lim, pd, ld, dim, show.limits) {
+      if (!(is.null(lim) && show.limits)) return(lim)
+      return(c(0, max(sapply(pd, function(x) max(x[, dim])), ld$outliers[, dim])) * 1.05)
+   }
+
+   # compute plot data for each result object
+   plot_data <- lapply(res, plotXYResiduals.plsres, ncomp = ncomp, norm = norm, log = log,
+      show.plot = FALSE)
+
+   # get coordinates for critical limits
+   lim_data <- pls.getLimitsCoordinates(obj$Qlim, obj$T2lim, obj$Zlim,
+      ncomp = ncomp, nobj = obj$limParams$Q$moments$nobj, norm = norm, log = log)
+
+   xlim <- getPlotLim(xlim, plot_data, lim_data, 1, show.limits)
+   ylim <- getPlotLim(ylim, plot_data, lim_data, 2, show.limits)
+
+   # make plot
+   if (length(plot_data) == 1) {
+      mdaplot(plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, ...)
+   } else {
+      mdaplotg(plot_data, type = "p", xlim = xlim, ylim = ylim, show.legend = show.legend,
+         legend.position = legend.position, ...)
+   }
+
+   # show critical limits
+   if (show.limits) {
+      lines(lim_data$extremes[, 1], lim_data$extremes[, 2],
+         col = lim.col[1], lty = lim.lty[1], lwd = lim.lwd[1])
+      lines(lim_data$outliers[, 1], lim_data$outliers[, 2],
+         col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
+   }
+}
+
+#' X loadings plot for PLS
+#'
+#' @description
+#' Shows plot with X loading values for selected components.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param comp
+#' which components to show the plot for (one or vector with several values)
+#' @param type
+#' type of the plot
+#' @param show.axes
+#' logical, show or not a axes lines crossing origin (0,0)
+#' @param show.legend
+#' logical, show or not legend on the plot (when it is available)
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plotXLoadings.pls <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE,
+   show.legend = TRUE, ...) {
+
+   plot_data <- mda.subset(obj$xloadings, select = comp)
+   colnames(plot_data) <- sprintf("Comp %d (%.2f%%)", comp, obj$res[["cal"]]$xdecomp$expvar[comp])
+   attr(plot_data, "name") <- "Loadings (X)"
+
+   # set up values for showing axes lines
+   show.lines <- FALSE
+   if (show.axes) {
+      show.lines <- if (length(comp) == 2 && type == "p") c(0, 0) else c(NA, 0)
+   }
+
+   if (type == "p") {
+      return(mdaplot(plot_data, type = type, show.lines = show.lines, ...))
+   }
+
+   plot_data <- mda.t(plot_data)
+   attr(plot_data, "yaxis.name") <- "Loading"
+   mdaplotg(plot_data, show.legend = show.legend, type = type, show.lines = show.lines, ...)
+}
+
+#' X loadings plot for PLS
+#'
+#' @description
+#' Shows plot with X loading values for selected components.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param comp
+#' which components to show the plot for (one or vector with several values)
+#' @param type
+#' type of the plot
+#' @param show.axes
+#' logical, show or not a axes lines crossing origin (0,0)
+#' @param show.legend
+#' logical, show or not a legend
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plotWeights.pls <- function(obj, comp = 1, type = (if (nrow(obj$weights) < 20) "h" else "l"),
+   show.axes = TRUE, show.legend = TRUE, ...) {
+
+   plot_data <- mda.subset(obj$weights, select = comp)
+   colnames(plot_data) <- sprintf("Comp %d (%.2f%%)", comp, obj$res[["cal"]]$xdecomp$expvar[comp])
+   attr(plot_data, "name") <- "Weights"
+
+   # set up values for showing axes lines
+   show.lines <- FALSE
+   if (show.axes) {
+      show.lines <- if (length(comp) == 2 && type == "p") c(0, 0) else c(NA, 0)
+   }
+
+   if (type == "p") {
+      return(mdaplot(plot_data, type = type, show.lines = show.lines, ...))
+   }
+
+   plot_data <- mda.t(plot_data)
+   attr(plot_data, "yaxis.name") <- "Weight"
+   mdaplotg(plot_data, show.legend = show.legend, type = type, show.lines = show.lines, ...)
+}
+
+#' XY loadings plot for PLS
+#'
+#' @description
+#' Shows plot with X and Y loading values for selected components.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param comp
+#' which components to show the plot for (one or vector with several values)
+#' @param show.axes
+#' logical, show or not a axes lines crossing origin (0,0)
+#' @param ...
+#' other plot parameters (see \code{mdaplotg} for details)
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plotXYLoadings.pls <- function(obj, comp = c(1, 2), show.axes = TRUE, ...) {
+
+   if (length(comp) != 2) {
+      stop("This plot can be made for only two components.")
+   }
+
+   plot_data <- list(
+      "X" = mda.subset(obj$xloadings, select = comp),
+      "Y" = mda.subset(obj$yloadings, select = comp)
+   )
+   colnames(plot_data[[1]]) <- sprintf("Comp %d (%.2f%%)", comp,
+      obj$res[["cal"]]$xdecomp$expvar[comp])
+
+   attr(plot_data, "name") <- "Loadings (XY)"
+   show.lines <- if (show.axes) c(0, 0) else FALSE
+   mdaplotg(plot_data, type = "p", show.lines = show.lines, ...)
+}
+
+#' VIP scores plot for PLS model
+#'
+#' @description
+#' Shows a plot with VIP scores values for given number of components
+#' and response variable
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param ny
+#' which response to plot the values for (if y is multivariate), can be a vector.
+#' @param ncomp
+#' number of components to count
+#' @param type
+#' type of the plot
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' See \code{\link{vipscores}} for more details.
+#'
+#' @export
+plotVIPScores.pls <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
+   type = "l", ...) {
+
+   vipscores <- vipscores(obj, ncomp = ncomp)
+   mdaplotg(mda.t(mda.subset(vipscores, select = ny)), type = type, ...)
+}
+
+#' Selectivity ratio plot for PLS model
+#'
+#' @description
+#' Computes and shows a plot for Selectivity ratio values for given number of components
+#' and response variable
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param ny
+#' which response to plot the values for (if y is multivariate), can be a vector.
+#' @param ncomp
+#' number of components to count
+#' @param type
+#' type of the plot
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' See \code{\link{vipscores}} for more details.
+#'
+#' @export
+plotSelectivityRatio.pls <- function(obj, ny = 1,
+   ncomp = obj$ncomp.selected, type = "l", ...) {
+
+   selratio <- selratio(obj, ncomp = ncomp)
+   mdaplotg(mda.t(mda.subset(selratio, select = ny)), type = type, ...)
+}
+
+#' Model overview plot for PLS
+#'
+#' @description
+#' Shows a set of plots (x residuals, regression coefficients, RMSE and predictions) for PLS model.
+#'
+#' @param x
+#' a PLS model (object of class \code{pls})
+#' @param ncomp
+#' how many components to use (if NULL - user selected optimal value will be used)
+#' @param ny
+#' which y variable to show the summary for (if NULL, will be shown for all)
+#' @param show.legend
+#' logical, show or not a legend on the plot
+#' @param ...
+#' other arguments
+#'
+#' @details
+#' See examples in help for \code{\link{pls}} function.
+#'
+#' @export
+plot.pls <- function(x, ncomp = x$ncomp.selected, ny = 1, show.legend = TRUE, ...) {
+
+   if (!is.null(ncomp) && (ncomp <= 0 || ncomp > x$ncomp)) {
+      stop("Wrong value for number of components.")
+   }
+
+   par(mfrow = c(2, 2))
+   plotXResiduals(x, ncomp = ncomp, show.legend = show.legend)
+   plotRegcoeffs(x, ncomp = ncomp, ny = ny)
+   plotRMSE(x, ny = ny, show.legend = show.legend)
+   plotPredictions(x, ncomp = ncomp, ny = ny, show.legend = show.legend)
+   par(mfrow = c(1, 1))
+}
+
+
+################################
+#  Static methods              #
+################################
+
+
 #' Runs selected PLS algorithm
-#' 
+#'
 #' @param x
 #' a matrix with x values (predictors from calibration set)
 #' @param y
@@ -523,20 +1421,28 @@ pls.cal = function(x, y, ncomp, center, scale, method, cv, alpha, coeffs.ci, coe
 #' algorithm for computing PLS model
 #' @param cv
 #' logical, is this for CV or not
-#' 
+#'
 #' @export
-pls.run = function(x, y, ncomp, method, cv) {
-   if (method == 'simpls')
-      return(pls.simpls(x, y, ncomp, cv = cv))
-   else
-      stop('Method with this name is not supported!')
+pls.run <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x)), method = "simpls", cv = FALSE) {
+
+   if (ncomp < 1 || ncomp > min(nrow(x) - 1, ncol(x))) {
+      stop("Wrong value for 'ncomp' parameter.")
+   }
+
+   methods <- list("simpls" = pls.simpls)
+
+   if (!(method %in% names(methods))) {
+      stop("Method with this name is not supported.")
+   }
+
+   return(methods[[method]](x, y, ncomp, cv = cv))
 }
 
 #' SIMPLS algorithm
-#' 
+#'
 #' @description
 #' SIMPLS algorithm for calibration of PLS model
-#' 
+#'
 #' @param x
 #' a matrix with x values (predictors)
 #' @param y
@@ -545,1637 +1451,602 @@ pls.run = function(x, y, ncomp, method, cv) {
 #' number of components to calculate
 #' @param cv
 #' logical, is model calibrated during cross-validation or not
-#' 
-#' @return 
+#'
+#' @return
 #' a list with computed regression coefficients, loadings and scores for x and y matrices,
 #' and weights.
-#' 
+#'
 #' @references
-#' [1]. S. de Jong. SIMPLS: An Alternative approach to partial least squares regression. 
+#' [1]. S. de Jong. SIMPLS: An Alternative approach to partial least squares regression.
 #' Chemometrics and Intelligent Laboratory Systems, 18, 1993 (251-263).
-#' 
-pls.simpls = function(x, y, ncomp, cv = FALSE) {
-   x = as.matrix(x)
-   y = as.matrix(y)
-   
-   npred = ncol(x)
-   nresp = ncol(y)
-   
+#'
+pls.simpls <- function(x, y, ncomp, cv = FALSE) {
+
+   x <- as.matrix(x)
+   y <- as.matrix(y)
+
+   npred <- ncol(x)
+   nresp <- ncol(y)
+
    # initial estimation
-   A = t(x) %*% y
-   M = t(x) %*% x
-   C = diag(npred)
-   
+   A <- crossprod(x, y)
+   M <- crossprod(x, x)
+   C <- diag(npred)
+
    # prepare space for results
-   B = array(0, dim = c(npred, ncomp, nresp))
-   W = matrix(0, nrow = npred, ncol = ncomp)
-   P = matrix(0, nrow = npred, ncol = ncomp)
-   Q = matrix(0, nrow = nresp, ncol = ncomp)
-   
+   B <- array(0, dim = c(npred, ncomp, nresp))
+   W <- matrix(0, nrow = npred, ncol = ncomp)
+   P <- matrix(0, nrow = npred, ncol = ncomp)
+   Q <- matrix(0, nrow = nresp, ncol = ncomp)
+
    # loop for each components
-   for (n in 1:ncomp) {
+   for (n in seq_len(ncomp)) {
       # get the dominate eigenvector of A'A
-      e = eigen(crossprod(A))
-      q = e$vectors[1:nresp]
-      
+      e <- eigen(crossprod(A))
+      q <- e$vectors[seq_len(nresp)]
+
       # calculate and store weights
-      w = A %*% q
-      c = crossprod(w, (M %*% w))
-      w = w/sqrt(as.numeric(c))
-      W[, n] = w
-      
+      w <- A %*% q
+      c <- crossprod(w, (M %*% w))
+      w <- w / sqrt(as.numeric(c))
+      W[, n] <- w
+
       # calculate and store x loadings
-      p = M %*% w
-      P[, n] = p
-      
+      p <- M %*% w
+      P[, n] <- p
+
       # calculate and store y loadings
-      q = crossprod(A, w)
-      Q[, n] = q
-      
-      v = C %*% p
-      v = v/sqrt(as.numeric(crossprod(v)))
-      
-      # calculate and store regression coefficients
-      B[, n, ] = tcrossprod(W[, 1:n, drop = FALSE], Q[, 1:n, drop = FALSE])
-      
+      q <- crossprod(A, w)
+      Q[, n] <- q
+
+      v <- C %*% p
+      v <- v / sqrt(as.numeric(crossprod(v)))
+
+      # compute coefficients for current component
+      B[, n, ] <- tcrossprod(W[, seq_len(n), drop = FALSE], Q[, seq_len(n), drop = FALSE])
+
       # recalculate matrices for the next compnonent
-      C = C - tcrossprod(v)
-      M = M - tcrossprod(p)
-      A = C %*% A      
-      
-      if (cv == FALSE && max(e$values) < 10^-12) {
+      C <- C - tcrossprod(v)
+      M <- M - tcrossprod(p)
+      A <- C %*% A
+
+      if (!cv && max(e$values) < 10 * .Machine$double.eps) {
          # stop cycle is egienvalue is almost zero
          break
       }
    }
-   
-   # truncate results if n is smaller than ncomp
-   B = B[, 1:n, , drop = F]
-   W = W[, 1:n, drop = F]
-   P = P[, 1:n, drop = F]
-   Q = Q[, 1:n, drop = F]
-   
-   # calculate x and y scores
-   U = y %*% Q 
-   TT = x %*% (W %*% solve(t(P) %*% W))  
-   
-   res = list(
-      coeffs = B,
-      weights = W,
-      xloadings = P,
-      xscores = TT,
-      yloadings = Q,
-      yscores = U,
-      ncomp = n
-   )  
-   
-   res
-}  
 
-#' Cross-validation of a PLS model
-#' 
+   # truncate results if n is smaller than ncomp
+   W <- W[, seq_len(n), drop = FALSE]
+   P <- P[, seq_len(n), drop = FALSE]
+   Q <- Q[, seq_len(n), drop = FALSE]
+   B <- B[, seq_len(n), , drop = FALSE]
+
+   return(list(coeffs = B, weights = W, xloadings = P, yloadings = Q, ncomp = n))
+}
+
+#' PLS model calibration
+#'
 #' @description
-#' Does the cross-validation of a PLS model
-#' 
-#' @param model
-#' a PLS model (object of class \code{pls})
+#' Calibrates (builds) a PLS model for given data and parameters
+#'
 #' @param x
-#' a matrix with x values (predictors from calibration set)
+#' a matrix with x values (predictors)
 #' @param y
-#' a matrix with y values (responses from calibration set)
-#' @param cv
-#' number of segments (if cv = 1, full cross-validation will be used)
+#' a matrix with y values (responses)
+#' @param ncomp
+#' number of components to calculate
 #' @param center
 #' logical, do mean centering or not
 #' @param scale
 #' logical, do standardization or not
 #' @param method
-#' algorithm for computing PLS model
-#' @param jack.knife
-#' logical, do jack-knifing or not
-#' 
-#' @return
-#' object of class \code{plsres} with results of cross-validation
-#'  
-pls.crossval = function(model, x, y, cv, center, scale, method, jack.knife = T) {
+#' algorithm for computing PLS model (only 'simpls' is supported so far)
+#' @param cv
+#' logical, is model calibrated during cross-validation or not
+#'
+#' @return model
+#' an object with calibrated PLS model
+#'
+pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
+
+   # prepare empty list for model object and assign
+   # several properties, which do not depend on calculations below
+   model <- list()
+   model$center <- center
+   model$scale <- scale
+   model$method <- method
+   class(model) <- c("pls", "regmodel")
+
    # get attributes
-   x.attrs = attributes(x)
-   y.attrs = attributes(y)
-   
-   # remove excluded rows 
-   if (length(x.attrs$exclrows) > 0){
-      x = x[-x.attrs$exclrows, , drop = F]
-      y = y[-x.attrs$exclrows, , drop = F]
-   }
-   
-   # remove excluded columns 
-   if (length(x.attrs$exclcols) > 0)
-      x = x[, -x.attrs$exclcols, drop = F]
-   if (length(y.attrs$exclcols) > 0)
-      y = y[, -y.attrs$exclcols, drop = F]
-   
-   ncomp = model$ncomp
-   nobj = nrow(x)
-   nvar = ncol(x)
-   nresp = ncol(y)
-   
-   # get matrix with indices for cv segments
-   idx = crossval(nobj, cv)
-   nseg = nrow(idx);
-   nrep = dim(idx)[3]
-   
-   yp.cv = array(0, dim = c(nobj, ncomp, nresp))
-   Qx = matrix(0, ncol = ncomp, nrow = nobj)   
-   T2x = matrix(0, ncol = ncomp, nrow = nobj)   
-   Qy = matrix(0, ncol = ncomp, nrow = nobj)   
-   T2y = matrix(0, ncol = ncomp, nrow = nobj)   
-   jkcoeffs = array(0, dim = c(nvar, ncomp, nresp, nseg))
-   
-   # loop over segments and repetitions
-   for (iRep in 1:nrep) {   
-      for (iSeg in 1:nseg) {         
-         ind = na.exclude(idx[iSeg, , iRep])
-         
-         if (length(ind) > 0) {   
-            xc = x[-ind, , drop = F]
-            yc = y[-ind, , drop = F]
-            xt = x[ind, , drop = F]
-            yt = y[ind, , drop = F]
-            
-            # autoscale calibration set
-            xc = prep.autoscale(xc, center = center, scale = scale)
-            yc = prep.autoscale(yc, center = center, scale = scale)
-            
-            # create a model            
-            m = pls.run(xc, yc, ncomp, method = method, cv = TRUE)            
-            m$xcenter = attr(xc, 'prep:center')
-            m$ycenter = attr(yc, 'prep:center')
-            m$xscale = attr(xc, 'prep:scale')
-            m$yscale = attr(yc, 'prep:scale')
-            
-            # autoscale test set
-            xt = prep.autoscale(xt, center = m$xcenter, scale = m$xscale)
-            yt = prep.autoscale(yt, center = m$ycenter, scale = m$yscale)
-            
-            # get scores
-            xscores = xt %*% (m$weights %*% solve(crossprod(m$xloadings, m$weights)))  
+   x.attrs <- mda.getattr(x)
+   y.attrs <- mda.getattr(y)
 
-            # make predictions 
-            yp = apply(m$coeffs, 3, function(x, y)(y %*% x), xt)
-            dim(yp) = c(nrow(xt), ncomp, ncol(yt))
-            
-            # get residuals
-            xresiduals = xt - tcrossprod(xscores, m$xloadings)
-            yresiduals = yt - yp[, ncol(yp), ]
-            
-            # unscale predicted y values
-            if (scale == TRUE)
-               yp = sweep(yp, 3, m$yscale, '*')
-            
-            # uncenter predicted y values
-            if (center == TRUE)
-               yp = sweep(yp, 3, m$ycenter, '+')
-            
-            # get distances
-            xdist = ldecomp.getDistances(scores = xscores, loadings = m$xloadings, 
-                                         residuals = xresiduals, tnorm = model$xtnorm)
-            ydist = ldecomp.getDistances(scores = xscores, loadings = m$yloadings, 
-                                         residuals = yresiduals, tnorm = model$ytnorm)
-            
-            # correct dimenstion for reg coeffs for JK
-            dim(m$coeffs) = c(dim(m$coeffs), 1)
-            
-            # save results
-            yp.cv[ind, , ] = yp.cv[ind, , , drop = F]  + yp
-            Qx[ind, ]  = Qx[ind, , drop = F] + xdist$Q        
-            T2x[ind, ]  = T2x[ind, , drop = F] + xdist$T2        
-            Qy[ind, ]  = Qy[ind, , drop = F] + ydist$Q
-            T2y[ind, ]  = T2y[ind, , drop = F] + ydist$T2       
-            jkcoeffs[, , , iSeg] = jkcoeffs[, , , iSeg, drop = F] + m$coeffs
-         }   
-      }      
-   }  
-   
-   # average results over repetitions
-   yp.cv= yp.cv / nrep
-   Qx = Qx / nrep
-   T2x = T2x / nrep
-   Qy = Qy / nrep
-   T2y = T2y / nrep
-   jkcoeffs = jkcoeffs / nrep
-   
-   # set up names
-   dimnames(jkcoeffs) = list(colnames(x), colnames(model$coeffs$values), 
-                             colnames(model$calres$y.ref), 1:nseg)
-   dimnames(yp.cv) = list(rownames(x), colnames(model$coeffs$values), colnames(model$calres$y.ref))         
-   
-   # compute variance
-   varx = ldecomp.getVariances(Qx, model$calres$xdecomp$totvar)
-   vary = ldecomp.getVariances(Qy, model$calres$ydecomp$totvar)
-   
-   # get rid of some of the attributed
-   x.attrs$exclrows = NULL
-   x.attrs$exclcols = NULL
-   y.attrs$exclrows = NULL
-   y.attrs$exclcols = NULL
-   x.attrs$dimnames = dimnames(x)
-   y.attrs$dimnames = dimnames(y)
-   
-   # make pls results and return
-   res = plsres(yp.cv, y.ref = y, ncomp.selected = model$ncomp.selected,
-                xdecomp = ldecomp(ncomp.selected = model$ncomp.selected, 
-                                  dist = list(Q = Qx, T2 = T2x), 
-                                  var = varx, loadings = model$xloadings, attrs = x.attrs),
-                ydecomp = ldecomp(ncomp.selected = model$ncomp.selected, 
-                                  dist = list(Q = Qy, T2 = T2y), 
-                                  var = vary, loadings = model$yloadings, attrs = y.attrs)
-   )
-   if (jack.knife == T)
-      res$jkcoeffs = jkcoeffs
-   
-   res
-}
+   # get names of variables
+   prednames <- colnames(x)
+   respnames <- colnames(y)
 
-#' Select optimal number of components for PLS model
-#' 
-#' @description
-#' Allows user to select optimal number of components for PLS model
-#' 
-#' @param model
-#' PLS model (object of class \code{pls})
-#' @param ncomp
-#' number of components to select
-#' @param selcrit
-#' criterion for selecting optimal number of components (\code{'min'} for 
-#' first local minimum of RMSECV and \code{'wold'} for Wold's rule.)
-#' @param ...
-#' other parameters if any
-#' 
-#' @return
-#' the same model with selected number of components
-#'
-#' @details
-#' If number of components is not specified, the cross-validation statistics will be used. It can
-#' be either first local minimum of RMSECV (`selcrit='min'`) or Wold's rule (`selcrit='wold'`)
-#' based on ratio of PRESS values and threshold of 0.95. 
-#' 
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-selectCompNum.pls = function(model, ncomp = NULL, selcrit = model$ncomp.selcrit, ...) {
-   if (!is.null(ncomp)) {
-      # user defined number of components
-      if (ncomp > model$ncomp || ncomp < 0)
-         stop('Wrong number of selected components!')
-   } else {
-      # automatic estimation of the optimal number of components
-      
-      # calculate PRESS based on RMSE      
-      if (!is.null(model$cvres))
-         press = model$cvres$rmse^2 * nrow(model$cvres$y.pred)
-      else if (!is.null(model$testres))
-         press = model$testres$rmse^2 * nrow(model$testres$y.pred)
-      else {   
-         press = model$calres$rmse^2 * nrow(model$calres$ypred)
-         warning('No validation results were found!')
-      }
+   # if y is a vector convert it to a matrix
+   if (is.null(dim(y))) dim(y) <- c(length(y), 1)
 
-      ncomp = model$ncomp
-      if (selcrit == 'wold') {   
-         # using Wold's criterion
-         if (ncomp > 2) {
-            r = press[, 2:ncomp] / press[, 1:(ncomp - 1)] 
-            ind = which(r > 0.95, arr.ind = TRUE)
-            if (is.null(dim(ind)))
-               ncomp = min(ind)
-            else
-               ncomp = min(ind[, 2])
-         } else {
-            ncomp = which.min(press)
-         }   
-      } else if (selcrit == 'min') {
-         # using first local minimum
-         df = diff(as.vector(press)) > 0
-         if (any(df))
-            ncomp = which(df)[1]
-      } else {
-         stop('Wrong value for "ncomp.selcrit" argument!')
-      }   
-   }   
-   
-   model$ncomp.selected = ncomp      
-   model$calres$ncomp.selected = ncomp
-   
-   if (!is.null(model$cvres)) 
-      model$cvres$ncomp.selected = ncomp
-   
-   if (!is.null(model$testres)) 
-      model$testres$ncomp.selected = ncomp
-   
-   if (!model$light)
-      model$vipscores = pls.calculateVIPScores(model)
-   
-   model
-}   
-
-#' PLS predictions
-#' 
-#' @description
-#' Applies PLS model to a new data set
-#' 
-#' @param object
-#' a PLS model (object of class \code{pls})
-#' @param x
-#' a matrix with x values (predictors)
-#' @param y
-#' a matrix with reference y values (responses)
-#' @param ...
-#' other arguments
-#' 
-#' @return
-#' PLS results (an object of class \code{plsres})
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#'  
-#' @export
-predict.pls = function(object, x, y = NULL, ...) {   
-   
-   # preprocess x and calculate scores, total and full variance
-   x.attrs = attributes(x)
-   y.attrs = attributes(y)
-   
-   # correct dimension for y if it is a vector
-   if (!is.null(y) && is.null(dim(y))) {
-      y.rownames = names(y)
-      y = matrix(y, ncol = 1)
-      rownames(y) = y.rownames
-   }
-   
-   # convert to matrices   
-   x = mda.df2mat(x)
-   y = mda.df2mat(y)
-   
-   # get dimensions
-   nresp = dim(object$coeffs$values)[3]
-   ncomp = object$ncomp
-   
    # check dimensions
-   if (ncol(x) != dim(object$coeffs$values)[1])
-      stop('Wrong number of columns in matrix with predictors (x)!')
-   
-   if (!is.null(y)) {
-      if (nrow(x) != nrow(y))
-         stop('Matrices with predictors (x) and response (y) should have the same number of rows!')
-      if (ncol(y) != nresp)
-         stop('Wrong number of columns in matrix with response values (y)!')
+   if (nrow(x) != nrow(y)) {
+      stop("Number of rows for predictors and responses should be the same.")
    }
-   
-   # autoscale x
-   x = prep.autoscale(x, center = object$xcenter, scale = object$xscale)
-   
-   # compute x scores and residuals
-   xscores = x %*% (object$weights %*% solve(crossprod(object$xloadings, object$weights)))  
-   xresiduals = x - tcrossprod(xscores, object$xloadings)
 
-   # make predictions
-   yp = apply(object$coeffs$values, 3, function(x, y)(y %*% x), x)
-   dim(yp) = c(nrow(x), ncomp, dim(object$coeffs$values)[3])
-   
-   # if reference values are provided calculate and set up names for ydecomp
-   y.ref = NULL
-   ydecomp = NULL
-   if (!is.null(y)) {   
-      y.ref = y      
-      
-      # compute everything for yldecomp
-      y = prep.autoscale(y, center = object$ycenter, scale = object$yscale)
-      yscores = as.matrix(y) %*% object$yloadings 
-      
-      yresiduals = y - as.matrix(yp[, ncol(yp), ])
-      ydist = ldecomp.getDistances(xscores, object$yloadings, yresiduals, object$ytnorm) 
-      
-      
-      # compute total variance 
-      if (length(y.attrs$exclrows) > 0)
-         y = y[-y.attrs$exclrows, , drop = F]
-      
-      if (length(y.attrs$exclcols) > 0)
-         y = y[, -y.attrs$exclcols, drop = F]
-      
-      ytotvar = sum(y^2)
-      
-      # create ydecomp object
-      ydecomp = ldecomp(scores = yscores, residuals = yresiduals, loadings = object$yloadings, 
-                        attrs = y.attrs, ncomp.selected = object$ncomp.selected, dist = ydist, 
-                        totvar = ytotvar)
-      ydecomp$totvar = ytotvar
-   }
-   
-   # unscale predicted y values
-   if (is.numeric(object$yscale))
-      yp = sweep(yp, 3, object$yscale, '*')
-   
-   # uncenter predicted y values
-   if (is.numeric(object$ycenter))
-      yp = sweep(yp, 3, object$ycenter, '+')
-   
-   # set up all attributes and names
-   dimnames(yp) = list(rownames(x), dimnames(object$coeffs$values)[[2]], 
-                       dimnames(object$coeffs$values)[[3]])
-   yp = mda.setattr(yp, y.attrs)
-   attr(yp, 'name') = 'Response values, predicted'
-   
-   # we exclude rows always based on information from x (in case if y is NULL)
-   attr(yp, 'exclrows') = NULL
-   yp = mda.exclrows(yp, attr(x, 'exclrows'))
-   
-   # compute total variance 
-   if (length(x.attrs$exclrows) > 0)
-      x = x[-x.attrs$exclrows, , drop = F]
-   
-   if (length(object$exclcols) > 0)
-      x = x[, -object$exclcols, drop = F]
-   
-   xtotvar = sum(x^2)
-   
-   # create xdecomp object
-   xdecomp = ldecomp(scores = xscores, residuals = xresiduals, loadings = object$xloadings, 
-                     attrs = x.attrs,
-                     ncomp.selected = object$ncomp.selected, 
-                     tnorm = object$xtnorm, totvar = xtotvar)
-   xdecomp$totvar = xtotvar
-   
-   res = plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, 
-                xdecomp = xdecomp, ydecomp = ydecomp)
-   res
-}  
+   # convert data to a matrix
+   x <- mda.df2mat(x)
+   y <- mda.df2mat(y)
 
-#' Selectivity ratio calculation
-#' 
-#' @description
-#' Calculates selectivity ration for each component and response variable in
-#' the PLS model
-#' 
-#' @param model
-#' a PLS model (object of class \code{pls})
-#' @param x
-#' predictor values from calibration set, preprocessed, centered and scaled
-#' 
-#' @references
-#' [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
-#' 
-#' @return
-#' array \code{nvar x ncomp x ny} with selectivity ratio values
-#' 
-pls.calculateSelectivityRatio = function(model, x) {
-   ny = dim(model$coeffs$values)[3]
-   ncomp = dim(model$coeffs$values)[2]
-   nvar = ncol(x)
-   
-   # get coefficients 
-   coeffs = model$coeffs$values
-   attrs = mda.getattr(coeffs)
-   exclvars = attrs$exclrows
-   nexclvar = length(exclvars)
-   if (nexclvar > 0) {
-      coeffs = coeffs[-exclvars, , , drop = FALSE]
-      attrs$exclrow = NULL
-   }
-   
-   selratio = array(0, dim = c(nvar, ncomp, ny))
-   for (y in 1:ny) {   
-      for (comp in 1:model$ncomp) {   
-         b = coeffs[, comp, y]
-         bnorm = sqrt(as.numeric(crossprod(b)))
-         w = b/bnorm
-         
-         ttp = x %*% w
-         ptp = crossprod(ttp, x) / as.numeric(crossprod(ttp))
-         
-         expvar = ttp %*% ptp
-         resvar = apply(x - expvar, 2, var)
-         expvar = apply(expvar, 2, var)
-         
-         selratio[, comp, y] = expvar / resvar        
-      }
-   }   
-   
-   if (nexclvar > 0) {
-      selratio.out = array(0, dim = c(nvar + nexclvar, ncomp, ny))
-      selratio.out[-exclvars, , ] = selratio
-   } else {
-      selratio.out = selratio
-   }
-   
-   dimnames(selratio.out) = dimnames(model$coeffs$values)
-   selratio.out = mda.setattr(selratio.out, attrs)   
-   attr(selratio.out, 'name') = 'Selectivity ratio'
-   selratio.out
-}   
+   # get dimension of original data
+   x.ncols <- ncol(x)
+   y.ncols <- ncol(y)
 
-#' VIP scores calculation for PLS model
-#'
-#' @description
-#' Calculates VIP (Variable Importance in Projection) scores for each component and 
-#' response variable in the PLS model
-#' 
-#' @param object
-#' a PLS model (object of class \code{pls})
-#' 
-#' @return
-#' matrix \code{nvar x ny} with VIP score values for selected number of components
-#' 
-pls.calculateVIPScores = function(object) {
-   
-   # get values
-   comp = object$ncomp.selected 
-   coeffs = object$coeffs$values
-   w = object$weights[, 1:comp, drop = F]
-   xloads = object$xloadings[, 1:comp, drop = F];
-   xscores = object$calres$xdecomp$scores[, 1:comp, drop = F];
-   
-   # remove hidden variables
-   attrs = mda.getattr(coeffs)
-   exclvars = attrs$exclrows
-   nexclvar = length(exclvars)
-   if (nexclvar > 0) {
-      coeffs = coeffs[-exclvars, , , drop = FALSE]
-      w = w[-exclvars, , drop = FALSE]
-      xloads = xloads[-exclvars, , drop = FALSE]
+   # check if data has missing values
+   if (any(is.na(x))) {
+      stop("Predictors have missing values, try to fix this using pca.mvreplace.")
    }
-   
-   # remove hidden objects
-   if (length(attr(xscores, 'exclrows')) > 0)
-      xscores = xscores[-attr(xscores, 'exclrows'), , drop = FALSE]
-   
-   ny = dim(coeffs)[3]
-   nvar = dim(coeffs)[1]
-   vipscores = matrix(0, nrow = nvar, ncol = ny)
-   
-   # regression coefficients for working with scores instead of x
-   # T = X * WPW 
-   # T * WPW' = X * WPW * WPW'
-   # T * WPW' * (WPW * WPW')^-1 = X
-   # YP = X * b 
-   # YP = T * WPW' * (WPW * WPW')^-1 * b
-   # YP = T * bT, where bT = WPW' * (WPW * WPW)^-1 * b
-   wpw = (w %*% solve(t(xloads) %*% w))
-   
-   # normalise weights
-   n = 1/sqrt(colSums(w^2))
-   if (comp == 1)
-      dim(n) = c(1, 1)
-   else
-      n = diag(n)                     
-   wnorm = w %*% n
-   
-   for (y in 1:ny) {   
-      b = coeffs[, comp, y, drop = F]
-      dim(b) = c(dim(b)[1], 1) 
-      
-      bscores = ( t(wpw) %*% pinv(wpw %*% t(wpw)) ) %*% b
-      
-      TT = colSums(xscores^2)
-      dim(TT) = c(1, comp)
-      SS = bscores^2 * t(TT)
-      vipscores[, y] = nvar * wnorm^2 %*% as.matrix(SS) / sum(SS)
-   }   
-   
-   if (nexclvar > 0) {
-      vipscores.out = matrix(0, nrow = nvar + nexclvar, ncol = ny)
-      vipscores.out[-exclvars, ] = vipscores
-   } else {
-      vipscores.out = vipscores
-   }
-   
-   rownames(vipscores.out) = dimnames(object$coeffs$values)[[1]]
-   colnames(vipscores.out) = dimnames(object$coeffs$values)[[3]]
-   vipscores.out = mda.setattr(vipscores.out, attrs)
-   attr(vipscores.out, 'name') = 'VIP scores'
-   vipscores.out   
-}   
 
-#' Selectivity ratio for PLS model
-#' 
-#' @description
-#' Returns vector with selectivity ratio values for given number of components
-#' and response variable
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param ncomp
-#' number of components to get the values for (if NULL user selected as optimal will be 
-#' used)
-#' @param ny
-#' which response to get the values for (if y is multivariate)
-#' @param ...
-#' other parameters
-#' 
-#' @references
-#' [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
-#' 
-#' @return
-#' vector with selectivity ratio values
-#' 
-#' @export
-getSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, ...) {
-   if (is.null(ncomp))
-      ncomp = obj$ncomp.selected
-   
-   attrs = mda.getattr(obj$selratio)   
-   selratio = obj$selratio[, ncomp, ny]
-   dim(selratio) = c(dim(obj$selratio)[1], 1)
-   selratio = mda.setattr(selratio, attrs)   
-   rownames(selratio) = dimnames(obj$selratio)[[1]]
-   colnames(selratio) = dimnames(obj$selratio)[[3]][[ny]]
-   
-   selratio
-}  
+   if (any(is.na(y))) {
+      stop("Responses have missing values, try to fix this using pca.mvreplace.")
+   }
+
+   # set column names for predictors if missing
+   if (is.null(colnames(y))) {
+      colnames(y) <- paste0("y", seq_len(ncol(y)))
+   }
+
+   # correct x-axis name
+   if (is.null(x.attrs$xaxis.name)) {
+     x.attrs$xaxis.name <- "Predictors"
+   }
+
+   if (is.null(y.attrs$xaxis.name)) {
+     y.attrs$xaxis.name <- "Responses"
+   }
+
+   # remove excluded rows
+   if (length(x.attrs$exclrows) > 0) {
+      x <- x[-x.attrs$exclrows, , drop = FALSE]
+      y <- y[-x.attrs$exclrows, , drop = FALSE]
+   }
+
+   # autoscale and save the mean and std values for predictors
+   x <- prep.autoscale(x, center = center, scale = scale)
+   model$xcenter <- attr(x, "prep:center")
+   model$xscale <- attr(x, "prep:scale")
+
+   # autoscale and save the mean and std values for responses
+   y <- prep.autoscale(y, center = center, scale = scale)
+   model$ycenter <- attr(y, "prep:center")
+   model$yscale <- attr(y, "prep:scale")
+
+   # remove excluded columns for predictors
+   if (length(x.attrs$exclcols) > 0) {
+      x <- x[, -x.attrs$exclcols, drop = FALSE]
+   }
+
+   # remove excluded columns for responses
+   if (length(y.attrs$exclcols) > 0) {
+      y <- y[, -y.attrs$exclcols, drop = FALSE]
+   }
+
+   # get dimensions of reduced datasets
+   xc.nrows <- nrow(x)
+   xc.ncols <- ncol(x)
+   yc.ncols <- ncol(y)
+
+   # find maximum number of objects in a segment
+   nobj.cv <- 0
+   if (!is.logical(cv)) {
+      nseg <- if (is.numeric(cv)) cv else cv[[2]]
+      nobj.cv <- if (nseg == 1) 1 else ceiling(xc.nrows / nseg)
+   }
+
+   # correct maximum number of components
+   ncomp <- min(xc.ncols, xc.nrows - 1 - nobj.cv, ncomp)
+
+   # fit model
+
+   fit <- pls.run(x, y, method = method, ncomp = ncomp)
+   ncomp <- fit$ncomp
+   model$ncomp <- ncomp
+
+   # if it is for cross-validation return the results as is
+   if (cv) {
+      model$coeffs <- regcoeffs(fit$coeffs)
+      model$xloadings <- fit$xloadings
+      model$weights <- fit$weights
+      return(model)
+   }
+
+   # compute eigenvalues
+   xscores <- x %*% (fit$weights %*% solve(crossprod(fit$xloadings, fit$weights)))
+   yscores <- as.matrix(y) %*% fit$yloadings
+   xeigenvals <- colSums(xscores^2) / (xc.nrows - 1)
+   attr(xeigenvals, "DoF") <- (xc.nrows - 1)
+   yeigenvals <- colSums(yscores^2) / (xc.nrows - 1)
+   attr(yeigenvals, "DoF") <- (xc.nrows - 1)
+
+   # correct results related to predictors for missing columns in x
+   # corresponding rows will be set to 0 and excluded
+   xloadings <- matrix(0, nrow = x.ncols, ncol = ncomp)
+   yloadings <- matrix(0, nrow = y.ncols, ncol = ncomp)
+   weights <- matrix(0, nrow = x.ncols, ncol = ncomp)
+   coeffs <- array(0, dim = c(x.ncols, ncomp, yc.ncols))
+
+   pred_ind <- seq_len(x.ncols)
+   if (length(x.attrs$exclcols) > 0) pred_ind <- pred_ind[-x.attrs$exclcols]
+
+   resp_ind <- seq_len(y.ncols)
+   if (length(y.attrs$exclcols) > 0) resp_ind <- resp_ind[-y.attrs$exclcols]
+
+   # x-loadings
+   xloadings[pred_ind, ] <- fit$xloadings
+   xloadings <- mda.exclrows(xloadings, x.attrs$exclcols)
+
+   # y-loadings
+   yloadings[resp_ind, ] <- fit$yloadings
+   yloadings <- mda.exclrows(yloadings, y.attrs$exclcols)
+
+   # weights
+   weights[pred_ind, ] <- fit$weights
+   weights <- mda.exclrows(weights, x.attrs$exclcols)
+
+   # coeffs
+   coeffs[pred_ind, , ] <- fit$coeffs
+   coeffs <- mda.exclrows(coeffs, x.attrs$exclcols)
+
+   # set names and attributes
+   compnames <- paste("Comp", seq_len(ncomp))
+
+   # x-loadings and weights
+   rownames(xloadings) <- rownames(weights) <- prednames
+   colnames(xloadings) <- colnames(weights) <- compnames
+   attr(xloadings, "name") <- "X loadings"
+   attr(weights, "name") <- "Weights"
+   attr(xloadings, "xaxis.name") <- attr(weights, "xaxis.name") <- "Components"
+   attr(xloadings, "yaxis.name") <- attr(weights, "yaxis.name") <- x.attrs$xaxis.name
+   attr(xloadings, "yaxis.values") <- attr(weights, "yaxis.values") <- x.attrs$xaxis.values
+
+   # coefficients
+   dimnames(coeffs) <- list(prednames, compnames, colnames(y))
+   attr(coeffs, "yaxis.name") <- x.attrs$xaxis.name
+   attr(coeffs, "yaxis.values") <- x.attrs$xaxis.values
+
+   # y-loadings
+   rownames(yloadings) <- respnames
+   colnames(yloadings) <- colnames(xloadings)
+   attr(yloadings, "name") <- "Y loadings"
+   attr(yloadings, "xaxis.name") <- "Components"
+   attr(yloadings, "yaxis.name") <- y.attrs$xaxis.name
+   attr(yloadings, "yaxis.values") <- y.attrs$xaxis.values
+
+   # set up and return model parameters
+   model$xloadings <- xloadings
+   model$yloadings <- yloadings
+   model$weights <- weights
+   model$coeffs <- regcoeffs(coeffs)
+
+   model$ncomp.selected <- ncomp
+   model$exclrows <- x.attrs$exclrows
+   model$exclcols <- x.attrs$exclcols
+   model$xeigenvals <- xeigenvals
+   model$yeigenvals <- yeigenvals
+
+   return(model)
+}
 
 #' VIP scores for PLS model
-#' 
-#' @description
-#' Returns vector with VIP scores values for given number of components
-#' and response variable
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param ny
-#' which response to get the values for (if y is multivariate)
-#' @param ...
-#' other parameters
-#' 
-#' @references
-#' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
-#' 
-#' @return
-#' vector with VIP scores values
-#' 
-#' @export
-getVIPScores.pls = function(obj, ny = 1, ...) {
-   return(mda.subset(obj$vipscores, select = ny))
-}
-
-
-#' Regression coefficients for PLS model'
 #'
-#' @description 
-#' Returns a matrix with regression coefficients for
-#' the PLS model which can be applied to a data directly
-#' 
+#' @description
+#' Calculates VIP (Variable Importance in Projection) scores for predictors for given number
+#' of components and response variable.
+#'
 #' @param obj
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
-#' number of components to return the coefficients for
-#' @param ny
-#' if y is multivariate which variables you want to see the coefficients for
-#' @param full
-#' if TRUE the method also shows p-values and t-values as well as confidence intervals for the 
-#' coefficients (if available)
-#' @param alpha
-#' significance level for confidence intervals (a number between 0 and 1, e.g. for 95\% alpha = 0.05)
+#' number of components to count
+#'
+#' @return
+#' matrix \code{nvar x ny} with VIP score values (columns correspond to responses).
+#'
+#' @details
+#' May take some time in case of large number of predictors Returns results as a column-vector,
+#' with all necessary attributes inherited (e.g. xaxis.values, excluded variables, etc.). If you
+#' want to make a plot use for example: \code{mdaplot(mda.t(v), type = "l")}, where \code{v} is
+#' a vector with computed VIP scores. Or just try \code{\link{plotVIPScores.pls}}.
+#'
+#' @references
+#' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
+#'
+#' @export
+vipscores <- function(obj, ncomp = obj$ncomp.selected) {
+
+   if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
+      stop("Wrong value for the 'ncomp' parameter.")
+   }
+
+   # subset needed model parameters
+   comp <- seq_len(ncomp)
+   weights <- obj$weights[, comp, drop = FALSE]
+   yloads <- obj$yloadings[, comp, drop = FALSE];
+
+   # get eigenvalues and multiply them to degrees of freedom
+   xeigenvals <- obj$xeigenvals[comp]
+
+   # get number and indices of variables and adjust dimension for regcoeffs
+   nvar <- nrow(weights)
+   var_ind <- seq_len(nvar)
+
+   # remove hidden variables
+   if (length(obj$exclcols) > 0) {
+      weights <- weights[-obj$exclcols, , drop = FALSE]
+      var_ind <- var_ind[-obj$exclcols]
+   }
+
+   # prepare matrix for vipscores
+   vipscores <- matrix(0, nrow = nvar, ncol = nrow(yloads))
+
+   # normalize scores
+   wnorm <- weights %*% diag(1 / sqrt(colSums(weights^2)), nrow = ncomp, ncol = ncomp)
+
+   # compute sum of squares for explained y variance and normalize it
+   ssq <- yloads^2 %*% diag(xeigenvals, nrow = ncomp, ncol = ncomp)
+   ssq <- ssq %*% diag(1 / rowSums(ssq), nrow = ncomp, ncol = ncomp)
+
+   # compute VIP scores
+   vipscores[var_ind, ] <- sqrt(nvar * wnorm^2 %*% t(ssq))
+
+   rownames(vipscores) <- rownames(obj$xloadings)
+   colnames(vipscores) <- rownames(obj$yloadings)
+
+   attr(vipscores, "exclrows") <- obj$exclcols
+   attr(vipscores, "yaxis.values") <- attr(obj$xloadings, "yaxis.values")
+   attr(vipscores, "yaxis.name") <- attr(obj$xloadings, "yaxis.name")
+   attr(vipscores, "xaxis.name") <- ""
+   attr(vipscores, "name") <- sprintf("VIP scores (ncomp = %d)", ncomp)
+
+   return(vipscores)
+}
+
+#' VIP scores for PLS model
+#'
+#' @description
+#' Returns vector with VIP scores values. This function is a proxy for \code{\link{vipscores}}
+#' and will be removed in future releases.
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param ncomp
+#' number of components to count
 #' @param ...
 #' other parameters
 #'
-#' @details 
-#' The method recalculates the regression coefficients found by the PLS algorithm
-#' taking into account centering and scaling of predictors and responses, so the 
-#' matrix with coefficients can be applied directly to original data (yp = Xb).
-#' 
-#' If number of components is not specified, the optimal number, selected by user
-#' or identified by a model will be used.
-#' 
-#' If Jack-knifing method was used to get statistics for the coefficient the method 
-#' returns all statistics as well (p-value, t-value, confidence interval). In this case user
-#' has to specified a number of y-variable (if there are many) to get the statistics and 
-#' the coefficients for. The confidence interval is computed for unstandardized coefficients.
-#' 
-#' @return 
-#' A matrix  with regression coefficients and (optinally) statistics.
-#'  
+#' @return
+#' matrix \code{nvar x 1} with VIP score values
+#'
 #' @export
-getRegcoeffs.pls = function(obj, ncomp = NULL, ny = NULL, full = FALSE, 
-                            alpha = obj$coeffs.alpha, ...) {
-   if (is.null(ncomp)) 
-      ncomp = obj$ncomp.selected
-   else if (length(ncomp) != 1 || ncomp <= 0 || ncomp > obj$ncomp) 
-      stop('Wrong value for number of components!')
-   
-   if (is.null(ny))
-      ny = 1:dim(obj$coeffs$values)[3]
-   
-   if (min(ny) < 1 || max(ny) > dim(obj$coeffs$values)[3])
-      stop('Wrong value for ny!')
-   
-   if (alpha <= 0 || alpha >= 1)
-      stop('Wrong value for alpha (must be between 0 and 1)')
-   
-   attrs = mda.getattr(obj$coeffs$values)
-   coeffs = obj$coeffs$values[, ncomp, ny, drop = F]
-   coeffs = matrix(coeffs, nrow = dim(coeffs)[1], ncol = dim(coeffs)[3])
-   
-   xscale = obj$xscale
-   if (is.logical(xscale))
-      xscale = matrix(1, nrow = nrow(coeffs))
-   
-   xcenter = obj$xcenter 
-   if (is.logical(xcenter))
-      xcenter = matrix(0, nrow = nrow(coeffs))
-   
-   yscale = obj$yscale
-   if (is.logical(yscale))
-      yscale = matrix(1, nrow = ncol(coeffs))
-   else
-      yscale = yscale[ny]
-   
-   ycenter = obj$ycenter 
-   if (is.logical(ycenter))
-      ycenter = matrix(0, nrow = ncol(coeffs))
-   else
-      ycenter = ycenter[ny]
-   
-   # calculate intercept
-   b0 = sweep(coeffs,  1, xcenter, '*')
-   b0 = sweep(b0, 1, xscale, '/')
-   b0 = apply(-b0, 2, sum)
-   b0 = matrix(b0, nrow = 1)
-   b0 = sweep(b0, 2, yscale, '*')
-   b0 = sweep(b0, 2, ycenter, '+')
-   
-   # rescale coefficients
-   coeffs = sweep(coeffs, 1, xscale, '/');
-   coeffs = sweep(coeffs, 2, yscale, '*');
-   coeffs = rbind(b0, coeffs)
-   
-   if (full == TRUE && !is.null(obj$coeffs$p.values)) {
-      
-      if (ncol(coeffs) != 1)
-         stop('Full table can be shown only for selected response variable (ny)!')
-      
-      ci.CL = (1 - alpha) * 100
-      t = qt(1 - alpha/2, obj$coeffs$niter - 1)
-      
-            
-      se = matrix(obj$coeffs$se[, ncomp, ny], ncol = 1)
-      se = sweep(se, 1, xscale, '/');
-      se = sweep(se, 2, yscale, '*');
-      ci.lo = coeffs[-1, ] - t * se
-      ci.up = coeffs[-1, ] + t * se
-      
-      coeffs = cbind(coeffs, 
-                     c(NA, obj$coeffs$t.values[, ncomp, ny]),
-                     c(NA, se),
-                     c(NA, obj$coeffs$p.values[, ncomp, ny]),
-                     c(NA, ci.lo),
-                     c(NA, ci.up)
-      )
-      colnames(coeffs) = c('Estimated coefficients', 't-value', 'SE', 'p-value', 
-                           sprintf('%d%% CI (lo)', ci.CL),
-                           sprintf('%d%% CI (up)', ci.CL)
-      )
-   } else {
-      colnames(coeffs) = dimnames(obj$coeffs$values)[[3]]
-   }
-   
-   rownames(coeffs) = c('Intercept', dimnames(obj$coeffs$values)[[1]])
-   attr(coeffs, 'exclrows') = attrs$exclrows
-   attr(coeffs, 'name') = paste('Regression coefficients for ', dimnames(obj$coeffs$values)[[3]][ny])
-   
-   coeffs
-}   
+getVIPScores.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
 
-#' VIP scores plot for PLS model
-#' 
-#' @description
-#' Shows a plot with VIP scores values for given number of components
-#' and response variable
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param ny
-#' which response to get the values for (if y is multivariate)
-#' @param type
-#' type of the plot
-#' @param main
-#' main title for the plot
-#' @param ylab
-#' label for y axis
-#' @param ...
-#' other plot parameters (see \code{mdaplot} for details)
-#' 
-#' @references
-#' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
-#' 
-#' @export
-plotVIPScores.pls = function(obj, ny = 1, type = 'l', main = NULL, ylab = '', ...) {   
-   
-   main = getMainTitle(main, NULL, 'VIP scores')
-   vipscores = getVIPScores.pls(obj, ny)
-   mdaplot(mda.t(vipscores), type = type, main = main, ylab = ylab, ...)
+   warning("This function is deprecated and will be removed in future. Use 'vipscores()' insted.")
+   return(vipscores(obj, ncomp = ncomp))
 }
 
-#' Selectivity ratio plot for PLS model
-#' 
+#' Selectivity ratio calculation
+#'
 #' @description
-#' Shows a plot with selectivity ratio values for given number of components
-#' and response variable
-#' 
+#' Calculates selectivity ratio for each component and response variable in
+#' the PLS model
+#'
+#' @param obj
+#' a PLS model (object of class \code{pls})
+#' @param ncomp
+#' number of components to count
+#'
+#' @references
+#' [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
+#'
+#' @return
+#' array \code{nvar x ncomp x ny} with selectivity ratio values
+#'
+#' @export
+selratio <- function(obj, ncomp = obj$ncomp.selected) {
+
+   if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
+      stop("Wrong value for the 'ncomp' parameter.")
+   }
+
+   # get number and indices of variables and adjust dimension for regcoeffs
+   nvar <- nrow(obj$weights)
+   nresp <- nrow(obj$yloadings)
+   var_ind <- seq_len(nvar)
+
+   # reproduce x values
+   xresiduals <- obj$res[["cal"]]$xdecomp$residuals
+   xscores <- obj$res[["cal"]]$xdecomp$scores
+   x <- xresiduals + tcrossprod(xscores, obj$xloadings)
+
+   # remove excluded rows
+   if (length(obj$exclrows) > 0) {
+      x <- x[-obj$exclrows, , drop = FALSE]
+   }
+
+   # subset needed model parameters
+   coeffs <- obj$coeffs$values[, ncomp, , drop = FALSE]
+
+   # correct dimension for coefficients
+   dim(coeffs) <- c(nvar, nresp)
+
+   # remove hidden variables
+   if (length(obj$exclcols) > 0) {
+      x <- x[, -obj$exclcols, drop = FALSE]
+      coeffs <- coeffs[-obj$exclcols, , drop = FALSE]
+      var_ind <- var_ind[-obj$exclcols]
+   }
+
+   # prepare matrix for vipscores
+   selratio <- matrix(0, nrow = nvar, ncol = nresp)
+
+   # get norm value for regression coefficients
+   bnorm <- sqrt(colSums(coeffs^2))
+
+   # compute target projections
+   ttp <-  x %*% (coeffs %*% diag(1 / bnorm, nrow = nresp, ncol = nresp))
+   ptp <- t(crossprod(x, ttp) %*% diag(1 / colSums(ttp^2), nrow = nresp, ncol = nresp))
+
+   # compute selectivity ratio
+   for (y in seq_len(nresp)) {
+      expvar <- ttp[, y, drop = FALSE] %*% ptp[y, , drop = FALSE]
+      selratio[var_ind, y] <- colSums(expvar^2) / colSums((x - expvar)^2)
+   }
+
+   rownames(selratio) <- rownames(obj$xloadings)
+   colnames(selratio) <- rownames(obj$yloadings)
+
+   attr(selratio, "exclrows") <- obj$exclcols
+   attr(selratio, "yaxis.values") <- attr(obj$xloadings, "yaxis.values")
+   attr(selratio, "yaxis.name") <- attr(obj$xloadings, "yaxis.name")
+   attr(selratio, "xaxis.name") <- ""
+   attr(selratio, "name") <- sprintf("Selectivity ratio (ncomp = %d)", ncomp)
+
+   return(selratio)
+}
+
+#' Selectivity ratio for PLS model
+#'
+#' @description
+#' Returns vector with Selectivity ratio values. This function is a proxy for \code{\link{selratio}}
+#' and will be removed in future releases.
+#'
 #' @param obj
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
 #' number of components to get the values for (if NULL user selected as optimal will be used)
-#' @param ny
-#' which response to get the values for (if y is multivariate)
-#' @param type
-#' type of the plot
-#' @param main
-#' main title for the plot
-#' @param ylab
-#' label for y axis
 #' @param ...
-#' other plot parameters (see \code{mdaplot} for details)
-#' 
+#' other parameters
+#'
 #' @references
 #' [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
-#' 
-#' @export
-plotSelectivityRatio.pls = function(obj, ncomp = NULL, ny = 1, type = 'l', 
-                                    main = NULL, ylab = '', ...) {
-   main = getMainTitle(main, ncomp, 'Selectivity ratio')
-   ncomp = getSelectedComponents(obj, ncomp)
-   
-   selratio = getSelectivityRatio(obj, ncomp, ny)
-   mdaplot(mda.t(selratio), type = type, main = main, ylab = ylab, ...)
-} 
-
-
-#' RMSE plot for PLS
-#' 
-#' @description
-#' Shows plot with root mean squared error values vs. number of components for PLS model.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param ny
-#' number of response variable to make the plot for (if y is multivariate)
-#' @param type
-#' type of the plot('b', 'l' or 'h')
-#' @param main
-#' main plot title
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param labels
-#' what to show as labels (if this option is on)
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
 #'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
+#' @return
+#' vector with selectivity ratio values
+#'
 #' @export
-plotRMSE.pls = function(obj, ny = 1, type = 'b', main = 'RMSE', xlab = 'Components', ylab = NULL, 
-                        labels = 'values', ...) {
+getSelectivityRatio.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
+   warning("This function is deprecated and will be removed in future. Use 'selratio()' insted.")
+   return(selratio(obj, ncomp = ncomp))
+}
 
-   if (is.null(ylab)) {   
-      if (nrow(obj$calres$rmse) == 1)
-         ylab = 'RMSE'
-      else if (is.null(rownames(obj$calres$rmse)))
-         ylab = sprintf('RMSE (#%d)', ny)
-      else         
-         ylab = sprintf('RMSE (%s)', rownames(obj$calres$rmse)[ny])
+#' Compute critical limits for orthogonal distances (Q)
+#'
+#' @param lim.type
+#' which method to use for calculation of critical limits for residuals
+#' @param alpha
+#' significance level for extreme limits.
+#' @param gamma
+#' significance level for outlier limits.
+#' @param params
+#' distribution parameters returned by ldecomp.getLimParams
+#'
+#' @export
+pls.getZLimits <- function(lim.type, alpha, gamma, params) {
+
+   if (!(lim.type %in% c("ddmoments", "ddrobust"))) {
+      return(NULL)
    }
-   
-   data = list()
-   data$cal = obj$calres$rmse[ny, , drop = F]   
-   
-   if (!is.null(obj$cvres))  
-      data$cv = obj$cvres$rmse[ny, ]
-   
-   if (!is.null(obj$testres)) 
-      data$test = obj$testres$rmse[ny, ]
-   
-   mdaplotg(data, type = type, labels = labels, main = main, xlab = xlab, ylab = ylab, ...)
+
+   pZ <- if (regexpr("robust", lim.type) > 0) params$Z$robust else params$Z$moments
+   DoF <- round(pZ$Nu)
+   DoF[DoF < 1] <- 1
+   DoF[DoF > 250] <- 250
+
+   ncomp <- length(pZ$u0)
+   lim <- rbind(0, 0, pZ$u0, DoF)
+
+   colnames(lim) <- paste("Comp", seq_len(ncomp))
+   rownames(lim) <- c("Extremes limits", "Outliers limits", "Mean", "DoF")
+   attr(lim, "name") <- "Critical limits for orthogonal distance (Z)"
+   attr(lim, "alpha") <- alpha
+   attr(lim, "gamma") <- gamma
+   attr(lim, "lim.type") <- lim.type
+
+   return(lim)
 }
 
-#' Explained X variance plot for PLS
-#' 
-#' @description
-#' Shows plot with explained X variance vs. number of components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param type
-#' type of the plot('b', 'l' or 'h')
-#' @param main
-#' main plot title
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
+#' Compute coordinates of lines or curves with critical limits
 #'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotXVariance.pls = function(obj, type = 'b',
-                             main = 'X variance', xlab = 'Components', 
-                             ylab = 'Explained variance, %', ...) {
-   
-   plotVariance(obj, decomp = 'xdecomp', type = type, main = main, xlab = xlab, ylab = ylab, ...)
-}
-
-#' Explained Y variance plot for PLS
-#' 
-#' @description
-#' Shows plot with explained Y variance vs. number of components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param type
-#' type of the plot('b', 'l' or 'h')
-#' @param main
-#' main plot title
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotYVariance.pls = function(obj, type = 'b',
-                             main = 'Y variance', xlab = 'Components', 
-                             ylab = 'Explained variance, %', ...) {
-   
-   plotVariance(obj, decomp = 'ydecomp', type = type, main = main, xlab = xlab, ylab = ylab, ...)
-}
-
-#' Cumulative explained X variance plot for PLS
-#' 
-#' @description
-#' Shows plot with cumulative explained X variance vs. number of components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param type
-#' type of the plot('b', 'l' or 'h')
-#' @param main
-#' main plot title
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotXCumVariance.pls = function(obj, type = 'b',
-                                main = 'X cumulative variance', 
-                                xlab = 'Components', ylab = 'Explained variance, %', ...) {
-   
-   plotVariance(obj, decomp = 'xdecomp', variance = 'cumexpvar', 
-                type = type, main = main, xlab = xlab, ylab = ylab)   
-}
-
-#' Cumulative explained Y variance plot for PLS
-#' 
-#' @description
-#' Shows plot with cumulative explained Y variance vs. number of components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param type
-#' type of the plot('b', 'l' or 'h')
-#' @param main
-#' main plot title
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotYCumVariance.pls = function(obj, type = 'b',
-                                main = 'Y cumulative variance', 
-                                xlab = 'Components', ylab = 'Explained variance, %', ...) {
-   
-   plotVariance(obj, decomp = 'ydecomp', variance = 'cumexpvar', 
-                type = type, main = main, xlab = xlab, ylab = ylab, ...)   
-}
-
-#' Variance plot for PLS
-#' 
-#' @description
-#' Shows plot with variance values vs. number of components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param decomp
-#' which decomposition to use ('xdecomp' for x or 'ydecomp' for y)
-#' @param variance
-#' which variance to use ('expvar', 'cumexpvar)
-#' @param type
-#' type of the plot('b', 'l' or 'h')
-#' @param main
-#' main plot title
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param labels
-#' what to show as labels for plot objects.
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotVariance.pls = function(obj, decomp = 'xdecomp', variance = 'expvar',
-                            type = 'b', main = 'X variance', xlab = 'Components', 
-                            ylab = 'Explained variance, %', labels = 'values', ...) {
-   data = list()
-   data$cal = obj$calres[[decomp]][[variance]]   
-   
-   if (!is.null(obj$cvres)) 
-      data$cv = obj$cvres[[decomp]][[variance]]
-   
-   if (!is.null(obj$testres)) 
-      data$test = obj$testres[[decomp]][[variance]]
-   
-   mdaplotg(data, type = type, main = main, xlab = xlab, ylab = ylab, labels = labels, ...)
-}
-
-#' X scores plot for PLS
-#' 
-#' @description
-#' Shows plot with X scores values for selected components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param comp
-#' which components to show the plot for (one or vector with several values)
-#' @param main
-#' main plot title
-#' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotXScores.pls = function(obj, comp = c(1, 2), main = 'X scores', show.axes = T, ...) {
-   ncomp = length(comp)
-   
-   if (ncomp < 1 || ncomp > 2)
-      stop('The plot can be made for one or two components only!')
-   
-   data = list()
-   data$cal = mda.subset(obj$calres$xdecomp$scores, select = comp)
-   colnames(data$cal) = paste('Comp ', comp, ' (', round(obj$calres$xdecomp$expvar[comp], 2), '%)');
-   
-   if (!is.null(obj$testres)) 
-      data$test = mda.subset(obj$testres$xdecomp$scores, select = comp)
-   
-   if (show.axes == T)
-      show.lines = c(0, 0)
-   else
-      show.lines = F
-   
-   mdaplotg(data, show.lines = show.lines, main = main, ...)   
-}  
-
-#' XY scores plot for PLS
-#' 
-#' @description
-#' Shows plot with X vs. Y scores values for selected component.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param comp
-#' which component to show the plot for
-#' @param main
-#' main plot title
-#' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#'
-#' @export
-plotXYScores.pls = function(obj, comp = 1, main = 'XY scores', show.axes = T, ...) {
-   if (is.null(comp)) 
-      comp = obj$ncomp.selected   
-   else if (length(comp) != 1 || comp <= 0 || comp > obj$ncomp) 
-      stop('Wrong component number!')
-   
-   data = list() 
-   data$cal = cbind(
-      obj$calres$xdecomp$scores[, comp, drop = F], 
-      obj$calres$ydecomp$scores[, comp, drop = F]
-   )
-   data$cal = mda.setattr(data$cal, mda.getattr(obj$calres$xdecomp$scores))
-   attr(data$cal, 'name') = sprintf('XY scores')
-   rownames(data$cal) = rownames(obj$calres$xdecomp$scores)
-   colnames(data$cal) = c(
-      sprintf('X scores (Comp %d, %.2f%%)', comp, obj$calres$xdecomp$expvar[comp]), 
-      sprintf('Y scores (Comp %d, %.2f%%)', comp, obj$calres$ydecomp$expvar[comp])
-   )
-   
-   
-   if (!is.null(obj$testres)){
-      data$test = cbind(
-         obj$testres$xdecomp$scores[, comp, drop = F], 
-         obj$testres$ydecomp$scores[, comp, drop = F]
-      )
-      data$test = mda.setattr(data$test, mda.getattr(obj$testres$xdecomp$scores))
-      rownames(data$test) = rownames(obj$testres$xdecomp$scores)
-   }
-   
-   if (show.axes == T)
-      show.lines = c(0, 0)
-   else
-      show.lines = F
-   
-   mdaplotg(data, main = main, show.lines = show.lines, ...)   
-}  
-
-#' Predictions plot for PLS
-#' 
-#' @description
-#' Shows plot with predicted vs. reference (measured) y values for selected components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
+#' @param Qlim
+#' matrix with critical limits for orthogonal distances (X)
+#' @param T2lim
+#' matrix with critical limits for score distances (X)
+#' @param Zlim
+#' matrix with critical limits for orthogonal distances (Y)
+#' @param nobj
+#' number of objects to compute the limits for
 #' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
-#' @param ny
-#' number of response variable to make the plot for (if y is multivariate)
-#' @param main
-#' main plot title
-#' @param legend.position
-#' position of legend on the plot (if shown)
-#' @param show.line
-#' logical, show or not line fit for the plot points
-#' @param colmap
-#' a colormap to use for coloring the plot items
-#' @param col
-#' a vector with color values for target lines fitted the points
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
+#' number of components for computing the coordinates
+#' @param norm
+#' logical, shall distance values be normalized or not
+#' @param log
+#' logical, shall log transformation be applied or not
 #'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
+#' @return
+#' list with two matrices (x and y coordinates of corresponding limits)
 #'
 #' @export
-plotPredictions.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, legend.position = 'topleft', 
-                               show.line = T, colmap = 'default', col = NULL, ...) {
-   
-   if (is.null(main)) {   
-      if (is.null(ncomp))
-         main = 'Predictions'
-      else
-         main = sprintf('Predictions (ncomp = %d)', ncomp)
+pls.getLimitsCoordinates <- function(Qlim, T2lim, Zlim, nobj, ncomp, norm, log) {
+
+   # get DoF
+   Nh <- T2lim[4, ncomp]
+   Nq <- Qlim[4, ncomp]
+   Nz <- Zlim[4, ncomp]
+   Nf <- Nq + Nh
+
+   # get scaling factor
+   z0 <- Zlim[3, ncomp]
+   f0 <- Nf
+
+   # process degrees of freedom for (Z)
+   Nz <- round(Nz)
+   Nz[Nz < 1] <- 1
+   Nz[Nz > 250] <- 250
+
+   # process degrees of freedom for (F)
+   Nf <- round(Nf)
+   Nf[Nf < 1] <- 1
+   Nf[Nf > 250] <- 250
+
+   # get limit parameters
+   alpha <- attr(Qlim, "alpha")
+   gamma <- attr(Qlim, "gamma")
+
+   ## slope and intercepts
+   eB <- qchisq(1 - alpha, Nf + Nz) / Nz * z0
+   oB <- qchisq((1 - gamma) ^ (1 / nobj), Nf + Nz) / Nz * z0
+   eA <- oA <- -1 * (z0 / f0) * (Nf / Nz)
+
+   fE <- seq(-0.95, -eB / eA, length.out = 100)
+   fO <- seq(-0.95, -oB / oA, length.out = 100)
+   zE <- eA * fE + eB
+   zO <- oA * fO + oB
+
+   if (norm) {
+      fE <- fE / f0
+      zE <- zE / z0
+      fO <- fO / f0
+      zO <- zO / z0
    }
-   
-   if (is.null(ncomp))
-      ncomp = obj$ncomp.selected
-   else if (length(ncomp) != 1 || ncomp < 1 || ncomp > ncol(obj$calres$y.pred))
-      stop('Wrong number of components!')
-   
-   if (is.null(dimnames(obj$calres$y.pred)) || is.null(dimnames(obj$calres$y.pred)[[3]])) 
-      yaxis.name = 'y, predicted'
-   else
-      yaxis.name = sprintf('%s, predicted', dimnames(obj$calres$y.pred)[[3]][ny])
-   
-   if (!is.null(dimnames(obj$calres$y.pred)) && !is.null(dimnames(obj$calres$y.pred)[[3]])) 
-      xaxis.name = sprintf('%s, reference', dimnames(obj$calres$y.pred)[[3]][ny])
-   else
-      xaxis.name = 'y, reference'
-   
-   data = list()   
-   attrs = mda.getattr(obj$calres$y.pred)
-   data$cal = cbind(obj$calres$y.ref[, ny], obj$calres$y.pred[, ncomp, ny])
-   data$cal = mda.setattr(data$cal, attrs)
-   colnames(data$cal) = c(xaxis.name, yaxis.name)
-   rownames(data$cal) = rownames(obj$calres$y.pred)
-   
-   if (!is.null(obj$cvres)) { 
-      data$cv = cbind(obj$cvres$y.ref[, ny], obj$cvres$y.pred[, ncomp, ny])
-      colnames(data$cv) = c(xaxis.name, yaxis.name)
-      rownames(data$cv) = rownames(obj$cvres$y.pred)
-   }   
-   
-   if (!is.null(obj$testres)) { 
-      attrs = mda.getattr(obj$testres$y.pred)
-      data$test = cbind(obj$testres$y.ref[, ny], obj$testres$y.pred[, ncomp, ny])
-      data$test = mda.setattr(data$test, attrs)
-      colnames(data$test) = c(xaxis.name, yaxis.name)
-      rownames(data$test) = rownames(obj$testres$y.pred)
-   }   
-   
-   mdaplotg(data, main = main, colmap = colmap, legend.position = legend.position, ...)  
-   
-   if (show.line == T)
-      mdaplot.showRegressionLine(data, colmap = colmap, col = col)
-}
 
-#' Y residuals plot for PLS
-#' 
-#' @description
-#' Shows plot with y residuals for selected components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
-#' @param ny
-#' number of response variable to make the plot for (if y is multivariate)
-#' @param main
-#' main plot title
-#' @param show.line
-#' logical, show or not line for 0 value
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotYResiduals.pls = function(obj, ncomp = NULL, ny = 1, main = NULL, show.line = T, ...) {
-   
-   if (is.null(main)) {   
-      if (is.null(ncomp))
-         main = 'Y residuals'
-      else
-         main = sprintf('Y residuals (ncomp = %d)', ncomp)
+   if (log) {
+      fE <- log(1 + fE)
+      zE <- log(1 + zE)
+      fO <- log(1 + fO)
+      zO <- log(1 + zO)
    }
-   
-   if (is.null(ncomp)) 
-      ncomp = obj$ncomp.selected
-   else if (length(ncomp) != 1 || ncomp <= 0 || ncomp > obj$ncomp) 
-      stop('Wrong value for number of components!')
-   
-   if (length(ny) != 1)
-      stop('You can show prediction plot only for one selected response variable!')
-   
-   if (show.line == T)
-      show.line = c(NA, 0)
-   
-   if (!is.null(dimnames(obj$calres$y.pred)) && !is.null(dimnames(obj$calres$y.pred)[[3]])) 
-      xaxis.name = sprintf('%s, reference', dimnames(obj$calres$y.pred)[[3]][ny])
-   else
-      xaxis.name = 'y, reference'
-   
-   data = list()   
-   attr = mda.getattr(obj$calres$y.pred)
-   data$cal = cbind(obj$calres$y.ref[, ny], obj$calres$y.ref[, ny] - obj$calres$y.pred[, ncomp, ny])
-   data$cal = mda.setattr(data$cal, attr)
-   colnames(data$cal) = c(xaxis.name, 'Residuals')
-   rownames(data$cal) = rownames(obj$calres$y.pred)
-   
-   if (!is.null(obj$cvres)) { 
-      data$cv = cbind(obj$cvres$y.ref[, ny], obj$cvres$y.ref[, ny] - obj$cvres$y.pred[, ncomp, ny])
-      colnames(data$cv) = c(xaxis.name, 'Residuals')
-      rownames(data$cv) = rownames(obj$cvres$y.pred)
-   }   
-   
-   if (!is.null(obj$testres)) { 
-      attr = mda.getattr(obj$testres$y.pred)
-      data$test = cbind(obj$testres$y.ref[, ny], 
-                        obj$testres$y.ref[, ny] - obj$testres$y.pred[, ncomp, ny])
-      data$test = mda.setattr(data$test, attr)
-      colnames(data$test) = c(xaxis.name, 'Residuals')
-      rownames(data$test) = rownames(obj$testres$y.pred)
-   }   
-   
-   mdaplotg(data, type = 'p', main = main, show.lines = show.line, ...)      
-}
 
-#' Regression coefficient plot for PLS
-#' 
-#' @description
-#' Shows plot with regression coefficient values for selected components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} and \code{plot.regcoeffs} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotRegcoeffs.pls = function(obj, ncomp = NULL, ...) {
-   
-   if (is.null(ncomp)) 
-      ncomp = obj$ncomp.selected
-   else if (ncomp <= 0 || ncomp > obj$ncomp) 
-      stop('Wrong value for number of components!')
-   
-   plot(obj$coeffs, ncomp = ncomp, ...)
-}
-
-#' X loadings plot for PLS
-#' 
-#' @description
-#' Shows plot with X loading values for selected components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param comp
-#' which components to show the plot for (one or vector with several values)
-#' @param type
-#' type of the plot
-#' @param main
-#' main plot title
-#' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotXLoadings.pls = function(obj, comp = c(1, 2), type = 'p', main = 'X loadings', 
-                             show.axes = T, ...) {
-   ncomp = length(comp)
-   
-   if (min(comp) < 1 || max(comp) > obj$ncomp)
-      stop('Wrong components number!')
-   
-   if (type == 'p' && ncomp != 2)
-      stop('Scatter plot can be made only for two components!')
-   
-   if (show.axes == T) {
-      if (type == 'p')
-         show.lines = c(0, 0)
-      else
-         show.lines = c(NA, 0)
-   } else {
-      show.lines = F
-   }
-   
-   data = mda.subset(obj$xloadings, select = comp)
-   if (type == 'p') {
-      colnames(data) = paste('Comp ', comp, ' (', round(obj$calres$xdecomp$expvar[comp], 2) , '%)', 
-                             sep = '')
-      mdaplot(data, main = main, type = type, show.lines = show.lines, ...)
-   } else {
-      data = mda.t(data)
-      mdaplotg(data, main = main, type = type, show.lines = show.lines, ...)
-   }
-}
-
-
-#' XY loadings plot for PLS
-#' 
-#' @description
-#' Shows plot with X and Y loading values for selected components.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param comp
-#' which components to show the plot for (one or vector with several values)
-#' @param main
-#' main plot title
-#' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#'
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotXYLoadings.pls = function(obj, comp = c(1, 2), main = 'XY loadings', show.axes = F, ...) {
-   
-   if (length(comp) != 2)
-      stop('This plot can be made for only two components!')
-   
-   data = list() 
-   data$X = mda.subset(obj$xloadings, select = comp)
-   data$Y = mda.subset(obj$yloadings, select = comp)
-   
-   if (show.axes == T)
-      show.lines = c(0, 0)
-   else
-      show.lines = F
-   
-   mdaplotg(data, main = main, type = 'p', show.lines = show.lines, ...)
-}
-
-
-#' X residuals plot for PLS
-#' 
-#' @description
-#' Shows a plot with Q residuals vs. Hotelling T2 values for PLS decomposition of x data.
-#' 
-#' @param obj
-#' a PLS model (object of class \code{pls})
-#' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
-#' @param main
-#' main title for the plot
-#' @param xlab
-#' label for x axis
-#' @param ylab
-#' label for y axis
-#' @param ...
-#' other plot parameters (see \code{mdaplotg} for details)
-#' 
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plotXResiduals.pls = function(obj, ncomp = NULL, main = NULL, xlab = 'T2', 
-                              ylab = 'Squared residual distance (Q)', ...) {
-   
-   if (is.null(main)) {   
-      if (is.null(ncomp))
-         main = 'X residuals'
-      else
-         main = sprintf('X residuals (ncomp = %d)', ncomp)
-   }
-   
-   if (is.null(ncomp)) 
-      ncomp = obj$ncomp.selected
-   else if (length(ncomp) != 1 || ncomp <= 0 || ncomp > obj$ncomp) 
-      stop('Wrong value for number of components!')
-   
-   data = list()
-   attr = mda.getattr(obj$calres$xdecomp$Q)
-   data$cal = cbind(obj$calres$xdecomp$T2[, ncomp, drop = F], obj$calres$xdecomp$Q[, ncomp, drop = F])
-   data$cal = mda.setattr(data$cal, attr)
-   rownames(data$cal) = rownames(obj$calres$xdecomp$Q)
-   
-   if (!is.null(obj$cvres)) { 
-      data$cv = cbind(obj$cvres$xdecomp$T2[, ncomp, drop = F], obj$cvres$xdecomp$Q[, ncomp, drop = F])
-      rownames(data$cv) = rownames(obj$cvres$xdecomp$Q)
-   }   
-   
-   if (!is.null(obj$testres)) { 
-      attr = mda.getattr(obj$testres$xdecomp$Q)
-      data$test = cbind(obj$testres$xdecomp$T2[, ncomp, drop = F], 
-                        obj$testres$xdecomp$Q[, ncomp, drop = F])
-      data$test = mda.setattr(data$test, attr)
-      rownames(data$test) = rownames(obj$testres$xdecomp$Q)
-   }   
-   
-   mdaplotg(data, main = main, xlab = xlab, ylab = ylab, ...)
-} 
-
-#' Model overview plot for PLS
-#' 
-#' @description
-#' Shows a set of plots (x residuals, regression coefficients, RMSE and predictions) for PLS model.
-#' 
-#' @param x
-#' a PLS model (object of class \code{pls})
-#' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
-#' @param ny
-#' which y variable to show the summary for (if NULL, will be shown for all)
-#' @param show.labels
-#' logical, show or not labels for the plot objects
-#' @param show.legend
-#' logical, show or not a legend on the plot
-#' @param ...
-#' other arguments
-#' 
-#' @details
-#' See examples in help for \code{\link{pls}} function.
-#' 
-#' @export
-plot.pls = function(x, ncomp = NULL, ny = 1, show.legend = T, show.labels = F, ...) {
-   obj = x
-   
-   if (!is.null(ncomp) && (ncomp <= 0 || ncomp > obj$ncomp)) 
-      stop('Wrong value for number of components!')
-   
-   par(mfrow = c(2, 2))      
-   plotXResiduals(obj, ncomp = ncomp, show.labels = show.labels, show.legend = show.legend)   
-   plotRegcoeffs(obj, ncomp = ncomp, ny = ny, show.labels = F)   
-   plotRMSE(obj, ny = ny, show.legend = show.legend)   
-   plotPredictions(obj, ncomp = ncomp, ny = ny, show.labels = show.labels, show.legend = show.legend)   
-   par(mfrow = c(1, 1))
-}
-
-#' Summary method for PLS model object
-#' 
-#' @description
-#' Shows performance statistics for the model.
-#' 
-#' @param object
-#' a PLS model (object of class \code{pls})
-#' @param ncomp
-#' how many components to use (if NULL - user selected optimal value will be used)
-#' @param ny
-#' which y variable to show the summary for (if NULL, will be shown for all)
-#' @param ...
-#' other arguments
-#' 
-#' @export
-summary.pls = function(object, ncomp = NULL, ny = NULL, ...) {
-   obj = object
-   
-   if (is.null(ncomp))
-      ncomp = obj$ncomp.selected
-   else if (ncomp <= 0 || ncomp > obj$ncomp)
-      stop('Wrong value for number of components!')
-   
-   if (is.null(ny))
-      ny = 1:ncol(obj$calres$y.ref)
-   
-   cat('\nPLS model (class pls) summary\n')
-   cat('\nPerformance and validation:\n')
-   cat(sprintf('Number of selected components: %d\n', ncomp))
-   
-   for (y in ny) {   
-      if (ncol(obj$calres$y.ref) > 1)
-         cat(sprintf('\nResponse variable #%d (%s)\n', y, colnames(obj$calres$y.ref)[y]))
-      
-      data = as.matrix(obj$calres, ncomp = ncomp, ny = y)
-      rownames(data) = 'Cal'
-      
-      if (!is.null(obj$cvres)) {
-         data = rbind(data, as.matrix(obj$cvres, ncomp = ncomp, ny = y))      
-         rownames(data)[nrow(data)] = 'CV'
-      }
-      
-      if (!is.null(obj$testres)) {
-         data = rbind(data, as.matrix(obj$testres, ncomp = ncomp, ny = y))
-         rownames(data)[nrow(data)] = 'Test'
-      }   
-      
-      data = data[, -c(1, 3), drop = F]
-      data[, 1:2] = round(data[, 1:2], 2)      
-      data[, 3] = round(data[, 3], 3)  
-      data[, 4] = mdaplot.formatValues(data[, 4], round.only = T)
-      data[, 5] = round(data[, 5], 3)  
-      data[, 6] = round(data[, 6], 4)      
-      data[, 7] = round(data[, 7], 1)      
-      
-      print(data)
-   }   
-   cat('\n')
-}
-
-#' Print method for PLS model object
-#' 
-#' @description
-#' Prints information about the object structure
-#' 
-#' @param x
-#' a PLS model (object of class \code{pls})
-#' @param ...
-#' other arguments
-#'
-#' @export 
-print.pls = function(x, ...) {
-   obj = x
-   
-   cat('\nPLS model (class pls)\n')
-   cat('\nCall:\n')
-   print(obj$call)
-   cat('\nMajor fields:\n')
-   cat('$ncomp - number of calculated components\n')
-   cat('$ncomp.selected - number of selected components\n')
-   cat('$coeffs - object (regcoeffs) with regression coefficients\n')
-   cat('$xloadings - vector with x loadings\n')
-   cat('$yloadings - vector with y loadings\n')
-   cat('$weights - vector with weights\n')
-   cat('$calres - results for calibration set\n')
-   
-   if (!is.null(obj$cvres)) {
-      cat('$cvres - results for cross-validation\n')      
-   }   
-   
-   if (!is.null(obj$testres)) {
-      cat('$testres - results for test set\n')      
-   }   
-   
-   cat('\nTry summary(model) and plot(model) to see the model performance.\n')   
+   return(list(
+      extremes = cbind(fE, zE),
+      outliers = cbind(fO, zO)
+   ))
 }

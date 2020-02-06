@@ -14,6 +14,6 @@
 \item{...}{other arguments}
 }
 \description{
-Generic \code{summary} function for linear decomposition. Prints statistic about 
+Generic \code{summary} function for linear decomposition. Prints statistic about
 the decomposition.
 }

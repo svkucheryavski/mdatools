@@ -4,10 +4,24 @@
 \alias{pls}
 \title{Partial Least Squares regression}
 \usage{
-pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
-  exclcols = NULL, exclrows = NULL, x.test = NULL, y.test = NULL,
-  method = "simpls", alpha = 0.05, coeffs.ci = NULL,
-  coeffs.alpha = 0.05, info = "", light = F, ncomp.selcrit = "min")
+pls(
+  x,
+  y,
+  ncomp = min(nrow(x) - 1, ncol(x), 20),
+  center = TRUE,
+  scale = FALSE,
+  cv = NULL,
+  exclcols = NULL,
+  exclrows = NULL,
+  x.test = NULL,
+  y.test = NULL,
+  method = "simpls",
+  info = "",
+  ncomp.selcrit = "min",
+  lim.type = "ddmoments",
+  alpha = 0.05,
+  gamma = 0.01
+)
 }
 \arguments{
 \item{x}{matrix with predictors.}
@@ -32,75 +46,70 @@ pls(x, y, ncomp = 15, center = T, scale = F, cv = NULL,
 
 \item{method}{algorithm for computing PLS model (only 'simpls' is supported so far)}
 
-\item{alpha}{significance level for calculating statistical limits for residuals.}
-
-\item{coeffs.ci}{method to calculate p-values and confidence intervals for regression coefficients (so far only 
-jack-knifing is availavle: \code{='jk'}).}
-
-\item{coeffs.alpha}{significance level for calculating confidence intervals for regression coefficients.}
-
 \item{info}{short text with information about the model.}
 
-\item{light}{run normal or light (faster) version of PLS without calculationg some performance statistics.}
-
-\item{ncomp.selcrit}{criterion for selecting optimal number of components (\code{'min'} for 
+\item{ncomp.selcrit}{criterion for selecting optimal number of components (\code{'min'} for
 first local minimum of RMSECV and \code{'wold'} for Wold's rule.)}
+
+\item{lim.type}{which method to use for calculation of critical limits for residual distances (see details)}
+
+\item{alpha}{significance level for extreme limits for T2 and Q disances.}
+
+\item{gamma}{significance level for outlier limits for T2 and Q distances.}
 }
 \value{
 Returns an object of \code{pls} class with following fields:
-\item{ncomp }{number of components included to the model.} 
-\item{ncomp.selected }{selected (optimal) number of components.} 
-\item{xloadings }{matrix with loading values for x decomposition.} 
-\item{yloadings }{matrix with loading values for y decomposition.} 
-\item{weights }{matrix with PLS weights.} 
-\item{selratio }{array with selectivity ratio values.} 
-\item{vipscores }{matrix with VIP scores values.} 
-\item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated 
-for each component.}   
-\item{info }{information about the model, provided by user when build the model.} 
-\item{calres }{an object of class \code{\link{plsres}} with PLS results for a calibration data.} 
-\item{testres }{an object of class \code{\link{plsres}} with PLS results for a test data, if it 
-was provided.} 
-\item{cvres }{an object of class \code{\link{plsres}} with PLS results for cross-validation, if 
-this option was chosen.}
+\item{ncomp }{number of components included to the model.}
+\item{ncomp.selected }{selected (optimal) number of components.}
+\item{xcenter }{vector with values used to center the predictors (x).}
+\item{ycenter }{vector with values used to center the responses (y).}
+\item{xscale }{vector with values used to scale the predictors (x).}
+\item{yscale }{vector with values used to scale the responses (y).}
+\item{xloadings }{matrix with loading values for x decomposition.}
+\item{yloadings }{matrix with loading values for y decomposition.}
+\item{xeigenvals }{vector with eigenvalues of components (variance of x-scores).}
+\item{yeigenvals }{vector with eigenvalues of components (variance of y-scores).}
+\item{weights }{matrix with PLS weights.}
+\item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated
+for each component.}
+\item{info }{information about the model, provided by user when build the model.}
+\item{cv }{information cross-validation method used (if any).}
+\item{res }{a list with result objects (e.g. calibration, cv, etc.)}
 }
 \description{
-\code{pls} is used to calibrate, validate and use of partial least squares (PLS) 
+\code{pls} is used to calibrate, validate and use of partial least squares (PLS)
 regression model.
 }
 \details{
-So far only SIMPLS method [1] is available, more coming soon. Implementation works both with one
+So far only SIMPLS method [1] is available. Implementation works both with one
 and multiple response variables.
 
-Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) as a minimum of 
-number of objects - 1, number of x variables and the default or provided value. Regression 
+Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) as a minimum of
+number of objects - 1, number of x variables and the default or provided value. Regression
 coefficients, predictions and other results are calculated for each set of components from 1
-to \code{ncomp}: 1, 1:2, 1:3, etc. The optimal number of components, (\code{ncomp.selected}), 
-is found using Wold's R criterion, but can be adjusted by user using function
-(\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all 
-default operations - predictions, plots, etc. 
+to \code{ncomp}: 1, 1:2, 1:3, etc. The optimal number of components, (\code{ncomp.selected}),
+is found using first local minumum, but can be also forced to user defined value using function
+(\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all
+default operations - predictions, plots, etc.
 
-Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
-will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
-cross-validation will be preformed). If it is a list, the following syntax can be used: 
-\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
-segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
-to \code{nseg} segments ('venetian blinds').  
+Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
+will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
+cross-validation will be preformed). If it is a list, the following syntax can be used:
+\code{cv = list("rand", nseg, nrep)} for random repeated cross-validation with \code{nseg}
+segments and \code{nrep} repetitions or \code{cv = list("ven", nseg)} for systematic splits
+to \code{nseg} segments ('venetian blinds').
 
-Selectivity ratio [2] and VIP scores [3] are calculated for any PLS model authomatically, however
-while selectivity ratio values are calculated for all computed components, the VIP scores are 
-computed only for selected components (to save calculation time) and recalculated every time when 
-\code{selectCompNum()} is called for the model. 
-
-Calculation of confidence intervals and p-values for regression coefficients are available
-only by jack-knifing so far. See help for \code{\link{regcoeffs}} objects for details.
+Calculation of confidence intervals and p-values for regression coefficients can by done
+based on Jack-Knifing resampling. This is done automatically if cross-validation is used.
+However it is recommended to use at least 10 segments for stable JK result. See help for
+\code{\link{regcoeffs}} objects for more details.
 }
 \examples{
 ### Examples of using PLS model class
-library(mdatools)   
-  
-## 1. Make a PLS model for concentration of first component 
-## using full-cross validation and automatic detection of 
+library(mdatools)
+
+## 1. Make a PLS model for concentration of first component
+## using full-cross validation and automatic detection of
 ## optimal number of components and show an overview
 
 data(simdata)
@@ -111,7 +120,7 @@ model = pls(x, y, ncomp = 8, cv = 1)
 summary(model)
 plot(model)
 
-## 2. Make a PLS model for concentration of first component 
+## 2. Make a PLS model for concentration of first component
 ## using test set and 10 segment cross-validation and show overview
 
 data(simdata)
@@ -125,7 +134,7 @@ model = selectCompNum(model, 2)
 summary(model)
 plot(model)
 
-## 3. Make a PLS model for concentration of first component 
+## 3. Make a PLS model for concentration of first component
 ## using only test set validation and show overview
 
 data(simdata)
@@ -210,7 +219,7 @@ par(mfrow = c(1, 1))
 3. Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), 103-112.
 }
 \seealso{
-Methods for \code{pls} objects:
+Main methods for \code{pls} objects:
 \tabular{ll}{
  \code{print} \tab prints information about a \code{pls} object.\cr
  \code{\link{summary.pls}} \tab shows performance statistics for the model.\cr
@@ -218,32 +227,44 @@ Methods for \code{pls} objects:
  \code{\link{pls.simpls}} \tab implementation of SIMPLS algorithm.\cr
  \code{\link{predict.pls}} \tab applies PLS model to a new data.\cr
  \code{\link{selectCompNum.pls}} \tab set number of optimal components in the model.\cr
- \code{\link{plotPredictions.pls}} \tab shows predicted vs. measured plot.\cr
- \code{\link{plotRegcoeffs.pls}} \tab shows regression coefficients plot.\cr      
+ \code{\link{setDistanceLimits.pls}} \tab allows to change parameters for critical limits.\cr
+ \code{\link{categorize.pls}} \tab categorize data rows similar to
+   \code{\link{categorize.pca}}.\cr
+ \code{\link{selratio}} \tab computes matrix with selectivity ratio values.\cr
+ \code{\link{vipscores}} \tab computes matrix with VIP scores values.\cr
+}
+
+Plotting methods for \code{pls} objects:
+\tabular{ll}{
  \code{\link{plotXScores.pls}} \tab shows scores plot for x decomposition.\cr
  \code{\link{plotXYScores.pls}} \tab shows scores plot for x and y decomposition.\cr
  \code{\link{plotXLoadings.pls}} \tab shows loadings plot for x decomposition.\cr
  \code{\link{plotXYLoadings.pls}} \tab shows loadings plot for x and y decomposition.\cr
- \code{\link{plotRMSE.pls}} \tab shows RMSE plot.\cr
  \code{\link{plotXVariance.pls}} \tab shows explained variance plot for x decomposition.\cr
  \code{\link{plotYVariance.pls}} \tab shows explained variance plot for y decomposition.\cr
- \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for y 
+ \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for y
  decomposition.\cr
- \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y 
+ \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y
  decomposition.\cr
- \code{\link{plotXResiduals.pls}} \tab shows T2 vs. Q plot for x decomposition.\cr
- \code{\link{plotYResiduals.pls}} \tab shows residuals plot for y values.\cr
+ \code{\link{plotXResiduals.pls}} \tab shows distance/residuals plot for x decomposition.\cr
+ \code{\link{plotXYResiduals.pls}} \tab shows joint distance plot for x and y decomposition.\cr
+ \code{\link{plotWeights.pls}} \tab shows plot with weights.\cr
  \code{\link{plotSelectivityRatio.pls}} \tab shows plot with selectivity ratio values.\cr
  \code{\link{plotVIPScores.pls}} \tab shows plot with VIP scores values.\cr
- \code{\link{getSelectivityRatio.pls}} \tab returns vector with selectivity ratio values.\cr
- \code{\link{getVIPScores.pls}} \tab returns vector with VIP scores values.\cr
- \code{\link{getRegcoeffs.pls}} \tab returns matrix with regression coefficients.\cr
 }
-     
-Most of the methods for plotting data (except loadings and regression coefficients) are also 
-available for PLS results 
-(\code{\link{plsres}}) objects. There is also a randomization test for PLS-regression 
-(\code{\link{randtest}}).
+
+Methods inherited from \code{regmodel} object (parent class for \code{pls}):
+\tabular{ll}{
+ \code{\link{plotPredictions.regmodel}} \tab shows predicted vs. measured plot.\cr
+ \code{\link{plotRMSE.regmodel}} \tab shows RMSE plot.\cr
+ \code{\link{plotYResiduals.regmodel}} \tab shows residuals plot for y values.\cr
+ \code{\link{getRegcoeffs.regmodel}} \tab returns matrix with regression coefficients.\cr
+}
+
+Most of the methods for plotting data (except loadings and regression coefficients) are also
+available for PLS results (\code{\link{plsres}}) objects. There is also a randomization test
+for PLS-regression (\code{\link{randtest}}) and implementation of interval PLS algorithm
+for variable selection (\code{\link{ipls}})
 }
 \author{
 Sergey Kucheryavskiy (svkucheryavski@gmail.com)

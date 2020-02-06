@@ -4,12 +4,14 @@
 \alias{plot.pcares}
 \title{Plot method for PCA results object}
 \usage{
-\method{plot}{pcares}(x, comp = c(1, 2), show.labels = T, ...)
+\method{plot}{pcares}(x, comp = c(1, 2), ncomp = x$ncomp.selected, show.labels = TRUE, ...)
 }
 \arguments{
 \item{x}{PCA results (object of class \code{pcares})}
 
 \item{comp}{which components to show the scores plot for (can be one value or vector with two values).}
+
+\item{ncomp}{how many components to use for showing the residual distance plot}
 
 \item{show.labels}{logical, show or not labels for the plot objects}
 

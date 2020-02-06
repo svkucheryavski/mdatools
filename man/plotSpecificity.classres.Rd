@@ -4,14 +4,14 @@
 \alias{plotSpecificity.classres}
 \title{Specificity plot for classification results}
 \usage{
-\method{plotSpecificity}{classres}(obj, nc = NULL, ...)
+\method{plotSpecificity}{classres}(obj, legend.position = "bottomright", ...)
 }
 \arguments{
 \item{obj}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
 
-\item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
+\item{legend.position}{position of the legend (as in \code{mdaplotg}).}
 
-\item{...}{most of the graphical parameters from \code{\link{mdaplot}} function can be used.}
+\item{...}{other parameters for \code{\link{plotPerformance.classres}}}
 }
 \description{
 Makes a plot with specificity values vs. model complexity (e.g. number of components) for

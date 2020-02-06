@@ -4,8 +4,14 @@
 \alias{plotXLoadings.pls}
 \title{X loadings plot for PLS}
 \usage{
-\method{plotXLoadings}{pls}(obj, comp = c(1, 2), type = "p",
-  main = "X loadings", show.axes = T, ...)
+\method{plotXLoadings}{pls}(
+  obj,
+  comp = c(1, 2),
+  type = "p",
+  show.axes = TRUE,
+  show.legend = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
@@ -14,9 +20,9 @@
 
 \item{type}{type of the plot}
 
-\item{main}{main plot title}
-
 \item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+
+\item{show.legend}{logical, show or not legend on the plot (when it is available)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

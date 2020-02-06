@@ -4,7 +4,12 @@
 \alias{summary.plsda}
 \title{Summary method for PLS-DA model object}
 \usage{
-\method{summary}{plsda}(object, ncomp = NULL, nc = NULL, ...)
+\method{summary}{plsda}(
+  object,
+  ncomp = object$ncomp.selected,
+  nc = seq_len(object$nclasses),
+  ...
+)
 }
 \arguments{
 \item{object}{a PLS-DA model (object of class \code{plsda})}

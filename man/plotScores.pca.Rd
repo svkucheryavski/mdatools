@@ -2,32 +2,30 @@
 % Please edit documentation in R/pca.R
 \name{plotScores.pca}
 \alias{plotScores.pca}
-\title{Scores plot for PCA}
+\title{Scores plot for PCA model}
 \usage{
-\method{plotScores}{pca}(obj, comp = c(1, 2), type = "p",
-  main = "Scores", xlab = NULL, ylab = NULL, show.labels = F,
-  show.legend = NULL, cgroup = NULL, show.axes = TRUE, ...)
+\method{plotScores}{pca}(
+  obj,
+  comp = c(1, 2),
+  type = "p",
+  show.axes = TRUE,
+  show.legend = TRUE,
+  res = obj$res,
+  ...
+)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
 
 \item{comp}{a value or vector with several values - number of components to show the plot for}
 
-\item{type}{type of the plot ('b', 'l', 'h')}
+\item{type}{type of the plot ("p", "l", "b", "h")}
 
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
+\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
 
 \item{show.legend}{logical, show or not a legend on the plot}
 
-\item{cgroup}{a vector with numeric values or a factor used for color grouping of plot points.}
-
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+\item{res}{list with result objects to show the variance for}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
@@ -35,5 +33,12 @@
 Shows a scores plot for selected components.
 }
 \details{
+If plot is created only for one result object (e.g. calibration set), then the behaviour and
+all settings for the scores plot are identical to \code{\link{plotScores.ldecomp}}. In this case
+you can show scores as a scatter, line or bar plot for any number of components.
+
+Otherwise (e.g. if model contains results for calibration and test set) the plot is a group
+plot created using \code{\link{mdaplotg}} method and only scatter plot can be used.
+
 See examples in help for \code{\link{pca}} function.
 }

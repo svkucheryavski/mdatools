@@ -4,7 +4,7 @@
 \alias{summary.plsdares}
 \title{Summary method for PLS-DA results object}
 \usage{
-\method{summary}{plsdares}(object, nc = NULL, ...)
+\method{summary}{plsdares}(object, nc = seq_len(object$nclasses), ...)
 }
 \arguments{
 \item{object}{PLS-DA results (object of class \code{plsdares})}

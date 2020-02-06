@@ -4,10 +4,12 @@
 \alias{summary.simcamres}
 \title{Summary method for SIMCAM results object}
 \usage{
-\method{summary}{simcamres}(object, ...)
+\method{summary}{simcamres}(object, nc = seq_len(object$nclasses), ...)
 }
 \arguments{
 \item{object}{SIMCAM results (object of class \code{simcamres})}
+
+\item{nc}{number of class to show summary for (can be vector)}
 
 \item{...}{other arguments}
 }

@@ -4,34 +4,42 @@
 \alias{plotPerformance.classres}
 \title{Performance plot for classification results}
 \usage{
-\method{plotPerformance}{classres}(obj, nc = NULL, param = "all",
-  type = "h", legend = NULL, main = NULL, xlab = "Components",
-  ylab = "", ylim = c(0, 1.1), ...)
+\method{plotPerformance}{classres}(
+  obj,
+  nc = 1,
+  type = "b",
+  param = c("sensitivity", "specificity", "misclassified"),
+  labels = "values",
+  ylab = "",
+  ylim = c(0, 1.1),
+  xticks = seq_len(obj$ncomp),
+  show.plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
 
-\item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
-
-\item{param}{which performance parameter to make the plot for (\code{'sensitivity'}, \code{'specificity'}, 
-\code{'misclassified'}, \code{'all'}).}
+\item{nc}{if there are several classes, which class to make the plot for.}
 
 \item{type}{type of the plot}
 
-\item{legend}{vector with legend items}
+\item{param}{which performance parameter to make the plot for (can be a vector with several values).}
 
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
+\item{labels}{what to show as labels for plot objects.}
 
 \item{ylab}{label for y axis}
 
 \item{ylim}{vector with two values - limits for y axis}
 
+\item{xticks}{vector with x-axis tick values}
+
+\item{show.plot}{logical, shall plot be created or just plot series object is needed}
+
 \item{...}{most of the graphical parameters from \code{\link{mdaplot}} function can be used.}
 }
 \description{
-Makes a plot with classification performance parameters vs. model complexity (e.g. number of 
+Makes a plot with classification performance parameters vs. model complexity (e.g. number of
 components) for classification results.
 }
 \details{

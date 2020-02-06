@@ -2,30 +2,21 @@
 % Please edit documentation in R/ldecomp.R
 \name{plotCumVariance.ldecomp}
 \alias{plotCumVariance.ldecomp}
-\title{Cumulative explained variance plot for linear decomposition}
+\title{Cumulative explained variance plot}
 \usage{
-\method{plotCumVariance}{ldecomp}(obj, type = "b",
-  main = "Cumulative variance", xlab = "Components",
-  ylab = "Explained variance, \%", show.labels = F,
-  labels = "values", ...)
+\method{plotCumVariance}{ldecomp}(obj, type = "b", labels = "values", show.plot = TRUE, ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
 
 \item{type}{type of the plot}
 
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
-
 \item{labels}{what to show as labels for plot objects}
+
+\item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
 }
 \description{
-Shows a plot with cumulative explained variance values vs. number of components.
+Shows a plot with cumulative explained variance vs. number of components.
 }

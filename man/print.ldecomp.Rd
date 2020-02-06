@@ -14,6 +14,6 @@
 \item{...}{other arguments}
 }
 \description{
-Generic \code{print} function for linear decomposition. Prints information about 
+Generic \code{print} function for linear decomposition. Prints information about
 the \code{ldecomp} object.
 }

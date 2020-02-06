@@ -15,7 +15,7 @@ getSelectedComponents(obj, ncomp = NULL)
 returns number of components depending on a user choice
 }
 \details{
-Depedning on a user choice it returns optimal number of component for the model (if 
+Depedning on a user choice it returns optimal number of component for the model (if
 use did not provide any value) or check the user choice for correctness and returns
 it back
 }

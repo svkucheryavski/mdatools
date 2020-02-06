@@ -17,7 +17,6 @@ regres(y.pred, y.ref = NULL, ncomp.selected = 1)
 a list (object of \code{regres} class) with fields, including:
 \tabular{ll}{
    \code{y.pred} \tab a matrix with predicted values \cr
-   \code{y.pred} \tab a matrix with predicted values \cr
    \code{y.ref} \tab a vector with reference (measured) values \cr
    \code{ncomp.selected} \tab selected column/number of components for predictions \cr
    \code{rmse} \tab root mean squared error for predicted vs measured values \cr

@@ -4,7 +4,7 @@
 \alias{plotXVariance.plsres}
 \title{Explained X variance plot for PLS results}
 \usage{
-\method{plotXVariance}{plsres}(obj, main = "X variance", ...)
+\method{plotXVariance}{plsres}(obj, main = "Variance (X)", ...)
 }
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}

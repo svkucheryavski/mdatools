@@ -9,18 +9,18 @@ simcam(models, info = "")
 \arguments{
 \item{models}{list with SIMCA models (\code{simca} objects).}
 
-\item{info}{text with information about the the object.}
+\item{info}{optional text with information about the the object.}
 }
 \value{
 Returns an object of \code{simcam} class with following fields:
-\item{models }{a list with provided SIMCA models.} 
-\item{dispower }{an array with discrimination power of variables for each pair of individual 
-models.} 
-\item{moddist }{a matrix with distance between each each pair of individual models.} 
-\item{classnames }{vector with names of individual classes.} 
-\item{nclasses }{number of classes in the object.} 
-\item{info }{information provided by user when create the object.} 
-\item{calres }{an object of class \code{\link{simcamres}} with classification results for a 
+\item{models }{a list with provided SIMCA models.}
+\item{dispower }{an array with discrimination power of variables for each pair of individual
+models.}
+\item{moddist }{a matrix with distance between each each pair of individual models.}
+\item{classnames }{vector with names of individual classes.}
+\item{nclasses }{number of classes in the object.}
+\item{info }{information provided by user when create the object.}
+\item{calres }{an object of class \code{\link{simcamres}} with classification results for a
 calibration data.}
 }
 \description{
@@ -28,59 +28,50 @@ calibration data.}
 }
 \details{
 Besides the possibility for multiclass classification, SIMCAM also provides tools for
-investigation of relationship among individual models (classes), such as discrimination power of 
+investigation of relationship among individual models (classes), such as discrimination power of
 variables, Cooman's plot, model distance, etc.
 
-When create \code{simcam} object, the calibration data from all individual SIMCA models is 
-extracted and combined for making predictions and calculate performance of the multi-class model. 
+When create \code{simcam} object, the calibration data from all individual SIMCA models is
+extracted and combined for making predictions and calculate performance of the multi-class model.
 The results are stored in \code{$calres} field of the model object.
 }
 \examples{
 ## make a multiclass SIMCA model for Iris data
 library(mdatools)
 
-# split data 
+# split data
 caldata = iris[seq(1, nrow(iris), 2), 1:4]
-se = caldata[1:25, ]
-ve = caldata[26:50, ]
-vi = caldata[51:75, ]
+x.se = caldata[1:25, ]
+x.ve = caldata[26:50, ]
+x.vi = caldata[51:75, ]
 
-testdata = iris[seq(2, nrow(iris), 2), 1:4]
-testdata.cref = iris[seq(2, nrow(iris), 2), 5]
+x.test = iris[seq(2, nrow(iris), 2), 1:4]
+c.test = iris[seq(2, nrow(iris), 2), 5]
 
 # create individual models
-semodel = simca(se, classname = 'setosa')
-semodel = selectCompNum(semodel, 1)
+m.se = simca(x.se, classname = "setosa")
+m.se = selectCompNum(m.se, 1)
 
-vimodel = simca(vi, classname = 'virginica')
-vimodel = selectCompNum(vimodel, 1)
+m.vi = simca(x.vi, classname = "virginica")
+m.vi = selectCompNum(m.vi, 2)
 
-vemodel = simca(ve, classname = 'versicolor')
-vemodel = selectCompNum(vemodel, 1)
+m.ve = simca(x.ve, classname = "versicolor")
+m.ve = selectCompNum(m.ve, 1)
 
 # combine models into SIMCAM objects, show statistics and plots
-model = simcam(list(semodel, vimodel, vemodel), info = 'Iris data')
-summary(model)
-plot(model)
+m = simcam(list(m.se, m.vi, m.ve), info = "simcam model for Iris data")
+summary(m)
 
 # show predictions and residuals for calibration data
 par(mfrow = c(2, 2))
-plotPredictions(model)
-plotCooman(model, nc = c(1, 2))
-plotResiduals(model, nc = 1)
-plotResiduals(model, nc = 2)
-par(mfrow = c(1, 1))
-
-# show different plots for the model
-par(mfrow = c(2, 2))
-plotModelDistance(model, nc = 1)
-plotDiscriminationPower(model, nc = c(1, 2))
-plotModellingPower(model, nc = 1)
-plotModellingPower(model, nc = 2)
+plotPredictions(m)
+plotCooman(m, nc = c(1, 2))
+plotModelDistance(m, nc = 1)
+plotDiscriminationPower(m, nc = c(1, 2))
 par(mfrow = c(1, 1))
 
 # apply the SIMCAM model to test set and show statistics and plots
-res = predict(model, testdata, testdata.cref)
+res = predict(m, x.test, c.test)
 summary(res)
 plotPredictions(res)
 
@@ -92,14 +83,10 @@ Methods for \code{simca} objects:
  \code{summary.simcam} \tab shows summary statistics for the models.\cr
  \code{plot.simcam} \tab makes an overview of SIMCAM model with two plots.\cr
  \code{\link{predict.simcam}} \tab applies SIMCAM model to a new data.\cr
- \code{\link{plotModelDistance.simcam}} \tab shows plot with distance between individual 
+ \code{\link{plotModelDistance.simcam}} \tab shows plot with distance between individual
  models.\cr
  \code{\link{plotDiscriminationPower.simcam}} \tab shows plot with discrimination power.\cr
- \code{\link{plotModellingPower.simcam}} \tab shows plot with modelling power for individual 
- model.\cr
  \code{\link{plotCooman.simcam}} \tab shows Cooman's plot for calibration data.\cr
- \code{\link{plotResiduals.simcam}} \tab shows plot with Q vs. T2 residuals for calibration 
- data.\cr
 }
 
 Methods, inherited from \code{classmodel} class:
@@ -110,7 +97,7 @@ Methods, inherited from \code{classmodel} class:
  \code{\link{plotMisclassified.classmodel}} \tab shows misclassified ratio plot.\cr
 }
 
-Since SIMCAM objects and results are calculated only for optimal number of components, there is no
-sense to show such plots like sensitivity or specificity vs. number of components. However they
-are available as for any other classification model.
+Since SIMCAM objects and results are calculated only for optimal number of components, there is
+no sense to show such plots like sensitivity or specificity vs. number of components. However
+they are available as for any other classification model.
 }

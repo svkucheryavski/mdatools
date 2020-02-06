@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{regression results (object of class \code{regres})}
 
-\item{ncomp}{model complexity (number of components) to calculate the statistics for}
+\item{ncomp}{model complexity (number of components) to calculate the statistics for (can be a vector)}
 
 \item{ny}{for which response variable calculate the statistics for}
 

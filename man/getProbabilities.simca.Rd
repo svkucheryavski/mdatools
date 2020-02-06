@@ -2,21 +2,25 @@
 % Please edit documentation in R/simca.R
 \name{getProbabilities.simca}
 \alias{getProbabilities.simca}
-\title{Probability of class belonging for PCA/SIMCA results}
+\title{Probabilities of class belonging for PCA/SIMCA results}
 \usage{
-\method{getProbabilities}{simca}(obj, ncomp, Q, T2, ...)
+\method{getProbabilities}{simca}(obj, ncomp, q, h, ...)
 }
 \arguments{
-\item{obj}{object with SIMCA model}
+\item{obj}{object with PCA model}
 
-\item{ncomp}{number of components to compute the probabilities for.}
+\item{ncomp}{number of components to compute the probability for}
 
-\item{Q}{vector with Q values for selected component}
+\item{q}{vector with squared orthogonal distances for given number of components}
 
-\item{T2}{vector with T2 values for selected component}
+\item{h}{vector with score distances for given number of components}
 
-\item{...}{other arguments}
+\item{...}{other parameters}
 }
 \description{
-Computes probability of class belonging for each object based on Q and T2 residuls
+Probabilities of class belonging for PCA/SIMCA results
+}
+\details{
+Computes p-value for every object being from the same populaion as calibration set
+based on its orthogonal and score distances.
 }

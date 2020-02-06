@@ -2,26 +2,30 @@
 % Please edit documentation in R/pca.R
 \name{plotVariance.pca}
 \alias{plotVariance.pca}
-\title{Explained variance plot for PCA}
+\title{Explained variance plot for PCA model}
 \usage{
-\method{plotVariance}{pca}(obj, type = "b", variance = "expvar",
-  main = "Variance", xlab = "Components",
-  ylab = "Explained variance, \%", show.legend = T, ...)
+\method{plotVariance}{pca}(
+  obj,
+  type = "b",
+  labels = "values",
+  variance = "expvar",
+  xticks = seq_len(obj$ncomp),
+  res = obj$res,
+  ...
+)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
 
-\item{type}{type of the plot ('b', 'l', 'h')}
+\item{type}{type of the plot ("b", "l", "h")}
 
-\item{variance}{which variance to use ('expvar', 'cumexpvar')}
+\item{labels}{what to use as labels (if \code{show.labels = TRUE})}
 
-\item{main}{main title for the plot}
+\item{variance}{which variance to show}
 
-\item{xlab}{label for x axis}
+\item{xticks}{vector with ticks for x-axis}
 
-\item{ylab}{label for y axis}
-
-\item{show.legend}{logical, show or not a legend on the plot}
+\item{res}{list with result objects to show the variance for}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

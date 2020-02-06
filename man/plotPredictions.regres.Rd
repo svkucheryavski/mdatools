@@ -4,9 +4,20 @@
 \alias{plotPredictions.regres}
 \title{Predictions plot for regression results}
 \usage{
-\method{plotPredictions}{regres}(obj, ny = 1, ncomp = NULL,
-  show.line = T, show.stat = F, stat.col = "#606060",
-  stat.cex = 0.85, axes.equal = T, col = mdaplot.getColors(1), ...)
+\method{plotPredictions}{regres}(
+  obj,
+  ny = 1,
+  ncomp = obj$ncomp.selected,
+  show.line = TRUE,
+  show.stat = FALSE,
+  stat.col = "#606060",
+  stat.cex = 0.85,
+  xlim = NULL,
+  ylim = NULL,
+  axes.equal = TRUE,
+  show.plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{regression results (object of class \code{regres})}
@@ -23,9 +34,13 @@
 
 \item{stat.cex}{size of text in legend with statistics}
 
+\item{xlim}{limits for x-axis (if NULL will be computed automatically)}
+
+\item{ylim}{limits for y-axis (if NULL will be computed automatically)}
+
 \item{axes.equal}{logical, make limits for x and y axes equal or not}
 
-\item{col}{color for the plot objects.}
+\item{show.plot}{logical, show plot or just return plot data}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
@@ -33,6 +48,6 @@
 Shows plot with predicted y values.
 }
 \details{
-If reference values are available, the function shows a scatter plot with predicted vs. 
+If reference values are available, the function shows a scatter plot with predicted vs.
 reference values, otherwise predicted values are shown vs. object numbers.
 }

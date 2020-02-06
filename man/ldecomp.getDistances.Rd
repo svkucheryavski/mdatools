@@ -2,10 +2,9 @@
 % Please edit documentation in R/ldecomp.R
 \name{ldecomp.getDistances}
 \alias{ldecomp.getDistances}
-\title{Residuals distances for linear decomposition}
+\title{Compute score and residual distances}
 \usage{
-ldecomp.getDistances(scores, loadings, residuals, tnorm = NULL,
-  cal = FALSE)
+ldecomp.getDistances(scores, loadings, residuals, eigenvals)
 }
 \arguments{
 \item{scores}{matrix with scores (T).}
@@ -14,17 +13,16 @@ ldecomp.getDistances(scores, loadings, residuals, tnorm = NULL,
 
 \item{residuals}{matrix with residuals (E).}
 
-\item{tnorm}{vector with singular values for scores normalisation}
-
-\item{cal}{if TRUE method will realize that these distances are calculated for calibration set}
+\item{eigenvals}{vector with eigenvalues for the components}
 }
 \value{
-Returns a list with Q, Qvar, T2 and modelling power values for each component.
+Returns a list with Q, T2 and tnorm values for each component.
 }
 \description{
-Computes residual distances (Q and T2) and modelling power for a data decomposition X = TP' + E.
+Compute orthogonal Euclidean distance from object to PC space (Q, q) and Mahalanobis
+squared distance between projection of the object to the space and its origin (T2, h).
 }
 \details{
-The distances are calculated for every 1:n components, where n goes from 1 to ncomp 
+The distances are calculated for every 1:n components, where n goes from 1 to ncomp
 (number of columns in scores and loadings).
 }
