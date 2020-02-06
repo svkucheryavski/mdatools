@@ -3,8 +3,8 @@
 #####################################################
 
 setup({
-   pdf(file = tempfile(fileext = ".pdf"))
-   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+   pdf(file = tempfile("mdatools-test-ldecompplots-", fileext = ".pdf"))
+   sink(tempfile("mdatools-test-ldecompplots-", fileext = ".txt"), append = FALSE, split = FALSE)
 })
 
 teardown({

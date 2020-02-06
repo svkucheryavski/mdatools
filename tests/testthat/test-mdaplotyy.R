@@ -4,8 +4,8 @@
 #####################################################
 
 setup({
-   pdf(file = tempfile(fileext = ".pdf"))
-   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+   pdf(file = tempfile("mdatools-test-mdaplotyy-", fileext = ".pdf"))
+   sink(tempfile("mdatools-test-mdaplotyy-", fileext = ".txt"), append = FALSE, split = FALSE)
 })
 
 teardown({

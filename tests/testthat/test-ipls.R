@@ -3,8 +3,8 @@
 #############################
 
 setup({
-   pdf(file = tempfile(fileext = ".pdf"))
-   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+   pdf(file = tempfile("mdatools-test-ipls-", fileext = ".pdf"))
+   sink(tempfile("mdatools-test-ipls-", fileext = ".txt"), append = FALSE, split = FALSE)
 })
 
 teardown({

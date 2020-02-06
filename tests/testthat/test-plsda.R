@@ -1,8 +1,8 @@
 # new tests on top
 
 setup({
-   pdf(file = tempfile(fileext = ".pdf"))
-   sink(tempfile(fileext = ".txt"), append = FALSE, split = FALSE)
+   pdf(file = tempfile("mdatools-test-plsda-", fileext = ".pdf"))
+   sink(tempfile("mdatools-test-plsda-", fileext = ".txt"), append = FALSE, split = FALSE)
 })
 
 teardown({
