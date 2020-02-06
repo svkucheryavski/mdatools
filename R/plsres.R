@@ -620,7 +620,7 @@ plotXYResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE,
       paste0("Y-distance, ", lylab)
    )
 
-   attr(plot_data, "name") <- sprintf("XY residuals (ncomp = %d)", ncomp)
+   attr(plot_data, "name") <- sprintf("XY-distances (ncomp = %d)", ncomp)
 
    # if no plot required - return plot series object
    if (!show.plot) return(plot_data)
