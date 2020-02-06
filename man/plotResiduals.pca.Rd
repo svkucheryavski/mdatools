@@ -2,47 +2,75 @@
 % Please edit documentation in R/pca.R
 \name{plotResiduals.pca}
 \alias{plotResiduals.pca}
-\title{Residuals plot for PCA}
+\title{Residuals distance plot for PCA model}
 \usage{
-\method{plotResiduals}{pca}(obj, ncomp = NULL, norm = F, main = NULL,
-  xlab = NULL, ylab = NULL, show.labels = F, show.legend = T,
-  show.limits = T, xlim = NULL, ylim = NULL, lim.col = c("#333333",
-  "#333333"), lim.lwd = c(1, 1), lim.lty = c(2, 3), ...)
+\method{plotResiduals}{pca}(
+  obj,
+  ncomp = obj$ncomp.selected,
+  log = FALSE,
+  norm = TRUE,
+  cgroup = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  show.limits = TRUE,
+  lim.col = c("darkgray", "darkgray"),
+  lim.lwd = c(1, 1),
+  lim.lty = c(2, 3),
+  res = obj$res,
+  show.legend = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
 
-\item{ncomp}{how many components to use (if NULL - user selected optimal value will be used)}
+\item{ncomp}{how many components to use (by default optimal value selected for the model will be used)}
 
-\item{norm}{logical, show normalized Q vs T2 (\code{norm = T}) values or original ones (\code{norm = F})}
+\item{log}{logical, apply log tranformation to the distances or not (see details)}
 
-\item{main}{main title for the plot}
+\item{norm}{logical, normalize distance values or not (see details)}
 
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
-
-\item{show.legend}{logical, show or not a legend on the plot}
-
-\item{show.limits}{logical, show or not lines with statistical limits for the residuals}
+\item{cgroup}{color grouping of plot points (works only if one result object is available)}
 
 \item{xlim}{limits for x-axis}
 
 \item{ylim}{limits for y-axis}
 
-\item{lim.col}{vector with two values - line color for extreme and outlier borders}
+\item{show.limits}{logical, show or not lines/curves with critical limits for the distances}
 
-\item{lim.lwd}{vector with two values - line width for extreme and outlier borders}
+\item{lim.col}{vector with two values - line color for extreme and outlier limits}
 
-\item{lim.lty}{vector with two values - line type for extreme and outlier borders}
+\item{lim.lwd}{vector with two values - line width for extreme and outlier limits}
+
+\item{lim.lty}{vector with two values - line type for extreme and outlier limits}
+
+\item{res}{list with result objects to show the plot for (by defaul, model results are used)}
+
+\item{show.legend}{logical, show or not a legend on the plot (needed if several result objects are available)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
-Shows a plot with Q residuals vs. Hotelling T2 values for selected number of components.
+Shows a plot with score (T2, h) vs orthogonal (Q, q) distances and corresponding critical
+limits for given number of components.
 }
 \details{
+The function is a bit more advanced version of \code{\link{plotResiduals.ldecomp}}. It allows to
+show distance values for several result objects (e.g. calibration and test set or calibration
+and new prediction set) as well as display the correspondng critical limits in form of lines
+or curves.
+
+Depending on how many result objects your model has or how many you specified manually,
+using the \code{res} parameter, the plot behaves in a bit different way.
+
+If only one result object is provided, then it allows to colorise the points using \code{cgroup}
+parameter. If you specify \code{cgroup = "categories"} then it will show points as three groups:
+normal, extreme and outliers. If two or more result objects are provided, then the function show
+distances in groups, and adds corresponding legend.
+
+The function can show distance values normalised (h/h0 and q/q0) as well as with log
+transformation (log(1 + h/h0), log(1 + q/q0)). The latter is useful if distribution of the
+points is skewed and most of them are densely located around bottom left corner.
+
 See examples in help for \code{\link{pca}} function.
 }

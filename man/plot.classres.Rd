@@ -4,15 +4,14 @@
 \alias{plot.classres}
 \title{Plot function for classification results}
 \usage{
-\method{plot}{classres}(x, nc = NULL, ...)
+\method{plot}{classres}(x, ...)
 }
 \arguments{
 \item{x}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
 
-\item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
-
-\item{...}{other arguments}
+\item{...}{other arguments for \code{plotPredictions()} method.}
 }
 \description{
-Generic plot function for classification results. Shows predicted class values.
+Generic plot function for classification results.
+Alias for \code{\link{plotPredictions.classres}}.
 }

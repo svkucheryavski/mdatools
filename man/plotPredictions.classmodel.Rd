@@ -4,21 +4,27 @@
 \alias{plotPredictions.classmodel}
 \title{Predictions plot for classification model}
 \usage{
-\method{plotPredictions}{classmodel}(obj, res = NULL, nc = NULL,
-  ncomp = NULL, main = NULL, ...)
+\method{plotPredictions}{classmodel}(
+  obj,
+  res.name = NULL,
+  nc = seq_len(obj$nclasses),
+  ncomp = NULL,
+  main = NULL,
+  ...
+)
 }
 \arguments{
-\item{obj}{a classification model (object of class \code{simca}, \code{plsda}, etc.). if \code{NULL} value 
-is specified, the result will be selected automatically by checking the nearest available from 
+\item{obj}{a classification model (object of class \code{simca}, \code{plsda}, etc.). if \code{NULL} value
+is specified, the result will be selected automatically by checking the nearest available from
 test, cv and calibration results.}
 
-\item{res}{which result to make the plot for (\code{'calres'}, \code{'cvres'} or \code{'testres'}).}
+\item{res.name}{name of result object to make the plot for ("test", "cv" or "cal").}
 
-\item{nc}{if there are several classes, which class to make the plot for (NULL - for all).}
+\item{nc}{vector with class numbers to make the plot for.}
 
-\item{ncomp}{what number of components to make the plot for (NULL - for selected in the model).}
+\item{ncomp}{what number of components to make the plot for.}
 
-\item{main}{main title for the plot}
+\item{main}{title of the plot (if NULL will be set automatically)}
 
 \item{...}{most of the graphical parameters from \code{\link{mdaplotg}} function can be used.}
 }

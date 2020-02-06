@@ -4,4 +4,13 @@
 .Rapp.history
 .Rbuildignore
 .DS_Store
+.lintr
+.vscode/*
+
+tests/plots/*.pdf
+tests/plots/*.txt
+tests/matlab
+tests/matlab/*
+
+linting.R
 mdatools.Rproj

@@ -4,19 +4,16 @@
 \alias{plotVIPScores.pls}
 \title{VIP scores plot for PLS model}
 \usage{
-\method{plotVIPScores}{pls}(obj, ny = 1, type = "l", main = NULL,
-  ylab = "", ...)
+\method{plotVIPScores}{pls}(obj, ny = 1, ncomp = obj$ncomp.selected, type = "l", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ny}{which response to get the values for (if y is multivariate)}
+\item{ny}{which response to plot the values for (if y is multivariate), can be a vector.}
+
+\item{ncomp}{number of components to count}
 
 \item{type}{type of the plot}
-
-\item{main}{main title for the plot}
-
-\item{ylab}{label for y axis}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
@@ -24,6 +21,6 @@
 Shows a plot with VIP scores values for given number of components
 and response variable
 }
-\references{
-[1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
+\details{
+See \code{\link{vipscores}} for more details.
 }

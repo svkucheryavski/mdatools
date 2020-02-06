@@ -4,13 +4,21 @@
 \alias{plot.pca}
 \title{Model overview plot for PCA}
 \usage{
-\method{plot}{pca}(x, comp = c(1, 2), show.labels = FALSE,
-  show.legend = TRUE, ...)
+\method{plot}{pca}(
+  x,
+  comp = c(1, 2),
+  ncomp = x$ncomp.selected,
+  show.labels = FALSE,
+  show.legend = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{a PCA model (object of class \code{pca})}
 
 \item{comp}{vector with two values - number of components to show the scores and loadings plots for}
+
+\item{ncomp}{number of components to show the residuals plot for}
 
 \item{show.labels}{logical, show or not labels for the plot objects}
 

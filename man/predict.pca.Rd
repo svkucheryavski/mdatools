@@ -4,20 +4,18 @@
 \alias{predict.pca}
 \title{PCA predictions}
 \usage{
-\method{predict}{pca}(object, x, cal = FALSE, ...)
+\method{predict}{pca}(object, x, ...)
 }
 \arguments{
-\item{object}{a PCA model (object of class \code{pca})}
+\item{object}{a PCA model (object of class \code{pca}).}
 
-\item{x}{a matrix with data values}
+\item{x}{data values (matrix or data frame).}
 
-\item{cal}{logical, if TRUE the predictions are made for calibration set}
-
-\item{...}{other arguments}
+\item{...}{other arguments.}
 }
 \value{
 PCA results (an object of class \code{pcares})
 }
 \description{
-Applies PCA model to a new data
+Applies PCA model to a new data set.
 }

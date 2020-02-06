@@ -16,6 +16,6 @@
 \item{...}{other arguments}
 }
 \description{
-Generic \code{as.matrix} function for classification results. Returns matrix with performance 
+Generic \code{as.matrix} function for classification results. Returns matrix with performance
 values for specific class.
 }

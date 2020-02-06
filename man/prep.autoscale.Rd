@@ -21,8 +21,8 @@ data matrix with processed values
 \description{
 Autoscale (mean center and standardize) values in columns of data matrix.
 
-The use of `max.cov` allows to avoid overestimation of inert variables, which vary 
-very little. Note, that the `max.cov` value is already in percent, e.g. if `max.cov = 0.1` it 
-will compare the coefficient of variation of every variable with 0.1% (not 1%). If you do not 
+The use of `max.cov` allows to avoid overestimation of inert variables, which vary
+very little. Note, that the `max.cov` value is already in percent, e.g. if `max.cov = 0.1` it
+will compare the coefficient of variation of every variable with 0.1% (not 1%). If you do not
 want to use this option simply keep `max.cov = 0`.
 }

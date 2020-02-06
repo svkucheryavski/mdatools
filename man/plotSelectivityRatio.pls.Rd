@@ -4,28 +4,23 @@
 \alias{plotSelectivityRatio.pls}
 \title{Selectivity ratio plot for PLS model}
 \usage{
-\method{plotSelectivityRatio}{pls}(obj, ncomp = NULL, ny = 1,
-  type = "l", main = NULL, ylab = "", ...)
+\method{plotSelectivityRatio}{pls}(obj, ny = 1, ncomp = obj$ncomp.selected, type = "l", ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{number of components to get the values for (if NULL user selected as optimal will be used)}
+\item{ny}{which response to plot the values for (if y is multivariate), can be a vector.}
 
-\item{ny}{which response to get the values for (if y is multivariate)}
+\item{ncomp}{number of components to count}
 
 \item{type}{type of the plot}
-
-\item{main}{main title for the plot}
-
-\item{ylab}{label for y axis}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
 \description{
-Shows a plot with selectivity ratio values for given number of components
+Computes and shows a plot for Selectivity ratio values for given number of components
 and response variable
 }
-\references{
-[1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
+\details{
+See \code{\link{vipscores}} for more details.
 }

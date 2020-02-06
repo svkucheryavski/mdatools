@@ -4,7 +4,7 @@
 \alias{predict.simcam}
 \title{SIMCA multiple classes predictions}
 \usage{
-\method{predict}{simcam}(object, x, c.ref = NULL, cv = F, ...)
+\method{predict}{simcam}(object, x, c.ref = NULL, ...)
 }
 \arguments{
 \item{object}{a SIMCAM model (object of class \code{simcam})}
@@ -12,8 +12,6 @@
 \item{x}{a matrix with x values (predictors)}
 
 \item{c.ref}{a vector with reference class names (same as class names in models)}
-
-\item{cv}{logical, are predictions for cross-validation or not}
 
 \item{...}{other arguments}
 }

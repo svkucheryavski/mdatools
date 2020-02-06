@@ -7,30 +7,31 @@
 pcares(...)
 }
 \arguments{
-\item{...}{other arguments supported by \code{ldecomp}.}
+\item{...}{all arguments supported by \code{ldecomp}.}
 }
 \value{
 Returns an object (list) of class \code{pcares} and \code{ldecomp} with following fields:
-\item{scores }{matrix with score values (nobj x ncomp).}
-\item{residuals }{matrix with data residuals (nobj x nvar).}
-\item{T2 }{matrix with T2 distances (nobj x ncomp).}
-\item{Q }{matrix with Q residuals (nobj x ncomp).}
-\item{tnorm }{vector with singular values used for scores normalization.}
+\item{scores }{matrix with score values (I x A).}
+\item{residuals }{matrix with data residuals (I x J).}
+\item{T2 }{matrix with score distances (I x A).}
+\item{Q }{matrix with orthogonal distances (I x A).}
 \item{ncomp.selected }{selected number of components.}
 \item{expvar }{explained variance for each component.}
 \item{cumexpvar }{cumulative explained variance.}
 }
 \description{
-\code{pcares} is used to store results for PCA decomposition of data.
+\code{pcares} is used to store and visualise results for PCA decomposition.
 }
 \details{
 In fact \code{pcares} is a wrapper for \code{\link{ldecomp}} - general class for storing
-results for linear decomposition X = TP' + E. So, most of the methods, arguments and 
+results for linear decomposition X = TP' + E. So, most of the methods, arguments and
 returned values are inherited from \code{ldecomp}.
-  
-There is no need to create a \code{pcares} object manually, it is created automatically when 
-build a PCA model (see \code{\link{pca}}) or apply the model to a new data (see 
+
+There is no need to create a \code{pcares} object manually, it is created automatically when
+build a PCA model (see \code{\link{pca}}) or apply the model to a new data (see
 \code{\link{predict.pca}}). The object can be used to show summary and plots for the results.
+
+It is assumed that data is a matrix or data frame with I rows and J columns.
 }
 \examples{
 ### Examples for PCA results class
@@ -44,7 +45,7 @@ data(people)
 x = people[seq(1, 32, 2), ]
 x.new = people[seq(1, 32, 2), ]
 
-model = pca(people, scale = TRUE, cv = 1, info = 'Simple PCA model')
+model = pca(people, scale = TRUE, info = "Simple PCA model")
 model = selectCompNum(model, 4)
 
 res = predict(model, x.new)
@@ -54,9 +55,8 @@ plot(res)
 ## 1. Make PCA model for People data with autoscaling
 ## and full cross-validation and get calibration results
 
-
 data(people)
-model = pca(people, scale = TRUE, cv = 1, info = 'Simple PCA model')
+model = pca(people, scale = TRUE, info = "Simple PCA model")
 model = selectCompNum(model, 4)
 
 res = model$calres
@@ -66,16 +66,16 @@ plot(res)
 ## 2. Show scores plots for the results
 par(mfrow = c(2, 2))
 plotScores(res)
-plotScores(res, cgroup = people[, 'Beer'], show.labels = TRUE)
+plotScores(res, cgroup = people[, "Beer"], show.labels = TRUE)
 plotScores(res, comp = c(1, 3), show.labels = TRUE)
-plotScores(res, comp = 2, type = 'h', show.labels = TRUE)
+plotScores(res, comp = 2, type = "h", show.labels = TRUE)
 par(mfrow = c(1, 1))
 
 ## 3. Show residuals and variance plots for the results
 par(mfrow = c(2, 2))
-plotVariance(res, type = 'h')
-plotCumVariance(res, show.labels = TRUE, legend.position = 'bottomright')
-plotResiduals(res, show.labels = TRUE, cgroup = people[, 'Sex'])
+plotVariance(res, type = "h")
+plotCumVariance(res, show.labels = TRUE)
+plotResiduals(res, show.labels = TRUE, cgroup = people[, "Sex"])
 plotResiduals(res, ncomp = 2, show.labels = TRUE)
 par(mfrow = c(1, 1))
 
@@ -87,12 +87,12 @@ Methods for \code{pcares} objects:
  \code{summary.pcares} \tab shows statistics for the PCA results.\cr
 }
 
-Methods, inherited from \code{\link{ldecomp}} class:   
+Methods, inherited from \code{\link{ldecomp}} class:
 \tabular{ll}{
  \code{\link{plotScores.ldecomp}} \tab makes scores plot.\cr
  \code{\link{plotVariance.ldecomp}} \tab makes explained variance plot.\cr
  \code{\link{plotCumVariance.ldecomp}} \tab makes cumulative explained variance plot.\cr
- \code{\link{plotResiduals.ldecomp}} \tab makes Q vs. T2 residuals plot.\cr
+ \code{\link{plotResiduals.ldecomp}} \tab makes Q vs. T2 distance plot.\cr
 }
 
 Check also \code{\link{pca}} and \code{\link{ldecomp}}.

@@ -4,12 +4,12 @@
 \alias{regres.slope}
 \title{Slope}
 \usage{
-regres.slope(y.ref, y.pred)
+regres.slope(y.pred, y.ref)
 }
 \arguments{
-\item{y.ref}{vector with reference values}
-
 \item{y.pred}{matrix with predicted values}
+
+\item{y.ref}{vector with reference values}
 }
 \description{
 Calculates matrix with slope of predicted and measured values for every response and components.

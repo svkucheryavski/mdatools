@@ -4,8 +4,7 @@
 \alias{plotYCumVariance.plsres}
 \title{Explained cumulative Y variance plot for PLS results}
 \usage{
-\method{plotYCumVariance}{plsres}(obj, main = "Y cumulative variance",
-  ...)
+\method{plotYCumVariance}{plsres}(obj, main = "Cumulative variance (Y)", ...)
 }
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}

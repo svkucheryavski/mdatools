@@ -4,56 +4,63 @@
 \alias{pca}
 \title{Principal Component Analysis}
 \usage{
-pca(x, ncomp = 15, center = T, scale = F, cv = NULL,
-  exclrows = NULL, exclcols = NULL, x.test = NULL, method = "svd",
-  rand = NULL, lim.type = "jm", alpha = 0.05, gamma = 0.01,
-  info = "")
+pca(
+  x,
+  ncomp = min(nrow(x) - 1, ncol(x), 20),
+  center = TRUE,
+  scale = FALSE,
+  exclrows = NULL,
+  exclcols = NULL,
+  x.test = NULL,
+  method = "svd",
+  rand = NULL,
+  lim.type = "ddmoments",
+  alpha = 0.05,
+  gamma = 0.01,
+  info = ""
+)
 }
 \arguments{
-\item{x}{a numerical matrix with calibration data.}
+\item{x}{calibration data (matrix or data frame).}
 
 \item{ncomp}{maximum number of components to calculate.}
 
 \item{center}{logical, do mean centering of data or not.}
 
-\item{scale}{logical, do sdandardization of data or not.}
-
-\item{cv}{cross-validation settings (see details).}
+\item{scale}{logical, do standardization of data or not.}
 
 \item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
 
 \item{exclcols}{columns to be excluded from calculations (numbers, names or vector with logical values)}
 
-\item{x.test}{a numerical matrix with test data.}
+\item{x.test}{test data (matrix or data frame).}
 
-\item{method}{method to compute principal components ('svd', 'nipals').}
+\item{method}{method to compute principal components ("svd", "nipals").}
 
 \item{rand}{vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)}
 
-\item{lim.type}{which method to use for calculation of critical limits for residuals (see details)}
+\item{lim.type}{which method to use for calculation of critical limits for residual distances (see details)}
 
-\item{alpha}{significance level for calculating critical limits for T2 and Q residuals.}
+\item{alpha}{significance level for extreme limits for T2 and Q disances.}
 
-\item{gamma}{significance level for calculating outlier limits for T2 and Q residuals.}
+\item{gamma}{significance level for outlier limits for T2 and Q distances.}
 
-\item{info}{a short text line with model description.}
+\item{info}{a short text with model description.}
 }
 \value{
 Returns an object of \code{pca} class with following fields:
-\item{ncomp }{number of components included to the model.} 
-\item{ncomp.selected }{selected (optimal) number of components.} 
-\item{loadings }{matrix with loading values (nvar x ncomp).} 
-\item{eigenvals }{vector with eigenvalues for all existent components.} 
-\item{expvar }{vector with explained variance for each component (in percent).} 
-\item{cumexpvar }{vector with cumulative explained variance for each component (in percent).} 
-\item{T2lim }{statistical limit for T2 distance.} 
-\item{Qlim }{statistical limit for Q residuals.} 
-\item{info }{information about the model, provided by user when build the model.} 
-\item{calres }{an object of class \code{\link{pcares}} with PCA results for a calibration data.} 
-\item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it 
-was provided.} 
-\item{cvres }{an object of class \code{\link{pcares}} with PCA results for cross-validation, 
-if this option was chosen.} 
+\item{ncomp }{number of components included to the model.}
+\item{ncomp.selected }{selected (optimal) number of components.}
+\item{loadings }{matrix with loading values (nvar x ncomp).}
+\item{eigenvals }{vector with eigenvalues for all existent components.}
+\item{expvar }{vector with explained variance for each component (in percent).}
+\item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
+\item{T2lim }{statistical limit for T2 distance.}
+\item{Qlim }{statistical limit for Q residuals.}
+\item{info }{information about the model, provided by user when build the model.}
+\item{calres }{an object of class \code{\link{pcares}} with PCA results for a calibration data.}
+\item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it
+was provided.}
 
 More details and examples can be found in the Bookdown tutorial.
 }
@@ -61,108 +68,105 @@ More details and examples can be found in the Bookdown tutorial.
 \code{pca} is used to build and explore a principal component analysis (PCA) model.
 }
 \details{
-By default \code{pca} uses number of components (\code{ncomp}) as a minimum of number of 
-objects - 1, number of variables and default or provided value. Besides that, there is also 
-a parameter for selecting an optimal number of components (\code{ncomp.selected}). The optimal 
-number of components is used to build a residuals plot (with Q residuals vs. Hotelling T2 
-values), calculate confidence limits for Q residuals, as well as for SIMCA classification. 
+Note, that from v. 0.10.0 cross-validation is no more supported in PCA.
 
-Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
-will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
-cross-validation will be preformed). If it is a list, the following syntax can be used: 
-\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
-segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
-to \code{nseg} segments ('venetian blinds').  
+If number of components is not specified, a minimum of number of objects - 1 and number of
+variables in calibration set is used. One can also specified an optimal number of component,
+once model is calibrated (\code{ncomp.selected}). The optimal number of components is used to
+build a residuals distance plot, as well as for SIMCA classification.
 
-You can provde number, names or logical values to exclude rows or columns from calibration and
-validation of PCA model. In this case the outcome, e.g. scores and loadings will correspond to 
-the original size of the data, but:
+If some of rows of calibration set should be excluded from calculations (e.g. because they are
+outliers) you can provide row numbers, names, or logical values as parameter \code{exclrows}. In
+this case they will be completely ignored we model is calibrated. However, score and residuls
+distances will be computed for these rows as well and then hidden. You can show them
+on corresponding plots by using parameter \code{show.excluded = TRUE}.
 
-\enumerate{
-  \item Loadings (and all performance statistics) will be computed without excluded objects and 
-  variables
-  \item Matrix with loadings will have zero values for the excluded variables and the 
-  corresponding columns will be hidden.
-  \item Matrix with scores will have score values calculated for the hidden objects but 
-  the rows will be hidden.
-}
+It is also possible to exclude selected columns from calculations by provideing parameter
+\code{exclcols} in form of column numbers, names or logical values. In this case loading matrix
+will have zeros for these columns. This allows to compute PCA models for selected variables
+without removing them physically from a dataset.
 
-You can see scores and loadings for hidden rows and columns by using parameter 
-'show.excluded = T' in plots. If you see other packages to make plots (e.g. ggplot2) you will 
-not be able to distinguish between hidden and normal objects. 
+Take into account that if you see other packages to make plots (e.g. ggplot2) you will
+not be able to distinguish between hidden and normal objects.
 
 By default loadings are computed for the original dataset using either SVD or NIPALS algorithm.
-However, for datasets with large number of rows (e.g. hyperspectral images), there is a 
+However, for datasets with large number of rows (e.g. hyperspectral images), there is a
 possibility to run algorithms based on random permutations [1, 2]. In this case you have
-to define parameter \code{rand} as a vector with two values: p - oversampling parameter and
-k - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)} are good 
-options, which give quite precise solution using several times less computational time. It must 
-be noted that statistical limits for residuals will not be computed in this case.
-  
-There are several ways to calculate critical limits for Q and T2 residuals. In \code{mdatools} 
-you can specify one of the following methods via parameter \code{lim.type}: \code{'jm'} - method 
-based on Jackson-Mudholkar approach [3], \code{'chisq'} - method based on chi-square distribution
-[4] and \code{'ddrobust'} and \code{'ddmoments'} - both related to data driven method proposed 
-by Pomerantsev and Rodionova [5]. The \code{'ddmoments'} is based on method of moments for 
-estimation of distribution parameters while \code{'ddrobust'} is based in robust estimation.
- 
-It must be noted that the first two methods calculate limits for Q-residuals only, assuming, 
-that limits for T2 residuals must be computed using Hotelling's T-squared distribution. The 
-methods based on the data driven approach calculate limits for both Q and T2 residuals based on 
-chi-square distribution and parameters estimated from the calibration data.
+to define parameter \code{rand} as a vector with two values: \code{p} - oversampling parameter
+and \code{k} - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)}
+are good options, which give quite almost precise solution but much faster.
 
-The critical limits are calculated for a significance level defined by parameter \code{'alpha'}. 
-You can also specify another parameter, \code{'gamma'}, which is used to calculate acceptance 
-limit for outliers (shown as dashed line on residuals plot).
+There are several ways to calculate critical limits for orthogonal (Q, q) and score (T2, h)
+distances. In \code{mdatools} you can specify one of the following methods via parameter
+\code{lim.type}: \code{"jm"} Jackson-Mudholkar approach [3], \code{"chisq"} - method based on
+chi-square distribution [4], \code{"ddmoments"} and \code{"ddrobust"} - related to data
+driven method proposed in [5]. The \code{"ddmoments"} is based on method of moments for
+estimation of distribution parameters (also known as "classical" approach) while
+\code{"ddrobust"} is based in robust estimation.
+
+If \code{lim.type="chisq"} or \code{lim.type="jm"} is used, only limits for Q-distances are
+computed based on corresponding approach, limits for T2-distances are computed using
+Hotelling's T-squared distribution. The methods utilizing the data driven approach calculate
+limits for combination of the distances bases on chi-square distribution and parameters
+estimated from the calibration data.
+
+The critical limits are calculated for a significance level defined by parameter \code{'alpha'}.
+You can also specify another parameter, \code{'gamma'}, which is used to calculate acceptance
+limit for outliers (shown as dashed line on residual distance plot).
 
 You can also recalculate the limits for existent model by using different values for alpha and
-gamme, without recomputing the model itself. In this case use the following code (it is assumed 
-that you current PCA/SIMCA model is stored in variable \code{m}): 
-\code{m = setResLimits(m, alpha, gamma)}.
+gamme, without recomputing the model itself. In this case use the following code (it is assumed
+that you current PCA/SIMCA model is stored in variable \code{m}):
+\code{m = setDistanceLimits(m, lim.type, alpha, gamma)}.
 
-In case of PCA the critical limits are just shown on residual plot as lines and can be used for 
-detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for 
-classification in SIMCA (see \code{\link{simca}}) the limits are utilized for classification of 
-objects.
+In case of PCA the critical limits are just shown on residual plot as lines and can be used for
+detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for
+classification in SIMCA (see \code{\link{simca}}) the limits are also employed for
+classification of objects.
 }
 \examples{
 library(mdatools)
 ### Examples for PCA class
 
 ## 1. Make PCA model for People data with autoscaling
-## and full cross-validation
 
 data(people)
-model = pca(people, scale = TRUE, cv = 1, info = 'Simple PCA model')
+model = pca(people, scale = TRUE, info = "Simple PCA model")
 model = selectCompNum(model, 4)
 summary(model)
 plot(model, show.labels = TRUE)
 
-## 3. Show scores and loadings plots for the model
+## 2. Show scores and loadings plots for the model
+
 par(mfrow = c(2, 2))
 plotScores(model, comp = c(1, 3), show.labels = TRUE)
-plotScores(model, comp = 2, type = 'h', show.labels = TRUE)
+plotScores(model, comp = 2, type = "h", show.labels = TRUE)
 plotLoadings(model, comp = c(1, 3), show.labels = TRUE)
-plotLoadings(model, comp = c(1, 2), type = 'h', show.labels = TRUE)
+plotLoadings(model, comp = c(1, 2), type = "h", show.labels = TRUE)
 par(mfrow = c(1, 1))
 
-## 4. Show residuals and variance plots for the model
+## 3. Show residual distance and variance plots for the model
 par(mfrow = c(2, 2))
-plotVariance(model, type = 'h')
-plotCumVariance(model, show.labels = TRUE, legend.position = 'bottomright')
+plotVariance(model, type = "h")
+plotCumVariance(model, show.labels = TRUE, legend.position = "bottomright")
 plotResiduals(model, show.labels = TRUE)
 plotResiduals(model, ncomp = 2, show.labels = TRUE)
 par(mfrow = c(1, 1))
 
 }
 \references{
-1. N. Halko, P.G. Martinsson, J.A. Tropp. Finding structure with randomness: probabilistic 
-algorithms for constructing approximate matrix decompositions. SIAM Review, 53 (2010) pp. 217-288.
-2. S. Kucheryavskiy, Blessing of randomness against the curse of dimensionality, 
-Journal of Chemometrics, 32 (2018), pp. 
+1. N. Halko, P.G. Martinsson, J.A. Tropp. Finding structure with randomness: probabilistic
+algorithms for constructing approximate matrix decompositions. SIAM Review, 53 (2010) pp.
+217-288.
+
+2. S. Kucheryavskiy, Blessing of randomness against the curse of dimensionality,
+Journal of Chemometrics, 32 (2018).
+
 3. J.E. Jackson, A User's Guide to Principal Components, John Wiley & Sons, New York, NY (1991).
-4. A.L. Pomerantsev, Acceptance areas for multivariate classification derived by projection 
+
+4. A.L. Pomerantsev, Acceptance areas for multivariate classification derived by projection
 methods, Journal of Chemometrics, 22 (2008) pp. 601-609.
+
 5. A.L. Pomerantsev, O.Ye. Rodionova, Concept and role of extreme objects in PCA/SIMCA,
 Journal of Chemometrics, 28 (2014) pp. 429-438.
 }
@@ -171,18 +175,28 @@ Methods for \code{pca} objects:
 \tabular{ll}{
    \code{plot.pca} \tab makes an overview of PCA model with four plots.\cr
    \code{summary.pca} \tab shows some statistics for the model.\cr
+   \code{categorize.pca} \tab categorize data rows as "normal", "extreme" or "outliers".\cr
    \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
-   \code{\link{setResLimits.pca}} \tab set critical limits for residuals\cr
+   \code{\link{setDistanceLimits.pca}} \tab set critical limits for residuals\cr
    \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr
+}
+
+Plotting methods for \code{pca} objects:
+\tabular{ll}{
    \code{\link{plotScores.pca}} \tab shows scores plot.\cr
    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
    \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
-   \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
+   \code{\link{plotResiduals.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
+   \code{\link{plotBiplot.pca}} \tab shows bi-plot.\cr
+   \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr
+   \code{\link{plotT2DoF}} \tab plot with degrees of freedom for score distance.\cr
+   \code{\link{plotQDoF}} \tab plot with degrees of freedom for orthogonal distance.\cr
+   \code{\link{plotDistDoF}} \tab plot with degrees of freedom for both distances.\cr
 }
 
 Most of the methods for plotting data are also available for PCA results (\code{\link{pcares}})
-objects. Also check \code{\link{pca.mvreplace}}, which replaces missing values in a data matrix 
+objects. Also check \code{\link{pca.mvreplace}}, which replaces missing values in a data matrix
 with approximated using iterative PCA decomposition.
 }
 \author{

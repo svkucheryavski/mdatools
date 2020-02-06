@@ -2,17 +2,30 @@
 % Please edit documentation in R/simcam.R
 \name{plotModelDistance.simcam}
 \alias{plotModelDistance.simcam}
-\title{Modelling distance plot for SIMCAM model}
+\title{Model distance plot for SIMCAM model}
 \usage{
-\method{plotModelDistance}{simcam}(obj, nc = 1, type = "h",
-  main = NULL, xlab = "Models", ylab = "", ...)
+\method{plotModelDistance}{simcam}(
+  obj,
+  nc = 1,
+  type = "h",
+  xticks = seq_len(obj$nclasses),
+  xticklabels = obj$classnames,
+  main = paste0("Model distance (", obj$classnames[nc], ")"),
+  xlab = "Models",
+  ylab = "",
+  ...
+)
 }
 \arguments{
 \item{obj}{a SIMCAM model (object of class \code{simcam})}
 
-\item{nc}{for which class (SIMCA model) to show the plot for}
+\item{nc}{one value - number of class (SIMCA model) to show the plot for}
 
-\item{type}{type of the plot}
+\item{type}{type of the plot ("h", "l" or "b")}
+
+\item{xticks}{vector with tick values for x-axis}
+
+\item{xticklabels}{vector with tick labels for x-axis}
 
 \item{main}{main plot title}
 
@@ -23,8 +36,47 @@
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
-Shows a plot with distance from data objects to a SIMCA model
+Shows a plot with distance between one SIMCA model to others.
 }
 \details{
-See examples in help for \code{\link{simcam}} function.
+The plot shows similarity between a selected model and the others as a ratio of residual
+variance using the following algorithm. Let's take two SIMCA/PCA models, m1 and m2, which
+have optimal number of components A1 and A2. The models have been calibrated
+using calibration sets X1 and X2 with number of rows n1 and n2.
+Then we do the following:
+
+1. Project X2 to model m1 and compute residuals, E12
+2. Compute variance of the residuals as s12 = sum(E12^2) / n1
+3. Project X1 to model m2 and compute residuals, E21
+4. Compute variance of the residuals as s21 = sum(E21^2) / n2
+5. Compute variance of residuals for m1 as s1 = sum(E1^2) / (n1 - A1 - 1)
+6. Compute variance of residuals for m2 as s2 = sum(E2^2) / (n2 - A2 - 1)
+
+The model distance then can be computed as: d = sqrt((s12 + s21) / (s1 + s2))
+
+As one can see, if the two models and corresponding calibration sets are identical, then the
+distance will be sqrt((n - A - 1) / n). For example, if n = 25 and A = 2, then the distance
+between the model and itself is sqrt(25/22) = sqrt(0.88) = 0.938. This case is demonstrated
+in the example section.
+
+In general, if distance between models is below one classes are overlapping. If it is above 3
+the classes are well separated.
+}
+\examples{
+# create two calibration sets with n = 25 objects in each
+data(iris)
+x1 <- iris[1:25, 1:4]
+x2 <- iris[51:75, 1:4]
+
+# create to SIMCA models with A = 2
+m1 <- simca(x1, 'setosa', ncomp = 2)
+m2 <- simca(x2, 'versicolor', ncomp = 2)
+
+# combine the models into SIMCAM class
+m <- simcam(list(m1, m2))
+
+# show the model distance plot with distance values as labels
+# note, that distance between setosa and setosa is 0.938
+plotModelDistance(m, show.labels = TRUE, labels = "values")
+
 }

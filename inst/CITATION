@@ -1,0 +1,11 @@
+year <- sub("-.*", "", meta$Date)
+note <- sprintf("R package version %s", meta$Version)
+
+bibentry(bibtype = "Article",
+         title = "mdatools --- R package for chemometrics",
+         author = c(person("Sergey", "Kucheryavskiy")),
+         journal = "Chemometrics and Intelligent Laboratory Systems",
+         volume = 198,
+         year = 2020,
+         url = "https://doi.org/10.1016/j.chemolab.2020.103937"
+)

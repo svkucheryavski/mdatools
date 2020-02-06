@@ -4,19 +4,23 @@
 \alias{summary.classres}
 \title{Summary statistics about classification result object}
 \usage{
-\method{summary}{classres}(object, ncomp = NULL, nc = NULL, ...)
+\method{summary}{classres}(
+  object,
+  ncomp = object$ncomp.selected,
+  nc = seq_len(object$nclasses),
+  ...
+)
 }
 \arguments{
 \item{object}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
 
-\item{ncomp}{which number of components to make the plot for (can be one value for all classes or vector with
-separate values for each, if NULL - model selected number will be used).}
+\item{ncomp}{which number of components to make the plot for (use NULL to show results for all available).}
 
-\item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
+\item{nc}{vector with class numbers to show the summary for.}
 
 \item{...}{other arguments}
 }
 \description{
-Generic \code{summary} function for classification results. Prints performance values for the 
+Generic \code{summary} function for classification results. Prints performance values for the
 results.
 }

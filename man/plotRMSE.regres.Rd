@@ -4,8 +4,15 @@
 \alias{plotRMSE.regres}
 \title{RMSE plot for regression results}
 \usage{
-\method{plotRMSE}{regres}(obj, ny = 1, type = "b", labels = "values",
-  ...)
+\method{plotRMSE}{regres}(
+  obj,
+  ny = 1,
+  type = "b",
+  xticks = seq_len(obj$ncomp),
+  labels = "values",
+  show.plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{regression results (object of class \code{regres})}
@@ -14,7 +21,11 @@
 
 \item{type}{type of the plot}
 
-\item{labels}{what to show as labels for plot objects.}
+\item{xticks}{vector with ticks for x-axis}
+
+\item{labels}{what to use as labels ("names", "values" or "indices")}
+
+\item{show.plot}{logical, show plot or just return plot data}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }

@@ -4,10 +4,15 @@
 \alias{simca}
 \title{SIMCA one-class classification}
 \usage{
-simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL,
-  exclcols = NULL, exclrows = NULL, x.test = NULL, c.test = NULL,
-  method = "svd", rand = NULL, lim.type = "jm", alpha = 0.05,
-  gamma = 0.01, info = "")
+simca(
+  x,
+  classname,
+  ncomp = min(nrow(x) - 1, ncol(x) - 1, 20),
+  x.test = NULL,
+  c.test = NULL,
+  cv = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{a numerical matrix with data values.}
@@ -16,68 +21,50 @@ simca(x, classname, ncomp = 15, center = T, scale = F, cv = NULL,
 
 \item{ncomp}{maximum number of components to calculate.}
 
-\item{center}{logical, do mean centering of data or not.}
-
-\item{scale}{logical, do sdandardization of data or not.}
-
-\item{cv}{cross-validation settings (see details).}
-
-\item{exclcols}{columns to be excluded from calculations (numbers, names or vector with logical values)}
-
-\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
-
 \item{x.test}{a numerical matrix with test data.}
 
 \item{c.test}{a vector with classes of test data objects (can be text with names of classes or logical).}
 
-\item{method}{method to compute principal components.}
+\item{cv}{cross-validation settings (see details).}
 
-\item{rand}{vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)}
-
-\item{lim.type}{which method to use for calculation of critical limits for residuals (see details)}
-
-\item{alpha}{significance level for calculating critical limits for T2 and Q residuals.}
-
-\item{gamma}{significance level for calculating outlier limits for T2 and Q residuals.}
-
-\item{info}{text with information about the model.}
+\item{...}{any other parameters suitable for \code{\link{pca}} method.}
 }
 \value{
 Returns an object of \code{simca} class with following fields:
-\item{classname }{a short text with class name.} 
-\item{modpower }{a matrix with modelling power of variables.} 
-\item{calres }{an object of class \code{\link{simcares}} with classification results for a 
-calibration data.} 
-\item{testres }{an object of class \code{\link{simcares}} with classification results for a test 
-data, if it was provided.} 
-\item{cvres }{an object of class \code{\link{simcares}} with classification results for 
-cross-validation, if this option was chosen.} 
+\item{classname }{a short text with class name.}
+\item{modpower }{a matrix with modelling power of variables.}
+\item{calres }{an object of class \code{\link{simcares}} with classification results for a
+calibration data.}
+\item{testres }{an object of class \code{\link{simcares}} with classification results for a test
+data, if it was provided.}
+\item{cvres }{an object of class \code{\link{simcares}} with classification results for
+cross-validation, if this option was chosen.}
 
 Fields, inherited from \code{\link{pca}} class:
-\item{ncomp }{number of components included to the model.} 
-\item{ncomp.selected }{selected (optimal) number of components.} 
-\item{loadings }{matrix with loading values (nvar x ncomp).} 
-\item{eigenvals }{vector with eigenvalues for all existent components.} 
-\item{expvar }{vector with explained variance for each component (in percent).} 
-\item{cumexpvar }{vector with cumulative explained variance for each component (in percent).} 
-\item{T2lim }{statistical limit for T2 distance.} 
-\item{Qlim }{statistical limit for Q residuals.} 
+\item{ncomp }{number of components included to the model.}
+\item{ncomp.selected }{selected (optimal) number of components.}
+\item{loadings }{matrix with loading values (nvar x ncomp).}
+\item{eigenvals }{vector with eigenvalues for all existent components.}
+\item{expvar }{vector with explained variance for each component (in percent).}
+\item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
+\item{T2lim }{statistical limit for T2 distance.}
+\item{Qlim }{statistical limit for Q residuals.}
 \item{info }{information about the model, provided by user when build the model.}
 }
 \description{
-\code{simca} is used to make SIMCA (Soft Independent Modelling of Class Analogies) model for 
+\code{simca} is used to make SIMCA (Soft Independent Modelling of Class Analogies) model for
 one-class classification.
 }
 \details{
-SIMCA is in fact PCA model with additional functionality, so \code{simca} class inherits most 
-of the functionality of \code{\link{pca}} class. It uses critical limits calculated for Q and T2 
+SIMCA is in fact PCA model with additional functionality, so \code{simca} class inherits most
+of the functionality of \code{\link{pca}} class. It uses critical limits calculated for Q and T2
 residuals calculated for PCA model for making classification decistion.
 
-Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it 
-will be used as a number of segments for random cross-validation (if \code{cv = 1}, full 
-cross-validation will be preformed). If it is a list, the following syntax can be used: 
-\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg} 
-segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits 
+Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
+will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
+cross-validation will be preformed). If it is a list, the following syntax can be used:
+\code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg}
+segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits
 to \code{nseg} segments ('venetian blinds').
 }
 \examples{
@@ -87,11 +74,11 @@ library(mdatools)
 data = iris[, 1:4]
 class = iris[, 5]
 
-# take first 20 objects of setosa as calibration set 
+# take first 20 objects of setosa as calibration set
 se = data[1:20, ]
 
 # make SIMCA model and apply to test set
-model = simca(se, 'setosa', cv = 1)
+model = simca(se, "setosa", cv = 1)
 model = selectCompNum(model, 1)
 
 # show infromation, summary and plot overview
@@ -99,24 +86,24 @@ print(model)
 summary(model)
 plot(model)
 
-# show predictions 
+# show predictions
 par(mfrow = c(2, 1))
 plotPredictions(model, show.labels = TRUE)
-plotPredictions(model, res = 'calres', ncomp = 2, show.labels = TRUE)
+plotPredictions(model, res = "cal", ncomp = 2, show.labels = TRUE)
 par(mfrow = c(1, 1))
 
 # show performance, modelling power and residuals for ncomp = 2
 par(mfrow = c(2, 2))
 plotSensitivity(model)
 plotMisclassified(model)
-plotModellingPower(model, ncomp = 2, show.labels = TRUE)
+plotLoadings(model, comp = c(1, 2), show.labels = TRUE)
 plotResiduals(model, ncomp = 2)
 par(mfrow = c(1, 1))
 
 }
 \references{
-S. Wold, M. Sjostrom. "SIMCA: A method for analyzing chemical data in terms of similarity and 
-analogy" in B.R. Kowalski (ed.), Chemometrics Theory and Application, American Chemical Society 
+S. Wold, M. Sjostrom. "SIMCA: A method for analyzing chemical data in terms of similarity and
+analogy" in B.R. Kowalski (ed.), Chemometrics Theory and Application, American Chemical Society
 Symposium Series 52, Wash., D.C., American Chemical Society, p. 243-282.
 }
 \seealso{
@@ -126,7 +113,6 @@ Methods for \code{simca} objects:
  \code{summary.simca} \tab shows summary statistics for the model.\cr
  \code{plot.simca} \tab makes an overview of SIMCA model with four plots.\cr
  \code{\link{predict.simca}} \tab applies SIMCA model to a new data.\cr
- \code{\link{plotModellingPower.simca}} \tab shows plot with modelling power of variables.\cr
 }
 
 Methods, inherited from \code{classmodel} class:
@@ -146,4 +132,7 @@ Methods, inherited from \code{\link{pca}} class:
  \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
  \code{\link{plotResiduals.pca}} \tab shows Q vs. T2 residuals plot.\cr
 }
+}
+\author{
+Sergey Kucheryavskiy (svkucheryavski@gmail.com)
 }

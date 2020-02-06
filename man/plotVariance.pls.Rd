@@ -4,27 +4,28 @@
 \alias{plotVariance.pls}
 \title{Variance plot for PLS}
 \usage{
-\method{plotVariance}{pls}(obj, decomp = "xdecomp",
-  variance = "expvar", type = "b", main = "X variance",
-  xlab = "Components", ylab = "Explained variance, \%",
-  labels = "values", ...)
+\method{plotVariance}{pls}(
+  obj,
+  decomp = "xdecomp",
+  variance = "expvar",
+  type = "b",
+  labels = "values",
+  res = obj$res,
+  ...
+)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{decomp}{which decomposition to use ('xdecomp' for x or 'ydecomp' for y)}
+\item{decomp}{which decomposition to use ("xdecomp" for x or "ydecomp" for y)}
 
-\item{variance}{which variance to use ('expvar', 'cumexpvar)}
+\item{variance}{which variance to use ("expvar", "cumexpvar")}
 
-\item{type}{type of the plot('b', 'l' or 'h')}
-
-\item{main}{main plot title}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
+\item{type}{type of the plot("b", "l" or "h")}
 
 \item{labels}{what to show as labels for plot objects.}
+
+\item{res}{list with result objects to show the plot for (by defaul, model results are used)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

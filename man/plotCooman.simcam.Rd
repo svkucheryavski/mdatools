@@ -4,12 +4,28 @@
 \alias{plotCooman.simcam}
 \title{Cooman's plot for SIMCAM model}
 \usage{
-\method{plotCooman}{simcam}(obj, nc = c(1, 2), ...)
+\method{plotCooman}{simcam}(
+  obj,
+  nc = c(1, 2),
+  res = list(cal = obj$res[["cal"]]),
+  groupby = res[[1]]$c.ref,
+  main = "Cooman's plot",
+  show.limits = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{a SIMCAM model (object of class \code{simcam})}
 
 \item{nc}{vector with two values - classes (SIMCA models) to show the plot for}
+
+\item{res}{list with results to show the plot for}
+
+\item{groupby}{factor to use for grouping points on the plot}
+
+\item{main}{title of the plot}
+
+\item{show.limits}{logical, show or not critical limits}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
@@ -17,5 +33,13 @@
 Shows a Cooman's plot for a pair of SIMCA models
 }
 \details{
-See examples in help for \code{\link{simcam}} function.
+Cooman's plot shows squared orthogonal distance from data points to two selected SIMCA models
+as well as critical limits for the distance (optional). In case if critical limits must be shown
+they are computed using chi-square distribution regardless which type of limits is employed for
+classification.
+
+If only one result object is provided (e.g. results for calibration set or new predictions),
+then the points can be color grouped using 'groupby' parameter (by default reference class values
+are used to make the groups). In case of multiple result objects, the points are color grouped
+according to the objects (e.g. calibration set and test set).
 }

@@ -4,15 +4,14 @@
 \alias{selectCompNum.pls}
 \title{Select optimal number of components for PLS model}
 \usage{
-\method{selectCompNum}{pls}(model, ncomp = NULL,
-  selcrit = model$ncomp.selcrit, ...)
+\method{selectCompNum}{pls}(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ...)
 }
 \arguments{
-\item{model}{PLS model (object of class \code{pls})}
+\item{obj}{PLS model (object of class \code{pls})}
 
 \item{ncomp}{number of components to select}
 
-\item{selcrit}{criterion for selecting optimal number of components (\code{'min'} for 
+\item{selcrit}{criterion for selecting optimal number of components (\code{'min'} for
 first local minimum of RMSECV and \code{'wold'} for Wold's rule.)}
 
 \item{...}{other parameters if any}
@@ -24,9 +23,30 @@ the same model with selected number of components
 Allows user to select optimal number of components for PLS model
 }
 \details{
-If number of components is not specified, the cross-validation statistics will be used. It can
-be either first local minimum of RMSECV (`selcrit='min'`) or Wold's rule (`selcrit='wold'`)
-based on ratio of PRESS values and threshold of 0.95. 
+The method sets \code{ncomp.selected} parameter for the model and return it back. The parameter
+points out to the optimal number of components in the model. You can either specify it manually,
+as argument \code{ncomp}, or use one of the algorithms for automatic selection.
+
+Automatic selection by default based on cross-validation statistics. If no cross-validation
+results are found in the model, the method will use test set validation results. If they are
+not available as well, the model will use calibration results and give a warning as in this case
+the selected number of components will lead to overfitted model.
+
+There are two algorithms for automatic selection you can chose between: either first local
+minimum of RMSE (`selcrit="min"`) or Wold's rule (`selcrit="wold"`).
+
+The first local minimum criterion finds at which component, A, error of prediction starts
+raising and selects (A - 1) as the optimal number. The Wold's criterion finds which component A
+does not make error smaller at least by 5% comparing to the previous value and selects (A - 1)
+as the optimal number.
+
+If model is PLS2 model (has several response variables) the method computes optimal number of
+components for each response and returns the smallest value. For example, if for the first
+response 2 components give the smallest error and for the second response this number is 3,
+A = 2 will be selected as a final result.
+
+It is not recommended to use automatic selection for real applications, always investigate
+your model (via RMSE, Y-variance plot, regression coefficients) to make correct decision.
 
 See examples in help for \code{\link{pls}} function.
 }

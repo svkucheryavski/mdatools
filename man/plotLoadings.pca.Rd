@@ -2,11 +2,16 @@
 % Please edit documentation in R/pca.R
 \name{plotLoadings.pca}
 \alias{plotLoadings.pca}
-\title{Loadings plot for PCA}
+\title{Loadings plot for PCA model}
 \usage{
-\method{plotLoadings}{pca}(obj, comp = c(1, 2), type = NULL,
-  main = "Loadings", xlab = NULL, ylab = NULL, show.labels = NULL,
-  show.legend = TRUE, show.axes = TRUE, ...)
+\method{plotLoadings}{pca}(
+  obj,
+  comp = c(1, 2),
+  type = (if (length(comp == 2)) "p" else "l"),
+  show.legend = TRUE,
+  show.axes = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
@@ -14,14 +19,6 @@
 \item{comp}{a value or vector with several values - number of components to show the plot for}
 
 \item{type}{type of the plot ('b', 'l', 'h')}
-
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
 
 \item{show.legend}{logical, show or not a legend on the plot}
 

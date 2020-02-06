@@ -4,19 +4,14 @@
 \alias{plotHist.randtest}
 \title{Histogram plot for randomization test results}
 \usage{
-\method{plotHist}{randtest}(obj, comp = NULL, main = NULL,
-  xlab = "Test statistic", ylab = "Frequency", ...)
+\method{plotHist}{randtest}(obj, ncomp = obj$ncomp.selected, bwd = 0.9, ...)
 }
 \arguments{
 \item{obj}{results of randomization test (object of class `randtest`)}
 
-\item{comp}{number of component to make the plot for}
+\item{ncomp}{number of component to make the plot for}
 
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
+\item{bwd}{width of bars (between 0 and 1)}
 
 \item{...}{other optional arguments}
 }

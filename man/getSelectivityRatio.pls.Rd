@@ -4,15 +4,12 @@
 \alias{getSelectivityRatio.pls}
 \title{Selectivity ratio for PLS model}
 \usage{
-\method{getSelectivityRatio}{pls}(obj, ncomp = NULL, ny = 1, ...)
+\method{getSelectivityRatio}{pls}(obj, ncomp = obj$ncomp.selected, ...)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{number of components to get the values for (if NULL user selected as optimal will be 
-used)}
-
-\item{ny}{which response to get the values for (if y is multivariate)}
+\item{ncomp}{number of components to get the values for (if NULL user selected as optimal will be used)}
 
 \item{...}{other parameters}
 }
@@ -20,8 +17,8 @@ used)}
 vector with selectivity ratio values
 }
 \description{
-Returns vector with selectivity ratio values for given number of components
-and response variable
+Returns vector with Selectivity ratio values. This function is a proxy for \code{\link{selratio}}
+and will be removed in future releases.
 }
 \references{
 [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.

@@ -2,55 +2,42 @@
 % Please edit documentation in R/ldecomp.R
 \name{ldecomp}
 \alias{ldecomp}
-\title{Linear decomposition of data}
+\title{Class for storing and visualising linear decomposition of dataset (X = TP' + E)}
 \usage{
-ldecomp(scores = NULL, residuals = NULL, loadings = NULL,
-  ncomp.selected = NULL, attrs = NULL, tnorm = NULL, dist = NULL,
-  var = NULL, cal = FALSE, totvar = NULL)
+ldecomp(scores, loadings, residuals, eigenvals, ncomp.selected = ncol(scores))
 }
 \arguments{
-\item{scores}{matrix with score values (nobj x ncomp).}
+\item{scores}{matrix with score values (I x A).}
 
-\item{residuals}{matrix with data residuals}
+\item{loadings}{matrix with loading values (J x A).}
 
-\item{loadings}{matrix with loading values (nvar x ncomp).}
+\item{residuals}{matrix with data residuals (I x J)}
+
+\item{eigenvals}{vector with eigenvalues for the loadings}
 
 \item{ncomp.selected}{number of selected components}
-
-\item{attrs}{list with attributes of original dataset}
-
-\item{tnorm}{singular values for score normalization}
-
-\item{dist}{list with calculated T2 and Q values (e.g. for CV)}
-
-\item{var}{list with explained and cumulative explained variance (e.g. for CV)}
-
-\item{cal}{logical, true if data is for calibration of a LDECOMP based model}
-
-\item{totvar}{full variance of original data, preprocessed and centered}
 }
 \value{
 Returns an object (list) of \code{ldecomp} class with following fields:
-\item{scores }{matrix with score values (nobj x ncomp).}
-\item{residuals }{matrix with data residuals (nobj x nvar).}
-\item{T2 }{matrix with T2 distances (nobj x ncomp).}
-\item{Q }{matrix with Q statistic (nobj x ncomp).}
-\item{tnorm }{vector with singular values used for scores normalization.}
+\item{scores }{matrix with score values (I x A).}
+\item{residuals }{matrix with data residuals (I x J).}
+\item{T2 }{matrix with score distances (I x A).}
+\item{Q }{matrix with orthogonal distances (I x A).}
 \item{ncomp.selected }{selected number of components.}
 \item{expvar }{explained variance for each component.}
 \item{cumexpvar }{cumulative explained variance.}
-\item{modpower}{modelling power of variables.}
 }
 \description{
 Creates an object of ldecomp class.
 }
 \details{
-\code{ldecomp} is a general class for decomposition X = TP' + E. Here, X is a data matrix, 
-T - matrix with scores, P - matrix with loadings and E - matrix with residuals. It is used, 
-for example, for PCA results (\code{\link{pcares}}), in PLS and other methods. The class also 
-includes methods for calculation and plotting residuals, variances, and so on.
+\code{ldecomp} is a general class for storing results of decomposition of dataset in
+form X = TP' + E. Here, X is a data matrix, T - matrix with scores, P - matrix with
+loadings and E - matrix with residuals. It is used, for example, for PCA results
+(\code{\link{pcares}}), in PLS and other methods. The class also includes methods for
+calculation of residual distances and explained variance.
 
-There is no need to use the \code{ldecomp} manually. For example, when build PCA model 
-with \code{\link{pca}} or apply it to a new data, the results will automatically inherit 
+There is no need to use the \code{ldecomp} manually. For example, when build PCA model
+with \code{\link{pca}} or apply it to a new data, the results will automatically inherit
 all methods of \code{ldecomp}.
 }

@@ -4,27 +4,38 @@
 \alias{plotPerformance.classmodel}
 \title{Performance plot for classification model}
 \usage{
-\method{plotPerformance}{classmodel}(obj, nc = NULL,
-  param = "specificity", type = "h", main = NULL,
-  xlab = "Components", ylab = "", ylim = c(0, 1.15), ...)
+\method{plotPerformance}{classmodel}(
+  obj,
+  nc = 1,
+  param = "misclassified",
+  type = "b",
+  labels = "values",
+  ylab = "",
+  ylim = c(0, 1.15),
+  xticks = seq_len(dim(obj$res$cal$c.pred)[2]),
+  res = obj$res,
+  ...
+)
 }
 \arguments{
 \item{obj}{classification model (object of class \code{plsda}, \code{simca}, etc.).}
 
-\item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
+\item{nc}{class number to make the plot for.}
 
-\item{param}{which parameter to make the plot for (\code{'specificity'}, \code{'sensitivity'}, 
-or \code{'misclassified'})}
+\item{param}{which parameter to make the plot for (\code{"specificity"}, \code{"sensitivity"},
+or \code{"misclassified"})}
 
 \item{type}{type of the plot}
 
-\item{main}{main title for the plot}
-
-\item{xlab}{label for x axis}
+\item{labels}{what to show as labels for plot objects.}
 
 \item{ylab}{label for y axis}
 
 \item{ylim}{vector with two values - limits for y axis}
+
+\item{xticks}{vector with tick values for x-axis}
+
+\item{res}{list with result objects to show the plot for}
 
 \item{...}{most of the graphical parameters from \code{\link{mdaplotg}} function can be used.}
 }

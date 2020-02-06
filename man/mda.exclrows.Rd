@@ -18,7 +18,8 @@ dataset with excluded rows
 Exclude/hide rows in a dataset
 }
 \details{
-The method assign attribute 'exclrows', which contains number of rows, which should be excluded/hidden
-from calculations and plots (without removing them physically). The argument \code{ind} should contain 
-rows numbers (excluding already hidden), names or logical values.
+The method assign attribute 'exclrows', which contains number of rows, which should be
+excluded/hidden from calculations and plots (without removing them physically). The
+argument \code{ind} should contain rows numbers (excluding already hidden), names or logical
+values.
 }

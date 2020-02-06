@@ -2,26 +2,36 @@
 % Please edit documentation in R/ldecomp.R
 \name{plotResiduals.ldecomp}
 \alias{plotResiduals.ldecomp}
-\title{Residuals plot for linear decomposition}
+\title{Residual distance plot}
 \usage{
-\method{plotResiduals}{ldecomp}(obj, ncomp = NULL, main = NULL,
-  xlab = NULL, ylab = NULL, show.labels = F, ...)
+\method{plotResiduals}{ldecomp}(
+  obj,
+  ncomp = obj$ncomp.selected,
+  norm = FALSE,
+  log = FALSE,
+  show.labels = FALSE,
+  labels = "names",
+  show.plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
 
-\item{ncomp}{what number of components to show the plot for (if NULL, model selected value will be used).}
+\item{ncomp}{number of components to show the plot for (if NULL, selected by model value will be used).}
 
-\item{main}{main title for the plot}
+\item{norm}{logical, normalize distance values or not (see details)}
 
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
+\item{log}{logical, apply log tranformation to the distances or not (see details)}
 
 \item{show.labels}{logical, show or not labels for the plot objects}
+
+\item{labels}{what to show as labels if necessary}
+
+\item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
 }
 \description{
-Shows a plot with T2 vs Q values for data objects.
+Shows a plot with orthogonal (Q, q) vs. score (T2, h) distances for data objects.
 }

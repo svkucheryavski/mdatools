@@ -7,9 +7,7 @@
 regres.bias(err)
 }
 \arguments{
-\item{y.ref}{vector with reference values}
-
-\item{y.pred}{matrix with predicted values}
+\item{err}{vector with difference between reference and predicted y-values}
 }
 \description{
 Calculates matrix with bias (average prediction error) for every response and components

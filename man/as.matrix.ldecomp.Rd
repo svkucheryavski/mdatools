@@ -4,14 +4,16 @@
 \alias{as.matrix.ldecomp}
 \title{as.matrix method for ldecomp object}
 \usage{
-\method{as.matrix}{ldecomp}(x, ...)
+\method{as.matrix}{ldecomp}(x, ncomp = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{ldecomp}}
 
+\item{ncomp}{number of components to get the result for (if NULL will return for each available)}
+
 \item{...}{other arguments}
 }
 \description{
-Generic \code{as.matrix} function for linear decomposition. Returns a matrix with information 
+Generic \code{as.matrix} function for linear decomposition. Returns a matrix with information
 about the decomposition.
 }

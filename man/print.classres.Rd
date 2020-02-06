@@ -4,7 +4,7 @@
 \alias{print.classres}
 \title{Print information about classification result object}
 \usage{
-\method{print}{classres}(x, str = NULL, ...)
+\method{print}{classres}(x, str = "Classification results (class classres)\\nMajor fields:", ...)
 }
 \arguments{
 \item{x}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}

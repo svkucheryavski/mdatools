@@ -4,12 +4,14 @@
 \alias{plotXYScores.plsres}
 \title{XY scores plot for PLS results}
 \usage{
-\method{plotXYScores}{plsres}(obj, ncomp = 1, ...)
+\method{plotXYScores}{plsres}(obj, ncomp = 1, show.plot = TRUE, ...)
 }
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}
 
 \item{ncomp}{which component to show the plot for}
+
+\item{show.plot}{logical, show plot or just return plot data}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }

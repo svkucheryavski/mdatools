@@ -4,14 +4,14 @@
 \alias{plotSpecificity.classmodel}
 \title{Specificity plot for classification model}
 \usage{
-\method{plotSpecificity}{classmodel}(obj, nc = NULL, ...)
+\method{plotSpecificity}{classmodel}(obj, legend.position = "bottomright", ...)
 }
 \arguments{
 \item{obj}{classification model (object of class \code{plsda}, \code{simca}, etc.).}
 
-\item{nc}{if there are several classes, which class to make the plot for (NULL - summary for all classes).}
+\item{legend.position}{position of the legend (as in \code{mdaplotg}).}
 
-\item{...}{most of the graphical parameters from \code{\link{mdaplotg}} function can be used.}
+\item{...}{parameters for \code{\link{plotPerformance.classmodel}} function.}
 }
 \description{
 Makes a plot with specificity values vs. model complexity (e.g. number of components)

@@ -4,8 +4,7 @@
 \alias{plot.pls}
 \title{Model overview plot for PLS}
 \usage{
-\method{plot}{pls}(x, ncomp = NULL, ny = 1, show.legend = T,
-  show.labels = F, ...)
+\method{plot}{pls}(x, ncomp = x$ncomp.selected, ny = 1, show.legend = TRUE, ...)
 }
 \arguments{
 \item{x}{a PLS model (object of class \code{pls})}
@@ -15,8 +14,6 @@
 \item{ny}{which y variable to show the summary for (if NULL, will be shown for all)}
 
 \item{show.legend}{logical, show or not a legend on the plot}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
 
 \item{...}{other arguments}
 }

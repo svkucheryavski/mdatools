@@ -2,19 +2,14 @@
 % Please edit documentation in R/pca.R
 \name{plotCumVariance.pca}
 \alias{plotCumVariance.pca}
-\title{Cumulative explained variance plot for PCA}
+\title{Cumulative explained variance plot for PCA model}
 \usage{
-\method{plotCumVariance}{pca}(obj, xlab = "Components",
-  ylab = "Explained variance, \%", main = "Cumulative variance", ...)
+\method{plotCumVariance}{pca}(obj, legend.position = "bottomright", ...)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
 
-\item{xlab}{label for x axis}
-
-\item{ylab}{label for y axis}
-
-\item{main}{main title for the plot}
+\item{legend.position}{position of the legend}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

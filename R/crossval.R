@@ -1,122 +1,151 @@
+#' Define parameters based on 'cv' value
+#'
+#' @param cv
+#' settings for cross-validation provided by user
+#' @param nobj
+#' number of objects in calibration set
+#'
+crossval.getParams <- function(cv, nobj) {
+
+   nrep <- 1
+
+   # random
+   if (is.numeric(cv)) {
+      return(
+         list(
+            type = "rand",
+            nrep = 1,
+            nseg = if (cv == 1) nobj else cv
+         )
+      )
+   }
+
+   # leave one out
+   type <- cv[[1]]
+   if (type == "loo") {
+      return(
+         list(
+            type = "rand",
+            nrep = nrep,
+            nseg = nobj
+         )
+      )
+   }
+
+   # venetian blinds
+   nseg <- cv[[2]]
+   if (type == "ven") {
+      return(
+         list(
+            type = "ven",
+            nrep = nrep,
+            nseg = nseg
+         )
+      )
+   }
+
+   nrep <- if (length(cv) == 3) cv[[3]] else 1
+   return(
+      list(
+         type = type,
+         nrep = nrep,
+         nseg = nseg
+      )
+   )
+}
+
 #' Generate sequence of indices for cross-validation
 #'
 #' @description
-#' Generates and returns sequence of object indices for each segment in random segmented 
+#' Generates and returns sequence of object indices for each segment in random segmented
 #' cross-validation
-#' 
+#'
 #' @param nobj
 #' number of objects in a dataset
 #' @param cv
-#' cross-validation settings, can be a number or a list. If cv is a number, it will be 
-#' used as a number of segments for random cross-validation (if cv = 1, full cross-validation 
-#' will be preformed), if it is a list, the following syntax can be used: cv = list('rand', nseg, nrep) 
-#' for random repeated cross-validation with nseg segments and nrep repetitions or cv = list('ven', nseg) 
-#' for systematic splits to nseg segments ('venetian blinds').  
-#' 
+#' cross-validation settings, can be a number or a list. If cv is a number, it will be
+#' used as a number of segments for random cross-validation (if cv = 1, full cross-validation
+#' will be preformed), if it is a list, the following syntax can be used:
+#' cv = list('rand', nseg, nrep) for random repeated cross-validation with nseg segments and nrep
+#' repetitions or cv = list('ven', nseg) for systematic splits to nseg segments ('venetian blinds').
+#' @param resp
+#' vector with response values to use in case of venetian blinds
+#'
 #' @return
 #' matrix with object indices for each segment
-#' 
+#'
 #' @export
-crossval = function(nobj, cv = NULL) {
-   methods = c('rand', 'ven', 'loo')
-   
-   if (is.null(cv))
-   {
-      type = 'rand'
-      rep = 1
-      if (nobj < 24) { nseg = nobj}
-      else if (nobj >= 24 && nobj < 40) { nseg = 8}
-      else if (nobj >= 40) { nseg = 4 }
-   }   
-   else if (is.numeric(cv))
-   {
-      type = 'rand'
-      nrep = 1
-      if (cv == 1)
-         nseg = nobj
-      else
-         nseg = cv
+crossval <- function(cv = 1, nobj = NULL, resp = NULL) {
+
+   # get cross-validation parameters
+   if (is.null(nobj)) nobj <- length(resp)
+
+   p <- crossval.getParams(cv = cv, nobj = nobj)
+   if (!(p$type %in% c("rand", "ven", "loo"))) {
+      stop("Wrong name for cross-validation method.")
    }
-   else
-   {
-      type = cv[[1]]
-      
-      if ( type == 'loo' )
-      {
-         type = 'rand'
-         nseg = nobj
-         nrep = 1
-      }   
-      else
-      {   
-         nseg = cv[[2]]
-      
-         if (length(cv) > 2)
-            nrep = cv[[3]]
-         else
-            nrep = 1
-      }   
-   }   
-   
-   if ( !(type %in% methods) ) 
-      stop('Wrong name for cross-valudation method!')      
-   
-   if (type != 'rand')
-      nrep = 1
-   
-   seglen = ceiling(nobj / nseg)
-   fulllen = seglen * nseg
-   
-   idx = array(0, dim = c(nseg, ceiling(nobj / nseg), nrep))
-      
-   if (type == 'rand')
-   {   
-      for (irep in 1:nrep)
-      {   
-         v = c(sample(1:nobj), rep(NA, fulllen - nobj))
-         idx[, , irep] = matrix(v, nrow = nseg, byrow = T)   
+
+   # check number of repetitions
+   if (p$nrep < 1 || p$nrep > 100) {
+      stop("Wrong value for cv repetitions (should be between 1 and 100).")
+   }
+
+   # check number of segments
+   if (p$nseg < 2 || p$nseg > nobj) {
+      stop("Wrong value for number of segments (should be between 2 and number of objects).")
+   }
+
+   seglen <- ceiling(nobj / p$nseg)
+   fulllen <- seglen * p$nseg
+   ind <- array(0, dim = c(p$nseg, seglen, p$nrep))
+
+   if (p$type == "rand") {
+      for (i in seq_len(p$nrep)) {
+         v <- c(sample(nobj), rep(NA, fulllen - nobj))
+         ind[, , i] <- matrix(v, nrow = p$nseg, byrow = TRUE)
       }
+      return(ind)
    }
-   else if (type == 'ven')
-   {
-      v = c(1:nobj, rep(NA, fulllen - nobj))
-      idx[, , 1] = matrix(v, nrow = nseg, byrow = F)               
-   }   
-   return (idx)        
-}   
+
+   if (p$type == "ven") {
+      v <- c(order(resp), rep(NA, fulllen - nobj))
+      ind[, , 1] <- matrix(v, nrow = p$nseg, byrow = FALSE)
+      return(ind)
+   }
+
+   stop("Something went wrong.")
+}
 
 #' String with description of cross-validation method
 #'
-#' @param cv 
+#' @param cv
 #' a list with cross-validation settings
-#' 
+#'
 #' @return
 #' a string with the description text
 #'
-crossval.str = function(cv)
-{
-   str = '';
-   if (is.numeric(cv))
-   {
-      if (cv == 1)
-         str = 'full cross-validation'
-      else
-         str = sprintf('random cross-validation with %d segments', cv)
+crossval.str <- function(cv) {
+
+   if (length(cv) == 0) return("none")
+
+   if (is.numeric(cv)) {
+      return(
+         if (cv == 1) "full (leave one out)"
+         else sprintf("random with %.0f segments", cv)
+      )
    }
-   else
-   {
-      type = cv[[1]]
-      if ( type == 'loo' )
-         str = 'full cross-validation'
-      else if ( type == 'ven')
-      {   
-         str = sprintf('venetian blinds with %d segments', cv[[2]])
-      }   
-      else
-      {
-         str = sprintf('random cross-validation with %d segments', cv[[2]])
-      }   
-   }   
-   
-   str
-}   
+
+   type <- cv[[1]]
+   if (type == "loo") {
+      return("full (leave one out)")
+   }
+
+   if (type == "ven") {
+      return(sprintf("venetian blinds with %.0f segments", cv[[2]]))
+   }
+
+   return(
+      sprintf("random with %.0f segments%s",
+         cv[[2]], if (length(cv) == 3) paste(" and", cv[[3]], "repetitions") else "")
+   )
+}

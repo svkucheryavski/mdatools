@@ -4,9 +4,16 @@
 \alias{plotSelection.ipls}
 \title{iPLS performance plot}
 \usage{
-\method{plotSelection}{ipls}(obj, glob.ncomp = NULL,
-  main = "iPLS results", xlab = obj$xaxis.name, ylab = "RMSECV",
-  xlim = NULL, ylim = NULL, ...)
+\method{plotSelection}{ipls}(
+  obj,
+  glob.ncomp = obj$gm$ncomp.selected,
+  main = "iPLS results",
+  xlab = obj$xaxis.name,
+  ylab = "RMSECV",
+  xlim = NULL,
+  ylim = NULL,
+  ...
+)
 }
 \arguments{
 \item{obj}{iPLS results (object of class ipls)}
@@ -31,12 +38,12 @@ first iteration
 }
 \details{
 The plot shows intervals as bars, which height corresponds to RMSECV obtained when particular
-interval was selected (forward) or excluded (backward) from a model at the first iteration. 
-The intervals found optimal after backward/forward iPLS selection are shown with green color 
+interval was selected (forward) or excluded (backward) from a model at the first iteration.
+The intervals found optimal after backward/forward iPLS selection are shown with green color
 while the other intervals are gray.
 
 See examples in help for \code{\link{ipls}} function.
 
- @seealso 
+ @seealso
  \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
 }

@@ -18,22 +18,22 @@ list with two fields - preprocessed spectra and calculated mean spectrum
 Applies Multiplicative Scatter Correction (MSC) transformation to data matrix (spectra)
 }
 \details{
-MSC is used to remove scatter effects (baseline offset and slope) from 
+MSC is used to remove scatter effects (baseline offset and slope) from
 spectral data, e.g. NIR spectra.
- 
+
  @examples
- 
+
  ### Apply MSC to spectra from simdata
- 
+
  library(mdatools)
  data(simdata)
- 
+
  spectra = simdata$spectra.c
  wavelength = simdata$wavelength
- 
+
  res = prep.msc(spectra)
  cspectra = res$cspectra
- 
+
  par(mfrow = c(2, 1))
  mdaplot(cbind(wavelength, t(spectra)), type = 'l', main = 'Before MSC')
  mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After MSC')

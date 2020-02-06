@@ -4,10 +4,14 @@
 \alias{summary.simca}
 \title{Summary method for SIMCA model object}
 \usage{
-\method{summary}{simca}(object, ...)
+\method{summary}{simca}(object, ncomp = object$ncomp.selected, res = object$res, ...)
 }
 \arguments{
 \item{object}{a SIMCA model (object of class \code{simca})}
+
+\item{ncomp}{number of components to show summary for}
+
+\item{res}{list of result objects to show summary for}
 
 \item{...}{other arguments}
 }

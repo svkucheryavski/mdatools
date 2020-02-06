@@ -4,17 +4,25 @@
 \alias{plotXScores.pls}
 \title{X scores plot for PLS}
 \usage{
-\method{plotXScores}{pls}(obj, comp = c(1, 2), main = "X scores",
-  show.axes = T, ...)
+\method{plotXScores}{pls}(
+  obj,
+  comp = c(1, 2),
+  show.axes = T,
+  main = "Scores (X)",
+  res = obj$res,
+  ...
+)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
 \item{comp}{which components to show the plot for (one or vector with several values)}
 
+\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+
 \item{main}{main plot title}
 
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+\item{res}{list with result objects to show the plot for (by defaul, model results are used)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

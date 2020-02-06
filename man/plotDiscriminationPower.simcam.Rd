@@ -4,8 +4,16 @@
 \alias{plotDiscriminationPower.simcam}
 \title{Discrimination power plot for SIMCAM model}
 \usage{
-\method{plotDiscriminationPower}{simcam}(obj, nc = c(1, 2), type = "h",
-  main = NULL, xlab = "Variables", ylab = "", ...)
+\method{plotDiscriminationPower}{simcam}(
+  obj,
+  nc = c(1, 2),
+  type = "h",
+  main = paste0("Discrimination power: ", obj$classnames[nc[1]], " vs. ",
+    obj$classname[nc[2]]),
+  xlab = attr(obj$dispower, "xaxis.name"),
+  ylab = "",
+  ...
+)
 }
 \arguments{
 \item{obj}{a SIMCAM model (object of class \code{simcam})}
@@ -26,5 +34,9 @@
 Shows a plot with discrimination power of predictors for a pair of SIMCA models
 }
 \details{
-See examples in help for \code{\link{simcam}} function.
+Discrimination power shows an ability of variables to separate classes. The power is computed
+similar to model distance, using variance of residuals. However in this case instead of sum the
+variance across all variables, we take the ratio separately for individual variables.
+
+Discrimination power equal or above 3 is considered as high.
 }

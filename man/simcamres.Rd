@@ -9,10 +9,10 @@ simcamres(cres, pred.res)
 \arguments{
 \item{cres}{results of classification (class \code{classres}).}
 
-\item{pred.res}{prediction results from each model (as pcares)}
+\item{pred.res}{list with prediction results from each model (pcares objects)}
 }
 \value{
-Returns an object (list) of class \code{simcamres} with the same fields as \code{\link{classres}} 
+Returns an object (list) of class \code{simcamres} with the same fields as \code{\link{classres}}
 plus extra fields for Q and T2 values and limits:
 
 \item{c.pred}{predicted class values.}
@@ -33,63 +33,18 @@ The following fields are available only if reference values were provided.
 \code{simcamres} is used to store results for SIMCA multiclass classification.
 }
 \details{
-Class \code{simcamres} inherits all properties and methods of class \code{\link{classres}}, plus 
+Class \code{simcamres} inherits all properties and methods of class \code{\link{classres}}, plus
 store values necessary to visualise prediction decisions (e.g. Cooman's plot or Residuals plot).
 
-In cotrast to \code{simcares} here only values for optimal (selected) number of components in 
+In cotrast to \code{simcares} here only values for optimal (selected) number of components in
 each individual SIMCA models are presented.
 
-There is no need to create a \code{simcamres} object manually, it is created automatically when 
-make a SIMCAM model (see \code{\link{simcam}}) or apply the model to a new data (see 
+There is no need to create a \code{simcamres} object manually, it is created automatically when
+make a SIMCAM model (see \code{\link{simcam}}) or apply the model to a new data (see
 \code{\link{predict.simcam}}). The object can be used to show summary and plots for the results.
 }
 \examples{
-## make a multiclass SIMCA model for Iris data and apply to test set
-library(mdatools)
-
-# split data 
-caldata = iris[seq(1, nrow(iris), 2), 1:4]
-se = caldata[1:25, ]
-ve = caldata[26:50, ]
-vi = caldata[51:75, ]
-
-testdata = iris[seq(2, nrow(iris), 2), 1:4]
-testdata.cref = iris[seq(2, nrow(iris), 2), 5]
-
-# create individual models
-semodel = simca(se, classname = 'setosa')
-semodel = selectCompNum(semodel, 1)
-
-vimodel = simca(vi, classname = 'virginica')
-vimodel = selectCompNum(vimodel, 1)
-
-vemodel = simca(ve, classname = 'versicolor')
-vemodel = selectCompNum(vemodel, 1)
-
-# combine models into SIMCAM object, show statistics 
-model = simcam(list(semodel, vimodel, vemodel), info = 'Iris data')
-res = predict(model, testdata, testdata.cref)
-summary(res)
-
-# show predicted values
-showPredictions(res)
-
-# plot predictions
-par(mfrow = c(2, 2))
-plotPredictions(res)
-plotPredictions(res, nc = 1)
-plotPredictions(res, nc = c(1, 2))
-plotPredictions(res, show.labels = TRUE)
-par(mfrow = c(1, 1))
-
-# show residuals and Cooman's plot
-
-par(mfrow = c(2, 2))
-plotCooman(res)
-plotCooman(res, nc = c(1, 3))
-plotResiduals(res)
-plotResiduals(res, nc = 3)
-par(mfrow = c(1, 1))
+## see examples for simcam method.
 
 }
 \seealso{
@@ -97,7 +52,6 @@ Methods for \code{simcamres} objects:
 \tabular{ll}{
  \code{print.simcamres} \tab shows information about the object.\cr
  \code{summary.simcamres} \tab shows statistics for results of classification.\cr
- \code{\link{plotResiduals.simcamres}} \tab makes Q vs. T2 residuals plot.\cr
  \code{\link{plotCooman.simcamres}} \tab makes Cooman's plot.\cr
 }
 

@@ -4,7 +4,7 @@
 \alias{classres}
 \title{Results of classification}
 \usage{
-classres(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL)
+classres(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = 1)
 }
 \arguments{
 \item{c.pred}{matrix with predicted values (+1 or -1) for each class.}
@@ -22,19 +22,21 @@ classres(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = NULL)
 
 The following fields are available only if reference values were provided.
 \item{tp}{number of true positives.}
+\item{tn}{number of true negatives.}
 \item{fp}{nmber of false positives.}
 \item{fn}{number of false negatives.}
 \item{specificity}{specificity of predictions.}
 \item{sensitivity}{sensitivity of predictions.}
+\item{misclassified}{ratio of misclassified objects.}
 }
 \description{
 \code{classres} is used to store results classification for one or multiple classes.
 }
 \details{
-There is no need to create a \code{classres} object manually, it is created automatically when 
-build a classification model (e.g. using \code{\link{simca}} or \code{\link{plsda}}) or apply the 
-model to new data. For any classification method from \code{mdatools}, a class using to represent 
-results of classification (e.g. \code{\link{simcares}}) inherits fields and methods of 
+There is no need to create a \code{classres} object manually, it is created automatically when
+build a classification model (e.g. using \code{\link{simca}} or \code{\link{plsda}}) or apply
+the model to new data. For any classification method from \code{mdatools}, a class using to
+represent results of classification (e.g. \code{\link{simcares}}) inherits fields and methods of
 \code{classres}.
 }
 \seealso{
@@ -42,10 +44,10 @@ Methods \code{classres} class:
 \tabular{ll}{
  \code{\link{showPredictions.classres}} \tab shows table with predicted values.\cr
  \code{\link{plotPredictions.classres}} \tab makes plot with predicted values.\cr
- \code{\link{plotSensitivity.classres}} \tab makes plot with sensitivity vs. components values.\cr
- \code{\link{plotSpecificity.classres}} \tab makes plot with specificity vs. components values.\cr
- \code{\link{plotMisclassified.classres}} \tab makes plot with misclassified ratio values.\cr
- \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ration, specificity 
+ \code{\link{plotSensitivity.classres}} \tab makes sn plot.\cr
+ \code{\link{plotSpecificity.classres}} \tab makes specificity plot.\cr
+ \code{\link{plotMisclassified.classres}} \tab makes ms ratio plot.\cr
+ \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ratio, specificity
  and sensitivity values.\cr
 }
 }

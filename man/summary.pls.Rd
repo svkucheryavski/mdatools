@@ -4,14 +4,19 @@
 \alias{summary.pls}
 \title{Summary method for PLS model object}
 \usage{
-\method{summary}{pls}(object, ncomp = NULL, ny = NULL, ...)
+\method{summary}{pls}(
+  object,
+  ncomp = object$ncomp.selected,
+  ny = seq_len(nrow(object$yloadings)),
+  ...
+)
 }
 \arguments{
 \item{object}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{how many components to use (if NULL - user selected optimal value will be used)}
+\item{ncomp}{how many components to count.}
 
-\item{ny}{which y variable to show the summary for (if NULL, will be shown for all)}
+\item{ny}{which y variables to show the summary for (can be a vector)}
 
 \item{...}{other arguments}
 }

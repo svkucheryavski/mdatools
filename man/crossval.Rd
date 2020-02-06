@@ -4,21 +4,23 @@
 \alias{crossval}
 \title{Generate sequence of indices for cross-validation}
 \usage{
-crossval(nobj, cv = NULL)
+crossval(cv = 1, nobj = NULL, resp = NULL)
 }
 \arguments{
+\item{cv}{cross-validation settings, can be a number or a list. If cv is a number, it will be
+used as a number of segments for random cross-validation (if cv = 1, full cross-validation
+will be preformed), if it is a list, the following syntax can be used:
+cv = list('rand', nseg, nrep) for random repeated cross-validation with nseg segments and nrep
+repetitions or cv = list('ven', nseg) for systematic splits to nseg segments ('venetian blinds').}
+
 \item{nobj}{number of objects in a dataset}
 
-\item{cv}{cross-validation settings, can be a number or a list. If cv is a number, it will be 
-used as a number of segments for random cross-validation (if cv = 1, full cross-validation 
-will be preformed), if it is a list, the following syntax can be used: cv = list('rand', nseg, nrep) 
-for random repeated cross-validation with nseg segments and nrep repetitions or cv = list('ven', nseg) 
-for systematic splits to nseg segments ('venetian blinds').}
+\item{resp}{vector with response values to use in case of venetian blinds}
 }
 \value{
 matrix with object indices for each segment
 }
 \description{
-Generates and returns sequence of object indices for each segment in random segmented 
+Generates and returns sequence of object indices for each segment in random segmented
 cross-validation
 }

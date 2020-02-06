@@ -4,14 +4,14 @@
 \alias{summary.regres}
 \title{summary method for regression results object}
 \usage{
-\method{summary}{regres}(object, ncomp = NULL, ny = NULL, ...)
+\method{summary}{regres}(object, ncomp = object$ncomp.selected, ny = seq_len(object$nresp), ...)
 }
 \arguments{
 \item{object}{regression results (object of class \code{regres})}
 
-\item{ncomp}{model complexity to show the summary for}
+\item{ncomp}{model complexity to show the summary for (if NULL - shows for all available values)}
 
-\item{ny}{for which response variable show the summary for}
+\item{ny}{for which response variable show the summary for (one value or a vector)}
 
 \item{...}{other arguments}
 }
