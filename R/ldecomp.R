@@ -240,7 +240,7 @@ plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected, norm = FALSE,
       paste0("Orthogonal distance, ", lylab)
    )
 
-   attr(plot_data, "name") <- sprintf("Residuals (ncomp = %d)", ncomp)
+   attr(plot_data, "name") <- sprintf("Distances (ncomp = %d)", ncomp)
 
    # if no plot required - return plot series object
    if (!show.plot) return(plot_data)

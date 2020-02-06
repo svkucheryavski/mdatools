@@ -1074,7 +1074,7 @@ plotXYScores.pls <- function(obj, ncomp = 1, show.axes = T,  res = obj$res, ...)
 #'
 #' @export
 plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
-   main = sprintf("X-residuals (ncomp = %d)", ncomp), cgroup = NULL, xlim = NULL, ylim = NULL,
+   main = sprintf("X-distances (ncomp = %d)", ncomp), cgroup = NULL, xlim = NULL, ylim = NULL,
    show.limits = TRUE, lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
 
@@ -1139,7 +1139,7 @@ plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log
 #'
 #' @export
 plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
-   main = sprintf("XY-residuals (ncomp = %d)", ncomp), cgroup = NULL, xlim = NULL, ylim = NULL,
+   main = sprintf("XY-distances (ncomp = %d)", ncomp), cgroup = NULL, xlim = NULL, ylim = NULL,
    show.limits = TRUE, lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
 

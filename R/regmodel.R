@@ -347,7 +347,7 @@ plotYResiduals.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, sho
    }
 
    plot_data <- lapply(res, plotResiduals, ny = ny, ncomp = ncomp, show.plot = FALSE)
-   attr(plot_data[[1]], "name") <- sprintf("Y residuals (ncomp = %d)", ncomp)
+   attr(plot_data[[1]], "name") <- sprintf("Y-distance (ncomp = %d)", ncomp)
    mdaplotg(plot_data, show.lines = show.lines, ...)
 }
 
