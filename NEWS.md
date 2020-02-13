@@ -1,3 +1,9 @@
+v.0.10.1
+========
+
+* small improvements to  `plotExtreme.pca()` so user can specify additional parameters, such as, for example `cex`. If plot is made for several components, you can now specify just one value for all points (e.g. color of points or marker symbol).
+
+
 v.0.10.0
 ========
 

@@ -1429,6 +1429,8 @@ plotDistDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj
 #' vector with background color values for series of points (if pch=21:25)
 #' @param lwd
 #' line width for point symbols
+#' @param cex
+#' scale factor for data points
 #' @param ellipse.col
 #' color for tolerance ellipse
 #' @param legend.position
@@ -1439,7 +1441,8 @@ plotDistDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj
 #' @export
 plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.selected,
    main = "Extreme plot", xlab = "Expected", ylab = "Observed", pch = rep(21, length(comp)),
-   bg = mdaplot.getColors(length(comp)), col = rep("white", length(comp)), lwd = 0.25,
+   bg = mdaplot.getColors(length(comp)), col = rep("white", length(comp)),
+   lwd = ifelse(pch %in% 21:25, 0.25, 1), cex = rep(1.2, length(comp)),
    ellipse.col = "#cceeff", legend.position = "bottomright", ...) {
 
    if (min(comp) < 1 || max(comp) > obj$ncomp) {
@@ -1478,13 +1481,23 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
    lines(c(0, expected), c(0, Nm), col = ellipse.col)
    lines(c(0, expected), c(0, Np), col = ellipse.col)
 
+   # check length of main plot parameters and correct if necessary
+   ncomp <- length(comp)
+   correct.param <- function(param) if (length(param) == 1) rep(param, ncomp) else param
+   pch <- correct.param(pch)
+   col <- correct.param(col)
+   cex <- correct.param(cex)
+   lwd <- correct.param(lwd)
+   bg <- correct.param(bg)
+
    # show the plints
    alpha_mat <- matrix(alpha, byrow = TRUE, ncol = nobj, nrow = nobj)
    for (j in seq_along(comp)) {
       p <- getProbabilities.pca(obj, comp[j], Q[, comp[j]], T2[, comp[j]])
       p_mat <- matrix((1 - p), ncol = nobj, nrow = nobj)
       observed <- colSums(p_mat < alpha_mat)
-      points(expected, observed, pch = pch[j], lwd = lwd, cex = 1.2, col = col[j], bg = bg[j])
+      points(expected, observed, pch = pch[j], lwd = lwd[j], cex = cex[j], col = col[j],
+         bg = bg[j])
    }
 
    legend <- paste0(comp, " PC", ifelse(comp > 1, "s", ""))

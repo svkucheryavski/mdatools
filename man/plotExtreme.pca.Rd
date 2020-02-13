@@ -14,7 +14,8 @@
   pch = rep(21, length(comp)),
   bg = mdaplot.getColors(length(comp)),
   col = rep("white", length(comp)),
-  lwd = 0.25,
+  lwd = ifelse(pch \%in\% 21:25, 0.25, 1),
+  cex = rep(1.2, length(comp)),
   ellipse.col = "#cceeff",
   legend.position = "bottomright",
   ...
@@ -40,6 +41,8 @@
 \item{col}{vector with color values for series of points}
 
 \item{lwd}{line width for point symbols}
+
+\item{cex}{scale factor for data points}
 
 \item{ellipse.col}{color for tolerance ellipse}
 
