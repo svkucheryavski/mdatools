@@ -1501,7 +1501,7 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
    }
 
    legend <- paste0(comp, " PC", ifelse(comp > 1, "s", ""))
-   mdaplotg.showLegend(legend, pt.bg = bg, lty = NA, col = col, pch = pch, lwd = lwd,
+   mdaplotg.showLegend(legend, pt.bg = bg, lty = NA, col = col, pch = pch, lwd = lwd, cex = cex,
       position = legend.position)
 }
 
