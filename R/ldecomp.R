@@ -856,12 +856,15 @@ ldecomp.getT2Limits <- function(lim.type, alpha, gamma, params) {
 #' logical, shall distance values be normalized or not
 #' @param log
 #' logical, shall log transformation be applied or not
+#' @param show.limits
+#' vector with two logical values defining if limits for extreme and/or outliers must be shown
 #'
 #' @return
 #' list with two matrices (x and y coordinates of corresponding limits)
 #'
 #' @export
-ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log) {
+ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
+   show.limits = c(TRUE, TRUE)) {
 
    # get parameters
    h0 <- T2lim[3, ncomp]
@@ -870,6 +873,17 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log) {
    Nq <- Qlim[4, ncomp]
    lim.type <- attr(Qlim, "lim.type")
 
+   # check that show.limits is logical
+   if (!all(is.logical(show.limits))) {
+      stop("Parameter 'show.limits' must have logical value(s).")
+   }
+
+   # if show.limits has only one value - duplicate it
+   if (length(show.limits) == 1) {
+      show.limits <- rep(show.limits, 2)
+   }
+
+   # compute the limits
    if (lim.type %in% c("jm", "chisq")) {
 
       # quadratic limits
@@ -907,8 +921,8 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log) {
    }
 
    return(list(
-      extremes = cbind(hE, qE),
-      outliers = cbind(hO, qO)
+      extremes = if (show.limits[[1]]) cbind(hE, qE),
+      outliers = if (show.limits[[2]]) cbind(hO, qO)
    ))
 }
 
@@ -939,7 +953,7 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log) {
 #' @param show.legend
 #' logical, show or not a legend on the plot (needed if several result objects are available)
 #' @param show.limits
-#' logical, show or not lines/curves with critical limits for the distances
+#' vector with two logical values defining if limits for extreme and/or outliers must be shown
 #' @param lim.col
 #' vector with two values - line color for extreme and outlier limits
 #' @param lim.lwd
@@ -971,14 +985,25 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log) {
 #' points is skewed and most of them are densely located around bottom left corner.
 #'
 #' @export
-ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE,
-   norm = FALSE, cgroup = NULL, xlim = NULL, ylim = NULL, show.limits = TRUE,
+ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE, norm = FALSE,
+   cgroup = NULL, xlim = NULL, ylim = NULL, show.limits = c(TRUE, TRUE),
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    show.legend = TRUE, legend.position = "topright", ...) {
 
    getPlotLim <- function(lim, pd, ld, dim, show.limits) {
-      if (!(is.null(lim) && show.limits)) return(lim)
-      return(c(0, max(sapply(pd, function(x) max(x[, dim])), ld$outliers[, dim])) * 1.05)
+      if (!is.null(lim) ||all(!show.limits)) return(lim)
+      limits <- if (show.limits[[2]]) ld$outliers else ld$extremes
+      return(c(0, max(sapply(pd, function(x) max(x[, dim])), limits[, dim])) * 1.05)
+   }
+
+   # check that show.limits is logical
+   if (!all(is.logical(show.limits))) {
+      stop("Parameter 'show.limits' must have logical value(s).")
+   }
+
+   # if show.limits has only one value - duplicate it
+   if (length(show.limits) == 1) {
+      show.limits <- rep(show.limits, 2)
    }
 
    # keep only ojects of class "ldecomp" in result list
@@ -1002,9 +1027,12 @@ ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE,
    }
 
    # show critical limits
-   if (show.limits) {
+   if (show.limits[[1]]) {
       lines(lim_data$extremes[, 1], lim_data$extremes[, 2],
          col = lim.col[1], lty = lim.lty[1], lwd = lim.lwd[1])
+   }
+
+   if (show.limits[[2]]) {
       lines(lim_data$outliers[, 1], lim_data$outliers[, 2],
          col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
    }
