@@ -991,7 +991,7 @@ ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE, norm = F
    show.legend = TRUE, legend.position = "topright", ...) {
 
    getPlotLim <- function(lim, pd, ld, dim, show.limits) {
-      if (!is.null(lim) ||all(!show.limits)) return(lim)
+      if (!is.null(lim) || all(!show.limits)) return(lim)
       limits <- if (show.limits[[2]]) ld$outliers else ld$extremes
       return(c(0, max(sapply(pd, function(x) max(x[, dim])), limits[, dim])) * 1.05)
    }

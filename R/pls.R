@@ -743,7 +743,6 @@ categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
    h0 <- obj$T2lim[3, ncomp]
    q0 <- obj$Qlim[3, ncomp]
    z0 <- obj$Zlim[3, ncomp]
-   f0 <- Nq + Nh
 
    # process degrees of freedom for (Z)
    Nz <- round(Nz)
@@ -1158,7 +1157,7 @@ plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, lo
 
    # function to compute plot limits
    getPlotLim <- function(lim, pd, ld, dim, show.limits) {
-      if (!is.null(lim) ||all(!show.limits)) return(lim)
+      if (!is.null(lim) || all(!show.limits)) return(lim)
       limits <- if (show.limits[[2]]) ld$outliers else ld$extremes
       return(c(0, max(sapply(pd, function(x) max(x[, dim])), limits[, dim])) * 1.05)
    }
