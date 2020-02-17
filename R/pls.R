@@ -1053,7 +1053,7 @@ plotXYScores.pls <- function(obj, ncomp = 1, show.axes = T,  res = obj$res, ...)
 #' @param show.legend
 #' logical, show or not a legend on the plot (needed if several result objects are available)
 #' @param show.limits
-#' logical, show or not lines/curves with critical limits for the distances
+#' vector with two logical values defining if limits for extreme and/or outliers must be shown
 #' @param lim.col
 #' vector with two values - line color for extreme and outlier limits
 #' @param lim.lwd
@@ -1075,8 +1075,8 @@ plotXYScores.pls <- function(obj, ncomp = 1, show.axes = T,  res = obj$res, ...)
 #' @export
 plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
    main = sprintf("X-distances (ncomp = %d)", ncomp), cgroup = NULL, xlim = NULL, ylim = NULL,
-   show.limits = TRUE, lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
-   show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
+   show.limits = c(TRUE, TRUE), lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1),
+   lim.lty = c(2, 3), show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
 
    # get xdecomp from list with result objects
    res <- lapply(res, function(x) if ("ldecomp" %in% class(x$xdecomp)) x$xdecomp)
@@ -1109,7 +1109,7 @@ plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log
 #' @param show.legend
 #' logical, show or not a legend on the plot (needed if several result objects are available)
 #' @param show.limits
-#' logical, show or not lines/curves with critical limits for the distances
+#' vector with two logical values defining if limits for extreme and/or outliers must be shown
 #' @param lim.col
 #' vector with two values - line color for extreme and outlier limits
 #' @param lim.lwd
@@ -1140,8 +1140,8 @@ plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log
 #' @export
 plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
    main = sprintf("XY-distances (ncomp = %d)", ncomp), cgroup = NULL, xlim = NULL, ylim = NULL,
-   show.limits = TRUE, lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
-   show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
+   show.limits = c(TRUE, TRUE), lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1),
+   lim.lty = c(2, 3), show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
 
    if (!(obj$lim.type %in% c("ddmoments", "ddrobust"))) {
       stop("plotXYResiduals() works only with data driven limit types ('ddoments' or 'ddrobust')")
@@ -1156,9 +1156,21 @@ plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, lo
    res <- lapply(res, function(x) if ("ldecomp" %in% class(x$xdecomp)) x)
    res <- res[!sapply(res, is.null)]
 
+   # function to compute plot limits
    getPlotLim <- function(lim, pd, ld, dim, show.limits) {
-      if (!(is.null(lim) && show.limits)) return(lim)
-      return(c(0, max(sapply(pd, function(x) max(x[, dim])), ld$outliers[, dim])) * 1.05)
+      if (!is.null(lim) ||all(!show.limits)) return(lim)
+      limits <- if (show.limits[[2]]) ld$outliers else ld$extremes
+      return(c(0, max(sapply(pd, function(x) max(x[, dim])), limits[, dim])) * 1.05)
+   }
+
+   # check that show.limits is logical
+   if (!all(is.logical(show.limits))) {
+      stop("Parameter 'show.limits' must have logical value(s).")
+   }
+
+   # if show.limits has only one value - duplicate it
+   if (length(show.limits) == 1) {
+      show.limits <- rep(show.limits, 2)
    }
 
    # compute plot data for each result object
@@ -1181,9 +1193,12 @@ plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, lo
    }
 
    # show critical limits
-   if (show.limits) {
+   if (show.limits[[1]]) {
       lines(lim_data$extremes[, 1], lim_data$extremes[, 2],
          col = lim.col[1], lty = lim.lty[1], lwd = lim.lwd[1])
+   }
+
+   if (show.limits[[2]]) {
       lines(lim_data$outliers[, 1], lim_data$outliers[, 2],
          col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
    }
