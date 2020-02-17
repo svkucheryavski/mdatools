@@ -95,14 +95,100 @@ for (i in seq_along(datasets)) {
       expect_silent(plotXScores(m2, c(1, 3), show.labels = T, show.excluded = T, legend.position = "top"))
    })
 
-   test_that("X-residuals plot works fine", {
+   # X-distance
+   test_name <- "X-residual distance plot works fine"
+   test_that(test_name, {
       par(mfrow = c(2, 2))
       expect_silent(plotXResiduals(m1))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
       expect_silent(plotXResiduals(m2))
-      expect_silent(plotXResiduals(m1, 3, show.labels = T, show.excluded = T, legend.position = "top"))
-      expect_silent(plotXResiduals(m2, 3, show.labels = T, show.excluded = T, legend.position = "top"))
+      expect_silent(plotXResiduals(m1, 3, show.labels = T, show.excluded = T))
+      expect_silent(plotXResiduals(m2, 3, show.labels = T, show.excluded = T))
    })
 
+   test_name <- "X-residual distance plot understands two values for show.limits"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotXResiduals(m1, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotXResiduals(m1, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotXResiduals(m2, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotXResiduals(m2, show.limits = c(TRUE, TRUE)))
+   })
+
+   test_name <- "X-residual distance plot: show.limits works fine with log transform"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotXResiduals(m1, log = TRUE, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotXResiduals(m1, log = TRUE, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotXResiduals(m2, log = TRUE, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotXResiduals(m2, log = TRUE, show.limits = c(TRUE, TRUE)))
+   })
+
+   test_name <- "X-residual distance plot: show.limits works fine with none normalized values"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotXResiduals(m1, norm = FALSE, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotXResiduals(m1, norm = FALSE, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotXResiduals(m2, norm = FALSE, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotXResiduals(m2, norm = FALSE, show.limits = c(TRUE, TRUE)))
+   })
+
+   # XY-distance
+   test_name <- "XY-residual distance plot works fine"
+   test_that(test_name, {
+      par(mfrow = c(2, 2))
+      expect_silent(plotXYResiduals(m1))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotXYResiduals(m2))
+      expect_silent(plotXYResiduals(m1, 3, show.labels = T, show.excluded = T))
+      expect_silent(plotXYResiduals(m2, 3, show.labels = T, show.excluded = T))
+   })
+
+   test_name <- "XY-residual distance plot understands two values for show.limits"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotXYResiduals(m1, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotXYResiduals(m1, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotXYResiduals(m2, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotXYResiduals(m2, show.limits = c(TRUE, TRUE)))
+   })
+
+   test_name <- "XY-residual distance plot and two values for show.limits works fine with category"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotXYResiduals(m1, cgroup = "categories", show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotXYResiduals(m1, cgroup = "categories", show.limits = c(FALSE, TRUE)))
+      expect_silent(plotXYResiduals(m2, cgroup = "categories", show.limits = c(TRUE, FALSE)))
+      expect_silent(plotXYResiduals(m2, cgroup = "categories", show.limits = c(TRUE, TRUE)))
+   })
+
+   test_name <- "XY-residual distance plot: show.limits works fine with log transform"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotXYResiduals(m1, log = TRUE, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotXYResiduals(m1, log = TRUE, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotXYResiduals(m2, log = TRUE, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotXYResiduals(m2, log = TRUE, show.limits = c(TRUE, TRUE)))
+   })
+
+   test_name <- "XY-residual distance plot: show.limits works fine with none normalized values"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotXYResiduals(m1, norm = FALSE, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotXYResiduals(m1, norm = FALSE, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotXYResiduals(m2, norm = FALSE, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotXYResiduals(m2, norm = FALSE, show.limits = c(TRUE, TRUE)))
+   })
+
+
+   # XY-scores
    test_that("XY-scores plot works fine", {
       par(mfrow = c(2, 2))
       expect_silent(plotXYScores(m1))

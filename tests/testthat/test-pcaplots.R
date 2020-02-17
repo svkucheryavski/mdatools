@@ -271,6 +271,36 @@ tf <- function(x.cal, x.test, name) {
       expect_silent(plotResiduals(m4, show.excluded = T))
    })
 
+
+   test_name <- "residual distance plot understands two values for show.limits"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotResiduals(m3, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotResiduals(m4, show.limits = c(TRUE, TRUE)))
+   })
+
+   test_name <- "show.limits works fine with log transform"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, log = TRUE, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, log = TRUE, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotResiduals(m3, log = TRUE, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotResiduals(m4, log = TRUE, show.limits = c(TRUE, TRUE)))
+   })
+
+   test_name <- "show.limits works fine with none normalized values"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, norm = FALSE, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, norm = FALSE, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotResiduals(m3, norm = FALSE, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotResiduals(m4, norm = FALSE, show.limits = c(TRUE, TRUE)))
+   })
 }
 
 for (i in seq_len(length(m))) {

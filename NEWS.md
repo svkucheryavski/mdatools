@@ -1,8 +1,9 @@
 v.0.10.1
 ========
 
-* small improvements to  `plotExtreme.pca()` so user can specify additional parameters, such as, for example `cex`. If plot is made for several components, you can now specify just one value for all points (e.g. color of points or marker symbol).
+* Small improvements to  `plotExtreme.pca()` so user can specify additional parameters, such as, for example `cex`. If plot is made for several components, you can now specify just one value for all points (e.g. color of points or marker symbol).
 
+* Parameter `show.limits` in methods `plotResiduals.pca()`, `plotXResiduals.pls()`, `plotXYResiduals.pls()` can now take two logical values — first for extreme limit and second for outlier limit. So, you can show only one of the two limits on the plot. If one value is specified it will be taken for both limits.
 
 v.0.10.0
 ========
