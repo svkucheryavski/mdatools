@@ -4,7 +4,14 @@
 \alias{ldecomp.getLimitsCoordinates}
 \title{Compute coordinates of lines or curves with critical limits}
 \usage{
-ldecomp.getLimitsCoordinates(Qlim, T2lim, ncomp, norm, log)
+ldecomp.getLimitsCoordinates(
+  Qlim,
+  T2lim,
+  ncomp,
+  norm,
+  log,
+  show.limits = c(TRUE, TRUE)
+)
 }
 \arguments{
 \item{Qlim}{matrix with critical limits for orthogonal distances}
@@ -16,6 +23,8 @@ ldecomp.getLimitsCoordinates(Qlim, T2lim, ncomp, norm, log)
 \item{norm}{logical, shall distance values be normalized or not}
 
 \item{log}{logical, shall log transformation be applied or not}
+
+\item{show.limits}{vector with two logical values defining if limits for extreme and/or outliers must be shown}
 }
 \value{
 list with two matrices (x and y coordinates of corresponding limits)
