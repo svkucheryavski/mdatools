@@ -5,6 +5,8 @@ v.0.10.1
 
 * Parameter `show.limits` in methods `plotResiduals.pca()`, `plotXResiduals.pls()`, `plotXYResiduals.pls()` can now take two logical values — first for extreme limit and second for outlier limit. So, you can show only one of the two limits on the plot. If one value is specified it will be taken for both limits.
 
+* New function `plotHotellingEllipse()` adds Hotelling T^2^ ellipse to any scatter plot (of course it is made first of all for PCA and PLS scores plots). The function works similar to `plotConvexHull()` and `plotConfidenceEllipse()`, see help for examples.
+
 v.0.10.0
 ========
 

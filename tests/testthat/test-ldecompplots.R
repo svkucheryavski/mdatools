@@ -131,6 +131,22 @@ test_that("scores plot works fine with cgroup and convex hulls.", {
    })
 })
 
+test_that("scores plot works fine with Hotelling ellipse.", {
+
+   expect_silent({
+      par(mfrow = c(2, 2))
+      p <- plotScores(obj, xlim = c(-8, 8), ylim = c(-8, 8))
+      plotHotellingEllipse(p)
+      p <- plotScores(obj, c(2, 3), xlim = c(-8, 8), ylim = c(-8, 8))
+      plotHotellingEllipse(p)
+      p <- plotScores(obj, xlim = c(-8, 8), ylim = c(-8, 8))
+      plotHotellingEllipse(p, conf.lim = 0.90, col = "red", lty = 1, lwd = 0.5)
+      p <- plotScores(obj, c(2, 3), xlim = c(-8, 8), ylim = c(-8, 8))
+      plotHotellingEllipse(p, conf.lim = 0.90, col = "red", lty = 1, lwd = 0.5)
+
+   })
+})
+
 test_that("residuals plot can return plot data.", {
    pd <- plotResiduals(obj, ncomp = 4, show.plot = FALSE)
    expect_true("matrix" %in% class(pd))
