@@ -799,7 +799,7 @@ summary.pls <- function(object, ncomp = object$ncomp.selected,
    cat("\n")
    for (y in ny) {
       fprintf("Response variable: %s\n", rownames(object$yloadings)[y])
-      out <- do.call(rbind, lapply(object$res, as.matrix, ncomp = ncomp))
+      out <- do.call(rbind, lapply(object$res, as.matrix, ncomp = ncomp, ny = y))
       rownames(out) <- capitalize(names(object$res))
 
       if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
