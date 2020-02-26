@@ -899,7 +899,6 @@ plotRegressionLine <- function(p, col = p$col, ...) {
    abline(lm(p$y_values ~ p$x_values), col = col, ...)
 }
 
-
 #' Hotelling ellipse
 #'
 #' @description
@@ -976,7 +975,6 @@ plotHotellingEllipse <- function(p, conf.lim = 0.95, col = "#a0a0a0", lty = 3, .
 
    ellipse(a = a, b = b, col = col, lty = lty, ...)
 }
-
 
 #' Create ellipse on the current plot
 #'
