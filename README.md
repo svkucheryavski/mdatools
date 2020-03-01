@@ -17,7 +17,7 @@ If you want to cite the package, please use the following: Sergey Kucheryavskiy,
 What is new
 -----------
 
-Latest release (0.10.0) is available via GitHub (released *26.01.2019*). It contains a lot of improvements and most of code has been refactored. Check full [list of changes](NEWS.md) carefully as it can lead to a (although very small) incompatibility. The Bookdown tutorial has been also revised significantly. This version will be released on CRAN at the end of February.
+Latest release (0.10.1) is available via GitHub (released *1.03.2020*). It contains a lot of improvements and most of code has been refactored. Check full [list of changes](NEWS.md) carefully as it can lead to a (although very small) incompatibility. The Bookdown tutorial has been also revised significantly. This version will be released on CRAN at the end of February.
 
 Starting from this release, several badges added to the top of this file. The first shows current build status, which makes the use of Git Hub hosted developer version more secure. If build is passing it means that the code currently available in master branch passes all CRAN checks and internal tests. Other badges show number of downloads from CRAN and GitHub as well as how much of code is currently covered with tests.
 
@@ -25,10 +25,10 @@ Starting from this release, several badges added to the top of this file. The fi
 How to install
 --------------
 
-The package is available from CRAN by usual installing procedure. However, due to restrictions in CRAN politics regarding number of submissions (one in 3-4 month), mostly major releases will be published there (with 2-3 weeks delay after GitHub release as more thorough testing is needed). You can [download](https://github.com/svkucheryavski/mdatools/releases) a zip-file with source package and install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.10.0.tar.gz` and it is located in a current working directory, just run the following:
+The package is available from CRAN by usual installing procedure. However, due to restrictions in CRAN politics regarding number of submissions (one in 3-4 month), mostly major releases will be published there (with 2-3 weeks delay after GitHub release as more thorough testing is needed). You can [download](https://github.com/svkucheryavski/mdatools/releases) a zip-file with source package and install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.10.1.tar.gz` and it is located in a current working directory, just run the following:
 
 ```
-install.packages("mdatools_0.10.0.tar.gz")
+install.packages("mdatools_0.10.1.tar.gz")
 ```
 
 If you have `devtools` package installed, the following command will install the current developer version from the master branch of GitHub repository (do not forget to load the `devtools` package first):
