@@ -7,6 +7,8 @@ v.0.10.1
 
 * New function `plotHotellingEllipse()` adds Hotelling T^2^ ellipse to any scatter plot (of course it is made first of all for PCA and PLS scores plots). The function works similar to `plotConvexHull()` and `plotConfidenceEllipse()`, see help for examples.
 
+* Fixed a bug in `summary()` method for PLS, which worked incorrectly in case of several response variables (PLS2).
+
 v.0.10.0
 ========
 
