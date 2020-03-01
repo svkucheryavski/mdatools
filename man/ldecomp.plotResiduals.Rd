@@ -14,7 +14,7 @@ ldecomp.plotResiduals(
   cgroup = NULL,
   xlim = NULL,
   ylim = NULL,
-  show.limits = TRUE,
+  show.limits = c(TRUE, TRUE),
   lim.col = c("darkgray", "darkgray"),
   lim.lwd = c(1, 1),
   lim.lty = c(2, 3),
@@ -42,7 +42,7 @@ ldecomp.plotResiduals(
 
 \item{ylim}{limits for y-axis (if NULL will be computed automatically)}
 
-\item{show.limits}{logical, show or not lines/curves with critical limits for the distances}
+\item{show.limits}{vector with two logical values defining if limits for extreme and/or outliers must be shown}
 
 \item{lim.col}{vector with two values - line color for extreme and outlier limits}
 

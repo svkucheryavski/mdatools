@@ -167,6 +167,31 @@ tf <- function(model, x.cal, name) {
       expect_silent(plotScores(model, c(1, 3), show.excluded = TRUE, show.labels = T, col = "red"))
       expect_silent(plotScores(model, c(1, 3), show.excluded = TRUE, res = list("cal" = model$res[["cal"]])))
    })
+
+   # add Hotelling ellipse
+   test_name <- "Hotelling ellipse can be added"
+   if (is.null(model$res$test)) {
+      par(mfrow = c(2, 2))
+      test_that(test_name, {
+         expect_silent({p <- plotScores(model); plotHotellingEllipse(p)})
+         mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+         expect_silent({p <- plotScores(model, c(2, 3)); plotHotellingEllipse(p)})
+         expect_silent({p <- plotScores(model); plotHotellingEllipse(p)})
+         expect_silent({p <- plotScores(model, c(2, 3)); plotHotellingEllipse(p)})
+      })
+   } else {
+      expect_error({p <- plotScores(model); plotHotellingEllipse(p)})
+      expect_error({p <- plotScores(model, c(2, 3)); plotHotellingEllipse(p)})
+      par(mfrow = c(2, 2))
+      test_that(test_name, {
+         expect_silent({p <- plotScores(model); plotHotellingEllipse(p[[1]])})
+         mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+         expect_silent({p <- plotScores(model, c(2, 3)); plotHotellingEllipse(p[[1]])})
+         expect_silent({p <- plotScores(model); plotHotellingEllipse(p[[1]])})
+         expect_silent({p <- plotScores(model, c(2, 3)); plotHotellingEllipse(p[[1]])})
+      })
+   }
+
 }
 
 for (i in seq_along(m)) {
@@ -271,6 +296,36 @@ tf <- function(x.cal, x.test, name) {
       expect_silent(plotResiduals(m4, show.excluded = T))
    })
 
+
+   test_name <- "residual distance plot understands two values for show.limits"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotResiduals(m3, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotResiduals(m4, show.limits = c(TRUE, TRUE)))
+   })
+
+   test_name <- "show.limits works fine with log transform"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, log = TRUE, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, log = TRUE, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotResiduals(m3, log = TRUE, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotResiduals(m4, log = TRUE, show.limits = c(TRUE, TRUE)))
+   })
+
+   test_name <- "show.limits works fine with none normalized values"
+   par(mfrow = c(2, 2))
+   test_that(test_name, {
+      expect_silent(plotResiduals(m1, norm = FALSE, show.limits = c(FALSE, FALSE)))
+      mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
+      expect_silent(plotResiduals(m2, norm = FALSE, show.limits = c(FALSE, TRUE)))
+      expect_silent(plotResiduals(m3, norm = FALSE, show.limits = c(TRUE, FALSE)))
+      expect_silent(plotResiduals(m4, norm = FALSE, show.limits = c(TRUE, TRUE)))
+   })
 }
 
 for (i in seq_len(length(m))) {

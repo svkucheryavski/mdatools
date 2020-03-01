@@ -898,3 +898,105 @@ plotPointsShape <- function(p, lwd, lty, opacity, shape_function, ...) {
 plotRegressionLine <- function(p, col = p$col, ...) {
    abline(lm(p$y_values ~ p$x_values), col = col, ...)
 }
+
+#' Hotelling ellipse
+#'
+#' @description
+#' Add Hotelling ellipse to a scatter plot
+#'
+#' @param p
+#' plot series (e.g. from PCA scores plot)
+#' @param conf.lim
+#' confidence limit
+#' @param col
+#' color of the ellipse line
+#' @param lty
+#' line type (e.g. 1 for solid, 2 for dashed, etc.)
+#' @param ...
+#' any argument suitable for \code{lines} function
+#'
+#' @details
+#' The method is created to be used with PCA and PLS scores plots, so it shows the statistical
+#' limits computed using Hotelling T^2 distribution in form of ellipse. The function works similar
+#' to \code{\link{plotConvexHull}} and \code{\link{plotConfidenceEllipse}} but does not require
+#' grouping of data points. Can be used together with functions \code{\link{plotScores.pca}},
+#' \code{\link{plotScores.ldecomp}}, \code{\link{plotXScores.pls}},
+#' \code{\link{plotXScores.plsres}}.
+#'
+#' See examples for more details.
+#'
+#' @examples
+#'
+#' # create PCA model for People data
+#' data(people)
+#' m <- pca(people, 4, scale = TRUE)
+#'
+#' # make scores plot and show Hotelling ellipse with default settings
+#' p <- plotScores(m, xlim = c(-8, 8), ylim = c(-8, 8))
+#' plotHotellingEllipse(p)
+#'
+#' # make scores plot and show Hotelling ellipse with manual settings
+#' p <- plotScores(m, xlim = c(-8, 8), ylim = c(-8, 8))
+#' plotHotellingEllipse(p, conf.lim = 0.99, col = "red")
+#'
+#' # in case if you have both calibration and test set, 'plotScores()' returns
+#' # plot series data for both, so you have to subset it and take the first series
+#' # (calibration set) as shown below.
+#' ind <- seq(1, 32, by = 4)
+#' xc <- people[-ind, , drop = FALSE]
+#' xt <- people[ind, , drop = FALSE]
+#' m <- pca(xc, 4, scale = TRUE, x.test = xt)
+#'
+#' p <- plotScores(m, xlim = c(-8, 8), ylim = c(-8, 8))
+#' plotHotellingEllipse(p[[1]])
+#'
+#' @export
+plotHotellingEllipse <- function(p, conf.lim = 0.95, col = "#a0a0a0", lty = 3, ...) {
+
+   if (!inherits(p, "plotseries")) {
+      stop("Argument 'p' does not look like a plot series, try 'p[[1]]' instead.")
+   }
+
+   if (p$type != "p") {
+      stop("Hotelling ellipse can be added to scatter plot only.")
+   }
+
+   t1 <- as.numeric(p$x_values)
+   t2 <- as.numeric(p$y_values)
+
+   s1 <- sd(t1)^2
+   s2 <- sd(t2)^2
+
+   nobj <- length(t1)
+   T2lim <- (2 * (nobj - 1) / (nobj - 2)) * qf(conf.lim, 2, (nobj - 2))
+
+   a <- sqrt(T2lim * s1)
+   b <- sqrt(T2lim * s2)
+
+   ellipse(a = a, b = b, col = col, lty = lty, ...)
+}
+
+#' Create ellipse on the current plot
+#'
+#' @param xc
+#' coordinate of center (x)
+#' @param yc
+#' coordinate of center (y)
+#' @param a
+#' major axis
+#' @param b
+#' minor axis
+#' @param col
+#' color of the ellipse line
+#' @param lty
+#' type of the ellipse line
+#' @param ...
+#' any argument suitable for \code{lines} function
+#'
+#' @export
+ellipse <- function(xc = 0, yc = 0, a, b, col = "black", lty = 1, ...) {
+   t <- seq(0, 2 * pi, 0.01)
+   x <- xc + a * cos(t)
+   y <- yc + b * sin(t)
+   lines(x, y, type = "l", col = col, lty = lty, ...)
+}
