@@ -1,3 +1,8 @@
+v.0.10.2
+========
+
+* Fixed a bug in `categorize.pls()` method, which could give wrong results for test set measurements (see issue #82).
+
 v.0.10.1
 ========
 

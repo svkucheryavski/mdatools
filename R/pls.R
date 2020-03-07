@@ -708,8 +708,8 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 #' @export
 categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, ...) {
 
-   create_categories <- function(nobj, extremes_ind, outliers_ind) {
-      categories <- rep(1, nobj)
+   create_categories <- function(extremes_ind, outliers_ind) {
+      categories <- rep(1, length(extremes_ind))
       categories[extremes_ind] <- 2
       categories[outliers_ind] <- 3
       return(factor(categories, levels = 1:3, labels = c("regular", "extreme", "outlier")))
@@ -757,7 +757,7 @@ categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
    # compute total distance and DoF for it
    g <- Nh * h / h0 + Nq * q / q0 + Nz * z / z0
    Ng <- Nh + Nq + Nz
-   nobj <- length(g)
+   nobj <- nrow(obj$res$cal$xdecomp$scores)
 
    # compute limits for total distance
    ext_lim <- qchisq(1 - obj$alpha, Ng)
@@ -765,7 +765,8 @@ categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
 
    outliers_ind <- g > out_lim
    extremes_ind <- g > ext_lim & g < out_lim
-   return(create_categories(nobj, extremes_ind, outliers_ind))
+
+   return(create_categories(extremes_ind, outliers_ind))
 }
 
 #' Summary method for PLS model object

@@ -597,7 +597,7 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #' @param ps
 #' `plotseries` object, if NULL will be created based on the provided data values
 #' @param type
-#' type of the plot ('p', 'l', 'b', 'h', 'e', 'i').
+#' type of the plot ("p", "d", "l", "b", "h", "e").
 #' @param cgroup
 #' a vector with values to use for make color groups.
 #' @param colmap
@@ -629,7 +629,7 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #' @param main
 #' an overall title for the plot (same as \code{plot} parameter).
 #' @param labels
-#' a vector with text labels for data points or one of the following: 'names', 'indices', 'values'.
+#' a vector with text labels for data points or one of the following: "names", "indices", "values".
 #' @param show.labels
 #' logical, show or not labels for the data objects.
 #' @param show.colorbar
@@ -699,8 +699,8 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #'
 #' The used color scheme is defined by the \code{colmap} parameter. The default scheme is based
 #' on color brewer (colorbrewer2.org) diverging scheme with eight colors. There is also a gray
-#' scheme (\code{colmap = 'gray'}) and user can define its own just by specifing the needed
-#' sequence of colors (e.g. \code{colmap = c('red', 'yellow', 'green')}, two colors is minimum).
+#' scheme (\code{colmap = "gray"}) and user can define its own just by specifing the needed
+#' sequence of colors (e.g. \code{colmap = c("red", "yellow", "green")}, two colors is minimum).
 #' The scheme will then be generated automatically as a gradient among the colors.
 #'
 #' Besides that the function allows to change tick values and corresponding tick labels for x and
