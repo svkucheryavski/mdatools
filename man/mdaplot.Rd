@@ -53,7 +53,7 @@ mdaplot(
 
 \item{ps}{`plotseries` object, if NULL will be created based on the provided data values}
 
-\item{type}{type of the plot ('p', 'l', 'b', 'h', 'e', 'i').}
+\item{type}{type of the plot ("p", "d", "l", "b", "h", "e").}
 
 \item{pch}{a character for markers (same as \code{plot} parameter).}
 
@@ -79,7 +79,7 @@ mdaplot(
 
 \item{colmap}{a colormap to use for coloring the plot items.}
 
-\item{labels}{a vector with text labels for data points or one of the following: 'names', 'indices', 'values'.}
+\item{labels}{a vector with text labels for data points or one of the following: "names", "indices", "values".}
 
 \item{main}{an overall title for the plot (same as \code{plot} parameter).}
 
@@ -158,8 +158,8 @@ allows to turn off and on a color bar legend for this option.
 
 The used color scheme is defined by the \code{colmap} parameter. The default scheme is based
 on color brewer (colorbrewer2.org) diverging scheme with eight colors. There is also a gray
-scheme (\code{colmap = 'gray'}) and user can define its own just by specifing the needed
-sequence of colors (e.g. \code{colmap = c('red', 'yellow', 'green')}, two colors is minimum).
+scheme (\code{colmap = "gray"}) and user can define its own just by specifing the needed
+sequence of colors (e.g. \code{colmap = c("red", "yellow", "green")}, two colors is minimum).
 The scheme will then be generated automatically as a gradient among the colors.
 
 Besides that the function allows to change tick values and corresponding tick labels for x and
