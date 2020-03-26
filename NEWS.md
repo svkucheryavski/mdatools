@@ -1,3 +1,9 @@
+v.0.10.3
+========
+
+* Fixed bug `#85` when using y-values as data frame gave an error in PLS regression
+
+
 v.0.10.2
 ========
 

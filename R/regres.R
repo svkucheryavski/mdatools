@@ -34,9 +34,11 @@ regres <- function(y.pred, y.ref = NULL, ncomp.selected = 1) {
       stop("Wrong value for 'ncomp.selected' parameter.")
    }
 
+   if (!is.null(y.ref)) y.ref <- as.matrix(y.ref)
+
    obj <- list()
    obj$y.pred <- y.pred
-   obj$y.ref <- if (!is.null(y.ref)) as.matrix(y.ref)
+   obj$y.ref <- y.ref
    obj$ncomp <- dim(y.pred)[2]
    obj$ncomp.selected <- ncomp.selected
    obj$nresp <- dim(y.pred)[3]
