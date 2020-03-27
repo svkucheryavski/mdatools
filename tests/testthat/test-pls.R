@@ -155,15 +155,15 @@ for (i in seq_along(datasets)) {
       exclcols <- attr(d$xc, "exclcols")
       nrows <- nrow(d$xc) - length(exclrows)
 
-      obj <- pls.cal(d$xc, d$yc, ncomp = 80, center = d$center, scale = d$scale)
+      obj <- pls.cal(d$xc, d$yc, ncomp = 50, center = d$center, scale = d$scale)
       exp_ncomp <- min(nrows - 1, ncol(d$xc) - length(exclcols))
       expect_lte(obj$ncomp, exp_ncomp)
 
-      obj <- pls.cal(d$xc, d$yc, ncomp = 80, center = d$center, scale = d$scale, cv = 1)
+      obj <- pls.cal(d$xc, d$yc, ncomp = 50, center = d$center, scale = d$scale, cv = 1)
       exp_ncomp <- min(nrows - 2, ncol(d$xc) - length(exclcols))
       expect_lte(obj$ncomp, exp_ncomp)
 
-      obj <- pls.cal(d$xc, d$yc, ncomp = 80, center = d$center, scale = d$scale, cv = 2)
+      obj <- pls.cal(d$xc, d$yc, ncomp = 50, center = d$center, scale = d$scale, cv = 2)
       exp_ncomp <- min(nrows - 1 - nrows/2, ncol(d$xc) - length(exclcols))
       expect_lte(obj$ncomp, exp_ncomp)
 

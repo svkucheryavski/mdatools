@@ -68,12 +68,13 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
          xt <- x[ind, , drop = FALSE]
 
          # create a model
-         m.loc <- cal.fun(xc, yc, obj$ncomp, method = obj$method, center = obj$center,
+         m.loc <- cal.fun(xc, yc, ncomp, method = obj$method, center = obj$center,
             scale = obj$scale, cv = TRUE)
          r.loc <- predict(m.loc, xt, cv = TRUE)
 
          # save results
          if (any(is.na(r.loc$y.pred))) stop()
+
          yp.cv[ind, , ] <- yp.cv[ind, , , drop = FALSE] + r.loc$y.pred
 
          jk.coeffs[, , , is] <- jk.coeffs[, , , is, drop = FALSE] +
