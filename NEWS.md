@@ -5,6 +5,7 @@ v.0.10.3
 
 * Fixed bug `#86` and changed the way PLS limits maximum number of components to avoid problems with singular matrices. Now if PLS algorithm finds during calculations that provided number of components is too large, it gives a warning and reduces this number.
 
+* Code refactoring and tests for preprocessing methods
 
 v.0.10.2
 ========
