@@ -792,5 +792,6 @@ capitalize <- function(str) {
 #'
 #' @export
 repmat <- function(x, nrows, ncols = nrows) {
+   x <- as.matrix(x)
    return(matrix(1, nrows, ncols) %x% x)
 }

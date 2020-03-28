@@ -12,7 +12,7 @@ prep.msc(spectra, mspectrum = NULL)
 \item{mspectrum}{mean spectrum (if NULL will be calculated from \code{spectra})}
 }
 \value{
-list with two fields - preprocessed spectra and calculated mean spectrum
+preprocessed spectra (calculated mean spectrum is assigned as attribut 'mspectrum')
 }
 \description{
 Applies Multiplicative Scatter Correction (MSC) transformation to data matrix (spectra)
@@ -29,12 +29,9 @@ spectral data, e.g. NIR spectra.
  data(simdata)
 
  spectra = simdata$spectra.c
- wavelength = simdata$wavelength
-
- res = prep.msc(spectra)
- cspectra = res$cspectra
+ cspectra = prep.msc(spectra)
 
  par(mfrow = c(2, 1))
- mdaplot(cbind(wavelength, t(spectra)), type = 'l', main = 'Before MSC')
- mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After MSC')
+ mdaplot(spectra, type = "l", main = "Before MSC")
+ mdaplot(cspectra, type = "l", main = "After MSC")
 }

@@ -19,7 +19,7 @@ pls.cal(x, y, ncomp, center, scale, method = "simpls", cv = FALSE)
 
 \item{method}{algorithm for computing PLS model (only 'simpls' is supported so far)}
 
-\item{cv}{logical, is model calibrated during cross-validation or not}
+\item{cv}{logical, is model calibrated during cross-validation or not (or cv settings for calibration)}
 }
 \value{
 model
