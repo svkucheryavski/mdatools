@@ -9,7 +9,7 @@ prep.norm(data, type = "area")
 \arguments{
 \item{data}{a matrix with data values}
 
-\item{type}{type of normalization \code{'area'} or \code{'length'}}
+\item{type}{type of normalization \code{"area"} or \code{"length"}}
 }
 \value{
 data matrix with normalized values

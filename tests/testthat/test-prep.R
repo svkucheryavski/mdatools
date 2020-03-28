@@ -68,6 +68,7 @@ test_that("SNV works correctly", {
 })
 
 test_that("MSC works correctly", {
+   spectra <- simdata$spectra.c
    mn <- apply(spectra, 2, mean)
    md <- apply(spectra, 2, median)
 

@@ -224,7 +224,6 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
 #'  data(simdata)
 #'
 #'  spectra = simdata$spectra.c
-#'
 #'  cspectra = prep.msc(spectra)
 #'
 #'  par(mfrow = c(2, 1))
