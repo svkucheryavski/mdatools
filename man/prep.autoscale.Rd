@@ -4,7 +4,7 @@
 \alias{prep.autoscale}
 \title{Autoscale values}
 \usage{
-prep.autoscale(data, center = T, scale = F, max.cov = 0)
+prep.autoscale(data, center = TRUE, scale = FALSE, max.cov = 0)
 }
 \arguments{
 \item{data}{a matrix with data values}
@@ -13,7 +13,8 @@ prep.autoscale(data, center = T, scale = F, max.cov = 0)
 
 \item{scale}{a logical value or vector with numbers for weighting}
 
-\item{max.cov}{columns that have coefficient of variation (in percent) below or equal to `max.cov` will not be scaled}
+\item{max.cov}{columns that have coefficient of variation (in percent) below or equal to `max.cov` will not
+be scaled}
 }
 \value{
 data matrix with processed values
