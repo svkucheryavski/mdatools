@@ -9,7 +9,7 @@ Multivariate Data Analysis Tools
 
 *mdatools* is an R package for preprocessing, exploring and analysis of multivariate data. The package provides methods mostly common for [Chemometrics](http://en.wikipedia.org/wiki/Chemometrics). It was created for an introductory PhD course on Chemometrics given at Section of Chemical Engineering, Aalborg University. The general idea of the package is to collect most widespread chemometric methods and give a similar "user interface" (or rather API) for using them. So if a user knows how to make a model and visualize results for one method, he or she can easily do this for the others.
 
-For more details and examples read a [Bookdown tutorial](http://mdatools.com/docs/).
+For more details and examples read a [Bookdown tutorial](http://mdatools.com/docs/). The project website, [mdatools.com](https://mdatools.com), contains additional information about supplementary materials and tools.
 
 If you want to cite the package, please use the following: Sergey Kucheryavskiy, *mdatools – R package for chemometrics*, Chemometrics and Intelligent Laboratory Systems, Volume 198,
 2020 (DOI: [10.1016/j.chemolab.2020.103937](https://doi.org/10.1016/j.chemolab.2020.103937)).
