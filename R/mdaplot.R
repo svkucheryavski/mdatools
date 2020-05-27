@@ -734,7 +734,8 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
 
    if (is.null(ps)) {
       # get the data for plot
-      ps <- plotseries(data, type, col = col, cgroup = cgroup, colmap = colmap, labels = labels)
+      ps <- plotseries(data, type, col = col, cgroup = cgroup, colmap = colmap, labels = labels,
+         opacity = opacity)
    }
 
    # if cgroup is NULL for plot data - color grouping is not allowed
