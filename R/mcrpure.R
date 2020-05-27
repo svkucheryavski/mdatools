@@ -80,11 +80,74 @@ mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, savgol = NULL, exc
 
    # get pure variables and unmix data
    model <- getPureVariables(x, ncomp, purevars = purevars, offset = offset)
-   #res2 = unmix(spectra, D[, res1$purevars, drop = F], by.spec = by.spec)
+   model <- unmix.mcrpure(model, x)
 
    class(model) <- c("mcr", "mcrpure")
    return(model)
 }
+
+#' Unmix them all !
+unmix.mcrpure <- function(obj, D){
+   attrs <- mda.getattr(D)
+   Dr <- D[, obj$purevars, drop = FALSE]
+
+   # resolve spectra and concentrations
+   St <- t(D) %*% Dr %*% solve(crossprod(Dr))
+   Ct <- D %*% St %*% solve(crossprod(St))
+
+   # scale
+   f <- as.matrix(rowSums(D))
+   a <- solve(crossprod(Ct)) %*% t(Ct) %*% f
+   A <- if (length(a) == 1) a else diag(as.vector(a))
+   St <- St %*% A %*% solve(crossprod(A))
+   Ct <- Ct %*% A
+
+   # add attributes
+   Ct <- mda.setattr(Ct, attrs, "row")
+   St <- mda.setattr(t(St), attrs, "col")
+   colnames(Ct) <- rownames(St) <- names(obj$purevars)
+
+   if (is.null(attr(Ct, "xaxis.name"))) attr(Ct, "xaxis.name") <- "Observations"
+   attr(Ct, "name") <- "Resolved contributions"
+   attr(St, "name") <- "Resolved spectra"
+
+   # combine the results with model object
+   return(c(obj, list(pureconc = Ct, purespec = St)))
+}
+
+#' Print method for PCA model object
+#'
+#' @description
+#' Prints information about the object structure
+#'
+#' @param x
+#' a PCA model (object of class \code{pca})
+#' @param ...
+#' other arguments
+#'
+#' @export
+print.mcrpure <- function(x, ...) {
+}
+
+#' Summary method for PCA model object
+#'
+#' @description
+#' Shows some statistics (explained variance, eigenvalues) for the model.
+#'
+#' @param object
+#' a PCA model (object of class \code{pca})
+#' @param ...
+#' other arguments
+#'
+#' @export
+summary.mcrpure <- function(object, ...) {
+}
+
+
+################################
+#  Static methods              #
+################################
+
 
 #' Identifies pure variables
 #'
@@ -110,7 +173,6 @@ mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, savgol = NULL, exc
 #' \item{ncomp }{number of pure components.}
 #' \item{purvars }{vector with indices for pure variables.}
 #' \item{purityspec }{matrix with purity values for each resolved components.}
-#' \item{stdspec }{matrix with weighted standard deviation values.}
 #' \item{purity }{vector with purity values for resolved components.}
 #'
 #' @export
@@ -121,55 +183,50 @@ getPureVariables <- function(D, ncomp, purevars, offset) {
    purityspec <- NULL
 
    # if indices for pure variables are not provided - compute them
-   if (is.null(purevars)) {
-      exclrows <- attrs$exclrows
-      exclcols <- attrs$exclcols
-      D <- prepCalData(D, exclrows, exclcols)
+   if (is.null(purevars)) purevars <- rep(0, ncomp)
 
-      # get dimensions
-      nspec <- nrow(D)
-      nvar <- ncol(D)
+   exclrows <- attrs$exclrows
+   exclcols <- attrs$exclcols
+   D <- prepCalData(D, exclrows, exclcols)
 
-      # get indices for excluded columns if provided
-      colind <- rep(TRUE, nvar)
-      colind[exclcols] <- FALSE
+   # get dimensions
+   nspec <- nrow(D)
+   nvar <- ncol(D)
 
-      # calculate purity spectrum
-      mu <- apply(D, 2, mean)
-      sigma <- apply(D, 2, sd) * sqrt((nspec - 1) / nspec)
-      alpha <- offset * max(mu)
-      purity <- sigma / (mu + alpha)
+   # get indices for excluded columns if provided
+   colind <- rep(TRUE, nvar)
+   colind[exclcols] <- FALSE
 
-      # calculate variance-covariance matrix
-      Dprime <- sweep(D, 2, (sqrt(mu^2 + (sigma + alpha)^2)), '/')
-      R <- crossprod(Dprime) / nrow(Dprime)
+   # calculate purity spectrum
+   mu <- apply(D, 2, mean)
+   sigma <- apply(D, 2, sd) * sqrt((nspec - 1) / nspec)
+   alpha <- offset * max(mu)
+   purity <- sigma / (mu + alpha)
 
-      # loop to locate the pure variables
-      purityspec <- matrix(0, nrow = ncomp, ncol = nvar)
-      purevars <- rep(0, ncomp)
-      purevals <- rep(0, ncomp)
+   # calculate variance-covariance matrix
+   Dprime <- sweep(D, 2, (sqrt(mu^2 + (sigma + alpha)^2)), '/')
+   R <- crossprod(Dprime) / nrow(Dprime)
 
-      for (i in seq_len(ncomp)) {
-         weights <- sapply(
-            seq_len(nvar),
-            function(j) det(
-               R[c(j, purevars[seq_len(i-1)]), c(j, purevars[seq_len(i-1)]), drop = FALSE]
-            )
-         )
+   # loop to locate the pure variables
+   purityspec <- matrix(0, nrow = ncomp, ncol = nvar)
+   purevals <- rep(0, ncomp)
 
-         purityspec[i, colind] <- purity[colind] * weights
-         purevars[i] <- which.max(purityspec[i, ])
-         purevals[i] <- purityspec[i, purevars[i]]
-      }
+   for (i in seq_len(ncomp)) {
+      pv <- purevars[seq_len(i-1)]
+      weights <- sapply(seq_len(nvar), function(j) det(R[c(j, pv), c(j, pv), drop = FALSE]))
 
-      dim(purevals) <- c(1, ncomp)
-      colnames(purevals) <- rownames(purityspec) <- paste("Comp", seq_len(ncomp))
-      purityspec <- mda.setattr(purityspec, attrs, "col")
-
-      attr(purevals, "name") <- "Purity"
-      attr(purevals, "xaxis.name") <- "Components"
-      attr(purityspec, "name") <- "Purity spectra"
+      purityspec[i, colind] <- purity[colind] * weights
+      if (purevars[i] == 0) purevars[i] <- which.max(purityspec[i, ])
+      purevals[i] <- purityspec[i, purevars[i]]
    }
+
+   dim(purevals) <- c(1, ncomp)
+   names(purevars) <- colnames(purevals) <- rownames(purityspec) <- paste("Comp", seq_len(ncomp))
+   purityspec <- mda.setattr(purityspec, attrs, "col")
+
+   attr(purevals, "name") <- "Purity"
+   attr(purevals, "xaxis.name") <- "Components"
+   attr(purityspec, "name") <- "Purity spectra"
 
    attr(purevars, "xaxis.name") <- attrs$xaxis.name
    attr(purevars, "xaxis.values") <- purevars
@@ -187,6 +244,12 @@ getPureVariables <- function(D, ncomp, purevars, offset) {
    )
 }
 
+
+########################
+#  Plotting methods    #
+########################
+
+
 #' Purity values plot
 #'
 #' @param obj
@@ -203,11 +266,6 @@ getPureVariables <- function(D, ncomp, purevars, offset) {
 #' @export
 plotPurity.mcrpure <- function(obj, xticks = seq_len(obj$ncomp), type = "h",
    labels = "values", ...) {
-
-   if (is.null(obj$purity)) {
-      warning("Purity values are not computed when pure variables provided by user.")
-      return()
-   }
 
    mdaplot(obj$purity, xticks = xticks, type = type, labels = labels, ...)
 }
@@ -240,11 +298,6 @@ plotPuritySpectra.mcrpure <- function(obj, comp = seq_len(obj$ncomp), type = "l"
    col = mdaplot.getColors(obj$ncomp), show.lines = TRUE,
    lines.col = adjustcolor(col, alpha.f = 0.5), lines.lty = 3, lines.lwd = 1, ...) {
 
-   if (is.null(obj$purityspec)) {
-      warning("Purity values are not computed when pure variables provided by user.")
-      return()
-   }
-
    stopifnot("Parameter 'comp' has wrong value." = min(comp) > 0 && max(comp) <= obj$ncomp)
    mdaplotg(mda.subset(obj$purityspec, comp), type = type, col = col[comp], ...)
 
@@ -256,34 +309,6 @@ plotPuritySpectra.mcrpure <- function(obj, comp = seq_len(obj$ncomp), type = "l"
          lwd = lines.lwd
       )
    }
-}
-
-#' Print method for PCA model object
-#'
-#' @description
-#' Prints information about the object structure
-#'
-#' @param x
-#' a PCA model (object of class \code{pca})
-#' @param ...
-#' other arguments
-#'
-#' @export
-print.mcrpure <- function(x, ...) {
-}
-
-#' Summary method for PCA model object
-#'
-#' @description
-#' Shows some statistics (explained variance, eigenvalues) for the model.
-#'
-#' @param object
-#' a PCA model (object of class \code{pca})
-#' @param ...
-#' other arguments
-#'
-#' @export
-summary.mcrpure <- function(object, ...) {
 }
 
 
