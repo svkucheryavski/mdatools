@@ -1,3 +1,9 @@
+v.0.10.4
+========
+
+* fixed a bug, which led to ignoring `opacity` option in plots.
+
+
 v.0.10.3
 ========
 

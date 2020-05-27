@@ -425,7 +425,7 @@ mdaplotg <- function(
    # get plot data for each group
    ps <- vector("list", ngroups)
    for (i in seq_len(ngroups)) {
-      ps[[i]] <- plotseries(data[[i]], type = type[i], col = col[i], opacity <- opacity[i],
+      ps[[i]] <- plotseries(data[[i]], type = type[i], col = col[i], opacity = opacity[i],
          labels = labels)
    }
 
