@@ -60,25 +60,30 @@
 #' library(mdatools)
 #'
 #' @export
-mcrpure <- function(x, ncomp, exclrows = NULL, exclcols = NULL, offset = offset, savgol = NULL, info = "") {
+mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, savgol = NULL, exclrows = NULL,
+   exclcols = NULL, info = "") {
 
-   x <- prepCalData(x, exclrows, exclcols)
+   stopifnot("Parameter 'offset' should be between 0 and 1." = offset < 1 && offset > 0)
+   stopifnot("Provided pure variables have wrong values." =
+      is.null(purevars) || (min(purevars) > 0 & max(purevars) <= ncol(x)))
+
+
+   # exclude columns if "exclcols" is provided
+   if (length(exclcols) > 0) {
+      x <- mda.exclcols(x, exclcols)
+   }
+
+   # exclude rows if "exclrows" is provided
+   if (length(exclrows) > 0) {
+      x <- mda.exclrows(x, exclrows)
+   }
 
    # get pure variables and unmix data
-   model <- getPureVariables(x, ncomp, offset = offset, exclude = exclude)
-   res2 = unmix(spectra, D[, res1$purevars, drop = F], by.spec = by.spec)
+   model <- getPureVariables(x, ncomp, purevars = purevars, offset = offset)
+   #res2 = unmix(spectra, D[, res1$purevars, drop = F], by.spec = by.spec)
 
    class(model) <- c("mcr", "mcrpure")
    return(model)
-}
-
-
-getPureSpectra.mcrpure <- function() {
-
-  # combine all values to the final list
-  res = c(res1, res2)
-  res$by.spec = by.spec
-  res$savgol = savgol
 }
 
 #' Identifies pure variables
@@ -87,12 +92,18 @@ getPureSpectra.mcrpure <- function() {
 #' The method identifies indices of pure variables using the SIMPLISMA
 #' algorithm.
 #'
-#' @param x
-#' matrix with the spectra or their inverted second derivative
+#' @param D
+#' matrix with the spectra
 #' @param ncomp
 #' number of pure components
+#' @param purevars
+#' user provided values gor pure variables (no calculation will be run in this case)
 #' @param offset
-#' offset in percent for calculation of parameter alpha
+#' offset (between 0 and 1) for calculation of parameter alpha
+#' @param exclcols
+#' optinal, indices of columns to be excluded from calculations
+#' @param exclrows
+#' optinal, indices of columns to be excluded from calculations
 #'
 #' @return
 #' The function returns a list with with following fields:
@@ -103,141 +114,149 @@ getPureSpectra.mcrpure <- function() {
 #' \item{purity }{vector with purity values for resolved components.}
 #'
 #' @export
-getPureVariables <- function(x, ncomp, offset = 5, exclude = NULL) {
-  nspec = nrow(D)
-  nvar = ncol(D)
+getPureVariables <- function(D, ncomp, purevars, offset) {
 
-  # get indices for excluded columns if provided
-  colind = rep(TRUE, nvar)
-  if (!is.null(exclude))
-  {
-    if (max(exclude)> nvar || min(exclude) < 1)
-      stop('Wrong values for the parameter "exclude"!')
-    colind[exclude] = FALSE
-  }
+   attrs <- mda.getattr(D)
+   purevals <- NULL
+   purityspec <- NULL
 
+   # if indices for pure variables are not provided - compute them
+   if (is.null(purevars)) {
+      exclrows <- attrs$exclrows
+      exclcols <- attrs$exclcols
+      D <- prepCalData(D, exclrows, exclcols)
 
-  # calculate purity spectrum
-  mu = apply(D, 2, mean)
-  sigma = apply(D, 2, sd) * sqrt((nspec - 1) / nspec)
-  alpha = offset / 100 * max(mu)
-  purity = sigma / (mu + alpha)
+      # get dimensions
+      nspec <- nrow(D)
+      nvar <- ncol(D)
 
-  # calculate variance-covariance matrix
-  Dprime = sweep(D, 2, (sqrt(mu^2 + (sigma + alpha)^2)), '/')
-  R = 1/nrow(Dprime) * (t(Dprime) %*% Dprime)
+      # get indices for excluded columns if provided
+      colind <- rep(TRUE, nvar)
+      colind[exclcols] <- FALSE
 
-  # loop to locate the pure variables variables
-  purityspec = matrix(0, nrow = ncomp, ncol = nvar)
-  stdspec = matrix(0, nrow = ncomp, ncol = nvar)
-  purevars = rep(0, ncomp)
-  purevals = rep(0, ncomp)
-  for (i in 1:ncomp)
-  {
-    weights = matrix(0, ncol = ncol(D), nrow = 1)
-    for (j in 1:ncol(D))
-    {
-      weights[j] = det(R[c(j, purevars[1:(i-1)]), c(j, purevars[1:(i-1)]), drop = F]);
-    }
+      # calculate purity spectrum
+      mu <- apply(D, 2, mean)
+      sigma <- apply(D, 2, sd) * sqrt((nspec - 1) / nspec)
+      alpha <- offset * max(mu)
+      purity <- sigma / (mu + alpha)
 
-    purityspec[i, colind] = purity[colind] * weights
-    stdspec[i, colind] = sigma * weights
-    purevars[i] = which.max(purityspec[i, ])
-    purevals[i] = purityspec[i, purevars[i]]
-  }
+      # calculate variance-covariance matrix
+      Dprime <- sweep(D, 2, (sqrt(mu^2 + (sigma + alpha)^2)), '/')
+      R <- crossprod(Dprime) / nrow(Dprime)
 
-  res = list()
-  res$ncomp = ncomp
-  res$purity = purevals
-  res$purityspec = purityspec
-  res$stdspec = stdspec
-  res$purevars = purevars
+      # loop to locate the pure variables
+      purityspec <- matrix(0, nrow = ncomp, ncol = nvar)
+      purevars <- rep(0, ncomp)
+      purevals <- rep(0, ncomp)
 
-  res
+      for (i in seq_len(ncomp)) {
+         weights <- sapply(
+            seq_len(nvar),
+            function(j) det(
+               R[c(j, purevars[seq_len(i-1)]), c(j, purevars[seq_len(i-1)]), drop = FALSE]
+            )
+         )
+
+         purityspec[i, colind] <- purity[colind] * weights
+         purevars[i] <- which.max(purityspec[i, ])
+         purevals[i] <- purityspec[i, purevars[i]]
+      }
+
+      dim(purevals) <- c(1, ncomp)
+      colnames(purevals) <- rownames(purityspec) <- paste("Comp", seq_len(ncomp))
+      purityspec <- mda.setattr(purityspec, attrs, "col")
+
+      attr(purevals, "name") <- "Purity"
+      attr(purevals, "xaxis.name") <- "Components"
+      attr(purityspec, "name") <- "Purity spectra"
+   }
+
+   attr(purevars, "xaxis.name") <- attrs$xaxis.name
+   attr(purevars, "xaxis.values") <- purevars
+   if (!is.null(attrs$xaxis.values)) {
+      attr(purevars, "xaxis.values") <- attrs$xaxis.values[purevars]
+   }
+
+   return(
+      list(
+         ncomp = ncomp,
+         purity = purevals,
+         purityspec = purityspec,
+         purevars = purevars
+      )
+   )
 }
 
-#' Unmix spectral data with least squares method
+#' Purity values plot
 #'
-#' @description
-#' \code{unmix} decomposes the spectral data to a matrix with concentrations and
-#' a matrix with spectra of pure components using set of pure variables.
+#' @param obj
+#' \code{mcrpure} object
+#' @param xticks
+#' ticks for x axis
+#' @param type
+#' type of the plot
+#' @param ...
+#' other parameters suitable for \code{mdaplot}
 #'
-#' @param D
-#' matrix with the spectral data
-#' @param Dr
-#' a matrix with concentration estimates (e.g. columns of D with pure variables)
-#' @param by.spec
-#' logical, should the algorithm works with spectra (rows) or with concentrations (columns)
-#'
-#' @return
-#' Returns a list with two matrices, `conc` for concentrations and `spec` for spectra as well
-#' as a vector with residual variance values
+#' The plot shows largest weighted purity value for each component graphically.
 #'
 #' @export
-unmix = function(D, Dr, by.spec = T)
-{
+plotPurity.mcrpure <- function(obj, xticks = seq_len(obj$ncomp), type = "h",
+   labels = "values", ...) {
 
-  # resolve spectra and concentrations
-  St = t(D) %*% Dr %*% solve(t(Dr) %*% Dr)
-  Ct = D %*% St %*% solve(t(St) %*% St)
+   if (is.null(obj$purity)) {
+      warning("Purity values are not computed when pure variables provided by user.")
+      return()
+   }
 
-  # scale
-  #if (savgol[1] > 0)
-  #  f = as.matrix(rowSums(deriv))
-  #else
-  #  f = as.matrix(rowSums(D))
-  f = as.matrix(rowSums(D))
-  a = solve(t(Ct) %*% Ct) %*% t(Ct) %*% f
-
-  if (length(a) == 1)
-    A = a
-  else
-    A = diag(as.vector(a))
-
-  Ct = Ct %*% A
-  St = St %*% A %*% solve(t(A) %*% A)
-
-  # calculate residual variance
-  ncomp = ncol(Ct)
-  resvar = rep(0, ncomp)
-  for (i in 1:ncomp)
-  {
-    exp = Ct[, 1:i, drop = F] %*% t(St[, 1:i, drop = F])
-    res = D - exp
-    resvar[i] = sum(res^2) / sum(D^2)
-  }
-
-  # add names
-  names(resvar) = colnames(Ct) = colnames(St) = paste('C', 1:ncomp, sep = '')
-  rownames(Ct) = rownames(D)
-  rownames(St) = colnames(D)
-
-  # switch spectra and concentrations if unmixing was in contribution space
-  if (by.spec)
-  {
-    spec = St
-    conc = Ct
-  }
-  else
-  {
-    spec = Ct
-    conc = St
-  }
-
-  # add attributes for hyperspectral image if any
-  attr(conc, 'width') = attr(D, 'width')
-  attr(conc, 'height') = attr(D, 'height')
-
-  # return the results
-  res = list(
-    conc = conc,
-    spec = spec,
-    resvar = resvar
-  )
-
-  res
+   mdaplot(obj$purity, xticks = xticks, type = type, labels = labels, ...)
 }
 
+#' Purity spectra plot
+#'
+#' @param obj
+#' \code{mcrpure} object
+#' @param comp
+#' vector of components to show the purity spectra for
+#' @param type
+#' type of the plot
+#' @param col
+#' colors for the plot (should be a vector with one value for each component in \code{obj})
+#' @param show.lines
+#' if \code{TRUE} show the selected pure variables as vertical lines
+#' @param lines.col
+#' color for the selected pure variable lines (by default same as for plots but semitransparent)
+#' @param lines.lty
+#' line type for the purity lines
+#' @param lines.lwd
+#' line width for the purity lines
+#' @param ...
+#' other parameters suitable for \code{mdaplotg}
+#'
+#' The plot shows weighted purity value of each variable separately for each specified component.
+#'
+#' @export
+plotPuritySpectra.mcrpure <- function(obj, comp = seq_len(obj$ncomp), type = "l",
+   col = mdaplot.getColors(obj$ncomp), show.lines = TRUE,
+   lines.col = adjustcolor(col, alpha.f = 0.5), lines.lty = 3, lines.lwd = 1, ...) {
+
+   if (is.null(obj$purityspec)) {
+      warning("Purity values are not computed when pure variables provided by user.")
+      return()
+   }
+
+   stopifnot("Parameter 'comp' has wrong value." = min(comp) > 0 && max(comp) <= obj$ncomp)
+   mdaplotg(mda.subset(obj$purityspec, comp), type = type, col = col[comp], ...)
+
+   if (show.lines) {
+      abline(
+         v = attr(obj$purevars, "xaxis.values")[comp],
+         col = lines.col[comp],
+         lty = lines.lty,
+         lwd = lines.lwd
+      )
+   }
+}
 
 #' Print method for PCA model object
 #'
