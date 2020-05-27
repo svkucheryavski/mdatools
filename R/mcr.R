@@ -51,48 +51,22 @@ mcr <- function(x, ncomp, method, exclrows = NULL, exclcols = NULL, info = "", .
 #'
 #' @export
 predict.mcr <- function(object, x, ...) {
+   attrs <- mda.getattr(x)
+   Ct <- x %*% St %*% solve(crossprod(St))
+   f <- as.matrix(rowSums(x))
+   a <- solve(crossprod(Ct)) %*% t(Ct) %*% f
+   A <- if (length(a) == 1) a else diag(as.vector(a))
+   Ct <- Ct %*% A
 
-   # convert to matrix
-   x <- mda.df2mat(x)
-   attrs <- attributes(x)
-
-   if (is.null(dim(x))) {
-      stop("Test set should be a matrix or a data frame.")
-   }
-
-   if (ncol(x) != nrow(object$loadings)) {
-      stop("Number and type of data columns should be the same as in calibration dataset.")
-   }
-
-   # compute scores and residuals
-   x <- prep.autoscale(x, center = object$center, scale = object$scale)
-   scores <- x %*% object$loadings
-
-   # set names
-   rownames(scores) <- rownames(residuals) <- attrs$dimnames[[1]]
-   colnames(scores) <- colnames(object$loadings)
-
-   # set attributes
-   scores <- mda.setattr(scores, attrs, "row")
-   residuals <- mda.setattr(residuals, attrs)
-   attr(scores, "name") <- "Scores"
-   attr(scores, "xaxis.name") <- "Components"
-   attr(residuals, "name") <- "Residuals"
-
-   if (is.null(attrs$yaxis.name)) {
-      attr(scores, "yaxis.name") <- "Objects"
-   }
-
-   return(contributions)
+   Ct <- mda.setattr(Ct, attrs, "rows")
+   return(Ct)
 }
 
 
 summary.mcr <- function(obj) {
-
 }
 
 print.mcr <- function(obj) {
-
 }
 
 
@@ -100,12 +74,18 @@ print.mcr <- function(obj) {
 #  Plotting methods    #
 ########################
 
-plotSpectra.mcr <- function(obj, comp, ...) {
+plotSpectra.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
+   col = mdaplot.getColors(obj$ncomp), ...) {
+   stopifnot("Parameter 'comp' has wrong value." = min(comp) > 0 && max(comp) <= obj$ncomp)
 
+   mdaplotg(mda.subset(obj$purespec, comp), type = type, col = col[comp], ...)
 }
 
-plotContributions.mcr <- function(obj, comp, ...) {
+plotContributions.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
+   col = mdaplot.getColors(obj$ncomp), ...) {
+   stopifnot("Parameter 'comp' has wrong value." = min(comp) > 0 && max(comp) <= obj$ncomp)
 
+   mdaplotg(mda.subset(mda.t(obj$pureconc), comp), type = type, ...)
 }
 
 plotVariance.mcr <- function(obj, ...) {
@@ -119,5 +99,4 @@ plotVariance.mcr <- function(obj, ...) {
 #'
 #' @export
 plot.mcr <- function(obj) {
-
 }
