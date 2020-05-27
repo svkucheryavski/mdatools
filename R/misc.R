@@ -210,7 +210,7 @@ mda.subset <- function(x, subset = NULL, select = NULL) {
 
       # get numeric indices for the rows and subset them
       subset <- mda.getexclind(subset, rownames(x), nrow(x))
-      x <- x[subset, ]
+      x <- x[subset, , drop = FALSE]
 
       # correct attributes
       if (!is.null(attrs$yaxis.values)) {
@@ -810,9 +810,7 @@ repmat <- function(x, nrows, ncols = nrows) {
 prepCalData <- function(x, exclrows = NULL, exclcols = NULL) {
 
    # check that x has a dimension
-   if (is.null(dim(x))) {
-      stop("Data values must be provided in form of a matrix or a data frame.")
-   }
+   stopifnot("Data values must be provided in form of a matrix or a data frame." = !is.null(dim(x)))
 
    # exclude columns if "exclcols" is provided
    if (length(exclcols) > 0) {
