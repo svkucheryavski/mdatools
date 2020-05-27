@@ -54,7 +54,7 @@ test_that("mda.df2mat() and mda.t() work correctly", {
 
 })
 
-context("test purge methods")
+context("misc: purge methods")
 
 data(people)
 attr(people, "xaxis.values") <- seq(10, 120, by = 10)
@@ -163,5 +163,32 @@ test_that("purge both works correctly", {
    expect_equal(attr(x2pc, "yaxis.values"), attr(x1, "yaxis.values")[-exclrows])
    expect_equal(attr(x3pc, "yaxis.values"), attr(x1, "yaxis.values"))
    expect_equal(attr(x4pc, "yaxis.values"), attr(x1, "yaxis.values")[-exclrows])
+
+})
+
+context("misc: prepare calibration data")
+
+test_that("prepCalData works correctly", {
+   data(people)
+   exclrows <- c(2, 10, 20)
+   exclcols <- c(5, 10)
+
+   expect_silent(x1 <- prepCalData(people))
+   expect_silent(x2 <- prepCalData(people, exclrows = exclrows))
+   expect_silent(x3 <- prepCalData(people, exclcols = exclcols))
+   expect_silent(x4 <- prepCalData(people, exclrows = exclrows, exclcols = exclcols))
+   expect_error(prepCalData(people[1, , drop = FALSE]))
+
+   expect_equivalent(attr(x1, "exclrows"), NULL)
+   expect_equivalent(attr(x1, "exclcols"), NULL)
+
+   expect_equivalent(attr(x2, "exclrows"), exclrows)
+   expect_equivalent(attr(x2, "exclcols"), NULL)
+
+   expect_equivalent(attr(x3, "exclrows"), NULL)
+   expect_equivalent(attr(x3, "exclcols"), exclcols)
+
+   expect_equivalent(attr(x4, "exclrows"), exclrows)
+   expect_equivalent(attr(x4, "exclcols"), exclcols)
 
 })

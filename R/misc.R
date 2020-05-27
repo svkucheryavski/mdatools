@@ -795,3 +795,39 @@ repmat <- function(x, nrows, ncols = nrows) {
    x <- as.matrix(x)
    return(matrix(1, nrows, ncols) %x% x)
 }
+
+
+#' Prepares calibration data
+#'
+#' @param x
+#' matrix or data frame with values (calibration set)
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclcols
+#' columns to be excluded from calculations (numbers, names or vector with logical values)
+#'
+#' @export
+prepCalData <- function(x, exclrows = NULL, exclcols = NULL) {
+
+   # check that x has a dimension
+   if (is.null(dim(x))) {
+      stop("Data values must be provided in form of a matrix or a data frame.")
+   }
+
+   # exclude columns if "exclcols" is provided
+   if (length(exclcols) > 0) {
+      x <- mda.exclcols(x, exclcols)
+   }
+
+   # exclude rows if "exclrows" is provided
+   if (length(exclrows) > 0) {
+      x <- mda.exclrows(x, exclrows)
+   }
+
+   # check number of rows
+   if (nrow(x) - length(attr(x, "exclrows")) < 2) {
+      stop("At least two measurements must be provided (rows of 'x').")
+   }
+
+   return(x)
+}
