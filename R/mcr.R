@@ -52,6 +52,7 @@ mcr <- function(x, ncomp, method, exclrows = NULL, exclcols = NULL, info = "", .
 #' @export
 predict.mcr <- function(object, x, ...) {
    attrs <- mda.getattr(x)
+   St <- object$resspec
    Ct <- x %*% St %*% solve(crossprod(St))
    f <- as.matrix(rowSums(x))
    a <- solve(crossprod(Ct)) %*% t(Ct) %*% f
@@ -63,33 +64,115 @@ predict.mcr <- function(object, x, ...) {
 }
 
 
-summary.mcr <- function(obj) {
-}
+########################
+#  Static methods      #
+########################
 
-print.mcr <- function(obj) {
-}
+#' Compute explained variance for MCR case
+#'
+#' @param obj
+#' object of class \code{mcr}
+#' @param x
+#' original spectral data
+#'
+#' @export
+getVariance.mcr <- function(obj, x) {
 
+   cumresvar <- rep(0, obj$ncomp)
+   for (i in seq_len(obj$ncomp)) {
+      cumresvar[i] <- sum((x - tcrossprod(
+         obj$rescont[, seq_len(i), drop = FALSE],
+         obj$resspec[, seq_len(i), drop = FALSE]
+      ))^2)
+   }
+
+   cumexpvar <- 100 - cumresvar / sum(x^2) * 100
+   expvar <- c(cumexpvar[1], diff(cumexpvar))
+
+   names(cumexpvar) <- names(expvar) <- colnames(obj$resspec)
+   attr(expvar, "name") <- "Variance"
+   attr(cumexpvar, "name") <- "Cumulative variance"
+   attr(expvar, "xaxis.name") <- attr(cumexpvar, "xaxis.name") <- "Components"
+   attr(expvar, "yaxis.name") <- attr(cumexpvar, "yaxis.name") <- "Explained variance, %"
+   return(list(cumexpvar = cumexpvar, expvar = expvar))
+}
 
 ########################
 #  Plotting methods    #
 ########################
 
+#' Show plot with resolved spectra
+#'
+#' @param obj
+#' object of clacc \code{mcr}
+#' @param comp
+#' vector with number of components to make the plot for
+#' @param type
+#' type of the plot
+#' @param col
+#' vector with colors for individual components
+#'
+#' @export
 plotSpectra.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
    col = mdaplot.getColors(obj$ncomp), ...) {
    stopifnot("Parameter 'comp' has wrong value." = min(comp) > 0 && max(comp) <= obj$ncomp)
 
-   mdaplotg(mda.subset(obj$purespec, comp), type = type, col = col[comp], ...)
+   mdaplotg(mda.subset(mda.t(obj$resspec), comp), type = type, col = col[comp], ...)
 }
 
+#' Show plot with resolved contributions
+#'
+#' @param obj
+#' object of clacc \code{mcr}
+#' @param comp
+#' vector with number of components to make the plot for
+#' @param type
+#' type of the plot
+#' @param col
+#' vector with colors for individual components
+#'
+#' @export
 plotContributions.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
    col = mdaplot.getColors(obj$ncomp), ...) {
    stopifnot("Parameter 'comp' has wrong value." = min(comp) > 0 && max(comp) <= obj$ncomp)
 
-   mdaplotg(mda.subset(mda.t(obj$pureconc), comp), type = type, ...)
+   mdaplotg(mda.subset(mda.t(obj$rescont), comp), type = type, ...)
 }
 
-plotVariance.mcr <- function(obj, ...) {
+#' Show plot with explained variance
+#'
+#' @param obj
+#' object of clacc \code{mcr}
+#' @param type
+#' type of the plot
+#' @param labels
+#' what to use as data labels
+#' @param xticks
+#' vector with ticks for x-axis
+#'
+#' @export
+plotVariance.mcr <- function(obj, type = "h", labels = "values",
+   xticks = seq_len(obj$ncomp), ...) {
 
+   mdaplot(obj$expvar, type = type, labels = labels, ...)
+}
+
+#' Show plot with cumulative explained variance
+#'
+#' @param obj
+#' object of clacc \code{mcr}
+#' @param type
+#' type of the plot
+#' @param labels
+#' what to use as data labels
+#' @param xticks
+#' vector with ticks for x-axis
+#'
+#' @export
+plotCumVariance.mcr <- function(obj, type = "b", labels = "values",
+   xticks = seq_len(obj$ncomp), ...) {
+
+   mdaplot(obj$cumexpvar, type = type, labels = labels, ...)
 }
 
 #' Plot summary for MCR model
