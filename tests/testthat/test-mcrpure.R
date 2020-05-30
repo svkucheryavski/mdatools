@@ -1,95 +1,140 @@
-# temporary code for debugging while develop
+########################################################
+# Block 1: testing methods implementing pca algorithms #
+########################################################
+
+setup({
+   #pdf(file = "mdatools-test-mcrpure.pdf")
+   pdf(file = tempfile("mdatools-test-mcrpure-", fileext = ".pdf"))
+   sink(tempfile("mdatools-test-mcrpure-", fileext = ".txt"), append = FALSE, split = FALSE)
+})
+
+teardown({
+   dev.off()
+   sink()
+})
+
 library(mdatools)
+data(carbs)
 
-data(simdata)
-load("data/puredata.RData")
-S <- simdata$S
-attr(S, "yaxis.name") <- "Wavelength, nm"
-attr(S, "yaxis.values") <- simdata$wavelength
+params_ok <- list(
+   list(ncomp = 1),
+   list(ncomp = 1, offset = 0),
+   list(ncomp = 1, offset = 0.05),
+   list(ncomp = 4),
+   list(ncomp = 4, offset = 0),
+   list(ncomp = 4, offset = 0.05),
+   list(ncomp = 3),
+   list(ncomp = 3, offset = 0),
+   list(ncomp = 3, offset = 0.05),
+   list(ncomp = 3, offset = 0.25),
+   list(ncomp = 3, offset = 0.05, use.deriv = 1, savgol = list(width = 3, porder = 1, dorder = 1)),
+   list(ncomp = 3, offset = 0.05, use.deriv = 1, savgol = list(width = 5, porder = 2, dorder = 2)),
+   list(ncomp = 3, offset = 0.05, use.deriv = 2, savgol = list(width = 3, porder = 1, dorder = 1)),
+   list(ncomp = 3, offset = 0.05, use.deriv = 2, savgol = list(width = 5, porder = 2, dorder = 2))
+)
 
-# ceate concentration profiles
-C1 <- dnorm(1:100, 20, 5)
-C2 <- dnorm(1:100, 50, 20)
-C3 <- dnorm(1:100, 70, 10)
-C <- cbind(C1, C2, C3)
-attr(C, "yaxis.name") <- "Time, c"
-attr(C, "yaxis.values") <- (1:100)/10
+params_err <- list(
+   list(ncomp = 0),
+   list(ncomp = 1, offset = -1),
+   list(ncomp = 1, offset = 1),
+   list(ncomp = 30),
+   list(ncomp = 3, offset = 0.05, use.deriv = 1),
+   list(ncomp = 3, offset = 0.05, use.deriv = 1, savgol = list(width = 3, porder = 1, dorder = 0)),
+   list(ncomp = 3, offset = 0.05, use.deriv = 2, savgol = list(width = 3, porder = 1, dorder = 0))
+)
 
-D <- C %*% t(S) + matrix(rnorm(nrow(C) * nrow(S), 0, 0.001), nrow(C), nrow(S))
-attr(D, "xaxis.name") <- "Wavelength, nm"
-attr(D, "xaxis.values") <- simdata$wavelength
-attr(D, "yaxis.name") <- "Time, c"
-attr(D, "yaxis.values") <- (1:100)/10
+C <- carbs$C
+S <- carbs$S
+D <- carbs$D
 
-par(mfrow = c(3, 1))
-mdaplotg(mda.t(C), type = "l")
-mdaplotg(mda.t(S), type = "l")
-mdaplot(D, type = "l")
+for (p in params_err) {
+   context("mcrpure: testing error cases")
+   expect_error(m <- do.call(mcrpure, c(list(x = D), p)))
+}
+
+n <- 1
+for (p in params_ok) {
+
+   context(sprintf("mcrpure: testing case %d", n))
+
+   par(mfrow = c(1, 1))
+   plot.new()
+   plot.window(xlim = c(0, 1), ylim = c(0, 1))
+   text(0.25, 1, paste0("mcrpure - case - ", n), pos = 4, font = 2)
+   text(0.25, 0.5, paste0(capture.output(str(p)), collapse="\n"), pos = 4)
+
+   expect_silent(m <- do.call(mcrpure, c(list(x = D), p)))
+   summary(m)
+
+   # check dimensions and names
+   expect_equal(nrow(m$resspec), ncol(D))
+   expect_equal(ncol(m$resspec), p$ncomp)
+   expect_equal(nrow(m$purityspec), ncol(D))
+   expect_equal(ncol(m$purityspec), p$ncomp)
+   expect_equal(nrow(m$rescont), nrow(D))
+   expect_equal(colnames(m$rescont), colnames(m$resspec))
+
+   # variance plots
+   par(mfrow = c(2, 2))
+   expect_silent(plotVariance(m))
+   expect_silent(plotCumVariance(m))
+   expect_silent(plotVariance(m, show.labels = TRUE))
+   expect_silent(plotCumVariance(m, type = "h", col = "red"))
+
+   # purity plots
+   par(mfrow = c(2, 2))
+   expect_silent(plotPurity(m))
+   expect_silent(plotPurity(m, type = "h"))
+   expect_silent(plotPurity(m, type = "h", col = "red", show.labels = TRUE))
+   expect_silent(plotPurity(m, type = "h", col = "red", show.labels = TRUE, labels = "names"))
+
+   # purity spectra
+   par(mfrow = c(2, 2))
+   expect_silent(plotPuritySpectra(m))
+   expect_silent(plotPuritySpectra(m, comp = 1, type = "b", col = "black"))
+   expect_silent(if (m$ncomp > 1) plotPuritySpectra(m, comp = 2, type = "h"))
+   expect_silent(if (m$ncomp > 2) plotPuritySpectra(m, comp = 3))
+
+   # resolved contributions
+   par(mfrow = c(2, 2))
+   expect_silent(plotContributions(m))
+   expect_silent(plotContributions(m, comp = 1, type = "b", col = "black"))
+   expect_silent(if (m$ncomp > 1) plotContributions(m, comp = 2, type = "h"))
+   expect_silent(if (m$ncomp > 2) plotContributions(m, comp = 3))
+
+   # resolved spectra
+   par(mfrow = c(2, 2))
+   expect_silent(plotSpectra(m))
+   expect_silent(plotSpectra(m, comp = 1, type = "b", col = "black"))
+   expect_silent(if (m$ncomp > 1) plotSpectra(m, comp = 2, type = "h"))
+   expect_silent(if (m$ncomp > 2) plotSpectra(m, comp = 3))
+
+   # resolved spectra vs new
+   par(mfrow = c(2, 2))
+   for (i in 1:min(c(m$ncomp, ncol(S)))) {
+      mdaplotg(
+         list(
+            original = prep.norm(mda.subset(mda.t(S), i), "area"),
+            resolved = prep.norm(mda.subset(mda.t(m$resspec), i), "area")
+         ), type = "l", col = c("gray", "red"), lwd = c(2, 1), opacity = c(0.5, 1),
+         , xlim = c(1600, 200), xticks = seq(1600, 200, by = -200)
+      )
+   }
+
+   # resolved contributions vs new
+   par(mfrow = c(2, 2))
+   for (i in 1:min(c(m$ncomp, ncol(C)))) {
+      mdaplotg(
+         list(
+            original = prep.norm(mda.subset(mda.t(C), i), "area"),
+            resolved = prep.norm(mda.subset(mda.t(m$rescont), i), "area")
+         ), type = "l", col = c("gray", "red"), lwd = c(2, 1), opacity = c(0.5, 1)
+      )
+   }
 
 
-source("R/misc.R")
-source("R/mcr.R")
-source("R/mcrpure.R")
-
-
-# ! test for user provided pure variables
-
-# this should raise an error
-#m <- mcrpure(D, ncomp = 3, purevars = c(50, 100, 200))
-
-# this should be ok
-m <- mcrpure(D, ncomp = 3, purevars = c(50, 100, 120))
-show(m$purevars)
-
-par(mfrow = c(2, 2))
-plotPurity.mcrpure(m)
-plotPurity.mcrpure(m, show.labels = TRUE)
-plotPurity.mcrpure(m, type = "b", show.labels = TRUE, col = "red")
-
-par(mfrow = c(2, 2))
-plotPuritySpectra.mcrpure(m)
-plotPuritySpectra.mcrpure(m, comp = 3)
-plotPuritySpectra.mcrpure(m, comp = 1, type = "h", col = "black", show.lines = FALSE)
-plotPuritySpectra.mcrpure(m, comp = c(2, 3))
-
-par(mfrow = c(2, 2))
-plotSpectra.mcr(m)
-plotSpectra.mcr(m, comp = 3)
-plotSpectra.mcr(m, comp = 1, type = "h", col = "black")
-plotSpectra.mcr(m, comp = c(2, 3))
-
-par(mfrow = c(2, 2))
-plotContributions.mcr(m)
-plotContributions.mcr(m, comp = 3)
-plotContributions.mcr(m, comp = 1, type = "h", col = "black")
-plotContributions.mcr(m, comp = c(2, 3))
-
-
-# ! test for normal ones
-
-m <- mcrpure(D, ncomp = 3)
-show(m$purevars)
-
-par(mfrow = c(2, 2))
-plotPurity.mcrpure(m)
-plotPurity.mcrpure(m, show.labels = TRUE)
-plotPurity.mcrpure(m, type = "b", show.labels = TRUE, col = "red")
-
-par(mfrow = c(2, 2))
-plotPuritySpectra.mcrpure(m)
-plotPuritySpectra.mcrpure(m, comp = 3)
-plotPuritySpectra.mcrpure(m, comp = 1, type = "h", col = "black", show.lines = FALSE)
-plotPuritySpectra.mcrpure(m, comp = c(2, 3))
-
-par(mfrow = c(2, 2))
-plotSpectra.mcr(m)
-plotSpectra.mcr(m, comp = 3)
-plotSpectra.mcr(m, comp = 1, type = "h", col = "black")
-plotSpectra.mcr(m, comp = c(2, 3))
-
-par(mfrow = c(2, 2))
-plotContributions.mcr(m)
-plotContributions.mcr(m, comp = 3)
-plotContributions.mcr(m, comp = 1, type = "h", col = "black")
-plotContributions.mcr(m, comp = c(2, 3))
-
+   # check that predictions work correctly
+   res <- predict(m, D)
+   show(res)
+   n <- n + 1
+}
