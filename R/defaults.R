@@ -3,6 +3,8 @@
 #' obbject with mcr pure case
 #' @param ...
 #' other parameters
+#'
+#' @export
 plotPuritySpectra <- function(obj, ...) {
    UseMethod("plotPuritySpectra")
 }
@@ -12,6 +14,8 @@ plotPuritySpectra <- function(obj, ...) {
 #' obbject with mcr pure case
 #' @param ...
 #' other parameters
+#'
+#' @export
 plotPurity <- function(obj, ...) {
    UseMethod("plotPurity")
 }
@@ -21,6 +25,8 @@ plotPurity <- function(obj, ...) {
 #' obbject with mcr case
 #' @param ...
 #' other parameters
+#'
+#' @export
 plotSpectra <- function(obj, ...) {
    UseMethod("plotSpectra")
 }
@@ -30,6 +36,8 @@ plotSpectra <- function(obj, ...) {
 #' obbject with mcr case
 #' @param ...
 #' other parameters
+#'
+#' @export
 plotContributions <- function(obj, ...) {
    UseMethod("plotContributions")
 }
