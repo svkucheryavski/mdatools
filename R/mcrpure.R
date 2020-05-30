@@ -139,7 +139,7 @@
 #' # and resolved spectra
 #' mdaplotg(
 #'    list(
-#'       "original" = prep.norm(D, "area"),
+#'       "original" = prep.norm(carbs$D, "area"),
 #'       "resolved" = prep.norm(mda.subset(mda.t(m$resspec), 1), "area")
 #'    ), col = c("gray", "red"), type = "l"
 #' )
