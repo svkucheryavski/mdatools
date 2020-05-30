@@ -1,3 +1,39 @@
+#' Plot purity spectra
+#' @param obj
+#' obbject with mcr pure case
+#' @param ...
+#' other parameters
+plotPuritySpectra <- function(obj, ...) {
+   UseMethod("plotPuritySpectra")
+}
+
+#' Plot purity values
+#' @param obj
+#' obbject with mcr pure case
+#' @param ...
+#' other parameters
+plotPurity <- function(obj, ...) {
+   UseMethod("plotPurity")
+}
+
+#' Plot resolved spectra
+#' @param obj
+#' obbject with mcr case
+#' @param ...
+#' other parameters
+plotSpectra <- function(obj, ...) {
+   UseMethod("plotSpectra")
+}
+
+#' Plot resolved contributions
+#' @param obj
+#' obbject with mcr case
+#' @param ...
+#' other parameters
+plotContributions <- function(obj, ...) {
+   UseMethod("plotContributions")
+}
+
 #' Categorize PCA results
 #' @param obj
 #' object with PCA model
