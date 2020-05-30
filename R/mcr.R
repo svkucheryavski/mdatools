@@ -111,6 +111,8 @@ getVariance.mcr <- function(obj, x) {
 #' type of the plot
 #' @param col
 #' vector with colors for individual components
+#' @param ...
+#' other parameters suitable for \code{mdaplotg}
 #'
 #' @export
 plotSpectra.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
@@ -130,6 +132,8 @@ plotSpectra.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
 #' type of the plot
 #' @param col
 #' vector with colors for individual components
+#' @param ...
+#' other parameters suitable for \code{mdaplotg}
 #'
 #' @export
 plotContributions.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
@@ -149,6 +153,8 @@ plotContributions.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
 #' what to use as data labels
 #' @param xticks
 #' vector with ticks for x-axis
+#' @param ...
+#' other parameters suitable for \code{mdaplot}
 #'
 #' @export
 plotVariance.mcr <- function(obj, type = "h", labels = "values",
@@ -167,6 +173,8 @@ plotVariance.mcr <- function(obj, type = "h", labels = "values",
 #' what to use as data labels
 #' @param xticks
 #' vector with ticks for x-axis
+#' @param ...
+#' other parameters suitable for \code{mdaplot}
 #'
 #' @export
 plotCumVariance.mcr <- function(obj, type = "b", labels = "values",
@@ -177,9 +185,16 @@ plotCumVariance.mcr <- function(obj, type = "b", labels = "values",
 
 #' Plot summary for MCR model
 #'
-#' @param obj
+#' @param x
 #' \code{mcr} model object
+#' @param ...
+#' other parameters
 #'
 #' @export
-plot.mcr <- function(obj) {
+plot.mcr <- function(x, ...) {
+   par(mfrow = c(2, 2))
+   plotSpectra(x)
+   plotContributions(x)
+   plotVariance(x)
+   plotCumVariance(x)
 }

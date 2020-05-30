@@ -59,7 +59,7 @@
 #' \item{offset}{offset value used to compute the purity}
 #' \item{ncomp}{number of resolved components}
 #' \item{use.deriv}{value for corresponding argument.}
-#' \teim{savgol}{value for corresponding argument.}
+#' \item{savgol}{value for corresponding argument.}
 #' \item{info }{information about the model, provided by user when build the model.}
 #'
 #'
@@ -79,7 +79,7 @@
 #' \tabular{ll}{
 #'    \code{summary.mcrpure} \tab shows some statistics for the case.\cr
 #'    \code{\link{unmix.mcrpure}} \tab makes unmixing of new set of spectra.\cr
-#'    \code{\link{predict.mcrpure}} \tab computes contributions by projection of new spectra to
+#'    \code{\link{predict.mcr}} \tab computes contributions by projection of new spectra to
 #'    the resolved ones.\cr
 #' }
 #'
@@ -112,7 +112,7 @@
 #' mdaplotg(
 #'    list(
 #'       "spectra" = prep.norm(D, "area"),
-#'       "purity" = prep.norm(mda.subset(mda.t(m$purityspec), 1), "area")
+#'       "purity" = prep.norm(mda.subset(mda.t(m$resspec), 1), "area")
 #'    ), col = c("gray", "red"), type = "l"
 #' )
 #'
@@ -316,7 +316,7 @@ summary.mcrpure <- function(object, ...) {
    fprintf("\nOffset: %s\n", object$offset)
    fprintf("Use of derivative: %s\n", drvstr[object$use.deriv + 1])
    if (object$use.deriv > 0) {
-      cat("\t", str(object$savgol), max.level = 1, give.attr = FALSE)
+      cat("\t", toString(object$savgol))
    }
    cat("\n")
 
@@ -351,10 +351,10 @@ summary.mcrpure <- function(object, ...) {
 #' user provided values gor pure variables (no calculation will be run in this case)
 #' @param offset
 #' offset (between 0 and 1) for calculation of parameter alpha
-#' @param exclcols
-#' optinal, indices of columns to be excluded from calculations
-#' @param exclrows
-#' optinal, indices of columns to be excluded from calculations
+#' @param use.deriv
+#' a number which tells how to use derivative.
+#' @param savgol
+#' list with parameters for Savitzky-Golay preprocessing (if \code{use.deriv} is not 0).
 #'
 #' @return
 #' The function returns a list with with following fields:
@@ -454,6 +454,8 @@ getPureVariables <- function(D, ncomp, purevars, offset, use.deriv, savgol) {
 #' ticks for x axis
 #' @param type
 #' type of the plot
+#' @param labels
+#' what to use as data labels
 #' @param ...
 #' other parameters suitable for \code{mdaplot}
 #'
