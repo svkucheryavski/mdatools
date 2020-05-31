@@ -177,7 +177,7 @@ test_that("prepCalData works correctly", {
    expect_silent(x2 <- prepCalData(people, exclrows = exclrows))
    expect_silent(x3 <- prepCalData(people, exclcols = exclcols))
    expect_silent(x4 <- prepCalData(people, exclrows = exclrows, exclcols = exclcols))
-   expect_error(prepCalData(people[1, , drop = FALSE]))
+   expect_error(prepCalData(people[1, , drop = FALSE], min.nrows = 2))
 
    expect_equivalent(attr(x1, "exclrows"), NULL)
    expect_equivalent(attr(x1, "exclcols"), NULL)
