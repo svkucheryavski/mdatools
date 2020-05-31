@@ -1,3 +1,14 @@
+v.0.11.0
+========
+
+## New features
+
+* new method, `mcrpure()`, implementing multivariate curve resolution based on the purity approach (also known as SIMPLISMA)
+* added new dataset, `carbs`, for visualization of MCR methods
+
+## Small improvements
+
+
 v.0.10.4
 ========
 
