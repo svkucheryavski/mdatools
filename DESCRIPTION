@@ -13,4 +13,4 @@ RoxygenNote: 7.1.0
 Suggests: testthat
 NeedsCompilation: no
 Packaged: 2019-05-24 11:03:33 UTC; svkucheryavski
-Depends: R (>= 2.10)
+Depends: R (>= 3.5.0)
