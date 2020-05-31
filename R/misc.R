@@ -824,12 +824,12 @@ prepCalData <- function(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.
 
    # check number of rows
    if (nrow(x) - length(attr(x, "exclrows")) < min.nrows) {
-      stop(sprintf("At least %d measurements must be provided (rows of 'x').", min.nrows)
+      stop(sprintf("At least %d measurements must be provided (rows of 'x').", min.nrows))
    }
 
    # check number of columns
    if (ncol(x) - length(attr(x, "exclcols")) < min.ncols) {
-      stop(sprintf("At least %d variables must be provided (columns of 'x').", min.ncols)
+      stop(sprintf("At least %d variables must be provided (columns of 'x').", min.ncols))
    }
 
    return(x)
