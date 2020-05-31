@@ -5,23 +5,34 @@
 Raman spectra of carbonhydrates
 }
 \description{
-Simdata contains training and test set with spectra and concentration values of polyaromatic hydrocarbons mixings.
+The dataset consists of Raman spectra of fructose, lactose, and ribose as well as spectra of their
+mixtures.
 }
 
 \usage{data(simdata)}
 \format{
-   The data is a list with following fields:
+   The data is a list (\code{carbs}) with the following fields:
    \tabular{rlll}{
-    \code{$D} \tab a matrix (100x150) with spectral values for the training set. \cr
-    \code{$S} \tab a matrix (100x150) with spectral values for the test set. \cr
-    \code{$C} \tab a matrix (100x3) with concentration of components for the training set. \cr
+    \code{$D} \tab a matrix (21x1401) with spectral values for the mixtures. \cr
+    \code{$S} \tab a matrix (1401x3) with spectral values for the pure components. \cr
+    \code{$C} \tab a matrix (21x3) with concentration of the pure components. \cr
   }
 }
 
 \details{
-This is a simulated data containing UV/Vis spectra of three component (polyaromatic hydrocarbons) mixings - C1, C2 and C3. The spectral range is betwen 210 and 360 nm. The spectra were simulated as a linear combination of pure component spectra plus 5\% of random noise. The concentration range is (in moles): C1 [0, 1], C2 [0, 0.5], C3 [0, 0.1].
+The dataset consists of Raman spectra of fructose, lactose, and ribose as well as spectra of their
+mixtures. The original spectra were downloaded from publicly available SPECARB library [1], created
+by S.B. Engelsen. The specta were truncated to the range from 200 to 1600 cm-1.
 
-There are 100 mixings in a training set and 50 mixings in a test set. The data can be used for multivariate regression examples.
+The spectra of mixtures were created by linear combinations of the original spectra:
+
+D = CS' + E
+
+Concentrations of the components, C, follow a simplex lattice design with four levels. Some noise calculated as a random number uniformly distributed between 0\% and 3\% of maximum initial intensity (E) was added to each spectrum of the dataset, D, individually.
+}
+
+\references{
+1. Engelsen S.B., Database on Raman spectra of carbohydrates. Available at: http://www.models.life.ku.dk/~specarb/specarb.html [visited 31.05.2020]
 }
 
 \keyword{datasets}
