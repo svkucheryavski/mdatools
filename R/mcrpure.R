@@ -173,7 +173,7 @@ mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, use.deriv = 0, sav
    }
 
    # get pure variables and unmix data
-   x <- prepCalData(x, exclrows, exclcols, min.nrow = 2, min.ncol = 2)
+   x <- prepCalData(x, exclrows, exclcols, min.nrows = 2, min.ncols = 2)
    model <- getPureVariables(x, ncomp, purevars, offset, use.deriv = use.deriv, savgol = savgol)
    model <- c(model, unmix.mcrpure(model, x))
 
