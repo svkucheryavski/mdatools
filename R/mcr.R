@@ -140,7 +140,7 @@ plotContributions.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
    col = mdaplot.getColors(obj$ncomp), ...) {
    stopifnot("Parameter 'comp' has wrong value." = min(comp) > 0 && max(comp) <= obj$ncomp)
 
-   mdaplotg(mda.subset(mda.t(obj$rescont), comp), type = type, ...)
+   mdaplotg(mda.subset(mda.t(obj$rescont), comp), type = type, col = col[comp], ...)
 }
 
 #' Show plot with explained variance

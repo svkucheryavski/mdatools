@@ -98,7 +98,7 @@ plotPuritySpectra(m, comp = 2:3)
 par(mfrow = c(1, 1))
 mdaplotg(
    list(
-      "spectra" = prep.norm(D, "area"),
+      "spectra" = prep.norm(carbs$D, "area"),
       "purity" = prep.norm(mda.subset(mda.t(m$resspec), 1), "area")
    ), col = c("gray", "red"), type = "l"
 )
@@ -124,6 +124,7 @@ plotContributions(m, comp = 2:3)
 
 # of course you can do this manually as well, e.g. show original
 # and resolved spectra
+par(mfrow = c(1, 1))
 mdaplotg(
    list(
       "original" = prep.norm(carbs$D, "area"),
