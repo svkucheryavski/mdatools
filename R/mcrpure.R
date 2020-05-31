@@ -308,7 +308,7 @@ summary.mcrpure <- function(object, ...) {
    fprintf("\nOffset: %s\n", object$offset)
    fprintf("Use of derivative: %s\n", drvstr[object$use.deriv + 1])
    if (object$use.deriv > 0) {
-      cat("\t", toString(object$savgol))
+      cat("Savgol parameters: ", toString(object$savgol), "\n")
    }
    cat("\n")
 

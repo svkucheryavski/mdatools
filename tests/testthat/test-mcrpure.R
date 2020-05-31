@@ -157,7 +157,8 @@ for (p in params_ok) {
 
    # check that predictions work correctly
    res <- predict(m, D)
-   show(res)
+   expect_equivalent(res, m$rescont)
+
    n <- n + 1
 }
 
@@ -172,6 +173,7 @@ attr(simdata$spectra.c, "yaxis.values") <- seq(0, 10, length.out = nrow(simdata$
 
 expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.04, use.deriv = 2,
    savgol = list(dorder = 2, width = 5, porder = 2)))
+summary(m)
 
 par(mfrow = c(2, 1))
 expect_silent(plotSpectra(m))
@@ -179,6 +181,7 @@ expect_silent(plotContributions(m))
 
 expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.04, use.deriv = 2,
    savgol = list(dorder = 2, width = 5, porder = 2), exclcols = 141:150))
+summary(m)
 
 par(mfrow = c(2, 1))
 expect_silent(plotSpectra(m))
@@ -186,6 +189,7 @@ expect_silent(plotContributions(m))
 
 expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.04, use.deriv = 2,
    savgol = list(dorder = 2, width = 5, porder = 2), exclrows = 1:10))
+summary(m)
 
 par(mfrow = c(2, 1))
 expect_silent(plotSpectra(m))
