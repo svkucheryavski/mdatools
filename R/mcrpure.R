@@ -172,17 +172,8 @@ mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, use.deriv = 0, sav
       stopifnot("You need to specify derivative order in 'savgol' parameter." = savgol$dorder > 0)
    }
 
-   # exclude columns if "exclcols" is provided
-   if (length(exclcols) > 0) {
-      x <- mda.exclcols(x, exclcols)
-   }
-
-   # exclude rows if "exclrows" is provided
-   if (length(exclrows) > 0) {
-      x <- mda.exclrows(x, exclrows)
-   }
-
    # get pure variables and unmix data
+   x <- prepCalData(x, exclrows, exclcols, min.nrow = 2, min.ncol = 2)
    model <- getPureVariables(x, ncomp, purevars, offset, use.deriv = use.deriv, savgol = savgol)
    model <- c(model, unmix.mcrpure(model, x))
 
@@ -368,15 +359,12 @@ summary.mcrpure <- function(object, ...) {
 getPureVariables <- function(D, ncomp, purevars, offset, use.deriv, savgol) {
 
    attrs <- mda.getattr(D)
-   purevals <- NULL
-   purityspec <- NULL
 
    # if indices for pure variables are not provided - compute them
    if (is.null(purevars)) purevars <- rep(0, ncomp)
 
    exclrows <- attrs$exclrows
    exclcols <- attrs$exclcols
-   D <- prepCalData(D, exclrows, exclcols)
 
    # if derivative must be used - apply savgol
    if (use.deriv > 0) {
@@ -387,14 +375,22 @@ getPureVariables <- function(D, ncomp, purevars, offset, use.deriv, savgol) {
    # get dimensions
    nspec <- nrow(D)
    nvar <- ncol(D)
+   nvarvis <- nvar - length(exclcols)
 
    # get indices for excluded columns if provided
-   colind <- rep(TRUE, nvar)
-   colind[exclcols] <- FALSE
+   colind <- seq_len(nvar)
+
+   # remove hidden rows and columns
+   if (!is.null(exclrows)) D <- D[-exclrows, , drop = FALSE]
+
+   if (!is.null(exclcols)) {
+      D <- D[, -exclcols, drop = FALSE]
+      colind <- colind[-exclcols]
+   }
 
    # calculate purity spectrum
    mu <- apply(D, 2, mean)
-   sigma <- apply(D, 2, sd) * sqrt((nspec - 1) / nspec)
+   sigma <- apply(D, 2, sd) * sqrt((nrow(D) - 1) / nrow(D))
    alpha <- offset * max(mu)
    purity <- sigma / (mu + alpha)
 
@@ -404,17 +400,18 @@ getPureVariables <- function(D, ncomp, purevars, offset, use.deriv, savgol) {
 
    # loop to locate the pure variables
    purityspec <- matrix(0, nrow = ncomp, ncol = nvar)
+   purevars <- rep(0, ncomp)
    purevals <- rep(0, ncomp)
 
    for (i in seq_len(ncomp)) {
       pv <- purevars[seq_len(i - 1)]
-      weights <- sapply(seq_len(nvar), function(j) det(R[c(j, pv), c(j, pv), drop = FALSE]))
+      weights <- sapply(seq_len(nvarvis), function(j) det(R[c(j, pv), c(j, pv), drop = FALSE]))
 
-      purityspec[i, colind] <- purity[colind] * weights
-      if (purevars[i] == 0) purevars[i] <- which.max(purityspec[i, ])
+      purityspec[i, colind] <- purity * weights
+      if (purevars[i] == 0) purevars[i] <- which.max(purityspec[i, colind])
       purevals[i] <- purityspec[i, purevars[i]]
    }
-
+   purevars <- colind[purevars]
    names(purevars) <- names(purevals) <- rownames(purityspec) <- paste("Comp", seq_len(ncomp))
    purityspec <- mda.setattr(purityspec, attrs, "col")
 

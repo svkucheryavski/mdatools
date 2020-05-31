@@ -27,10 +27,26 @@ params_ok <- list(
    list(ncomp = 3, offset = 0),
    list(ncomp = 3, offset = 0.05),
    list(ncomp = 3, offset = 0.25),
+
+   # with derivatives
    list(ncomp = 3, offset = 0.05, use.deriv = 1, savgol = list(width = 3, porder = 1, dorder = 1)),
    list(ncomp = 3, offset = 0.05, use.deriv = 1, savgol = list(width = 5, porder = 2, dorder = 2)),
    list(ncomp = 3, offset = 0.05, use.deriv = 2, savgol = list(width = 3, porder = 1, dorder = 1)),
-   list(ncomp = 3, offset = 0.05, use.deriv = 2, savgol = list(width = 5, porder = 2, dorder = 2))
+   list(ncomp = 3, offset = 0.05, use.deriv = 2, savgol = list(width = 5, porder = 2, dorder = 2)),
+
+   # with excluded columns
+   list(ncomp = 3, exclcols = 1:9),
+   list(ncomp = 3, exclcols = 1:9, use.deriv = 1, savgol = list(width = 3, porder = 1, dorder = 1)),
+   list(ncomp = 3, exclcols = 1:9, use.deriv = 1, savgol = list(width = 5, porder = 2, dorder = 2)),
+   list(ncomp = 3, exclcols = 1:9, use.deriv = 2, savgol = list(width = 3, porder = 1, dorder = 1)),
+   list(ncomp = 3, exclcols = 1:9, use.deriv = 2, savgol = list(width = 5, porder = 2, dorder = 2)),
+
+   # with excluded rows
+   list(ncomp = 3, exclrows = 1:3),
+   list(ncomp = 3, exclrows = 1:3, use.deriv = 1, savgol = list(width = 3, porder = 1, dorder = 1)),
+   list(ncomp = 3, exclrows = 1:3, use.deriv = 1, savgol = list(width = 5, porder = 2, dorder = 2)),
+   list(ncomp = 3, exclrows = 1:3, use.deriv = 2, savgol = list(width = 3, porder = 1, dorder = 1)),
+   list(ncomp = 3, exclrows = 1:3, use.deriv = 2, savgol = list(width = 5, porder = 2, dorder = 2))
 )
 
 params_err <- list(
@@ -46,6 +62,7 @@ params_err <- list(
 C <- carbs$C
 S <- carbs$S
 D <- carbs$D
+
 
 for (p in params_err) {
    context("mcrpure: testing error cases")
@@ -73,6 +90,11 @@ for (p in params_ok) {
    expect_equal(ncol(m$purityspec), p$ncomp)
    expect_equal(nrow(m$rescont), nrow(D))
    expect_equal(colnames(m$rescont), colnames(m$resspec))
+
+   # excluded rows and columns
+   expect_equal(attr(m$rescont, "exclrows"), p$exclrows)
+   expect_equal(attr(m$resspec, "exclrows"), p$exclcols)
+   expect_equal(attr(m$purityspec, "exclrows"), p$exclcols)
 
    # variance plots
    par(mfrow = c(2, 2))
@@ -143,7 +165,28 @@ context("mcrpure: testing for simdata")
 
 data(simdata)
 
+simdata$spectra.c <- simdata$spectra.c[order(simdata$conc.c[, 1]), ]
+attr(simdata$spectra.c, "yaxis.name") <- "Time, s"
+attr(simdata$spectra.c, "yaxis.values") <- seq(0, 10, length.out = nrow(simdata$spectra.c))
+
+
 expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.04, use.deriv = 2,
    savgol = list(dorder = 2, width = 5, porder = 2)))
 
+par(mfrow = c(2, 1))
 expect_silent(plotSpectra(m))
+expect_silent(plotContributions(m))
+
+expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.04, use.deriv = 2,
+   savgol = list(dorder = 2, width = 5, porder = 2), exclcols = 141:150))
+
+par(mfrow = c(2, 1))
+expect_silent(plotSpectra(m))
+expect_silent(plotContributions(m))
+
+expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.04, use.deriv = 2,
+   savgol = list(dorder = 2, width = 5, porder = 2), exclrows = 1:10))
+
+par(mfrow = c(2, 1))
+expect_silent(plotSpectra(m))
+expect_silent(plotContributions(m, type = "l"))
