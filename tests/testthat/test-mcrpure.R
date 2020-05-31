@@ -138,3 +138,12 @@ for (p in params_ok) {
    show(res)
    n <- n + 1
 }
+
+context("mcrpure: testing for simdata")
+
+data(simdata)
+
+expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.04, use.deriv = 2,
+   savgol = list(dorder = 2, width = 5, porder = 2)))
+
+expect_silent(plotSpectra(m))
