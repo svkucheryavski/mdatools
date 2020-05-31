@@ -805,6 +805,10 @@ repmat <- function(x, nrows, ncols = nrows) {
 #' rows to be excluded from calculations (numbers, names or vector with logical values)
 #' @param exclcols
 #' columns to be excluded from calculations (numbers, names or vector with logical values)
+#' @param min.nrows
+#' smallest number of rows which must be in the dataset
+#' @param min.ncols
+#' smallest number of columns which must be in the dataset
 #'
 #' @export
 prepCalData <- function(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.ncols = 2) {
