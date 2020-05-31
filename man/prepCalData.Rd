@@ -4,7 +4,7 @@
 \alias{prepCalData}
 \title{Prepares calibration data}
 \usage{
-prepCalData(x, exclrows = NULL, exclcols = NULL)
+prepCalData(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.ncols = 2)
 }
 \arguments{
 \item{x}{matrix or data frame with values (calibration set)}
@@ -12,6 +12,10 @@ prepCalData(x, exclrows = NULL, exclcols = NULL)
 \item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
 
 \item{exclcols}{columns to be excluded from calculations (numbers, names or vector with logical values)}
+
+\item{min.nrows}{smallest number of rows which must be in the dataset}
+
+\item{min.ncols}{smallest number of columns which must be in the dataset}
 }
 \description{
 Prepares calibration data
