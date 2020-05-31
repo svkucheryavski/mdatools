@@ -807,7 +807,7 @@ repmat <- function(x, nrows, ncols = nrows) {
 #' columns to be excluded from calculations (numbers, names or vector with logical values)
 #'
 #' @export
-prepCalData <- function(x, exclrows = NULL, exclcols = NULL) {
+prepCalData <- function(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.ncols = 2) {
 
    # check that x has a dimension
    stopifnot("Data values must be provided in form of a matrix or a data frame." = !is.null(dim(x)))
@@ -823,8 +823,13 @@ prepCalData <- function(x, exclrows = NULL, exclcols = NULL) {
    }
 
    # check number of rows
-   if (nrow(x) - length(attr(x, "exclrows")) < 2) {
-      stop("At least two measurements must be provided (rows of 'x').")
+   if (nrow(x) - length(attr(x, "exclrows")) < min.nrows) {
+      stop(sprintf("At least %d measurements must be provided (rows of 'x').", min.nrows)
+   }
+
+   # check number of columns
+   if (ncol(x) - length(attr(x, "exclcols")) < min.ncols) {
+      stop(sprintf("At least %d variables must be provided (columns of 'x').", min.ncols)
    }
 
    return(x)
