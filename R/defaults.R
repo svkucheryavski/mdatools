@@ -1,6 +1,17 @@
+#' Generic function to apply a method (e.g. constraint)
+#' @param obj
+#' object
+#' @param ...
+#' other parameters
+#'
+#' @export
+apply <- function(obj, ...) {
+   UseMethod("apply")
+}
+
 #' Plot purity spectra
 #' @param obj
-#' obbject with mcr pure case
+#' object with mcr pure case
 #' @param ...
 #' other parameters
 #'
@@ -11,7 +22,7 @@ plotPuritySpectra <- function(obj, ...) {
 
 #' Plot purity values
 #' @param obj
-#' obbject with mcr pure case
+#' object with mcr pure case
 #' @param ...
 #' other parameters
 #'
@@ -22,7 +33,7 @@ plotPurity <- function(obj, ...) {
 
 #' Plot resolved spectra
 #' @param obj
-#' obbject with mcr case
+#' object with mcr case
 #' @param ...
 #' other parameters
 #'
@@ -33,7 +44,7 @@ plotSpectra <- function(obj, ...) {
 
 #' Plot resolved contributions
 #' @param obj
-#' obbject with mcr case
+#' object with mcr case
 #' @param ...
 #' other parameters
 #'
