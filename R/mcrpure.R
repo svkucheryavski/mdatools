@@ -2,7 +2,7 @@
 #'
 #' @description
 #' \code{mcrpure} allows to resolve spectroscopic data to linear combination of individual spectra
-#' and contributions using the pure variables approach. .
+#' and contributions using the pure variables approach.
 #'
 #' @param x
 #' spectra of mixtures (matrix or data frame).
@@ -88,7 +88,6 @@
 #'    \code{\link{plotPurity.mcrpure}} \tab shows plot with maximum purity of each component.\cr
 #'    \code{\link{plotPuritySpectra.mcrpure}} \tab shows plot with purity spectra.\cr
 #'    \code{\link{plotSpectra.mcr}} \tab shows plot with resolved spectra.\cr
-#'    \code{\link{plotContributions.mcr}} \tab shows plot with resolved contributions.\cr
 #'    \code{\link{plotContributions.mcr}} \tab shows plot with resolved contributions.\cr
 #'    \code{\link{plotVariance.mcr}} \tab shows plot with explained variance.\cr
 #'    \code{\link{plotCumVariance.mcr}} \tab shows plot with cumulative explained variance.\cr
@@ -180,6 +179,7 @@ mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, use.deriv = 0, sav
    # compute explained variance
    model <- c(model, getVariance.mcr(model, x))
    class(model) <- c("mcr", "mcrpure")
+   model$info <- info
 
    return(model)
 }
