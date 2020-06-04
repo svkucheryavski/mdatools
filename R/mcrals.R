@@ -14,6 +14,8 @@
 #' a list with constraints to be applied to spectra  (see details).
 #' @param max.niter
 #' maximum number of iterations
+#' @param solver
+#' which function to use as a solver, can be \code{mcrals.ols}, \code{mcrals.nnls} or user defined.
 #' @param exclrows
 #' rows to be excluded from calculations (numbers, names or vector with logical values).
 #' @param exclcols
@@ -31,6 +33,11 @@
 #' currently supported by running \code{mcrals.constlist()}. See the code examples below or a
 #' Bookdown tutorial for more details.
 #'
+#' The solver function is the one which is applid to resolve concetrations using current version of
+#' resolved spectra and original data or the same but to resolve spectra. If \code{mcrals.ols} is
+#' selected, then ordinary least squares is applied, in this case it can be a good idea to add the
+#' non-negativity constraint. In case if \code{mcrals.nnls} is selected (default value), the solver
+#' will by default obtain solution without negative values and use of this constraint is non needed.
 #'
 #' @return
 #' Returns an object of \code{\link{mcrpure}} class with the following fields:
@@ -122,13 +129,13 @@
 #'
 #' @export
 mcrals <- function(x, ncomp, cont.constraints = list(), spec.constraints = list(), max.niter = 100,
-   exclrows = NULL, exclcols = NULL, verbose = FALSE, info = "") {
+   solver = mcrals.ols, exclrows = NULL, exclcols = NULL, verbose = FALSE, info = "") {
 
    stopifnot("Parameter 'max.niter' should be positive." = max.niter > 0)
 
    # get pure variables and unmix data
    x <- prepCalData(x, exclrows, exclcols, min.nrows = 2, min.ncols = 2)
-   model <- mcrals.cal(x, ncomp, cont.constraints, spec.constraints, max.niter, verbose)
+   model <- mcrals.cal(x, ncomp, cont.constraints, spec.constraints, max.niter, solver, verbose)
 
    # compute explained variance
    model <- c(model, getVariance.mcr(model, x))
@@ -240,7 +247,7 @@ summary.mcrals <- function(object, ...) {
 #' \item{purity }{vector with purity values for resolved components.}
 #'
 #' @export
-mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, max.niter, verbose) {
+mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, max.niter, solver, verbose) {
 
    attrs <- mda.getattr(D)
    exclrows <- attrs$exclrows
@@ -269,13 +276,13 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, max.niter, 
    for (i in seq_len(max.niter)) {
 
       ## compute C and apply constraints
-      C <- D %*% (S %*% solve(crossprod(S)))
+      C <- solver(D, S)
       for (cc in cont.constraints) {
          C <- apply(cc, C)
       }
 
       ## compute S and apply constraints
-      S <- t(D) %*% (C %*% solve(crossprod(C)))
+      S <- solver(D, C)
       for (sc in spec.constraints) {
          S <- apply(sc, S)
       }
@@ -311,6 +318,13 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, max.niter, 
    )
 }
 
+#' Ordinary least squares
+#'
+#'
+mcrals.ols <- function(A, B) {
+   if (ncol(A) != nrow(B)) A <- t(A)
+   return(A %*% (B %*% solve(crossprod(B))))
+}
 
 ########################
 #  Plotting methods    #
