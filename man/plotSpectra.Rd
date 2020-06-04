@@ -7,7 +7,7 @@
 plotSpectra(obj, ...)
 }
 \arguments{
-\item{obj}{obbject with mcr case}
+\item{obj}{object with mcr case}
 
 \item{...}{other parameters}
 }

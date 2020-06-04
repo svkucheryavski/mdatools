@@ -56,7 +56,7 @@ More details and examples can be found in the Bookdown tutorial.
 }
 \description{
 \code{mcrpure} allows to resolve spectroscopic data to linear combination of individual spectra
-and contributions using the pure variables approach. .
+and contributions using the pure variables approach.
 }
 \details{
 The method estimates purity of each variable and then uses the purest ones to decompose the
@@ -167,7 +167,6 @@ Plotting methods for \code{mcrpure} objects:
    \code{\link{plotPurity.mcrpure}} \tab shows plot with maximum purity of each component.\cr
    \code{\link{plotPuritySpectra.mcrpure}} \tab shows plot with purity spectra.\cr
    \code{\link{plotSpectra.mcr}} \tab shows plot with resolved spectra.\cr
-   \code{\link{plotContributions.mcr}} \tab shows plot with resolved contributions.\cr
    \code{\link{plotContributions.mcr}} \tab shows plot with resolved contributions.\cr
    \code{\link{plotVariance.mcr}} \tab shows plot with explained variance.\cr
    \code{\link{plotCumVariance.mcr}} \tab shows plot with cumulative explained variance.\cr

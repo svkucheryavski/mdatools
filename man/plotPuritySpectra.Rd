@@ -7,7 +7,7 @@
 plotPuritySpectra(obj, ...)
 }
 \arguments{
-\item{obj}{obbject with mcr pure case}
+\item{obj}{object with mcr pure case}
 
 \item{...}{other parameters}
 }
