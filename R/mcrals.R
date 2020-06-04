@@ -48,7 +48,8 @@
 #' More details and examples can be found in the Bookdown tutorial.
 #'
 #' @references
-#' 1.
+#' 1. J. Jaumot, R. Gargallo, A. de Juan, and R. Tauler, "A graphical user-friendly interface for
+#' MCR-ALS: a new tool for multivariate curve resolution in MATLAB", Chemometrics and Intelligent #' Laboratory Systems 76, 101-110 (2005).
 #'
 #' 2.
 #'
@@ -124,11 +125,6 @@ mcrals <- function(x, ncomp, cont.constraints = list(), spec.constraints = list(
    exclrows = NULL, exclcols = NULL, verbose = FALSE, info = "") {
 
    stopifnot("Parameter 'max.niter' should be positive." = max.niter > 0)
-   stopifnot("Parameter 'cont.constraints' has incorrect values" =
-      check.constraint(cont.constraints))
-   stopifnot("Parameter 'spec.constraints' has incorrect values" =
-      check.constraint(spec.constraints))
-
 
    # get pure variables and unmix data
    x <- prepCalData(x, exclrows, exclcols, min.nrows = 2, min.ncols = 2)
@@ -244,7 +240,7 @@ summary.mcrals <- function(object, ...) {
 #' \item{purity }{vector with purity values for resolved components.}
 #'
 #' @export
-mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, max.niter, verbose {
+mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, max.niter, verbose) {
 
    attrs <- mda.getattr(D)
    exclrows <- attrs$exclrows
@@ -271,8 +267,6 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, max.niter, 
 
    # main loop for ALS
    for (i in seq_len(max.niter)) {
-      ## normalize S
-      S <- S %*% diag(1 / sqrt(colSums(S^2)), nvarvis, nvarvis)
 
       ## compute C and apply constraints
       C <- D %*% (S %*% solve(crossprod(S)))
