@@ -179,6 +179,7 @@ mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, use.deriv = 0, sav
    # compute explained variance
    model <- c(model, getVariance.mcr(model, x))
    class(model) <- c("mcr", "mcrpure")
+   model$call <- match.call()
    model$info <- info
 
    return(model)
