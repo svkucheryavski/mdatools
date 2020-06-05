@@ -4,12 +4,12 @@
 \alias{employ}
 \title{Generic function to apply a method (e.g. constraint)}
 \usage{
-employ(obj, ...)
+employ(obj, x)
 }
 \arguments{
-\item{obj}{object}
+\item{obj}{constraint object}
 
-\item{...}{other parameters}
+\item{x}{data matrix}
 }
 \description{
 Generic function to apply a method (e.g. constraint)

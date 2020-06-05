@@ -1,11 +1,12 @@
-##' Generic function to apply a method (e.g. constraint)
-##' @param obj
-##' object
-##' @param ...
-##' other parameters
-##'
-##' @export
-employ <- function(obj, ...) {
+#' Generic function to apply a method (e.g. constraint)
+#'
+#' @param obj
+#' constraint object
+#' @param x
+#' data matrix
+#'
+#' @export
+employ <- function(obj, x) {
    UseMethod("employ")
 }
 

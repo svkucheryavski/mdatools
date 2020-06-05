@@ -9,7 +9,6 @@ mcrals.cal(
   ncomp,
   cont.constraints,
   spec.constraints,
-  cont.ini,
   spec.ini,
   cont.solver,
   spec.solver,
@@ -23,20 +22,30 @@ mcrals.cal(
 
 \item{ncomp}{number of pure components}
 
-\item{purevars}{user provided values gor pure variables (no calculation will be run in this case)}
+\item{cont.constraints}{a list with constraints to be applied to contributions  (see details).}
 
-\item{offset}{offset (between 0 and 1) for calculation of parameter alpha}
+\item{spec.constraints}{a list with constraints to be applied to spectra  (see details).}
 
-\item{use.deriv}{a number which tells how to use derivative.}
+\item{spec.ini}{a matrix with initial estimation of the pure components spectra.}
 
-\item{savgol}{list with parameters for Savitzky-Golay preprocessing (if \code{use.deriv} is not 0).}
+\item{cont.solver}{which function to use as a solver for resolving of pure components contributions (see detials).}
+
+\item{spec.solver}{which function to use as a solver for resolving of pure components spectra (see detials).}
+
+\item{max.niter}{maximum number of iterations.}
+
+\item{tol}{tolerance, when explained variance change is smaller than this value, iterations stop.}
+
+\item{verbose}{logical, if TRUE information about every iteration will be shown.}
 }
 \value{
 The function returns a list with with following fields:
 \item{ncomp }{number of pure components.}
-\item{purvars }{vector with indices for pure variables.}
-\item{purityspec }{matrix with purity values for each resolved components.}
-\item{purity }{vector with purity values for resolved components.}
+\item{resspec}{matrix with resolved spectra.}
+\item{rescont}{matrix with resolved contributions.}
+\item{cont.constraints}{list with contribution constraints provided by user.}
+\item{spec.constraints}{list with spectra constraints provided by user.}
+\item{max.niter}{maximum number of iterations}
 }
 \description{
 The method identifies indices of pure variables using the SIMPLISMA

@@ -6,6 +6,14 @@
 \usage{
 mcrals.ols(A, B)
 }
+\arguments{
+\item{A}{a matrix}
+
+\item{B}{a matrix}
+}
 \description{
 Ordinary least squares
+}
+\details{
+Computes OLS solution for A = CB
 }

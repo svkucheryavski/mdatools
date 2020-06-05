@@ -91,7 +91,6 @@
 #' Methods for \code{mcrals} objects:
 #' \tabular{ll}{
 #'    \code{summary.mcrals} \tab shows some statistics for the case.\cr
-#'    \code{\link{unmix.mcrals}} \tab makes unmixing of new set of spectra.\cr
 #'    \code{\link{predict.mcr}} \tab computes contributions by projection of new spectra to
 #'    the resolved ones.\cr
 #' }
@@ -173,7 +172,6 @@
 mcrals <- function(x, ncomp,
    cont.constraints = list(),
    spec.constraints = list(),
-   cont.ini = matrix(runif(nrow(x) * ncomp), nrow(x), ncomp),
    spec.ini = matrix(runif(ncol(x) * ncomp), ncol(x), ncomp),
    cont.solver = mcrals.ols,
    spec.solver = mcrals.ols,
@@ -310,25 +308,35 @@ summary.mcrals <- function(object, ...) {
 #' matrix with the spectra
 #' @param ncomp
 #' number of pure components
-#' @param purevars
-#' user provided values gor pure variables (no calculation will be run in this case)
-#' @param offset
-#' offset (between 0 and 1) for calculation of parameter alpha
-#' @param use.deriv
-#' a number which tells how to use derivative.
-#' @param savgol
-#' list with parameters for Savitzky-Golay preprocessing (if \code{use.deriv} is not 0).
+#' @param cont.constraints
+#' a list with constraints to be applied to contributions  (see details).
+#' @param spec.constraints
+#' a list with constraints to be applied to spectra  (see details).
+#' @param spec.ini
+#' a matrix with initial estimation of the pure components spectra.
+#' @param cont.solver
+#' which function to use as a solver for resolving of pure components contributions (see detials).
+#' @param spec.solver
+#' which function to use as a solver for resolving of pure components spectra (see detials).
+#' @param max.niter
+#' maximum number of iterations.
+#' @param tol
+#' tolerance, when explained variance change is smaller than this value, iterations stop.
+#' @param verbose
+#' logical, if TRUE information about every iteration will be shown.
 #'
 #' @return
 #' The function returns a list with with following fields:
 #' \item{ncomp }{number of pure components.}
-#' \item{purvars }{vector with indices for pure variables.}
-#' \item{purityspec }{matrix with purity values for each resolved components.}
-#' \item{purity }{vector with purity values for resolved components.}
+#' \item{resspec}{matrix with resolved spectra.}
+#' \item{rescont}{matrix with resolved contributions.}
+#' \item{cont.constraints}{list with contribution constraints provided by user.}
+#' \item{spec.constraints}{list with spectra constraints provided by user.}
+#' \item{max.niter}{maximum number of iterations}
 #'
 #' @export
-mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, cont.ini, spec.ini,
-   cont.solver, spec.solver, max.niter, tol, verbose) {
+mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, cont.solver,
+   spec.solver, max.niter, tol, verbose) {
 
    attrs <- mda.getattr(D)
    exclrows <- attrs$exclrows
@@ -345,7 +353,6 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, cont.ini, s
    # remove hidden rows if any
    if (!is.null(exclrows)) {
       D <- D[-exclrows, , drop = FALSE]
-      conc.init <- conc.ini[-exclrows, , drop = FALSE]
       rowind <- rowind[-exclrows]
    }
 
@@ -422,7 +429,13 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, cont.ini, s
 
 #' Ordinary least squares
 #'
+#' @param A
+#' a matrix
+#' @param B
+#' a matrix
 #'
+#' @details
+#' Computes OLS solution for A = CB
 mcrals.ols <- function(A, B) {
    if (ncol(A) != nrow(B)) A <- t(A)
    return(A %*% (B %*% solve(crossprod(B))))
