@@ -12,14 +12,22 @@
 #' a list with constraints to be applied to contributions  (see details).
 #' @param spec.constraints
 #' a list with constraints to be applied to spectra  (see details).
-#' @param max.niter
-#' maximum number of iterations
-#' @param solver
-#' which function to use as a solver, can be \code{mcrals.ols}, \code{mcrals.nnls} or user defined.
+#' @param spec.ini
+#' a matrix with initial estimation of the pure components spectra.
+#' @param cont.solver
+#' which function to use as a solver for resolving of pure components contributions (see detials).
+#' @param spec.solver
+#' which function to use as a solver for resolving of pure components spectra (see detials).
 #' @param exclrows
 #' rows to be excluded from calculations (numbers, names or vector with logical values).
 #' @param exclcols
 #' columns to be excluded from calculations (numbers, names or vector with logical values).
+#' @param verbose
+#' logical, if TRUE information about every iteration will be shown.
+#' @param max.niter
+#' maximum number of iterations.
+#' @param tol
+#' tolerance, when explained variance change is smaller than this value, iterations stop.
 #' @param info
 #' a short text with description of the case (optional).
 #'
@@ -28,16 +36,32 @@
 #' contributions of each chemical component are estimated and then a set of constraints is
 #' applied to each. The method is well described in [1, 2].
 #'
-#' The constraints for contributions and for spectra should be provided as a list with name of the
-#' constraint and all necessary parameters. You can see which constraints and parameters are
-#' currently supported by running \code{mcrals.constlist()}. See the code examples below or a
-#' Bookdown tutorial for more details.
+#' The method assumes that the spectra (D) is a linear combination of pure components spectra (S)
+#' and pure component concentrations (C):
 #'
-#' The solver function is the one which is applid to resolve concetrations using current version of
-#' resolved spectra and original data or the same but to resolve spectra. If \code{mcrals.ols} is
-#' selected, then ordinary least squares is applied, in this case it can be a good idea to add the
-#' non-negativity constraint. In case if \code{mcrals.nnls} is selected (default value), the solver
-#' will by default obtain solution without negative values and use of this constraint is non needed.
+#' D = CS' + E
+#'
+#' So the task is to get C and S by knowing D. In order to do that you need to provide:
+#'
+#' 1. Constraints for spectra and contributions. The constraints should be provided as a list
+#' with name of the constraint and all necessary parameters. You can see which constraints and
+#' parameters are currently supported by running \code{constraintList()}. See the code examples
+#' below or a Bookdown tutorial for more details.
+#'
+#' 2. Initial estimation of the pure components spectra, S. By default method uses a matrix with
+#' random numbers but you can provide a better guess (for example by running \code{\link{mcrpure}})
+#' as a first step.
+#'
+#' 3. Which solver to use for resolving spectra and concentrations. There are two built in solvers:
+#' \code{mcrals.nnls} (default) and \code{mcrals.ols}. The first implements non-negative least
+#' squares method which gives non-negative (thus physically meaningful) solutions. The second is
+#' ordinary least squares and if you want to get non-negative spectra and/or contributions in this
+#' case you need to provide a non-negativity constraint.
+#'
+#' The algorithm iteratively resolves C and S and checks how well CS' is to D. The iterations stop
+#' either when number exceeds value in \code{max.niter} or when improvements (difference between
+#' explained variance on current and previous steps) is smaller than \code{tol} value.
+#'
 #'
 #' @return
 #' Returns an object of \code{\link{mcrpure}} class with the following fields:
@@ -86,7 +110,25 @@
 #' # resolve mixture of carbonhydrates Raman spectra
 #'
 #' data(carbs)
-#' m = mcrpure(carbs$D, ncomp = 3)
+#'
+#' # define constraints for contributions
+#' cc <- list(
+#'    constraint("non-negativity")
+#' )
+#'
+#' # define constraints for spectra
+#' cs <- list(
+#'    constraint("non-negativity"),
+#'    constraint("norm", params = list(type = "area"))
+#' )
+#'
+#' # because by default initial approximation is made by using random numbers
+#' # we need to seed the generator in order to get reproducable results
+#' set.seed(6)
+#'
+#' # run ALS
+#' m <- mcrals(carbs$D, ncomp = 3, cont.constraints = cc, spec.constraints = cs)
+#' summary(m)
 #'
 #' # plot cumulative and individual explained variance
 #' par(mfrow = c(1, 2))
@@ -128,18 +170,46 @@
 #' # See bookdown tutorial for more details.
 #'
 #' @export
-mcrals <- function(x, ncomp, cont.constraints = list(), spec.constraints = list(), max.niter = 100,
-   solver = mcrals.ols, exclrows = NULL, exclcols = NULL, verbose = FALSE, info = "") {
+mcrals <- function(x, ncomp,
+   cont.constraints = list(),
+   spec.constraints = list(),
+   cont.ini = matrix(runif(nrow(x) * ncomp), nrow(x), ncomp),
+   spec.ini = matrix(runif(ncol(x) * ncomp), ncol(x), ncomp),
+   cont.solver = mcrals.ols,
+   spec.solver = mcrals.ols,
+   exclrows = NULL, exclcols = NULL, verbose = FALSE,
+   max.niter = 100, tol = 10^-6, info = "") {
 
    stopifnot("Parameter 'max.niter' should be positive." = max.niter > 0)
 
    # get pure variables and unmix data
    x <- prepCalData(x, exclrows, exclcols, min.nrows = 2, min.ncols = 2)
-   model <- mcrals.cal(x, ncomp, cont.constraints, spec.constraints, max.niter, solver, verbose)
+   model <- mcrals.cal(
+      x, ncomp,
+      cont.constraints = cont.constraints,
+      spec.constraints = spec.constraints,
+      spec.ini = spec.ini,
+      cont.solver = cont.solver,
+      spec.solver = spec.solver,
+      max.niter = max.niter,
+      tol = tol,
+      verbose = verbose
+   )
 
    # compute explained variance
    model <- c(model, getVariance.mcr(model, x))
+
+   # reorder spectra and contributions according to the explained variance
+   ind <- order(model$expvar, decreasing = TRUE)
+   model$rescont <- mda.subset(model$rescont, select = ind)
+   model$resspec <- mda.subset(model$resspec, select = ind)
+   model$expvar <- model$expvar[ind, drop = FALSE]
+   colnames(model$rescont) <- colnames(model$resspec) <- names(model$expvar) <-
+      paste("Comp", seq_len(ncomp))
+
+   # add class name, call and info and return
    class(model) <- c("mcr", "mcrals")
+   model$call <- match.call()
    model$info <- info
 
    return(model)
@@ -202,12 +272,22 @@ summary.mcrals <- function(object, ...) {
       fprintf("Excluded coumns: %d\n", length(object$exclcols))
    }
 
-   #fprintf("\nOffset: %s\n", object$offset)
-   cat("\n")
+   if (length(object$spec.constraints) > 0) {
+      cat("\nConstraints for spectra:\n")
+      cat(paste(" - ", sapply(object$spec.constraints, function(x) x$name), collapse = "\n"))
+      cat("\n")
+   }
 
+   if (length(object$cont.constraints) > 0) {
+      cat("\nConstraints for contributions:\n")
+      cat(paste(" - ", sapply(object$cont.constraints, function(x) x$name), collapse = "\n"))
+      cat("\n")
+   }
+
+   cat("\n")
    data <- cbind(
       round(object$expvar, 2),
-      round(object$cumexpvar, 2),
+      round(object$cumexpvar, 2)
    )
    colnames(data) <- c("Expvar", "Cumexpvar")
    rownames(data) <- colnames(object$resspec)
@@ -247,73 +327,95 @@ summary.mcrals <- function(object, ...) {
 #' \item{purity }{vector with purity values for resolved components.}
 #'
 #' @export
-mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, max.niter, solver, verbose) {
+mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, cont.ini, spec.ini,
+   cont.solver, spec.solver, max.niter, tol, verbose) {
 
    attrs <- mda.getattr(D)
    exclrows <- attrs$exclrows
    exclcols <- attrs$exclcols
 
    # get dimensions
-   nspec <- nrow(D)
+   nobj <- nrow(D)
    nvar <- ncol(D)
-   nvarvis <- nvar - length(exclcols)
 
    # get indices for excluded columns if provided
    colind <- seq_len(nvar)
+   rowind <- seq_len(nobj)
 
-   # remove hidden rows and columns
-   if (!is.null(exclrows)) D <- D[-exclrows, , drop = FALSE]
+   # remove hidden rows if any
+   if (!is.null(exclrows)) {
+      D <- D[-exclrows, , drop = FALSE]
+      conc.init <- conc.ini[-exclrows, , drop = FALSE]
+      rowind <- rowind[-exclrows]
+   }
 
+   # remove hidden columns if any
    if (!is.null(exclcols)) {
       D <- D[, -exclcols, drop = FALSE]
+      spec.ini <- spec.ini[-exclcols, , drop = FALSE]
       colind <- colind[-exclcols]
    }
 
-   # initialize S with random numbers
-   S <- matrix(runif(nvarvis * ncomp), nvarvis, ncomp)
-
    # main loop for ALS
+   totvar <- sum(D^2)
+   var <- 0
+
+   if (verbose) {
+      cat(sprintf("\nStarting iterations (max.niter = %d):\n", max.niter))
+   }
+
+   S <- spec.ini
    for (i in seq_len(max.niter)) {
 
       ## compute C and apply constraints
-      C <- solver(D, S)
+      C <- cont.solver(D, S)
       for (cc in cont.constraints) {
-         C <- apply(cc, C)
+         C <- employ(cc, C)
       }
 
       ## compute S and apply constraints
-      S <- solver(D, C)
+      S <- spec.solver(D, C)
       for (sc in spec.constraints) {
-         S <- apply(sc, S)
+         S <- employ(sc, S)
+      }
+
+      var_old <- var
+      var <- 1 - sum((D - tcrossprod(C, S))^2) / totvar
+      if ( (var - var_old) < tol) {
+         if (verbose) cat("No more improvements.\n")
+         break
+      }
+
+      if (verbose) {
+         cat(sprintf("Iteration %4d, R2 = %7.4f\n", i, var * 100))
       }
    }
+
 
    # if there were excluded rows or columns, handle this
    Ct <- matrix(0, nobj, ncomp)
    Ct[rowind, ] <- C
 
    St <- matrix(0, ncomp, nvar)
-   St[, colind] <- S
+   St[, colind] <- t(S)
 
    # add attributes
    Ct <- mda.setattr(Ct, attrs, "row")
    St <- mda.setattr(St, attrs, "col")
-   colnames(Ct) <- rownames(St) <- paste("Comp", seq_len(ncomp))
 
    if (is.null(attr(Ct, "xaxis.name"))) attr(Ct, "xaxis.name") <- "Observations"
    attr(Ct, "name") <- "Resolved contributions"
    attr(St, "name") <- "Resolved spectra"
 
    # combine the results with model object
-   return(list(rescont = Ct, resspec = mda.t(St)))
    return(
       list(
          ncomp = ncomp,
-         rescont = rescont,
-         resspec = resspec,
+         rescont = Ct,
+         resspec = mda.t(St),
          cont.constraints = cont.constraints,
          spec.constraints = spec.constraints,
-         max.niter = max.niter,
+         max.niter = max.niter
       )
    )
 }
@@ -325,9 +427,5 @@ mcrals.ols <- function(A, B) {
    if (ncol(A) != nrow(B)) A <- t(A)
    return(A %*% (B %*% solve(crossprod(B))))
 }
-
-########################
-#  Plotting methods    #
-########################
 
 
