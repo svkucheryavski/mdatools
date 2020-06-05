@@ -9,10 +9,15 @@ mcrals(
   ncomp,
   cont.constraints = list(),
   spec.constraints = list(),
-  max.niter = 100,
+  cont.ini = matrix(runif(nrow(x) * ncomp), nrow(x), ncomp),
+  spec.ini = matrix(runif(ncol(x) * ncomp), ncol(x), ncomp),
+  cont.solver = mcrals.ols,
+  spec.solver = mcrals.ols,
   exclrows = NULL,
   exclcols = NULL,
   verbose = FALSE,
+  max.niter = 100,
+  tol = 10^-6,
   info = ""
 )
 }
@@ -25,11 +30,21 @@ mcrals(
 
 \item{spec.constraints}{a list with constraints to be applied to spectra  (see details).}
 
-\item{max.niter}{maximum number of iterations}
+\item{spec.ini}{a matrix with initial estimation of the pure components spectra.}
+
+\item{cont.solver}{which function to use as a solver for resolving of pure components contributions (see detials).}
+
+\item{spec.solver}{which function to use as a solver for resolving of pure components spectra (see detials).}
 
 \item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values).}
 
 \item{exclcols}{columns to be excluded from calculations (numbers, names or vector with logical values).}
+
+\item{verbose}{logical, if TRUE information about every iteration will be shown.}
+
+\item{max.niter}{maximum number of iterations.}
+
+\item{tol}{tolerance, when explained variance change is smaller than this value, iterations stop.}
 
 \item{info}{a short text with description of the case (optional).}
 }
@@ -57,10 +72,31 @@ The method implements the iterative ALS algorithm, where, at each iteration, spe
 contributions of each chemical component are estimated and then a set of constraints is
 applied to each. The method is well described in [1, 2].
 
-The constraints for contributions and for spectra should be provided as a list with name of the
-constraint and all necessary parameters. You can see which constraints and parameters are
-currently supported by running \code{mcrals.constlist()}. See the code examples below or a
-Bookdown tutorial for more details.
+The method assumes that the spectra (D) is a linear combination of pure components spectra (S)
+and pure component concentrations (C):
+
+D = CS' + E
+
+So the task is to get C and S by knowing D. In order to do that you need to provide:
+
+1. Constraints for spectra and contributions. The constraints should be provided as a list
+with name of the constraint and all necessary parameters. You can see which constraints and
+parameters are currently supported by running \code{constraintList()}. See the code examples
+below or a Bookdown tutorial for more details.
+
+2. Initial estimation of the pure components spectra, S. By default method uses a matrix with
+random numbers but you can provide a better guess (for example by running \code{\link{mcrpure}})
+as a first step.
+
+3. Which solver to use for resolving spectra and concentrations. There are two built in solvers:
+\code{mcrals.nnls} (default) and \code{mcrals.ols}. The first implements non-negative least
+squares method which gives non-negative (thus physically meaningful) solutions. The second is
+ordinary least squares and if you want to get non-negative spectra and/or contributions in this
+case you need to provide a non-negativity constraint.
+
+The algorithm iteratively resolves C and S and checks how well CS' is to D. The iterations stop
+either when number exceeds value in \code{max.niter} or when improvements (difference between
+explained variance on current and previous steps) is smaller than \code{tol} value.
 }
 \examples{
 library(mdatools)
@@ -68,7 +104,25 @@ library(mdatools)
 # resolve mixture of carbonhydrates Raman spectra
 
 data(carbs)
-m = mcrpure(carbs$D, ncomp = 3)
+
+# define constraints for contributions
+cc <- list(
+   constraint("non-negativity")
+)
+
+# define constraints for spectra
+cs <- list(
+   constraint("non-negativity"),
+   constraint("norm", params = list(type = "area"))
+)
+
+# because by default initial approximation is made by using random numbers
+# we need to seed the generator in order to get reproducable results
+set.seed(6)
+
+# run ALS
+m <- mcrals(carbs$D, ncomp = 3, cont.constraints = cc, spec.constraints = cs)
+summary(m)
 
 # plot cumulative and individual explained variance
 par(mfrow = c(1, 2))

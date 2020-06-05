@@ -4,7 +4,19 @@
 \alias{mcrals.cal}
 \title{Identifies pure variables}
 \usage{
-mcrals.cal(D, ncomp, cont.constraints, spec.constraints, max.niter, verbose)
+mcrals.cal(
+  D,
+  ncomp,
+  cont.constraints,
+  spec.constraints,
+  cont.ini,
+  spec.ini,
+  cont.solver,
+  spec.solver,
+  max.niter,
+  tol,
+  verbose
+)
 }
 \arguments{
 \item{D}{matrix with the spectra}
