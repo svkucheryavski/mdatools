@@ -119,7 +119,7 @@ constraint <- function(name, params = NULL, method = NULL) {
 #' matrix with data values
 #'
 #' @export
-apply.constraint <- function(obj, x) {
+employ.constraint <- function(obj, x) {
    return(do.call(obj$method, c(list(x = x), obj$params)))
 }
 

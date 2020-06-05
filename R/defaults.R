@@ -1,12 +1,12 @@
-#' Generic function to apply a method (e.g. constraint)
-#' @param obj
-#' object
-#' @param ...
-#' other parameters
-#'
-#' @export
-apply <- function(obj, ...) {
-   UseMethod("apply")
+##' Generic function to apply a method (e.g. constraint)
+##' @param obj
+##' object
+##' @param ...
+##' other parameters
+##'
+##' @export
+employ <- function(obj, ...) {
+   UseMethod("employ")
 }
 
 #' Plot purity spectra
