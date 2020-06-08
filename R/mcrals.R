@@ -173,8 +173,8 @@ mcrals <- function(x, ncomp,
    cont.constraints = list(),
    spec.constraints = list(),
    spec.ini = matrix(runif(ncol(x) * ncomp), ncol(x), ncomp),
-   cont.solver = mcrals.ols,
-   spec.solver = mcrals.ols,
+   cont.solver = mcrals.nnls,
+   spec.solver = mcrals.nnls,
    exclrows = NULL, exclcols = NULL, verbose = FALSE,
    max.niter = 100, tol = 10^-6, info = "") {
 
@@ -429,16 +429,124 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
 
 #' Ordinary least squares
 #'
-#' @param A
+#' @param D
 #' a matrix
 #' @param B
 #' a matrix
 #'
 #' @details
-#' Computes OLS solution for A = CB
-mcrals.ols <- function(A, B) {
-   if (ncol(A) != nrow(B)) A <- t(A)
-   return(A %*% (B %*% solve(crossprod(B))))
+#' Computes OLS solution for D = AB' (or D' = AB'), where D, A are known
+#'
+#' @export
+mcrals.ols <- function(D, A) {
+   if (ncol(D) != nrow(A)) D <- t(D)
+   return(D %*% (A %*% solve(crossprod(A))))
 }
 
 
+#' Non-negative least squares
+#'
+#' @param D
+#' a matrix
+#' @param A
+#' a matrix
+#' @param tol
+#' tolerance parameter for algorithm convergence
+#'
+#' @details
+#' Computes NNLS solution for B: D = AB' subject to B >= 0. Implements
+#' the active-set based algorithm proposed by Lawson and Hanson [1].
+#'
+#' @references
+#' 1.  Lawson, Charles L.; Hanson, Richard J. (1995). Solving Least Squares Problems. SIAM.
+#'
+#' @export
+mcrals.nnls <- function(D, A,
+   tol = 10 * .Machine$double.eps * as.numeric(sqrt(crossprod(A[, 1]))) * nrow(A)) {
+
+   if (nrow(D) != nrow(A)) D <- t(D)
+
+   nvars <- ncol(D)
+   ncomp <- ncol(A)
+   itmax <- 30 * ncomp
+   B <- matrix(0, nvars, ncomp)
+
+   for (v in seq_len(nvars)) {
+
+      d <- D[, v, drop = FALSE]
+
+      # initialize vector of zeros and infinites
+      nz <- rep(0, ncomp)
+      wz <- nz
+
+      # vector of non-active columns (positive set)
+      p <- rep(FALSE, ncomp)
+
+      # vector of active columns (zero or active set)
+      z <- rep(TRUE, ncomp)
+
+      # initialize vector with current solution
+      b <- nz
+
+      # compute initial residuals and values for Lagrange multipliers
+      E <- d - A %*% b
+      w <- t(A) %*% E
+
+      iter <- 0
+
+      # outer loop
+      while (any(z) && any(w[z] > tol)) {
+
+         # set intermediate solution for b to zeros
+         b.hat <- nz
+
+         # create vector with Lagrange multipliers for active set (-Inf for positive set)
+         wz[p] <- -Inf
+         wz[z] <- w[z]
+
+         # find index with larges multiplier
+         t <- which.max(wz)
+
+         # move variable corrsponding to the index from active set to positive set
+         p[t] <- TRUE
+         z[t] <- FALSE
+
+         # compute intermediate solution using only positive set
+         b.hat[p] <- mcrals.ols(d, A[, p, drop = FALSE])
+
+         # inner loop to remove elements from the positive set
+         while (any(b.hat[p] <= 0)) {
+            iter <- iter + 1
+
+            if (iter > itmax) {
+               # too many iterations, exitint with current solution
+               return(b.hat)
+            }
+
+            # find which values in current solution are negative but they are in positive lest
+            q <- (b.hat <= 0) & p
+
+            # adjust solution to make them non-negative
+            alpha <- min(b[q]/(b[q] - b.hat[q]))
+            b <- b + alpha * (b.hat - b)
+
+            # reset the active set and positive set according to the current solution
+            z <- ((abs(b) < tol) & p) | z
+            p <- !z
+
+            # compute intermedate solution again
+            b.hat <- nz
+            b.hat[p] <- mcrals.ols(d, A[, p, drop = FALSE])
+         }
+
+         # set current solution to intermediate solution and recompute the multipliers
+         b <- b.hat
+         E <- d - A %*% b
+         w <- crossprod(A, E)
+      }
+
+      B[v, ] <- b
+   }
+
+   return(B)
+}
