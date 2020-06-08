@@ -46,7 +46,7 @@ constraintNorm <- function(x, type = "area") {
    types <- c("area", "length")
    stopifnot("Parameter 'type' should be either 'area' or 'length'." = type %in% types )
    norma <- if(type == "length") sqrt(colSums(x^2)) else colSums(abs(x))
-   return(x %*% diag(1/norma))
+   return(x %*% diag(1/norma, nrow = ncol(x), ncol = ncol(x)))
 }
 
 
