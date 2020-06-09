@@ -34,35 +34,6 @@ mcr <- function(x, ncomp, method, exclrows = NULL, exclcols = NULL, info = "", .
    return(model)
 }
 
-#' MCR predictions
-#'
-#' @description
-#' Applies MCR model to a new set of spectra and returns matrix with contributions.
-#'
-#' @param object
-#' an MCR model (object of class \code{mcr}).
-#' @param x
-#' spectral values (matrix or data frame).
-#' @param ...
-#' other arguments.
-#'
-#' @return
-#' Matrix with contributions
-#'
-#' @export
-predict.mcr <- function(object, x, ...) {
-   attrs <- mda.getattr(x)
-   St <- object$resspec
-   Ct <- x %*% St %*% solve(crossprod(St))
-   f <- as.matrix(rowSums(x))
-   a <- solve(crossprod(Ct)) %*% t(Ct) %*% f
-   A <- if (length(a) == 1) a else diag(as.vector(a))
-   Ct <- Ct %*% A
-
-   Ct <- mda.setattr(Ct, attrs, "rows")
-   return(Ct)
-}
-
 
 ########################
 #  Static methods      #
