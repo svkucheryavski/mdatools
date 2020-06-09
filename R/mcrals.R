@@ -216,6 +216,34 @@ mcrals <- function(x, ncomp,
    return(model)
 }
 
+#' MCR ALS predictions
+#'
+#' @description
+#' Applies MCR-ALS model to a new set of spectra and returns matrix with contributions.
+#'
+#' @param object
+#' an MCR model (object of class \code{mcr}).
+#' @param x
+#' spectral values (matrix or data frame).
+#' @param ...
+#' other arguments.
+#'
+#' @return
+#' Matrix with contributions
+#'
+#' @export
+predict.mcrals <- function(object, x, ...) {
+   attrs <- mda.getattr(x)
+   C <- cont.solver(x, object$resspec)
+   for (cc in object$cont.constraints) {
+      C <- employ(cc, C)
+   }
+   C <- mda.setattr(Ct, attrs, "rows")
+   return(C)
+}
+
+
+
 #' Print method for mcrpure object
 #'
 #' @description
