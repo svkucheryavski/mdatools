@@ -79,7 +79,7 @@
 #' \tabular{ll}{
 #'    \code{summary.mcrpure} \tab shows some statistics for the case.\cr
 #'    \code{\link{unmix.mcrpure}} \tab makes unmixing of new set of spectra.\cr
-#'    \code{\link{predict.mcr}} \tab computes contributions by projection of new spectra to
+#'    \code{\link{predict.mcrpure}} \tab computes contributions by projection of new spectra to
 #'    the resolved ones.\cr
 #' }
 #'
