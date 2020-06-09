@@ -1,12 +1,12 @@
 setup({
-   pdf(file = "mdatools-test-mcrpure.pdf")
-   #pdf(file = tempfile("mdatools-test-mcrpure-", fileext = ".pdf"))
-   #sink(tempfile("mdatools-test-mcrpure-", fileext = ".txt"), append = FALSE, split = FALSE)
+   #pdf(file = "mdatools-test-mcrpure.pdf")
+   pdf(file = tempfile("mdatools-test-mcrpure-", fileext = ".pdf"))
+   sink(tempfile("mdatools-test-mcrpure-", fileext = ".txt"), append = FALSE, split = FALSE)
 })
 
 teardown({
    dev.off()
-   #sink()
+   sink()
 })
 
 
