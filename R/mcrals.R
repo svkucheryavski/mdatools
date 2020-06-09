@@ -183,8 +183,10 @@ mcrals <- function(x, ncomp,
    if (any(spec.ini < 0)) {
       warning("Initial estimation of pure spectra has negative numbers, it can cause problems.")
    }
+
    # get pure variables and unmix data
    x <- prepCalData(x, exclrows, exclcols, min.nrows = 2, min.ncols = 2)
+
    model <- mcrals.cal(
       x, ncomp,
       cont.constraints = cont.constraints,
@@ -402,23 +404,37 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
       cat(sprintf("\nStarting iterations (max.niter = %d):\n", max.niter))
    }
 
-   S <- spec.ini
+   St <- spec.ini
    for (i in seq_len(max.niter)) {
 
-      ## compute C and apply constraints
-      C <- cont.solver(D, S)
+      ## resolve contributions
+      Ct <- tryCatch(
+         cont.solver(D, St),
+         error = function(e) {
+            stop("Unable to resolve the components, perhaps 'ncomp' is too large.", call. = FALSE)
+         }
+      )
+
+      ## apply constraints to the resolved contributions
       for (cc in cont.constraints) {
-         C <- employ(cc, C)
+         Ct <- employ(cc, Ct)
       }
 
-      ## compute S and apply constraints
-      S <- spec.solver(D, C)
+      ## resolve spectra
+      St <- tryCatch(
+         spec.solver(D, Ct),
+         error = function(e) {
+            stop("Unable to resolve the components, perhaps 'ncomp' is too large.", call. = FALSE)
+         }
+      )
+
+      ## apply constraints to the resolved spectra
       for (sc in spec.constraints) {
-         S <- employ(sc, S)
+         St <- employ(sc, St)
       }
 
       var_old <- var
-      var <- 1 - sum((D - tcrossprod(C, S))^2) / totvar
+      var <- 1 - sum((D - tcrossprod(Ct, St))^2) / totvar
       if ( (var - var_old) < tol) {
          if (verbose) cat("No more improvements.\n")
          break
@@ -431,26 +447,26 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
 
 
    # if there were excluded rows or columns, handle this
-   Ct <- matrix(0, nobj, ncomp)
-   Ct[rowind, ] <- C
+   cont <- matrix(0, nobj, ncomp)
+   cont[rowind, ] <- Ct
 
-   St <- matrix(0, ncomp, nvar)
-   St[, colind] <- t(S)
+   spec <- matrix(0, ncomp, nvar)
+   spec[, colind] <- t(St)
 
    # add attributes
-   Ct <- mda.setattr(Ct, attrs, "row")
-   St <- mda.setattr(St, attrs, "col")
+   cont <- mda.setattr(cont, attrs, "row")
+   spec <- mda.setattr(spec, attrs, "col")
 
-   if (is.null(attr(Ct, "xaxis.name"))) attr(Ct, "xaxis.name") <- "Observations"
-   attr(Ct, "name") <- "Resolved contributions"
-   attr(St, "name") <- "Resolved spectra"
+   if (is.null(attr(cont, "xaxis.name"))) attr(cont, "xaxis.name") <- "Observations"
+   attr(cont, "name") <- "Resolved contributions"
+   attr(spec, "name") <- "Resolved spectra"
 
    # combine the results with model object
    return(
       list(
          ncomp = ncomp,
-         rescont = Ct,
-         resspec = mda.t(St),
+         rescont = cont,
+         resspec = mda.t(spec),
          cont.constraints = cont.constraints,
          spec.constraints = spec.constraints,
          max.niter = max.niter
