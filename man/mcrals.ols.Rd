@@ -4,16 +4,16 @@
 \alias{mcrals.ols}
 \title{Ordinary least squares}
 \usage{
-mcrals.ols(A, B)
+mcrals.ols(D, A)
 }
 \arguments{
-\item{A}{a matrix}
+\item{D}{a matrix}
 
-\item{B}{a matrix}
+\item{A}{a matrix}
 }
 \description{
 Ordinary least squares
 }
 \details{
-Computes OLS solution for A = CB
+Computes OLS solution for D = AB' (or D' = AB'), where D, A are known
 }

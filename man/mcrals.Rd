@@ -10,8 +10,8 @@ mcrals(
   cont.constraints = list(),
   spec.constraints = list(),
   spec.ini = matrix(runif(ncol(x) * ncomp), ncol(x), ncomp),
-  cont.solver = mcrals.ols,
-  spec.solver = mcrals.ols,
+  cont.solver = mcrals.nnls,
+  spec.solver = mcrals.nnls,
   exclrows = NULL,
   exclcols = NULL,
   verbose = FALSE,
@@ -173,7 +173,7 @@ MCR-ALS: a new tool for multivariate curve resolution in MATLAB", Chemometrics a
 Methods for \code{mcrals} objects:
 \tabular{ll}{
    \code{summary.mcrals} \tab shows some statistics for the case.\cr
-   \code{\link{predict.mcr}} \tab computes contributions by projection of new spectra to
+   \code{\link{predict.mcrals}} \tab computes contributions by projection of new spectra to
    the resolved ones.\cr
 }
 
