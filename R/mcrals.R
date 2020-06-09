@@ -91,7 +91,7 @@
 #' Methods for \code{mcrals} objects:
 #' \tabular{ll}{
 #'    \code{summary.mcrals} \tab shows some statistics for the case.\cr
-#'    \code{\link{predict.mcr}} \tab computes contributions by projection of new spectra to
+#'    \code{\link{predict.mcrals}} \tab computes contributions by projection of new spectra to
 #'    the resolved ones.\cr
 #' }
 #'
@@ -236,12 +236,12 @@ mcrals <- function(x, ncomp,
 #' @export
 predict.mcrals <- function(object, x, ...) {
    attrs <- mda.getattr(x)
-   C <- cont.solver(x, object$resspec)
+   Ct <- object$cont.solver(x, object$resspec)
    for (cc in object$cont.constraints) {
-      C <- employ(cc, C)
+      Ct <- employ(cc, Ct)
    }
-   C <- mda.setattr(Ct, attrs, "rows")
-   return(C)
+   Ct <- mda.setattr(Ct, attrs, "rows")
+   return(Ct)
 }
 
 
@@ -469,6 +469,8 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
          resspec = mda.t(spec),
          cont.constraints = cont.constraints,
          spec.constraints = spec.constraints,
+         cont.solver = cont.solver,
+         spec.colver = spec.solver,
          max.niter = max.niter
       )
    )
@@ -478,7 +480,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
 #'
 #' @param D
 #' a matrix
-#' @param B
+#' @param A
 #' a matrix
 #'
 #' @details
