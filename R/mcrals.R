@@ -180,6 +180,9 @@ mcrals <- function(x, ncomp,
 
    stopifnot("Parameter 'max.niter' should be positive." = max.niter > 0)
 
+   if (any(spec.ini < 0)) {
+      warning("Initial estimation of pure spectra has negative numbers, it can cause problems.")
+   }
    # get pure variables and unmix data
    x <- prepCalData(x, exclrows, exclcols, min.nrows = 2, min.ncols = 2)
    model <- mcrals.cal(
