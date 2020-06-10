@@ -3,10 +3,15 @@ v.0.11.0
 
 ## New features
 
-* new method, `mcrpure()`, implementing multivariate curve resolution based on the purity approach (also known as SIMPLISMA)
-* added new dataset, `carbs`, for visualization of MCR methods
+* new method, `mcrals()`, implementing multivariate curve resolution based on the alternating least squares. The method allows user to select among three solvers (OLS, NNLS, FNNLS) and apply several basic constraints (non-negativity, normalization)
 
-## Small improvements
+* new method, `mcrpure()`, implementing multivariate curve resolution based on the purity approach (also known as SIMPLISMA).
+
+* added two datasets, `carbs` with Raman spectra of ribose, glucose and fructose as well as their mixtures and `eminoil`, well known "emulsion in oil" spectroscopic image. Both datasets aim at testing and trying the curve resolution methods.
+
+## Improvements and bug fixes
+
+* fixed bug #88 which appears when initial number of components in PLS model is too large. From v. 0.10.3 in this case the algorithm warns user and reduces maximum number of components automatically. But if cross-validation is used, sometimes for cross-validation local model this number should be even smaller (because local calibration subset has fewer observations). In this case the `pls()` method will raise an error and asks user to limit the maximum number of components and run the model again.
 
 
 v.0.10.4
