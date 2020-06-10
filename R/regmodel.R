@@ -70,13 +70,24 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
          # create a model
          m.loc <- cal.fun(xc, yc, ncomp, method = obj$method, center = obj$center,
             scale = obj$scale, cv = TRUE)
+
+         if (m.loc$ncomp < ncomp) {
+             stop(
+                "Local model inside cross-validation can not be computed with the same number of\n",
+                "components as used for calibration. Limit the number by using parameter 'ncomp'\n",
+                "and run the code again.\n", call. = FALSE
+             )
+         }
+
          r.loc <- predict(m.loc, xt, cv = TRUE)
 
+         # if any have NA values quit
+         if (any(is.na(r.loc$y.pred))) {
+            stop("NA results produced during cross-validation.")
+         }
+
          # save results
-         if (any(is.na(r.loc$y.pred))) stop()
-
          yp.cv[ind, , ] <- yp.cv[ind, , , drop = FALSE] + r.loc$y.pred
-
          jk.coeffs[, , , is] <- jk.coeffs[, , , is, drop = FALSE] +
             array(m.loc$coeffs$values, dim = c(dim(m.loc$coeffs$values), 1))
       }

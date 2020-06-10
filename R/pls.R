@@ -1505,10 +1505,10 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
       c <- as.numeric(crossprod(w, (M %*% w)))
 
       # stop cycle since c-value is very small and can result in singular matrix
-      if (!cv && c < 2 * .Machine$double.eps) {
+      if (c < 2 * .Machine$double.eps) {
          n <- n - 1
          warning(paste0(
-            "PLS can not compute more than ", n, " components (eigenvalues are too small)."
+            "PLS can not compute more than ", n, " components (eigenvalues are too small). "
          ), call. = FALSE)
          break
       }
@@ -1684,9 +1684,11 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
       return(model)
    }
 
-   # compute eigenvalues
+   # compute x-scores and residuals
    xscores <- x %*% (fit$weights %*% solve(crossprod(fit$xloadings, fit$weights)))
    yscores <- as.matrix(y) %*% fit$yloadings
+
+   # compute eigenvalues
    xeigenvals <- colSums(xscores^2) / (xc.nrows - 1)
    attr(xeigenvals, "DoF") <- (xc.nrows - 1)
    yeigenvals <- colSums(yscores^2) / (xc.nrows - 1)
