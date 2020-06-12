@@ -1,41 +1,73 @@
 setup({
-   #pdf(file = "mdatools-test-mcrpure.pdf")
-   pdf(file = tempfile("mdatools-test-mcrpure-", fileext = ".pdf"))
-   sink(tempfile("mdatools-test-mcrpure-", fileext = ".txt"), append = FALSE, split = FALSE)
+   pdf(file = "mdatools-test-mcrpure.pdf")
+   #pdf(file = tempfile("mdatools-test-mcrpure-", fileext = ".pdf"))
+   #sink(tempfile("mdatools-test-mcrpure-", fileext = ".txt"), append = FALSE, split = FALSE)
 })
 
 teardown({
    dev.off()
-   sink()
+   #sink()
 })
 
+
+#!###################################
+#! Block 1. Testing solver functins #
+#!###################################
 
 context("mcrals: testing solvers")
 
 # simple test from Bro article about fast nnls
 C <- matrix(c(73, 87, 72, 80, 71, 74, 2, 89, 52, 46, 7, 71), ncol = 3)
 D <- matrix(c(49, 67, 68, 20), ncol = 1)
+S.ols <- c(1.123, 0.917, -2.068)
+S.nnls <- c(0.650, 0, 0)
 
 test_that("mcrals.ols works correctly", {
-   S.ols <- mcrals.ols(D, C)
-   expect_equal(dim(S.ols), c(ncol(D), ncol(C)))
-   expect_equal(round(as.numeric(S.ols), 3), c(1.123, 0.917, -2.068))
+   res <- mcrals.ols(D, C)
+   expect_equal(dim(res), c(ncol(D), ncol(C)))
+   expect_equal(round(as.numeric(res), 3), S.ols)
 })
 
 test_that("mcrals.nnls works correctly", {
-   S.nnls <- mcrals.nnls(D, C)
-   expect_equal(dim(S.nnls), c(ncol(D), ncol(C)))
-   expect_equal(round(as.numeric(S.nnls), 3), c(0.650, 0, 0))
+   res <- mcrals.nnls(D, C)
+   expect_equal(dim(res), c(ncol(D), ncol(C)))
+   expect_equal(round(as.numeric(res), 3), S.nnls)
 })
 
+test_that("mcrals.nnls works correctly", {
+   res <- mcrals.fcnnls(D, C)
+   expect_equal(dim(res), c(ncol(D), ncol(C)))
+   expect_equal(round(as.numeric(res), 3), S.nnls)
+})
 
-# prepare data for other tests
-data(carbs)
-C <- carbs$C
-S <- carbs$S
-D <- carbs$D
-D.ini <- pca(D, 3)$loadings
-D.ini <- abs(D.ini)
+# simple test from Benthem and Keenan article about fast nnls
+C <- matrix(c(95, 23, 61, 42, 89, 76, 46, 2, 82, 44, 62, 79), ncol = 3)
+D <- matrix(c(92, 74, 18, 41, 99, 19, 41, 61, 80, 43, 51, 39), ncol = 3)
+S.ols  <- c(-0.468, 0.833, 0.284, 0.748, -0.150, 0.286, 0.661, .272, 0.335)
+S.nnls  <- c(0, 0.687, 0.284, 0.627, 0, 0.286, 0.352, 0.287, 0.335)
+
+test_that("mcrals.ols works correctly", {
+   res <- mcrals.ols(D, C)
+   expect_equal(dim(res), c(ncol(D), ncol(C)))
+   expect_equal(round(as.numeric(res), 3), S.ols)
+})
+
+test_that("mcrals.nnls works correctly", {
+   res <- mcrals.nnls(D, C)
+   expect_equal(dim(res), c(ncol(D), ncol(C)))
+   expect_equal(round(as.numeric(res), 3), S.nnls)
+})
+
+test_that("mcrals.fcnnls works correctly", {
+   res <- mcrals.fcnnls(D, C)
+   expect_equal(dim(res), c(ncol(D), ncol(C)))
+   expect_equal(round(as.numeric(res), 3), S.nnls)
+})
+
+#!####################################
+#! Block 2. Simple tests for SIMDATA #
+#!####################################
+
 
 # concentration constrains
 cc <- list(
@@ -49,7 +81,117 @@ sc <- list(
 )
 
 # solvers
-solvers <- list(mcrals.ols, mcrals.nnls)
+solvers <- list(mcrals.ols, mcrals.nnls, mcrals.fcnnls)
+
+
+context("mcrals: testing for simdata")
+
+data(simdata)
+
+D <- simdata$spectra.c[order(simdata$conc.c[, 1]), ]
+attr(D, "yaxis.name") <- "Time, s"
+attr(D, "yaxis.values") <- seq(0, 10, length.out = nrow(simdata$spectra.c))
+
+
+#rm(list = ls())
+#data(simdata)
+#
+#D <- simdata$spectra.c[order(simdata$conc.c[, 1]), ]
+#attr(D, "yaxis.name") <- "Time, s"
+#attr(D, "yaxis.values") <- seq(0, 10, length.out = nrow(simdata$spectra.c))
+#
+#set.seed(6)
+#m1 <- mcrals(D, 3, spec.solver = mcrals.nnls, cont.solver = mcrals.nnls)
+#set.seed(6)
+#m2 <- mcrals(D, 3, spec.solver = mcrals.fcnnls, cont.solver = mcrals.fcnnls)
+#
+#par(mfrow = c(1, 2))
+#plotSpectra(m1)
+#plotSpectra(m2)
+#
+#stop()
+
+
+#set.seed(16)
+#s <- mcrals.ols
+#m1 <- mcrals(D, 3, spec.constraints = sc, cont.constraints = cc, spec.solver = s, cont.solver = s)
+#
+#set.seed(6)
+#s <- mcrals.nnls
+#m1 <- mcrals(D, 3, spec.constraints = sc, cont.constraints = cc, spec.solver = s, cont.solver = s)
+#
+#set.seed(6)
+#s <- mcrals.fcnnls
+#m1 <- mcrals(D, 3, spec.constraints = sc, cont.constraints = cc, spec.solver = s, cont.solver = s)
+#traceback()
+
+
+n <- 1
+for (s in solvers) {
+
+   set.seed(1)
+   par(mfrow = c(1, 1))
+   plot.new()
+   plot.window(xlim = c(0, 1), ylim = c(0, 1))
+   text(0.25, 1, paste0("mcrals - solver - ", n), pos = 4, font = 2)
+
+   expect_silent(m <- mcrals(D, 3, spec.constraints = sc, cont.constraints = cc,
+      spec.solver = s, cont.solver = s))
+   summary(m)
+
+   par(mfrow = c(2, 1))
+   expect_silent(plotSpectra(m))
+   expect_silent(plotContributions(m))
+
+   par(mfrow = c(2, 1))
+   expect_silent(plotSpectra(m))
+   expect_silent(plotContributions(m))
+
+   expect_silent(m <- mcrals(D, 3, spec.constraints = sc, cont.constraints = cc,
+      exclcols = 141:150,
+      spec.solver = s, cont.solver = s))
+   summary(m)
+
+   par(mfrow = c(2, 1))
+   expect_silent(plotSpectra(m))
+   expect_silent(plotContributions(m))
+
+   expect_silent(mcrals(D, 3, spec.constraints = sc, cont.constraints = cc,
+      exclrows = 1:10,
+      spec.solver = s, cont.solver = s))
+   summary(m)
+
+   par(mfrow = c(2, 1))
+   expect_silent(plotSpectra(m))
+   expect_silent(plotContributions(m, type = "l"))
+
+   n <- n + 1
+}
+
+context("mcrals: compare nnls and fcnnls")
+
+test_that("nnls and fcnnls give identical results", {
+   set.seed(6)
+   m1 <- mcrals(D, 3, spec.solver = mcrals.nnls, cont.solver = mcrals.nnls)
+   set.seed(6)
+   m2 <- mcrals(D, 3, spec.solver = mcrals.fcnnls, cont.solver = mcrals.fcnnls)
+
+   expect_equal(m1$resspec, m2$resspec)
+   expect_equal(m1$rescont, m2$rescont)
+   expect_equal(m1$expvar, m2$expvar)
+})
+
+#!#########################################
+#! Block 3. Thorough tests based on Carbs #
+#!#########################################
+
+# prepare data for other tests
+data(carbs)
+C <- carbs$C
+S <- carbs$S
+D <- carbs$D
+D.ini <- pca(D, 3)$loadings
+D.ini <- abs(D.ini)
 
 params_ok <- list(
    list(ncomp = 1),
@@ -180,46 +322,3 @@ for (s in solvers) {
    n <- n + 1
 }
 
-context("mcrals: testing for simdata")
-
-data(simdata)
-
-D <- simdata$spectra.c[order(simdata$conc.c[, 1]), ]
-attr(D, "yaxis.name") <- "Time, s"
-attr(D, "yaxis.values") <- seq(0, 10, length.out = nrow(simdata$spectra.c))
-
-# concentration constrains
-cc <- list(
-   constraint("non-negativity")
-)
-
-# spectral constrains
-sc <- list(
-   constraint("non-negativity"),
-   constraint("norm", params = list(type = "area"))
-)
-
-expect_silent(m <- mcrals(D, 3, spec.constraints = sc, cont.constraints = cc))
-summary(m)
-
-par(mfrow = c(2, 1))
-expect_silent(plotSpectra(m))
-expect_silent(plotContributions(m))
-
-par(mfrow = c(2, 1))
-expect_silent(plotSpectra(m))
-expect_silent(plotContributions(m))
-
-expect_silent(m <- mcrals(D, 3, spec.constraints = sc, cont.constraints = cc, exclcols = 141:150))
-summary(m)
-
-par(mfrow = c(2, 1))
-expect_silent(plotSpectra(m))
-expect_silent(plotContributions(m))
-
-expect_silent(mcrals(D, 3, spec.constraints = sc, cont.constraints = cc, exclrows = 1:10))
-summary(m)
-
-par(mfrow = c(2, 1))
-expect_silent(plotSpectra(m))
-expect_silent(plotContributions(m, type = "l"))

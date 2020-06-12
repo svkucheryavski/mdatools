@@ -411,7 +411,9 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
       Ct <- tryCatch(
          cont.solver(D, St),
          error = function(e) {
-            stop("Unable to resolve the components, perhaps 'ncomp' is too large.", call. = FALSE)
+            print(e)
+            stop("Unable to resolve the components, perhaps 'ncomp' is too large.\n
+               or initial estimates for spectra are not good enough.", call. = FALSE)
          }
       )
 
@@ -424,7 +426,9 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
       St <- tryCatch(
          spec.solver(D, Ct),
          error = function(e) {
-            stop("Unable to resolve the components, perhaps 'ncomp' is too large.", call. = FALSE)
+            print(e)
+            stop("Unable to resolve the components, perhaps 'ncomp' is too large.\n
+               or initial estimates for spectra are not good enough.", call. = FALSE)
          }
       )
 
@@ -515,12 +519,12 @@ mcrals.nnls <- function(D, A,
 
    if (nrow(D) != nrow(A)) D <- t(D)
 
-   nvars <- ncol(D)
+   nvar <- ncol(D)
    ncomp <- ncol(A)
    itmax <- 30 * ncomp
-   B <- matrix(0, nvars, ncomp)
+   B <- matrix(0, nvar, ncomp)
 
-   for (v in seq_len(nvars)) {
+   for (v in seq_len(nvar)) {
 
       d <- D[, v, drop = FALSE]
 
@@ -598,4 +602,173 @@ mcrals.nnls <- function(D, A,
    }
 
    return(B)
+}
+
+
+#' Fast combinatorial non-negative least squares
+#'
+#' @param D
+#' a matrix
+#' @param A
+#' a matrix
+#' @param tol
+#' tolerance parameter for algorithm convergence
+#'
+#' @details
+#' Computes Fast combinatorial NNLS solution for B: D = AB' subject to B >= 0. Implements
+#' the method described in [1].
+#'
+#' @references
+#' 1.
+#'
+#' @export
+mcrals.fcnnls <- function(D, A,
+   tol = 10 * .Machine$double.eps * as.numeric(sqrt(crossprod(A[, 1]))) * nrow(A)) {
+
+   ind2sub <- function(size, ind) {
+      return(list(
+         r = ((ind - 1) %% size[1]) + 1,
+         c = floor((ind - 1) / size[1]) + 1
+      ))
+   }
+
+   sub2ind <- function(size, r, c) {
+      return((c - 1) * size[1] + r)
+   }
+
+   cssls <- function(AtD, AtA, P.set = NULL) {
+
+      if (is.null(P.set) || length(P.set) == 0 || all(P.set)) {
+         return(solve(AtA, AtD))
+      }
+
+      B <- matrix(0, nrow(AtD), ncol(AtD))
+      ncomp <- nrow(P.set)
+      nvar <- ncol(P.set)
+
+      codedPset <- (2^((ncomp - 1):0)) %*% P.set
+
+      sortedEset <- order(codedPset)
+      sortedPset <- codedPset[sortedEset]
+
+      breaks <- diff(sortedPset)
+      breakIdx <- c(0, which(breaks > 0), nvar)
+
+      for (k in seq_len(length(breakIdx) - 1)) {
+         cols2solve <- sortedEset[(breakIdx[k] + 1) : breakIdx[k+1]]
+         vars <- P.set[, sortedEset[breakIdx[k] + 1]]
+         B[vars, cols2solve] <- solve(
+            AtA[vars, vars, drop = FALSE],
+            AtD[vars, cols2solve, drop = FALSE]
+         )
+      }
+
+      return(B)
+   }
+
+
+   if (nrow(D) != nrow(A)) D <- t(D)
+
+   nvar <- ncol(D)
+   ncomp <- ncol(A)
+   nobj <- nrow(A)
+
+   W <- matrix(0, ncomp, nvar)
+   iter <- 0
+   maxiter <- 3 * ncomp
+
+   # precompute parts of pseudoinverse
+   AtA <- crossprod(A)
+   AtD <- crossprod(A, D)
+
+   # Obtain the initial feasible solution and corresponding passive set
+   B <- cssls(AtD, AtA)
+   P.set <- B > 0
+   B[!P.set] <- 0
+   B.hat <- B
+
+   # F.set contains indices of variables where there is at least one
+   # negative coefficient (active columns)
+   F.set <- which(!apply(P.set, 2, all))
+
+   # active set algorithm for NNLS
+   while (length(F.set) != 0) {
+      # get solution for the variables from active columns
+      B[, F.set] <- cssls(AtD[, F.set, drop = FALSE], AtA, P.set[, F.set, drop = FALSE])
+
+      # find variables from active columns where at least one coefficient is negative
+      # and keep them in H.set (so it is a part of F.set which was not improved)
+      H.set <- F.set[which(apply(B[, F.set, drop = FALSE] < 0, 2, any))]
+
+      # make infeasible solutions feasible (standard NNLS inner loop)
+      # get number of currently active columns
+      nHset <- length(H.set)
+      if (nHset > 0) {
+
+         while (length(H.set) != 0 && (iter < maxiter)) {
+            iter <- iter + 1
+            alpha <- matrix(Inf, ncomp, nHset)
+
+            # find rows and columns of all negative coefficients in the passive set
+            nvInd <- which(P.set[, H.set, drop = FALSE] & (B[, H.set, drop = FALSE] < 0),
+               arr.ind = TRUE)
+            nvR <- nvInd[, 1]
+            nvC <- nvInd[, 2]
+
+            # convert rows and columns into indices for every negative coefficient in
+            # the passive set — indices based on the size of H.set and alpha
+            hIdx <- sub2ind(dim(alpha), nvR, nvC)
+
+            # get similar indices but based on the size of B
+            bIdx <- sub2ind(dim(B), nvR, H.set[nvC])
+
+            # compute alpha for the negative coefficients
+            alpha[hIdx] <- B.hat[bIdx] / (B.hat[bIdx] - B[bIdx])
+
+            # find smallest values for alpha in each column
+            alphaMin <- apply(alpha, 2, min)
+
+            # find row indices which contain the smallest values
+            alphaMinIdx <- apply(alpha, 2, which.min)
+
+            # replace alpha values with the smallest ones for each column
+            alpha <- matrix(alphaMin, ncomp, nHset, byrow = TRUE)
+
+            # adjust coefficients from the problematic columns
+            B.hat[, H.set] <- B.hat[, H.set] - alpha * (B.hat[, H.set] - B[, H.set])
+
+            # get indices of the coefficients with smallest alpha in each column
+            # and set them to 0 plus remove them from the passive set
+            idx2zero <- sub2ind(dim(B.hat), alphaMinIdx, H.set)
+            B.hat[idx2zero] <- 0
+            P.set[idx2zero] <- FALSE
+
+            B[, H.set] <- cssls(AtD[, H.set, drop = FALSE], AtA, P.set[, H.set, drop = FALSE])
+            H.set <- which(apply(B < 0, 2, any))
+            nHset <- length(H.set)
+         }
+
+      }
+
+
+      # Check solutions for optimality
+      W[, F.set] <- AtD[, F.set, drop = FALSE] - AtA %*% B[, F.set, drop = FALSE]
+      J.set <- apply(((!P.set[, F.set, drop = FALSE]) * W[, F.set, drop = FALSE]) <= 0, 2, all)
+      F.set <- F.set[!J.set]
+
+
+      # For non-optimal solutions, add the appropriate variable to Pset
+      if (length(F.set) > 0) {
+         mxidx <- apply((!P.set[, F.set, drop = FALSE]) * W[, F.set, drop = FALSE], 2, which.max)
+         P.set[sub2ind(c(ncomp, nvar), mxidx, F.set)] <- TRUE
+         B.hat[, F.set] <- B[, F.set]
+      }
+
+      if (iter == maxiter) {
+         warning("Maximum number of iterations is reached, quit with current solution.")
+         return(t(B))
+      }
+   }
+
+   return(t(B))
 }
