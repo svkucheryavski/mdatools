@@ -14,6 +14,12 @@ getImplementedConstraints <- function() {
          method = constraintNorm,
          params = list(type = "area"),
          info = "Normalization constraint (type can be either 'area' or 'length')."
+      ),
+      "angle" = list(
+         name = "angle",
+         method = constraintAngle,
+         params = list(ratio = 0.05),
+         info = "Angle constraint (ratio is how many percent of mean to add)."
       )
    )
 }
@@ -50,6 +56,21 @@ constraintNorm <- function(x, type = "area") {
    return(x %*% diag(1/norma, nrow = ncol(x), ncol = ncol(x)))
 }
 
+#' Method for angle constraint
+#'
+#' @description
+#' Adds a small portion of mean to contributions or spectra to increase contrast
+#'
+#' @param x
+#' data matrix (spectra or contributions)
+#' @param ratio
+#' how many percent of mean to add (between 0 and 1)
+#'
+constraintAngle <- function(x, ratio = 0.05) {
+   stopifnot("Parameter 'ratio' should be between 0 and 1." = ratio >= 0 && ratio <= 1 )
+   m <- apply(x, 1, mean)
+   return(x * (1 - ratio) + matrix(m * ratio, nrow(x), ncol(x)))
+}
 
 #' Class for MCR-ALS constraint
 #'
