@@ -1,12 +1,12 @@
 setup({
-   pdf(file = "mdatools-test-mcrpure.pdf")
-   #pdf(file = tempfile("mdatools-test-mcrpure-", fileext = ".pdf"))
-   #sink(tempfile("mdatools-test-mcrpure-", fileext = ".txt"), append = FALSE, split = FALSE)
+   #pdf(file = "mdatools-test-mcrpure.pdf")
+   pdf(file = tempfile("mdatools-test-mcrpure-", fileext = ".pdf"))
+   sink(tempfile("mdatools-test-mcrpure-", fileext = ".txt"), append = FALSE, split = FALSE)
 })
 
 teardown({
    dev.off()
-   #sink()
+   sink()
 })
 
 
@@ -34,7 +34,7 @@ test_that("mcrals.nnls works correctly", {
    expect_equal(round(as.numeric(res), 3), S.nnls)
 })
 
-test_that("mcrals.nnls works correctly", {
+test_that("mcrals.fcnnls works correctly", {
    res <- mcrals.fcnnls(D, C)
    expect_equal(dim(res), c(ncol(D), ncol(C)))
    expect_equal(round(as.numeric(res), 3), S.nnls)
@@ -91,39 +91,6 @@ data(simdata)
 D <- simdata$spectra.c[order(simdata$conc.c[, 1]), ]
 attr(D, "yaxis.name") <- "Time, s"
 attr(D, "yaxis.values") <- seq(0, 10, length.out = nrow(simdata$spectra.c))
-
-
-#rm(list = ls())
-#data(simdata)
-#
-#D <- simdata$spectra.c[order(simdata$conc.c[, 1]), ]
-#attr(D, "yaxis.name") <- "Time, s"
-#attr(D, "yaxis.values") <- seq(0, 10, length.out = nrow(simdata$spectra.c))
-#
-#set.seed(6)
-#m1 <- mcrals(D, 3, spec.solver = mcrals.nnls, cont.solver = mcrals.nnls)
-#set.seed(6)
-#m2 <- mcrals(D, 3, spec.solver = mcrals.fcnnls, cont.solver = mcrals.fcnnls)
-#
-#par(mfrow = c(1, 2))
-#plotSpectra(m1)
-#plotSpectra(m2)
-#
-#stop()
-
-
-#set.seed(16)
-#s <- mcrals.ols
-#m1 <- mcrals(D, 3, spec.constraints = sc, cont.constraints = cc, spec.solver = s, cont.solver = s)
-#
-#set.seed(6)
-#s <- mcrals.nnls
-#m1 <- mcrals(D, 3, spec.constraints = sc, cont.constraints = cc, spec.solver = s, cont.solver = s)
-#
-#set.seed(6)
-#s <- mcrals.fcnnls
-#m1 <- mcrals(D, 3, spec.constraints = sc, cont.constraints = cc, spec.solver = s, cont.solver = s)
-#traceback()
 
 
 n <- 1
@@ -294,7 +261,7 @@ for (s in solvers) {
                original = prep.norm(mda.subset(mda.t(S), i), "area"),
                resolved = prep.norm(mda.subset(mda.t(m$resspec), i), "area")
             ), type = "l", col = c("gray", "red"), lwd = c(2, 1), opacity = c(0.5, 1),
-            , xlim = c(1600, 200), xticks = seq(1600, 200, by = -200)
+            xlim = c(1600, 200), xticks = seq(1600, 200, by = -200)
          )
       }
 
