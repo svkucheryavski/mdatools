@@ -449,7 +449,6 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
       }
    }
 
-
    # if there were excluded rows or columns, handle this
    cont <- matrix(0, nobj, ncomp)
    cont[rowind, ] <- Ct
@@ -619,7 +618,9 @@ mcrals.nnls <- function(D, A,
 #' the method described in [1].
 #'
 #' @references
-#' 1.
+#' 1. Van Benthem, M.H. and Keenan, M.R. (2004), Fast algorithm for the solution of large‐scale
+#' non‐negativity‐constrained least squares problems. J. Chemometrics, 18: 441-450. 
+#' doi:10.1002/cem.889
 #'
 #' @export
 mcrals.fcnnls <- function(D, A,
@@ -638,7 +639,7 @@ mcrals.fcnnls <- function(D, A,
 
    cssls <- function(AtD, AtA, P.set = NULL) {
 
-      if (is.null(P.set) || length(P.set) == 0 || all(P.set)) {
+      if (is.null(P.set) || length(P.set) == 0 || all(P.set)) {
          return(solve(AtA, AtD))
       }
 
@@ -750,12 +751,10 @@ mcrals.fcnnls <- function(D, A,
 
       }
 
-
       # Check solutions for optimality
       W[, F.set] <- AtD[, F.set, drop = FALSE] - AtA %*% B[, F.set, drop = FALSE]
       J.set <- apply(((!P.set[, F.set, drop = FALSE]) * W[, F.set, drop = FALSE]) <= 0, 2, all)
       F.set <- F.set[!J.set]
-
 
       # For non-optimal solutions, add the appropriate variable to Pset
       if (length(F.set) > 0) {
