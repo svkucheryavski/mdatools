@@ -265,7 +265,8 @@ predict.mcrpure <- function(object, x, ...) {
    a <- solve(crossprod(Ct)) %*% t(Ct) %*% f
    A <- if (length(a) == 1) a else diag(as.vector(a))
    Ct <- Ct %*% A
-   Ct <- mda.setattr(Ct, attrs, "rows")
+   colnames(Ct) <- colnames(object$rescont)
+   Ct <- mda.setattr(Ct, attrs, "row")
    return(Ct)
 }
 
