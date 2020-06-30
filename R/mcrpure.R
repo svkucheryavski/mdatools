@@ -295,7 +295,7 @@ print.mcrpure <- function(x, ...) {
    cat("\nMajor model fields:\n")
    cat("$ncomp - number of calculated components\n")
    cat("$resspec - matrix with resolved spectra\n")
-   cat("$rescons - matrix with resolved concentrations\n")
+   cat("$rescont - matrix with resolved contributions\n")
    cat("$purityspec - matrix with purity spectra\n")
    cat("$purevars - vector with indices of pure variables\n")
    cat("$purevals - purity values for the selected pure variables\n")
