@@ -131,7 +131,7 @@ plotContributions.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
 plotVariance.mcr <- function(obj, type = "h", labels = "values",
    xticks = seq_len(obj$ncomp), ...) {
 
-   mdaplot(obj$expvar, type = type, labels = labels, ...)
+   mdaplot(obj$expvar, type = type, labels = labels, xticks = xticks, ...)
 }
 
 #' Show plot with cumulative explained variance
@@ -151,7 +151,7 @@ plotVariance.mcr <- function(obj, type = "h", labels = "values",
 plotCumVariance.mcr <- function(obj, type = "b", labels = "values",
    xticks = seq_len(obj$ncomp), ...) {
 
-   mdaplot(obj$cumexpvar, type = type, labels = labels, ...)
+   mdaplot(obj$cumexpvar, type = type, labels = labels, xticks = xticks, ...)
 }
 
 #' Plot summary for MCR model
