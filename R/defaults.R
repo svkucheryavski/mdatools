@@ -3,10 +3,12 @@
 #' @param obj
 #' constraint object
 #' @param x
-#' data matrix
+#' data in question (e.g. resolved spectra)
+#' @param d
+#' matrix with original data
 #'
 #' @export
-employ <- function(obj, x) {
+employ <- function(obj, x, d) {
    UseMethod("employ")
 }
 
