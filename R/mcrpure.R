@@ -233,7 +233,8 @@ unmix.mcrpure <- function(obj, x) {
    St <- mda.setattr(t(St), attrs, "col")
    colnames(Ct) <- rownames(St) <- names(obj$purevars)
 
-   if (is.null(attr(Ct, "xaxis.name"))) attr(Ct, "xaxis.name") <- "Observations"
+   if (is.null(attr(Ct, "yaxis.name"))) attr(Ct, "yaxis.name") <- "Observations"
+   attr(Ct, "xaxis.name") <- attr(St, "yaxis.name") <- "Arbitrary units"
    attr(Ct, "name") <- "Resolved contributions"
    attr(St, "name") <- "Resolved spectra"
 
@@ -441,13 +442,16 @@ getPureVariables <- function(D, ncomp, purevars, offset, use.deriv, savgol) {
       if (purevars[i] == 0) purevars[i] <- which.max(purityspec[i, colind])
       purevals[i] <- purityspec[i, purevars[i]]
    }
+
    purevars <- colind[purevars]
    names(purevars) <- names(purevals) <- rownames(purityspec) <- paste("Comp", seq_len(ncomp))
+
    purityspec <- mda.setattr(purityspec, attrs, "col")
+   attr(purityspec, "name") <- "Purity spectra"
+   attr(purityspec, "yaxis.name") <- "Purity"
 
    attr(purevals, "name") <- "Purity"
    attr(purevals, "xaxis.name") <- "Components"
-   attr(purityspec, "name") <- "Purity spectra"
 
    attr(purevars, "xaxis.name") <- attrs$xaxis.name
    attr(purevars, "xaxis.values") <- purevars
@@ -523,7 +527,7 @@ plotPurity.mcrpure <- function(obj, xticks = seq_len(obj$ncomp), type = "h",
 #' @export
 plotPuritySpectra.mcrpure <- function(obj, comp = seq_len(obj$ncomp), type = "l",
    col = mdaplot.getColors(obj$ncomp), show.lines = TRUE,
-   lines.col = adjustcolor(col, alpha.f = 0.5), lines.lty = 3, lines.lwd = 1, ...) {
+   lines.col = adjustcolor(col, alpha.f = 0.75), lines.lty = 3, lines.lwd = 1, ...) {
 
    stopifnot("Parameter 'comp' has wrong value." = min(comp) > 0 && max(comp) <= obj$ncomp)
    p <- mdaplotg(mda.subset(mda.t(obj$purityspec), comp), type = type, col = col[comp], ...)
