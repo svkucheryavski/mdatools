@@ -419,7 +419,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
 
       ## apply constraints to the resolved contributions
       for (cc in cont.constraints) {
-         Ct <- employ(cc, Ct)
+         Ct <- employ(cc, x = Ct, d = D)
       }
 
       ## resolve spectra
@@ -434,7 +434,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
 
       ## apply constraints to the resolved spectra
       for (sc in spec.constraints) {
-         St <- employ(sc, St)
+         St <- employ(sc, x = St, d = D)
       }
 
       var_old <- var
@@ -619,7 +619,7 @@ mcrals.nnls <- function(D, A,
 #'
 #' @references
 #' 1. Van Benthem, M.H. and Keenan, M.R. (2004), Fast algorithm for the solution of large‐scale
-#' non‐negativity‐constrained least squares problems. J. Chemometrics, 18: 441-450. 
+#' non‐negativity‐constrained least squares problems. J. Chemometrics, 18: 441-450.
 #' doi:10.1002/cem.889
 #'
 #' @export
