@@ -17,15 +17,15 @@ getImplementedConstraints <- function() {
       "norm" = list(
          name = "norm",
          method = constraintNorm,
-         params = list(type = "area"),
-         params.info = list(type = "type of normalization: 'length' or 'area'"),
+         params = list(type = "length"),
+         params.info = list(type = "type of normalization: 'length', 'area' or 'sum'"),
          info = "Normalization (normalize spectra or contributions)"
       ),
       "angle" = list(
          name = "angle",
          method = constraintAngle,
-         params = list(ratio = 0.05),
-         params.info = list(ratio = "how much of mean will be added: between 0 and 1"),
+         params = list(weight = 0.05),
+         params.info = list(weight = "how much of mean will be added: between 0 and 1"),
          info = "Angle (increases contrast among resolved spectra or contributions)"
       )
    )
@@ -62,7 +62,7 @@ constraints.list <- function() {
 #' @param x
 #' data matrix (spectra or contributions)
 #'
-constraintNonNegativity <- function(x) {
+constraintNonNegativity <- function(x, d) {
    x[x < 0] <- 0
    return(x)
 }
@@ -75,14 +75,12 @@ constraintNonNegativity <- function(x) {
 #' @param x
 #' data matrix (spectra or contributions)
 #' @param type
-#' type of normalization ("area" or "length")
+#' type of normalization ("area", "length" or "sum")
 #'
-constraintNorm <- function(x, type = "area") {
-   types <- c("area", "length")
-   stopifnot("Parameter 'type' should be either 'area' or 'length'." = type %in% types )
-   norma <- if(type == "length") sqrt(colSums(x^2)) else colSums(abs(x))
-   norma[norma == 0] <- 1
-   return(x %*% diag(1/norma, nrow = ncol(x), ncol = ncol(x)))
+constraintNorm <- function(x, d, type = "length") {
+   types <- c("area", "length", "sum")
+   stopifnot("Parameter 'type' should be either 'area', 'length' or 'sum'." = type %in% types )
+   return(t(prep.norm(t(x), type)))
 }
 
 #' Method for angle constraint
@@ -92,13 +90,24 @@ constraintNorm <- function(x, type = "area") {
 #'
 #' @param x
 #' data matrix (spectra or contributions)
-#' @param ratio
+#' @param d
+#' matrix with the original spectral values
+#' @param weight
 #' how many percent of mean to add (between 0 and 1)
 #'
-constraintAngle <- function(x, ratio = 0.05) {
-   stopifnot("Parameter 'ratio' should be between 0 and 1." = ratio >= 0 && ratio <= 1 )
-   m <- apply(x, 1, mean)
-   return(x * (1 - ratio) + matrix(m * ratio, nrow(x), ncol(x)))
+constraintAngle <- function(x, d, weight = 0.05) {
+   stopifnot("Parameter 'weight' should be between 0 and 1." = weight >= 0 && weight <= 1 )
+
+   # compute mean values for rows or columns of d
+   m <- apply(d, ifelse(nrow(x) == ncol(d), 2, 1), mean)
+
+   # scale mean values to unit length
+   m <- m / sqrt(sum(m^2))
+
+   # scale data to unit length
+   x <- t(prep.norm(t(x), "length"))
+
+   return((1 - weight) * x + matrix(m * weight, nrow(x), ncol(x)))
 }
 
 #' Class for MCR-ALS constraint
@@ -167,10 +176,12 @@ constraint <- function(name, params = NULL, method = NULL) {
 #' @param obj
 #' object with constraint
 #' @param x
-#' matrix with data values
+#' matrix with pure spectra or contributions
+#' @param d
+#' matrix with original spectral values
 #'
 #' @export
-employ.constraint <- function(obj, x) {
-   return(do.call(obj$method, c(list(x = x), obj$params)))
+employ.constraint <- function(obj, x, d) {
+   return(do.call(obj$method, c(list(x = x, d = d), obj$params)))
 }
 
