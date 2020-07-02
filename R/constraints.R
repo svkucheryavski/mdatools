@@ -1,29 +1,58 @@
 ###################
 # Static methods  #
 ###################
+
+#' Shows a list with implemented constraints
+#'
+#' @export
 getImplementedConstraints <- function() {
    list(
       "non-negativity" = list(
          name = "non-negativity",
          method = constraintNonNegativity,
          params = list(),
-         info = "Non-negativity constraint."
+         params.info = list(),
+         info = "Non-negativity (sets negative values to zero)"
       ),
       "norm" = list(
          name = "norm",
          method = constraintNorm,
          params = list(type = "area"),
-         info = "Normalization constraint (type can be either 'area' or 'length')."
+         params.info = list(type = "type of normalization: 'length' or 'area'"),
+         info = "Normalization (normalize spectra or contributions)"
       ),
       "angle" = list(
          name = "angle",
          method = constraintAngle,
          params = list(ratio = 0.05),
-         info = "Angle constraint (ratio is how many percent of mean to add)."
+         params.info = list(ratio = "how much of mean will be added: between 0 and 1"),
+         info = "Angle (increases contrast among resolved spectra or contributions)"
       )
    )
 }
 
+constraints.list <- function() {
+   constraints <- getImplementedConstraints()
+
+   cat("\nList of constraints available for mcrals():\n")
+   lapply(constraints, function(c) {
+      cat("\n\n")
+      fprintf(" %s\n", c$info)
+      cat(" ---------------\n")
+      fprintf(" name: '%s'\n", c$name)
+
+      if (length(c$params.info) == 0) {
+         cat(" no parameters required\n")
+      } else {
+         cat(" parameters:\n")
+         for (i in seq_along(c$params.info)) {
+            fprintf("  '%s': %s\n", names(c$params.info)[i], c$params.info[[i]])
+         }
+      }
+   })
+
+   invisible()
+}
 
 #' Method for non-negativity constraint
 #'
