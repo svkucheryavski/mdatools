@@ -110,12 +110,12 @@ prep.snv <- function(data) {
 #' Normalization
 #'
 #' @description
-#' Normalizes signals (rows of data matrix) to unit area or unit length
+#' Normalizes signals (rows of data matrix) to unit area, unit length or unit sum
 #'
 #' @param data
 #' a matrix with data values
 #' @param type
-#' type of normalization \code{"area"} or \code{"length"}
+#' type of normalization \code{"area"}, \code{"length"} or \code{"sum"}.
 #'
 #' @return
 #' data matrix with normalized values
@@ -128,7 +128,8 @@ prep.norm <- function(data, type = "area") {
    w <- switch(
       type,
       "area" = apply(abs(data), 1, sum),
-      "length" = sqrt(apply(data^2, 1, sum))
+      "length" = sqrt(apply(data^2, 1, sum)),
+      "sum" = apply(data, 1, sum)
    )
 
    if (is.null(w)) {
