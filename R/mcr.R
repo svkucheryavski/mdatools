@@ -134,7 +134,7 @@ plotVariance.mcr <- function(obj, type = "h", labels = "values", main = "Varianc
    xticks = seq_len(obj$ncomp), ...) {
 
    mdaplot(mda.subset(obj$variance, 1), type = type, labels = labels, xticks = xticks,
-      main = main ...)
+      main = main, ...)
 }
 
 #' Show plot with cumulative explained variance
