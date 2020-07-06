@@ -426,16 +426,17 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
          St <- employ(sc, x = St, d = D)
       }
 
+      if (verbose) {
+         cat(sprintf("Iteration %4d, R2 = %8.5f\n", i, var * 100))
+      }
+
       var_old <- var
-      var <- 1 - sum((D - tcrossprod(Ct, St))^2) / totvar
+      var <- 1 - sum((D - tcrossprod(cont.solver(D, St), St))^2) / totvar
       if ( (var - var_old) < tol) {
          if (verbose) cat("No more improvements.\n")
          break
       }
 
-      if (verbose) {
-         cat(sprintf("Iteration %4d, R2 = %7.4f\n", i, var * 100))
-      }
    }
 
    # predict final Ct values based on last version of the St
