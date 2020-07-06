@@ -300,26 +300,27 @@ summary.mcrals <- function(object, ...) {
       fprintf("Excluded coumns: %d\n", length(object$exclcols))
    }
 
+   cat("\nConstraints for spectra:\n")
    if (length(object$spec.constraints) > 0) {
-      cat("\nConstraints for spectra:\n")
       cat(paste(" - ", sapply(object$spec.constraints, function(x) x$name), collapse = "\n"))
       cat("\n")
+   } else {
+      cat(" - none\n\n")
    }
 
+   cat("\nConstraints for contributions:\n")
    if (length(object$cont.constraints) > 0) {
-      cat("\nConstraints for contributions:\n")
       cat(paste(" - ", sapply(object$cont.constraints, function(x) x$name), collapse = "\n"))
       cat("\n")
+   } else {
+      cat(" - none\n\n")
    }
 
    cat("\n")
-   data <- cbind(
-      round(object$expvar, 2),
-      round(object$cumexpvar, 2)
-   )
-   colnames(data) <- c("Expvar", "Cumexpvar")
-   rownames(data) <- colnames(object$resspec)
-   show(data)
+   out <- round(t(object$variance[1:2, ]), 2)
+   rownames(out) <- colnames(object$variance)
+   colnames(out) <- c("Expvar", "Cumexpvar")
+   show(out)
 }
 
 
