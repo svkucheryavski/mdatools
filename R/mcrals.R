@@ -447,6 +447,16 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
       }
    }
 
+   # predict final Ct values based on last version of the St
+   Ct <- tryCatch(
+      cont.solver(D, St),
+      error = function(e) {
+         print(e)
+         stop("Unable to resolve the components, perhaps 'ncomp' is too large.\n
+            or initial estimates for spectra are not good enough.", call. = FALSE)
+      }
+   )
+
    # if there were excluded rows or columns, handle this
    cont <- matrix(0, nobj, ncomp)
    cont[rowind, ] <- Ct
