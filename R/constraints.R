@@ -31,6 +31,9 @@ getImplementedConstraints <- function() {
    )
 }
 
+#' Shows information about all implemented constraints
+#'
+#' @export
 constraints.list <- function() {
    constraints <- getImplementedConstraints()
 
