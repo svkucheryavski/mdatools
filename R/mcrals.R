@@ -462,7 +462,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
    cont <- mda.setattr(cont, attrs, "row")
    spec <- mda.setattr(spec, attrs, "col")
 
-   if (is.null(attr(cont, "xaxis.name"))) attr(cont, "xaxis.name") <- "Observations"
+   if (is.null(attr(cont, "yaxis.name"))) attr(cont, "yaxis.name") <- "Observations"
    attr(cont, "name") <- "Resolved contributions"
    attr(spec, "name") <- "Resolved spectra"
 
