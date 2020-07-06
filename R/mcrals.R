@@ -237,9 +237,6 @@ mcrals <- function(x, ncomp,
 predict.mcrals <- function(object, x, ...) {
    attrs <- mda.getattr(x)
    Ct <- object$cont.solver(x, object$resspec)
-   for (cc in object$cont.constraints) {
-      Ct <- employ(cc, Ct, NULL)
-   }
    Ct <- mda.setattr(Ct, attrs, "rows")
    return(Ct)
 }
