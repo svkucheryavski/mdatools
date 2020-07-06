@@ -4,12 +4,14 @@
 \alias{employ}
 \title{Generic function to apply a method (e.g. constraint)}
 \usage{
-employ(obj, x)
+employ(obj, x, d)
 }
 \arguments{
 \item{obj}{constraint object}
 
-\item{x}{data matrix}
+\item{x}{data in question (e.g. resolved spectra)}
+
+\item{d}{matrix with original data}
 }
 \description{
 Generic function to apply a method (e.g. constraint)

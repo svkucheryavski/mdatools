@@ -10,7 +10,7 @@
   type = "l",
   col = mdaplot.getColors(obj$ncomp),
   show.lines = TRUE,
-  lines.col = adjustcolor(col, alpha.f = 0.5),
+  lines.col = adjustcolor(col, alpha.f = 0.75),
   lines.lty = 3,
   lines.lwd = 1,
   ...

@@ -9,11 +9,11 @@ prep.norm(data, type = "area")
 \arguments{
 \item{data}{a matrix with data values}
 
-\item{type}{type of normalization \code{"area"} or \code{"length"}}
+\item{type}{type of normalization \code{"area"}, \code{"length"} or \code{"sum"}.}
 }
 \value{
 data matrix with normalized values
 }
 \description{
-Normalizes signals (rows of data matrix) to unit area or unit length
+Normalizes signals (rows of data matrix) to unit area, unit length or unit sum
 }

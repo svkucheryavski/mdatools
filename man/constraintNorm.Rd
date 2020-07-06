@@ -4,12 +4,12 @@
 \alias{constraintNorm}
 \title{Method for normalization constraint}
 \usage{
-constraintNorm(x, type = "area")
+constraintNorm(x, d, type = "length")
 }
 \arguments{
 \item{x}{data matrix (spectra or contributions)}
 
-\item{type}{type of normalization ("area" or "length")}
+\item{type}{type of normalization ("area", "length" or "sum")}
 }
 \description{
 Normalize rows of matrix to unit length or area

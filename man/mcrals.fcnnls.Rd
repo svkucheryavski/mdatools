@@ -26,6 +26,6 @@ the method described in [1].
 }
 \references{
 1. Van Benthem, M.H. and Keenan, M.R. (2004), Fast algorithm for the solution of large‐scale
-non‐negativity‐constrained least squares problems. J. Chemometrics, 18: 441-450. 
+non‐negativity‐constrained least squares problems. J. Chemometrics, 18: 441-450.
 doi:10.1002/cem.889
 }

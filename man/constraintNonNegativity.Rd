@@ -4,7 +4,7 @@
 \alias{constraintNonNegativity}
 \title{Method for non-negativity constraint}
 \usage{
-constraintNonNegativity(x)
+constraintNonNegativity(x, d)
 }
 \arguments{
 \item{x}{data matrix (spectra or contributions)}
