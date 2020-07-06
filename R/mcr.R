@@ -60,12 +60,14 @@ getVariance.mcr <- function(obj, x) {
    cumexpvar <- 100 - cumresvar / sum(x^2) * 100
    expvar <- c(cumexpvar[1], diff(cumexpvar))
 
-   names(cumexpvar) <- names(expvar) <- colnames(obj$resspec)
-   attr(expvar, "name") <- "Variance"
-   attr(cumexpvar, "name") <- "Cumulative variance"
-   attr(expvar, "xaxis.name") <- attr(cumexpvar, "xaxis.name") <- "Components"
-   attr(expvar, "yaxis.name") <- attr(cumexpvar, "yaxis.name") <- "Explained variance, %"
-   return(list(cumexpvar = cumexpvar, expvar = expvar))
+   variance <- rbind(expvar, cumexpvar)
+   colnames(variance) <- colnames(obj$resspec)
+   rownames(variance) <- c("Variance", "Cumulative variance")
+   attr(variance, "name") <- "Explained variance"
+   attr(variance, "xaxis.name") <- "Components"
+   attr(variance, "yaxis.name") <- "Explained variance, %"
+
+   return(variance)
 }
 
 ########################
@@ -128,10 +130,11 @@ plotContributions.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
 #' other parameters suitable for \code{mdaplot}
 #'
 #' @export
-plotVariance.mcr <- function(obj, type = "h", labels = "values",
+plotVariance.mcr <- function(obj, type = "h", labels = "values", main = "Variance",
    xticks = seq_len(obj$ncomp), ...) {
 
-   mdaplot(obj$expvar, type = type, labels = labels, xticks = xticks, ...)
+   mdaplot(mda.subset(obj$variance, 1), type = type, labels = labels, xticks = xticks,
+      main = main ...)
 }
 
 #' Show plot with cumulative explained variance
@@ -148,10 +151,11 @@ plotVariance.mcr <- function(obj, type = "h", labels = "values",
 #' other parameters suitable for \code{mdaplot}
 #'
 #' @export
-plotCumVariance.mcr <- function(obj, type = "b", labels = "values",
+plotCumVariance.mcr <- function(obj, type = "b", labels = "values", main = "Cumulative variance",
    xticks = seq_len(obj$ncomp), ...) {
 
-   mdaplot(obj$cumexpvar, type = type, labels = labels, xticks = xticks, ...)
+   mdaplot(mda.subset(obj$variance, 2), type = type, labels = labels, xticks = xticks,
+      main = main, ...)
 }
 
 #' Plot summary for MCR model
