@@ -200,15 +200,7 @@ mcrals <- function(x, ncomp,
    )
 
    # compute explained variance
-   model <- c(model, getVariance.mcr(model, x))
-
-   # reorder spectra and contributions according to the explained variance
-   ind <- order(model$expvar, decreasing = TRUE)
-   model$rescont <- mda.subset(model$rescont, select = ind)
-   model$resspec <- mda.subset(model$resspec, select = ind)
-   model$expvar <- model$expvar[ind, drop = FALSE]
-   colnames(model$rescont) <- colnames(model$resspec) <- names(model$expvar) <-
-      paste("Comp", seq_len(ncomp))
+   model$variance <- getVariance.mcr(model, x)
 
    # add class name, call and info and return
    class(model) <- c("mcr", "mcrals")
@@ -240,7 +232,6 @@ predict.mcrals <- function(object, x, ...) {
    Ct <- mda.setattr(Ct, attrs, "rows")
    return(Ct)
 }
-
 
 
 #' Print method for mcrpure object
@@ -463,6 +454,9 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
 
    spec <- matrix(0, ncomp, nvar)
    spec[, colind] <- t(St)
+
+   # add names for components
+   rownames(spec) <- colnames(cont) <- paste("Comp", seq_len(ncomp))
 
    # add attributes
    cont <- mda.setattr(cont, attrs, "row")
