@@ -177,7 +177,9 @@ mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, use.deriv = 0, sav
    model <- c(model, unmix.mcrpure(model, x))
 
    # compute explained variance
-   model <- c(model, getVariance.mcr(model, x))
+   model$variance <- getVariance.mcr(model, x)
+
+   # combine everything as an S3 object
    class(model) <- c("mcr", "mcrpure")
    model$call <- match.call()
    model$info <- info
@@ -344,11 +346,11 @@ summary.mcrpure <- function(object, ...) {
    cat("\n")
 
    data <- cbind(
-      round(object$expvar, 2),
-      round(object$cumexpvar, 2),
+      round(t(object$variance), 2),
       object$purevars,
       round(object$purevals, 3)
    )
+
    colnames(data) <- c("Expvar", "Cumexpvar", "Varindex", "Purity")
    rownames(data) <- colnames(object$purityspec)
    show(data)
