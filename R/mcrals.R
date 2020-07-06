@@ -427,7 +427,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
       }
 
       if (verbose) {
-         cat(sprintf("Iteration %4d, R2 = %8.5f\n", i, var * 100))
+         cat(sprintf("Iteration %4d, R2 = %.6f\n", i, var))
       }
 
       var_old <- var
