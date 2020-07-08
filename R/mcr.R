@@ -124,6 +124,8 @@ plotContributions.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
 #' type of the plot
 #' @param labels
 #' what to use as data labels
+#' @param main
+#' title of the plot
 #' @param xticks
 #' vector with ticks for x-axis
 #' @param ...
@@ -145,6 +147,8 @@ plotVariance.mcr <- function(obj, type = "h", labels = "values", main = "Varianc
 #' type of the plot
 #' @param labels
 #' what to use as data labels
+#' @param main
+#' title of the plot
 #' @param xticks
 #' vector with ticks for x-axis
 #' @param ...
