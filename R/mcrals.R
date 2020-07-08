@@ -112,12 +112,12 @@
 #'
 #' # define constraints for contributions
 #' cc <- list(
-#'    constraint("non-negativity")
+#'    constraint("nonneg")
 #' )
 #'
 #' # define constraints for spectra
 #' cs <- list(
-#'    constraint("non-negativity"),
+#'    constraint("nonneg"),
 #'    constraint("norm", params = list(type = "area"))
 #' )
 #'
