@@ -8,6 +8,7 @@
   obj,
   type = "b",
   labels = "values",
+  main = "Cumulative variance",
   xticks = seq_len(obj$ncomp),
   ...
 )
@@ -18,6 +19,8 @@
 \item{type}{type of the plot}
 
 \item{labels}{what to use as data labels}
+
+\item{main}{title of the plot}
 
 \item{xticks}{vector with ticks for x-axis}
 

@@ -9,6 +9,8 @@ constraintNorm(x, d, type = "length")
 \arguments{
 \item{x}{data matrix (spectra or contributions)}
 
+\item{d}{matrix with the original spectral values}
+
 \item{type}{type of normalization ("area", "length" or "sum")}
 }
 \description{
