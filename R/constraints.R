@@ -7,12 +7,26 @@
 #' @export
 getImplementedConstraints <- function() {
    list(
-      "non-negativity" = list(
-         name = "non-negativity",
+      "nonneg" = list(
+         name = "nonneg",
          method = constraintNonNegativity,
          params = list(),
          params.info = list(),
          info = "Non-negativity (sets negative values to zero)"
+      ),
+      "unimod" = list(
+         name = "unimod",
+         method = constraintUnimod,
+         params = list(tol = 0),
+         params.info = list(tol = "tolerance (between 0 and 1)"),
+         info = "Unimodality (forces contribution or spectral profile to have a single maximum)"
+      ),
+      "closure" = list(
+         name = "closure",
+         method = constraintClosure,
+         params = list(sum = 1),
+         params.info = list(sum = "value, the data rows should sum up to"),
+         info = "Closure (forces contributions or spectral profiles sum up to constant value)"
       ),
       "norm" = list(
          name = "norm",
@@ -57,6 +71,73 @@ constraints.list <- function() {
    invisible()
 }
 
+#' Method for closure constraint
+#'
+#' @description
+#' Force rows of data sum up to given value
+#'
+#' @param x
+#' data matrix (spectra or contributions)
+#' @param d
+#' matrix with the original spectral values
+#' @param sum
+#' which value the specra or contributions should sum up to
+#'
+#' @export
+constraintClosure <- function(x, d, sum = 1) {
+   stopifnot("Parameter 'sum' should be positive number." = sum > 0 )
+   s <- diag(sum / rowSums(x), nrow(x), nrow(x))
+   return(s %*% x)
+}
+
+#' Method for unimodality constraint
+#'
+#' @description
+#' forces column of matrix to have one maximum each
+#'
+#' @param x
+#' data matrix (spectra or contributions)
+#' @param d
+#' matrix with the original spectral values
+#' @param tol
+#' tolerance (value between 0 and 1) to take make method stable to small fluctuations
+#'
+#' @export
+constraintUnimod <- function(x, d, tol = 0) {
+
+   f <- function(y, max, indseq, step) {
+
+      for (i in indseq) {
+         if (y[i] <= max) {
+            max <- y[i]
+         } else if (y[i] > max * (1 + tol)) {
+            y[i] <- y[i + step]
+            max <- y[i]
+         }
+      }
+
+      return(y)
+   }
+
+   # find maximum for each component
+   peak.ind <- apply(x, 2, which.max)
+   nvar <- nrow(x)
+
+   # process each component separately
+   for (a in seq_len(ncol(x))) {
+
+      # flatten peaks to the left of maximum
+      left_part <- (peak.ind[a] - 1):1
+      x[, a] <- f(x[, a], max = x[peak.ind[a], a], indseq = left_part, step = +1)
+
+      # flatten peaks to the right of maximum
+      right_part <- (peak.ind[a] + 1):nvar
+      x[, a] <- f(x[, a], max = x[peak.ind[a], a], indseq = right_part, step = -1)
+   }
+
+   return(x)
+}
+
 #' Method for non-negativity constraint
 #'
 #' @description
@@ -64,7 +145,10 @@ constraints.list <- function() {
 #'
 #' @param x
 #' data matrix (spectra or contributions)
+#' @param d
+#' matrix with the original spectral values
 #'
+#' @export
 constraintNonNegativity <- function(x, d) {
    x[x < 0] <- 0
    return(x)
@@ -77,9 +161,12 @@ constraintNonNegativity <- function(x, d) {
 #'
 #' @param x
 #' data matrix (spectra or contributions)
+#' @param d
+#' matrix with the original spectral values
 #' @param type
 #' type of normalization ("area", "length" or "sum")
 #'
+#' @export
 constraintNorm <- function(x, d, type = "length") {
    types <- c("area", "length", "sum")
    stopifnot("Parameter 'type' should be either 'area', 'length' or 'sum'." = type %in% types )
@@ -98,6 +185,7 @@ constraintNorm <- function(x, d, type = "length") {
 #' @param weight
 #' how many percent of mean to add (between 0 and 1)
 #'
+#' @export
 constraintAngle <- function(x, d, weight = 0.05) {
    stopifnot("Parameter 'weight' should be between 0 and 1." = weight >= 0 && weight <= 1 )
 
@@ -142,8 +230,8 @@ constraint <- function(name, params = NULL, method = NULL) {
       # assuming it is one of the standard constraints
       # 1. first check name
       item <- getImplementedConstraints()[[name]]
-      stopifnot("Either name of constraint is wrong you you need to provide a method if the
-         consttaint is user defined." = !is.null(item))
+      stopifnot("Either name of constraint is wrong or you need to provide a method if the
+         constraint is user defined." = !is.null(item))
 
       # 2. check the parameters
       if (is.null(params)) params <- item$params
