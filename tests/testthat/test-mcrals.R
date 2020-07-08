@@ -71,12 +71,12 @@ test_that("mcrals.fcnnls works correctly", {
 
 # concentration constrains
 cc <- list(
-   constraint("non-negativity")
+   constraint("nonneg")
 )
 
 # spectral constrains
 sc <- list(
-   constraint("non-negativity"),
+   constraint("nonneg"),
    constraint("norm", params = list(type = "area"))
 )
 
