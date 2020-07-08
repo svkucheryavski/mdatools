@@ -21,7 +21,7 @@ for (cl in getImplementedConstraints()) {
 # add one of the existing constraints with default parameters
 test_that("Non-negativity constraint works correctly", {
    S[sample(1:length(S))[1:10]] <- -10
-   cn <- constraint("non-negativity")
+   cn <- constraint("nonneg")
    Sr <- employ(cn, S, D)
    expect_equal(sum(Sr < 0), 0)
 })
@@ -103,13 +103,60 @@ test_that("Angle constraint with user defined parameters (wrong)", {
 })
 
 
-# add one of the existing constraints with non-default parameters
+#!###############
+#! Unimodality  #
+#!###############
 
-# check all available existing constraints with default parameters
+# generate data with extra peaks
+x  <- 1:500
+y1 <- dnorm(x, m = 100, s = 20) * 0.8  + dnorm(x, m = 200, s = 10) * 0.2
+y2 <- dnorm(x, m = 100, s = 10) * 0.2  + dnorm(x, m = 200, s = 20) * 0.8
+y3 <- dnorm(x, m = 250, s = 20)
+y <- cbind(y1, y2, y3)
+y <- y + matrix(rnorm(length(y), 0, max(y) * 0.05), nrow(y), ncol(y))
 
-# add user defined constraint correctly
+check_unimodality <- function(y, tol = 0) {
+   n <- length(y)
+   im <- which.max(y)
+   dl <- round(diff(y[im:1]) / abs(y[im:2]), 3)
+   dr <- round(diff(y[im:n]) / abs(y[im:(n-1)]), 3)
+   return(sum(dl > tol) + sum(dr > tol))
+}
 
-# add user defined constraint with wrong method
+test_that("Unimodality constraint works correctly", {
+   cn1 <- constraint("unimod")
+   y.new1 <- employ(cn1, y, NULL)
 
-# add user defined constraint with wrong parameters
+   cn2 <- constraint("unimod", params = list(tol = 0.2))
+   y.new2 <- employ(cn2, y, NULL)
+
+   expect_true(all(apply(y, 2, check_unimodality, tol = 0) > 0))
+   expect_true(all(apply(y.new1, 2, check_unimodality, tol = 0) < 0.00000001))
+   expect_true(all(apply(y.new2, 2, check_unimodality, tol = 0.2) < 0.20))
+})
+
+
+#!###############
+#! Closure      #
+#!###############
+
+# generate data with violation of the closure
+x  <- 1:50
+y1 <- x/10
+y2 <- 1 / (1 + exp(-(20 - x))) - (x - 20) / 100 + 0.5
+y3 <- max(y2) - y2 - (x - 20) / 100 + 0.5
+y <- cbind(y1, y2, y3)
+y <- y + matrix(rnorm(length(y), 0, max(y) * 0.01), nrow(y), ncol(y))
+
+test_that("Closure constraint works correctly", {
+   cn1 <- constraint("closure")
+   y.new1 <- employ(cn1, y, NULL)
+
+   cn2 <- constraint("closure", params = list(sum = 10))
+   y.new2 <- employ(cn2, y, NULL)
+
+   expect_true(length(unique(rowSums(y))) > 1)
+   expect_true(all(abs(rowSums(y.new1) - 1) < 10^-8))
+   expect_true(all(abs(rowSums(y.new2) - 10) < 10^-8))
+})
 
