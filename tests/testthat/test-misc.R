@@ -201,4 +201,10 @@ test_that("prepCalData works correctly", {
    expect_equivalent(attr(x4, "exclrows"), exclrows)
    expect_equivalent(attr(x4, "exclcols"), exclcols)
 
+   peopledf <- as.data.frame(people)
+   peopledf$Sex <- factor(peopledf$Sex, labels = c("M", "F"))
+   expect_silent(x1 <- prepCalData(peopledf))
+
+   peopledf$Sex <- as.character(peopledf$Sex)
+   expect_error(x1 <- prepCalData(peopledf))
 })

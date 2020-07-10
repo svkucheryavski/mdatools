@@ -820,6 +820,10 @@ prepCalData <- function(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.
    # check that x has a dimension
    stopifnot("Data values must be provided in form of a matrix or a data frame." = !is.null(dim(x)))
 
+   if (is.data.frame(x) && any(sapply(x, is.character))) {
+      stop("At least one column in the provided data frame has text values.", call. = FALSE)
+   }
+
    # exclude columns if "exclcols" is provided
    if (length(exclcols) > 0) {
       x <- mda.exclcols(x, exclcols)
