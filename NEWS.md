@@ -3,11 +3,15 @@ v.0.11.0
 
 ## New features
 
-* new method, `mcrals()`, implementing multivariate curve resolution based on the alternating least squares. The method allows user to select among three solvers (OLS, NNLS, FNNLS) and apply several basic constraints (non-negativity, normalization)
+* new method, `mcrals()`, implementing multivariate curve resolution based on the alternating least squares. The method allows user to select among three solvers (OLS, NNLS, FNNLS) and apply several basic constraints (non-negativity, normalization, closure, etc.).
 
 * new method, `mcrpure()`, implementing multivariate curve resolution based on the purity approach (also known as SIMPLISMA).
 
-* added two datasets, `carbs` with Raman spectra of ribose, glucose and fructose as well as their mixtures and `eminoil`, well known "emulsion in oil" spectroscopic image. Both datasets aim at testing and trying the curve resolution methods.
+* added a new preprocessing method, `prep.alsbasecorr()`, implementing baseline correction with asymmetric least squares.
+
+* added a new datasets, `carbs` with Raman spectra of ribose, glucose and fructose. The dataset aims at testing and trying the curve resolution methods.
+
+* small improvements and bug fixes.
 
 ## Improvements and bug fixes
 
