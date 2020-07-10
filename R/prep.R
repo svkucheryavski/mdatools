@@ -292,7 +292,7 @@ pinv <- function(data) {
 #' The function implements baseline correction algorithm based on Whittaker smoother. The method
 #' was first shown in [1]. The function has two main parameters - power of a penalty parameter
 #' (usually varies betwen 2 and 9) and the ratio of assymetry (usually between 0.1 and 0.001). The
-#' choice of the parameters depend on how broad the disturbances of the baseline are and how
+#' choice of the parameters depends on how broad the disturbances of the baseline are and how
 #' narrow the original spectral peaks are.
 #'
 #' @examples
