@@ -255,16 +255,9 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
       dim(y) <- c(length(y), 1)
    }
 
-   # exclude columns if "exclcols" is provided
-   if (length(exclcols) > 0) {
-      x <- mda.exclcols(x, exclcols)
-   }
-
-   # exclude rows if "exclrows" is provided
-   if (length(exclrows) > 0) {
-      x <- mda.exclrows(x, exclrows)
-      y <- mda.exclrows(y, exclrows)
-   }
+   # check calibration data and process excluded rows and columns
+   x <- prepCalData(x, exclrows = exclrows, exclcols = exclcols, min.nrows = 2, min.ncols = 2)
+   y <- prepCalData(y, exclrows = exclrows, exclcols = NULL, min.nrows = 2, min.ncols = 1)
 
    # build a model and apply to calibration set
    model <- pls.cal(x, y, ncomp, center = center, scale = scale, method = method, cv = cv)
