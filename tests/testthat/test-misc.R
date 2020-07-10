@@ -54,6 +54,16 @@ test_that("mda.df2mat() and mda.t() work correctly", {
 
 })
 
+
+test_that("mda.df2mat raises error if text columns are present.", {
+   x1 <- data.frame(a = c(1, 2, 3, 4), b = factor(c("a", "a", "b", "b")))
+   x2 <- data.frame(a = c(1, 2, 3, 4), b = c("a", "a", "b", "b"))
+   expect_silent(mda.df2mat(x1))
+   expect_error(mda.df2mat(x2))
+})
+
+
+
 context("misc: purge methods")
 
 data(people)

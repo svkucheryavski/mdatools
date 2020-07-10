@@ -592,6 +592,10 @@ mda.df2mat <- function(x, full = FALSE) {
       x <- data.frame(x)
    }
 
+   if (any(sapply(x, is.character))) {
+      stop("At least one column in the provided data frame has text values.", call. = FALSE)
+   }
+
    # get indices of factor and numeric columns
    col.fac <- unlist(lapply(x, is.factor))
    col.num <- which(!col.fac)
