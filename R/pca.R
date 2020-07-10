@@ -187,15 +187,8 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
    exclrows = NULL, exclcols = NULL, x.test = NULL, method = "svd", rand = NULL,
    lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "") {
 
-   # exclude columns if "exclcols" is provided
-   if (length(exclcols) > 0) {
-      x <- mda.exclcols(x, exclcols)
-   }
-
-   # exclude rows if "exclrows" is provided
-   if (length(exclrows) > 0) {
-      x <- mda.exclrows(x, exclrows)
-   }
+   # check calibration data and process excluded rows and columns
+   x <- prepCalData(x, exclrows = exclrows, exclcols = exclcols, min.nrows = 2, min.ncols = 2)
 
    # calibrate model and set distance limits
    model <- pca.cal(x, ncomp, center = center, scale = scale, method = method, rand = rand)
