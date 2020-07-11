@@ -1,3 +1,61 @@
+#' Generic function to apply a method (e.g. constraint)
+#'
+#' @param obj
+#' constraint object
+#' @param x
+#' data in question (e.g. resolved spectra)
+#' @param d
+#' matrix with original data
+#'
+#' @export
+employ <- function(obj, x, d) {
+   UseMethod("employ")
+}
+
+#' Plot purity spectra
+#' @param obj
+#' object with mcr pure case
+#' @param ...
+#' other parameters
+#'
+#' @export
+plotPuritySpectra <- function(obj, ...) {
+   UseMethod("plotPuritySpectra")
+}
+
+#' Plot purity values
+#' @param obj
+#' object with mcr pure case
+#' @param ...
+#' other parameters
+#'
+#' @export
+plotPurity <- function(obj, ...) {
+   UseMethod("plotPurity")
+}
+
+#' Plot resolved spectra
+#' @param obj
+#' object with mcr case
+#' @param ...
+#' other parameters
+#'
+#' @export
+plotSpectra <- function(obj, ...) {
+   UseMethod("plotSpectra")
+}
+
+#' Plot resolved contributions
+#' @param obj
+#' object with mcr case
+#' @param ...
+#' other parameters
+#'
+#' @export
+plotContributions <- function(obj, ...) {
+   UseMethod("plotContributions")
+}
+
 #' Categorize PCA results
 #' @param obj
 #' object with PCA model

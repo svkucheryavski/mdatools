@@ -255,16 +255,9 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
       dim(y) <- c(length(y), 1)
    }
 
-   # exclude columns if "exclcols" is provided
-   if (length(exclcols) > 0) {
-      x <- mda.exclcols(x, exclcols)
-   }
-
-   # exclude rows if "exclrows" is provided
-   if (length(exclrows) > 0) {
-      x <- mda.exclrows(x, exclrows)
-      y <- mda.exclrows(y, exclrows)
-   }
+   # check calibration data and process excluded rows and columns
+   x <- prepCalData(x, exclrows = exclrows, exclcols = exclcols, min.nrows = 2, min.ncols = 1)
+   y <- prepCalData(y, exclrows = exclrows, exclcols = NULL, min.nrows = 2, min.ncols = 1)
 
    # build a model and apply to calibration set
    model <- pls.cal(x, y, ncomp, center = center, scale = scale, method = method, cv = cv)
@@ -551,9 +544,8 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
       x.attrs$yaxis.name <- "Objects"
    }
 
-   # convert to matrices
-   x <- mda.df2mat(x)
-   y <- mda.df2mat(y)
+   # check datasets and convert to matrix if needed
+   x <- prepCalData(x, min.nrows = 1, min.ncols = nrow(object$xloadings) - length(x.attrs$exclcols))
 
    # get dimensions
    nresp <- dim(object$coeffs$values)[3]
@@ -1505,10 +1497,10 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
       c <- as.numeric(crossprod(w, (M %*% w)))
 
       # stop cycle since c-value is very small and can result in singular matrix
-      if (!cv && c < 2 * .Machine$double.eps) {
+      if (c < 2 * .Machine$double.eps) {
          n <- n - 1
          warning(paste0(
-            "PLS can not compute more than ", n, " components (eigenvalues are too small)."
+            "PLS can not compute more than ", n, " components (eigenvalues are too small). "
          ), call. = FALSE)
          break
       }
@@ -1684,9 +1676,11 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
       return(model)
    }
 
-   # compute eigenvalues
+   # compute x-scores and residuals
    xscores <- x %*% (fit$weights %*% solve(crossprod(fit$xloadings, fit$weights)))
    yscores <- as.matrix(y) %*% fit$yloadings
+
+   # compute eigenvalues
    xeigenvals <- colSums(xscores^2) / (xc.nrows - 1)
    attr(xeigenvals, "DoF") <- (xc.nrows - 1)
    yeigenvals <- colSums(yscores^2) / (xc.nrows - 1)

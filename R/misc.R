@@ -210,7 +210,7 @@ mda.subset <- function(x, subset = NULL, select = NULL) {
 
       # get numeric indices for the rows and subset them
       subset <- mda.getexclind(subset, rownames(x), nrow(x))
-      x <- x[subset, ]
+      x <- x[subset, , drop = FALSE]
 
       # correct attributes
       if (!is.null(attrs$yaxis.values)) {
@@ -592,6 +592,10 @@ mda.df2mat <- function(x, full = FALSE) {
       x <- data.frame(x)
    }
 
+   if (any(sapply(x, is.character))) {
+      stop("At least one column in the provided data frame has text values.", call. = FALSE)
+   }
+
    # get indices of factor and numeric columns
    col.fac <- unlist(lapply(x, is.factor))
    col.num <- which(!col.fac)
@@ -794,4 +798,51 @@ capitalize <- function(str) {
 repmat <- function(x, nrows, ncols = nrows) {
    x <- as.matrix(x)
    return(matrix(1, nrows, ncols) %x% x)
+}
+
+
+#' Prepares calibration data
+#'
+#' @param x
+#' matrix or data frame with values (calibration set)
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclcols
+#' columns to be excluded from calculations (numbers, names or vector with logical values)
+#' @param min.nrows
+#' smallest number of rows which must be in the dataset
+#' @param min.ncols
+#' smallest number of columns which must be in the dataset
+#'
+#' @export
+prepCalData <- function(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.ncols = 2) {
+
+   # check that x has a dimension
+   stopifnot("Data values must be provided in form of a matrix or a data frame." = !is.null(dim(x)))
+
+   if (is.data.frame(x) && any(sapply(x, is.character))) {
+      stop("At least one column in the provided data frame has text values.", call. = FALSE)
+   }
+
+   # exclude columns if "exclcols" is provided
+   if (length(exclcols) > 0) {
+      x <- mda.exclcols(x, exclcols)
+   }
+
+   # exclude rows if "exclrows" is provided
+   if (length(exclrows) > 0) {
+      x <- mda.exclrows(x, exclrows)
+   }
+
+   # check number of rows
+   if (nrow(x) - length(attr(x, "exclrows")) < min.nrows) {
+      stop(sprintf("Dataset should contain at least %d measurements (rows).", min.nrows))
+   }
+
+   # check number of columns
+   if (ncol(x) - length(attr(x, "exclcols")) < min.ncols) {
+      stop(sprintf("Dataset should contain at least %d variables (columns).", min.ncols))
+   }
+
+   return(x)
 }
