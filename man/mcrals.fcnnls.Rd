@@ -25,7 +25,7 @@ Computes Fast combinatorial NNLS solution for B: D = AB' subject to B >= 0. Impl
 the method described in [1].
 }
 \references{
-1. Van Benthem, M.H. and Keenan, M.R. (2004), Fast algorithm for the solution of large‐scale
-non‐negativity‐constrained least squares problems. J. Chemometrics, 18: 441-450.
+1. Van Benthem, M.H. and Keenan, M.R. (2004), Fast algorithm for the solution of large scale
+non-negativity-constrained least squares problems. J. Chemometrics, 18: 441-450.
 doi:10.1002/cem.889
 }
