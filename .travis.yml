@@ -8,4 +8,8 @@ r_packages:
   - covr
 
 after_success:
-  - Rscript -e 'library(covr); codecov()'  
+  - travis_wait 20 Rscript -e 'library(covr); codecov()'
+
+script:
+  - R CMD build .
+  - travis_wait 20 R CMD check --as-cran *.tar.gz

@@ -186,6 +186,7 @@ for (i in seq_along(datasets)) {
    yaxis.name.y <- if (is.null(attr(d$yc, "yaxis.name"))) "Objects" else attr(d$yc, "yaxis.name")
 
    for (ncomp in 1:d$ncomp) {
+
       obj <- pls.cal(d$xc, d$yc, ncomp = ncomp, center = d$center, scale = d$scale)
       res <- predict(obj, d$xc, d$yc)
 
@@ -341,8 +342,8 @@ for (i in seq_along(datasets)) {
 
    expect_warning(m <- pls(d$xc, d$yc, ncomp = ncomp))
    fprintf("\n\nCalibration (%s): -------\n", name)
-   #summary(m)
-   #summary(m$calres)
+   summary(m)
+   summary(m$calres)
 
    test_that("test constructor with cross-validation", {
       for (cv in list(1, list("rand", 4), list("rand", 4, 4), list("ven", 8))) {

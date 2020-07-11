@@ -110,12 +110,12 @@ prep.snv <- function(data) {
 #' Normalization
 #'
 #' @description
-#' Normalizes signals (rows of data matrix) to unit area or unit length
+#' Normalizes signals (rows of data matrix) to unit area, unit length or unit sum
 #'
 #' @param data
 #' a matrix with data values
 #' @param type
-#' type of normalization \code{"area"} or \code{"length"}
+#' type of normalization \code{"area"}, \code{"length"} or \code{"sum"}.
 #'
 #' @return
 #' data matrix with normalized values
@@ -128,7 +128,8 @@ prep.norm <- function(data, type = "area") {
    w <- switch(
       type,
       "area" = apply(abs(data), 1, sum),
-      "length" = sqrt(apply(data^2, 1, sum))
+      "length" = sqrt(apply(data^2, 1, sum)),
+      "sum" = apply(data, 1, sum)
    )
 
    if (is.null(w)) {
@@ -274,3 +275,75 @@ pinv <- function(data) {
    s <- svd(data)
    s$v %*% diag(1 / s$d) %*% t(s$u)
 }
+
+
+#' Baseline correction using assymetric least squares
+#'
+#' @param spectra
+#' matrix with spectra (rows correspond to individual spectra)
+#' @param plambda
+#' power of the penalty parameter (e.g. if plambda = 5, lambda = 10^5)
+#' @param p
+#' assymetry ratio (should be between 0 and 1)
+#' @param max.niter
+#' maximum number of iterations
+#'
+#' @details
+#' The function implements baseline correction algorithm based on Whittaker smoother. The method
+#' was first shown in [1]. The function has two main parameters - power of a penalty parameter
+#' (usually varies betwen 2 and 9) and the ratio of assymetry (usually between 0.1 and 0.001). The
+#' choice of the parameters depends on how broad the disturbances of the baseline are and how
+#' narrow the original spectral peaks are.
+#'
+#' @examples
+#' # take spectra from carbs dataset
+#' data(carbs)
+#' spectra = mda.t(carbs$S)
+#'
+#' # apply the correction
+#' pspectra = prep.alsbasecorr(spectra, plambda = 3, p = 0.01)
+#'
+#' # show the original and the corrected spectra individually
+#' par(mfrow = c(3, 1))
+#' for (i in 1:3) {
+#'    mdaplotg(list(
+#'       original = mda.subset(spectra, i),
+#'       corrected = mda.subset(pspectra, i)
+#'    ), type = "l", col = c("black", "red"), lwd = c(2, 1), main = rownames(spectra)[i])
+#' }
+#'
+#' @importFrom Matrix Matrix Diagonal
+#'
+#' @export
+prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 10) {
+   attrs <- mda.getattr(spectra)
+   dimnames <- dimnames(spectra)
+
+   baseline <- function(y) {
+
+      m <- length(y)
+      D <- Matrix::Matrix(diff(diag(m), difference = 2), sparse = TRUE)
+      LDD <- (10^plambda) * Matrix::crossprod(D)
+      w <- Matrix::Matrix(1, nrow = m, ncol = 1, sparse = TRUE)
+
+      for (i in seq_len(max.niter)) {
+         W <- Matrix::Diagonal(x = as.numeric(w))
+         z <- Matrix::solve(W + LDD, w * y)
+         w.old <- w
+         w <- p * (y > z) + (1 - p) * (y < z)
+
+         if (sum(abs(w - w.old)) < 10^-12) {
+            break
+         }
+      }
+
+      return(as.numeric(z))
+   }
+
+   pspectra <- t(apply(spectra, 1, function(x) x - baseline(x)))
+   pspectra <- mda.setattr(pspectra, attrs)
+   dimnames(pspectra) <- dimnames
+
+   return(pspectra)
+}
+

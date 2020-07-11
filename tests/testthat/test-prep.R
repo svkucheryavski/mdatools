@@ -135,3 +135,36 @@ test_that("SavGol smoothing works correctly", {
    expect_error(pspectra <- prep.savgol(spectra, 3, 2,  4))
 
 })
+
+context("prep: alsbasecorr")
+
+test_that("ALS baseline correction works correctly", {
+   data(carbs)
+
+   spectra <- mda.t(carbs$S)
+   nvar <- ncol(spectra)
+
+   spoiled_spectra <- spectra + rbind(
+      dnorm(seq_len(nvar), nvar/2, nvar/5) * 100 * max(spectra[1, ]),
+      dnorm(seq_len(nvar), nvar/3, nvar/5) * 500 * max(spectra[2, ]),
+      dnorm(seq_len(nvar), nvar/1.5, nvar/5) * 100 * max(spectra[3, ])
+   )
+
+   corrected_spectra1 <- prep.alsbasecorr(spoiled_spectra)
+   corrected_spectra2 <- prep.alsbasecorr(spoiled_spectra, plambda = 3, p = 0.05)
+   corrected_spectra3 <- prep.alsbasecorr(spoiled_spectra, plambda = 4, p = 0.01)
+
+   err_before <- sum((spectra - spoiled_spectra)^2) / sum(spectra^2)
+   err_after1 <- sum((spectra - corrected_spectra1)^2) / sum(spectra^2)
+   err_after2 <- sum((spectra - corrected_spectra2)^2) / sum(spectra^2)
+   err_after3 <- sum((spectra - corrected_spectra3)^2) / sum(spectra^2)
+
+   # preprocessing improves the spectra
+   expect_true(err_after1 < err_before)
+   expect_true(err_after2 < err_before)
+   expect_true(err_after3 < err_before)
+
+   # third case is the best
+   expect_true(err_after3 < err_after1)
+   expect_true(err_after3 < err_after2)
+})
