@@ -544,9 +544,8 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
       x.attrs$yaxis.name <- "Objects"
    }
 
-   # convert to matrices
-   x <- mda.df2mat(x)
-   y <- mda.df2mat(y)
+   # check datasets and convert to matrix if needed
+   x <- prepCalData(x, min.nrows = 1, min.ncols = nrow(object$xloadings) - length(x.attrs$exclcols))
 
    # get dimensions
    nresp <- dim(object$coeffs$values)[3]
