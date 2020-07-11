@@ -621,8 +621,8 @@ mcrals.nnls <- function(D, A,
 #' the method described in [1].
 #'
 #' @references
-#' 1. Van Benthem, M.H. and Keenan, M.R. (2004), Fast algorithm for the solution of large‐scale
-#' non‐negativity‐constrained least squares problems. J. Chemometrics, 18: 441-450.
+#' 1. Van Benthem, M.H. and Keenan, M.R. (2004), Fast algorithm for the solution of large scale
+#' non-negativity-constrained least squares problems. J. Chemometrics, 18: 441-450.
 #' doi:10.1002/cem.889
 #'
 #' @export
@@ -720,7 +720,7 @@ mcrals.fcnnls <- function(D, A,
             nvC <- nvInd[, 2]
 
             # convert rows and columns into indices for every negative coefficient in
-            # the passive set — indices based on the size of H.set and alpha
+            # the passive set - indices based on the size of H.set and alpha
             hIdx <- sub2ind(dim(alpha), nvR, nvC)
 
             # get similar indices but based on the size of B
