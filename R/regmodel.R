@@ -31,15 +31,19 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
    if (length(x.attrs$exclrows) > 0) {
       x <- x[-x.attrs$exclrows, , drop = FALSE]
       y <- y[-x.attrs$exclrows, , drop = FALSE]
+      attr(x, "exclrows") <- NULL
+      attr(y, "exclrows") <- NULL
    }
 
    # remove excluded columns
    if (length(x.attrs$exclcols) > 0) {
       x <- x[, -x.attrs$exclcols, drop = FALSE]
+      attr(x, "exclcols") <- NULL
    }
 
    if (length(y.attrs$exclcols) > 0) {
       y <- y[, -y.attrs$exclcols, drop = FALSE]
+      attr(y, "exclcols") <- NULL
    }
 
    # get main data parameters
