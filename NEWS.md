@@ -9,13 +9,13 @@ v.0.11.0
 
 * added a new preprocessing method, `prep.alsbasecorr()`, implementing baseline correction with asymmetric least squares. It preserves all important data arguments similar to other preprocessing methods.
 
-* added a new datasets, `carbs` with Raman spectra of ribose, glucose and fructose and simulated spectra of their mixtures. The dataset aims at testing and trying the curve resolution methods.
-
-* main model methods (`pls()`, `pca()`, etc.), now do additional check for the consistency of provided datasets.
+* added a new datasets, `carbs`, with Raman spectra of ribose, glucose and fructose and simulated spectra of their mixtures. The dataset aims at testing and trying the curve resolution methods.
 
 ## Improvements and bug fixes
 
 * fixed bug `#88` which appears when initial number of components in PLS model is too large. From v. 0.10.3 in this case the algorithm warns user and reduces maximum number of components automatically. But if cross-validation is used, sometimes for cross-validation local model this number should be even smaller (because local calibration subset has fewer observations). In this case the `pls()` method will raise an error and asks user to limit the maximum number of components and run the model again.
+
+* main model methods (`pls()`, `pca()`, etc.), now do additional check for the consistency of provided datasets.
 
 
 v.0.10.4
