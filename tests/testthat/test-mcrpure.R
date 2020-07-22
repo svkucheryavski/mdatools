@@ -28,35 +28,18 @@ params_ok <- list(
    list(ncomp = 3, offset = 0.05),
    list(ncomp = 3, offset = 0.25),
 
-   # with derivatives
-   list(ncomp = 3, offset = 0.05, use.deriv = 1, savgol = list(width = 3, porder = 1, dorder = 1)),
-   list(ncomp = 3, offset = 0.05, use.deriv = 1, savgol = list(width = 5, porder = 2, dorder = 2)),
-   list(ncomp = 3, offset = 0.05, use.deriv = 2, savgol = list(width = 3, porder = 1, dorder = 1)),
-   list(ncomp = 3, offset = 0.05, use.deriv = 2, savgol = list(width = 5, porder = 2, dorder = 2)),
-
    # with excluded columns
    list(ncomp = 3, exclcols = 1:9),
-   list(ncomp = 3, exclcols = 1:9, use.deriv = 1, savgol = list(width = 3, porder = 1, dorder = 1)),
-   list(ncomp = 3, exclcols = 1:9, use.deriv = 1, savgol = list(width = 5, porder = 2, dorder = 2)),
-   list(ncomp = 3, exclcols = 1:9, use.deriv = 2, savgol = list(width = 3, porder = 1, dorder = 1)),
-   list(ncomp = 3, exclcols = 1:9, use.deriv = 2, savgol = list(width = 5, porder = 2, dorder = 2)),
 
    # with excluded rows
-   list(ncomp = 3, exclrows = 1:3),
-   list(ncomp = 3, exclrows = 1:3, use.deriv = 1, savgol = list(width = 3, porder = 1, dorder = 1)),
-   list(ncomp = 3, exclrows = 1:3, use.deriv = 1, savgol = list(width = 5, porder = 2, dorder = 2)),
-   list(ncomp = 3, exclrows = 1:3, use.deriv = 2, savgol = list(width = 3, porder = 1, dorder = 1)),
-   list(ncomp = 3, exclrows = 1:3, use.deriv = 2, savgol = list(width = 5, porder = 2, dorder = 2))
+   list(ncomp = 3, exclrows = 1:3)
 )
 
 params_err <- list(
    list(ncomp = 0),
    list(ncomp = 1, offset = -1),
    list(ncomp = 1, offset = 1),
-   list(ncomp = 30),
-   list(ncomp = 3, offset = 0.05, use.deriv = 1),
-   list(ncomp = 3, offset = 0.05, use.deriv = 1, savgol = list(width = 3, porder = 1, dorder = 0)),
-   list(ncomp = 3, offset = 0.05, use.deriv = 2, savgol = list(width = 3, porder = 1, dorder = 0))
+   list(ncomp = 30)
 )
 
 C <- carbs$C
@@ -171,24 +154,21 @@ attr(simdata$spectra.c, "yaxis.name") <- "Time, s"
 attr(simdata$spectra.c, "yaxis.values") <- seq(0, 10, length.out = nrow(simdata$spectra.c))
 
 
-expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.04, use.deriv = 2,
-   savgol = list(dorder = 2, width = 5, porder = 2)))
+expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.0004))
 summary(m)
 
 par(mfrow = c(2, 1))
 expect_silent(plotSpectra(m))
 expect_silent(plotContributions(m))
 
-expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.04, use.deriv = 2,
-   savgol = list(dorder = 2, width = 5, porder = 2), exclcols = 141:150))
+expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.0004, exclcols = 141:150))
 summary(m)
 
 par(mfrow = c(2, 1))
 expect_silent(plotSpectra(m))
 expect_silent(plotContributions(m))
 
-expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.04, use.deriv = 2,
-   savgol = list(dorder = 2, width = 5, porder = 2), exclrows = 1:10))
+expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.0004, exclrows = 1:10))
 summary(m)
 
 par(mfrow = c(2, 1))
