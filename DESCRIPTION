@@ -1,7 +1,7 @@
 Package: mdatools
 Title: Multivariate Data Analysis for Chemometrics
-Version: 0.11.0
-Date: 2020-07-15
+Version: 0.11.1
+Date: 2020-07-21
 Author: Sergey Kucheryavskiy
 Maintainer: Sergey Kucheryavskiy <svkucheryavski@gmail.com>
 Description: Projection based methods for preprocessing,
