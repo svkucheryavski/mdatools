@@ -1,3 +1,9 @@
+v.0.11.1
+========
+
+* the algorithm for `mcrpure()` method has been modified to avoid potential issues with original patented version.
+
+
 v.0.11.0
 ========
 

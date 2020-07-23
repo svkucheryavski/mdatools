@@ -9,8 +9,6 @@ mcrpure(
   ncomp,
   purevars = NULL,
   offset = 0.05,
-  use.deriv = 0,
-  savgol = NULL,
   exclrows = NULL,
   exclcols = NULL,
   info = ""
@@ -23,12 +21,7 @@ mcrpure(
 
 \item{purevars}{vector with indices for pure variables (optional, if you want to provide the variables directly).}
 
-\item{offset}{offset for computing purity spectra (should be value within [0, 1)).}
-
-\item{use.deriv}{a number which tells how to use derivative (0 - do not use, 1 - only for estimation of  pure
-variables, 2 - both for pure variables estimation and for unmixing).}
-
-\item{savgol}{list with parameters for Savitzky-Golay preprocessing (if \code{use.deriv} is not 0).}
+\item{offset}{offset for correcting noise in computing maximum angles (should be value within [0, 1)).}
 
 \item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values).}
 
@@ -47,8 +40,6 @@ Returns an object of \code{\link{mcrpure}} class with the following fields:
 \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
 \item{offset}{offset value used to compute the purity}
 \item{ncomp}{number of resolved components}
-\item{use.deriv}{value for corresponding argument.}
-\item{savgol}{value for corresponding argument.}
 \item{info }{information about the model, provided by user when build the model.}
 
 
@@ -63,23 +54,11 @@ The method estimates purity of each variable and then uses the purest ones to de
 spectral data into spectra (`resspec`) and contributions (`rescont`) of individual
 chemical components by ordinary least squares.
 
-The purity of of variables for the first component is computed as:
-
-   `purity = sigma / (mu + max(mu) * offset)``
-
-where `sigma` is standard deviation of the original spectra, `mu` is mean and `offset` is a
-parameter, provided by user. The default value for the `offset` is 0.05, but usually values
-between 0.01 and 0.10 can be a good choice.
-
-Sometimes, especially for NIR and UV/Vis data, using derivatives can help to get better results.
-In this case, you need to specify a value for \code{use.deriv} - 1 if you want to use derivative
-only for detection of pure variables or 2 - if you want to use derivative both for estimatiion
-of the pure variables and for the unmixing/resolving. The derivative is computed using
-Savitzky-Golay transformation, so you need to provide the parameters as additional argument
-\code{savgol}. The values should be provided as a list using names from \code{\link{prep.savgol}}
-, for example: \code{savgol = list(width = 3, porder = 1, dorder = 1)}.
-
-More details about the method can be found in [1].
+The pure variabes are identified using stepwise maximum angle calculations and described in
+detail in [1]. So the purity of a spectral variable (wavelength, wavenumber) is actually an
+angle (measured in degrees) between the variable and vector of ones for the first component;
+and between the variable and space formed by previously found pure variables for the other
+components.
 }
 \examples{
 library(mdatools)
@@ -148,10 +127,9 @@ for (i in 1:3) {
 
 }
 \references{
-1. S. Kucheryavskiy, A. Bogomolov, W. Windih  (2016). Spectral unmixing using the concept of pure
-variables. I C. Ruckebusch (red.), Resolving Spectral Mixtures: With Applications from Ultrafast
-Time-Resolved Spectroscopy to Super-Resolution Imaging (1 udg., s. 53-100). Elsevier. Data
-Handling in Science and Technology, Bind. 30
+1. Willem Windig, Neal B. Gallagher, Jeremy M. Shaver, Barry M. Wise. A new approach for
+interactive self-modeling mixture analysis. Chemometrics and Intelligent Laboratory Systems,
+77 (2005) 85–96. DOI: 10.1016/j.chemolab.2004.06.009
 }
 \seealso{
 Methods for \code{mcrpure} objects:

@@ -4,7 +4,7 @@
 \alias{getPureVariables}
 \title{Identifies pure variables}
 \usage{
-getPureVariables(D, ncomp, purevars, offset, use.deriv, savgol)
+getPureVariables(D, ncomp, purevars, offset)
 }
 \arguments{
 \item{D}{matrix with the spectra}
@@ -14,10 +14,6 @@ getPureVariables(D, ncomp, purevars, offset, use.deriv, savgol)
 \item{purevars}{user provided values gor pure variables (no calculation will be run in this case)}
 
 \item{offset}{offset (between 0 and 1) for calculation of parameter alpha}
-
-\item{use.deriv}{a number which tells how to use derivative.}
-
-\item{savgol}{list with parameters for Savitzky-Golay preprocessing (if \code{use.deriv} is not 0).}
 }
 \value{
 The function returns a list with with following fields:

@@ -17,16 +17,16 @@ If you want to cite the package, please use the following: Sergey Kucheryavskiy,
 What is new
 -----------
 
-Latest release (0.11.0) is available from GitHub. It will be available on CRAN soon (release is planned for *17.07.2020*). You can see the full list of changes [here](NEWS.md). The Bookdown tutorial has been also updated and contains the description of new methods added in the last release.
+Latest release (0.11.1) is available from GitHub. It will be available on CRAN soon (release is expected for *25.07.2020*). You can see the full list of changes [here](NEWS.md). The Bookdown tutorial has been also updated and contains the description of new methods added in the last release.
 
 
 How to install
 --------------
 
-The package is available from CRAN by usual installing procedure. However, due to restrictions in CRAN politics regarding number of submissions (one in 3-4 month), mostly major releases will be published there (with 2-3 weeks delay after GitHub release as more thorough testing is needed). You can [download](https://github.com/svkucheryavski/mdatools/releases) a zip-file with source package and install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.11.0.tar.gz` and it is located in a current working directory, just run the following:
+The package is available from CRAN by usual installing procedure. However, due to restrictions in CRAN politics regarding number of submissions (one in 3-4 month), mostly major releases will be published there (with 2-3 weeks delay after GitHub release as more thorough testing is needed). You can [download](https://github.com/svkucheryavski/mdatools/releases) a zip-file with source package and install it using the `install.packages` command, e.g. if the downloaded file is `mdatools_0.11.1.tar.gz` and it is located in a current working directory, just run the following:
 
 ```
-install.packages("mdatools_0.11.0.tar.gz")
+install.packages("mdatools_0.11.1.tar.gz")
 ```
 
 If you have `devtools` package installed, the following command will install the current developer version from the master branch of GitHub repository (do not forget to load the `devtools` package first):

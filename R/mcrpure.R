@@ -11,12 +11,7 @@
 #' @param purevars
 #' vector with indices for pure variables (optional, if you want to provide the variables directly).
 #' @param offset
-#' offset for computing purity spectra (should be value within [0, 1)).
-#' @param use.deriv
-#' a number which tells how to use derivative (0 - do not use, 1 - only for estimation of  pure
-#' variables, 2 - both for pure variables estimation and for unmixing).
-#' @param savgol
-#' list with parameters for Savitzky-Golay preprocessing (if \code{use.deriv} is not 0).
+#' offset for correcting noise in computing maximum angles (should be value within [0, 1)).
 #' @param exclrows
 #' rows to be excluded from calculations (numbers, names or vector with logical values).
 #' @param exclcols
@@ -29,23 +24,11 @@
 #' spectral data into spectra (`resspec`) and contributions (`rescont`) of individual
 #' chemical components by ordinary least squares.
 #'
-#' The purity of of variables for the first component is computed as:
-#'
-#'    `purity = sigma / (mu + max(mu) * offset)``
-#'
-#' where `sigma` is standard deviation of the original spectra, `mu` is mean and `offset` is a
-#' parameter, provided by user. The default value for the `offset` is 0.05, but usually values
-#' between 0.01 and 0.10 can be a good choice.
-#'
-#' Sometimes, especially for NIR and UV/Vis data, using derivatives can help to get better results.
-#' In this case, you need to specify a value for \code{use.deriv} - 1 if you want to use derivative
-#' only for detection of pure variables or 2 - if you want to use derivative both for estimatiion
-#' of the pure variables and for the unmixing/resolving. The derivative is computed using
-#' Savitzky-Golay transformation, so you need to provide the parameters as additional argument
-#' \code{savgol}. The values should be provided as a list using names from \code{\link{prep.savgol}}
-#' , for example: \code{savgol = list(width = 3, porder = 1, dorder = 1)}.
-#'
-#' More details about the method can be found in [1].
+#' The pure variabes are identified using stepwise maximum angle calculations and described in
+#' detail in [1]. So the purity of a spectral variable (wavelength, wavenumber) is actually an
+#' angle (measured in degrees) between the variable and vector of ones for the first component;
+#' and between the variable and space formed by previously found pure variables for the other
+#' components.
 #'
 #' @return
 #' Returns an object of \code{\link{mcrpure}} class with the following fields:
@@ -58,18 +41,15 @@
 #' \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
 #' \item{offset}{offset value used to compute the purity}
 #' \item{ncomp}{number of resolved components}
-#' \item{use.deriv}{value for corresponding argument.}
-#' \item{savgol}{value for corresponding argument.}
 #' \item{info }{information about the model, provided by user when build the model.}
 #'
 #'
 #' More details and examples can be found in the Bookdown tutorial.
 #'
 #' @references
-#' 1. S. Kucheryavskiy, A. Bogomolov, W. Windih  (2016). Spectral unmixing using the concept of pure
-#' variables. I C. Ruckebusch (red.), Resolving Spectral Mixtures: With Applications from Ultrafast
-#' Time-Resolved Spectroscopy to Super-Resolution Imaging (1 udg., s. 53-100). Elsevier. Data
-#' Handling in Science and Technology, Bind. 30
+#' 1. Willem Windig, Neal B. Gallagher, Jeremy M. Shaver, Barry M. Wise. A new approach for
+#' interactive self-modeling mixture analysis. Chemometrics and Intelligent Laboratory Systems,
+#' 77 (2005) 85–96. DOI: 10.1016/j.chemolab.2004.06.009
 #'
 #' @author
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
@@ -159,21 +139,16 @@
 #' # See bookdown tutorial for more details.
 #'
 #' @export
-mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, use.deriv = 0, savgol = NULL,
-   exclrows = NULL, exclcols = NULL, info = "") {
+mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, exclrows = NULL, exclcols = NULL,
+   info = "") {
 
    stopifnot("Parameter 'offset' should be within [0, 1)." = offset < 1 && offset >= 0)
    stopifnot("Provided pure variables have wrong values." =
       is.null(purevars) || (min(purevars) > 0 & max(purevars) <= ncol(x)))
 
-   if (use.deriv > 0) {
-      stopifnot("You need to provide values for 'savgol' parameter." = !is.null(savgol))
-      stopifnot("You need to specify derivative order in 'savgol' parameter." = savgol$dorder > 0)
-   }
-
    # get pure variables and unmix data
    x <- prepCalData(x, exclrows, exclcols, min.nrows = 2, min.ncols = 2)
-   model <- getPureVariables(x, ncomp, purevars, offset, use.deriv = use.deriv, savgol = savgol)
+   model <- getPureVariables(x, ncomp, purevars, offset)
    model <- c(model, unmix.mcrpure(model, x))
 
    # compute explained variance
@@ -199,16 +174,8 @@ mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, use.deriv = 0, sav
 unmix.mcrpure <- function(obj, x) {
    attrs <- mda.getattr(x)
 
-   # if derivative must be used - apply savgol
-   if (obj$use.deriv > 1) {
-      Dr <- -do.call(prep.savgol, c(list(data = x), obj$savgol))
-      Dr[Dr < 0] <- 0
-   } else {
-      Dr <- x
-   }
-
    # get only values for the purest variables
-   Dr <- Dr[, obj$purevars, drop = FALSE]
+   Dr <- x[, obj$purevars, drop = FALSE]
 
    # resolve spectra and concentrations
    St <- tryCatch(
@@ -302,8 +269,6 @@ print.mcrpure <- function(x, ...) {
    cat("$purityspec - matrix with purity spectra\n")
    cat("$purevars - vector with indices of pure variables\n")
    cat("$purevals - purity values for the selected pure variables\n")
-   cat("$use.deriv - show how derivative was employed\n")
-   cat("$savgol - Savitzky-Golay transformation parameters\n")
    cat("$expvar - vector with explained variance\n")
    cat("$cumexpvar - vector with cumulative explained variance\n")
    cat("$offset - offset value used to compute the purity\n")
@@ -338,13 +303,6 @@ summary.mcrpure <- function(object, ...) {
       fprintf("Excluded coumns: %d\n", length(object$exclcols))
    }
 
-   fprintf("\nOffset: %s\n", object$offset)
-   fprintf("Use of derivative: %s\n", drvstr[object$use.deriv + 1])
-   if (object$use.deriv > 0) {
-      cat("Savgol parameters: ", toString(object$savgol), "\n")
-   }
-   cat("\n")
-
    data <- cbind(
       round(t(object$variance), 2),
       object$purevars,
@@ -376,10 +334,6 @@ summary.mcrpure <- function(object, ...) {
 #' user provided values gor pure variables (no calculation will be run in this case)
 #' @param offset
 #' offset (between 0 and 1) for calculation of parameter alpha
-#' @param use.deriv
-#' a number which tells how to use derivative.
-#' @param savgol
-#' list with parameters for Savitzky-Golay preprocessing (if \code{use.deriv} is not 0).
 #'
 #' @return
 #' The function returns a list with with following fields:
@@ -389,7 +343,7 @@ summary.mcrpure <- function(object, ...) {
 #' \item{purity }{vector with purity values for resolved components.}
 #'
 #' @export
-getPureVariables <- function(D, ncomp, purevars, offset, use.deriv, savgol) {
+getPureVariables <- function(D, ncomp, purevars, offset) {
 
    attrs <- mda.getattr(D)
 
@@ -399,48 +353,58 @@ getPureVariables <- function(D, ncomp, purevars, offset, use.deriv, savgol) {
    exclrows <- attrs$exclrows
    exclcols <- attrs$exclcols
 
-   # if derivative must be used - apply savgol
-   if (use.deriv > 0) {
-      D <- -do.call(prep.savgol, c(list(data = D), savgol))
-      D[D < 0] <- 0
-  }
-
    # get dimensions
    nspec <- nrow(D)
    nvar <- ncol(D)
+   nspecvis <- nspec - length(exclrows)
    nvarvis <- nvar - length(exclcols)
 
    # get indices for excluded columns if provided
    colind <- seq_len(nvar)
 
    # remove hidden rows and columns
-   if (!is.null(exclrows)) D <- D[-exclrows, , drop = FALSE]
+   if (!is.null(exclrows)) {
+      D <- D[-exclrows, , drop = FALSE]
+   }
 
    if (!is.null(exclcols)) {
       D <- D[, -exclcols, drop = FALSE]
       colind <- colind[-exclcols]
    }
 
-   # calculate purity spectrum
+   # calculate statistics and noise correction vector
    mu <- apply(D, 2, mean)
-   sigma <- apply(D, 2, sd) * sqrt((nrow(D) - 1) / nrow(D))
-   alpha <- offset * max(mu)
-   purity <- sigma / (mu + alpha)
+   n <- mu / (mu + offset * max(mu))
+   n <- (1 + offset) * n
 
-   # calculate variance-covariance matrix
-   Dprime <- sweep(D, 2, (sqrt(mu^2 + (sigma + alpha)^2)), "/")
-   R <- crossprod(Dprime) / nrow(Dprime)
-
-   # loop to locate the pure variables
+   # prepare vectores for resultss
    purityspec <- matrix(0, nrow = ncomp, ncol = nvar)
    purevars <- rep(0, ncomp)
    purevals <- rep(0, ncomp)
 
-   for (i in seq_len(ncomp)) {
-      pv <- purevars[seq_len(i - 1)]
-      weights <- sapply(seq_len(nvarvis), function(j) det(R[c(j, pv), c(j, pv), drop = FALSE]))
+   # scale columns of the original spectra to unit length
+   Dr <- D %*% diag(1 / sqrt(colSums(D^2)))
 
-      purityspec[i, colind] <- purity * weights
+   # initialize loadings
+   for (i in seq_len(ncomp)) {
+
+      # compute loadings (V in the original paper)
+      if (i  == 1) {
+         V <- svd(matrix(1, nspecvis, 1))$u[, seq_len(i), drop = FALSE]
+      } else {
+         V <- svd(D[, purevars, drop = FALSE])$u[, seq_len(i - 1), drop = FALSE]
+      }
+
+      # project data to the previously selected pure variable space
+      s <- crossprod(V, Dr)
+
+      # compute angles and keep them as purity spectrum
+      s <- sqrt(colSums(s^2))
+      s[s > 1] <- 1
+      purityspec[i, colind] <- acos(s) / pi * 180 * n
+
+      # find the largest value in the purity spectrum and save corresponding
+      # column index and next pure variable
       if (purevars[i] == 0) purevars[i] <- which.max(purityspec[i, colind])
       purevals[i] <- purityspec[i, purevars[i]]
    }
@@ -465,8 +429,6 @@ getPureVariables <- function(D, ncomp, purevars, offset, use.deriv, savgol) {
       list(
          ncomp = ncomp,
          offset = offset,
-         use.deriv = use.deriv,
-         savgol = savgol,
          purityspec = mda.t(purityspec),
          purevars = purevars,
          purevals = purevals

@@ -14,4 +14,4 @@ tests/matlab/*
 
 linting.R
 mdatools.Rproj
-current_dev_tests.R
+localtests.R
