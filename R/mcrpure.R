@@ -269,8 +269,6 @@ print.mcrpure <- function(x, ...) {
    cat("$purityspec - matrix with purity spectra\n")
    cat("$purevars - vector with indices of pure variables\n")
    cat("$purevals - purity values for the selected pure variables\n")
-   cat("$use.deriv - show how derivative was employed\n")
-   cat("$savgol - Savitzky-Golay transformation parameters\n")
    cat("$expvar - vector with explained variance\n")
    cat("$cumexpvar - vector with cumulative explained variance\n")
    cat("$offset - offset value used to compute the purity\n")
