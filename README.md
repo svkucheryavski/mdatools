@@ -17,7 +17,7 @@ If you want to cite the package, please use the following: Sergey Kucheryavskiy,
 What is new
 -----------
 
-Latest release (0.11.1) is available from GitHub. It will be available on CRAN soon (release is planned for *21.07.2020*). You can see the full list of changes [here](NEWS.md). The Bookdown tutorial has been also updated and contains the description of new methods added in the last release.
+Latest release (0.11.1) is available from GitHub. It will be available on CRAN soon (release is expected for *25.07.2020*). You can see the full list of changes [here](NEWS.md). The Bookdown tutorial has been also updated and contains the description of new methods added in the last release.
 
 
 How to install
