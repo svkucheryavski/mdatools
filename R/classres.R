@@ -534,10 +534,8 @@ plotPerformance.classres <- function(obj, nc = 1, type = "b",
    # prepare plot data
    plot_data <- do.call(rbind, lapply(obj[param], function(x) x[nc, , drop = FALSE]))
 
-   attr(plot_data, "name") <- sprintf(
-      if (length(param) == 1) capitalize(param) else "Classification performance (%s)",
-      obj$classnames[[nc]]
-   )
+   attr(plot_data, "name") <- if (length(param) == 1) capitalize(param) else sprintf(
+      "Classification performance (%s)", obj$classnames[[nc]])
 
    attr(plot_data, "xaxis.name") <- "Components"
    rownames(plot_data) <- param
