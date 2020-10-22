@@ -1,3 +1,10 @@
+v.0.11.2
+========
+
+* fixed an issue, which lead to a bug in `simcam.getPerformanceStats`, returning implausible and asymmetrical results (thanks to @svonallmen).
+
+* fixed a small issue sometimes giving warning when running tests on CRAN (did not influence the user experience though).
+
 v.0.11.1
 ========
 
@@ -66,7 +73,7 @@ Finally, all model results (calibration, cross-validation and test set validatio
 into a single list, `model$res`. This makes a lot of things easier. However, the old way of
 accessing the result objects (e.g. `model$calres` or `model$cvres`) still works, you can access e.g. calibration results both using `model$res$cal` and `model$calres`, so this change will not break the compatibility.
 
-Below is more detailed list of changes. The [tutorial](http://mdatools.com/docs/) has been updated accordingly.
+Below is more detailed list of changes. The [tutorial](https://mdatools.com/docs/) has been updated accordingly.
 
 ## Breaking changes
 
