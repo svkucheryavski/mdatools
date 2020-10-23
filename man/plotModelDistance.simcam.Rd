@@ -45,18 +45,20 @@ have optimal number of components A1 and A2. The models have been calibrated
 using calibration sets X1 and X2 with number of rows n1 and n2.
 Then we do the following:
 
-1. Project X2 to model m1 and compute residuals, E12
-2. Compute variance of the residuals as s12 = sum(E12^2) / n1
-3. Project X1 to model m2 and compute residuals, E21
-4. Compute variance of the residuals as s21 = sum(E21^2) / n2
-5. Compute variance of residuals for m1 as s1 = sum(E1^2) / (n1 - A1 - 1)
-6. Compute variance of residuals for m2 as s2 = sum(E2^2) / (n2 - A2 - 1)
+\enumerate{
+\item Project X2 to model m1 and compute residuals, E12
+\item Compute variance of the residuals as s12 = sum(E12^2) / n1
+\item Project X1 to model m2 and compute residuals, E21
+\item Compute variance of the residuals as s21 = sum(E21^2) / n2
+\item Compute variance of residuals for m1 as s1 = sum(E1^2) / (n1 - A1 - 1)
+\item Compute variance of residuals for m2 as s2 = sum(E2^2) / (n2 - A2 - 1)
+}
 
 The model distance then can be computed as: d = sqrt((s12 + s21) / (s1 + s2))
 
 As one can see, if the two models and corresponding calibration sets are identical, then the
 distance will be sqrt((n - A - 1) / n). For example, if n = 25 and A = 2, then the distance
-between the model and itself is sqrt(25/22) = sqrt(0.88) = 0.938. This case is demonstrated
+between the model and itself is sqrt(22/25) = sqrt(0.88) = 0.938. This case is demonstrated
 in the example section.
 
 In general, if distance between models is below one classes are overlapping. If it is above 3
