@@ -16,6 +16,11 @@
 #'
 #' All details can be found in [1]
 #'
+#' @references
+#' 1. Kucheryavskiy, S., Zhilin, S., Rodionova, O., & Pomerantsev, A.
+#' Procrustes Cross-Validation—A Bridge between Cross-Validation and Independent Validation Sets.
+#' Analytical Chemistry, 92 (17), 2020. pp.11842–11850. DOI: 10.1021/acs.analchem.0c02175
+#'
 #' @return
 #' Pseudo-validation matrix (IxJ)
 #'
