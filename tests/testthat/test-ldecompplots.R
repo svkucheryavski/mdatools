@@ -195,3 +195,41 @@ test_that("variance plot works fine.", {
       plotCumVariance(obj, type = "h", col = "red", show.labels = TRUE, labels = "names")
    })
 })
+
+test_that("Bug 94: limits for residuals plot are computed correctly", {
+   set.seed(42)
+   X <- matrix(rnorm(100 * 10), 100, 10)
+   X[20, ] <- X[20, ] * 10
+
+   m1 <- pca(X, 5)
+   m2 <- pca(X, 5, exclrows = 20)
+
+   ldecomp.plotResiduals(res = list(m1$res$cal), m1$Qlim, m1$T2lim, 5, norm = TRUE)
+   p1 <- par("usr")
+
+   ldecomp.plotResiduals(res = list(m2$res$cal), m2$Qlim, m2$T2lim, 5, norm = TRUE)
+   p2 <- par("usr")
+
+   ldecomp.plotResiduals(res = list(m2$res$cal), m2$Qlim, m2$T2lim, 5, norm = TRUE, show.limits = FALSE)
+   p3 <- par("usr")
+
+   ldecomp.plotResiduals(res = list(m2$res$cal), m2$Qlim, m2$T2lim, 5, norm = TRUE, show.excluded = TRUE)
+   p4 <- par("usr")
+
+   # check that limits without outlier are small enough
+   expect_lt(p1[2], 35)
+   expect_lt(p1[4], 7)
+
+   # check that limits with hidden outlier are small enough
+   expect_lt(p2[2], 8)
+   expect_lt(p2[4], 8)
+
+   # check that limits with shown outlier are larger
+   expect_lt(p2[2], p4[2])
+   expect_lt(p2[4], p4[4])
+
+   # now limits and hidden outliers should have smallest limits
+   expect_lt(p3[2], p2[2])
+   expect_lt(p3[4], p2[4])
+
+})
