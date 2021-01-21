@@ -4,12 +4,12 @@
 
 setup({
    pdf(file = tempfile("mdatools-test-mdaplot2-", fileext = ".pdf"))
-   sink(tempfile("mdatools-test-mdaplot2-", fileext = ".txt"), append = FALSE, split = FALSE)
+   #sink(tempfile("mdatools-test-mdaplot2-", fileext = ".txt"), append = FALSE, split = FALSE)
 })
 
 teardown({
    dev.off()
-   sink()
+   #sink()
 })
 
 par(mfrow = c(2, 2))
