@@ -964,6 +964,8 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
 #' logical, show or not legend on the plot (if more than one result object)
 #' @param legend.position
 #' if legend must be shown, where it should be
+#' @param show.excluded
+#' logical, show or hide rows marked as excluded (attribute `exclrows`).
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'

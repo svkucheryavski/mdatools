@@ -20,6 +20,7 @@ ldecomp.plotResiduals(
   lim.lty = c(2, 3),
   show.legend = TRUE,
   legend.position = "topright",
+  show.excluded = FALSE,
   ...
 )
 }
@@ -53,6 +54,8 @@ ldecomp.plotResiduals(
 \item{show.legend}{logical, show or not legend on the plot (if more than one result object)}
 
 \item{legend.position}{if legend must be shown, where it should be}
+
+\item{show.excluded}{logical, show or hide rows marked as excluded (attribute `exclrows`).}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
