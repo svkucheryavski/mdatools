@@ -26,10 +26,10 @@ params[[2]] <- list(x = x, ncomp = 1)
 params[[3]] <- list(x = x, ncomp = A)
 params[[4]] <- list(x = x, ncomp = A, nseg = 4)
 params[[5]] <- list(x = x, ncomp = A, nseg = 10)
-params[[6]] <- list(x = x, ncomp = A, nseg = nrow(X))
+params[[6]] <- list(x = x, ncomp = A, nseg = nrow(x))
 params[[7]] <- list(x = x, ncomp = A, nseg = 4, scale = TRUE)
 params[[8]] <- list(x = x, ncomp = A, nseg = 10, scale = TRUE)
-params[[9]] <- list(x = x, ncomp = A, nseg = nrow(X), scale = TRUE)
+params[[9]] <- list(x = x, ncomp = A, nseg = nrow(x), scale = TRUE)
 
 context("pcv: for PCA")
 for (i in seq_along(params)) {
