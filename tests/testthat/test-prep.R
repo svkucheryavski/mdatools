@@ -57,7 +57,7 @@ test_that("Full autoscaling with limits for max.cov is correct for negative data
 })
 
 
-context("prep: snv, msc, norm")
+context("prep: snv, msc, norm, km")
 
 test_that("SNV works correctly", {
    spectra <- simdata$spectra.c
@@ -108,6 +108,23 @@ test_that("Normalization to unit length works correctly", {
    expect_silent(pspectra <- prep.norm(spectra, "length"))
    expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
    expect_equivalent(apply(pspectra, 1, function(x) sqrt(sum(x^2))), rep(1, nrow(pspectra)))
+})
+
+
+
+test_that("Kubelka-Munk works correctly", {
+   spectra <- simdata$spectra.c
+   spectra <- spectra - min(spectra) + 0.01 * max(spectra)
+   expect_silent(pspectra <- prep.ref2km(spectra))
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equal(dim(spectra), dim(pspectra))
+   expect_true(all(pspectra > 0))
+
+   spectra[10, 10] <- 0
+   expect_error(prep.km(spectra))
+
+   spectra[10, 10] <- -1
+   expect_error(prep.km(spectra))
 })
 
 context("prep: savgol")

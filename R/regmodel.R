@@ -325,7 +325,7 @@ plotPredictions.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1,
       stop("Wrong value for 'ncomp' parameter.")
    }
 
-   plot_data <- lapply(res, plotPredictions, ny = ny, ncomp = ncomp, show.plot = FALSE)
+   plot_data <- lapply(res, plotPredictions.regres, ny = ny, ncomp = ncomp, show.plot = FALSE)
    attr(plot_data[[1]], "name") <- sprintf("Predictions (ncomp = %d)", ncomp)
    plots <- mdaplotg(plot_data, type = "p", legend.position = legend.position, ...)
 

@@ -60,6 +60,10 @@ test_that("excluded values and color grouping work fine together", {
    expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: jet", colmap = "jet"))
    expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: user", colmap = usr_cmap1))
    expect_silent(mdaplot(pd, cgroup = d, main = "Colormap: user", colmap = usr_cmap2))
+
+   # if cgroup is a matrix or is a vector - raise an error
+   expect_error(mdaplot(pd, cgroup = as.matrix(d)))
+   expect_error(mdaplot(pd, cgroup = as.data.frame(d)))
 })
 
 par(mfrow = c(2, 2))
@@ -75,7 +79,7 @@ test_that("opacity parameter works well together with color grouping", {
    expect_silent(tf(type = "p", cgroup = people[, "Wine"], opacity = 0.5))
    expect_silent(tf(type = "l", cgroup = people[, "Wine"], opacity = 0.5))
    expect_silent(tf(type = "b", cgroup = people[, "Wine"], opacity = 0.5))
-   expect_silent(tf(type = "h", cgroup = people[1, ], opacity = 0.5))
+   expect_silent(tf(type = "h", cgroup = as.numeric(people[1, ]), opacity = 0.5))
 })
 
 par(mfrow = c(4, 2))

@@ -1,3 +1,19 @@
+v.0.11.3
+========
+
+* added [Procrustes Cross-Validation method](https://doi.org/10.1021/acs.analchem.0c02175), `pcv()` (it is also available as a [separate project](https://github.com/svkucheryavski/pcv)).
+
+* added Kubelka-Munk transformation for diffuse reflectance spectra (`prep.ref2km()`).
+
+* fixed bug [#94](https://github.com/svkucheryavski/mdatools/issues/94) which caused wrong limits in PCA distance plot when outliers are present but excluded.
+
+* fixed bug [#95](https://github.com/svkucheryavski/mdatools/issues/95) which lead to issues when PLS regression methods (e.g. `plotRMSE()`) are used for PLS-DA model object.
+
+* added additional check that parameter `cgroup` for plotting functions is provided as a vector or as a factor to avoid confusion.
+
+* added link to [YouTube channel](https://www.youtube.com/channel/UCox0H4utfMq4FIu2kymuyTA) with Chemometric course based on *mdatools* package.
+
+
 v.0.11.2
 ========
 

@@ -273,6 +273,10 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
       return(mdaplot.prepareColors(palette, ngroups, opacity))
    }
 
+   if (!is.null(dim(cgroup))) {
+      stop("Parameter 'cgroup' should be a vector of values or a factor.")
+   }
+
    # if cgroup is factor return vector with corresponding values
    if (is.factor(cgroup)) {
       ngroups <- length(attr(cgroup, "levels"))

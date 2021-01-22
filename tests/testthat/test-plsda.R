@@ -110,3 +110,16 @@ test_that("predictions work fine", {
    summary(res)
    print(res)
 })
+
+test_that("Bug #95: plots for PLS regression can be also used with PLS-DA objects", {
+   data(people)
+   X <- people[, -c(3, 9)]
+   c <- as.factor(people[, 9])
+   m <- plsda(X, c, 3, cv = 1)
+
+   expect_equal(class(m$res$cal), c("plsdares", "classres", "plsres", "regres"))
+
+   par(mfrow = c(1, 2))
+   expect_silent(plotRMSE(m))
+   expect_silent(plotPredictions.regmodel(m))
+})

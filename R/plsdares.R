@@ -129,7 +129,7 @@
 #' @export
 plsdares <- function(plsres, cres) {
    obj <- c(plsres, cres)
-   class(obj) <- c("plsdares", "classres", "plsres")
+   class(obj) <- c("plsdares", "classres", "plsres", "regres")
    obj$call <- match.call()
 
    return(obj)

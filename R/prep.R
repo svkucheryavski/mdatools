@@ -26,42 +26,40 @@
 #' @export
 prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0) {
 
-   attrs <- mda.getattr(data)
-   dimnames <- dimnames(data)
+   f <- function(data, center, scale, max.cov) {
+      # define values for centering
+      if (is.logical(center) && center) center <- apply(data, 2, mean)
 
-   # define values for centering
-   if (is.logical(center) && center) center <- apply(data, 2, mean)
+      if (is.numeric(center) && length(center) != ncol(data)) {
+         stop("Number of values in 'center' should be the same as number of columns in 'daata'")
+      }
 
-   if (is.numeric(center) && length(center) != ncol(data)) {
-      stop("Number of values in 'center' should be the same as number of columns in 'daata'")
+      # define values for weigting
+      if (is.logical(scale) && scale) scale <- apply(data, 2, sd)
+
+      if (is.numeric(scale) && length(scale) != ncol(data)) {
+         stop("Number of values in 'scale' should be the same as number of columns in 'daata'")
+      }
+
+      # compute coefficient of variation and set scale to 1 if it is below
+      # a user defined threshold
+      if (is.numeric(scale)) {
+         m <- if (is.numeric(center)) center else apply(data, 2, mean)
+         cv <- scale / abs(m) * 100
+         scale[is.nan(cv) | cv <= max.cov] <- 1
+      }
+
+      # make autoscaling and attach preprocessing attributes
+      data <- scale(data, center = center, scale = scale)
+      attr(data, "scaled:center") <- NULL
+      attr(data, "scaled:scale") <- NULL
+      attr(data, "prep:center") <- center
+      attr(data, "prep:scale") <- scale
+
+      return(data)
    }
 
-   # define values for weigting
-   if (is.logical(scale) && scale) scale <- apply(data, 2, sd)
-
-   if (is.numeric(scale) && length(scale) != ncol(data)) {
-      stop("Number of values in 'scale' should be the same as number of columns in 'daata'")
-   }
-
-   # compute coefficient of variation and set scale to 1 if it is below
-   # a user defined threshold
-   if (is.numeric(scale)) {
-      m <- if (is.numeric(center)) center else apply(data, 2, mean)
-      cv <- scale / abs(m) * 100
-      scale[is.nan(cv) | cv <= max.cov] <- 1
-   }
-
-   # make autoscaling and attach preprocessing attributes
-   data <- scale(data, center = center, scale = scale)
-
-   data <- mda.setattr(data, attrs)
-   attr(data, "scaled:center") <- NULL
-   attr(data, "scaled:scale") <- NULL
-   attr(data, "prep:center") <- center
-   attr(data, "prep:scale") <- scale
-   dimnames(data) <- dimnames
-
-   return(data)
+   return(prep.generic(data, f, center = center, scale = scale, max.cov = max.cov))
 }
 
 #' Standard Normal Variate transformation
@@ -97,14 +95,9 @@ prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0) {
 #'
 #' @export
 prep.snv <- function(data) {
-   attrs <- mda.getattr(data)
-   dimnames <- dimnames(data)
 
-   data <- t(scale(t(data), center = TRUE, scale = TRUE))
-   data <- mda.setattr(data, attrs)
-   dimnames(data) <- dimnames
-
-   return(data)
+   f <- function(data) t(scale(t(data), center = TRUE, scale = TRUE))
+   return(prep.generic(data, f))
 }
 
 #' Normalization
@@ -122,25 +115,21 @@ prep.snv <- function(data) {
 #'
 #' @export
 prep.norm <- function(data, type = "area") {
-   attrs <- mda.getattr(data)
-   dimnames <- dimnames(data)
 
-   w <- switch(
-      type,
-      "area" = apply(abs(data), 1, sum),
-      "length" = sqrt(apply(data^2, 1, sum)),
-      "sum" = apply(data, 1, sum)
-   )
+   f <- function(data, type) {
 
-   if (is.null(w)) {
-      stop("Wrong value for argument 'type'.")
+      w <- switch(
+         type,
+         "area" = apply(abs(data), 1, sum),
+         "length" = sqrt(apply(data^2, 1, sum)),
+         "sum" = apply(data, 1, sum)
+      )
+
+      if (is.null(w)) stop("Wrong value for argument 'type'.")
+      return(sweep(data, 1, w, "/"))
    }
 
-   data <- sweep(data, 1, w, "/")
-   data <- mda.setattr(data, attrs)
-   dimnames(data) <- dimnames
-
-   return(data)
+   return(prep.generic(data, f, type = type))
 }
 
 #' Savytzky-Golay filter
@@ -159,45 +148,30 @@ prep.norm <- function(data, type = "area") {
 #'
 #' @export
 prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
-   attrs <- mda.getattr(data)
-   dimnames <- dimnames(data)
 
-   if (width < 3) {
-      stop("Filter width ('width') should be equal at least to 3.")
+   f <- function(data, width, porder, dorder) {
+      stopifnot("Filter width ('width') should be equal at least to 3." = width > 2)
+      stopifnot("Filter width ('width') should be an odd integer number." = width %% 2 == 1)
+      stopifnot("Wrong value for the derivative order (should be 0, 1, or 2)." = dorder %in% (0:2))
+      stopifnot("Wrong value for the polynomial degree (should be integer number between 0 and 4)." = porder %in% (0:4))
+      stopifnot("Polynomal degree ('porder') should not be smaller the derivative order ('dorder')." = porder >= dorder)
+
+      nobj <- nrow(data)
+      nvar <- ncol(data)
+      pdata <- matrix(0, ncol = nvar, nrow = nobj)
+
+      for (i in seq_len(nobj)) {
+         d <- data[i, ]
+         w <- (width - 1) / 2
+         f <- pinv(outer(-w:w, 0:porder, FUN = "^"))
+         d <- convolve(d, rev(f[dorder + 1, ]), type = "o")
+         pdata[i, ] <- d[(w + 1) : (length(d) - w)]
+      }
+
+      return(pdata)
    }
 
-   if (width %% 2 != 1) {
-      stop("Filter width ('width') should be an odd integer number.")
-   }
-
-   if (dorder < 0 || dorder > 2) {
-      stop("Wrong value for the derivative order (should be 0, 1, or 2).")
-   }
-
-   if (porder < 0 || porder > 4) {
-      stop("Wrong value for the polynomial degree (should be integer number between 0 and 4).")
-   }
-
-   if (porder < dorder) {
-      stop("Polynomal degree ('porder') should not be smaller the derivative order ('dorder').")
-   }
-
-   nobj <- nrow(data)
-   nvar <- ncol(data)
-   pdata <- matrix(0, ncol = nvar, nrow = nobj)
-
-   for (i in seq_len(nobj)) {
-      d <- data[i, ]
-      w <- (width - 1) / 2
-      f <- pinv(outer(-w:w, 0:porder, FUN = "^"))
-      d <- convolve(d, rev(f[dorder + 1, ]), type = "o")
-      pdata[i, ] <- d[(w + 1) : (length(d) - w)]
-   }
-
-   pdata <- mda.setattr(pdata, attrs)
-   dimnames(pdata) <- dimnames
-
-   return(pdata)
+   return(prep.generic(data, f, width = width, porder = porder, dorder = dorder))
 }
 
 #' Multiplicative Scatter Correction transformation
@@ -233,49 +207,57 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
 #'
 #' @export
 prep.msc <- function(spectra, mspectrum = NULL) {
-   attrs <- mda.getattr(spectra)
-   dimnames <- dimnames(spectra)
 
-   if (is.null(mspectrum)) {
-      mspectrum <- apply(spectra, 2, mean)
+   f <- function(spectra, mspectrum) {
+      if (is.null(mspectrum)) {
+         mspectrum <- apply(spectra, 2, mean)
+      }
+
+      if (!is.null(mspectrum)) {
+         dim(mspectrum) <- NULL
+      }
+
+      if (length(mspectrum) != ncol(spectra)) {
+         stop("Length of 'mspectrum' should be the same as number of columns in 'spectra'.")
+      }
+
+      pspectra <- matrix(0, nrow = nrow(spectra), ncol = ncol(spectra))
+      for (i in seq_len(nrow(spectra))) {
+         coef <- coef(lm(spectra[i, ] ~ mspectrum))
+         pspectra[i, ] <- (spectra[i, ] - coef[1]) / coef[2]
+      }
+
+      attr(pspectra, "mspectrum") <- mspectrum
+      return(pspectra)
    }
 
-   if (!is.null(mspectrum)) {
-      dim(mspectrum) <- NULL
-   }
-
-   if (length(mspectrum) != ncol(spectra)) {
-      stop("Length of 'mspectrum' should be the same as number of columns in 'spectra'.")
-   }
-
-   cspectra <- matrix(0, nrow = nrow(spectra), ncol = ncol(spectra))
-   for (i in seq_len(nrow(spectra))) {
-      coef <- coef(lm(spectra[i, ] ~ mspectrum))
-      cspectra[i, ] <- (spectra[i, ] - coef[1]) / coef[2]
-   }
-
-   cspectra <- mda.setattr(cspectra, attrs)
-   attr(cspectra, "mspectrum") <- mspectrum
-   dimnames(cspectra) <- dimnames
-
-   return(cspectra)
+   return(prep.generic(spectra, f, mspectrum = mspectrum))
 }
 
-#' Pseudo-inverse matrix
+
+#' Kubelka-Munk transformation
 #'
 #' @description
-#' Computes pseudo-inverse matrix using SVD
+#' Applies Kubelka-Munk (km) transformation to data matrix (spectra)
 #'
-#' @param data
-#' a matrix with data values to compute inverse for
+#' @param spectra
+#' a matrix with spectra values (absolute reflectance values)
+#'
+#' @return
+#' preprocessed spectra.
+#'
+#' @details
+#' Kubelka-Munk is useful preprocessing method for diffuse reflection spectra (e.g. taken for
+#' powders or rough surface). It transforms the reflectance spectra R to K/M units as follows:
+#' (1 - R)^2 / 2R
 #'
 #' @export
-pinv <- function(data) {
-   # Calculates pseudo-inverse of data matrix
-   s <- svd(data)
-   s$v %*% diag(1 / s$d) %*% t(s$u)
-}
+prep.ref2km <- function(spectra) {
+   stopifnot("Can't use Kubelka-Munk transformation as some of the values are zeros or negative." = all(spectra > 0))
+   f <- function(x) (1 - x)^2 / (2 * x)
 
+   return(prep.generic(spectra, f))
+}
 
 #' Baseline correction using assymetric least squares
 #'
@@ -347,3 +329,37 @@ prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 10) {
    return(pspectra)
 }
 
+
+#' Pseudo-inverse matrix
+#'
+#' @description
+#' Computes pseudo-inverse matrix using SVD
+#'
+#' @param data
+#' a matrix with data values to compute inverse for
+#'
+#' @export
+pinv <- function(data) {
+   # Calculates pseudo-inverse of data matrix
+   s <- svd(data)
+   s$v %*% diag(1 / s$d) %*% t(s$u)
+}
+
+#' Generic function for preprocessing
+#'
+#' @param x
+#' data matrix to be preprocessed
+#' @param f
+#' function for preprocessing
+#' @param ...
+#' arguments for the function f
+#'
+#'
+prep.generic <- function(x, f, ...) {
+   attrs <- mda.getattr(x)
+   dimnames <- dimnames(x)
+   x.p <- f(x, ...)
+   x.p <- mda.setattr(x.p, attrs)
+   dimnames(x.p) <- dimnames
+   return(x.p)
+}

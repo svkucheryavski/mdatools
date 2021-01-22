@@ -964,6 +964,8 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
 #' logical, show or not legend on the plot (if more than one result object)
 #' @param legend.position
 #' if legend must be shown, where it should be
+#' @param show.excluded
+#' logical, show or hide rows marked as excluded (attribute `exclrows`).
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -988,12 +990,18 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
 ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE, norm = FALSE,
    cgroup = NULL, xlim = NULL, ylim = NULL, show.limits = c(TRUE, TRUE),
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
-   show.legend = TRUE, legend.position = "topright", ...) {
+   show.legend = TRUE, legend.position = "topright", show.excluded = FALSE, ...) {
 
-   getPlotLim <- function(lim, pd, ld, dim, show.limits) {
+   # return column with values either with or without excluded outliers
+   getValues <- function(x, dim) {
+      return(if (show.excluded) x[, dim] else mda.purgeRows(x)[, dim])
+   }
+
+   # compute limits fo axis depending on values and position of critical limits
+   getPlotLim <- function(lim, pd, ld, dim) {
       if (!is.null(lim) || all(!show.limits)) return(lim)
-      limits <- if (show.limits[[2]]) ld$outliers else ld$extremes
-      return(c(0, max(sapply(pd, function(x) max(x[, dim])), limits[, dim])) * 1.05)
+      limits <- if (show.limits[[2]]) max(ld$outliers[, dim]) else max(ld$extremes[, dim])
+      return( c(0, max(sapply(pd, function(x) { max(c(getValues(x, dim), limits)) * 1.05}))) )
    }
 
    # check that show.limits is logical
@@ -1015,15 +1023,16 @@ ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE, norm = F
 
    # get coordinates for critical limits
    lim_data <- ldecomp.getLimitsCoordinates(Qlim, T2lim, ncomp = ncomp, norm = norm, log = log)
-   xlim <- getPlotLim(xlim, plot_data, lim_data, 1, show.limits)
-   ylim <- getPlotLim(ylim, plot_data, lim_data, 2, show.limits)
+   xlim <- getPlotLim(xlim, plot_data, lim_data, 1)
+   ylim <- getPlotLim(ylim, plot_data, lim_data, 2)
 
    # make plot
    if (length(plot_data) == 1) {
-      mdaplot(plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, ...)
+      mdaplot(plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup,
+         show.excluded = show.excluded, ...)
    } else {
       mdaplotg(plot_data, type = "p", xlim = xlim, ylim = ylim, show.legend = show.legend,
-         legend.position = legend.position, ...)
+         show.excluded = show.excluded, legend.position = legend.position, ...)
    }
 
    # show critical limits
