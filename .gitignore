@@ -6,6 +6,7 @@
 .DS_Store
 .lintr
 .vscode/*
+LICENSE
 
 tests/plots/*.pdf
 tests/plots/*.txt
