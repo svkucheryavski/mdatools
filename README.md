@@ -1,9 +1,8 @@
 Multivariate Data Analysis Tools
 ===========================================
-![GitHub build status](https://github.com/actions/mdatools/workflows/R-CMD-check/badge.svg)
-![Travis (build status)](https://img.shields.io/travis/svkucheryavski/mdatools?color=blue&style=flat-square "Travis CI build status")
+![GitHub build status](https://github.com/svkucheryavski/mdatools/workflows/R-CMD-check/badge.svg)
+![GitHub All Releases](https://img.shields.io/github/downloads/svkucheryavski/mdatools/total?color=blue&logo=Github "Downloads from GitHub")
 ![Downloads (CRAN)](https://cranlogs.r-pkg.org/badges/grand-total/mdatools?color=blue&logo=R&style=flat-square "Downloads from CRAN")
-![GitHub All Releases](https://img.shields.io/github/downloads/svkucheryavski/mdatools/total?color=blue&logo=Github&style=flat-square "Downloads from GitHub")
 [![codecov](https://codecov.io/gh/svkucheryavski/mdatools/branch/0.10.0/graph/badge.svg?style=flat-square)](https://codecov.io/gh/svkucheryavski/mdatools)
 
 <img src="https://mdatools.com//images/logo.svg" align="left" style="top: 5px 10px 5px 0;" />
