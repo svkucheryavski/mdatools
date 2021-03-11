@@ -33,7 +33,7 @@ attr(xc, "xaxis.name") <- "Wavelength, nm"
 attr(xc, "xaxis.values") <- simdata$wavelength
 
 xt <- simdata$spectra.t
-yt <- simdata$conc.t
+yt <- simdata$conc.t[, 1, drop = F]
 xt <- mda.exclrows(xt, c(15, 35))
 yt <- mda.exclrows(yt, c(15, 35))
 attr(xt, "name") <- "Spectra, val"
@@ -140,3 +140,27 @@ for (i in seq_along(datasets)) {
    print(m2)
    #print(m3)
 }
+
+context("ipls: check if works with test set")
+
+d <- datasets[["spectra"]]
+
+# test that if test set is bad it raises an error
+expect_error(ipls(d$xc, d$yc, int.width = 10, glob.ncomp = d$ncomp, x.test = d$xt[, -1], y.test = d$yt))
+expect_error(ipls(d$xc, d$yc, int.width = 10, glob.ncomp = d$ncomp, x.test = d$xt[-1, ], y.test = d$yt))
+expect_error(ipls(d$xc, d$yc, int.width = 10, glob.ncomp = d$ncomp, x.test = d$xt, y.test = d$yt[-1, ]))
+
+# test forward method with test set
+expect_silent(m <- ipls(d$xc, d$yc, method = "forward", int.width = 10, glob.ncomp = d$ncomp,
+   x.test = d$xt, y.test = d$yt, silent = TRUE))
+
+expect_output(summary(m))
+expect_silent(plot(m))
+expect_equivalent(m$int.selected, c(6, 11, 4, 9))
+
+expect_silent(m <- ipls(d$xc, d$yc, method = "backward", int.width = 10, glob.ncomp = d$ncomp,
+   x.test = d$xt, y.test = d$yt, silent = TRUE))
+
+expect_output(summary(m))
+expect_silent(plot(m))
+expect_equivalent(m$int.selected, c(3, 4, 8, 13))
