@@ -320,6 +320,10 @@ ipls.getintlimits <- function(int.limits, int.width, int.num, npred) {
 #' a vector with response values
 #' @param obj
 #' object with initial settings for iPLS algorithm
+#' @param int.stat
+#' data frame with initial interval statistics
+#' @param glob.stat
+#' data frame with initial global statistics
 #'
 ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
 
@@ -414,6 +418,10 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
 #' a vector with response values
 #' @param obj
 #' object with initial settings for iPLS algorithm
+#' @param int.stat
+#' data frame with initial interval statistics
+#' @param glob.stat
+#' data frame with initial global statistics
 #'
 ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
 

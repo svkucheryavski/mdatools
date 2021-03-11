@@ -4,7 +4,7 @@
 \alias{ipls.forward}
 \title{Runs the forward iPLS algorithm}
 \usage{
-ipls.forward(x, y, obj)
+ipls.forward(x, y, obj, int.stat, glob.stat)
 }
 \arguments{
 \item{x}{a matrix with predictor values}
@@ -12,6 +12,10 @@ ipls.forward(x, y, obj)
 \item{y}{a vector with response values}
 
 \item{obj}{object with initial settings for iPLS algorithm}
+
+\item{int.stat}{data frame with initial interval statistics}
+
+\item{glob.stat}{data frame with initial global statistics}
 }
 \description{
 Runs the forward iPLS algorithm

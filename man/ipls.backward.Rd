@@ -4,7 +4,7 @@
 \alias{ipls.backward}
 \title{Runs the backward iPLS algorithm}
 \usage{
-ipls.backward(x, y, obj)
+ipls.backward(x, y, obj, int.stat, glob.stat)
 }
 \arguments{
 \item{x}{a matrix with predictor values}
@@ -12,6 +12,10 @@ ipls.backward(x, y, obj)
 \item{y}{a vector with response values}
 
 \item{obj}{object with initial settings for iPLS algorithm}
+
+\item{int.stat}{data frame with initial interval statistics}
+
+\item{glob.stat}{data frame with initial global statistics}
 }
 \description{
 Runs the backward iPLS algorithm
