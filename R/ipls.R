@@ -400,6 +400,7 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
       if (!obj$silent) {
          fprintf("selected interval %3d (RMSE = %f, nLV = %d)\n", sel, rmse, m$ncomp.selected)
       }
+
    }
 
    # return the selection results
