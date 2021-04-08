@@ -147,30 +147,43 @@ for (p in params_ok) {
 
 context("mcrpure: testing for simdata")
 
-data(simdata)
+test_that("mcrpure works with simdata and attributes", {
 
-simdata$spectra.c <- simdata$spectra.c[order(simdata$conc.c[, 1]), ]
-attr(simdata$spectra.c, "yaxis.name") <- "Time, s"
-attr(simdata$spectra.c, "yaxis.values") <- seq(0, 10, length.out = nrow(simdata$spectra.c))
+   data(simdata)
+
+   simdata$spectra.c <- simdata$spectra.c[order(simdata$conc.c[, 1]), ]
+   attr(simdata$spectra.c, "yaxis.name") <- "Time, s"
+   attr(simdata$spectra.c, "yaxis.values") <- seq(0, 10, length.out = nrow(simdata$spectra.c))
 
 
-expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.0004))
-summary(m)
+   expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.0004))
+   summary(m)
 
-par(mfrow = c(2, 1))
-expect_silent(plotSpectra(m))
-expect_silent(plotContributions(m))
+   par(mfrow = c(2, 1))
+   expect_silent(plotSpectra(m))
+   expect_silent(plotContributions(m))
 
-expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.0004, exclcols = 141:150))
-summary(m)
+   expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.0004, exclcols = 141:150))
+   summary(m)
 
-par(mfrow = c(2, 1))
-expect_silent(plotSpectra(m))
-expect_silent(plotContributions(m))
+   par(mfrow = c(2, 1))
+   expect_silent(plotSpectra(m))
+   expect_silent(plotContributions(m))
 
-expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.0004, exclrows = 1:10))
-summary(m)
+   expect_silent(m <- mcrpure(simdata$spectra.c, 3, offset = 0.0004, exclrows = 1:10))
+   summary(m)
 
-par(mfrow = c(2, 1))
-expect_silent(plotSpectra(m))
-expect_silent(plotContributions(m, type = "l"))
+   par(mfrow = c(2, 1))
+   expect_silent(plotSpectra(m))
+   expect_silent(plotContributions(m, type = "l"))
+})
+
+
+context("mcrpure: tests for recent bug fixes")
+
+test_that("user provided indices for pure variables are forced", {
+   data(simdata)
+   spectra <- simdata$spectra.c
+   m <- mcrpure(spectra, ncomp = 3, purevars = c(10, 20, 30))
+   expect_equivalent(m$purevars, c(10, 20, 30))
+})
