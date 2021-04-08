@@ -379,7 +379,6 @@ getPureVariables <- function(D, ncomp, purevars, offset) {
 
    # prepare vectores for resultss
    purityspec <- matrix(0, nrow = ncomp, ncol = nvar)
-   purevars <- rep(0, ncomp)
    purevals <- rep(0, ncomp)
 
    # scale columns of the original spectra to unit length
