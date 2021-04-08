@@ -5,8 +5,7 @@ v.0.11.4
 
 * fixed bug [#98](https://github.com/svkucheryavski/mdatools/issues/98), which caused a drop of row names when data frame was used as a data source for PCA/SIMCA.
 
-
-
+* fixed bug [#99](https://github.com/svkucheryavski/mdatools/issues/99), which did not allow to use user defined indices of pure variables in `mcrpure()`.
 
 
 v.0.11.3
