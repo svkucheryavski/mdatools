@@ -10,6 +10,8 @@ mcrals.cal(
   cont.constraints,
   spec.constraints,
   spec.ini,
+  cont.forced,
+  spec.forced,
   cont.solver,
   spec.solver,
   max.niter,
@@ -27,6 +29,10 @@ mcrals.cal(
 \item{spec.constraints}{a list with constraints to be applied to spectra  (see details).}
 
 \item{spec.ini}{a matrix with initial estimation of the pure components spectra.}
+
+\item{cont.forced}{a matrix which allows to force some of the concentration values (see details).}
+
+\item{spec.forced}{a matrix which allows to force some of the spectra values (see details).}
 
 \item{cont.solver}{which function to use as a solver for resolving of pure components contributions (see detials).}
 

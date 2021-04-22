@@ -86,7 +86,13 @@ constraints.list <- function() {
 #' @export
 constraintClosure <- function(x, d, sum = 1) {
    stopifnot("Parameter 'sum' should be positive number." = sum > 0 )
-   s <- diag(sum / rowSums(x), nrow(x), nrow(x))
+
+   # if all values in a row are zeros set sums to one so they will not be scaled
+   rsums <- rowSums(x)
+   rsums[rsums == 0] <- 1
+
+   # scale the values so for evert row they sum up to 1
+   s <- diag(sum / rsums, nrow(x), nrow(x))
    return(s %*% x)
 }
 

@@ -289,3 +289,77 @@ for (s in solvers) {
    n <- n + 1
 }
 
+
+#!#########################################
+#! Block 4. Test of new features          #
+#!#########################################
+
+test_that("some of the resolved concentrations can be forced", {
+
+   data(carbs)
+   C <- carbs$C
+   S <- mda.t(prep.norm(mda.t(carbs$S), "length"))
+   D <- prep.norm(carbs$D, "length")
+
+   D.ini <- pca(D, 3)$loadings
+   D.ini <- abs(D.ini)
+
+   D <- mda.rbind(mda.t(S), D)
+   cont.forced <- matrix(NA, nrow = nrow(D), ncol = ncol(C))
+   cont.forced[1, ] <- c(1, 0, 0)
+   cont.forced[2, ] <- c(0, 1, 0)
+   cont.forced[3, ] <- c(0, 0, 1)
+
+   cc <- list(
+      constraint("nonneg"),
+      constraint("closure")
+   )
+
+   # define constraints for spectra
+   cs <- list(
+      constraint("nonneg"),
+      constraint("norm", params = list(type = "length"))
+   )
+
+   m <- mcrals(D, ncomp = 3, spec.ini = D.ini, cont.forced = cont.forced, spec.constraints = cs, cont.constraints = cc)
+   expect_equivalent(round(m$rescont[1, ], 1), c(1, 0, 0))
+   expect_equivalent(round(m$rescont[2, ], 1), c(0, 1, 0))
+   expect_equivalent(round(m$rescont[3, ], 1), c(0, 0, 1))
+})
+
+test_that("some of the resolved concentrations and spectral values can be forced", {
+
+   data(carbs)
+   C <- carbs$C
+   S <- mda.t(prep.norm(mda.t(carbs$S), "length"))
+   D <- prep.norm(carbs$D, "length")
+
+   Dplus <- mda.rbind(mda.t(S), D)
+   cont.forced <- matrix(NA, nrow(Dplus), 3)
+   spec.forced <- matrix(NA, ncol(Dplus), 3)
+
+   cont.forced[1, 2:3] <- 0
+   cont.forced[2, c(1, 3)] <- 0
+   cont.forced[3, 1:2] <- 0
+
+   spec.forced[1350:1401, ] <- 0
+
+   cc <- list(
+      constraint("closure")
+   )
+
+   # define constraints for spectra
+   cs <- list(
+      constraint("norm", params = list(type = "length"))
+   )
+
+
+   m <- mcrals(Dplus, 3, cont.forced = cont.forced, spec.forced = spec.forced,
+      cont.constraints = cc, spec.constraints = cs)
+
+   expect_equivalent(round(m$rescont[1, 2:3], 1), c(0, 0))
+   expect_equivalent(round(m$rescont[2, c(1, 3)], 1), c(0, 0))
+   expect_equivalent(round(m$rescont[3, 1:2], 1), c(0, 0))
+   expect_equivalent(round(spec.forced[1350:1401, ], 1), rep(0, length(spec.forced[1350:1401, ])))
+
+})

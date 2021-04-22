@@ -1,7 +1,9 @@
 v.0.11.4
 ========
 
-* added possibility to run iPLS with test set (parameters `x.test` and `y.test`).
+* added possibility to provide partially known contributions (parameter `cont.forced`) or spectral values (parameter `spec.forced`) to `mcrals()`. See more in help text and user guide for the package.
+
+* added possibility to run iPLS using test set (parameters `x.test` and `y.test`) instead of cross-validation.
 
 * fixed bug [#98](https://github.com/svkucheryavski/mdatools/issues/98), which caused a drop of row names when data frame was used as a data source for PCA/SIMCA.
 
