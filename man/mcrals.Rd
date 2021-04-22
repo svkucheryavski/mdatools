@@ -10,6 +10,8 @@ mcrals(
   cont.constraints = list(),
   spec.constraints = list(),
   spec.ini = matrix(runif(ncol(x) * ncomp), ncol(x), ncomp),
+  cont.forced = matrix(NA, nrow(x), ncomp),
+  spec.forced = matrix(NA, ncol(x), ncomp),
   cont.solver = mcrals.nnls,
   spec.solver = mcrals.nnls,
   exclrows = NULL,
@@ -30,6 +32,10 @@ mcrals(
 \item{spec.constraints}{a list with constraints to be applied to spectra  (see details).}
 
 \item{spec.ini}{a matrix with initial estimation of the pure components spectra.}
+
+\item{cont.forced}{a matrix which allows to force some of the concentration values (see details).}
+
+\item{spec.forced}{a matrix which allows to force some of the spectra values (see details).}
 
 \item{cont.solver}{which function to use as a solver for resolving of pure components contributions (see detials).}
 
@@ -96,8 +102,20 @@ case you need to provide a non-negativity constraint.
 The algorithm iteratively resolves C and S and checks how well CS' is to D. The iterations stop
 either when number exceeds value in \code{max.niter} or when improvements (difference between
 explained variance on current and previous steps) is smaller than \code{tol} value.
+
+Parameters \code{cont.force} and \code{spec.force} allows you to force some parts of the
+contributions or the spectra to be equal to particular pre-defined values. In this case you need
+to provide the parameters (or just one of them) in form of a matrix. For example \code{cont.force}
+should have as many rows as many you have in the original spectral data \code{x} and as many
+columns as many pure components you want to resolve. Feel all values of this matrix with
+\code{NA} and the values you want to force with real numbers. For example if you know that in
+the first measurement concentration of 2 and 3 components was zero, set the corresponding
+values of \code{cont.force} to zero. See also the last case in the examples section.
 }
 \examples{
+
+\donttest{
+
 library(mdatools)
 
 # resolve mixture of carbonhydrates Raman spectra
@@ -160,14 +178,31 @@ for (i in 1:3) {
    )
 }
 
+# This example shows how to force some of the contribution values
+# First of all we combine the matrix with mixtures and the pure spectra, so the pure
+# spectra are on top of the combined matrix
+Dplus <- mda.rbind(mda.t(carbs$S), carbs$D)
+
+# since we know that concentration of C2 and C3 is zero in the first row (it is a pure
+# spectrum of first component), we can force them to be zero in the optimization procedure.
+# Similarly we can do this for second and third rows.
+
+cont.forced <- matrix(NA, nrow(Dplus), 3)
+cont.forced[1, ] <- c(NA, 0, 0)
+cont.forced[2, ] <- c(0, NA, 0)
+cont.forced[3, ] <- c(0, 0, NA)
+
+m <- mcrals(Dplus, 3, cont.forced = cont.forced, cont.constraints = cc, spec.constraints = cs)
+plot(m)
+
 # See bookdown tutorial for more details.
+
+}
 
 }
 \references{
 1. J. Jaumot, R. Gargallo, A. de Juan, and R. Tauler, "A graphical user-friendly interface for
 MCR-ALS: a new tool for multivariate curve resolution in MATLAB", Chemometrics and Intelligent #' Laboratory Systems 76, 101-110 (2005).
-
-2.
 }
 \seealso{
 Methods for \code{mcrals} objects:

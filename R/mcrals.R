@@ -14,6 +14,10 @@
 #' a list with constraints to be applied to spectra  (see details).
 #' @param spec.ini
 #' a matrix with initial estimation of the pure components spectra.
+#' @param cont.forced
+#' a matrix which allows to force some of the concentration values (see details).
+#' @param spec.forced
+#' a matrix which allows to force some of the spectra values (see details).
 #' @param cont.solver
 #' which function to use as a solver for resolving of pure components contributions (see detials).
 #' @param spec.solver
@@ -62,6 +66,14 @@
 #' either when number exceeds value in \code{max.niter} or when improvements (difference between
 #' explained variance on current and previous steps) is smaller than \code{tol} value.
 #'
+#' Parameters \code{cont.force} and \code{spec.force} allows you to force some parts of the
+#' contributions or the spectra to be equal to particular pre-defined values. In this case you need
+#' to provide the parameters (or just one of them) in form of a matrix. For example \code{cont.force}
+#' should have as many rows as many you have in the original spectral data \code{x} and as many
+#' columns as many pure components you want to resolve. Feel all values of this matrix with
+#' \code{NA} and the values you want to force with real numbers. For example if you know that in
+#' the first measurement concentration of 2 and 3 components was zero, set the corresponding
+#' values of \code{cont.force} to zero. See also the last case in the examples section.
 #'
 #' @return
 #' Returns an object of \code{\link{mcrpure}} class with the following fields:
@@ -81,8 +93,6 @@
 #' @references
 #' 1. J. Jaumot, R. Gargallo, A. de Juan, and R. Tauler, "A graphical user-friendly interface for
 #' MCR-ALS: a new tool for multivariate curve resolution in MATLAB", Chemometrics and Intelligent #' Laboratory Systems 76, 101-110 (2005).
-#'
-#' 2.
 #'
 #' @author
 #' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
@@ -104,6 +114,9 @@
 #' }
 #'
 #' @examples
+#'
+#' \donttest{
+#'
 #' library(mdatools)
 #'
 #' # resolve mixture of carbonhydrates Raman spectra
@@ -166,13 +179,34 @@
 #'    )
 #' }
 #'
+#' # This example shows how to force some of the contribution values
+#' # First of all we combine the matrix with mixtures and the pure spectra, so the pure
+#' # spectra are on top of the combined matrix
+#' Dplus <- mda.rbind(mda.t(carbs$S), carbs$D)
+#'
+#' # since we know that concentration of C2 and C3 is zero in the first row (it is a pure
+#' # spectrum of first component), we can force them to be zero in the optimization procedure.
+#' # Similarly we can do this for second and third rows.
+#'
+#' cont.forced <- matrix(NA, nrow(Dplus), 3)
+#' cont.forced[1, ] <- c(NA, 0, 0)
+#' cont.forced[2, ] <- c(0, NA, 0)
+#' cont.forced[3, ] <- c(0, 0, NA)
+#'
+#' m <- mcrals(Dplus, 3, cont.forced = cont.forced, cont.constraints = cc, spec.constraints = cs)
+#' plot(m)
+#'
 #' # See bookdown tutorial for more details.
+#'
+#' }
 #'
 #' @export
 mcrals <- function(x, ncomp,
    cont.constraints = list(),
    spec.constraints = list(),
    spec.ini = matrix(runif(ncol(x) * ncomp), ncol(x), ncomp),
+   cont.forced = matrix(NA, nrow(x), ncomp),
+   spec.forced = matrix(NA, ncol(x), ncomp),
    cont.solver = mcrals.nnls,
    spec.solver = mcrals.nnls,
    exclrows = NULL, exclcols = NULL, verbose = FALSE,
@@ -187,11 +221,19 @@ mcrals <- function(x, ncomp,
    # get pure variables and unmix data
    x <- prepCalData(x, exclrows, exclcols, min.nrows = 2, min.ncols = 2)
 
+   # check dimensions of cont.forced and spec.forced
+   stopifnot("Number of rows in 'cont.forced' should be the same as number of rows in 'x'." = nrow(cont.forced) == nrow(x))
+   stopifnot("Number of columns in 'cont.forced' should be the same as 'ncomp'." = ncol(cont.forced) == ncomp)
+   stopifnot("Number of rows in 'spec.forced' should be the same as number of columns in 'x'." = nrow(spec.forced) == ncol(x))
+   stopifnot("Number of columns in 'spec.forced' should be the same as 'ncomp'." = ncol(cont.forced) == ncomp)
+
    model <- mcrals.cal(
       x, ncomp,
       cont.constraints = cont.constraints,
       spec.constraints = spec.constraints,
       spec.ini = spec.ini,
+      cont.forced = cont.forced,
+      spec.forced = spec.forced,
       cont.solver = cont.solver,
       spec.solver = spec.solver,
       max.niter = max.niter,
@@ -277,6 +319,7 @@ print.mcrals <- function(x, ...) {
 #'
 #' @export
 summary.mcrals <- function(object, ...) {
+
    cat("\nSummary for MCR ALS case (class mcrals)\n")
 
    if (length(object$info) > 1) {
@@ -336,6 +379,10 @@ summary.mcrals <- function(object, ...) {
 #' a list with constraints to be applied to spectra  (see details).
 #' @param spec.ini
 #' a matrix with initial estimation of the pure components spectra.
+#' @param cont.forced
+#' a matrix which allows to force some of the concentration values (see details).
+#' @param spec.forced
+#' a matrix which allows to force some of the spectra values (see details).
 #' @param cont.solver
 #' which function to use as a solver for resolving of pure components contributions (see detials).
 #' @param spec.solver
@@ -357,8 +404,8 @@ summary.mcrals <- function(object, ...) {
 #' \item{max.niter}{maximum number of iterations}
 #'
 #' @export
-mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, cont.solver,
-   spec.solver, max.niter, tol, verbose) {
+mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini,
+   cont.forced, spec.forced, cont.solver, spec.solver, max.niter, tol, verbose) {
 
    attrs <- mda.getattr(D)
    exclrows <- attrs$exclrows
@@ -393,6 +440,9 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
       cat(sprintf("\nStarting iterations (max.niter = %d):\n", max.niter))
    }
 
+   cont.forced.ind <- !is.na(cont.forced)
+   spec.forced.ind <- !is.na(spec.forced)
+
    St <- spec.ini
    for (i in seq_len(max.niter)) {
 
@@ -400,11 +450,15 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
       Ct <- tryCatch(
          cont.solver(D, St),
          error = function(e) {
-            print(e)
-            stop("Unable to resolve the components, perhaps 'ncomp' is too large.\n
-               or initial estimates for spectra are not good enough.", call. = FALSE)
+            #print(e)
+            stop("Unable to resolve the components, perhaps 'ncomp' is too large or initial estimates for spectra are not good enough.", call. = FALSE)
          }
       )
+
+      ## force the user defined values
+      if (any(cont.forced.ind)) {
+         Ct[cont.forced.ind] <- cont.forced[cont.forced.ind]
+      }
 
       ## apply constraints to the resolved contributions
       for (cc in cont.constraints) {
@@ -415,11 +469,15 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini, c
       St <- tryCatch(
          spec.solver(D, Ct),
          error = function(e) {
-            print(e)
-            stop("Unable to resolve the components, perhaps 'ncomp' is too large.\n
-               or initial estimates for spectra are not good enough.", call. = FALSE)
+            #print(e)
+            stop("Unable to resolve the components, perhaps 'ncomp' is too large or initial estimates for spectra are not good enough.", call. = FALSE)
          }
       )
+
+      ## force the user defined values
+      if (any(spec.forced.ind)) {
+         St[spec.forced.ind] <- spec.forced[spec.forced.ind]
+      }
 
       ## apply constraints to the resolved spectra
       for (sc in spec.constraints) {
