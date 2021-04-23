@@ -564,7 +564,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
 #'  \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
 #'
 plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "iPLS results",
-   xlab = obj$xaxis.name, ylab = "RMSECV", xlim = NULL, ylim = NULL, ...) {
+   xlab = obj$xaxis.name, ylab = if (is.null(obj$cv)) "RMSEP" else "RMSECV", xlim = NULL, ylim = NULL, ...) {
 
    if (glob.ncomp < 1 || glob.ncomp > obj$gm$ncomp) {
       stop("Wrong value for number of components.")
@@ -663,7 +663,7 @@ plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "
 #'
 #' @export
 plotRMSE.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "RMSE development",
-   xlab = "Iterations", ylab = "RMSECV", xlim = NULL, ylim = NULL, ...) {
+   xlab = "Iterations", ylab = if (is.null(obj$cv)) "RMSEP" else "RMSECV", xlim = NULL, ylim = NULL, ...) {
 
    if (glob.ncomp < 1 || glob.ncomp > obj$gm$ncomp) {
       stop("Wrong value for number of components.")
