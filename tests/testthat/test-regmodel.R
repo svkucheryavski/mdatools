@@ -49,8 +49,8 @@ predict.testmodel <- function(obj, x, y = NULL, cv = FALSE) {
 
    x <- prep.autoscale(x, center = obj$xcenter, scale = obj$xscale)
    y.pred <- x %*% obj$coeffs$values
-   y.pred <- sweep(y.pred, 2, obj$yscale, "*")
-   y.pred <- sweep(y.pred, 2, obj$ycenter, "+")
+   y.pred <- if (is.numeric(obj$yscale)) sweep(y.pred, 2, obj$yscale, "*") else y.pred
+   y.pred <- if (is.numeric(obj$ycenter)) sweep(y.pred, 2, obj$ycenter, "+") else y.pred
    dim(y.pred) <- c(nrow(x), 1, 1)
    dimnames(y.pred) <- list(
       rownames(x),

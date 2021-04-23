@@ -1,3 +1,17 @@
+v.0.11.4
+========
+
+* added possibility for providing partially known contributions (parameter `cont.forced`) or spectral values (parameter `spec.forced`) to `mcrals()`. See more in help text and user guide for the package.
+
+* added possibility to run iPLS using test set (parameters `x.test` and `y.test`) instead of cross-validation.
+
+* added a possibility to provide user defined indices of the purest variables in `mcrpure()` instead of detecting them automatically.
+
+* fixed bug [#98](https://github.com/svkucheryavski/mdatools/issues/98), which caused a drop of row names when data frame was used as a data source for PCA/SIMCA.
+
+* fixed bug [#99](https://github.com/svkucheryavski/mdatools/issues/99), which did not allow to use user defined indices of pure variables in `mcrpure()`.
+
+
 v.0.11.3
 ========
 

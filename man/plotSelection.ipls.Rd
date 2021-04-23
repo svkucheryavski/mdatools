@@ -9,7 +9,7 @@
   glob.ncomp = obj$gm$ncomp.selected,
   main = "iPLS results",
   xlab = obj$xaxis.name,
-  ylab = "RMSECV",
+  ylab = if (is.null(obj$cv)) "RMSEP" else "RMSECV",
   xlim = NULL,
   ylim = NULL,
   ...

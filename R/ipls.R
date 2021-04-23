@@ -36,6 +36,10 @@
 #' criterion for selecting optimal number of components ('min' for minimum of RMSECV)
 #' @param method
 #' iPLS method (\code{'forward'} or \code{'backward'})
+#' @param x.test
+#' matrix with predictors for test set (by default is NULL, if specified, is used instead of cv).
+#' @param y.test
+#' matrix with responses for test set.
 #' @param silent
 #' logical, show or not information about selection process
 #'
@@ -108,7 +112,8 @@
 #' @export
 ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list("ven", 10),
    exclcols = NULL, exclrows = NULL,  int.ncomp = glob.ncomp, int.num = NULL, int.width = NULL,
-   int.limits = NULL, int.niter = NULL, ncomp.selcrit = "min", method = "forward", silent = FALSE) {
+   int.limits = NULL, int.niter = NULL, ncomp.selcrit = "min", method = "forward",
+   x.test = NULL, y.test = NULL, silent = FALSE) {
 
    # process names and values for xaxis
    x <- mda.df2mat(x)
@@ -119,6 +124,15 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
    if (is.null(xaxis.values)) xaxis.values <- seq_len(ncol(x))
    if (is.null(dim(y))) dim(y) <- c(length(y), 1)
 
+   # if test set is provided check it and set cv to NULL
+   if (!is.null(x.test) && !is.null(y.test)) {
+      if (is.null(dim(y.test))) dim(y.test) <- c(length(y.test), 1)
+      if (nrow(x.test) != nrow(y.test)) stop("Number of rows in 'x.test' and 'y.test' should be the same")
+      if (ncol(x.test) != ncol(x)) stop("Number of columns in 'x.test' and 'x' should be the same")
+      if (ncol(y.test) != ncol(y)) stop("Number of columns in 'y.test' and 'y' should be the same")
+      cv <- NULL
+   }
+
    # remove excluded columns and rows
    if (length(exclcols) > 0) {
       x <- mda.exclcols(x, exclcols)
@@ -126,6 +140,11 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
       x <- x[, -exclcols, drop = FALSE]
       xaxis.values <- xaxis.values[-exclcols]
       attr(x, "exclcols") <- NULL
+
+      if (!is.null(x.test)) {
+         x.test <- x.test[, -exclcols, drop = FALSE]
+         attr(x.test, "exclcols") <- NULL
+      }
    }
 
    if (length(exclrows) > 0) {
@@ -198,17 +217,43 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
       ncomp.selcrit = ncomp.selcrit,
       silent = silent,
       xaxis.name = xaxis.name,
-      xaxis.values = xaxis.values
+      xaxis.values = xaxis.values,
+      x.test = x.test,
+      y.test = y.test
    )
 
    # make a global model
    obj$gm <- pls(x, y, ncomp = obj$glob.ncomp, center = obj$center, scale = obj$scale, cv = obj$cv,
-      ncomp.selcrit = obj$ncomp.selcrit)
+      ncomp.selcrit = obj$ncomp.selcrit, x.test = obj$x.test, y.test = obj$y.test)
+
+
+   # get statistics for global model
+   gmres <- if (is.null(obj$cv)) obj$gm$res$test else obj$gm$res$cv
+
+   glob.stat <- data.frame(
+      "n" = 0,
+      "start" = 1,
+      "end" = ncol(x),
+      "nComp" = obj$gm$ncomp.selected,
+      "RMSE" = gmres$rmse[1, obj$gm$ncomp.selected],
+      "R2" = gmres$r2[1, obj$gm$ncomp.selected]
+   )
+
+   # initialize statistics for local models
+   int.stat <- data.frame(
+      "n" = 0,
+      "start" = 1,
+      "end" = ncol(x),
+      "selected" = F,
+      "nComp" = obj$gm$ncomp.selected,
+      "RMSE" = gmres$rmse[1, obj$gm$ncomp.selected],
+      "R2" = gmres$r2[1, obj$gm$ncomp.selected]
+   )
 
    # do iPLS
    obj <- switch(method,
-      "forward" = ipls.forward(x, y, obj),
-      "backward" = ipls.backward(x, y, obj),
+      "forward" = ipls.forward(x, y, obj, int.stat, glob.stat),
+      "backward" = ipls.backward(x, y, obj, int.stat, glob.stat),
       stop("Wrong value for parameter 'method'.")
    )
 
@@ -217,10 +262,6 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
       obj$int.stat$R2 <- round(obj$int.stat$R2, 3)
    }
 
-   if (!is.null(obj$glob.stat)) {
-      rownames(obj$glob.stat) <- seq_len(nrow(obj$glob.stat))
-      obj$glob.stat$R2 <- round(obj$glob.stat$R2, 3)
-   }
 
    # prepare vector with selected variables
    int.limits <- obj$int.limits[obj$int.selected, , drop = FALSE]
@@ -229,8 +270,9 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
    names(obj$var.selected) <- dim(obj$var.selected) <- NULL
    obj$var.selected <- sort(obj$var.selected)
 
-   obj$om <- pls(x[, obj$var.selected], y, ncomp = obj$int.ncomp, center = obj$center,
-      scale = obj$scale, cv = obj$cv, ncomp.selcrit = obj$ncomp.selcrit)
+   obj$om <- pls(x[, obj$var.selected, drop = FALSE], y, ncomp = obj$int.ncomp, center = obj$center,
+      scale = obj$scale, cv = obj$cv, ncomp.selcrit = obj$ncomp.selcrit,
+      x.test = obj$x.test[, obj$var.selected, drop = FALSE], y.test = obj$y.test)
 
    obj$call <- match.call()
    class(obj) <- "ipls"
@@ -278,34 +320,20 @@ ipls.getintlimits <- function(int.limits, int.width, int.num, npred) {
 #' a vector with response values
 #' @param obj
 #' object with initial settings for iPLS algorithm
+#' @param int.stat
+#' data frame with initial interval statistics
+#' @param glob.stat
+#' data frame with initial global statistics
 #'
-ipls.forward <- function(x, y, obj) {
+ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
 
    # define vectors with status, selected and non-selected intervals
    int.nonselected <- seq_len(obj$int.num)
    int.selected <- NULL
 
-   glob.stat <- data.frame(
-      "n" = 0,
-      "start" = 1,
-      "end" = ncol(x),
-      "nComp" = obj$gm$ncomp.selected,
-      "RMSE" = obj$gm$cvres$rmse[1, obj$gm$ncomp.selected],
-      "R2" = obj$gm$cvres$r2[1, obj$gm$ncomp.selected]
-   )
-
-   int.stat <- data.frame(
-      "n" = 0,
-      "start" = 1,
-      "end" = ncol(x),
-      "selected" = F,
-      "nComp" = obj$gm$ncomp.selected,
-      "RMSE" = obj$gm$cvres$rmse[1, obj$gm$ncomp.selected],
-      "R2" = obj$gm$cvres$r2[1, obj$gm$ncomp.selected]
-   )
 
    if (!obj$silent) {
-      fprintf("\nModel with all intervals: RMSECV = %f, nLV = %d\n",
+      fprintf("\nModel with all intervals: RMSE = %f, nLV = %d\n",
          int.stat$RMSE[1], int.stat$nComp[1])
    }
 
@@ -321,10 +349,13 @@ ipls.forward <- function(x, y, obj) {
          # combine already selected intervals with the current
          ind <- obj$int.limits[l, 1]:obj$int.limits[l, 2]
          xc <- x[, c(selind, ind), drop = FALSE]
+         xt <- if(!is.null(obj$x.test)) obj$x.test[, c(selind, ind), drop = FALSE] else NULL
 
          # build a model
-         m <- pls(xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale,
-                 cv = obj$cv, ncomp.selcrit = obj$ncomp.selcrit)
+         m <- pls(xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale, cv = obj$cv,
+            ncomp.selcrit = obj$ncomp.selcrit, x.test = xt, y.test = obj$y.test)
+
+         lres <- if (is.null(obj$cv)) m$res$test else m$res$cv
 
          # if first round, build a data frame with statistics for each interval
          if (i == 1) {
@@ -333,16 +364,16 @@ ipls.forward <- function(x, y, obj) {
                "start" = obj$int.limits[l, 1],
                "end" = obj$int.limits[l, 2],
                "nComp" = m$ncomp.selected,
-               "RMSE" = m$cvres$rmse[1, m$ncomp.selected],
-               "R2" = m$cvres$r2[1, m$ncomp.selected]
+               "RMSE" = lres$rmse[1, m$ncomp.selected],
+               "R2" = lres$r2[1, m$ncomp.selected]
             ))
          }
 
          # else check if rmse has been improved
-         if (rmse > m$cvres$rmse[1, m$ncomp.selected]) {
+         if (rmse > lres$rmse[1, m$ncomp.selected]) {
             ncomp <- m$ncomp.selected
-            rmse <- m$cvres$rmse[1, m$ncomp.selected]
-            r2 <- m$cvres$r2[1, m$ncomp.selected]
+            rmse <- lres$rmse[1, m$ncomp.selected]
+            r2 <- lres$r2[1, m$ncomp.selected]
             sel <- l
          }
       }
@@ -367,8 +398,9 @@ ipls.forward <- function(x, y, obj) {
       ))
 
       if (!obj$silent) {
-         fprintf("selected interval %3d (RMSECV = %f, nLV = %d)\n", sel, rmse, m$ncomp.selected)
+         fprintf("selected interval %3d (RMSE = %f, nLV = %d)\n", sel, rmse, m$ncomp.selected)
       }
+
    }
 
    # return the selection results
@@ -387,34 +419,19 @@ ipls.forward <- function(x, y, obj) {
 #' a vector with response values
 #' @param obj
 #' object with initial settings for iPLS algorithm
+#' @param int.stat
+#' data frame with initial interval statistics
+#' @param glob.stat
+#' data frame with initial global statistics
 #'
-ipls.backward <- function(x, y, obj) {
+ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
 
    # define vectors with status, selected and non-selected intervals
    int.selected <- seq_len(obj$int.num)
    int.nonselected <- NULL
 
-   glob.stat <- data.frame(
-      "n" = 0,
-      "start" = 1,
-      "end" = ncol(x),
-      "nComp" = obj$gm$ncomp.selected,
-      "RMSE" = obj$gm$cvres$rmse[1, obj$gm$ncomp.selected],
-      "R2" = obj$gm$cvres$r2[1, obj$gm$ncomp.selected]
-   )
-
-   int.stat <- data.frame(
-      "n" = 0,
-      "start" = 1,
-      "end" = ncol(x),
-      "selected" = F,
-      "nComp" = obj$gm$ncomp.selected,
-      "RMSE" = obj$gm$cvres$rmse[1, obj$gm$ncomp.selected],
-      "R2" = obj$gm$cvres$r2[1, obj$gm$ncomp.selected]
-   )
-
    if (!obj$silent) {
-      fprintf("\nModel with all intervals: RMSECV = %f, nLV = %d\n",
+      fprintf("\nModel with all intervals: RMSE = %f, nLV = %d\n",
          int.stat$RMSE[1], int.stat$nComp[1])
    }
 
@@ -435,11 +452,14 @@ ipls.backward <- function(x, y, obj) {
          ind <- obj$int.limits[l, 1]:obj$int.limits[l, 2]
 
          # combine already selected intervals with the current
-         xc <- x[, -c(unselind, ind), drop = F]
+         xc <- x[, -c(unselind, ind), drop = FALSE]
+         xt <- if(!is.null(obj$x.test)) obj$x.test[, -c(unselind, ind), drop = FALSE] else NULL
 
          # build a model
-         m <- pls(xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale,
-            cv = obj$cv, ncomp.selcrit = obj$ncomp.selcrit)
+         m <- pls(xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale, cv = obj$cv,
+            ncomp.selcrit = obj$ncomp.selcrit, x.test = xt, y.test = obj$y.test)
+
+         lres <- if (is.null(obj$cv)) m$res$test else m$res$cv
 
          # if first round, build a data frame with statistics for each interval
          if (i == 1) {
@@ -448,8 +468,8 @@ ipls.backward <- function(x, y, obj) {
                "start" = obj$int.limits[l, 1],
                "end" = obj$int.limits[l, 2],
                "nComp" = m$ncomp.selected,
-               "RMSE" = m$cvres$rmse[1, m$ncomp.selected],
-               "R2" = m$cvres$r2[1, m$ncomp.selected]
+               "RMSE" = lres$rmse[1, m$ncomp.selected],
+               "R2" = lres$r2[1, m$ncomp.selected]
             ))
          }
 
@@ -461,18 +481,18 @@ ipls.backward <- function(x, y, obj) {
                "end" = obj$int.limits[l, 2],
                "selected" = F,
                "nComp" = m$ncomp.selected,
-               "RMSE" = m$cvres$rmse[1, m$ncomp.selected],
-               "R2" = m$cvres$r2[1, m$ncomp.selected]
+               "RMSE" = lres$rmse[1, m$ncomp.selected],
+               "R2" = lres$r2[1, m$ncomp.selected]
             ))
             unsel <- NULL
             break
          }
 
          # else check if rmse has been improved
-         if (rmse > m$cvres$rmse[1, m$ncomp.selected]) {
+         if (rmse > lres$rmse[1, m$ncomp.selected]) {
             ncomp <- m$ncomp.selected
-            rmse <- m$cvres$rmse[1, m$ncomp.selected]
-            r2 <- m$cvres$r2[1, m$ncomp.selected]
+            rmse <- lres$rmse[1, m$ncomp.selected]
+            r2 <- lres$r2[1, m$ncomp.selected]
             unsel <- l
          }
       }
@@ -490,14 +510,14 @@ ipls.backward <- function(x, y, obj) {
          "n" = unsel,
          "start" = obj$int.limits[unsel, 1],
          "end" = obj$int.limits[unsel, 2],
-         "selected" = F,
+         "selected" = FALSE,
          "nComp" = ncomp,
          "RMSE" = rmse,
          "R2" = r2
       ))
 
       if (!obj$silent) {
-         fprintf("excluded interval %3d (RMSECV = %f, nLV = %d)\n", unsel, rmse, m$ncomp.selected)
+         fprintf("excluded interval %3d (RMSE = %f, nLV = %d)\n", unsel, rmse, m$ncomp.selected)
       }
    }
 
@@ -544,7 +564,7 @@ ipls.backward <- function(x, y, obj) {
 #'  \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
 #'
 plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "iPLS results",
-   xlab = obj$xaxis.name, ylab = "RMSECV", xlim = NULL, ylim = NULL, ...) {
+   xlab = obj$xaxis.name, ylab = if (is.null(obj$cv)) "RMSEP" else "RMSECV", xlim = NULL, ylim = NULL, ...) {
 
    if (glob.ncomp < 1 || glob.ncomp > obj$gm$ncomp) {
       stop("Wrong value for number of components.")
@@ -643,7 +663,7 @@ plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "
 #'
 #' @export
 plotRMSE.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "RMSE development",
-   xlab = "Iterations", ylab = "RMSECV", xlim = NULL, ylim = NULL, ...) {
+   xlab = "Iterations", ylab = if (is.null(obj$cv)) "RMSEP" else "RMSECV", xlim = NULL, ylim = NULL, ...) {
 
    if (glob.ncomp < 1 || glob.ncomp > obj$gm$ncomp) {
       stop("Wrong value for number of components.")
@@ -735,14 +755,15 @@ summary.ipls <- function(object, glob.ncomp = object$gm$ncomp.selected, ...) {
    glob.rmse <- object$gm$cvres$rmse[1, glob.ncomp]
    opt.ncomp <- object$om$ncomp.selected
    opt.rmse <- object$om$cvres$rmse[1, opt.ncomp]
+   rmse.suffix <- if (is.null(object$cv)) "P" else "CV"
 
    cat("\niPLS variable selection results\n")
    fprintf("  Method: %s\n", object$method)
-   fprintf("  Validation: %s\n", crossval.str(object$cv))
+   fprintf("  Validation: %s\n", if (is.null(object$cv)) "test set" else crossval.str(object$cv))
    fprintf("  Number of intervals: %d\n", object$int.num)
    fprintf("  Number of selected intervals: %d\n", length(object$int.selected))
-   fprintf("  RMSECV for global model: %f (%d LVs)\n", glob.rmse, glob.ncomp)
-   fprintf("  RMSECV for optimized model: %f (%d LVs)\n", opt.rmse, opt.ncomp)
+   fprintf("  RMSE%s for global model: %f (%d LVs)\n", rmse.suffix, glob.rmse, glob.ncomp)
+   fprintf("  RMSE%s for optimized model: %f (%d LVs)\n", rmse.suffix, opt.rmse, opt.ncomp)
    cat("\nSummary for selection procedure:\n")
    show(object$int.stat)
    cat("\n")

@@ -46,6 +46,8 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
       attr(y, "exclcols") <- NULL
    }
 
+   y.ref <- y
+
    # get main data parameters
    nvar <- ncol(x)
    nobj <- nrow(x)
@@ -116,7 +118,7 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
    )
 
    # make pls results and return
-   return(list(y.pred = yp.cv, y.ref = y, jk.coeffs = jk.coeffs))
+   return(list(y.pred = yp.cv, y.ref = y.ref, jk.coeffs = jk.coeffs))
 }
 
 #' Regression coefficients for PLS model'

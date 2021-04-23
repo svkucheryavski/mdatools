@@ -20,6 +20,8 @@ ipls(
   int.niter = NULL,
   ncomp.selcrit = "min",
   method = "forward",
+  x.test = NULL,
+  y.test = NULL,
   silent = FALSE
 )
 }
@@ -53,6 +55,10 @@ ipls(
 \item{ncomp.selcrit}{criterion for selecting optimal number of components ('min' for minimum of RMSECV)}
 
 \item{method}{iPLS method (\code{'forward'} or \code{'backward'})}
+
+\item{x.test}{matrix with predictors for test set (by default is NULL, if specified, is used instead of cv).}
+
+\item{y.test}{matrix with responses for test set.}
 
 \item{silent}{logical, show or not information about selection process}
 }

@@ -781,7 +781,6 @@ tf(x, x.test, 10)
 
 
 data(people)
-
 context("pca: test pca.mvreplace() function")
 
 test_that("for simple dataset it can reconstruct values in full", {
@@ -810,4 +809,29 @@ test_that("for people data it can partially reconstruct the values", {
       pca.mvreplace(data, scale = T),
       tolerance = 0.1
    )
+})
+
+#########################################
+# Block 9: testing bug fixes            #
+#########################################
+
+data(people)
+context("pca: test recent bug fixes")
+
+test_that("row and column names are kept when data frame is used as data source", {
+   m1 <- pca(people)
+   m2 <- pca(as.data.frame(people))
+   m3 <- pca(people, 5, scale = TRUE)
+   m4 <- pca(as.data.frame(people), 5, scale = TRUE)
+
+   expect_equal(rownames(m1$res$cal$scores), rownames(people))
+   expect_equal(rownames(m2$res$cal$scores), rownames(people))
+   expect_equal(rownames(m3$res$cal$scores), rownames(people))
+   expect_equal(rownames(m4$res$cal$scores), rownames(people))
+
+   expect_equal(rownames(m1$loadings), colnames(people))
+   expect_equal(rownames(m2$loadings), colnames(people))
+   expect_equal(rownames(m3$loadings), colnames(people))
+   expect_equal(rownames(m4$loadings), colnames(people))
+
 })

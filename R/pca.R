@@ -452,6 +452,7 @@ predict.pca <- function(object, x, ...) {
 
    # check datasets and convert to matrix if needed
    attrs <- attributes(x)
+   rownames <- rownames(x)
    x <- prepCalData(x, min.nrows = 1, min.ncols = nrow(object$loadings) - length(attrs$exclcols))
 
    if (ncol(x) != nrow(object$loadings)) {
@@ -464,7 +465,7 @@ predict.pca <- function(object, x, ...) {
    residuals <- x - tcrossprod(scores, object$loadings)
 
    # set names
-   rownames(scores) <- rownames(residuals) <- attrs$dimnames[[1]]
+   rownames(scores) <- rownames(residuals) <- rownames
    colnames(scores) <- colnames(object$loadings)
    colnames(residuals) <- attrs$dimnames[[2]]
 
