@@ -1497,7 +1497,7 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
       c <- as.numeric(crossprod(w, (M %*% w)))
 
       # stop cycle since c-value is very small and can result in singular matrix
-      if (c < .Machine$longdouble.eps) {
+      if (c < .Machine$double.eps) {
          n <- n - 1
          warning(paste0(
             "PLS can not compute more than ", n, " components (eigenvalues are too small). "
