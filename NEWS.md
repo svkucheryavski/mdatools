@@ -1,3 +1,8 @@
+v.0.11.5
+========
+
+* fix for an issue in PLS SIMPLS implementation (incorrect use of `Machine$longdouble.eps`), which lead to an error when the package is tested on Apple M1.
+
 v.0.11.4
 ========
 
