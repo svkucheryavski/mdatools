@@ -65,6 +65,13 @@ test_that("SNV works correctly", {
    expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
    expect_equivalent(apply(pspectra, 1, mean), rep(0, nrow(spectra)))
    expect_equivalent(apply(pspectra, 1, sd), rep(1, nrow(spectra)))
+
+   spectra <- simdata$spectra.c
+   expect_silent(pspectra <- prep.norm(spectra, type = "snv"))
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equivalent(apply(pspectra, 1, mean), rep(0, nrow(spectra)))
+   expect_equivalent(apply(pspectra, 1, sd), rep(1, nrow(spectra)))
+
 })
 
 test_that("MSC works correctly", {
@@ -110,7 +117,38 @@ test_that("Normalization to unit length works correctly", {
    expect_equivalent(apply(pspectra, 1, function(x) sqrt(sum(x^2))), rep(1, nrow(pspectra)))
 })
 
+test_that("Normalization to unit sum works correctly", {
+   spectra <- simdata$spectra.c
+   expect_silent(pspectra <- prep.norm(spectra, "sum"))
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equivalent(apply(pspectra, 1, function(x) sum(x)), rep(1, nrow(pspectra)))
+})
 
+test_that("Normalization to IS peak works (one value)", {
+   spectra <- simdata$spectra.c
+
+   expect_error(prep.norm(spectra, "is"))
+   expect_error(prep.norm(spectra, "is", col.ind = -1))
+   expect_error(prep.norm(spectra, "is", col.ind = 1000))
+   expect_error(prep.norm(spectra, "is", col.ind = c(1, 1000)))
+   expect_error(prep.norm(spectra, "is", col.ind = c(-1, 100)))
+
+
+   col.ind <- 100
+   expect_silent(pspectra <- prep.norm(spectra, type = "is", col.ind))
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equivalent(apply(pspectra[, col.ind, drop = FALSE], 1, function(x) sum(x)), rep(1, nrow(pspectra)))
+
+   col.ind <- 100:110
+   expect_silent(pspectra <- prep.norm(spectra, type = "is", col.ind))
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equivalent(apply(pspectra[, col.ind, drop = FALSE], 1, function(x) sum(x)), rep(1, nrow(pspectra)))
+
+   col.ind <- 1:ncol(spectra)
+   pspectra1 <- prep.norm(spectra, type = "is", col.ind)
+   pspectra2 <- prep.norm(spectra, type = "sum")
+   expect_equivalent(pspectra1, pspectra2)
+})
 
 test_that("Kubelka-Munk works correctly", {
    spectra <- simdata$spectra.c
