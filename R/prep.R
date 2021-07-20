@@ -130,7 +130,19 @@ prep.norm <- function(data, type = "area", col.ind = NULL) {
 
    if (type == "snv") return(prep.snv(data))
 
-   f <- function(data, type) {
+   if (type == "is" && is.null(col.ind) ) {
+      stop("For 'is' normalization you need to provide indices for IS peak.")
+   }
+
+   if (is.logical(col.ind)) {
+      col.ind <- which(col.ind)
+   }
+
+   if (!is.null(col.ind) && (min(col.ind) < 1 || max(col.ind) > ncol(data))) {
+      stop("Values for 'col.ind' seem to be wrong.")
+   }
+
+   f <- function(data, type, col.ind) {
 
       w <- switch(
          type,
@@ -144,7 +156,7 @@ prep.norm <- function(data, type = "area", col.ind = NULL) {
       return(sweep(data, 1, w, "/"))
    }
 
-   return(prep.generic(data, f, type = type))
+   return(prep.generic(data, f, type = type, col.ind = col.ind))
 }
 
 #' Savytzky-Golay filter
