@@ -189,6 +189,22 @@ test_that("SavGol smoothing works correctly", {
    expect_error(pspectra <- prep.savgol(spectra, 3, 1,  2))
    expect_error(pspectra <- prep.savgol(spectra, 3, 2,  4))
 
+   # check that the derivatives are correct based on sin(x) and cos(x)
+   x <- pi * seq(-2.4, 2.4, by = 0.1)
+   y <- matrix(sin(x), nrow = 1)
+   zeros <- which((abs(y) < 10^-12))
+   ones <- which((abs(y) > 0.999999))
+
+   # first derivative should have zeros where original function has maximums
+   dy2 <- prep.savgol(y, 3, 1, 1)
+   expect_equal(dim(dy2), dim(y))
+   expect_equivalent(which((abs(dy2) < 10^-12)), ones)
+
+   # second derivative should have zeros where the original function has zeros
+   dy3 <- prep.savgol(y, 3, 2, 2)
+   expect_equal(dim(dy3), dim(y))
+   expect_equivalent(which((abs(dy3) < 10^-12)), zeros)
+
 })
 
 context("prep: alsbasecorr")
@@ -223,3 +239,85 @@ test_that("ALS baseline correction works correctly", {
    expect_true(err_after3 < err_after1)
    expect_true(err_after3 < err_after2)
 })
+
+context("prep: trasnform")
+
+test_that("Transformation works correctly", {
+   x <- -5:5
+   y <- cbind(exp(x), x^2)
+   colnames(y) <- c("Y1", "Y2")
+   attr(y, "yaxis.values") <- x
+   attr(y, "yaxis.name") <- "Time to sleep"
+
+   # errors
+
+   # normal behaviour no extra parameters
+   yp <- prep.transform(y, log)
+   expect_equal(dim(yp), dim(y))
+   expect_equal(colnames(yp), colnames(y))
+   expect_equal(rownames(yp), rownames(y))
+   expect_equal(mda.getattr(yp), mda.getattr(y))
+   expect_equivalent(yp, log(y))
+
+   # normal behaviour extra parameters
+   yp <- prep.transform(y, log, 2)
+   expect_equal(dim(yp), dim(y))
+   expect_equal(colnames(yp), colnames(y))
+   expect_equal(rownames(yp), rownames(y))
+   expect_equal(mda.getattr(yp), mda.getattr(y))
+   expect_equivalent(yp, log2(y))
+
+   # normal behaviour extra parameters user defined function
+   yp <- prep.transform(y, function(x, p) x^p, 1.25)
+   expect_equal(dim(yp), dim(y))
+   expect_equal(colnames(yp), colnames(y))
+   expect_equal(rownames(yp), rownames(y))
+   expect_equal(mda.getattr(yp), mda.getattr(y))
+   expect_equivalent(yp, y^1.25)
+
+});
+
+context("prep: varsel")
+
+test_that("Variable selection works correctly", {
+
+   checkprep <- function(x, xp, ind) {
+      expect_equal(ncol(xp), length(ind))
+      expect_equal(nrow(xp), nrow(x))
+      expect_equal(attr(xp, "yaxis.name"), attr(x, "yaxis.name"))
+      expect_equal(attr(xp, "yaxis.values"), attr(x, "yaxis.values"))
+      expect_equal(attr(xp, "xaxis.name"), attr(x, "xaxis.name"))
+      expect_equal(attr(xp, "xaxis.values"), attr(x, "xaxis.values")[ind])
+      expect_equal(attr(xp, "exclrows"), attr(x, "exclrows"))
+   }
+
+   x <- simdata$spectra.c
+   attr(x, "xaxis.values") <- simdata$wavelength
+   attr(x, "xaxis.name") <- "Wavelength, nm"
+   attr(x, "yaxis.values") <- seq_len(nrow(x)) * 10
+   attr(x, "yaxis.name") <- "Time, s"
+   x <- mda.exclrows(x, c(1, 20, 30, 70))
+
+   ind <- 21:140
+   expect_silent(xp <- prep.varsel(x, ind))
+   checkprep(x, xp, ind)
+
+   ind <- c(21:30, 130:140)
+   expect_silent(xp <- prep.varsel(x, ind))
+   checkprep(x, xp, ind)
+
+   ind <- rep(FALSE, ncol(x))
+   ind[21:140] <- TRUE
+   expect_silent(xp <- prep.varsel(x, ind))
+   checkprep(x, xp, which(ind))
+
+   ind <- rep(FALSE, ncol(x))
+   ind[c(11:20, 130:140)] <- TRUE
+   expect_silent(xp <- prep.varsel(x, ind))
+   checkprep(x, xp, which(ind))
+
+   # errors
+   x <- mda.exclcols(x, c(1, 150))
+   expect_error(xp <- prep.varsel(x, 20:140))
+
+});
