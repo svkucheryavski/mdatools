@@ -173,26 +173,73 @@ prep.norm <- function(data, type = "area", col.ind = NULL) {
 #' @param dorder
 #' order of derivative to take (0 - no derivative)
 #'
+#' @details
+#' The function implements algorithm described in [1] which handles the edge points correctly and
+#' does not require to cut the spectra.
+#'
+#' @references
+#' 1. Peter A. Gorry. General least-squares smoothing and differentiation by the convolution
+#' (Savitzky-Golay) method. Anal. Chem. 1990, 62, 6, 570–573, https://doi.org/10.1021/ac00205a007.
+#'
 #' @export
 prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
 
+   stopifnot("Filter width ('width') should be equal at least to 3." = width > 2)
+   stopifnot("Filter width ('width') should be an odd integer number." = width %% 2 == 1)
+   stopifnot("Wrong value for the derivative order (should be 0, 1, or 2)." = dorder %in% (0:2))
+   stopifnot("Wrong value for the polynomial degree (should be integer number between 0 and 4)." = porder %in% (0:4))
+   stopifnot("Polynomal degree ('porder') should not be smaller the derivative order ('dorder')." = porder >= dorder)
+
+   # compute grams polynomials
+   gram <- function(i, m, k, s) {
+      if (k > 0) {
+         return( (4 * k - 2) / (k * (2 * m - k + 1)) * (i * gram(i, m, k - 1, s) + s * gram(i, m, k - 1, s - 1)) -
+            ((k - 1) * (2 * m + k)) / (k * (2 * m - k + 1)) * gram(i, m, k - 2, s) )
+      }
+      if (k == 0 && s == 0) return(1)
+      return(0)
+   }
+
+   # compute generalized factorial
+   genfact <- function(a, b) {
+      f <- 1;
+      if ((a - b + 1) > a) return(f)
+
+      for (i in (a - b + 1):a) {
+         f <- f * i;
+      }
+
+      return(f)
+   }
+
+   # compute weights for convolution depending on position
+   weight <- function(i, t, m, n, s) {
+      sum <- 0
+      for (k in 0:n) {
+         sum <- sum + (2 * k + 1) * (genfact(2 * m, k) / genfact(2 * m + k + 1, k + 1)) * gram(i, m, k, 0) * gram(t, m, k, s)
+      }
+      return(sum)
+   }
+
    f <- function(data, width, porder, dorder) {
-      stopifnot("Filter width ('width') should be equal at least to 3." = width > 2)
-      stopifnot("Filter width ('width') should be an odd integer number." = width %% 2 == 1)
-      stopifnot("Wrong value for the derivative order (should be 0, 1, or 2)." = dorder %in% (0:2))
-      stopifnot("Wrong value for the polynomial degree (should be integer number between 0 and 4)." = porder %in% (0:4))
-      stopifnot("Polynomal degree ('porder') should not be smaller the derivative order ('dorder')." = porder >= dorder)
 
       nobj <- nrow(data)
       nvar <- ncol(data)
       pdata <- matrix(0, ncol = nvar, nrow = nobj)
 
-      for (i in seq_len(nobj)) {
-         d <- data[i, ]
-         w <- (width - 1) / 2
-         f <- pinv(outer(-w:w, 0:porder, FUN = "^"))
-         d <- convolve(d, rev(f[dorder + 1, ]), type = "o")
-         pdata[i, ] <- d[(w + 1) : (length(d) - w)]
+      m <- (width - 1) / 2
+      w <- outer(-m:m, -m:m, function(x, y) weight(x, y, m, porder, dorder))
+      n <- ncol(data)
+
+      for (j in seq_len(nobj)) {
+         for (i in 1:m) {
+            pdata[j, i] <- convolve(data[j, 1:(2 * m + 1)], w[, i], type = "filter")
+            pdata[j, n - i + 1] <- convolve(data[j, (n - 2 * m):n], w[, width - i + 1], type = "filter")
+         }
+
+         for (i in (m+1):(n-m)) {
+            pdata[j, i] <- convolve(data[j, (i - m):(i + m)], w[, m + 1], type = "filter")
+         }
       }
 
       return(pdata)
@@ -297,6 +344,9 @@ prep.ref2km <- function(spectra) {
 #' @param max.niter
 #' maximum number of iterations
 #'
+#' @return
+#' preprocessed spectra.
+#'
 #' @details
 #' The function implements baseline correction algorithm based on Whittaker smoother. The method
 #' was first shown in [1]. The function has two main parameters - power of a penalty parameter
@@ -355,6 +405,67 @@ prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 10) {
 
    return(pspectra)
 }
+
+
+#' Transformation
+#'
+#' @description
+#' Transforms values from using any mathematical function (e.g. log).
+#'
+#' @param data
+#' a matrix with data values
+#' @param fun
+#' reference to a transformation function, e.g. `log` or `function(x) x^2`.
+#' @param ...
+#' optional parameters for the transformation function
+#'
+#' @return
+#' data matrix with transformed values
+#'
+#' @examples
+#' # generate a matrix with two columns
+#' y <- cbind(rnorm(100, 10, 1), rnorm(100, 20, 2))
+#'
+#' # apply log transformation
+#' py1 = prep.transform(y, log)
+#'
+#' # apply power transformation
+#' py2 = prep.transform(y, function(x) x^-1.25)
+#'
+#' # show distributions
+#' par(mfrow = c(2, 3))
+#' for (i in 1:2) {
+#'    hist(y[, i], main = paste0("Original values, column #", i))
+#'    hist(py1[, i], main = paste0("Log-transformed, column #", i))
+#'    hist(py2[, i], main = paste0("Power-transformed, column #", i))
+#' }
+#'
+#' @export
+prep.transform <- function(data, fun, ...) {
+   return(prep.generic(data, fun, ...))
+}
+
+
+#' Variable selection
+#'
+#' @description
+#' Returns dataset with selected variables
+#'
+#' @param data
+#' a matrix with data values
+#' @param var.ind
+#' indices of variables (columns) to select, can bet either numeric or logical
+#'
+#' @return
+#' data matrix with the selected variables (columns)
+#'
+prep.varsel <- function(data, var.ind) {
+   if (!is.null(attr(data, "exclcols"))) {
+      stop("prep.varsel() can not be used for dataset with excluded (hidden) columns.")
+   }
+   return(mda.subset(data, select = var.ind))
+}
+
 
 
 #' Pseudo-inverse matrix
