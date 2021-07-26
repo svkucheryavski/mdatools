@@ -15,6 +15,9 @@ prep.alsbasecorr(spectra, plambda = 5, p = 0.1, max.niter = 10)
 
 \item{max.niter}{maximum number of iterations}
 }
+\value{
+preprocessed spectra.
+}
 \description{
 Baseline correction using assymetric least squares
 }
