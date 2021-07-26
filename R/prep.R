@@ -149,7 +149,7 @@ prep.norm <- function(data, type = "area", col.ind = NULL) {
          "area" = apply(abs(data), 1, sum),
          "length" = sqrt(apply(data^2, 1, sum)),
          "sum" = apply(data, 1, sum),
-         "is" = apply(data[, col.ind], 1, sum)
+         "is" = apply(data[, col.ind, drop = FALSE], 1, sum)
       )
 
       if (is.null(w)) stop("Wrong value for argument 'type'.")
