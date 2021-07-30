@@ -1178,9 +1178,9 @@ plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, lo
 
    # make plot
    if (length(plot_data) == 1) {
-      mdaplot(plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, ...)
+      mdaplot(plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, main = main, ...)
    } else {
-      mdaplotg(plot_data, type = "p", xlim = xlim, ylim = ylim, show.legend = show.legend,
+      mdaplotg(plot_data, type = "p", xlim = xlim, ylim = ylim, show.legend = show.legend, main = main,
          legend.position = legend.position, ...)
    }
 
