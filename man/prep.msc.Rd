@@ -4,10 +4,10 @@
 \alias{prep.msc}
 \title{Multiplicative Scatter Correction transformation}
 \usage{
-prep.msc(spectra, mspectrum = NULL)
+prep.msc(data, mspectrum = NULL)
 }
 \arguments{
-\item{spectra}{a matrix with spectra values}
+\item{data}{a matrix with data values (spectra)}
 
 \item{mspectrum}{mean spectrum (if NULL will be calculated from \code{spectra})}
 }

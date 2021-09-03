@@ -501,3 +501,215 @@ prep.generic <- function(x, f, ...) {
    dimnames(x.p) <- dimnames
    return(x.p)
 }
+
+
+#' Shows a list with implemented preprocessing methods
+#'
+#' @export
+getImplementedPrepMethods <- function() {
+   list(
+      # prep.snv <- function(data)
+      "snv" = list(
+         name = "snv",
+         method = prep.snv,
+         params = list(),
+         params.info = list(),
+         info = "Standard normal variate normalization."
+      ),
+
+      # prep.ref2km <- function(spectra)
+      "ref2km" = list(
+         name = "ref2km",
+         method = prep.ref2km,
+         params = list(),
+         params.info = list(),
+         info = "Transform reflectance spectra to Kubelka-Munk units."
+      ),
+
+      # prep.msc <- function(spectra, mspectrum = NULL)
+      "msc" = list(
+         name = "msc",
+         method = prep.msc,
+         params = list(mspectrum = NULL),
+         params.info = list(mspectrum = "mean spectrum (if NULL will be computed based on data)."),
+         info = "Multiplicative scatter correction."
+      ),
+
+      # prep.transform <- function(data, fun, ...)
+      "transform" = list(
+         name = "transform",
+         method = prep.transform,
+         params = list(fun = log),
+         params.info = list(fun = "function to transform the values (e.g. 'log')"),
+         info = "Transformation of data values using math functions (log, sqrt, etc.)."
+      ),
+
+      # prep.varsel <- function(data, var.ind)
+      "varsel" = list(
+         name = "varsel",
+         method = prep.varsel,
+         params = list(var.ind = NULL),
+         params.info = list(var.ind = "indices of variables (columns) to select."),
+         info = "Select user-defined variables (columns of dataset)."
+      ),
+
+      # prep.norm <- function(data, type = "area", col.ind = NULL)
+      "norm" = list(
+         name = "norm",
+         method = prep.norm,
+         params = list(type = "area", col.ind = NULL),
+         params.info = list(
+            type = "type of normalization ('area', 'sum', 'length', 'is', 'snv').",
+            col.ind = "indices of columns (variables) for normalization to internal standard peak."
+         ),
+         info = "Normalization."
+      ),
+
+      # prep.savgol <- function(data, width = 3, porder = 1, dorder = 0)
+      "savgol" = list(
+         name = "savgol",
+         method = prep.savgol,
+         params = list(width = 3, porder = 1, dorder = 0),
+         params.info = list(
+            width = "width of the filter.",
+            porder = "polynomial order.",
+            dorder = "derivative order."
+         ),
+         info = "Savitzky-Golay filter."
+      ),
+
+      # prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 10)
+      "alsbasecorr" = list(
+         name = "alsbasecorr",
+         method = prep.alsbasecorr,
+         params = list(plambda = 5, p = 0.1, max.niter = 10),
+         params.info = list(
+            plambda = "power of the penalty parameter (e.g. if plambda = 5, lambda = 10^5)",
+            p = "assymetry ratio (should be between 0 and 1)",
+            max.niter = "maximum number of iterations"
+         ),
+         info = "Asymmetric least squares baseline correction."
+      ),
+
+      # prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0)
+      "autoscale" = list(
+         name = "autoscale",
+         method = prep.autoscale,
+         params = list(center = TRUE, scale = FALSE, max.cov = 0),
+         params.info = list(
+            center = "a logical value or vector with numbers for centering.",
+            scale = "a logical value or vector with numbers for weighting.",
+            max.cov = "columns with coefficient of variation (in percent) below `max.cov` will not be scaled"
+         )
+      )
+   )
+}
+
+
+#' Shows information about all implemented preprocessing methods.
+#'
+#' @export
+prep.list <- function() {
+   p <- getImplementedPrepMethods()
+
+   cat("\n\nList of available preprocessing methods:\n")
+   lapply(p, function(c) {
+      cat("\n\n")
+      fprintf(" %s\n", c$info)
+      cat(" ---------------\n")
+      fprintf(" name: '%s'\n", c$name)
+
+      if (length(c$params.info) == 0) {
+         cat(" no parameters required\n")
+      } else {
+         cat(" parameters:\n")
+         for (i in seq_along(c$params.info)) {
+            fprintf("  '%s': %s\n", names(c$params.info)[i], c$params.info[[i]])
+         }
+      }
+   })
+
+   invisible()
+}
+
+
+#' Class for preprocessing object
+#'
+#' @param name
+#' short text with name for the preprocessing method.
+#' @param params
+#' a list with parameters for the method (if NULL - default parameters will be used).
+#' @param method
+#' method to call when applying the preprocessing, provide it only for user defined methods.
+#'
+#' @details
+#' Use this class to create a list with a sequence of preprocessing methods to keep them together
+#' in right order and with defined parameters. The list/object can be provided as an extra argument
+#' to any modelling function (e.g. \code{pca}, \code{pls}, etc), so the optimal model parameters and
+#' the optimal preprocessing will be stored together and can be applied to a raw data by using
+#' method \code{predict}.
+#'
+#' For your own preprocessing method you need to create a function, which takes matrix with values
+#' (dataset) as the first argument, does something and then return a matrix with the same dimension
+#' and same attributes as the result. The method can have any number of optional  parameters.
+#'
+#' See Bookdown tutorial for details.
+#'
+#' @export
+prep <- function(name, params = NULL, method = NULL) {
+
+   if (!is.null(params) && !is.list(params)) {
+      stop("Argument 'params' must be a list with parameter names and values.")
+   }
+
+   if (is.null(method)) {
+      # assuming it is one of the standard constraints
+      # 1. first check name
+      item <- getImplementedPrepMethods()[[name]]
+      stopifnot("Either name of preprocessing method is wrong or you need to provide a reference to
+         function implementing the method if it is user defined." = !is.null(item))
+
+      # 2. check the parameters
+      if (is.null(params)) params <- item$params
+      if (length(params) > 0 && !(names(params) %in% names(item$params))) {
+         stop("Provided preprocessing parameters have wrong name.")
+      }
+
+      method <- item$method
+   } else {
+      # user defined method, check that it works
+      res <- tryCatch(
+         do.call(method, c(matrix(runif(25, 5, 10)), params)),
+         error = function(m) stop("The method you provided raises an error: \n", m),
+         warning = function(m) stop("The method you provided raises a warning: \n", m)
+      )
+
+      stopifnot("The method you provided does not return matrix with correct dimension." =
+         dim(res) == c(5, 10))
+   }
+
+   obj <- list(
+      name = name,
+      method = method,
+      params = params
+   )
+
+   class(obj) <- c("prep")
+   return(obj)
+}
+
+#' Applies a list with preprocessing methods to a dataset
+#'
+#' @param obj
+#' list with preprocssing methods (created using \code{prep} function).
+#' @param data
+#' matrix with dataset
+#'
+#' @export
+employ.prep <- function(obj, data) {
+   for (p in obj) {
+      data <- do.call(p$method, c(list(data = data), p$params))
+   }
+
+   return(data)
+}
