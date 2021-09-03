@@ -253,8 +253,8 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
 #' @description
 #' Applies Multiplicative Scatter Correction (MSC) transformation to data matrix (spectra)
 #'
-#' @param spectra
-#' a matrix with spectra values
+#' @param data
+#' a matrix with data values (spectra)
 #' @param mspectrum
 #' mean spectrum (if NULL will be calculated from \code{spectra})
 #'
@@ -280,7 +280,7 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
 #'  mdaplot(cspectra, type = "l", main = "After MSC")
 #'
 #' @export
-prep.msc <- function(spectra, mspectrum = NULL) {
+prep.msc <- function(data, mspectrum = NULL) {
 
    f <- function(spectra, mspectrum) {
       if (is.null(mspectrum)) {
@@ -305,7 +305,7 @@ prep.msc <- function(spectra, mspectrum = NULL) {
       return(pspectra)
    }
 
-   return(prep.generic(spectra, f, mspectrum = mspectrum))
+   return(prep.generic(data, f, mspectrum = mspectrum))
 }
 
 
@@ -314,7 +314,7 @@ prep.msc <- function(spectra, mspectrum = NULL) {
 #' @description
 #' Applies Kubelka-Munk (km) transformation to data matrix (spectra)
 #'
-#' @param spectra
+#' @param data
 #' a matrix with spectra values (absolute reflectance values)
 #'
 #' @return
@@ -326,16 +326,16 @@ prep.msc <- function(spectra, mspectrum = NULL) {
 #' (1 - R)^2 / 2R
 #'
 #' @export
-prep.ref2km <- function(spectra) {
-   stopifnot("Can't use Kubelka-Munk transformation as some of the values are zeros or negative." = all(spectra > 0))
+prep.ref2km <- function(data) {
+   stopifnot("Can't use Kubelka-Munk transformation as some of the values are zeros or negative." = all(data > 0))
    f <- function(x) (1 - x)^2 / (2 * x)
 
-   return(prep.generic(spectra, f))
+   return(prep.generic(data, f))
 }
 
 #' Baseline correction using assymetric least squares
 #'
-#' @param spectra
+#' @param data
 #' matrix with spectra (rows correspond to individual spectra)
 #' @param plambda
 #' power of the penalty parameter (e.g. if plambda = 5, lambda = 10^5)
@@ -374,9 +374,9 @@ prep.ref2km <- function(spectra) {
 #' @importFrom Matrix Matrix Diagonal
 #'
 #' @export
-prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 10) {
-   attrs <- mda.getattr(spectra)
-   dimnames <- dimnames(spectra)
+prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
+   attrs <- mda.getattr(data)
+   dimnames <- dimnames(data)
 
    baseline <- function(y) {
 
@@ -399,7 +399,7 @@ prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 10) {
       return(as.numeric(z))
    }
 
-   pspectra <- t(apply(spectra, 1, function(x) x - baseline(x)))
+   pspectra <- t(apply(data, 1, function(x) x - baseline(x)))
    pspectra <- mda.setattr(pspectra, attrs)
    dimnames(pspectra) <- dimnames
 

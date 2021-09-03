@@ -321,3 +321,94 @@ test_that("Variable selection works correctly", {
    expect_error(xp <- prep.varsel(x, 20:140))
 
 });
+
+
+context("prep: combine method together")
+
+test_that("List of available methods is shown corectly", {
+   expect_output(prep.list())
+})
+
+test_that("Errors are raised when necessary", {
+   expect_error(prep("varsel", var.ind = 50:150))
+   expect_error(prep("snv120"))
+})
+
+test_that("Method works with one preprocessing method in the list", {
+
+   x <- simdata$spectra.c
+   attr(x, "xaxis.values") <- simdata$wavelength
+   attr(x, "xaxis.name") <- "Wavelength, nm"
+   attr(x, "yaxis.values") <- seq_len(nrow(x)) * 10
+   attr(x, "yaxis.name") <- "Time, s"
+   x <- mda.exclrows(x, c(1, 20, 30, 70))
+
+   p <- list(
+      prep("savgol", list(width = 11, porder = 2, dorder = 1))
+   )
+
+   px1 <- employ.prep(p, x)
+   px2 <- prep.savgol(x, width = 11, porder = 2, dorder = 1)
+
+   par(mfrow = c(3, 1))
+   mdaplot(x, type = "l")
+   mdaplot(px1, type = "l")
+   mdaplot(px2, type = "l")
+
+   expect_equal(px1, px2)
+   expect_equal(mda.getattr(px1), mda.getattr(x))
+   expect_equal(mda.getattr(px2), mda.getattr(x))
+})
+
+test_that("Method works with several preprocessing methods in the list", {
+
+   x <- simdata$spectra.c
+   attr(x, "xaxis.values") <- simdata$wavelength
+   attr(x, "xaxis.name") <- "Wavelength, nm"
+   attr(x, "yaxis.values") <- seq_len(nrow(x)) * 10
+   attr(x, "yaxis.name") <- "Time, s"
+   x <- mda.exclrows(x, c(1, 20, 30, 70))
+
+   p <- list(
+      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
+      prep("snv"),
+      prep("autoscale", list(center = TRUE, scale = TRUE))
+   )
+
+   px1 <- employ.prep(p, x)
+   px2 <- x
+   px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
+   px2 <- prep.snv(px2)
+   px2 <- prep.autoscale(px2, center = TRUE, scale = TRUE)
+
+   expect_equal(px1, px2)
+   expect_equal(mda.getattr(px1), mda.getattr(x))
+   expect_equal(mda.getattr(px2), mda.getattr(x))
+})
+
+test_that("Method works with preprocessing methods and varable selection", {
+
+   x <- simdata$spectra.c
+   attr(x, "xaxis.values") <- simdata$wavelength
+   attr(x, "xaxis.name") <- "Wavelength, nm"
+   attr(x, "yaxis.values") <- seq_len(nrow(x)) * 10
+   attr(x, "yaxis.name") <- "Time, s"
+   x <- mda.exclrows(x, c(1, 20, 30, 70))
+
+   p <- list(
+      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
+      prep("snv"),
+      prep("autoscale", list(center = TRUE, scale = TRUE)),
+      prep("varsel", list(var.ind = 50:130))
+   )
+
+   px1 <- employ.prep(p, x)
+   px2 <- x
+   px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
+   px2 <- prep.snv(px2)
+   px2 <- prep.autoscale(px2, center = TRUE, scale = TRUE)
+   px2 <- mda.subset(px2, select = 50:130)
+
+   expect_equal(px1, px2)
+   expect_equal(mda.getattr(px1), mda.getattr(px2))
+})
