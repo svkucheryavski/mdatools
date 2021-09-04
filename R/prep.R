@@ -671,7 +671,7 @@ prep <- function(name, params = NULL, method = NULL) {
 
       # 2. check the parameters
       if (is.null(params)) params <- item$params
-      if (length(params) > 0 && !(names(params) %in% names(item$params))) {
+      if (length(params) > 0 && !all(names(params) %in% names(item$params))) {
          stop("Provided preprocessing parameters have wrong name.")
       }
 
@@ -702,14 +702,16 @@ prep <- function(name, params = NULL, method = NULL) {
 #'
 #' @param obj
 #' list with preprocssing methods (created using \code{prep} function).
-#' @param data
+#' @param x
 #' matrix with dataset
+#' @param ...
+#' other arguments
 #'
 #' @export
-employ.prep <- function(obj, data) {
+employ.prep <- function(obj, x, ...) {
    for (p in obj) {
-      data <- do.call(p$method, c(list(data = data), p$params))
+      x <- do.call(p$method, c(list(data = x), p$params))
    }
 
-   return(data)
+   return(x)
 }

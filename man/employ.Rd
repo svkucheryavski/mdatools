@@ -2,17 +2,17 @@
 % Please edit documentation in R/defaults.R
 \name{employ}
 \alias{employ}
-\title{Generic function to apply a method (e.g. constraint)}
+\title{Generic function to apply a method (e.g. constraint, preprocessing, etc)}
 \usage{
-employ(obj, x, d)
+employ(obj, x, ...)
 }
 \arguments{
-\item{obj}{constraint object}
+\item{obj}{object}
 
-\item{x}{data in question (e.g. resolved spectra)}
+\item{x}{data in question}
 
-\item{d}{matrix with original data}
+\item{...}{other parameters}
 }
 \description{
-Generic function to apply a method (e.g. constraint)
+Generic function to apply a method (e.g. constraint, preprocessing, etc)
 }

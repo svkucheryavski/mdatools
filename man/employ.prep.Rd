@@ -4,12 +4,14 @@
 \alias{employ.prep}
 \title{Applies a list with preprocessing methods to a dataset}
 \usage{
-\method{employ}{prep}(obj, data)
+\method{employ}{prep}(obj, x, ...)
 }
 \arguments{
 \item{obj}{list with preprocssing methods (created using \code{prep} function).}
 
-\item{data}{matrix with dataset}
+\item{x}{matrix with dataset}
+
+\item{...}{other arguments}
 }
 \description{
 Applies a list with preprocessing methods to a dataset
