@@ -32,7 +32,6 @@ simca(
 \value{
 Returns an object of \code{simca} class with following fields:
 \item{classname }{a short text with class name.}
-\item{modpower }{a matrix with modelling power of variables.}
 \item{calres }{an object of class \code{\link{simcares}} with classification results for a
 calibration data.}
 \item{testres }{an object of class \code{\link{simcares}} with classification results for a test
