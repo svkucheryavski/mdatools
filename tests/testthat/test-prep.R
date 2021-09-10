@@ -323,7 +323,7 @@ test_that("Variable selection works correctly", {
 });
 
 
-context("prep: combine method together")
+context("prep: combine methods together")
 
 test_that("List of available methods is shown corectly", {
    expect_output(prep.list())
@@ -349,11 +349,6 @@ test_that("Method works with one preprocessing method in the list", {
 
    px1 <- employ.prep(p, x)
    px2 <- prep.savgol(x, width = 11, porder = 2, dorder = 1)
-
-   par(mfrow = c(3, 1))
-   mdaplot(x, type = "l")
-   mdaplot(px1, type = "l")
-   mdaplot(px2, type = "l")
 
    expect_equal(px1, px2)
    expect_equal(mda.getattr(px1), mda.getattr(x))
