@@ -11,6 +11,7 @@
   variance = "expvar",
   xticks = seq_len(obj$ncomp),
   res = obj$res,
+  ylab = "Explained variance, \%",
   ...
 )
 }
@@ -26,6 +27,8 @@
 \item{xticks}{vector with ticks for x-axis}
 
 \item{res}{list with result objects to show the variance for}
+
+\item{ylab}{label for y-axis}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

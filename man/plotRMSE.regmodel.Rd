@@ -11,6 +11,7 @@
   labels = "values",
   xticks = seq_len(obj$ncomp),
   res = obj$res,
+  ylab = paste0("RMSE (", obj$res$cal$respnames[ny], ")"),
   ...
 )
 }
@@ -26,6 +27,8 @@
 \item{xticks}{vector with ticks for x-axis values}
 
 \item{res}{list with result objects}
+
+\item{ylab}{label for y-axis}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

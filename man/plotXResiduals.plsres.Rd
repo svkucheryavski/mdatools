@@ -9,7 +9,7 @@
   ncomp = obj$ncomp.selected,
   norm = TRUE,
   log = FALSE,
-  main = sprintf("X-residuals (ncomp = \%d)", ncomp),
+  main = sprintf("X-distances (ncomp = \%d)", ncomp),
   ...
 )
 }

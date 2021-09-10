@@ -11,6 +11,7 @@
   labels = "values",
   xticks = seq_len(obj$ncomp),
   show.plot = TRUE,
+  ylab = "Explained variance, \%",
   ...
 )
 }
@@ -26,6 +27,8 @@
 \item{xticks}{vector with ticks for x-axis}
 
 \item{show.plot}{logical, shall plot be created or just plot series object is needed}
+
+\item{ylab}{label for y-axis}
 
 \item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
 }

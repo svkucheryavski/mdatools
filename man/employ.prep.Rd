@@ -4,7 +4,7 @@
 \alias{employ.prep}
 \title{Applies a list with preprocessing methods to a dataset}
 \usage{
-\method{employ}{prep}(obj, x, ...)
+employ.prep(obj, x, ...)
 }
 \arguments{
 \item{obj}{list with preprocssing methods (created using \code{prep} function).}
