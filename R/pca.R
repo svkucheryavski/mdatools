@@ -1023,6 +1023,8 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
 #' vector with ticks for x-axis
 #' @param res
 #' list with result objects to show the variance for
+#' @param ylab
+#' label for y-axis
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1031,11 +1033,11 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
 #'
 #' @export
 plotVariance.pca <- function(obj, type = "b", labels = "values", variance = "expvar",
-   xticks = seq_len(obj$ncomp), res = obj$res, ...) {
+   xticks = seq_len(obj$ncomp), res = obj$res, ylab = "Explained variance, %", ...) {
 
    res <- getRes(res, "ldecomp")
    plot_data <- lapply(res, plotVariance, variance = variance, show.plot = FALSE)
-   mdaplotg(plot_data, xticks = xticks, labels = labels, type = type, ...)
+   mdaplotg(plot_data, xticks = xticks, labels = labels, type = type, ylab = ylab, ...)
 }
 
 #' Cumulative explained variance plot for PCA model
@@ -1302,6 +1304,8 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
 #' what to show as data points labels
 #' @param xticks
 #' vector with tick values for x-axis
+#' @param ylab
+#' label for y-axis
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1309,7 +1313,7 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
 #' Work only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
-plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...) {
+plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ylab = "Nh", ...) {
 
    if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
       stop("This plot can not be made for selected 'lim.type' method.")
@@ -1318,8 +1322,7 @@ plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$n
    plot_data <- mda.subset(obj$T2lim, subset = 4)
    attr(plot_data, "name") <- "Degrees of freedom"
    attr(plot_data, "xaxis.name") <- attr(obj$loadings, "xaxis.name")
-   attr(plot_data, "yaxis.name") <- "Nh"
-   mdaplot(plot_data, xticks = xticks, labels = labels, type = type, ...)
+   mdaplot(plot_data, xticks = xticks, labels = labels, type = type, ylab = ylab, ...)
 }
 
 #' Degrees of freedom plot for orthogonal distance (Nh)
@@ -1336,6 +1339,8 @@ plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$n
 #' what to show as data points labels
 #' @param xticks
 #' vector with tick values for x-axis
+#' @param ylab
+#' label for y-axis
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1343,7 +1348,7 @@ plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$n
 #' Work only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
-plotQDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...) {
+plotQDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ylab = "Nq", ...) {
 
    if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
       stop("This plot can not be made for selected 'lim.type' method.")
@@ -1352,8 +1357,7 @@ plotQDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$nc
    plot_data <- mda.subset(obj$Qlim, subset = 4)
    attr(plot_data, "name") <- "Degrees of freedom"
    attr(plot_data, "xaxis.name") <- attr(obj$loadings, "xaxis.name")
-   attr(plot_data, "yaxis.name") <- "Nq"
-   mdaplot(plot_data, type = type, labels = labels, xticks = xticks, ...)
+   mdaplot(plot_data, type = type, labels = labels, xticks = xticks, ylab = ylab, ...)
 }
 
 #' Degrees of freedom plot for both distances
