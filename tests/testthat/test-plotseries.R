@@ -213,11 +213,20 @@ test_that("xaxis.name argument is handled correctly", {
 test_that("yaxis.name argument is handled correctly", {
    yaxis.name <- "My y variable"
    attr(x, "yaxis.name") <- yaxis.name
+
+   # file non-scatter plots it is ignored
    for (type in nonscatter_plots) {
       res <- splitPlotData(preparePlotData(x)$visible, type)
-      expect_equal(attr(res$y_values, "name"), yaxis.name)
+      expect_equal(attr(res$y_values, "name"), "")
    }
 
+   # if transposed it becomes xaxis.name
+   for (type in nonscatter_plots) {
+      res <- splitPlotData(preparePlotData(mda.t(x))$visible, type)
+      expect_equal(attr(res$x_values, "name"), yaxis.name)
+   }
+
+   # for scatetr plot is ignored and column names is used instead
    for (type in scatter_plots) {
       res <- splitPlotData(preparePlotData(x)$visible, type)
       expect_equal(attr(res$y_values, "name"), "X2")
