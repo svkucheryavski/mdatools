@@ -1,16 +1,3 @@
-#' Generic function to apply a method (e.g. constraint, preprocessing, etc)
-#'
-#' @param obj
-#' object
-#' @param x
-#' data in question
-#' @param ...
-#' other parameters
-#'
-#' @export
-employ <- function(obj, x, ...) {
-   UseMethod("employ")
-}
 
 #' Plot purity spectra
 #' @param obj
