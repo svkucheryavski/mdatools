@@ -412,3 +412,28 @@ test_that("Method works with preprocessing methods and varable selection", {
    expect_equal(px1, px2)
    expect_equal(mda.getattr(px1), mda.getattr(px2))
 })
+
+
+test_that("Method works with user defined preprocessing method", {
+
+   x <- simdata$spectra.c
+   attr(x, "xaxis.values") <- simdata$wavelength
+   attr(x, "xaxis.name") <- "Wavelength, nm"
+   attr(x, "yaxis.values") <- seq_len(nrow(x)) * 10
+   attr(x, "yaxis.name") <- "Time, s"
+   x <- mda.exclrows(x, c(1, 20, 30, 70))
+
+   p <- list(
+      prep("r2a", method = function(data) log(1/abs(data))),
+      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
+      prep("snv")
+   )
+
+   px1 <- employ.prep(p, x)
+   px2 <- log(1/abs(x))
+   px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
+   px2 <- prep.snv(px2)
+
+   expect_equal(px1, px2)
+   expect_equal(mda.getattr(px1), mda.getattr(px2))
+})
