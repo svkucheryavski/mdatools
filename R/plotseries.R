@@ -71,6 +71,7 @@ plotseries <- function(data, type, cgroup = NULL, col = NULL, opacity = 1,
    ps$xlim <- range(ps$x_values)
    ps$ylim <- range(ps$y_values)
    class(ps) <- "plotseries"
+
    return(ps)
 }
 
@@ -126,7 +127,7 @@ preparePlotData <- function(data) {
    excluded_cols <- NULL
    if (length(attrs$exclcols) > 0) {
       excluded_cols <- mda.getexclind(attrs$exclcols, colnames(data), ncol(data))
-      data <- data[, -excluded_cols, drop = F]
+      data <- data[, -excluded_cols, drop = FALSE]
       attrs$xaxis.values <- attrs$xaxis.values[-excluded_cols]
    }
 
@@ -140,10 +141,10 @@ preparePlotData <- function(data) {
    excluded_rows <- NULL
    if (length(attrs$exclrows > 0)) {
       excluded_rows <- mda.getexclind(attrs$exclrows, rownames(data), nrow(data))
-      excluded_data <- data[excluded_rows, , drop = F]
+      excluded_data <- data[excluded_rows, , drop = FALSE]
       excluded_yaxis_values <- attrs$yaxis.values[excluded_rows]
 
-      data <- data[-excluded_rows, , drop = F]
+      data <- data[-excluded_rows, , drop = FALSE]
       attrs$yaxis.values <- attrs$yaxis.values[-excluded_rows]
    }
 
@@ -204,6 +205,12 @@ splitPlotData <- function(data, type) {
          data[1, ] - data[2, ],
          data[1, ] + if (nrow(data) > 2) data[3, ] else data[2, ]
       )
+   }
+
+
+   # 0.12.0: yaxis.name must not be used as axis label in line and bar plots
+   if (type %in% c("b", "l", "e", "h")) {
+      attrs$yaxis.name = NULL
    }
 
    # prepare x-axis values for other types of plots
