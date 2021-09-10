@@ -288,15 +288,17 @@ print.regmodel <- function(x, ...) {
 #' vector with ticks for x-axis values
 #' @param res
 #' list with result objects
+#' @param ylab
+#' label for y-axis
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
 #' @export
 plotRMSE.regmodel <- function(obj, ny = 1, type = "b", labels = "values",
-   xticks = seq_len(obj$ncomp), res = obj$res, ...) {
+   xticks = seq_len(obj$ncomp), res = obj$res, ylab = paste0("RMSE (", obj$res$cal$respnames[ny], ")"), ...) {
 
    plot_data <- lapply(res, plotRMSE, ny = ny, show.plot = FALSE)
-   mdaplotg(plot_data, type = type, xticks = xticks, labels = labels, ...)
+   mdaplotg(plot_data, type = type, xticks = xticks, labels = labels, ylab = ylab, ...)
 }
 
 #' Predictions plot for regression model
@@ -365,7 +367,7 @@ plotYResiduals.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, sho
    }
 
    plot_data <- lapply(res, plotResiduals, ny = ny, ncomp = ncomp, show.plot = FALSE)
-   attr(plot_data[[1]], "name") <- sprintf("Y-distance (ncomp = %d)", ncomp)
+   attr(plot_data[[1]], "name") <- sprintf("Y-residuals (ncomp = %d)", ncomp)
    mdaplotg(plot_data, show.lines = show.lines, ...)
 }
 
