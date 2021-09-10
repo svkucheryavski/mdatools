@@ -459,14 +459,13 @@ prep.transform <- function(data, fun, ...) {
 #' @return
 #' data matrix with the selected variables (columns)
 #'
+#' @export
 prep.varsel <- function(data, var.ind) {
    if (!is.null(attr(data, "exclcols"))) {
       stop("prep.varsel() can not be used for dataset with excluded (hidden) columns.")
    }
    return(mda.subset(data, select = var.ind))
 }
-
-
 
 #' Pseudo-inverse matrix
 #'
@@ -659,32 +658,32 @@ prep.list <- function() {
 prep <- function(name, params = NULL, method = NULL) {
 
    if (!is.null(params) && !is.list(params)) {
-      stop("Argument 'params' must be a list with parameter names and values.")
+      stop("prep: argument 'params' must be a list with parameter names and values.")
    }
 
    if (is.null(method)) {
       # assuming it is one of the standard constraints
       # 1. first check name
       item <- getImplementedPrepMethods()[[name]]
-      stopifnot("Either name of preprocessing method is wrong or you need to provide a reference to
+      stopifnot("prep: either name of preprocessing method is wrong or you need to provide a reference to
          function implementing the method if it is user defined." = !is.null(item))
 
       # 2. check the parameters
       if (is.null(params)) params <- item$params
       if (length(params) > 0 && !all(names(params) %in% names(item$params))) {
-         stop("Provided preprocessing parameters have wrong name.")
+         stop("prep: provided preprocessing parameters have wrong name.")
       }
 
       method <- item$method
    } else {
       # user defined method, check that it works
       res <- tryCatch(
-         do.call(method, c(matrix(runif(25, 5, 10)), params)),
-         error = function(m) stop("The method you provided raises an error: \n", m),
-         warning = function(m) stop("The method you provided raises a warning: \n", m)
+         do.call(method, c(list(data = matrix(runif(50, 1, 10), 5, 10)), params)),
+         error = function(m) stop("prep: the method you provided raises an error: \n", m),
+         warning = function(m) stop("prep: the method you provided raises a warning: \n", m)
       )
 
-      stopifnot("The method you provided does not return matrix with correct dimension." =
+      stopifnot("prep: the method you provided does not return matrix with correct dimension." =
          dim(res) == c(5, 10))
    }
 
@@ -709,6 +708,8 @@ prep <- function(name, params = NULL, method = NULL) {
 #'
 #' @export
 employ.prep <- function(obj, x, ...) {
+
+   stopifnot("employ.prep: the first argument must be a list with preprocessing methods" = is.list(obj) && class(obj[[1]]) == "prep")
    for (p in obj) {
       x <- do.call(p$method, c(list(data = x), p$params))
    }
