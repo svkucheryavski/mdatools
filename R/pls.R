@@ -946,6 +946,8 @@ plotYCumVariance.pls <- function(obj, type = "b", main = "Cumulative variance (Y
 #' what to show as labels for plot objects.
 #' @param res
 #' list with result objects to show the plot for (by defaul, model results are used)
+#' @param ylab
+#' label for y-axis
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -954,10 +956,10 @@ plotYCumVariance.pls <- function(obj, type = "b", main = "Cumulative variance (Y
 #'
 #' @export
 plotVariance.pls <- function(obj, decomp = "xdecomp", variance = "expvar", type = "b",
-   labels = "values", res = obj$res, ...) {
+   labels = "values", res = obj$res, ylab = "Explained variance, %", ...) {
 
    plot_data <- lapply(res, plotVariance, decomp = decomp, variance = variance, show.plot = FALSE)
-   mdaplotg(plot_data, labels = labels, type = type, ...)
+   mdaplotg(plot_data, labels = labels, type = type, ylab = ylab, ...)
 }
 
 #' X scores plot for PLS
