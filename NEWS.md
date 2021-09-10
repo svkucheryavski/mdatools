@@ -21,7 +21,7 @@ This release is mostly about preprocessing - added some new methods, improved th
 
 * fixed a bug when attribute `yaxis.value` was used as `ylab` when creating line and bar plots.
 
-* fixed an earlier reported issue with plotXYResiduals (#100)
+* fixed an earlier reported issue with plotXYResiduals ([#100](https://github.com/svkucheryavski/mdatools/issues/100))
 
 
 ## Other changes
