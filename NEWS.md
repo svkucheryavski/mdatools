@@ -1,6 +1,6 @@
 v.0.12.0
 ========
-This release is mostly about preprocessing - added some new methods, improved the existent once and implemented a possibility to combine preprocessing methods together (including parameter values) and apply them all together in a correct sequence. See [preprocessing section]() in the tutorials for details
+This release is mostly about preprocessing - added some new methods, improved the existent once and implemented a possibility to combine preprocessing methods together (including parameter values) and apply them all together in a correct sequence. See [preprocessing section](https://mda.tools/docs/preprocessing.html) in the tutorials for details
 
 ## New features and improvements
 
@@ -140,7 +140,7 @@ Finally, all model results (calibration, cross-validation and test set validatio
 into a single list, `model$res`. This makes a lot of things easier. However, the old way of
 accessing the result objects (e.g. `model$calres` or `model$cvres`) still works, you can access e.g. calibration results both using `model$res$cal` and `model$calres`, so this change will not break the compatibility.
 
-Below is more detailed list of changes. The [tutorial](https://mdatools.com/docs/) has been updated accordingly.
+Below is more detailed list of changes. The [tutorial](https://mda.tools/docs/) has been updated accordingly.
 
 ## Breaking changes
 
