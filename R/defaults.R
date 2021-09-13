@@ -1,16 +1,3 @@
-#' Generic function to apply a method (e.g. constraint)
-#'
-#' @param obj
-#' constraint object
-#' @param x
-#' data in question (e.g. resolved spectra)
-#' @param d
-#' matrix with original data
-#'
-#' @export
-employ <- function(obj, x, d) {
-   UseMethod("employ")
-}
 
 #' Plot purity spectra
 #' @param obj

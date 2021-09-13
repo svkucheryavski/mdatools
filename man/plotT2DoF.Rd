@@ -4,7 +4,14 @@
 \alias{plotT2DoF}
 \title{Degrees of freedom plot for score distance (Nh)}
 \usage{
-plotT2DoF(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...)
+plotT2DoF(
+  obj,
+  type = "b",
+  labels = "values",
+  xticks = seq_len(obj$ncomp),
+  ylab = "Nh",
+  ...
+)
 }
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
@@ -14,6 +21,8 @@ plotT2DoF(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...)
 \item{labels}{what to show as data points labels}
 
 \item{xticks}{vector with tick values for x-axis}
+
+\item{ylab}{label for y-axis}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

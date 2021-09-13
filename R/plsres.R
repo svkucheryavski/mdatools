@@ -466,7 +466,7 @@ plotXYScores.plsres <- function(obj, ncomp = 1, show.plot = TRUE, ...) {
 #'
 #' @export
 plotXResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log = FALSE,
-   main = sprintf("X-residuals (ncomp = %d)", ncomp), ...) {
+   main = sprintf("X-distances (ncomp = %d)", ncomp), ...) {
 
    if (is.null(obj$xdecomp)) return(invisible(NULL))
 
@@ -487,8 +487,6 @@ plotXResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, 
 #' PLS results (object of class \code{plsres})
 #' @param ncomp
 #' how many components to use (if NULL - user selected optimal value will be used)
-#' @param main
-#' main title for the plot
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
@@ -496,11 +494,10 @@ plotXResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, 
 #' Proxy for \code{\link{plotResiduals.regres}} function.
 #'
 #' @export
-plotYResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected,
-   main = sprintf("Y-residuals (ncomp = %d)", ncomp), ...) {
+plotYResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 
    if (is.null(obj$y.ref)) return(invisible(NULL))
-   return(plotResiduals.regres(obj, ncomp = ncomp, main = main, ...))
+   return(plotResiduals.regres(obj, ncomp = ncomp, ...))
 }
 
 

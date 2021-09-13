@@ -107,17 +107,19 @@ plotCumVariance.ldecomp <- function(obj, type = "b", labels = "values", show.plo
 #' vector with ticks for x-axis
 #' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
+#' @param ylab
+#' label for y-axis
 #' @param ...
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
 plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", labels = "values",
-   xticks = seq_len(obj$ncomp), show.plot = TRUE, ...) {
+   xticks = seq_len(obj$ncomp), show.plot = TRUE, ylab = "Explained variance, %", ...) {
 
    if (!show.plot) return(obj[[variance]])
 
    return(
-      mdaplot(obj[[variance]], xticks = xticks, labels = labels, type = type, ...)
+      mdaplot(obj[[variance]], xticks = xticks, labels = labels, type = type, ylab = ylab, ...)
    )
 }
 
@@ -387,7 +389,6 @@ ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
    attr(expvar, "name") <- "Variance"
    attr(cumexpvar, "name") <- "Cumulative variance"
    attr(expvar, "xaxis.name") <- attr(cumexpvar, "xaxis.name") <- "Components"
-   attr(expvar, "yaxis.name") <- attr(cumexpvar, "yaxis.name") <- "Explained variance, %"
 
    return(list(expvar = expvar, cumexpvar = cumexpvar))
 }
@@ -826,7 +827,7 @@ ldecomp.getT2Limits <- function(lim.type, alpha, gamma, params) {
    if (lim.type %in% c("jm", "chisq")) DoF <- pT2$nobj
 
    lim <- switch(lim.type,
-      "jm" = ,
+      "jm" = hotelling.crit(pT2$nobj, seq_len(ncomp), alpha, gamma),
       "chisq" = hotelling.crit(pT2$nobj, seq_len(ncomp), alpha, gamma),
       "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
       "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
@@ -1001,7 +1002,7 @@ ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE, norm = F
    getPlotLim <- function(lim, pd, ld, dim) {
       if (!is.null(lim) || all(!show.limits)) return(lim)
       limits <- if (show.limits[[2]]) max(ld$outliers[, dim]) else max(ld$extremes[, dim])
-      return( c(0, max(sapply(pd, function(x) { max(c(getValues(x, dim), limits)) * 1.05}))) )
+      return(c(0, max(sapply(pd, function(x) max(c(getValues(x, dim), limits)) * 1.05))))
    }
 
    # check that show.limits is logical

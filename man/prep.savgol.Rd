@@ -18,3 +18,11 @@ prep.savgol(data, width = 3, porder = 1, dorder = 0)
 \description{
 Applies Savytzky-Golay filter to the rows of data matrix
 }
+\details{
+The function implements algorithm described in [1] which handles the edge points correctly and
+does not require to cut the spectra.
+}
+\references{
+1. Peter A. Gorry. General least-squares smoothing and differentiation by the convolution
+(Savitzky-Golay) method. Anal. Chem. 1990, 62, 6, 570–573, https://doi.org/10.1021/ac00205a007.
+}

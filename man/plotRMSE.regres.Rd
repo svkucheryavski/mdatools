@@ -11,6 +11,7 @@
   xticks = seq_len(obj$ncomp),
   labels = "values",
   show.plot = TRUE,
+  ylab = paste0("RMSE (", obj$respnames[ny], ")"),
   ...
 )
 }
@@ -26,6 +27,8 @@
 \item{labels}{what to use as labels ("names", "values" or "indices")}
 
 \item{show.plot}{logical, show plot or just return plot data}
+
+\item{ylab}{label for y-axis}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }

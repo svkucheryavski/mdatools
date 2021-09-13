@@ -4,16 +4,19 @@
 \alias{prep.alsbasecorr}
 \title{Baseline correction using assymetric least squares}
 \usage{
-prep.alsbasecorr(spectra, plambda = 5, p = 0.1, max.niter = 10)
+prep.alsbasecorr(data, plambda = 5, p = 0.1, max.niter = 10)
 }
 \arguments{
-\item{spectra}{matrix with spectra (rows correspond to individual spectra)}
+\item{data}{matrix with spectra (rows correspond to individual spectra)}
 
 \item{plambda}{power of the penalty parameter (e.g. if plambda = 5, lambda = 10^5)}
 
 \item{p}{assymetry ratio (should be between 0 and 1)}
 
 \item{max.niter}{maximum number of iterations}
+}
+\value{
+preprocessed spectra.
 }
 \description{
 Baseline correction using assymetric least squares

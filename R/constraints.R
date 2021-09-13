@@ -276,9 +276,11 @@ constraint <- function(name, params = NULL, method = NULL) {
 #' matrix with pure spectra or contributions
 #' @param d
 #' matrix with original spectral values
+#' @param ...
+#' other arguments
 #'
 #' @export
-employ.constraint <- function(obj, x, d) {
+employ.constraint <- function(obj, x, d, ...) {
    return(do.call(obj$method, c(list(x = x, d = d), obj$params)))
 }
 

@@ -103,33 +103,60 @@ prep.snv <- function(data) {
 #' Normalization
 #'
 #' @description
-#' Normalizes signals (rows of data matrix) to unit area, unit length or unit sum
+#' Normalizes signals (rows of data matrix).
 #'
 #' @param data
 #' a matrix with data values
 #' @param type
-#' type of normalization \code{"area"}, \code{"length"} or \code{"sum"}.
+#' type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, or \code{"is"}.
+#' @param col.ind
+#' indices of columns (can be either integer or logical valuws) for normalization to internal
+#' standard peak.
+#'
+#' @details
+#' The \code{"area"}, \code{"length"}, \code{"sum"} types do preprocessing to unit area (sum of
+#' absolute values), length or sum of all values in every row of data matrix. Type \code{"snv"}
+#' does the Standard Normal Variate normalization, similar to \code{\link{prep.snv}}. Type
+#' \code{"is"} does the normalization to internal standard peak, whose position is defined by
+#' parameter `col.ind`. If the position is a single value, the rows are normalized to the height
+#' of this peak. If `col.ind` points on several adjucent vales, the rows are normalized to the area
+#' under the peak - sum of the intensities.
 #'
 #' @return
 #' data matrix with normalized values
 #'
 #' @export
-prep.norm <- function(data, type = "area") {
+prep.norm <- function(data, type = "area", col.ind = NULL) {
 
-   f <- function(data, type) {
+   if (type == "snv") return(prep.snv(data))
+
+   if (type == "is" && is.null(col.ind) ) {
+      stop("For 'is' normalization you need to provide indices for IS peak.")
+   }
+
+   if (is.logical(col.ind)) {
+      col.ind <- which(col.ind)
+   }
+
+   if (!is.null(col.ind) && (min(col.ind) < 1 || max(col.ind) > ncol(data))) {
+      stop("Values for 'col.ind' seem to be wrong.")
+   }
+
+   f <- function(data, type, col.ind) {
 
       w <- switch(
          type,
          "area" = apply(abs(data), 1, sum),
          "length" = sqrt(apply(data^2, 1, sum)),
-         "sum" = apply(data, 1, sum)
+         "sum" = apply(data, 1, sum),
+         "is" = apply(data[, col.ind, drop = FALSE], 1, sum)
       )
 
       if (is.null(w)) stop("Wrong value for argument 'type'.")
       return(sweep(data, 1, w, "/"))
    }
 
-   return(prep.generic(data, f, type = type))
+   return(prep.generic(data, f, type = type, col.ind = col.ind))
 }
 
 #' Savytzky-Golay filter
@@ -146,26 +173,73 @@ prep.norm <- function(data, type = "area") {
 #' @param dorder
 #' order of derivative to take (0 - no derivative)
 #'
+#' @details
+#' The function implements algorithm described in [1] which handles the edge points correctly and
+#' does not require to cut the spectra.
+#'
+#' @references
+#' 1. Peter A. Gorry. General least-squares smoothing and differentiation by the convolution
+#' (Savitzky-Golay) method. Anal. Chem. 1990, 62, 6, 570–573, https://doi.org/10.1021/ac00205a007.
+#'
 #' @export
 prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
 
+   stopifnot("Filter width ('width') should be equal at least to 3." = width > 2)
+   stopifnot("Filter width ('width') should be an odd integer number." = width %% 2 == 1)
+   stopifnot("Wrong value for the derivative order (should be 0, 1, or 2)." = dorder %in% (0:2))
+   stopifnot("Wrong value for the polynomial degree (should be integer number between 0 and 4)." = porder %in% (0:4))
+   stopifnot("Polynomal degree ('porder') should not be smaller the derivative order ('dorder')." = porder >= dorder)
+
+   # compute grams polynomials
+   gram <- function(i, m, k, s) {
+      if (k > 0) {
+         return( (4 * k - 2) / (k * (2 * m - k + 1)) * (i * gram(i, m, k - 1, s) + s * gram(i, m, k - 1, s - 1)) -
+            ((k - 1) * (2 * m + k)) / (k * (2 * m - k + 1)) * gram(i, m, k - 2, s) )
+      }
+      if (k == 0 && s == 0) return(1)
+      return(0)
+   }
+
+   # compute generalized factorial
+   genfact <- function(a, b) {
+      f <- 1;
+      if ((a - b + 1) > a) return(f)
+
+      for (i in (a - b + 1):a) {
+         f <- f * i;
+      }
+
+      return(f)
+   }
+
+   # compute weights for convolution depending on position
+   weight <- function(i, t, m, n, s) {
+      sum <- 0
+      for (k in 0:n) {
+         sum <- sum + (2 * k + 1) * (genfact(2 * m, k) / genfact(2 * m + k + 1, k + 1)) * gram(i, m, k, 0) * gram(t, m, k, s)
+      }
+      return(sum)
+   }
+
    f <- function(data, width, porder, dorder) {
-      stopifnot("Filter width ('width') should be equal at least to 3." = width > 2)
-      stopifnot("Filter width ('width') should be an odd integer number." = width %% 2 == 1)
-      stopifnot("Wrong value for the derivative order (should be 0, 1, or 2)." = dorder %in% (0:2))
-      stopifnot("Wrong value for the polynomial degree (should be integer number between 0 and 4)." = porder %in% (0:4))
-      stopifnot("Polynomal degree ('porder') should not be smaller the derivative order ('dorder')." = porder >= dorder)
 
       nobj <- nrow(data)
       nvar <- ncol(data)
       pdata <- matrix(0, ncol = nvar, nrow = nobj)
 
-      for (i in seq_len(nobj)) {
-         d <- data[i, ]
-         w <- (width - 1) / 2
-         f <- pinv(outer(-w:w, 0:porder, FUN = "^"))
-         d <- convolve(d, rev(f[dorder + 1, ]), type = "o")
-         pdata[i, ] <- d[(w + 1) : (length(d) - w)]
+      m <- (width - 1) / 2
+      w <- outer(-m:m, -m:m, function(x, y) weight(x, y, m, porder, dorder))
+      n <- ncol(data)
+
+      for (j in seq_len(nobj)) {
+         for (i in 1:m) {
+            pdata[j, i] <- convolve(data[j, 1:(2 * m + 1)], w[, i], type = "filter")
+            pdata[j, n - i + 1] <- convolve(data[j, (n - 2 * m):n], w[, width - i + 1], type = "filter")
+         }
+
+         for (i in (m+1):(n-m)) {
+            pdata[j, i] <- convolve(data[j, (i - m):(i + m)], w[, m + 1], type = "filter")
+         }
       }
 
       return(pdata)
@@ -179,8 +253,8 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
 #' @description
 #' Applies Multiplicative Scatter Correction (MSC) transformation to data matrix (spectra)
 #'
-#' @param spectra
-#' a matrix with spectra values
+#' @param data
+#' a matrix with data values (spectra)
 #' @param mspectrum
 #' mean spectrum (if NULL will be calculated from \code{spectra})
 #'
@@ -206,7 +280,7 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
 #'  mdaplot(cspectra, type = "l", main = "After MSC")
 #'
 #' @export
-prep.msc <- function(spectra, mspectrum = NULL) {
+prep.msc <- function(data, mspectrum = NULL) {
 
    f <- function(spectra, mspectrum) {
       if (is.null(mspectrum)) {
@@ -231,7 +305,7 @@ prep.msc <- function(spectra, mspectrum = NULL) {
       return(pspectra)
    }
 
-   return(prep.generic(spectra, f, mspectrum = mspectrum))
+   return(prep.generic(data, f, mspectrum = mspectrum))
 }
 
 
@@ -240,7 +314,7 @@ prep.msc <- function(spectra, mspectrum = NULL) {
 #' @description
 #' Applies Kubelka-Munk (km) transformation to data matrix (spectra)
 #'
-#' @param spectra
+#' @param data
 #' a matrix with spectra values (absolute reflectance values)
 #'
 #' @return
@@ -252,16 +326,16 @@ prep.msc <- function(spectra, mspectrum = NULL) {
 #' (1 - R)^2 / 2R
 #'
 #' @export
-prep.ref2km <- function(spectra) {
-   stopifnot("Can't use Kubelka-Munk transformation as some of the values are zeros or negative." = all(spectra > 0))
+prep.ref2km <- function(data) {
+   stopifnot("Can't use Kubelka-Munk transformation as some of the values are zeros or negative." = all(data > 0))
    f <- function(x) (1 - x)^2 / (2 * x)
 
-   return(prep.generic(spectra, f))
+   return(prep.generic(data, f))
 }
 
 #' Baseline correction using assymetric least squares
 #'
-#' @param spectra
+#' @param data
 #' matrix with spectra (rows correspond to individual spectra)
 #' @param plambda
 #' power of the penalty parameter (e.g. if plambda = 5, lambda = 10^5)
@@ -269,6 +343,9 @@ prep.ref2km <- function(spectra) {
 #' assymetry ratio (should be between 0 and 1)
 #' @param max.niter
 #' maximum number of iterations
+#'
+#' @return
+#' preprocessed spectra.
 #'
 #' @details
 #' The function implements baseline correction algorithm based on Whittaker smoother. The method
@@ -297,9 +374,9 @@ prep.ref2km <- function(spectra) {
 #' @importFrom Matrix Matrix Diagonal
 #'
 #' @export
-prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 10) {
-   attrs <- mda.getattr(spectra)
-   dimnames <- dimnames(spectra)
+prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
+   attrs <- mda.getattr(data)
+   dimnames <- dimnames(data)
 
    baseline <- function(y) {
 
@@ -322,13 +399,73 @@ prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 10) {
       return(as.numeric(z))
    }
 
-   pspectra <- t(apply(spectra, 1, function(x) x - baseline(x)))
+   pspectra <- t(apply(data, 1, function(x) x - baseline(x)))
    pspectra <- mda.setattr(pspectra, attrs)
    dimnames(pspectra) <- dimnames
 
    return(pspectra)
 }
 
+
+#' Transformation
+#'
+#' @description
+#' Transforms values from using any mathematical function (e.g. log).
+#'
+#' @param data
+#' a matrix with data values
+#' @param fun
+#' reference to a transformation function, e.g. `log` or `function(x) x^2`.
+#' @param ...
+#' optional parameters for the transformation function
+#'
+#' @return
+#' data matrix with transformed values
+#'
+#' @examples
+#' # generate a matrix with two columns
+#' y <- cbind(rnorm(100, 10, 1), rnorm(100, 20, 2))
+#'
+#' # apply log transformation
+#' py1 = prep.transform(y, log)
+#'
+#' # apply power transformation
+#' py2 = prep.transform(y, function(x) x^-1.25)
+#'
+#' # show distributions
+#' par(mfrow = c(2, 3))
+#' for (i in 1:2) {
+#'    hist(y[, i], main = paste0("Original values, column #", i))
+#'    hist(py1[, i], main = paste0("Log-transformed, column #", i))
+#'    hist(py2[, i], main = paste0("Power-transformed, column #", i))
+#' }
+#'
+#' @export
+prep.transform <- function(data, fun, ...) {
+   return(prep.generic(data, fun, ...))
+}
+
+
+#' Variable selection
+#'
+#' @description
+#' Returns dataset with selected variables
+#'
+#' @param data
+#' a matrix with data values
+#' @param var.ind
+#' indices of variables (columns) to select, can bet either numeric or logical
+#'
+#' @return
+#' data matrix with the selected variables (columns)
+#'
+#' @export
+prep.varsel <- function(data, var.ind) {
+   if (!is.null(attr(data, "exclcols"))) {
+      stop("prep.varsel() can not be used for dataset with excluded (hidden) columns.")
+   }
+   return(mda.subset(data, select = var.ind))
+}
 
 #' Pseudo-inverse matrix
 #'
@@ -362,4 +499,220 @@ prep.generic <- function(x, f, ...) {
    x.p <- mda.setattr(x.p, attrs)
    dimnames(x.p) <- dimnames
    return(x.p)
+}
+
+
+#' Shows a list with implemented preprocessing methods
+#'
+#' @export
+getImplementedPrepMethods <- function() {
+   list(
+      # prep.snv <- function(data)
+      "snv" = list(
+         name = "snv",
+         method = prep.snv,
+         params = list(),
+         params.info = list(),
+         info = "Standard normal variate normalization."
+      ),
+
+      # prep.ref2km <- function(spectra)
+      "ref2km" = list(
+         name = "ref2km",
+         method = prep.ref2km,
+         params = list(),
+         params.info = list(),
+         info = "Transform reflectance spectra to Kubelka-Munk units."
+      ),
+
+      # prep.msc <- function(spectra, mspectrum = NULL)
+      "msc" = list(
+         name = "msc",
+         method = prep.msc,
+         params = list(mspectrum = NULL),
+         params.info = list(mspectrum = "mean spectrum (if NULL will be computed based on data)."),
+         info = "Multiplicative scatter correction."
+      ),
+
+      # prep.transform <- function(data, fun, ...)
+      "transform" = list(
+         name = "transform",
+         method = prep.transform,
+         params = list(fun = log),
+         params.info = list(fun = "function to transform the values (e.g. 'log')"),
+         info = "Transformation of data values using math functions (log, sqrt, etc.)."
+      ),
+
+      # prep.varsel <- function(data, var.ind)
+      "varsel" = list(
+         name = "varsel",
+         method = prep.varsel,
+         params = list(var.ind = NULL),
+         params.info = list(var.ind = "indices of variables (columns) to select."),
+         info = "Select user-defined variables (columns of dataset)."
+      ),
+
+      # prep.norm <- function(data, type = "area", col.ind = NULL)
+      "norm" = list(
+         name = "norm",
+         method = prep.norm,
+         params = list(type = "area", col.ind = NULL),
+         params.info = list(
+            type = "type of normalization ('area', 'sum', 'length', 'is', 'snv').",
+            col.ind = "indices of columns (variables) for normalization to internal standard peak."
+         ),
+         info = "Normalization."
+      ),
+
+      # prep.savgol <- function(data, width = 3, porder = 1, dorder = 0)
+      "savgol" = list(
+         name = "savgol",
+         method = prep.savgol,
+         params = list(width = 3, porder = 1, dorder = 0),
+         params.info = list(
+            width = "width of the filter.",
+            porder = "polynomial order.",
+            dorder = "derivative order."
+         ),
+         info = "Savitzky-Golay filter."
+      ),
+
+      # prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 10)
+      "alsbasecorr" = list(
+         name = "alsbasecorr",
+         method = prep.alsbasecorr,
+         params = list(plambda = 5, p = 0.1, max.niter = 10),
+         params.info = list(
+            plambda = "power of the penalty parameter (e.g. if plambda = 5, lambda = 10^5)",
+            p = "assymetry ratio (should be between 0 and 1)",
+            max.niter = "maximum number of iterations"
+         ),
+         info = "Asymmetric least squares baseline correction."
+      ),
+
+      # prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0)
+      "autoscale" = list(
+         name = "autoscale",
+         method = prep.autoscale,
+         params = list(center = TRUE, scale = FALSE, max.cov = 0),
+         params.info = list(
+            center = "a logical value or vector with numbers for centering.",
+            scale = "a logical value or vector with numbers for weighting.",
+            max.cov = "columns with coefficient of variation (in percent) below `max.cov` will not be scaled"
+         )
+      )
+   )
+}
+
+
+#' Shows information about all implemented preprocessing methods.
+#'
+#' @export
+prep.list <- function() {
+   p <- getImplementedPrepMethods()
+
+   cat("\n\nList of available preprocessing methods:\n")
+   lapply(p, function(c) {
+      cat("\n\n")
+      fprintf(" %s\n", c$info)
+      cat(" ---------------\n")
+      fprintf(" name: '%s'\n", c$name)
+
+      if (length(c$params.info) == 0) {
+         cat(" no parameters required\n")
+      } else {
+         cat(" parameters:\n")
+         for (i in seq_along(c$params.info)) {
+            fprintf("  '%s': %s\n", names(c$params.info)[i], c$params.info[[i]])
+         }
+      }
+   })
+
+   invisible()
+}
+
+
+#' Class for preprocessing object
+#'
+#' @param name
+#' short text with name for the preprocessing method.
+#' @param params
+#' a list with parameters for the method (if NULL - default parameters will be used).
+#' @param method
+#' method to call when applying the preprocessing, provide it only for user defined methods.
+#'
+#' @details
+#' Use this class to create a list with a sequence of preprocessing methods to keep them together
+#' in right order and with defined parameters. The list/object can be provided as an extra argument
+#' to any modelling function (e.g. \code{pca}, \code{pls}, etc), so the optimal model parameters and
+#' the optimal preprocessing will be stored together and can be applied to a raw data by using
+#' method \code{predict}.
+#'
+#' For your own preprocessing method you need to create a function, which takes matrix with values
+#' (dataset) as the first argument, does something and then return a matrix with the same dimension
+#' and same attributes as the result. The method can have any number of optional  parameters.
+#'
+#' See Bookdown tutorial for details.
+#'
+#' @export
+prep <- function(name, params = NULL, method = NULL) {
+
+   if (!is.null(params) && !is.list(params)) {
+      stop("prep: argument 'params' must be a list with parameter names and values.")
+   }
+
+   if (is.null(method)) {
+      # assuming it is one of the standard constraints
+      # 1. first check name
+      item <- getImplementedPrepMethods()[[name]]
+      stopifnot("prep: either name of preprocessing method is wrong or you need to provide a reference to
+         function implementing the method if it is user defined." = !is.null(item))
+
+      # 2. check the parameters
+      if (is.null(params)) params <- item$params
+      if (length(params) > 0 && !all(names(params) %in% names(item$params))) {
+         stop("prep: provided preprocessing parameters have wrong name.")
+      }
+
+      method <- item$method
+   } else {
+      # user defined method, check that it works
+      res <- tryCatch(
+         do.call(method, c(list(data = matrix(runif(50, 1, 10), 5, 10)), params)),
+         error = function(m) stop("prep: the method you provided raises an error: \n", m),
+         warning = function(m) stop("prep: the method you provided raises a warning: \n", m)
+      )
+
+      stopifnot("prep: the method you provided does not return matrix with correct dimension." =
+         dim(res) == c(5, 10))
+   }
+
+   obj <- list(
+      name = name,
+      method = method,
+      params = params
+   )
+
+   class(obj) <- c("prep")
+   return(obj)
+}
+
+#' Applies a list with preprocessing methods to a dataset
+#'
+#' @param obj
+#' list with preprocssing methods (created using \code{prep} function).
+#' @param x
+#' matrix with dataset
+#' @param ...
+#' other arguments
+#'
+#' @export
+employ.prep <- function(obj, x, ...) {
+
+   stopifnot("employ.prep: the first argument must be a list with preprocessing methods" = is.list(obj) && class(obj[[1]]) == "prep")
+   for (p in obj) {
+      x <- do.call(p$method, c(list(data = x), p$params))
+   }
+
+   return(x)
 }

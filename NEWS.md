@@ -1,3 +1,35 @@
+v.0.12.0
+========
+This release is mostly about preprocessing - added some new methods, improved the existent once and implemented a possibility to combine preprocessing methods together (including parameter values) and apply them all together in a correct sequence. See [preprocessing section](https://mda.tools/docs/preprocessing.html) in the tutorials for details
+
+## New features and improvements
+
+* method `prep.norm()` for normalization of spectra (or any other signals) is more versatile now and supports normalization to unit sum, length, area, to height or area under internal standard  peak, and SNV. SNV via `prop.snv()` is still supported for compatibility.
+
+* `prep.savgol()` has been rewritten to fix a minor bug when first derivative was inverted, but also to make the handling of the edge points better. See details in help text for the function and in the tutorial.
+
+* added a new method `prep.transform()` which can be used for transformation of values of e.g. response variable to handle non-linearity.
+
+* added a new method `prep.varsel()` which makes possible to select particular variables as a part of preprocessing framework. For example you can apply baseline correction, normalization and noise suppression to the whole spectra and after that select only a particular part for modelling.
+
+* added new method `prep()` which let you to combine several preprocessing methods and their parameters into a list and use e.g. it as a part of model.
+
+
+## Bug fixes
+
+* fixed a bug in `mcrals()` which in rare occasions could lead to a wrong error message.
+
+* fixed a bug when attribute `yaxis.value` was used as `ylab` when creating line and bar plots.
+
+* fixed an earlier reported issue with plotXYResiduals ([#100](https://github.com/svkucheryavski/mdatools/issues/100))
+
+
+## Other changes
+
+* function `employ()` which was used to employ constraints in MCR-ALS has been renamed to `employ.constraint()`. The function is for internal use and this change should not give any issues in your code.
+
+* the user guides have been revised and improved.
+
 v.0.11.5
 ========
 
@@ -108,7 +140,7 @@ Finally, all model results (calibration, cross-validation and test set validatio
 into a single list, `model$res`. This makes a lot of things easier. However, the old way of
 accessing the result objects (e.g. `model$calres` or `model$cvres`) still works, you can access e.g. calibration results both using `model$res$cal` and `model$calres`, so this change will not break the compatibility.
 
-Below is more detailed list of changes. The [tutorial](https://mdatools.com/docs/) has been updated accordingly.
+Below is more detailed list of changes. The [tutorial](https://mda.tools/docs/) has been updated accordingly.
 
 ## Breaking changes
 

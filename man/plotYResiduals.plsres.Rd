@@ -4,19 +4,12 @@
 \alias{plotYResiduals.plsres}
 \title{Y residuals plot for PLS results}
 \usage{
-\method{plotYResiduals}{plsres}(
-  obj,
-  ncomp = obj$ncomp.selected,
-  main = sprintf("Y-residuals (ncomp = \%d)", ncomp),
-  ...
-)
+\method{plotYResiduals}{plsres}(obj, ncomp = obj$ncomp.selected, ...)
 }
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}
 
 \item{ncomp}{how many components to use (if NULL - user selected optimal value will be used)}
-
-\item{main}{main title for the plot}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }

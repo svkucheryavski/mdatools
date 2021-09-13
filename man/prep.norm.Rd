@@ -4,16 +4,28 @@
 \alias{prep.norm}
 \title{Normalization}
 \usage{
-prep.norm(data, type = "area")
+prep.norm(data, type = "area", col.ind = NULL)
 }
 \arguments{
 \item{data}{a matrix with data values}
 
-\item{type}{type of normalization \code{"area"}, \code{"length"} or \code{"sum"}.}
+\item{type}{type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, or \code{"is"}.}
+
+\item{col.ind}{indices of columns (can be either integer or logical valuws) for normalization to internal
+standard peak.}
 }
 \value{
 data matrix with normalized values
 }
 \description{
-Normalizes signals (rows of data matrix) to unit area, unit length or unit sum
+Normalizes signals (rows of data matrix).
+}
+\details{
+The \code{"area"}, \code{"length"}, \code{"sum"} types do preprocessing to unit area (sum of
+absolute values), length or sum of all values in every row of data matrix. Type \code{"snv"}
+does the Standard Normal Variate normalization, similar to \code{\link{prep.snv}}. Type
+\code{"is"} does the normalization to internal standard peak, whose position is defined by
+parameter `col.ind`. If the position is a single value, the rows are normalized to the height
+of this peak. If `col.ind` points on several adjucent vales, the rows are normalized to the area
+under the peak - sum of the intensities.
 }

@@ -4,10 +4,10 @@
 \alias{prep.ref2km}
 \title{Kubelka-Munk transformation}
 \usage{
-prep.ref2km(spectra)
+prep.ref2km(data)
 }
 \arguments{
-\item{spectra}{a matrix with spectra values (absolute reflectance values)}
+\item{data}{a matrix with spectra values (absolute reflectance values)}
 }
 \value{
 preprocessed spectra.

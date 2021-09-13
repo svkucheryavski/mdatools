@@ -462,7 +462,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini,
 
       ## apply constraints to the resolved contributions
       for (cc in cont.constraints) {
-         Ct <- employ(cc, x = Ct, d = D)
+         Ct <- employ.constraint(cc, x = Ct, d = D)
       }
 
       ## resolve spectra
@@ -481,7 +481,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini,
 
       ## apply constraints to the resolved spectra
       for (sc in spec.constraints) {
-         St <- employ(sc, x = St, d = D)
+         St <- employ.constraint(sc, x = St, d = D)
       }
 
       if (verbose) {
@@ -489,7 +489,15 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini,
       }
 
       var_old <- var
-      var <- 1 - sum((D - tcrossprod(cont.solver(D, St), St))^2) / totvar
+      var <- tryCatch(
+         1 - sum((D - tcrossprod(cont.solver(D, St), St))^2) / totvar,
+         error = function(e) {
+            print(e)
+            stop("Unable to resolve the components, perhaps 'ncomp' is too large.\n
+               or initial estimates for spectra are not good enough.", call. = FALSE)
+         }
+      )
+
       if ( (var - var_old) < tol) {
          if (verbose) cat("No more improvements.\n")
          break

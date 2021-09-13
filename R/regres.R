@@ -407,7 +407,7 @@ plotResiduals.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
    show.lines = c(NA, 0), show.plot = TRUE, ...) {
 
    if (is.null(obj$y.ref)) {
-      stop("Y residuals can not be plotted without reference values.")
+      stop("Y-residuals can not be plotted without reference values.")
    }
 
    if (length(ny) != 1) {
@@ -420,8 +420,11 @@ plotResiduals.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
 
    plot_data <- cbind(obj$y.ref[, ny], obj$y.ref[, ny] - obj$y.pred[, ncomp, ny])
    plot_data <- mda.setattr(plot_data, mda.getattr(obj$y.pred))
-   colnames(plot_data) <- c(sprintf("%s, reference", obj$respnames[ny]), "Residuals")
-   attr(plot_data, "name") <- sprintf("Y residuals (ncomp = %d)", ncomp)
+   colnames(plot_data) <- c(
+      sprintf("%s, reference", obj$respnames[ny]),
+      sprintf("%s, residuals", obj$respnames[ny])
+   )
+   attr(plot_data, "name") <- sprintf("Y-residuals (ncomp = %d)", ncomp)
 
    if (!show.plot) {
       return(plot_data)
@@ -447,12 +450,14 @@ plotResiduals.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
 #' what to use as labels ("names", "values" or "indices")
 #' @param show.plot
 #' logical, show plot or just return plot data
+#' @param ylab
+#' label for y-axis
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
 #' @export
 plotRMSE.regres <- function(obj, ny = 1, type = "b", xticks = seq_len(obj$ncomp),
-   labels = "values", show.plot = TRUE, ...) {
+   labels = "values", show.plot = TRUE, ylab = paste0("RMSE (", obj$respnames[ny], ")"), ...) {
 
    if (is.null(obj$rmse)) {
       stop("RMSE values are not available.")
@@ -463,14 +468,13 @@ plotRMSE.regres <- function(obj, ny = 1, type = "b", xticks = seq_len(obj$ncomp)
    }
 
    plot_data <- mda.subset(obj$rmse, ny)
-   attr(plot_data, "yaxis.name") <- paste0("RMSE (", obj$respnames[ny], ")")
    attr(plot_data, "name") <- "RMSE"
 
    if (!show.plot) {
       return(plot_data)
    }
 
-   return(mdaplot(plot_data, type = type, xticks = xticks, labels = labels, ...))
+   return(mdaplot(plot_data, type = type, xticks = xticks, labels = labels, ylab = ylab, ...))
 }
 
 #' Plot method for regression results

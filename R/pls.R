@@ -946,6 +946,8 @@ plotYCumVariance.pls <- function(obj, type = "b", main = "Cumulative variance (Y
 #' what to show as labels for plot objects.
 #' @param res
 #' list with result objects to show the plot for (by defaul, model results are used)
+#' @param ylab
+#' label for y-axis
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -954,10 +956,10 @@ plotYCumVariance.pls <- function(obj, type = "b", main = "Cumulative variance (Y
 #'
 #' @export
 plotVariance.pls <- function(obj, decomp = "xdecomp", variance = "expvar", type = "b",
-   labels = "values", res = obj$res, ...) {
+   labels = "values", res = obj$res, ylab = "Explained variance, %", ...) {
 
    plot_data <- lapply(res, plotVariance, decomp = decomp, variance = variance, show.plot = FALSE)
-   mdaplotg(plot_data, labels = labels, type = type, ...)
+   mdaplotg(plot_data, labels = labels, type = type, ylab = ylab, ...)
 }
 
 #' X scores plot for PLS
@@ -1178,9 +1180,9 @@ plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, lo
 
    # make plot
    if (length(plot_data) == 1) {
-      mdaplot(plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, ...)
+      mdaplot(plot_data[[1]], type = "p", xlim = xlim, ylim = ylim, cgroup = cgroup, main = main, ...)
    } else {
-      mdaplotg(plot_data, type = "p", xlim = xlim, ylim = ylim, show.legend = show.legend,
+      mdaplotg(plot_data, type = "p", xlim = xlim, ylim = ylim, show.legend = show.legend, main = main,
          legend.position = legend.position, ...)
    }
 

@@ -11,6 +11,7 @@
   type = "b",
   labels = "values",
   res = obj$res,
+  ylab = "Explained variance, \%",
   ...
 )
 }
@@ -26,6 +27,8 @@
 \item{labels}{what to show as labels for plot objects.}
 
 \item{res}{list with result objects to show the plot for (by defaul, model results are used)}
+
+\item{ylab}{label for y-axis}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

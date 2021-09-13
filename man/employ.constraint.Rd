@@ -4,7 +4,7 @@
 \alias{employ.constraint}
 \title{Applies constraint to a dataset}
 \usage{
-\method{employ}{constraint}(obj, x, d)
+employ.constraint(obj, x, d, ...)
 }
 \arguments{
 \item{obj}{object with constraint}
@@ -12,6 +12,8 @@
 \item{x}{matrix with pure spectra or contributions}
 
 \item{d}{matrix with original spectral values}
+
+\item{...}{other arguments}
 }
 \description{
 Applies constraint to a dataset

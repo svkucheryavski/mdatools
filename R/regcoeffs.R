@@ -334,13 +334,15 @@ regcoeffs.getStats <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 #' @param alpha
 #' significance level for confidence intervals (a number between 0 and 1, e.g.
 #' for 95\% alpha = 0.05)
+#' @param ylab
+#' label for y-axis
 #' @param ...
 #' other arguments for plotting methods (e.g. main, xlab, etc)
 #'
 #' @export
 plot.regcoeffs <- function(x, ncomp = 1, ny = 1, type = (if (x$nvar > 30) "l" else "h"),
    col = c(mdaplot.getColors(1), "lightgray"), show.lines = c(NA, 0), show.ci = FALSE,
-   alpha = 0.05, ...) {
+   alpha = 0.05, ylab = paste0("Coefficients (", x$respnames[ny], ")"), ...) {
 
    if (length(ncomp) != 1) {
       stop("Parameter 'ncomp' should be just one value.")
@@ -365,21 +367,20 @@ plot.regcoeffs <- function(x, ncomp = 1, ny = 1, type = (if (x$nvar > 30) "l" el
 
    colnames(plot_data) <- rownames(x$values)
    attr(plot_data, "name") <- paste0("Regression coefficients (ncomp = ", ncomp, ")")
-   attr(plot_data, "yaxis.name") <- paste0("Coefficients (", x$respnames[ny], ")")
 
    if (!(show.ci && !is.null(x$se))) {
-      return(mdaplot(plot_data, col = col[1], type = type, show.lines = show.lines, ...))
+      return(mdaplot(plot_data, col = col[1], type = type, show.lines = show.lines, ylab = ylab, ...))
    }
 
    ci <- confint(x, ncomp = ncomp, ny = ny, level = 1 - alpha)
    if (type == "l") {
       return(
          mdaplot(mda.rbind(plot_data, mda.t(ci)), type = "l", col = col[c(2, 1, 1)],
-            show.lines = show.lines, ...)
+            show.lines = show.lines, ylab = ylab, ...)
       )
    }
 
    err <- (ci[, 2] - ci[, 1]) / 2
    mdaplotg(list(plot_data, mda.rbind(plot_data, err)), type = c(type, "e"), show.legend = FALSE,
-      col = col[c(2, 1)], show.grid = T, show.lines = show.lines, ...)
+      col = col[c(2, 1)], show.grid = T, show.lines = show.lines, ylab = ylab, ...)
 }

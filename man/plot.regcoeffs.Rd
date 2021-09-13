@@ -13,6 +13,7 @@
   show.lines = c(NA, 0),
   show.ci = FALSE,
   alpha = 0.05,
+  ylab = paste0("Coefficients (", x$respnames[ny], ")"),
   ...
 )
 }
@@ -34,6 +35,8 @@ show confidence intervals)}
 
 \item{alpha}{significance level for confidence intervals (a number between 0 and 1, e.g.
 for 95\% alpha = 0.05)}
+
+\item{ylab}{label for y-axis}
 
 \item{...}{other arguments for plotting methods (e.g. main, xlab, etc)}
 }

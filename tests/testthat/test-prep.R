@@ -65,6 +65,13 @@ test_that("SNV works correctly", {
    expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
    expect_equivalent(apply(pspectra, 1, mean), rep(0, nrow(spectra)))
    expect_equivalent(apply(pspectra, 1, sd), rep(1, nrow(spectra)))
+
+   spectra <- simdata$spectra.c
+   expect_silent(pspectra <- prep.norm(spectra, type = "snv"))
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equivalent(apply(pspectra, 1, mean), rep(0, nrow(spectra)))
+   expect_equivalent(apply(pspectra, 1, sd), rep(1, nrow(spectra)))
+
 })
 
 test_that("MSC works correctly", {
@@ -110,7 +117,38 @@ test_that("Normalization to unit length works correctly", {
    expect_equivalent(apply(pspectra, 1, function(x) sqrt(sum(x^2))), rep(1, nrow(pspectra)))
 })
 
+test_that("Normalization to unit sum works correctly", {
+   spectra <- simdata$spectra.c
+   expect_silent(pspectra <- prep.norm(spectra, "sum"))
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equivalent(apply(pspectra, 1, function(x) sum(x)), rep(1, nrow(pspectra)))
+})
 
+test_that("Normalization to IS peak works (one value)", {
+   spectra <- simdata$spectra.c
+
+   expect_error(prep.norm(spectra, "is"))
+   expect_error(prep.norm(spectra, "is", col.ind = -1))
+   expect_error(prep.norm(spectra, "is", col.ind = 1000))
+   expect_error(prep.norm(spectra, "is", col.ind = c(1, 1000)))
+   expect_error(prep.norm(spectra, "is", col.ind = c(-1, 100)))
+
+
+   col.ind <- 100
+   expect_silent(pspectra <- prep.norm(spectra, type = "is", col.ind))
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equivalent(apply(pspectra[, col.ind, drop = FALSE], 1, function(x) sum(x)), rep(1, nrow(pspectra)))
+
+   col.ind <- 100:110
+   expect_silent(pspectra <- prep.norm(spectra, type = "is", col.ind))
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equivalent(apply(pspectra[, col.ind, drop = FALSE], 1, function(x) sum(x)), rep(1, nrow(pspectra)))
+
+   col.ind <- 1:ncol(spectra)
+   pspectra1 <- prep.norm(spectra, type = "is", col.ind)
+   pspectra2 <- prep.norm(spectra, type = "sum")
+   expect_equivalent(pspectra1, pspectra2)
+})
 
 test_that("Kubelka-Munk works correctly", {
    spectra <- simdata$spectra.c
@@ -151,6 +189,22 @@ test_that("SavGol smoothing works correctly", {
    expect_error(pspectra <- prep.savgol(spectra, 3, 1,  2))
    expect_error(pspectra <- prep.savgol(spectra, 3, 2,  4))
 
+   # check that the derivatives are correct based on sin(x) and cos(x)
+   x <- pi * seq(-2.4, 2.4, by = 0.1)
+   y <- matrix(sin(x), nrow = 1)
+   zeros <- which((abs(y) < 10^-12))
+   ones <- which((abs(y) > 0.999999))
+
+   # first derivative should have zeros where original function has maximums
+   dy2 <- prep.savgol(y, 3, 1, 1)
+   expect_equal(dim(dy2), dim(y))
+   expect_equivalent(which((abs(dy2) < 10^-12)), ones)
+
+   # second derivative should have zeros where the original function has zeros
+   dy3 <- prep.savgol(y, 3, 2, 2)
+   expect_equal(dim(dy3), dim(y))
+   expect_equivalent(which((abs(dy3) < 10^-12)), zeros)
+
 })
 
 context("prep: alsbasecorr")
@@ -184,4 +238,197 @@ test_that("ALS baseline correction works correctly", {
    # third case is the best
    expect_true(err_after3 < err_after1)
    expect_true(err_after3 < err_after2)
+})
+
+context("prep: trasnform")
+
+test_that("Transformation works correctly", {
+   x <- -5:5
+   y <- cbind(exp(x), x^2)
+   colnames(y) <- c("Y1", "Y2")
+   attr(y, "yaxis.values") <- x
+   attr(y, "yaxis.name") <- "Time to sleep"
+
+   # errors
+
+   # normal behaviour no extra parameters
+   yp <- prep.transform(y, log)
+   expect_equal(dim(yp), dim(y))
+   expect_equal(colnames(yp), colnames(y))
+   expect_equal(rownames(yp), rownames(y))
+   expect_equal(mda.getattr(yp), mda.getattr(y))
+   expect_equivalent(yp, log(y))
+
+   # normal behaviour extra parameters
+   yp <- prep.transform(y, log, 2)
+   expect_equal(dim(yp), dim(y))
+   expect_equal(colnames(yp), colnames(y))
+   expect_equal(rownames(yp), rownames(y))
+   expect_equal(mda.getattr(yp), mda.getattr(y))
+   expect_equivalent(yp, log2(y))
+
+   # normal behaviour extra parameters user defined function
+   yp <- prep.transform(y, function(x, p) x^p, 1.25)
+   expect_equal(dim(yp), dim(y))
+   expect_equal(colnames(yp), colnames(y))
+   expect_equal(rownames(yp), rownames(y))
+   expect_equal(mda.getattr(yp), mda.getattr(y))
+   expect_equivalent(yp, y^1.25)
+
+});
+
+context("prep: varsel")
+
+test_that("Variable selection works correctly", {
+
+   checkprep <- function(x, xp, ind) {
+      expect_equal(ncol(xp), length(ind))
+      expect_equal(nrow(xp), nrow(x))
+      expect_equal(attr(xp, "yaxis.name"), attr(x, "yaxis.name"))
+      expect_equal(attr(xp, "yaxis.values"), attr(x, "yaxis.values"))
+      expect_equal(attr(xp, "xaxis.name"), attr(x, "xaxis.name"))
+      expect_equal(attr(xp, "xaxis.values"), attr(x, "xaxis.values")[ind])
+      expect_equal(attr(xp, "exclrows"), attr(x, "exclrows"))
+   }
+
+   x <- simdata$spectra.c
+   attr(x, "xaxis.values") <- simdata$wavelength
+   attr(x, "xaxis.name") <- "Wavelength, nm"
+   attr(x, "yaxis.values") <- seq_len(nrow(x)) * 10
+   attr(x, "yaxis.name") <- "Time, s"
+   x <- mda.exclrows(x, c(1, 20, 30, 70))
+
+   ind <- 21:140
+   expect_silent(xp <- prep.varsel(x, ind))
+   checkprep(x, xp, ind)
+
+   ind <- c(21:30, 130:140)
+   expect_silent(xp <- prep.varsel(x, ind))
+   checkprep(x, xp, ind)
+
+   ind <- rep(FALSE, ncol(x))
+   ind[21:140] <- TRUE
+   expect_silent(xp <- prep.varsel(x, ind))
+   checkprep(x, xp, which(ind))
+
+   ind <- rep(FALSE, ncol(x))
+   ind[c(11:20, 130:140)] <- TRUE
+   expect_silent(xp <- prep.varsel(x, ind))
+   checkprep(x, xp, which(ind))
+
+   # errors
+   x <- mda.exclcols(x, c(1, 150))
+   expect_error(xp <- prep.varsel(x, 20:140))
+
+});
+
+
+context("prep: combine methods together")
+
+test_that("List of available methods is shown corectly", {
+   expect_output(prep.list())
+})
+
+test_that("Errors are raised when necessary", {
+   expect_error(prep("varsel", var.ind = 50:150))
+   expect_error(prep("snv120"))
+})
+
+test_that("Method works with one preprocessing method in the list", {
+
+   x <- simdata$spectra.c
+   attr(x, "xaxis.values") <- simdata$wavelength
+   attr(x, "xaxis.name") <- "Wavelength, nm"
+   attr(x, "yaxis.values") <- seq_len(nrow(x)) * 10
+   attr(x, "yaxis.name") <- "Time, s"
+   x <- mda.exclrows(x, c(1, 20, 30, 70))
+
+   p <- list(
+      prep("savgol", list(width = 11, porder = 2, dorder = 1))
+   )
+
+   px1 <- employ.prep(p, x)
+   px2 <- prep.savgol(x, width = 11, porder = 2, dorder = 1)
+
+   expect_equal(px1, px2)
+   expect_equal(mda.getattr(px1), mda.getattr(x))
+   expect_equal(mda.getattr(px2), mda.getattr(x))
+})
+
+test_that("Method works with several preprocessing methods in the list", {
+
+   x <- simdata$spectra.c
+   attr(x, "xaxis.values") <- simdata$wavelength
+   attr(x, "xaxis.name") <- "Wavelength, nm"
+   attr(x, "yaxis.values") <- seq_len(nrow(x)) * 10
+   attr(x, "yaxis.name") <- "Time, s"
+   x <- mda.exclrows(x, c(1, 20, 30, 70))
+
+   p <- list(
+      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
+      prep("snv"),
+      prep("autoscale", list(center = TRUE, scale = TRUE))
+   )
+
+   px1 <- employ.prep(p, x)
+   px2 <- x
+   px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
+   px2 <- prep.snv(px2)
+   px2 <- prep.autoscale(px2, center = TRUE, scale = TRUE)
+
+   expect_equal(px1, px2)
+   expect_equal(mda.getattr(px1), mda.getattr(x))
+   expect_equal(mda.getattr(px2), mda.getattr(x))
+})
+
+test_that("Method works with preprocessing methods and varable selection", {
+
+   x <- simdata$spectra.c
+   attr(x, "xaxis.values") <- simdata$wavelength
+   attr(x, "xaxis.name") <- "Wavelength, nm"
+   attr(x, "yaxis.values") <- seq_len(nrow(x)) * 10
+   attr(x, "yaxis.name") <- "Time, s"
+   x <- mda.exclrows(x, c(1, 20, 30, 70))
+
+   p <- list(
+      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
+      prep("snv"),
+      prep("autoscale", list(center = TRUE, scale = TRUE)),
+      prep("varsel", list(var.ind = 50:130))
+   )
+
+   px1 <- employ.prep(p, x)
+   px2 <- x
+   px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
+   px2 <- prep.snv(px2)
+   px2 <- prep.autoscale(px2, center = TRUE, scale = TRUE)
+   px2 <- mda.subset(px2, select = 50:130)
+
+   expect_equal(px1, px2)
+   expect_equal(mda.getattr(px1), mda.getattr(px2))
+})
+
+
+test_that("Method works with user defined preprocessing method", {
+
+   x <- simdata$spectra.c
+   attr(x, "xaxis.values") <- simdata$wavelength
+   attr(x, "xaxis.name") <- "Wavelength, nm"
+   attr(x, "yaxis.values") <- seq_len(nrow(x)) * 10
+   attr(x, "yaxis.name") <- "Time, s"
+   x <- mda.exclrows(x, c(1, 20, 30, 70))
+
+   p <- list(
+      prep("r2a", method = function(data) log(1/abs(data))),
+      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
+      prep("snv")
+   )
+
+   px1 <- employ.prep(p, x)
+   px2 <- log(1/abs(x))
+   px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
+   px2 <- prep.snv(px2)
+
+   expect_equal(px1, px2)
+   expect_equal(mda.getattr(px1), mda.getattr(px2))
 })

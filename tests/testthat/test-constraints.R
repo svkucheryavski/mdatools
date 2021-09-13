@@ -8,21 +8,21 @@ context("mcrals: test implemented constrains")
 for (cl in getImplementedConstraints()) {
    test_that(sprintf("%s works correctly with default parameters", cl$name), {
       expect_silent(cn <- constraint(cl$name, cl$params))
-      expect_silent(Sr <- employ(cn, S, D))
+      expect_silent(Sr <- employ.constraint(cn, S, D))
       expect_true(is.matrix(Sr))
       expect_equal(dim(Sr), dim(S))
    })
 }
 
-#!############################
-#! Non-negativity constraint #
-#!############################
+#############################
+# Non-negativity constraint #
+#############################
 
 # add one of the existing constraints with default parameters
 test_that("Non-negativity constraint works correctly", {
    S[sample(1:length(S))[1:10]] <- -10
    cn <- constraint("nonneg")
-   Sr <- employ(cn, S, D)
+   Sr <- employ.constraint(cn, S, D)
    expect_equal(sum(Sr < 0), 0)
 })
 
@@ -30,14 +30,14 @@ test_that("Non-negativity constraint with user defined parameters (wrong)", {
    expect_error(cn <- constraint("non-negativity", params = list(type = "xxx")))
 })
 
-#!###########################
-#! Normalization constraint #
-#!###########################
+############################
+# Normalization constraint #
+############################
 
 # add one of the existing constraints with default parameters
 test_that("Normalization constraint works correctly", {
    cn <- constraint("norm")
-   Sr <- employ(cn, S, D)
+   Sr <- employ.constraint(cn, S, D)
 
    # all columns should have unit length
    expect_equivalent(colSums(Sr^2), rep(1, ncol(Sr)))
@@ -45,13 +45,13 @@ test_that("Normalization constraint works correctly", {
 
 test_that("Normalization constraint with user defined parameters (correct)", {
    cn <- constraint("norm", params = list(type = "area"))
-   Sr <- employ(cn, S, D)
+   Sr <- employ.constraint(cn, S, D)
 
    # all columns should have unit area
    expect_equivalent(colSums(abs(Sr)), rep(1, ncol(Sr)))
 
    cn <- constraint("norm", params = list(type = "sum"))
-   Sr <- employ(cn, S, D)
+   Sr <- employ.constraint(cn, S, D)
 
    # all columns should have unit sum
    expect_equivalent(colSums(Sr), rep(1, ncol(Sr)))
@@ -62,14 +62,14 @@ test_that("Normalization constraint with user defined parameters (wrong)", {
 })
 
 
-#!###################
-#! Angle constraint #
-#!###################
+####################
+# Angle constraint #
+####################
 
 # add one of the existing constraints with default parameters
 test_that("Angle constraint works correctly", {
    cn <- constraint("angle")
-   Sr <- employ(cn, S, D)
+   Sr <- employ.constraint(cn, S, D)
 
    # compute the expected values
    m <- apply(D, 2, mean)
@@ -83,13 +83,13 @@ test_that("Angle constraint works correctly", {
 
 test_that("Angle constraint with user defined parameters (correct)", {
    cn <- constraint("angle", params = list(weight = 0))
-   Sr <- employ(cn, S, D)
+   Sr <- employ.constraint(cn, S, D)
 
    # all columns should have unit length
    expect_equivalent(Sr, t(prep.norm(t(S), "length")))
 
    cn <- constraint("angle", params = list(weight = 1))
-   Sr <- employ(cn, S, D)
+   Sr <- employ.constraint(cn, S, D)
 
    # compute the expected values
    m <- apply(D, 2, mean)
@@ -103,9 +103,9 @@ test_that("Angle constraint with user defined parameters (wrong)", {
 })
 
 
-#!###############
-#! Unimodality  #
-#!###############
+################
+# Unimodality  #
+################
 
 # generate data with extra peaks
 x  <- 1:500
@@ -125,10 +125,10 @@ check_unimodality <- function(y, tol = 0) {
 
 test_that("Unimodality constraint works correctly", {
    cn1 <- constraint("unimod")
-   y.new1 <- employ(cn1, y, NULL)
+   y.new1 <- employ.constraint(cn1, y, NULL)
 
    cn2 <- constraint("unimod", params = list(tol = 0.2))
-   y.new2 <- employ(cn2, y, NULL)
+   y.new2 <- employ.constraint(cn2, y, NULL)
 
    expect_true(all(apply(y, 2, check_unimodality, tol = 0) > 0))
    expect_true(all(apply(y.new1, 2, check_unimodality, tol = 0) < 0.00000001))
@@ -136,9 +136,9 @@ test_that("Unimodality constraint works correctly", {
 })
 
 
-#!###############
-#! Closure      #
-#!###############
+################
+# Closure      #
+################
 
 # generate data with violation of the closure
 x  <- 1:50
@@ -150,10 +150,10 @@ y <- y + matrix(rnorm(length(y), 0, max(y) * 0.01), nrow(y), ncol(y))
 
 test_that("Closure constraint works correctly", {
    cn1 <- constraint("closure")
-   y.new1 <- employ(cn1, y, NULL)
+   y.new1 <- employ.constraint(cn1, y, NULL)
 
    cn2 <- constraint("closure", params = list(sum = 10))
-   y.new2 <- employ(cn2, y, NULL)
+   y.new2 <- employ.constraint(cn2, y, NULL)
 
    expect_true(length(unique(rowSums(y))) > 1)
    expect_true(all(abs(rowSums(y.new1) - 1) < 10^-8))
