@@ -1,3 +1,9 @@
+v. Coming
+========
+
+* added [PQN](https://doi.org/10.1021/ac051632c) normalization method to `prep.norm()` function.
+
+
 v.0.12.0
 ========
 This release is mostly about preprocessing - added some new methods, improved the existent once and implemented a possibility to combine preprocessing methods together (including parameter values) and apply them all together in a correct sequence. See [preprocessing section](https://mda.tools/docs/preprocessing.html) in the tutorials for details
