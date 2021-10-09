@@ -150,6 +150,41 @@ test_that("Normalization to IS peak works (one value)", {
    expect_equivalent(pspectra1, pspectra2)
 })
 
+test_that("PQN normalization works correctly", {
+   data(simdata)
+   spectra <- simdata$spectra.c
+   ref.spectrum1 <- apply(simdata$spectra.c[c(1, 20, 30, 80, 80, 100), ], 2, mean)
+   ref.spectrum2 <- apply(spectra, 2, mean)
+
+   expect_error(prep.norm(spectra, "pqn", ref.spectrum = 1))
+   expect_error(prep.norm(spectra, "pqn", ref.spectrum = ref.spectrum1[, 1:10, drop = FALSE]))
+
+   # manual preprocessing of spectra
+   ref.spectrum1 <- ref.spectrum1 / sum(abs(ref.spectrum1))
+   ref.spectrum2 <- ref.spectrum2 / sum(abs(ref.spectrum2))
+   pspectra2 <- pspectra1 <- matrix(0, nrow(spectra), ncol(spectra))
+
+   for (i in seq_len(nrow(spectra))) {
+      s <- spectra[i, ] / sum(abs(spectra[i, ]))
+
+      q1 <- s / ref.spectrum1
+      pspectra1[i, ] <- s / median(q1)
+
+      q2 <- s / ref.spectrum2
+      pspectra2[i, ] <- s / median(q2)
+   }
+
+   par(mfrow = c(2, 2))
+   mdaplot(prep.norm(spectra, type = "sum"), type = "l")
+   mdaplot(pspectra1, type = "l")
+   mdaplot(pspectra2, type = "l")
+   mdaplot(prep.norm(spectra, type = "pqn"), type = "l")
+
+   expect_equivalent(prep.norm(spectra, type = "pqn", ref.spectrum = ref.spectrum1), pspectra1)
+   expect_equivalent(prep.norm(spectra, type = "pqn", ref.spectrum = ref.spectrum2), pspectra2)
+   expect_equivalent(prep.norm(spectra, type = "pqn"), pspectra2)
+})
+
 test_that("Kubelka-Munk works correctly", {
    spectra <- simdata$spectra.c
    spectra <- spectra - min(spectra) + 0.01 * max(spectra)
