@@ -1,5 +1,7 @@
-v. Coming
-========
+v. 0.12.1
+=========
+
+* fixed a bug in `vipscores()` which could lead to a bit higher values for PLS2 models.
 
 * added [PQN](https://doi.org/10.1021/ac051632c) normalization method to `prep.norm()` function.
 
