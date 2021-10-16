@@ -1792,10 +1792,10 @@ vipscores <- function(obj, ncomp = obj$ncomp.selected) {
    weights <- obj$weights[, comp, drop = FALSE]
    yloads <- obj$yloadings[, comp, drop = FALSE];
 
-   # get eigenvalues and multiply them to degrees of freedom
+   # get eigenvalues
    xeigenvals <- obj$xeigenvals[comp]
 
-   # get number and indices of variables and adjust dimension for regcoeffs
+   # get number and indices of variables
    nvar <- nrow(weights)
    var_ind <- seq_len(nvar)
 
@@ -1808,12 +1808,12 @@ vipscores <- function(obj, ncomp = obj$ncomp.selected) {
    # prepare matrix for vipscores
    vipscores <- matrix(0, nrow = nvar, ncol = nrow(yloads))
 
-   # normalize scores
-   wnorm <- weights %*% diag(1 / sqrt(colSums(weights^2)), nrow = ncomp, ncol = ncomp)
+   # normalize weights
+   wnorm <- sweep(weights, 2, sqrt(colSums(weights^2)), "/")
 
    # compute sum of squares for explained y variance and normalize it
    ssq <- yloads^2 %*% diag(xeigenvals, nrow = ncomp, ncol = ncomp)
-   ssq <- ssq %*% diag(1 / rowSums(ssq), nrow = ncomp, ncol = ncomp)
+   ssq <- sweep(ssq, 1, rowSums(ssq), "/")
 
    # compute VIP scores
    vipscores[var_ind, ] <- sqrt(nvar * wnorm^2 %*% t(ssq))
