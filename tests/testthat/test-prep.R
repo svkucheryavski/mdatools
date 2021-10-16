@@ -174,11 +174,11 @@ test_that("PQN normalization works correctly", {
       pspectra2[i, ] <- s / median(q2)
    }
 
-   par(mfrow = c(2, 2))
-   mdaplot(prep.norm(spectra, type = "sum"), type = "l")
-   mdaplot(pspectra1, type = "l")
-   mdaplot(pspectra2, type = "l")
-   mdaplot(prep.norm(spectra, type = "pqn"), type = "l")
+   # par(mfrow = c(2, 2))
+   # mdaplot(prep.norm(spectra, type = "sum"), type = "l")
+   # mdaplot(pspectra1, type = "l")
+   # mdaplot(pspectra2, type = "l")
+   # mdaplot(prep.norm(spectra, type = "pqn"), type = "l")
 
    expect_equivalent(prep.norm(spectra, type = "pqn", ref.spectrum = ref.spectrum1), pspectra1)
    expect_equivalent(prep.norm(spectra, type = "pqn", ref.spectrum = ref.spectrum2), pspectra2)

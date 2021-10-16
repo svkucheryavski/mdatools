@@ -108,7 +108,7 @@ prep.snv <- function(data) {
 #' @param data
 #' a matrix with data values
 #' @param type
-#' type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, \code{"is"}, or \code("pqn").
+#' type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, \code{"is"}, or \code{"pqn"}.
 #' @param col.ind
 #' indices of columns (can be either integer or logical valuws) for normalization to internal
 #' standard peak.

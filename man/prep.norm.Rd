@@ -9,7 +9,7 @@ prep.norm(data, type = "area", col.ind = NULL, ref.spectrum = NULL)
 \arguments{
 \item{data}{a matrix with data values}
 
-\item{type}{type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, or \code{"is"}.}
+\item{type}{type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, \code{"is"}, or \code{"pqn"}.}
 
 \item{col.ind}{indices of columns (can be either integer or logical valuws) for normalization to internal
 standard peak.}
