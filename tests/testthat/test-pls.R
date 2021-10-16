@@ -479,6 +479,19 @@ test_that("vipscores for people data (A = 4) identical to once computed in MATLA
    expect_equivalent(vipscores(m, ncomp = 4), as.matrix(vip), tolerance = 10^-4)
 })
 
+test_that("vipscores for people data (A = 4) identical to once computed in MATLAB for PLS2", {
+   data(people)
+   X <- people[, -c(4, 6)]
+   Y <- people[,  c(4, 6)]
+   m <- pls(X, Y, 8, center = TRUE, scale = TRUE, cv = 1)
+
+   f <- system.file("testdata", "pls2-vipscores.csv", package = "mdatools")
+   vip <- read.csv(f, header = FALSE)[[1]]
+   #dim(vip) <- c(ncol(X), 2)
+
+   expect_equivalent(vipscores(m, ncomp = 4), matrix(vip, ncol = 2), tolerance = 10^-4)
+})
+
 
 ######################################
 # Block 6. Tests selratio()  method  #
@@ -523,13 +536,6 @@ for (i in seq_along(datasets)) {
    print(v)
 }
 
-#test_that("vipscores for people data (A = 4) identical to once computed in MATLAB", {
-#   d <- datasets[[1]]
-#   m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
-#
-#   vip <- as.matrix(read.csv("../matlab/pls-vipscores.csv", header = FALSE))
-#   expect_equivalent(vipscores(m, ncomp = 4), vip, tolerance = 10^-4)
-#})
 
 #########################################
 # Block 7. Tests for outlier detection  #
