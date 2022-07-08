@@ -1478,6 +1478,78 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
    nresp <- ncol(y)
 
    # initial estimation
+   S <- crossprod(x, y)
+   M <- crossprod(x)
+   C <- diag(1, npred, npred)
+
+   # prepare space for results
+   B <- array(0, dim = c(npred, ncomp, nresp))
+   R <- matrix(0, nrow = npred, ncol = ncomp)
+   P <- matrix(0, nrow = npred, ncol = ncomp)
+   Q <- matrix(0, nrow = nresp, ncol = ncomp)
+
+
+   # loop for each components
+   for (a in seq_len(ncomp)) {
+
+      r <- svd(S, nu = 1, nv = 0)$u
+      t <- x %*% r
+
+      tnorm <- sqrt(sum(t * t))
+      t <- t / tnorm
+      r <- r / tnorm
+
+      q <- crossprod(S, r)
+      p <- M %*% r
+      v <- C %*% p
+      v <- v / sqrt(sum(v * v))
+
+      R[, a] <- r
+      Q[, a] <- q
+      P[, a] <- p
+
+      # coefficients are computed for each a from 1 to A
+      B[, a, ] <- tcrossprod(R[, seq_len(a), drop = FALSE], Q[, seq_len(a), drop = FALSE])
+
+      C <- C - tcrossprod(v)
+      M <- M - tcrossprod(p)
+      S <- C %*% S
+   }
+
+   return(list(coeffs = B, weights = R, xloadings = P, yloadings = Q, ncomp = a))
+}
+
+#' SIMPLS algorithm (old implementation)
+#'
+#' @description
+#' SIMPLS algorithm for calibration of PLS model (old version)
+#'
+#' @param x
+#' a matrix with x values (predictors)
+#' @param y
+#' a matrix with y values (responses)
+#' @param ncomp
+#' number of components to calculate
+#' @param cv
+#' logical, is model calibrated during cross-validation or not
+#'
+#' @return
+#' a list with computed regression coefficients, loadings and scores for x and y matrices,
+#' and weights.
+#'
+#' @references
+#' [1]. S. de Jong. SIMPLS: An Alternative approach to partial least squares regression.
+#' Chemometrics and Intelligent Laboratory Systems, 18, 1993 (251-263).
+#'
+pls.simplsold <- function(x, y, ncomp, cv = FALSE) {
+
+   x <- as.matrix(x)
+   y <- as.matrix(y)
+
+   npred <- ncol(x)
+   nresp <- ncol(y)
+
+   # initial estimation
    A <- crossprod(x, y)
    M <- crossprod(x, x)
    C <- diag(npred)
