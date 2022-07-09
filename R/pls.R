@@ -505,6 +505,161 @@ setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
    return(obj)
 }
 
+#' Compute predictions for response values
+#'
+#' @param x
+#' matrix with predictors, already preprocessed (e.g. mean centered) and cleaned
+#' @param coeffs
+#' array with regression coefficients
+#' @param ycenter
+#' `ycenter` property of PLS model
+#' @param yscale
+#' `yscale` property of PLS model
+#' @param ynames
+#' vector with names of the responses
+#' @param y.attrs
+#' list with response attributes (e.g. from reference values if any)
+#' @param objnames
+#' vector with names of objects (rows of x)
+#' @param compnames
+#' vector with names used for components
+#'
+#' @return array with predicted y-values
+pls.getpredictions <- function(x, coeffs, ycenter, yscale, ynames = NULL, y.attrs = NULL, objnames = NULL, compnames = NULL) {
+
+   yp <- apply(coeffs, 3, function(x, y)(y %*% x), x)
+   dim(yp) <- c(nrow(x), dim(coeffs)[2], dim(coeffs)[3])
+
+   # unscale predicted y values
+   yp <- if (is.numeric(yscale)) sweep(yp, 3, yscale, "*") else yp
+
+   # uncenter predicted y values
+   yp <- if (is.numeric(ycenter)) sweep(yp, 3, ycenter, "+") else yp
+
+   # set up all attributes and names
+   yp <- mda.setattr(yp, y.attrs, "row")
+   attr(yp, "name") <- "Response values, predicted"
+   dimnames(yp) <- list(objnames, compnames, ynames)
+
+   return (yp)
+}
+
+#' Compute object with decomposition of y-values
+#'
+#' @param y
+#' matrix with responses, already preprocessed (e.g. mean centered) and cleaned
+#' @param yscores
+#' matrix with Y-scores
+#' @param xscores
+#' matrix with X-scores
+#' @param yloadings
+#' matrix with Y-loadings
+#' @param yeigenvals
+#' matrix with eigenvalues for Y
+#' @param ynames
+#' vector with names of the responses
+#' @param y.attrs
+#' list with response attributes (e.g. from reference values if any)
+#' @param x.attrs
+#' list with preditors attributes
+#' @param objnames
+#' vector with names of objects (rows of x)
+#' @param compnames
+#' vector with names used for components
+#'
+#' @return array `ldecomp` object for y-values (or NULL if y is not provided)
+pls.getydecomp <- function(y, yscores, xscores, yloadings, yeigenvals, ynames = NULL, y.attrs = NULL, x.attrs = NULL, objnames = NULL, compnames = NULL) {
+
+   # if reference y-values are not provided, no ydecomp can be computed
+   if (is.null(y)) return (NULL)
+
+   # compute resuduals
+   yresiduals <- y - tcrossprod(xscores, yloadings)
+
+   # set names
+   rownames(yscores) <- rownames(yresiduals) <- objnames
+   colnames(yscores) <- compnames
+   colnames(yresiduals) <- ynames
+
+   # set attributes
+   yscores <- mda.setattr(yscores, y.attrs, "row")
+   yresiduals <- mda.setattr(yresiduals, y.attrs)
+
+   # set attributes
+   yscores <- mda.setattr(yscores, x.attrs, "row")
+   yresiduals <- mda.setattr(yresiduals, y.attrs)
+
+
+   # attr(yscores, "exclrows") <- attr(yresiduals, "exclrows") <- y.attrs$exclrows
+   attr(yscores, "name") <- "Y-scores"
+   attr(yscores, "xaxis.name") <- "Components"
+   attr(yresiduals, "name") <- "Residuals"
+
+   # create ydecomp object (we use xscores as residuals for different components are computed
+   # as xscores %*% t(yloadings)), but then we assign correct residuals
+   ydecomp <- ldecomp(scores = xscores, loadings = yloadings, residuals = yresiduals, eigenvals = yeigenvals)
+   ydecomp$scores <- yscores
+
+   return (ydecomp)
+}
+
+#' Compute object with decomposition of x-values
+#'
+#' @param x
+#' matrix with predictors, already preprocessed (e.g. mean centered) and cleaned
+#' @param xscores
+#' matrix with X-scores
+#' @param xloadings
+#' matrix with X-loadings
+#' @param xeigenvals
+#' matrix with eigenvalues for X
+#' @param xnames
+#' vector with names of the predictors
+#' @param x.attrs
+#' list with preditors attributes
+#' @param objnames
+#' vector with names of objects (rows of x)
+#' @param compnames
+#' vector with names used for components
+#'
+#' @return array `ldecomp` object for x-values
+pls.getxdecomp <- function(x, xscores, xloadings, xeigenvals, xnames = NULL, x.attrs = NULL, objnames = NULL, compnames = NULL) {
+
+   # compute x-residuals
+   xresiduals <- x - tcrossprod(xscores, xloadings)
+
+   # set attributes
+   xscores <- mda.setattr(xscores, x.attrs, "row")
+   xresiduals <- mda.setattr(xresiduals, x.attrs)
+   attr(xscores, "name") <- "X-scores"
+   attr(xscores, "xaxis.name") <- "Components"
+   attr(xresiduals, "name") <- "Residuals"
+
+   # set names
+   rownames(xscores) <- rownames(xresiduals) <- objnames
+   colnames(xscores) <- compnames
+   colnames(xresiduals) <- xnames
+
+   # create and return xdecomp object
+   xdecomp <- ldecomp(scores = xscores, residuals = xresiduals, loadings = xloadings, eigenvals = xeigenvals)
+   return (xdecomp)
+}
+
+#' Compute matrix with X-scores
+#'
+#' @param x
+#' matrix with predictors, already preprocessed and cleaned
+#' @param weights
+#' matrix with PLS weights
+#' @param  xloadings
+#' matrix with X-loadings
+#'
+#' @return matrix with X-scores
+pls.getxscores <- function(x, weights, xloadings) {
+   xscores <- x %*% (weights %*% solve(crossprod(xloadings, weights)))
+}
+
+
 #' PLS predictions
 #'
 #' @description
@@ -533,11 +688,11 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
    # get names
    prednames <- rownames(object$xloadings)
    respnames <- rownames(object$yloadings)
+   compnames <- colnames(object$xloadings)
    objnames <- rownames(x)
 
    # preprocess x and calculate scores, total and full variance
    x.attrs <- mda.getattr(x)
-   y.attrs <- mda.getattr(y)
 
    # set names for y-axis (rows if it is empty)
    if (is.null(x.attrs$yaxis.name)) {
@@ -559,29 +714,30 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
    # autoscale x
    x <- prep.autoscale(x, center = object$xcenter, scale = object$xscale)
 
-   # compute x scores and residuals
-   xscores <- x %*% (object$weights %*% solve(crossprod(object$xloadings, object$weights)))
-   xresiduals <- x - tcrossprod(xscores, object$xloadings)
+   # get predicted y-values
+   yp <- pls.getpredictions(x, object$coeffs$values, object$ycenter, object$yscale, respnames, x.attrs, objnames, compnames)
 
-   # set attributes
-   xscores <- mda.setattr(xscores, x.attrs, "row")
-   xresiduals <- mda.setattr(xresiduals, x.attrs)
-   attr(xscores, "name") <- "X-scores"
-   attr(xscores, "xaxis.name") <- "Components"
-   attr(xresiduals, "name") <- "Residuals"
+   # if predictions for cross-validation - return
+   if (cv) {
+      return(list(y.pred = yp))
+   }
 
-   # set names
-   rownames(xscores) <- rownames(xresiduals) <- objnames
-   colnames(xscores) <- colnames(object$xloadings)
-   colnames(xresiduals) <- prednames
+   # compute xdecomp
+   xscores <- pls.getxscores(x, object$weights, object$xloadings)
+   xdecomp <- pls.getxdecomp(x, xscores, object$xloadings, object$xeigenvals, prednames, x.attrs, objnames, compnames)
+   xdecomp$ncomp.selected <- object$ncomp.selected
 
-   # make predictions
-   yp <- apply(object$coeffs$values, 3, function(x, y)(y %*% x), x)
-   dim(yp) <- c(nrow(x), ncomp, dim(object$coeffs$values)[3])
+   # add u0 and Nu parameters as arguments, so the orthogonal distance values can be normalized
+   attr(xdecomp$Q, "u0") <- object$Qlim[3, ]
+   attr(xdecomp$Q, "Nu") <- object$Qlim[4, ]
 
-   # if reference values are provided calculate and set up names for ydecomp
-   y.ref <- NULL
+   # add u0 and Nu parameters as arguments, so the score distance values can be normalized
+   attr(xdecomp$T2, "u0") <- object$T2lim[3, ]
+   attr(xdecomp$T2, "Nu") <- object$T2lim[4, ]
+
+   # compute ydecomp if y-values are provided
    ydecomp <- NULL
+   y.ref <- y
    if (!is.null(y)) {
 
       if (is.null(dim(y))) dim(y) <- c(length(y), 1)
@@ -594,80 +750,24 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
          stop("Wrong number of columns in matrix with response values (y).")
       }
 
-      # keep the original y values as reference
-      y.ref <- y
+      y.attrs <- mda.getattr(y)
+      y.attrs$exclrows <- x.attrs$exclrows
 
       # autoscale y-values
       y <- prep.autoscale(y, center = object$ycenter, scale = object$yscale)
-
-      # compute and orthogonalize y-scores
       yscores <- as.matrix(y) %*% object$yloadings
-      for (a in seq_len(ncomp)) {
-         for (n in 1:2) {
-            for (j in seq_len(a - 1)) {
-               yscores[, a] <- yscores[, a] -
-                  tcrossprod(xscores[, j], yscores[, a]) %*% xscores[, j]
-            }
-         }
-      }
 
-      # compute y-residuals
-      yresiduals <- y - yp[, ncomp, ]
+      # below we use xdecomp$scores instead of xscores to provide all names and attributes
+      ydecomp <- pls.getydecomp(y, yscores, xdecomp$scores, object$yloadings, object$yeigenvals,
+         respnames, y.attrs, x.attrs, objnames, compnames)
+      ydecomp$ncomp.selected <- object$ncomp.selected
 
-      # set names
-      rownames(yscores) <- rownames(yresiduals) <- objnames
-      colnames(yscores) <- colnames(object$yloadings)
-      colnames(yresiduals) <- respnames
-
-      # set attributes
-      yscores <- mda.setattr(yscores, x.attrs, "row")
-      yresiduals <- mda.setattr(yresiduals, y.attrs)
-      attr(yscores, "exclrows") <- attr(yresiduals, "exclrows") <- x.attrs$exclrows
-      attr(yscores, "name") <- "Y-scores"
-      attr(yscores, "xaxis.name") <- "Components"
-      attr(yresiduals, "name") <- "Residuals"
-
-      # create ydecomp object (we use xscores as residuals for different components are computed
-      # as xscores %*% t(yloadings)), but then we assign correct residuals
-      ydecomp <- ldecomp(scores = xscores, loadings = object$yloadings, residuals = yresiduals,
-            eigenvals = object$yeigenvals, ncomp.selected = object$ncomp.selected)
-      ydecomp$scores <- yscores
+      # add u0 and Nu parameters as arguments, so the z-distance values can be normalized
       attr(ydecomp$Q, "u0") <- object$Zlim[3, ]
       attr(ydecomp$Q, "Nu") <- object$Zlim[4, ]
    }
 
-   # unscale predicted y values
-   yp <- if (is.numeric(object$yscale)) sweep(yp, 3, object$yscale, "*") else yp
-
-   # uncenter predicted y values
-   yp <- if (is.numeric(object$ycenter)) sweep(yp, 3, object$ycenter, "+") else yp
-
-   # if predictions for cross-validation - return
-   if (cv) {
-      return(list(y.pred = yp))
-   }
-
-   # set up all attributes and names
-   yp <- mda.setattr(yp, x.attrs, "row")
-   attr(yp, "exclrows") <- x.attrs$exclrows
-   attr(yp, "name") <- "Response values, predicted"
-   dimnames(yp) <- c(list(rownames(x)), dimnames(object$coeffs$values)[2:3])
-
-   # create xdecomp object
-   xdecomp <- ldecomp(scores = xscores, residuals = xresiduals, loadings = object$xloadings,
-      eigenvals = object$xeigenvals, ncomp.selected = object$ncomp.selected)
-
-   # add u0 and Nu parameters as arguments, so the residuals can be normalized
-   attr(xdecomp$Q, "u0") <- object$Qlim[3, ]
-   attr(xdecomp$Q, "Nu") <- object$Qlim[4, ]
-
-   attr(xdecomp$T2, "u0") <- object$T2lim[3, ]
-   attr(xdecomp$T2, "Nu") <- object$T2lim[4, ]
-
-   return(
-      plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected,
-         xdecomp = xdecomp, ydecomp = ydecomp)
-   )
+   return (plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, xdecomp = xdecomp, ydecomp = ydecomp))
 }
 
 #' Categorize data rows based on PLS results and critical limits for total distance.
@@ -1474,6 +1574,7 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
    x <- as.matrix(x)
    y <- as.matrix(y)
 
+   nobj  <- nrow(x)
    npred <- ncol(x)
    nresp <- ncol(y)
 
@@ -1487,6 +1588,8 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
    R <- matrix(0, nrow = npred, ncol = ncomp)
    P <- matrix(0, nrow = npred, ncol = ncomp)
    Q <- matrix(0, nrow = nresp, ncol = ncomp)
+   T <- matrix(0, nrow = nobj, ncol = ncomp)
+   U <- matrix(0, nrow = nobj, ncol = ncomp)
 
 
    # loop for each components
@@ -1499,14 +1602,18 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
       t <- t / tnorm
       r <- r / tnorm
 
-      q <- crossprod(S, r)
       p <- M %*% r
       v <- C %*% p
       v <- v / sqrt(sum(v * v))
 
+      q <- crossprod(S, r)
+      u <- y %*% q
+
       R[, a] <- r
       Q[, a] <- q
       P[, a] <- p
+      T[, a] <- t
+      U[, a] <- u
 
       # coefficients are computed for each a from 1 to A
       B[, a, ] <- tcrossprod(R[, seq_len(a), drop = FALSE], Q[, seq_len(a), drop = FALSE])
@@ -1516,7 +1623,7 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
       S <- C %*% S
    }
 
-   return(list(coeffs = B, weights = R, xloadings = P, yloadings = Q, ncomp = a))
+   return(list(coeffs = B, weights = R, xloadings = P, xscores = T, yloadings = Q, yscores = U, ncomp = a))
 }
 
 #' SIMPLS algorithm (old implementation)
@@ -1738,7 +1845,7 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
    # correct maximum number of components
    ncomp <- min(xc.ncols, xc.nrows - 1 - nobj.cv, ncomp)
 
-   # fit model
+   # fit the model
    fit <- pls.run(x, y, method = method, ncomp = ncomp, cv = cv)
    model$ncomp <- ncomp <- fit$ncomp
 
@@ -1750,14 +1857,11 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
       return(model)
    }
 
-   # compute x-scores and residuals
-   xscores <- x %*% (fit$weights %*% solve(crossprod(fit$xloadings, fit$weights)))
-   yscores <- as.matrix(y) %*% fit$yloadings
 
    # compute eigenvalues
-   xeigenvals <- colSums(xscores^2) / (xc.nrows - 1)
+   xeigenvals <- colSums(fit$xscores^2) / (xc.nrows - 1)
    attr(xeigenvals, "DoF") <- (xc.nrows - 1)
-   yeigenvals <- colSums(yscores^2) / (xc.nrows - 1)
+   yeigenvals <- colSums(fit$yscores^2) / (xc.nrows - 1)
    attr(yeigenvals, "DoF") <- (xc.nrows - 1)
 
    # correct results related to predictors for missing columns in x
