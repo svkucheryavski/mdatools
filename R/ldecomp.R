@@ -431,35 +431,21 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
       residuals <- residuals[, -cols_excluded, drop = FALSE]
    }
 
-   # get rid of hidden scores and residuals (needed for some calculations)
-   scores_visible <- scores
-   residuals_visible <- residuals
-   if (length(rows_excluded) > 0) {
-      scores_visible <- scores_visible[-rows_excluded, , drop = FALSE]
-      residuals_visible <- residuals_visible[-rows_excluded, , drop = FALSE]
+   # helper function to compute orthogonal distances for given number of components in a model
+   getResiduals <- function(scores, loadings, residuals, a) {
+      ncomp <- ncol(scores)
+      if (a == ncomp) return(residuals)
+
+      residuals + tcrossprod(
+         scores[, (a + 1):ncomp, drop = FALSE],
+         loadings[, (a + 1):ncomp, drop = FALSE]
+      )
    }
 
-   # normalize the scores
-   scoresn <- scale(scores, center = FALSE, scale = sqrt(eigenvals))
-
-   # prepare zero matrices for the and model power
-   T2 <- matrix(0, nrow = nobj, ncol = ncomp)
-   Q <- matrix(0, nrow = nobj, ncol = ncomp)
-
-   # calculate distances and model power for each possible number of components in model
-   for (i in seq_len(ncomp)) {
-      res <- residuals
-      if (i < ncomp) {
-         res <- res +
-            tcrossprod(
-               scores[, (i + 1):ncomp, drop = F],
-               loadings[, (i + 1):ncomp, drop = F]
-            )
-      }
-
-      Q[, i] <- rowSums(res^2)
-      T2[, i] <- rowSums(scoresn[, seq_len(i), drop = F]^2)
-   }
+   # compute matrices with orthogonal and score distances
+   Q <- sapply(seq_len(ncomp), function(a) rowSums(getResiduals(scores, loadings, residuals, a)^2))
+   T2 <- t(apply(scale(scores^2, center = FALSE, scale = eigenvals), 1, cumsum))
+   dim(T2) <- c(nobj, ncomp)
 
    # set attributes for Q
    Q <- mda.setattr(Q, mda.getattr(scores), type = "row")
