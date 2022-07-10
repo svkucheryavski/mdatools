@@ -659,7 +659,19 @@ pls.getxscores <- function(x, weights, xloadings) {
    xscores <- x %*% (weights %*% solve(crossprod(xloadings, weights)))
 }
 
+pls.getyscores <- function(y, yloadings, xscores) {
 
+   ncomp <- ncol(yloadings)
+   yscores <- as.matrix(y) %*% yloadings
+   if (ncomp < 2) return(yscores)
+
+   # orthogonalize
+   for (a in 2:ncomp) {
+      yscores[, a] <- yscores[, a] - xscores[, 1:(a-1), drop = FALSE] %*% crossprod(xscores[, 1:(a-1), drop = FALSE], yscores[, a])
+   }
+
+   return (yscores)
+}
 #' PLS predictions
 #'
 #' @description
@@ -755,7 +767,7 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 
       # autoscale y-values
       y <- prep.autoscale(y, center = object$ycenter, scale = object$yscale)
-      yscores <- as.matrix(y) %*% object$yloadings
+      yscores <- pls.getyscores(as.matrix(y), object$yloadings, xscores)
 
       # below we use xdecomp$scores instead of xscores to provide all names and attributes
       ydecomp <- pls.getydecomp(y, yscores, xdecomp$scores, object$yloadings, object$yeigenvals,
@@ -1581,15 +1593,12 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
    # initial estimation
    S <- crossprod(x, y)
    M <- crossprod(x)
-   C <- diag(1, npred, npred)
 
    # prepare space for results
    B <- array(0, dim = c(npred, ncomp, nresp))
-   R <- matrix(0, nrow = npred, ncol = ncomp)
-   P <- matrix(0, nrow = npred, ncol = ncomp)
    Q <- matrix(0, nrow = nresp, ncol = ncomp)
-   T <- matrix(0, nrow = nobj, ncol = ncomp)
-   U <- matrix(0, nrow = nobj, ncol = ncomp)
+   R <- V <- P <- matrix(0, nrow = npred, ncol = ncomp)
+   T <- U <- matrix(0, nrow = nobj, ncol = ncomp)
 
 
    # loop for each components
@@ -1602,25 +1611,30 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
       t <- t / tnorm
       r <- r / tnorm
 
-      p <- M %*% r
-      v <- C %*% p
+      p <- crossprod(x, t)
+      q <- crossprod(y, t)
+      u <- y %*% q
+      v <- p
+
+      if (a > 1) {
+         v <- v - V %*% crossprod(V, p)
+         u <- u - T %*% crossprod(T, u)
+      }
+
       v <- v / sqrt(sum(v * v))
 
-      q <- crossprod(S, r)
-      u <- y %*% q
-
       R[, a] <- r
-      Q[, a] <- q
+      V[, a] <- v
       P[, a] <- p
       T[, a] <- t
       U[, a] <- u
+      Q[, a] <- q
 
       # coefficients are computed for each a from 1 to A
       B[, a, ] <- tcrossprod(R[, seq_len(a), drop = FALSE], Q[, seq_len(a), drop = FALSE])
 
-      C <- C - tcrossprod(v)
       M <- M - tcrossprod(p)
-      S <- C %*% S
+      S <- S - v %*% crossprod(v, S)
    }
 
    return(list(coeffs = B, weights = R, xloadings = P, xscores = T, yloadings = Q, yscores = U, ncomp = a))
