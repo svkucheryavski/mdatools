@@ -591,3 +591,55 @@ test_that("XY-residual limits are computed correctly", {
    expect_equal(sum(c2 == "outlier"), 2)
 
 })
+
+test_that("PLS gives results comparable to other software", {
+
+   # read model parameters and calibration scores made in PLS_Toolbox
+   xscores <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xscores.csv", sep = " ", header = FALSE))
+   yscores <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-yscores.csv", sep = " ", header = FALSE))
+   weights <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-weights.csv", sep = " ", header = FALSE))
+   xloadings <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xloadings.csv", sep = " ", header = FALSE))
+   yloadings <- c(5.3643, 1.0338, 0.4675, 0.3567)
+   coeffs <- c(0.2078, 0.2647, 0.0073, 0.0722, -0.0016, 0.1829, 0.1420, -0.1984, 0.2153, 0.0151, -0.0405)
+
+   # make a model
+   data(people)
+   X <- people[, -4]
+   y <- people[, 4, drop = FALSE]
+   m <- pls(X, y, 4, scale = TRUE, cv = list("ven", 10))
+
+   # compare main model parameters
+   # here we re-normalize results from PLS_Toolbox
+   xnorm <- sqrt(colSums(xscores^2))
+   expect_equivalent(m$xloadings, xloadings %*% diag(xnorm), tolerance = 10^-3)
+   expect_equivalent(m$res$cal$xdecomp$scores, xscores %*% diag(1/xnorm), tolerance = 10^-3)
+   expect_equivalent(m$weights, weights %*% diag(1/xnorm), tolerance = 10^-3)
+
+   expect_equivalent(m$yloadings, yloadings, tolerance = 10^-4)
+   expect_equivalent(m$coeffs$values[, 4, 1], coeffs, tolerance = 10^-4)
+
+   # check selectivity ratio
+   # here we change the result from PLS toolbox a bit for large values as they add
+   # given portion of x-variance when compute SR
+   sr <- c(24.8, 21.7, 2.2359, 0.1179, 0.1552, 0.9740, 0.0076, 5.9018, 10.0, 0.0256, 0.0138)
+   expect_equivalent(selratio(m), sr, tolerance = 10^-1)
+
+   # compare calibration results
+   ypred <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-ypred.csv", sep = " ", header = FALSE))
+   xqdist <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xqdist.csv", sep = " ", header = FALSE))
+   xhdist <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xhdist.csv", sep = " ", header = FALSE))
+   yqdist <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-yqdist.csv", sep = " ", header = FALSE))
+   rmsec <- c(1.0273, 0.7404, 0.6668, 0.6198)
+   r2c <- c(0.9283, 0.9627, 0.9698, 0.9739)
+
+   expect_equivalent(m$res$cal$xdecomp$T2[, 4], xhdist, tolerance = 10^-3)
+   expect_equivalent(m$res$cal$xdecomp$Q[, 4], xqdist, tolerance = 10^-3)
+
+   expect_equivalent(m$res$cal$ydecomp$Q[, 4], yqdist, tolerance = 10^-3)
+   expect_equivalent(m$res$cal$ydecomp$scores, yscores, tolerance = 10^-4)
+   expect_equivalent(m$res$cal$y.pred[, 4, 1], ypred, tolerance = 10^-4)
+
+   expect_equivalent(m$res$cal$rmse, rmsec, tolerance = 10^-3)
+   expect_equivalent(m$res$cal$r2, r2c, tolerance = 10^-3)
+
+})

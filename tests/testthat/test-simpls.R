@@ -57,7 +57,6 @@ expected = list(
 )
 
 test_that("new algorithm works correctly", {
-
    res <- simpls2res(pls.simpls(X, Y, A), X, Y, A)
 
    expect_equivalent(abs(res$R), abs(expected$R), tolerance = 10^-4)
@@ -67,7 +66,6 @@ test_that("new algorithm works correctly", {
 })
 
 test_that("old algorithm works correctly", {
-
    res <- simpls2res(pls.simplsold(X, Y, A), X, Y, A)
 
    expect_equivalent(abs(res$R), abs(expected$R), tolerance = 10^-4)
@@ -85,3 +83,30 @@ test_that("new algorithm is more numerically stable", {
    expect_silent(pls.simpls(Xr, Yr / 100000000, 50))
 })
 
+
+test_that("new algorithm gives results comparable to other software", {
+
+   # read model parameters made in PLS_Toolbox
+   weights <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-weights.csv", sep = " ", header = FALSE))
+   xloadings <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xloadings.csv", sep = " ", header = FALSE))
+   xscores <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xscores.csv", sep = " ", header = FALSE))
+   yscores <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-yscores.csv", sep = " ", header = FALSE))
+   yloadings <- c(5.3643, 1.0338, 0.4675, 0.3567)
+   coeffs <- c(0.2078, 0.2647, 0.0073, 0.0722, -0.0016, 0.1829, 0.1420, -0.1984, 0.2153, 0.0151, -0.0405)
+
+   # make a model
+   data(people)
+   X <- scale(people[, -4], center = TRUE, scale = TRUE)
+   y <- scale(people[, 4, drop = FALSE], center = TRUE, scale = TRUE)
+   m <- pls.simpls(X, y, 4)
+
+   # here we re-normalize results from PLS_Toolbox
+   xnorm <- sqrt(colSums(xscores^2))
+   expect_equivalent(m$xloadings, xloadings %*% diag(xnorm), tolerance = 10^-3)
+   expect_equivalent(m$xscores, xscores %*% diag(1/xnorm), tolerance = 10^-3)
+   expect_equivalent(m$weights, weights %*% diag(1/xnorm), tolerance = 10^-3)
+
+   expect_equivalent(m$yscores, yscores, tolerance = 10^-4)
+   expect_equivalent(m$yloadings, yloadings, tolerance = 10^-4)
+   expect_equivalent(m$coeffs[, 4, 1], coeffs, tolerance = 10^-4)
+})
