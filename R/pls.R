@@ -2098,17 +2098,18 @@ selratio <- function(obj, ncomp = obj$ncomp.selected) {
    # prepare matrix for vipscores
    selratio <- matrix(0, nrow = nvar, ncol = nresp)
 
-   # get norm value for regression coefficients
-   bnorm <- sqrt(colSums(coeffs^2))
-
-   # compute target projections
-   ttp <-  x %*% (coeffs %*% diag(1 / bnorm, nrow = nresp, ncol = nresp))
-   ptp <- t(crossprod(x, ttp) %*% diag(1 / colSums(ttp^2), nrow = nresp, ncol = nresp))
-
    # compute selectivity ratio
    for (y in seq_len(nresp)) {
-      expvar <- ttp[, y, drop = FALSE] %*% ptp[y, , drop = FALSE]
-      selratio[var_ind, y] <- colSums(expvar^2) / colSums((x - expvar)^2)
+      b <- coeffs[, y, drop = FALSE] / sqrt(sum(coeffs[, y]^2))
+      t <- x %*% b
+      p <- crossprod(t, x) / sum(t * t)
+
+      exp <- t %*% p
+      res <- x - exp
+      expvar <- colSums(exp^2)
+      resvar <- colSums(res^2)
+      resvar[resvar < .Machine$double.eps] <- 1
+      selratio[var_ind, y] <- expvar / resvar
    }
 
    rownames(selratio) <- rownames(obj$xloadings)
