@@ -593,12 +593,14 @@ test_that("XY-residual limits are computed correctly", {
 })
 
 test_that("PLS gives results comparable to other software", {
+   dataFolder = file.path(system.file("/inst/testdata/", package="mdatools"))
+   weights <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-weights.csv"), sep = " ", header = FALSE))
 
    # read model parameters and calibration scores made in PLS_Toolbox
-   xscores <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xscores.csv", sep = " ", header = FALSE))
-   yscores <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-yscores.csv", sep = " ", header = FALSE))
-   weights <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-weights.csv", sep = " ", header = FALSE))
-   xloadings <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xloadings.csv", sep = " ", header = FALSE))
+   xscores <-   as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-xscores.csv"), sep = " ", header = FALSE))
+   yscores <-   as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-yscores.csv"), sep = " ", header = FALSE))
+   weights <-   as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-weights.csv"), sep = " ", header = FALSE))
+   xloadings <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-xloadings.csv"), sep = " ", header = FALSE))
    yloadings <- c(5.3643, 1.0338, 0.4675, 0.3567)
    coeffs <- c(0.2078, 0.2647, 0.0073, 0.0722, -0.0016, 0.1829, 0.1420, -0.1984, 0.2153, 0.0151, -0.0405)
 
@@ -625,10 +627,10 @@ test_that("PLS gives results comparable to other software", {
    expect_equivalent(selratio(m, 4), sr, tolerance = 10^-1)
 
    # compare calibration results
-   ypred <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-ypred.csv", sep = " ", header = FALSE))
-   xqdist <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xqdist.csv", sep = " ", header = FALSE))
-   xhdist <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xhdist.csv", sep = " ", header = FALSE))
-   yqdist <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-yqdist.csv", sep = " ", header = FALSE))
+   ypred <-  as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-ypred.csv"), sep = " ", header = FALSE))
+   xqdist <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-xqdist.csv"), sep = " ", header = FALSE))
+   xhdist <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-xhdist.csv"), sep = " ", header = FALSE))
+   yqdist <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-yqdist.csv"), sep = " ", header = FALSE))
    rmsec <- c(1.0273, 0.7404, 0.6668, 0.6198)
    r2c <- c(0.9283, 0.9627, 0.9698, 0.9739)
 

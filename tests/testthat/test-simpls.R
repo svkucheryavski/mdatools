@@ -2,15 +2,15 @@
 # Tests for SIMPLS algorithms     #
 ######################################
 
-# setup({
-#    pdf(file = tempfile("mdatools-test-simpls-", fileext = ".pdf"))
-#    sink(tempfile("mdatools-test-simpls-", fileext = ".txt"), append = FALSE, split = FALSE)
-# })
+setup({
+   pdf(file = tempfile("mdatools-test-simpls-", fileext = ".pdf"))
+   sink(tempfile("mdatools-test-simpls-", fileext = ".txt"), append = FALSE, split = FALSE)
+})
 
-# teardown({
-#    dev.off()
-#    sink()
-# })
+teardown({
+   dev.off()
+   sink()
+})
 
 #################################################
 # Block 1. Tests the old algorithm              #
@@ -87,10 +87,11 @@ test_that("new algorithm is more numerically stable", {
 test_that("new algorithm gives results comparable to other software", {
 
    # read model parameters made in PLS_Toolbox
-   weights <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-weights.csv", sep = " ", header = FALSE))
-   xloadings <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xloadings.csv", sep = " ", header = FALSE))
-   xscores <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-xscores.csv", sep = " ", header = FALSE))
-   yscores <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-yscores.csv", sep = " ", header = FALSE))
+   dataFolder = file.path(system.file("/inst/testdata/", package="mdatools"))
+   weights <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-weights.csv"), sep = " ", header = FALSE))
+   xloadings <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-xloadings.csv"), sep = " ", header = FALSE))
+   xscores <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-xscores.csv"), sep = " ", header = FALSE))
+   yscores <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-yscores.csv"), sep = " ", header = FALSE))
    yloadings <- c(5.3643, 1.0338, 0.4675, 0.3567)
    coeffs <- c(0.2078, 0.2647, 0.0073, 0.0722, -0.0016, 0.1829, 0.1420, -0.1984, 0.2153, 0.0151, -0.0405)
 
