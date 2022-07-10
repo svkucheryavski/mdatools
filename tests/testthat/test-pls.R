@@ -602,11 +602,11 @@ test_that("PLS gives results comparable to other software", {
    yloadings <- c(5.3643, 1.0338, 0.4675, 0.3567)
    coeffs <- c(0.2078, 0.2647, 0.0073, 0.0722, -0.0016, 0.1829, 0.1420, -0.1984, 0.2153, 0.0151, -0.0405)
 
-   # make a model
+   # make a model with manual cv splits
    data(people)
    X <- people[, -4]
    y <- people[, 4, drop = FALSE]
-   m <- pls(X, y, 4, scale = TRUE, cv = list("ven", 10))
+   m <- pls(X, y, 4, scale = TRUE, cv = rep(1:10, length.out = nrow(X)))
 
    # compare main model parameters
    # here we re-normalize results from PLS_Toolbox
@@ -622,7 +622,7 @@ test_that("PLS gives results comparable to other software", {
    # here we change the result from PLS toolbox a bit for large values as they add
    # given portion of x-variance when compute SR
    sr <- c(24.8, 21.7, 2.2359, 0.1179, 0.1552, 0.9740, 0.0076, 5.9018, 10.0, 0.0256, 0.0138)
-   expect_equivalent(selratio(m), sr, tolerance = 10^-1)
+   expect_equivalent(selratio(m, 4), sr, tolerance = 10^-1)
 
    # compare calibration results
    ypred <- as.matrix(read.delim("../../inst/testdata/plstlbx-people-ypred.csv", sep = " ", header = FALSE))
@@ -642,4 +642,11 @@ test_that("PLS gives results comparable to other software", {
    expect_equivalent(m$res$cal$rmse, rmsec, tolerance = 10^-3)
    expect_equivalent(m$res$cal$r2, r2c, tolerance = 10^-3)
 
+
+   # compare cross-validation results
+   rmsecv <- c(1.1044, 0.8673, 0.8627, 0.8186)
+   r2cv <- c(0.9173, 0.9489, 0.9498, 0.9545)
+
+   expect_equivalent(m$res$cv$rmse, rmsecv, tolerance = 10^-3)
+   expect_equivalent(m$res$cv$r2, r2cv, tolerance = 10^-3)
 })

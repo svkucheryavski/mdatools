@@ -1846,7 +1846,7 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
    # find maximum number of objects in a segment
    nobj.cv <- 0
    if (!is.logical(cv) && !is.null(cv)) {
-      nseg <- if (is.numeric(cv)) cv else cv[[2]]
+      nseg <- max(crossval(cv, xc.nrows))
       nobj.cv <- if (nseg == 1) 1 else ceiling(xc.nrows / nseg)
 
       # we set cv to FALSE so fitting knows that it is not a part of cross-validation

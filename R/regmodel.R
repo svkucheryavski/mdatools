@@ -56,8 +56,8 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
 
    # get matrix with indices for cv segments
    cv_ind <- crossval(cv, nobj = nobj, resp = y[, 1])
-   nseg <- nrow(cv_ind);
-   nrep <- dim(cv_ind)[3]
+   nseg <- max(cv_ind)
+   nrep <- ncol(cv_ind)
 
    # prepare arrays for results
    yp.cv <- array(0, dim = c(nobj, ncomp, nresp))
@@ -66,7 +66,7 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
    # loop over segments and repetitions
    for (ir in seq_len(nrep)) {
       for (is in seq_len(nseg)) {
-         ind <- na.exclude(cv_ind[is, , ir])
+         ind <- which(cv_ind[, ir] == is)
          if (length(ind) == 0) next
 
          xc <- x[-ind, , drop = FALSE]
