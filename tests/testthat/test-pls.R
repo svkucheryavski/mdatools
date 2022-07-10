@@ -253,17 +253,10 @@ context("pls: compare pedict.pls() outcome with known values")
 
 test_that("predictions for people data are correct", {
    # model
-   f <- system.file("testdata", "pls-xloadings.csv", package = "mdatools")
-   xloadings <- read.csv(f, header = FALSE)
-
-   f <- system.file("testdata", "pls-yloadings.csv", package = "mdatools")
-   yloadings <- read.csv(f, header = FALSE)
-
-   f <- system.file("testdata", "pls-weights.csv", package = "mdatools")
-   weights <- read.csv(f, header = FALSE)
-
-   f <- system.file("testdata", "pls-coeffs.csv", package = "mdatools")
-   coeffs <- read.csv(f, header = FALSE)
+   xloadings <- read.csv("pls-xloadings.csv", header = FALSE)
+   yloadings <- read.csv("pls-yloadings.csv", header = FALSE)
+   weights <- read.csv("pls-weights.csv", header = FALSE)
+   coeffs <- read.csv("pls-coeffs.csv", header = FALSE)
 
    xc <- people[, -4]
    yc <- people[, 4, drop = F]
@@ -274,25 +267,11 @@ test_that("predictions for people data are correct", {
    expect_equivalent(obj$coeffs$values[, 4, ], as.matrix(coeffs), tolerance = 10^-5)
 
    # predictions
-   f <- system.file("testdata", "pls-xscores.csv", package = "mdatools")
-   xscores <- read.csv(f, header = FALSE)
-   print(f)
-
-   f <- system.file("testdata", "pls-yscores.csv", package = "mdatools")
-   yscores <- read.csv(f, header = FALSE)
-   print(f)
-
-   f <- system.file("testdata", "pls-xres.csv", package = "mdatools")
-   xresid <- read.csv(f, header = FALSE)
-   print(f)
-
-   f <- system.file("testdata", "pls-yres.csv", package = "mdatools")
-   yresid <- read.csv(f, header = FALSE)
-   print(f)
-
-   f <- system.file("testdata", "pls-expvar.csv", package = "mdatools")
-   expvar <- read.csv(f, header = FALSE)
-   print(f)
+   xscores <- read.csv("pls-xscores.csv", header = FALSE)
+   yscores <- read.csv("pls-yscores.csv", header = FALSE)
+   xresid  <- read.csv("pls-xres.csv", header = FALSE)
+   yresid  <- read.csv("pls-yres.csv", header = FALSE)
+   expvar  <- read.csv("pls-expvar.csv", header = FALSE)
 
    res <- predict(obj, xc, yc)
    expect_equivalent(res$xdecomp$scores, as.matrix(xscores), tolerance = 10^-4)
@@ -474,8 +453,7 @@ test_that("vipscores for people data (A = 4) identical to once computed in MATLA
    d <- datasets[[1]]
    m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
 
-   f <- system.file("testdata", "pls-vipscores.csv", package = "mdatools")
-   vip <- read.csv(f, header = FALSE)
+   vip <- read.csv("pls-vipscores.csv", header = FALSE)
    expect_equivalent(vipscores(m, ncomp = 4), as.matrix(vip), tolerance = 10^-4)
 })
 
@@ -485,8 +463,7 @@ test_that("vipscores for people data (A = 4) identical to once computed in MATLA
    Y <- people[,  c(4, 6)]
    m <- pls(X, Y, 8, center = TRUE, scale = TRUE, cv = 1)
 
-   f <- system.file("testdata", "pls2-vipscores.csv", package = "mdatools")
-   vip <- read.csv(f, header = FALSE)[[1]]
+   vip <- read.csv("pls2-vipscores.csv", header = FALSE)[[1]]
    #dim(vip) <- c(ncol(X), 2)
 
    expect_equivalent(vipscores(m, ncomp = 4), matrix(vip, ncol = 2), tolerance = 10^-4)
@@ -593,14 +570,13 @@ test_that("XY-residual limits are computed correctly", {
 })
 
 test_that("PLS gives results comparable to other software", {
-   dataFolder = file.path(system.file("/inst/testdata/", package="mdatools"))
-   weights <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-weights.csv"), sep = " ", header = FALSE))
+
 
    # read model parameters and calibration scores made in PLS_Toolbox
-   xscores <-   as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-xscores.csv"), sep = " ", header = FALSE))
-   yscores <-   as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-yscores.csv"), sep = " ", header = FALSE))
-   weights <-   as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-weights.csv"), sep = " ", header = FALSE))
-   xloadings <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-xloadings.csv"), sep = " ", header = FALSE))
+   xscores <-   as.matrix(read.delim("plstlbx-people-xscores.csv", sep = " ", header = FALSE))
+   yscores <-   as.matrix(read.delim("plstlbx-people-yscores.csv", sep = " ", header = FALSE))
+   weights <-   as.matrix(read.delim("plstlbx-people-weights.csv", sep = " ", header = FALSE))
+   xloadings <- as.matrix(read.delim("plstlbx-people-xloadings.csv", sep = " ", header = FALSE))
    yloadings <- c(5.3643, 1.0338, 0.4675, 0.3567)
    coeffs <- c(0.2078, 0.2647, 0.0073, 0.0722, -0.0016, 0.1829, 0.1420, -0.1984, 0.2153, 0.0151, -0.0405)
 
@@ -627,10 +603,10 @@ test_that("PLS gives results comparable to other software", {
    expect_equivalent(selratio(m, 4), sr, tolerance = 10^-1)
 
    # compare calibration results
-   ypred <-  as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-ypred.csv"), sep = " ", header = FALSE))
-   xqdist <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-xqdist.csv"), sep = " ", header = FALSE))
-   xhdist <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-xhdist.csv"), sep = " ", header = FALSE))
-   yqdist <- as.matrix(read.delim(paste0(dataFolder, "/plstlbx-people-yqdist.csv"), sep = " ", header = FALSE))
+   ypred <-  as.matrix(read.delim("plstlbx-people-ypred.csv", sep = " ", header = FALSE))
+   xqdist <- as.matrix(read.delim("plstlbx-people-xqdist.csv", sep = " ", header = FALSE))
+   xhdist <- as.matrix(read.delim("plstlbx-people-xhdist.csv", sep = " ", header = FALSE))
+   yqdist <- as.matrix(read.delim("plstlbx-people-yqdist.csv", sep = " ", header = FALSE))
    rmsec <- c(1.0273, 0.7404, 0.6668, 0.6198)
    r2c <- c(0.9283, 0.9627, 0.9698, 0.9739)
 
