@@ -6,7 +6,7 @@
 \usage{
 \method{plotScores}{pca}(
   obj,
-  comp = c(1, 2),
+  comp = if (obj$ncomp > 1) c(1, 2) else 1,
   type = "p",
   show.axes = TRUE,
   show.legend = TRUE,

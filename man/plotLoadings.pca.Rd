@@ -6,7 +6,7 @@
 \usage{
 \method{plotLoadings}{pca}(
   obj,
-  comp = c(1, 2),
+  comp = if (obj$ncomp > 1) c(1, 2) else 1,
   type = (if (length(comp == 2)) "p" else "l"),
   show.legend = TRUE,
   show.axes = TRUE,
