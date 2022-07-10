@@ -659,6 +659,16 @@ pls.getxscores <- function(x, weights, xloadings) {
    xscores <- x %*% (weights %*% solve(crossprod(xloadings, weights)))
 }
 
+#' Compute and orthogonalize matrix with Y-scores
+#'
+#' @param y
+#' matrix with response values, already preprocessed and cleaned
+#' @param yloadings
+#' matrix with Y-loadings
+#' @param  xscores
+#' matrix with X-scores (needed for orthogonalization)
+#'
+#' @return matrix with Y-scores
 pls.getyscores <- function(y, yloadings, xscores) {
 
    ncomp <- ncol(yloadings)
@@ -1096,9 +1106,12 @@ plotVariance.pls <- function(obj, decomp = "xdecomp", variance = "expvar", type 
 #' See examples in help for \code{\link{pls}} function.
 #'
 #' @export
-plotXScores.pls <- function(obj, comp = c(1, 2), show.axes = T,  main = "Scores (X)",
+plotXScores.pls <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, show.axes = T,  main = "Scores (X)",
    res = obj$res, ...) {
 
+   if (min(comp) < 1 || max(comp) > ncol(obj$weights)) {
+      stop("Wrong values for 'comp' parameter.")
+   }
 
    # set up values for showing axes lines
    show.lines <- FALSE
@@ -1332,8 +1345,12 @@ plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, lo
 #' See examples in help for \code{\link{pls}} function.
 #'
 #' @export
-plotXLoadings.pls <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE,
+plotXLoadings.pls <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type = "p", show.axes = TRUE,
    show.legend = TRUE, ...) {
+
+   if (min(comp) < 1 || max(comp) > ncol(obj$weights)) {
+      stop("Wrong values for 'comp' parameter.")
+   }
 
    plot_data <- mda.subset(obj$xloadings, select = comp)
    colnames(plot_data) <- sprintf("Comp %d (%.2f%%)", comp, obj$res[["cal"]]$xdecomp$expvar[comp])

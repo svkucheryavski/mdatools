@@ -142,8 +142,12 @@ plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", labels = 
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotScores.ldecomp <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE,
+plotScores.ldecomp <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type = "p", show.axes = TRUE,
    show.plot = TRUE, ...) {
+
+   if (min(comp) < 1 || max(comp) > ncol(obj$scores)) {
+      stop("Wrong values for 'comp' parameter.")
+   }
 
    # get scores for given components and generate column names with explained variance
    plot_data <- mda.subset(obj$scores, select = comp)

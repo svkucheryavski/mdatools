@@ -1091,8 +1091,12 @@ plotCumVariance.pca <- function(obj, legend.position = "bottomright", ...) {
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotScores.pca <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE,
+plotScores.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type = "p", show.axes = TRUE,
    show.legend = TRUE, res = obj$res, ...) {
+
+   if (min(comp) < 1 || max(comp) > ncol(obj$loadings)) {
+      stop("Wrong values for 'comp' parameter.")
+   }
 
    res <- getRes(res, "ldecomp")
    if (length(res) == 1) {
@@ -1207,8 +1211,12 @@ plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotLoadings.pca <- function(obj, comp = c(1, 2), type = (if (length(comp == 2)) "p" else "l"),
+plotLoadings.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type = (if (length(comp == 2)) "p" else "l"),
    show.legend = TRUE, show.axes = TRUE, ...) {
+
+   if (min(comp) < 1 || max(comp) > ncol(obj$loadings)) {
+      stop("Wrong values for 'comp' parameter.")
+   }
 
    plot_data <- mda.subset(obj$loadings, select = comp)
    colnames(plot_data) <- paste0("Comp ", comp, " (", round(obj$res[["cal"]]$expvar[comp], 2), "%)")
