@@ -240,6 +240,26 @@ test_that("SavGol smoothing works correctly", {
    expect_equal(dim(dy3), dim(y))
    expect_equivalent(which((abs(dy3) < 10^-12)), zeros)
 
+   # check for small numeric sets
+   x = matrix(c(1, 1, 1, 3, 4, 7, 4, 3, 1, 1, 1.0), nrow = 1)
+   y = matrix(c(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5.0), nrow = 1)
+   z = matrix(c(4, 6, 4, 6, 4, 6, 4, 6, 4, 6.0), nrow = 1)
+
+   # no derivartive
+   expect_equivalent(prep.savgol(x, width = 5, porder = 1, dorder = 0), c(0.4, 1.2, 2.0, 3.2, 3.8, 4.2, 3.8, 3.2, 2.0, 1.2, 0.4))
+   expect_equivalent(prep.savgol(y, width = 3, porder = 1, dorder = 0), c(5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0))
+   expect_equivalent(prep.savgol(z, width = 5, porder = 1, dorder = 0), c(4.8, 4.8, 4.8, 5.2, 4.8, 5.2, 4.8, 5.2, 5.2, 5.2))
+
+   # first derivartive
+   expect_equivalent(prep.savgol(x, width = 3, porder = 1, dorder = 1), c(0.0, 0.0, 1.0, 1.5, 2.0, 0.0, -2.0, -1.5, -1.0, 0.0, 0.0))
+   expect_equivalent(prep.savgol(y, width = 3, porder = 1, dorder = 1), c(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+   expect_equivalent(prep.savgol(z, width = 3, porder = 1, dorder = 1), c(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+
+   # second derivartive
+   expect_equivalent(prep.savgol(x, width = 3, porder = 2, dorder = 2), c(0.0, 0.0, 2.0, -1.0, 2.0, -6.0, 2.0, -1.0, 2.0, 0.0, 0.0))
+   expect_equivalent(prep.savgol(y, width = 3, porder = 2, dorder = 2), c(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+   expect_equivalent(prep.savgol(z, width = 3, porder = 2, dorder = 2), c(-4.0, -4.0, 4.0, -4.0, 4.0, -4.0, 4.0, -4.0, 4.0, 4.0))
+
 })
 
 context("prep: alsbasecorr")

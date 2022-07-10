@@ -238,11 +238,11 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
 
    # compute generalized factorial
    genfact <- function(a, b) {
-      f <- 1;
+      f <- 1
       if ((a - b + 1) > a) return(f)
 
       for (i in (a - b + 1):a) {
-         f <- f * i;
+         f <- f * i
       }
 
       return(f)
@@ -257,28 +257,21 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
       return(sum)
    }
 
-   f <- function(data, width, porder, dorder) {
+   f <- function(x, width, porder, dorder) {
 
-      nobj <- nrow(data)
-      nvar <- ncol(data)
-      pdata <- matrix(0, ncol = nvar, nrow = nobj)
-
-      m <- (width - 1) / 2
+      nvar <- ncol(x)
+      px <- matrix(0.0, nrow(x), ncol(x))
+      m <- round((width - 1) / 2)
       w <- outer(-m:m, -m:m, function(x, y) weight(x, y, m, porder, dorder))
-      n <- ncol(data)
 
-      for (j in seq_len(nobj)) {
-         for (i in 1:m) {
-            pdata[j, i] <- convolve(data[j, 1:(2 * m + 1)], w[, i], type = "filter")
-            pdata[j, n - i + 1] <- convolve(data[j, (n - 2 * m):n], w[, width - i + 1], type = "filter")
-         }
-
-         for (i in (m+1):(n-m)) {
-            pdata[j, i] <- convolve(data[j, (i - m):(i + m)], w[, m + 1], type = "filter")
-         }
+      for (i in seq_len(m)) {
+         px[, i] = apply(x[, seq_len(2 * m + 1), drop = FALSE], 1, function(xx) convolve(xx, w[, i], type = "filter")[1])
+         px[, nvar - i + 1] = apply(x[, (nvar - 2 * m):nvar, drop = FALSE], 1, function(xx) convolve(xx, w[, width - i + 1], type = "filter")[1])
       }
 
-      return(pdata)
+      px[, (m+1):(nvar-m)] = apply(x, 1, function(xx) convolve(xx, w[, m + 1], type = "filter"))
+
+      return (px)
    }
 
    return(prep.generic(data, f, width = width, porder = porder, dorder = dorder))
