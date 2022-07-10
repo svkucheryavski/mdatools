@@ -444,6 +444,8 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
 
    # compute matrices with orthogonal and score distances
    Q <- sapply(seq_len(ncomp), function(a) rowSums(getResiduals(scores, loadings, residuals, a)^2))
+   dim(Q) <- c(nobj, ncomp)
+
    T2 <- t(apply(scale(scores^2, center = FALSE, scale = eigenvals), 1, cumsum))
    dim(T2) <- c(nobj, ncomp)
 
