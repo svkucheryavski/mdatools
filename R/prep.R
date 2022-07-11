@@ -362,7 +362,7 @@ prep.ref2km <- function(data) {
    return(prep.generic(data, f))
 }
 
-#' Baseline correction using assymetric least squares
+#' Baseline correction using asymetric least squares
 #'
 #' @param data
 #' matrix with spectra (rows correspond to individual spectra)
@@ -401,6 +401,7 @@ prep.ref2km <- function(data) {
 #' }
 #'
 #' @importFrom Matrix Matrix Diagonal
+#' @importFrom methods as
 #'
 #' @export
 prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
