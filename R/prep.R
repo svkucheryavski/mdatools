@@ -407,28 +407,27 @@ prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
    attrs <- mda.getattr(data)
    dimnames <- dimnames(data)
 
-   baseline <- function(y) {
+   m <- ncol(data)
+   baseline <- matrix(0, nrow(data), ncol(data))
+   LDD <- Matrix::Matrix((10^plambda) * crossprod(diff(diag(m), difference = 2)), sparse = TRUE)
+   w.ini <- matrix(rep(1, m))
 
-      m <- length(y)
-      D <- Matrix::Matrix(diff(diag(m), difference = 2), sparse = TRUE)
-      LDD <- (10^plambda) * Matrix::crossprod(D)
-      w <- Matrix::Matrix(1, nrow = m, ncol = 1, sparse = TRUE)
-
-      for (i in seq_len(max.niter)) {
+   for (i in seq_len(nrow(data))) {
+      y <- data[i, ]
+      w <- w.ini
+      for (j in seq_len(max.niter)) {
          W <- Matrix::Diagonal(x = as.numeric(w))
-         z <- Matrix::solve(W + LDD, w * y)
+         z <- Matrix::solve(as(W + LDD, 'dgCMatrix'), w * y, sparse = TRUE)
          w.old <- w
          w <- p * (y > z) + (1 - p) * (y < z)
 
-         if (sum(abs(w - w.old)) < 10^-12) {
-            break
-         }
+         if (sum(abs(w - w.old)) < 10^-10) break
       }
 
-      return(as.numeric(z))
+      baseline[i, ] <- as.numeric(z)
    }
 
-   pspectra <- t(apply(data, 1, function(x) x - baseline(x)))
+   pspectra <- data - baseline
    pspectra <- mda.setattr(pspectra, attrs)
    dimnames(pspectra) <- dimnames
 
