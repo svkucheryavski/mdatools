@@ -1,9 +1,20 @@
-v. 0.12.1
+v. 0.13.0
 =========
+This release brings an updated implementation of PLS algorithm (SIMPLS) which is more numerically stable and gives sufficiently less warnings about using too many components in case when you work with small y-values. The speed of `pls()` method in general has been also improved.
+
+Another important thing is that cross-validation of regression and classification models has been re-written towards more simple solution and now you can also use your own custom splits by providing a vector with segment indices associated with each measurement. For example if you run PLS with parameter `cv = c(1, 2, 3, 4, 1, 2, 3, 4, 1, 2)` it is assumed that you want to use venetian blinds split with four segments and your dataset has 10 measurements. See more details in the tutorial, where description of cross-validation procedure has been moved to a separate section.
+
+Other changes and improvements:
+
+* Refactoring and improvements of `prep.savgol()` code made the method much faster (up to 50-60 times faster for datasets with many measurements).
+
+* Refactoring and improvements of `prep.alsbasecorr()` code made the method 2-3 times faster especially for large datasets.
+
+* added [PQN](https://doi.org/10.1021/ac051632c) normalization method to `prep.norm()` function.
 
 * fixed a bug in `vipscores()` which could lead to a bit higher values for PLS2 models.
 
-* added [PQN](https://doi.org/10.1021/ac051632c) normalization method to `prep.norm()` function.
+* fixes to several small bugs and general improvements.
 
 
 v.0.12.0
