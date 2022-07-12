@@ -10,6 +10,7 @@ Other changes and improvements:
 
 * Refactoring and improvements of `prep.alsbasecorr()` code made the method 2-3 times faster especially for large datasets.
 
+* added new plotting method `plotRMSERatio()` for regression models (inspired by [this post](https://eigenvector.com/%EF%BF%BCevaluating-models-hating-on-r-squared/) by Barry M. Wise)
 * added [PQN](https://doi.org/10.1021/ac051632c) normalization method to `prep.norm()` function.
 
 * fixed a bug in `vipscores()` which could lead to a bit higher values for PLS2 models.

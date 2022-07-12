@@ -2,20 +2,39 @@
 % Please edit documentation in R/regmodel.R
 \name{plotRMSERatio.regmodel}
 \alias{plotRMSERatio.regmodel}
-\title{RMSE plot for regression model}
+\title{RMSECV/RMSEC ratio plot for regression model}
 \usage{
 \method{plotRMSERatio}{regmodel}(
   obj,
   ny = 1,
   type = "b",
-  xlab = "RMSECV/RMSEC ratio",
-  ylab = "RMSECV",
+  show.labels = TRUE,
+  labels = seq_len(obj$ncomp),
+  main = paste0("RMSECV/RMSEC ratio (", obj$res$cal$respnames[ny], ")"),
+  ylab = "RMSECV/RMSEC ratio",
+  xlab = "RMSECV",
   ...
 )
 }
 \arguments{
 \item{obj}{a regression model (object of class \code{regmodel})}
+
+\item{ny}{number of response variable to make the plot for (if y is multivariate)}
+
+\item{type}{type of the plot (use only "b" or "l")}
+
+\item{show.labels}{logical, show or not labels for plot points}
+
+\item{labels}{vector with point labels (by default number of components)}
+
+\item{main}{main plot title}
+
+\item{ylab}{label for y-axis}
+
+\item{xlab}{label for x-axis}
+
+\item{...}{other plot parameters (see \code{mdaplot} for details)}
 }
 \description{
-Shows plot with root mean squared error values vs. number of components for PLS model.
+Shows plot with RMSECV/RMSEC values vs. RMSECV for each component.
 }

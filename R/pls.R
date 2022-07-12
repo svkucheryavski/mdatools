@@ -125,6 +125,7 @@
 #' \tabular{ll}{
 #'  \code{\link{plotPredictions.regmodel}} \tab shows predicted vs. measured plot.\cr
 #'  \code{\link{plotRMSE.regmodel}} \tab shows RMSE plot.\cr
+#'  \code{\link{plotRMSERatio.regmodel}} \tab shows plot for ratio RMSECV/RMSEC values.\cr
 #'  \code{\link{plotYResiduals.regmodel}} \tab shows residuals plot for y values.\cr
 #'  \code{\link{getRegcoeffs.regmodel}} \tab returns matrix with regression coefficients.\cr
 #' }
