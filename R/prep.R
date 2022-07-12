@@ -252,8 +252,8 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
    weight <- function(i, t, m, n, s) {
       sum <- 0
       for (k in 0:n) {
-         sum <- sum + (2 * k + 1) * (genfact(2 * m, k) / genfact(2 * m + k + 1, k + 1)) * gram(i, m, k, 0) *
-            gram(t, m, k, s)
+         sum <- sum + (2 * k + 1) * (genfact(2 * m, k) / genfact(2 * m + k + 1, k + 1)) *
+            gram(i, m, k, 0) * gram(t, m, k, s)
       }
       return(sum)
    }
@@ -272,7 +272,7 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
             function(xx) convolve(xx, w[, width - i + 1], type = "filter")[1])
       }
 
-      px[, (m + 1):(nvar - m)] <- apply(x, 1, function(xx) convolve(xx, w[, m + 1], type = "filter"))
+      px[, (m + 1):(nvar - m)] <- t(apply(x, 1, function(xx) convolve(xx, w[, m + 1], type = "filter")))
 
       return(px)
    }

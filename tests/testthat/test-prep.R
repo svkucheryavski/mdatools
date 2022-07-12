@@ -260,6 +260,20 @@ test_that("SavGol smoothing works correctly", {
    expect_equivalent(prep.savgol(y, width = 3, porder = 2, dorder = 2), c(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
    expect_equivalent(prep.savgol(z, width = 3, porder = 2, dorder = 2), c(-4.0, -4.0, 4.0, -4.0, 4.0, -4.0, 4.0, -4.0, 4.0, 4.0))
 
+
+   y1 <- prep.savgol(
+      rbind(
+         matrix(c(1, 1, 1, 3, 4, 7, 4, 3, 1, 1, 1.0), nrow = 1),
+         matrix(c(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5.0), nrow = 1)
+      ), width = 5, porder = 1, dorder = 0
+   )
+
+   y2 <- rbind(
+      prep.savgol(matrix(c(1, 1, 1, 3, 4, 7, 4, 3, 1, 1, 1.0), nrow = 1), width = 5, porder = 1, dorder = 0),
+      prep.savgol(matrix(c(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5.0), nrow = 1), width = 5, porder = 1, dorder = 0)
+   )
+
+   expect_equivalent(y1, y2)
 })
 
 context("prep: alsbasecorr")
