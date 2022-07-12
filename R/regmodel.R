@@ -231,7 +231,7 @@ summary.regmodel <- function(object, ncomp = object$ncomp.selected,
       rownames(sum_data) <- capitalize(names(res))
 
       sum_data[, "R2"] <- round(sum_data[, "R2"], 3)
-      sum_data[, "RMSE"] <- mdaplot.formatValues(sum_data[, "RMSE"], round.only = T)
+      sum_data[, "RMSE"] <- mdaplot.formatValues(sum_data[, "RMSE"], round.only = TRUE)
       sum_data[, "Slope"] <- round(sum_data[, "Slope"], 3)
       sum_data[, "Bias"] <- round(sum_data[, "Bias"], 4)
       sum_data[, "RPD"] <- round(sum_data[, "RPD"], 1)
@@ -335,12 +335,12 @@ plotRMSERatio.regmodel <- function(obj, ny = 1, type = "b", show.labels = TRUE, 
    stopifnot("Cross-validation results are not found." = !is.null(obj$res$cv))
    stopifnot("Parameter 'ny' has a wrong value." = (length(ny) == 1 && ny >= 1 && ny <= nrow(obj$res$cal$rmse)))
 
-   plot_data <- matrix(obj$res$cv$rmse[ny, ]/obj$res$cal$rmse[ny, ], nrow = 1)
+   plot_data <- matrix(obj$res$cv$rmse[ny, ] / obj$res$cal$rmse[ny, ], nrow = 1)
    attr(plot_data, "xaxis.values") <- obj$res$cv$rmse[ny, ]
    attr(plot_data, "xaxis.name") <- xlab
 
    mdaplot(plot_data, type = type, xlab = xlab, ylab = ylab, main = main, show.labels = show.labels,
-   labels = labels,...)
+   labels = labels, ...)
 }
 
 

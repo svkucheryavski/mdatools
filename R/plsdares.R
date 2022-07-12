@@ -213,7 +213,7 @@ as.matrix.plsdares <- function(x, ncomp = NULL, nc = 1, ...) {
 #'
 #' @export
 summary.plsdares <- function(object, nc = seq_len(object$nclasses), ...) {
-   cat("\nPLS-DA results (class plsdares) summary:\n");
+   cat("\nPLS-DA results (class plsdares) summary:\n")
    fprintf("Number of selected components: %.0f\n", object$ncomp.selected)
 
    if (is.null(object$c.ref)) {

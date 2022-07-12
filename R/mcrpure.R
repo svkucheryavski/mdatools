@@ -180,14 +180,16 @@ unmix.mcrpure <- function(obj, x) {
    # resolve spectra and concentrations
    St <- tryCatch(
       t(x) %*% Dr %*% solve(crossprod(Dr)),
-      error = function(e)
+      error = function(e) {
          stop("Unable to resolve the components, perhaps 'ncomp' is too large.", call. = FALSE)
+      }
    )
 
    Ct <- tryCatch(
       x %*% St %*% solve(crossprod(St)),
-      error = function(e)
+      error = function(e) {
          stop("Unable to resolve the components, perhaps 'ncomp' is too large.", call. = FALSE)
+      }
    )
 
    # scale
@@ -293,8 +295,6 @@ summary.mcrpure <- function(object, ...) {
       fprintf("\nInfo:\n%s\n", object$info)
    }
 
-   drvstr <- c("no", "only for estimation of pure variables", "for pure variables and unmixing")
-
    if (length(object$exclrows) > 0) {
       fprintf("Excluded rows: %d\n", length(object$exclrows))
    }
@@ -357,7 +357,6 @@ getPureVariables <- function(D, ncomp, purevars, offset) {
    nspec <- nrow(D)
    nvar <- ncol(D)
    nspecvis <- nspec - length(exclrows)
-   nvarvis <- nvar - length(exclcols)
 
    # get indices for excluded columns if provided
    colind <- seq_len(nvar)

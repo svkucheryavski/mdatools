@@ -299,12 +299,12 @@ crossval.simca <- function(obj, x, cv) {
 
    # remove excluded rows
    if (length(attrs$exclrows) > 0) {
-      x <- x[-attrs$exclrows, , drop = F]
+      x <- x[-attrs$exclrows, , drop = FALSE]
    }
 
    # remove excluded columns
    if (length(attrs$exclcols) > 0) {
-      x <- x[, -attrs$exclcols, drop = F]
+      x <- x[, -attrs$exclcols, drop = FALSE]
    }
 
    # get matrix with indices for cv segments

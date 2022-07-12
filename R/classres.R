@@ -324,7 +324,7 @@ classres.getPerformance <- function(c.ref, c.pred) {
    dim(c.ref) <- NULL
    attrs <- mda.getattr(c.pred)
    if (length(attrs$exclrows) > 0) {
-      c.pred <- c.pred[-attrs$exclrows, , , drop = F]
+      c.pred <- c.pred[-attrs$exclrows, , , drop = FALSE]
       c.ref <- c.ref[-attrs$exclrows]
    }
 
@@ -339,10 +339,10 @@ classres.getPerformance <- function(c.ref, c.pred) {
    # compute main performance indicators
    classnames <- dimnames(c.pred)[[3]]
    for (i in seq_len(nclasses)) {
-      fn[i, ] <- colSums((c.ref == classnames[i]) & (c.pred[, , i, drop = F] == -1))
-      fp[i, ] <- colSums((c.ref != classnames[i]) & (c.pred[, , i, drop = F] == 1))
-      tp[i, ] <- colSums((c.ref == classnames[i]) & (c.pred[, , i, drop = F] == 1))
-      tn[i, ] <- colSums((c.ref != classnames[i]) & (c.pred[, , i, drop = F] == -1))
+      fn[i, ] <- colSums((c.ref == classnames[i]) & (c.pred[, , i, drop = FALSE] == -1))
+      fp[i, ] <- colSums((c.ref != classnames[i]) & (c.pred[, , i, drop = FALSE] == 1))
+      tp[i, ] <- colSums((c.ref == classnames[i]) & (c.pred[, , i, drop = FALSE] == 1))
+      tn[i, ] <- colSums((c.ref != classnames[i]) & (c.pred[, , i, drop = FALSE] == -1))
    }
 
    # compute main statistics

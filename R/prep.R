@@ -142,7 +142,7 @@ prep.norm <- function(data, type = "area", col.ind = NULL, ref.spectrum = NULL) 
 
    if (type == "snv") return(prep.snv(data))
 
-   if (type == "is" && is.null(col.ind) ) {
+   if (type == "is" && is.null(col.ind)) {
       stop("For 'is' normalization you need to provide indices for IS peak.")
    }
 
@@ -229,8 +229,8 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
    # compute grams polynomials
    gram <- function(i, m, k, s) {
       if (k > 0) {
-         return( (4 * k - 2) / (k * (2 * m - k + 1)) * (i * gram(i, m, k - 1, s) + s * gram(i, m, k - 1, s - 1)) -
-            ((k - 1) * (2 * m + k)) / (k * (2 * m - k + 1)) * gram(i, m, k - 2, s) )
+         return((4 * k - 2) / (k * (2 * m - k + 1)) * (i * gram(i, m, k - 1, s) + s * gram(i, m, k - 1, s - 1)) -
+            ((k - 1) * (2 * m + k)) / (k * (2 * m - k + 1)) * gram(i, m, k - 2, s))
       }
       if (k == 0 && s == 0) return(1)
       return(0)
@@ -252,7 +252,8 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
    weight <- function(i, t, m, n, s) {
       sum <- 0
       for (k in 0:n) {
-         sum <- sum + (2 * k + 1) * (genfact(2 * m, k) / genfact(2 * m + k + 1, k + 1)) * gram(i, m, k, 0) * gram(t, m, k, s)
+         sum <- sum + (2 * k + 1) * (genfact(2 * m, k) / genfact(2 * m + k + 1, k + 1)) * gram(i, m, k, 0) *
+            gram(t, m, k, s)
       }
       return(sum)
    }
@@ -265,13 +266,15 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
       w <- outer(-m:m, -m:m, function(x, y) weight(x, y, m, porder, dorder))
 
       for (i in seq_len(m)) {
-         px[, i] = apply(x[, seq_len(2 * m + 1), drop = FALSE], 1, function(xx) convolve(xx, w[, i], type = "filter")[1])
-         px[, nvar - i + 1] = apply(x[, (nvar - 2 * m):nvar, drop = FALSE], 1, function(xx) convolve(xx, w[, width - i + 1], type = "filter")[1])
+         px[, i] <- apply(x[, seq_len(2 * m + 1), drop = FALSE], 1,
+            function(xx) convolve(xx, w[, i], type = "filter")[1])
+         px[, nvar - i + 1] <- apply(x[, (nvar - 2 * m):nvar, drop = FALSE], 1,
+            function(xx) convolve(xx, w[, width - i + 1], type = "filter")[1])
       }
 
-      px[, (m+1):(nvar-m)] = apply(x, 1, function(xx) convolve(xx, w[, m + 1], type = "filter"))
+      px[, (m + 1):(nvar - m)] <- apply(x, 1, function(xx) convolve(xx, w[, m + 1], type = "filter"))
 
-      return (px)
+      return(px)
    }
 
    return(prep.generic(data, f, width = width, porder = porder, dorder = dorder))
@@ -418,7 +421,7 @@ prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
       w <- w.ini
       for (j in seq_len(max.niter)) {
          W <- Matrix::Diagonal(x = as.numeric(w))
-         z <- Matrix::solve(as(W + LDD, 'dgCMatrix'), w * y, sparse = TRUE)
+         z <- Matrix::solve(as(W + LDD, "dgCMatrix"), w * y, sparse = TRUE)
          w.old <- w
          w <- p * (y > z) + (1 - p) * (y < z)
 
@@ -738,7 +741,8 @@ prep <- function(name, params = NULL, method = NULL) {
 #' @export
 employ.prep <- function(obj, x, ...) {
 
-   stopifnot("employ.prep: the first argument must be a list with preprocessing methods" = is.list(obj) && class(obj[[1]]) == "prep")
+   stopifnot("employ.prep: the first argument must be a list with preprocessing methods" =
+      is.list(obj) && class(obj[[1]]) == "prep")
    for (p in obj) {
       x <- do.call(p$method, c(list(data = x), p$params))
    }

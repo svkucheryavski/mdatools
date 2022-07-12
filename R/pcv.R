@@ -25,7 +25,7 @@
 #' Pseudo-validation matrix (IxJ)
 #'
 #' @export
-pcv <- function(x, ncomp = min(round(nrow(x)/nseg) - 1, col(x), 20), nseg = 4, scale = FALSE) {
+pcv <- function(x, ncomp = min(round(nrow(x) / nseg) - 1, col(x), 20), nseg = 4, scale = FALSE) {
 
    # keep names if any
    attrs <- attributes(x)
@@ -56,7 +56,7 @@ pcv <- function(x, ncomp = min(round(nrow(x)/nseg) - 1, col(x), 20), nseg = 4, s
 
       # split data to calibration and validation
       x.c <- x[-ind[, k], , drop = FALSE]
-      x.k <- x[ ind[, k], , drop = FALSE]
+      x.k <- x[ind[, k], , drop = FALSE]
 
       # get loadings for local model and rotation matrix between global and local models
       P.k <- svd(x.c, nv = ncomp)$v[, seq_len(ncomp), drop = FALSE]
@@ -93,8 +93,8 @@ pcv <- function(x, ncomp = min(round(nrow(x)/nseg) - 1, col(x), 20), nseg = 4, s
 #' @return
 #' Rotation matrix (JxJ)
 getR <- function(base1, base2) {
-   base1 <- as.matrix(base1);
-   base2 <- as.matrix(base2);
+   base1 <- as.matrix(base1)
+   base2 <- as.matrix(base2)
 
    R1 <- rotationMatrixToX1(base1[, 1])
    R2 <- rotationMatrixToX1(base2[, 1])
@@ -122,7 +122,7 @@ getR <- function(base1, base2) {
       R <- crossprod(R2, (M %*% R1))
    }
 
-   return(R);
+   return(R)
 }
 
 #' Creates a rotation matrix to map a vector x to [1 0 0 ... 0]
@@ -174,4 +174,3 @@ eye <- function(n) {
    diag(X) <- 1
    return(X)
 }
-

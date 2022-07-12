@@ -422,7 +422,6 @@ ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
 ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
 
    # get names and attributes
-   rows_excluded <- attr(scores, "exclrows")
    cols_excluded <- attr(loadings, "exclrows")
 
    # get sizes
@@ -504,7 +503,7 @@ jm.crit <- function(residuals, eigenvals, alpha = 0.05, gamma = 0.01) {
    t2 <- rev(cumsum(rev(eigenvals)^2))[seq_len(ncomp)]
    t3 <- rev(cumsum(rev(eigenvals)^3))[seq_len(ncomp)]
 
-   h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2);
+   h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2)
    ifelse(h0 < 0.001, h0 <- 0.001, h0)
 
    # inverse error function
@@ -548,7 +547,7 @@ jm.prob <- function(u, eigenvals, ncomp) {
    t2 <- rev(cumsum(rev(eigenvals)^2))[ncomp]
    t3 <- rev(cumsum(rev(eigenvals)^3))[ncomp]
 
-   h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2);
+   h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2)
    ifelse(h0 < 0.001, h0 <- 0.001, h0)
 
    h1 <- (u / t1)^h0

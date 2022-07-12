@@ -476,7 +476,7 @@ mdaplotg <- function(
       # use mdaplot with show.axes = FALSE to create the plot
       mdaplot(ps = ps[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
               lwd = lwd[i], cex = cex[i], force.x.values = force.x.values, bwd = bwd,
-              show.grid = F, show.labels = show.labels, opacity = opacity[i],
+              show.grid = FALSE, show.labels = show.labels, opacity = opacity[i],
               lab.col = lab.col[i], lab.cex = lab.cex, show.axes = FALSE,
               show.excluded = show.excluded, ...
       )

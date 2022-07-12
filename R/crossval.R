@@ -81,7 +81,7 @@ crossval <- function(cv = 1, nobj = NULL, resp = NULL) {
    if (is.null(nobj)) nobj <- length(resp)
 
    # if user already provided matrix with values - return it
-   if (is.numeric(cv) && length(cv) == nobj) return (as.matrix(cv))
+   if (is.numeric(cv) && length(cv) == nobj) return(as.matrix(cv))
 
    p <- crossval.getParams(cv = cv, nobj = nobj)
    if (!(p$type %in% c("rand", "ven", "loo"))) {
@@ -99,16 +99,16 @@ crossval <- function(cv = 1, nobj = NULL, resp = NULL) {
    }
 
    if (p$type == "loo") {
-      return (matrix(seq_len(nobj), ncol = 1))
+      return(matrix(seq_len(nobj), ncol = 1))
    }
 
    if (p$type == "rand") {
-      return (sapply(seq_len(p$nrep), function(i) rep(seq_len(p$nseg), length.out = nobj)[sample(nobj)]))
+      return(sapply(seq_len(p$nrep), function(i) rep(seq_len(p$nseg), length.out = nobj)[sample(nobj)]))
    }
 
    if (p$type == "ven") {
       ind <- if (is.null(resp)) seq_len(nobj) else order(resp)
-      return (matrix(rep(seq_len(p$nseg), length.out = nobj)[ind], ncol = 1))
+      return(matrix(rep(seq_len(p$nseg), length.out = nobj)[ind], ncol = 1))
    }
 
    stop("Something went wrong.")

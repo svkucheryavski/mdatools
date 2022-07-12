@@ -526,9 +526,10 @@ setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
 #' vector with names used for components
 #'
 #' @return array with predicted y-values
-pls.getpredictions <- function(x, coeffs, ycenter, yscale, ynames = NULL, y.attrs = NULL, objnames = NULL, compnames = NULL) {
+pls.getpredictions <- function(x, coeffs, ycenter, yscale, ynames = NULL, y.attrs = NULL, objnames = NULL,
+   compnames = NULL) {
 
-   yp <- apply(coeffs, 3, function(x, y)(y %*% x), x)
+   yp <- apply(coeffs, 3, function(x, y) (y %*% x), x)
    dim(yp) <- c(nrow(x), dim(coeffs)[2], dim(coeffs)[3])
 
    # unscale predicted y values
@@ -542,7 +543,7 @@ pls.getpredictions <- function(x, coeffs, ycenter, yscale, ynames = NULL, y.attr
    attr(yp, "name") <- "Response values, predicted"
    dimnames(yp) <- list(objnames, compnames, ynames)
 
-   return (yp)
+   return(yp)
 }
 
 #' Compute object with decomposition of y-values
@@ -569,10 +570,11 @@ pls.getpredictions <- function(x, coeffs, ycenter, yscale, ynames = NULL, y.attr
 #' vector with names used for components
 #'
 #' @return array `ldecomp` object for y-values (or NULL if y is not provided)
-pls.getydecomp <- function(y, yscores, xscores, yloadings, yeigenvals, ynames = NULL, y.attrs = NULL, x.attrs = NULL, objnames = NULL, compnames = NULL) {
+pls.getydecomp <- function(y, yscores, xscores, yloadings, yeigenvals, ynames = NULL, y.attrs = NULL,
+   x.attrs = NULL, objnames = NULL, compnames = NULL) {
 
    # if reference y-values are not provided, no ydecomp can be computed
-   if (is.null(y)) return (NULL)
+   if (is.null(y)) return(NULL)
 
    # compute resuduals
    yresiduals <- y - tcrossprod(xscores, yloadings)
@@ -590,8 +592,6 @@ pls.getydecomp <- function(y, yscores, xscores, yloadings, yeigenvals, ynames = 
    yscores <- mda.setattr(yscores, x.attrs, "row")
    yresiduals <- mda.setattr(yresiduals, y.attrs)
 
-
-   # attr(yscores, "exclrows") <- attr(yresiduals, "exclrows") <- y.attrs$exclrows
    attr(yscores, "name") <- "Y-scores"
    attr(yscores, "xaxis.name") <- "Components"
    attr(yresiduals, "name") <- "Residuals"
@@ -601,7 +601,7 @@ pls.getydecomp <- function(y, yscores, xscores, yloadings, yeigenvals, ynames = 
    ydecomp <- ldecomp(scores = xscores, loadings = yloadings, residuals = yresiduals, eigenvals = yeigenvals)
    ydecomp$scores <- yscores
 
-   return (ydecomp)
+   return(ydecomp)
 }
 
 #' Compute object with decomposition of x-values
@@ -624,7 +624,8 @@ pls.getydecomp <- function(y, yscores, xscores, yloadings, yeigenvals, ynames = 
 #' vector with names used for components
 #'
 #' @return array `ldecomp` object for x-values
-pls.getxdecomp <- function(x, xscores, xloadings, xeigenvals, xnames = NULL, x.attrs = NULL, objnames = NULL, compnames = NULL) {
+pls.getxdecomp <- function(x, xscores, xloadings, xeigenvals, xnames = NULL, x.attrs = NULL, objnames = NULL,
+   compnames = NULL) {
 
    # compute x-residuals
    xresiduals <- x - tcrossprod(xscores, xloadings)
@@ -643,7 +644,7 @@ pls.getxdecomp <- function(x, xscores, xloadings, xeigenvals, xnames = NULL, x.a
 
    # create and return xdecomp object
    xdecomp <- ldecomp(scores = xscores, residuals = xresiduals, loadings = xloadings, eigenvals = xeigenvals)
-   return (xdecomp)
+   return(xdecomp)
 }
 
 #' Compute matrix with X-scores
@@ -657,7 +658,7 @@ pls.getxdecomp <- function(x, xscores, xloadings, xeigenvals, xnames = NULL, x.a
 #'
 #' @return matrix with X-scores
 pls.getxscores <- function(x, weights, xloadings) {
-   xscores <- x %*% (weights %*% solve(crossprod(xloadings, weights)))
+   return(x %*% (weights %*% solve(crossprod(xloadings, weights))))
 }
 
 #' Compute and orthogonalize matrix with Y-scores
@@ -678,10 +679,11 @@ pls.getyscores <- function(y, yloadings, xscores) {
 
    # orthogonalize
    for (a in 2:ncomp) {
-      yscores[, a] <- yscores[, a] - xscores[, 1:(a-1), drop = FALSE] %*% crossprod(xscores[, 1:(a-1), drop = FALSE], yscores[, a])
+      yscores[, a] <- yscores[, a] - xscores[, 1:(a - 1), drop = FALSE] %*%
+         crossprod(xscores[, 1:(a - 1), drop = FALSE], yscores[, a])
    }
 
-   return (yscores)
+   return(yscores)
 }
 #' PLS predictions
 #'
@@ -727,7 +729,6 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 
    # get dimensions
    nresp <- dim(object$coeffs$values)[3]
-   ncomp <- dim(object$coeffs$values)[2]
 
    # check dimensions of predictors
    if (ncol(x) != dim(object$coeffs$values)[1]) {
@@ -738,7 +739,8 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
    x <- prep.autoscale(x, center = object$xcenter, scale = object$xscale)
 
    # get predicted y-values
-   yp <- pls.getpredictions(x, object$coeffs$values, object$ycenter, object$yscale, respnames, x.attrs, objnames, compnames)
+   yp <- pls.getpredictions(x, object$coeffs$values, object$ycenter, object$yscale, respnames, x.attrs,
+      objnames, compnames)
 
    # if predictions for cross-validation - return
    if (cv) {
@@ -790,7 +792,7 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
       attr(ydecomp$Q, "Nu") <- object$Zlim[4, ]
    }
 
-   return (plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, xdecomp = xdecomp, ydecomp = ydecomp))
+   return(plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, xdecomp = xdecomp, ydecomp = ydecomp))
 }
 
 #' Categorize data rows based on PLS results and critical limits for total distance.
@@ -920,7 +922,7 @@ summary.pls <- function(object, ncomp = object$ncomp.selected,
 
       if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
       out[, 5] <- round(out[, 5], 3)
-      out[, 6] <- mdaplot.formatValues(out[, 6], round.only = T)
+      out[, 6] <- mdaplot.formatValues(out[, 6], round.only = TRUE)
       out[, 7] <- round(out[, 7], 3)
       out[, 8] <- round(out[, 8], 4)
       out[, 9] <- round(out[, 9], 2)
@@ -1107,7 +1109,7 @@ plotVariance.pls <- function(obj, decomp = "xdecomp", variance = "expvar", type 
 #' See examples in help for \code{\link{pls}} function.
 #'
 #' @export
-plotXScores.pls <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, show.axes = T,  main = "Scores (X)",
+plotXScores.pls <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, show.axes = TRUE,  main = "Scores (X)",
    res = obj$res, ...) {
 
    if (min(comp) < 1 || max(comp) > ncol(obj$weights)) {
@@ -1144,7 +1146,7 @@ plotXScores.pls <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, show.
 #' See examples in help for \code{\link{pls}} function.
 #'
 #' @export
-plotXYScores.pls <- function(obj, ncomp = 1, show.axes = T,  res = obj$res, ...) {
+plotXYScores.pls <- function(obj, ncomp = 1, show.axes = TRUE,  res = obj$res, ...) {
 
    show.lines <- if (show.axes) c(0, 0) else FALSE
    plot_data <- lapply(res, plotXYScores, ncomp = ncomp, type = "p", show.plot = FALSE)
@@ -1616,7 +1618,7 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
    B <- array(0, dim = c(npred, ncomp, nresp))
    Q <- matrix(0, nrow = nresp, ncol = ncomp)
    R <- V <- P <- matrix(0, nrow = npred, ncol = ncomp)
-   T <- U <- matrix(0, nrow = nobj, ncol = ncomp)
+   TT <- U <- matrix(0, nrow = nobj, ncol = ncomp)
 
 
    # loop for each components
@@ -1636,7 +1638,7 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
 
       if (a > 1) {
          v <- v - V %*% crossprod(V, p)
-         u <- u - T %*% crossprod(T, u)
+         u <- u - TT %*% crossprod(TT, u)
       }
 
       v <- v / sqrt(sum(v * v))
@@ -1644,7 +1646,7 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
       R[, a] <- r
       V[, a] <- v
       P[, a] <- p
-      T[, a] <- t
+      TT[, a] <- t
       U[, a] <- u
       Q[, a] <- q
 
@@ -1655,7 +1657,7 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
       S <- S - v %*% crossprod(v, S)
    }
 
-   return(list(coeffs = B, weights = R, xloadings = P, xscores = T, yloadings = Q, yscores = U, ncomp = a))
+   return(list(coeffs = B, weights = R, xloadings = P, xscores = TT, yloadings = Q, yscores = U, ncomp = a))
 }
 
 #' SIMPLS algorithm (old implementation)
@@ -1998,7 +2000,7 @@ vipscores <- function(obj, ncomp = obj$ncomp.selected) {
    # subset needed model parameters
    comp <- seq_len(ncomp)
    weights <- obj$weights[, comp, drop = FALSE]
-   yloads <- obj$yloadings[, comp, drop = FALSE];
+   yloads <- obj$yloadings[, comp, drop = FALSE]
 
    # get eigenvalues
    xeigenvals <- obj$xeigenvals[comp]

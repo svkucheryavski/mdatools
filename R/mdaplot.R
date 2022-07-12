@@ -28,7 +28,7 @@ mdaplot.areColors <- function(palette) {
 #' @return
 #' matrix with formatted values
 #'
-mdaplot.formatValues <- function(data, round.only = F, digits = 3) {
+mdaplot.formatValues <- function(data, round.only = FALSE, digits = 3) {
 
    # if values are not numeric - return as is
    if (!is.numeric(data[1])) return(data)
@@ -152,7 +152,7 @@ mdaplot.showColorbar <- function(cgroup, colmap = "default", lab.col = "darkgray
    shift <- shift * w * 0.02 # 2 percent of segment width
 
    x <- lim[1] + dx * 0.1
-   y <- lim[4] - (h + 0.1 * h);
+   y <- lim[4] - (h + 0.1 * h)
 
    # show colorbar and define coordinates for labels
    for (i in seq_len(ncol)) {
@@ -168,8 +168,7 @@ mdaplot.showColorbar <- function(cgroup, colmap = "default", lab.col = "darkgray
    }
 
    # show labels for colorbar regions
-   text(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col,
-      cex = lab.cex)
+   text(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col, cex = lab.cex)
 }
 
 #' Plot lines

@@ -7,7 +7,7 @@
 \method{plotXScores}{pls}(
   obj,
   comp = if (obj$ncomp > 1) c(1, 2) else 1,
-  show.axes = T,
+  show.axes = TRUE,
   main = "Scores (X)",
   res = obj$res,
   ...

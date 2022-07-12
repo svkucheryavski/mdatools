@@ -666,7 +666,7 @@ pca.mvreplace <- function(x, center = TRUE, scale = FALSE, maxncomp = 10, expvar
    }
 
    if (center) {
-      gmean <- attr(xo, "scaled:center");
+      gmean <- attr(xo, "scaled:center")
    }
 
    n <- 1
@@ -697,7 +697,7 @@ pca.mvreplace <- function(x, center = TRUE, scale = FALSE, maxncomp = 10, expvar
       x_new <- tcrossprod(scores, loadings)
 
       # remove centering
-      x_new <- sweep(x_new, 2L, lmean, "+", check.margin = F)
+      x_new <- sweep(x_new, 2L, lmean, "+", check.margin = FALSE)
 
       # replace missing values by the calculated
       x <- xo
@@ -831,7 +831,7 @@ pca.nipals <- function(x, ncomp = min(ncol(x), nrow(x) - 1), tol = 10^-10) {
    E <- x
    for (i in seq_len(ncomp)) {
       ind <- which.max(apply(E, 2, sd))
-      t <- E[, ind, drop = F]
+      t <- E[, ind, drop = FALSE]
       tau <- th <- 99999999
       while (th > tol * tau) {
          p <- crossprod(E, t) / as.vector(crossprod(t))
@@ -1211,7 +1211,8 @@ plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotLoadings.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type = (if (length(comp == 2)) "p" else "l"),
+plotLoadings.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1,
+   type = (if (length(comp == 2)) "p" else "l"),
    show.legend = TRUE, show.axes = TRUE, ...) {
 
    if (min(comp) < 1 || max(comp) > ncol(obj$loadings)) {
@@ -1292,7 +1293,7 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
             main = main, colmap = col, show.lines = show.lines, show.excluded = show.excluded, ...)
 
    if (show.excluded && length(attr(loadings, "exclrows")) > 0) {
-      loadings <- loadings[-attr(loadings, "exclrows"), , drop = F]
+      loadings <- loadings[-attr(loadings, "exclrows"), , drop = FALSE]
    }
 
    segments(0, 0, loadings[, 1], loadings[, 2], col = col[2], lty = lty, lwd = lwd)

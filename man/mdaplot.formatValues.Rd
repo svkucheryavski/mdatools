@@ -4,7 +4,7 @@
 \alias{mdaplot.formatValues}
 \title{Format vector with numeric values}
 \usage{
-mdaplot.formatValues(data, round.only = F, digits = 3)
+mdaplot.formatValues(data, round.only = FALSE, digits = 3)
 }
 \arguments{
 \item{data}{vector or matrix with values}

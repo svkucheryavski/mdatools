@@ -92,7 +92,7 @@
 #' par( mfrow = c(1, 1))
 #'
 #' @export
-randtest <- function(x, y, ncomp = 15, center = T, scale = F, nperm = 1000, sig.level = 0.05,
+randtest <- function(x, y, ncomp = 15, center = TRUE, scale = FALSE, nperm = 1000, sig.level = 0.05,
                     silent = TRUE, exclcols = NULL, exclrows = NULL) {
    x <- as.matrix(x)
    y <- as.matrix(y)
@@ -100,14 +100,14 @@ randtest <- function(x, y, ncomp = 15, center = T, scale = F, nperm = 1000, sig.
    # remove excluded columns and rows
    if (length(exclcols) > 0) {
       x <- mda.exclcols(x, exclcols)
-      x <- x[, -attr(x, "exclcols"), drop = F]
+      x <- x[, -attr(x, "exclcols"), drop = FALSE]
    }
 
    if (length(exclrows) > 0) {
       x <- mda.exclrows(x, exclrows)
       exclrows <- attr(x, "exclrows")
-      x <- x[-exclrows, , drop = F]
-      y <- y[-exclrows, , drop = F]
+      x <- x[-exclrows, , drop = FALSE]
+      y <- y[-exclrows, , drop = FALSE]
    }
 
    nobj <- nrow(x)
