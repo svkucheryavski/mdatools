@@ -196,3 +196,21 @@ test_that("text outcome works fine", {
    expect_output(summary(m, ny = 1, ncomp = 1, res = list("xres" = m$res$cal)))
    expect_output(print(m))
 })
+
+test_that("RMSE ratio plot works fine", {
+   data(simdata)
+   X <- simdata$spectra.c
+   Y <- simdata$conc.c
+   m1 <- pls(X, Y, 11, cv = 1)
+
+   par(mfrow = c(2, 2))
+   expect_silent(plotRMSERatio(m1))
+   expect_silent(plotRMSERatio(m1, ny = 2))
+   expect_silent(plotRMSERatio(m1, ny = 3))
+   expect_silent(plotRMSERatio(m1, ny = 3, col = "red", pch = 3, lty = 2, lwd = 2))
+
+   expect_error(plotRMSERatio(m1, 0))
+   expect_error(plotRMSERatio(m1, 4))
+   expect_error(plotRMSERatio(m1, c(1, 2)))
+
+})

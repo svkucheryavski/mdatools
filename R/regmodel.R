@@ -301,6 +301,49 @@ plotRMSE.regmodel <- function(obj, ny = 1, type = "b", labels = "values",
    mdaplotg(plot_data, type = type, xticks = xticks, labels = labels, ylab = ylab, ...)
 }
 
+
+#' RMSECV/RMSEC ratio plot for regression model
+#'
+#' @description
+#' Shows plot with RMSECV/RMSEC values vs. RMSECV for each component.
+#'
+#' @param obj
+#' a regression model (object of class \code{regmodel})
+#' @param ny
+#' number of response variable to make the plot for (if y is multivariate)
+#' @param type
+#' type of the plot (use only "b" or "l")
+#' @param show.labels
+#' logical, show or not labels for plot points
+#' @param labels
+#' vector with point labels (by default number of components)
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x-axis
+#' @param ylab
+#' label for y-axis
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @export
+plotRMSERatio.regmodel <- function(obj, ny = 1, type = "b", show.labels = TRUE, labels = seq_len(obj$ncomp),
+   main = paste0("RMSECV/RMSEC ratio (", obj$res$cal$respnames[ny], ")"),
+   ylab = "RMSECV/RMSEC ratio",
+   xlab = "RMSECV", ...) {
+
+   stopifnot("Cross-validation results are not found." = !is.null(obj$res$cv))
+   stopifnot("Parameter 'ny' has a wrong value." = (length(ny) == 1 && ny >= 1 && ny <= nrow(obj$res$cal$rmse)))
+
+   plot_data <- matrix(obj$res$cv$rmse[ny, ]/obj$res$cal$rmse[ny, ], nrow = 1)
+   attr(plot_data, "xaxis.values") <- obj$res$cv$rmse[ny, ]
+   attr(plot_data, "xaxis.name") <- xlab
+
+   mdaplot(plot_data, type = type, xlab = xlab, ylab = ylab, main = main, show.labels = show.labels,
+   labels = labels,...)
+}
+
+
 #' Predictions plot for regression model
 #'
 #' @description
