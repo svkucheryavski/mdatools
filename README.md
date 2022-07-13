@@ -3,7 +3,6 @@ Multivariate Data Analysis Tools
 ![GitHub build status](https://github.com/svkucheryavski/mdatools/workflows/R-CMD-check/badge.svg)
 ![GitHub All Releases](https://img.shields.io/github/downloads/svkucheryavski/mdatools/total?color=blue&logo=Github "Downloads from GitHub")
 ![Downloads (CRAN)](https://cranlogs.r-pkg.org/badges/grand-total/mdatools?color=blue&logo=R&style=flat-square "Downloads from CRAN")
-[![codecov](https://codecov.io/gh/svkucheryavski/mdatools/branch/0.12.0/graph/badge.svg?style=flat-square)](https://app.codecov.io/gh/svkucheryavski/mdatools)
 
 <img src="https://mda.tools/images/logo.svg" align="left" style="top: 5px 10px 5px 0;" />
 
