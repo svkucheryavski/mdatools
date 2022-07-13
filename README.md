@@ -3,7 +3,7 @@ Multivariate Data Analysis Tools
 ![GitHub build status](https://github.com/svkucheryavski/mdatools/workflows/R-CMD-check/badge.svg)
 ![GitHub All Releases](https://img.shields.io/github/downloads/svkucheryavski/mdatools/total?color=blue&logo=Github "Downloads from GitHub")
 ![Downloads (CRAN)](https://cranlogs.r-pkg.org/badges/grand-total/mdatools?color=blue&logo=R&style=flat-square "Downloads from CRAN")
-[![codecov](https://app.codecov.io/gh/svkucheryavski/mdatools/branch/0.12.0/graph/badge.svg?style=flat-square)](https://app.codecov.io/gh/svkucheryavski/mdatools)
+[![codecov](https://codecov.io/gh/svkucheryavski/mdatools/branch/0.12.0/graph/badge.svg?style=flat-square)](https://app.codecov.io/gh/svkucheryavski/mdatools)
 
 <img src="https://mda.tools/images/logo.svg" align="left" style="top: 5px 10px 5px 0;" />
 
@@ -14,7 +14,7 @@ For more details and examples read a [Bookdown tutorial](https://mda.tools/docs/
 You can also take video-lectures from [YouTube channel](https://www.youtube.com/channel/UCox0H4utfMq4FIu2kymuyTA) devoted to introductory Chemometric course I give to master students. The lectures explain theory behind basic Chemometric methods but also show how to use them in *mdatools*.
 
 If you want to cite the package, please use the following: Sergey Kucheryavskiy, *mdatools – R package for chemometrics*, Chemometrics and Intelligent Laboratory Systems, Volume 198,
-2020 (DOI: [10.1016/j.chemolab.2020.103937](https://doi.org/10.1016/j.chemolab.2020.103937)).
+2020 (DOI: [10.1016/j.chemolab.2020.103937](hui)).
 
 What is new
 -----------
