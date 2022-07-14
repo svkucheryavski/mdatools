@@ -13,7 +13,7 @@ For more details and examples read a [Bookdown tutorial](https://mda.tools/docs/
 You can also take video-lectures from [YouTube channel](https://www.youtube.com/channel/UCox0H4utfMq4FIu2kymuyTA) devoted to introductory Chemometric course I give to master students. The lectures explain theory behind basic Chemometric methods but also show how to use them in *mdatools*.
 
 If you want to cite the package, please use the following: Sergey Kucheryavskiy, *mdatools – R package for chemometrics*, Chemometrics and Intelligent Laboratory Systems, Volume 198,
-2020 (DOI: [10.1016/j.chemolab.2020.103937](hui)).
+2020 (DOI: [10.1016/j.chemolab.2020.103937](https://doi.org/10.1016/j.chemolab.2020.103937)).
 
 What is new
 -----------
