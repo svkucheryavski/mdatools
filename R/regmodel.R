@@ -56,8 +56,8 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
 
    # get matrix with indices for cv segments
    cv_ind <- crossval(cv, nobj = nobj, resp = y[, 1])
-   nseg <- nrow(cv_ind);
-   nrep <- dim(cv_ind)[3]
+   nseg <- max(cv_ind)
+   nrep <- ncol(cv_ind)
 
    # prepare arrays for results
    yp.cv <- array(0, dim = c(nobj, ncomp, nresp))
@@ -66,7 +66,7 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
    # loop over segments and repetitions
    for (ir in seq_len(nrep)) {
       for (is in seq_len(nseg)) {
-         ind <- na.exclude(cv_ind[is, , ir])
+         ind <- which(cv_ind[, ir] == is)
          if (length(ind) == 0) next
 
          xc <- x[-ind, , drop = FALSE]
@@ -231,7 +231,7 @@ summary.regmodel <- function(object, ncomp = object$ncomp.selected,
       rownames(sum_data) <- capitalize(names(res))
 
       sum_data[, "R2"] <- round(sum_data[, "R2"], 3)
-      sum_data[, "RMSE"] <- mdaplot.formatValues(sum_data[, "RMSE"], round.only = T)
+      sum_data[, "RMSE"] <- mdaplot.formatValues(sum_data[, "RMSE"], round.only = TRUE)
       sum_data[, "Slope"] <- round(sum_data[, "Slope"], 3)
       sum_data[, "Bias"] <- round(sum_data[, "Bias"], 4)
       sum_data[, "RPD"] <- round(sum_data[, "RPD"], 1)
@@ -300,6 +300,49 @@ plotRMSE.regmodel <- function(obj, ny = 1, type = "b", labels = "values",
    plot_data <- lapply(res, plotRMSE, ny = ny, show.plot = FALSE)
    mdaplotg(plot_data, type = type, xticks = xticks, labels = labels, ylab = ylab, ...)
 }
+
+
+#' RMSECV/RMSEC ratio plot for regression model
+#'
+#' @description
+#' Shows plot with RMSECV/RMSEC values vs. RMSECV for each component.
+#'
+#' @param obj
+#' a regression model (object of class \code{regmodel})
+#' @param ny
+#' number of response variable to make the plot for (if y is multivariate)
+#' @param type
+#' type of the plot (use only "b" or "l")
+#' @param show.labels
+#' logical, show or not labels for plot points
+#' @param labels
+#' vector with point labels (by default number of components)
+#' @param main
+#' main plot title
+#' @param xlab
+#' label for x-axis
+#' @param ylab
+#' label for y-axis
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @export
+plotRMSERatio.regmodel <- function(obj, ny = 1, type = "b", show.labels = TRUE, labels = seq_len(obj$ncomp),
+   main = paste0("RMSECV/RMSEC ratio (", obj$res$cal$respnames[ny], ")"),
+   ylab = "RMSECV/RMSEC ratio",
+   xlab = "RMSECV", ...) {
+
+   stopifnot("Cross-validation results are not found." = !is.null(obj$res$cv))
+   stopifnot("Parameter 'ny' has a wrong value." = (length(ny) == 1 && ny >= 1 && ny <= nrow(obj$res$cal$rmse)))
+
+   plot_data <- matrix(obj$res$cv$rmse[ny, ] / obj$res$cal$rmse[ny, ], nrow = 1)
+   attr(plot_data, "xaxis.values") <- obj$res$cv$rmse[ny, ]
+   attr(plot_data, "xaxis.name") <- xlab
+
+   mdaplot(plot_data, type = type, xlab = xlab, ylab = ylab, main = main, show.labels = show.labels,
+   labels = labels, ...)
+}
+
 
 #' Predictions plot for regression model
 #'

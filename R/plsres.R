@@ -226,7 +226,7 @@ summary.plsres <- function(object, ny = seq_len(object$nresp), ncomp = NULL, ...
       out <- as.matrix.plsres(object, ny = y, ncomp = ncomp)
       if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
       out[, 5] <- round(out[, 5], 3)
-      out[, 6] <- mdaplot.formatValues(out[, 6], round.only = T)
+      out[, 6] <- mdaplot.formatValues(out[, 6], round.only = TRUE)
       out[, 7] <- round(out[, 7], 3)
       out[, 8] <- round(out[, 8], 4)
       out[, 9] <- round(out[, 9], 2)

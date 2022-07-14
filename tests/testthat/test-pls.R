@@ -253,17 +253,10 @@ context("pls: compare pedict.pls() outcome with known values")
 
 test_that("predictions for people data are correct", {
    # model
-   f <- system.file("testdata", "pls-xloadings.csv", package = "mdatools")
-   xloadings <- read.csv(f, header = FALSE)
-
-   f <- system.file("testdata", "pls-yloadings.csv", package = "mdatools")
-   yloadings <- read.csv(f, header = FALSE)
-
-   f <- system.file("testdata", "pls-weights.csv", package = "mdatools")
-   weights <- read.csv(f, header = FALSE)
-
-   f <- system.file("testdata", "pls-coeffs.csv", package = "mdatools")
-   coeffs <- read.csv(f, header = FALSE)
+   xloadings <- read.csv("pls-xloadings.csv", header = FALSE)
+   yloadings <- read.csv("pls-yloadings.csv", header = FALSE)
+   weights <- read.csv("pls-weights.csv", header = FALSE)
+   coeffs <- read.csv("pls-coeffs.csv", header = FALSE)
 
    xc <- people[, -4]
    yc <- people[, 4, drop = F]
@@ -274,25 +267,11 @@ test_that("predictions for people data are correct", {
    expect_equivalent(obj$coeffs$values[, 4, ], as.matrix(coeffs), tolerance = 10^-5)
 
    # predictions
-   f <- system.file("testdata", "pls-xscores.csv", package = "mdatools")
-   xscores <- read.csv(f, header = FALSE)
-   print(f)
-
-   f <- system.file("testdata", "pls-yscores.csv", package = "mdatools")
-   yscores <- read.csv(f, header = FALSE)
-   print(f)
-
-   f <- system.file("testdata", "pls-xres.csv", package = "mdatools")
-   xresid <- read.csv(f, header = FALSE)
-   print(f)
-
-   f <- system.file("testdata", "pls-yres.csv", package = "mdatools")
-   yresid <- read.csv(f, header = FALSE)
-   print(f)
-
-   f <- system.file("testdata", "pls-expvar.csv", package = "mdatools")
-   expvar <- read.csv(f, header = FALSE)
-   print(f)
+   xscores <- read.csv("pls-xscores.csv", header = FALSE)
+   yscores <- read.csv("pls-yscores.csv", header = FALSE)
+   xresid  <- read.csv("pls-xres.csv", header = FALSE)
+   yresid  <- read.csv("pls-yres.csv", header = FALSE)
+   expvar  <- read.csv("pls-expvar.csv", header = FALSE)
 
    res <- predict(obj, xc, yc)
    expect_equivalent(res$xdecomp$scores, as.matrix(xscores), tolerance = 10^-4)
@@ -474,9 +453,20 @@ test_that("vipscores for people data (A = 4) identical to once computed in MATLA
    d <- datasets[[1]]
    m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
 
-   f <- system.file("testdata", "pls-vipscores.csv", package = "mdatools")
-   vip <- read.csv(f, header = FALSE)
+   vip <- read.csv("pls-vipscores.csv", header = FALSE)
    expect_equivalent(vipscores(m, ncomp = 4), as.matrix(vip), tolerance = 10^-4)
+})
+
+test_that("vipscores for people data (A = 4) identical to once computed in MATLAB for PLS2", {
+   data(people)
+   X <- people[, -c(4, 6)]
+   Y <- people[,  c(4, 6)]
+   m <- pls(X, Y, 8, center = TRUE, scale = TRUE, cv = 1)
+
+   vip <- read.csv("pls2-vipscores.csv", header = FALSE)[[1]]
+   #dim(vip) <- c(ncol(X), 2)
+
+   expect_equivalent(vipscores(m, ncomp = 4), matrix(vip, ncol = 2), tolerance = 10^-4)
 })
 
 
@@ -523,13 +513,6 @@ for (i in seq_along(datasets)) {
    print(v)
 }
 
-#test_that("vipscores for people data (A = 4) identical to once computed in MATLAB", {
-#   d <- datasets[[1]]
-#   m <- pls(d$xc, d$yc, d$ncomp, center = d$center, scale = d$scale, cv = 10)
-#
-#   vip <- as.matrix(read.csv("../matlab/pls-vipscores.csv", header = FALSE))
-#   expect_equivalent(vipscores(m, ncomp = 4), vip, tolerance = 10^-4)
-#})
 
 #########################################
 # Block 7. Tests for outlier detection  #
@@ -584,4 +567,64 @@ test_that("XY-residual limits are computed correctly", {
    expect_equal(sum(c2 == "extreme"), 2)
    expect_equal(sum(c2 == "outlier"), 2)
 
+})
+
+test_that("PLS gives results comparable to other software", {
+
+
+   # read model parameters and calibration scores made in PLS_Toolbox
+   xscores <-   as.matrix(read.delim("plstlbx-people-xscores.csv", sep = " ", header = FALSE))
+   yscores <-   as.matrix(read.delim("plstlbx-people-yscores.csv", sep = " ", header = FALSE))
+   weights <-   as.matrix(read.delim("plstlbx-people-weights.csv", sep = " ", header = FALSE))
+   xloadings <- as.matrix(read.delim("plstlbx-people-xloadings.csv", sep = " ", header = FALSE))
+   yloadings <- c(5.3643, 1.0338, 0.4675, 0.3567)
+   coeffs <- c(0.2078, 0.2647, 0.0073, 0.0722, -0.0016, 0.1829, 0.1420, -0.1984, 0.2153, 0.0151, -0.0405)
+
+   # make a model with manual cv splits
+   data(people)
+   X <- people[, -4]
+   y <- people[, 4, drop = FALSE]
+   m <- pls(X, y, 4, scale = TRUE, cv = rep(1:10, length.out = nrow(X)))
+
+   # compare main model parameters
+   # here we re-normalize results from PLS_Toolbox
+   xnorm <- sqrt(colSums(xscores^2))
+   expect_equivalent(m$xloadings, xloadings %*% diag(xnorm), tolerance = 10^-3)
+   expect_equivalent(m$res$cal$xdecomp$scores, xscores %*% diag(1/xnorm), tolerance = 10^-3)
+   expect_equivalent(m$weights, weights %*% diag(1/xnorm), tolerance = 10^-3)
+
+   expect_equivalent(m$yloadings, yloadings, tolerance = 10^-4)
+   expect_equivalent(m$coeffs$values[, 4, 1], coeffs, tolerance = 10^-4)
+
+   # check selectivity ratio
+   # here we change the result from PLS toolbox a bit for large values as they add
+   # given portion of x-variance when compute SR
+   sr <- c(24.8, 21.7, 2.2359, 0.1179, 0.1552, 0.9740, 0.0076, 5.9018, 10.0, 0.0256, 0.0138)
+   expect_equivalent(selratio(m, 4), sr, tolerance = 10^-1)
+
+   # compare calibration results
+   ypred <-  as.matrix(read.delim("plstlbx-people-ypred.csv", sep = " ", header = FALSE))
+   xqdist <- as.matrix(read.delim("plstlbx-people-xqdist.csv", sep = " ", header = FALSE))
+   xhdist <- as.matrix(read.delim("plstlbx-people-xhdist.csv", sep = " ", header = FALSE))
+   yqdist <- as.matrix(read.delim("plstlbx-people-yqdist.csv", sep = " ", header = FALSE))
+   rmsec <- c(1.0273, 0.7404, 0.6668, 0.6198)
+   r2c <- c(0.9283, 0.9627, 0.9698, 0.9739)
+
+   expect_equivalent(m$res$cal$xdecomp$T2[, 4], xhdist, tolerance = 10^-3)
+   expect_equivalent(m$res$cal$xdecomp$Q[, 4], xqdist, tolerance = 10^-3)
+
+   expect_equivalent(m$res$cal$ydecomp$Q[, 4], yqdist, tolerance = 10^-3)
+   expect_equivalent(m$res$cal$ydecomp$scores, yscores, tolerance = 10^-4)
+   expect_equivalent(m$res$cal$y.pred[, 4, 1], ypred, tolerance = 10^-4)
+
+   expect_equivalent(m$res$cal$rmse, rmsec, tolerance = 10^-3)
+   expect_equivalent(m$res$cal$r2, r2c, tolerance = 10^-3)
+
+
+   # compare cross-validation results
+   rmsecv <- c(1.1044, 0.8673, 0.8627, 0.8186)
+   r2cv <- c(0.9173, 0.9489, 0.9498, 0.9545)
+
+   expect_equivalent(m$res$cv$rmse, rmsecv, tolerance = 10^-3)
+   expect_equivalent(m$res$cv$r2, r2cv, tolerance = 10^-3)
 })

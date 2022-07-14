@@ -25,8 +25,8 @@ crossval.getParams <- function(cv, nobj) {
    if (type == "loo") {
       return(
          list(
-            type = "rand",
-            nrep = nrep,
+            type = "loo",
+            nrep = 1,
             nseg = nobj
          )
       )
@@ -80,6 +80,9 @@ crossval <- function(cv = 1, nobj = NULL, resp = NULL) {
    # get cross-validation parameters
    if (is.null(nobj)) nobj <- length(resp)
 
+   # if user already provided matrix with values - return it
+   if (is.numeric(cv) && length(cv) == nobj) return(as.matrix(cv))
+
    p <- crossval.getParams(cv = cv, nobj = nobj)
    if (!(p$type %in% c("rand", "ven", "loo"))) {
       stop("Wrong name for cross-validation method.")
@@ -95,22 +98,17 @@ crossval <- function(cv = 1, nobj = NULL, resp = NULL) {
       stop("Wrong value for number of segments (should be between 2 and number of objects).")
    }
 
-   seglen <- ceiling(nobj / p$nseg)
-   fulllen <- seglen * p$nseg
-   ind <- array(0, dim = c(p$nseg, seglen, p$nrep))
+   if (p$type == "loo") {
+      return(matrix(seq_len(nobj), ncol = 1))
+   }
 
    if (p$type == "rand") {
-      for (i in seq_len(p$nrep)) {
-         v <- c(sample(nobj), rep(NA, fulllen - nobj))
-         ind[, , i] <- matrix(v, nrow = p$nseg, byrow = TRUE)
-      }
-      return(ind)
+      return(sapply(seq_len(p$nrep), function(i) rep(seq_len(p$nseg), length.out = nobj)[sample(nobj)]))
    }
 
    if (p$type == "ven") {
-      v <- c(order(resp), rep(NA, fulllen - nobj))
-      ind[, , 1] <- matrix(v, nrow = p$nseg, byrow = FALSE)
-      return(ind)
+      ind <- if (is.null(resp)) seq_len(nobj) else order(resp)
+      return(matrix(rep(seq_len(p$nseg), length.out = nobj)[ind], ncol = 1))
    }
 
    stop("Something went wrong.")

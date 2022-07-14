@@ -165,7 +165,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
 
    if (ncol(y) > 1) {
       warning("iPLS can work with one y-variable at time, selecting first column.")
-      y <- y[, 1, drop = F]
+      y <- y[, 1, drop = FALSE]
    }
 
    # add name to the single column
@@ -244,7 +244,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
       "n" = 0,
       "start" = 1,
       "end" = ncol(x),
-      "selected" = F,
+      "selected" = FALSE,
       "nComp" = obj$gm$ncomp.selected,
       "RMSE" = gmres$rmse[1, obj$gm$ncomp.selected],
       "R2" = gmres$r2[1, obj$gm$ncomp.selected]
@@ -349,7 +349,7 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
          # combine already selected intervals with the current
          ind <- obj$int.limits[l, 1]:obj$int.limits[l, 2]
          xc <- x[, c(selind, ind), drop = FALSE]
-         xt <- if(!is.null(obj$x.test)) obj$x.test[, c(selind, ind), drop = FALSE] else NULL
+         xt <- if (!is.null(obj$x.test)) obj$x.test[, c(selind, ind), drop = FALSE] else NULL
 
          # build a model
          m <- pls(xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale, cv = obj$cv,
@@ -453,7 +453,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
 
          # combine already selected intervals with the current
          xc <- x[, -c(unselind, ind), drop = FALSE]
-         xt <- if(!is.null(obj$x.test)) obj$x.test[, -c(unselind, ind), drop = FALSE] else NULL
+         xt <- if (!is.null(obj$x.test)) obj$x.test[, -c(unselind, ind), drop = FALSE] else NULL
 
          # build a model
          m <- pls(xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale, cv = obj$cv,
@@ -479,7 +479,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
                "n" = l,
                "start" = obj$int.limits[l, 1],
                "end" = obj$int.limits[l, 2],
-               "selected" = F,
+               "selected" = FALSE,
                "nComp" = m$ncomp.selected,
                "RMSE" = lres$rmse[1, m$ncomp.selected],
                "R2" = lres$r2[1, m$ncomp.selected]

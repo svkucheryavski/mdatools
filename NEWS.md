@@ -1,5 +1,25 @@
-v.0.12.0
-========
+v. 0.13.0
+==========
+This release brings an updated implementation of PLS algorithm (SIMPLS) which is more numerically stable and gives sufficiently less warnings about using too many components in case when you work with small y-values. The speed of `pls()` method in general has been also improved.
+
+Another important thing is that cross-validation of regression and classification models has been re-written towards more simple solution and now you can also use your own custom splits by providing a vector with segment indices associated with each measurement. For example if you run PLS with parameter `cv = c(1, 2, 3, 4, 1, 2, 3, 4, 1, 2)` it is assumed that you want to use venetian blinds split with four segments and your dataset has 10 measurements. See more details in the tutorial, where description of cross-validation procedure has been moved to a separate section.
+
+Other changes and improvements:
+
+* Refactoring and improvements of `prep.savgol()` code made the method much faster (up to 50-60 times faster for datasets with many measurements).
+
+* Refactoring and improvements of `prep.alsbasecorr()` code made the method 2-3 times faster especially for large datasets.
+
+* added new plotting method `plotRMSERatio()` for regression models (inspired by [this post](https://eigenvector.com/%EF%BF%BCevaluating-models-hating-on-r-squared/) by Barry M. Wise)
+* added [PQN](https://doi.org/10.1021/ac051632c) normalization method to `prep.norm()` function.
+
+* fixed a bug in `vipscores()` which could lead to a bit higher values for PLS2 models.
+
+* fixes to several small bugs and general improvements.
+
+
+v. 0.12.0
+==========
 This release is mostly about preprocessing - added some new methods, improved the existent once and implemented a possibility to combine preprocessing methods together (including parameter values) and apply them all together in a correct sequence. See [preprocessing section](https://mda.tools/docs/preprocessing.html) in the tutorials for details
 
 ## New features and improvements
@@ -30,13 +50,13 @@ This release is mostly about preprocessing - added some new methods, improved th
 
 * the user guides have been revised and improved.
 
-v.0.11.5
-========
+v. 0.11.5
+==========
 
 * fix for an issue in PLS SIMPLS implementation (incorrect use of `Machine$longdouble.eps`), which lead to an error when the package is tested on Apple M1.
 
-v.0.11.4
-========
+v. 0.11.4
+==========
 
 * added possibility for providing partially known contributions (parameter `cont.forced`) or spectral values (parameter `spec.forced`) to `mcrals()`. See more in help text and user guide for the package.
 
@@ -49,8 +69,8 @@ v.0.11.4
 * fixed bug [#99](https://github.com/svkucheryavski/mdatools/issues/99), which did not allow to use user defined indices of pure variables in `mcrpure()`.
 
 
-v.0.11.3
-========
+v. 0.11.3
+==========
 
 * added [Procrustes Cross-Validation method](https://doi.org/10.1021/acs.analchem.0c02175), `pcv()` (it is also available as a [separate project](https://github.com/svkucheryavski/pcv)).
 
@@ -65,21 +85,21 @@ v.0.11.3
 * added link to [YouTube channel](https://www.youtube.com/channel/UCox0H4utfMq4FIu2kymuyTA) with Chemometric course based on *mdatools* package.
 
 
-v.0.11.2
-========
+v. 0.11.2
+==========
 
 * fixed an issue, which lead to a bug in `simcam.getPerformanceStats`, returning implausible and asymmetrical results (thanks to @svonallmen).
 
 * fixed a small issue sometimes giving warning when running tests on CRAN (did not influence the user experience though).
 
-v.0.11.1
-========
+v. 0.11.1
+==========
 
 * the algorithm for `mcrpure()` method has been modified to avoid potential issues with original patented version.
 
 
-v.0.11.0
-========
+v. 0.11.0
+==========
 
 ## New features
 
@@ -98,14 +118,14 @@ v.0.11.0
 * main model methods (`pls()`, `pca()`, etc.), now do additional check for the consistency of provided datasets.
 
 
-v.0.10.4
-========
+v. 0.10.4
+==========
 
 * fixed a bug, which led to ignoring `opacity` option in plots.
 
 
-v.0.10.3
-========
+v. 0.10.3
+==========
 
 * Fixed bug `#85` when using y-values as data frame gave an error in PLS regression
 
@@ -113,13 +133,13 @@ v.0.10.3
 
 * Code refactoring and tests for preprocessing methods
 
-v.0.10.2
-========
+v. 0.10.2
+==========
 
 * Fixed a bug in `categorize.pls()` method, which could give wrong results for test set measurements (see issue #82).
 
-v.0.10.1
-========
+v. 0.10.1
+==========
 
 * Small improvements to  `plotExtreme.pca()` so user can specify additional parameters, such as, for example `cex`. If plot is made for several components, you can now specify just one value for all points (e.g. color of points or marker symbol).
 
@@ -129,8 +149,8 @@ v.0.10.1
 
 * Fixed a bug in `summary()` method for PLS, which worked incorrectly in case of several response variables (PLS2).
 
-v.0.10.0
-========
+v. 0.10.0
+==========
 
 Many changes have been made in this version, but most of them are under the hood. Code has been refactored significantly in order to improve its efficiency and make future support easier. Some functionality has been re-written from the scratch. **Most** of the code is backward compatible, which means your old scripts should have no problem to run with this version. However, some changes are incompatible and this can lead to occasional errors and warning messages. All details are shown below, pay a special attention to **breaking changes** part.
 
@@ -232,29 +252,29 @@ Other changes are listed below:
 * New method `categorize()` allowing to categorize data rows based on PLS results and critical limits computed for X- and Y-distance.
 
 
-v.0.9.6
-=======
+v. 0.9.6
+=========
 * fixed a bug related to wrong calculation of R2 in case of multiple response variables (PLS2)
 * refactoring of `regres` methods
 * added tests for some of the `regres` methods
 
-v.0.9.5
-=======
+v. 0.9.5
+=========
 * better description of cross-validation settings in help text (parameter `cv`)
 * added column R2 (coefficient of determination) to PLS summary as it is not always identical to `Y cumexpvar`
 * better use of `cex` parameter for group plots (can be specified differently for each group)
 * if `cex` is specified it will be also applied for legend items
 
-v.0.9.4
-=======
+v. 0.9.4
+=========
 * fixed a bug leading to wrong results when using parameter `max.cov` in `prep.autoscale()` (#59)
 
-v.0.9.3
-=======
+v. 0.9.3
+=========
 * fixed a bug leading to wrong results in multiclass PLS-DA if class labels in reference class variable (factor) were not in alphabetical order
 
-v.0.9.2
-=======
+v. 0.9.2
+=========
 * improvements to `ipls()` method plus fixed a bug preventing breaking the selection loop (#56)
 * fixed a bug in `selectCompNum()` related to use of Wold criterion (#57)
 * fixed a bug with using of `max.cov` parameter in `prep.autoscale()` (#58)
@@ -262,15 +282,15 @@ v.0.9.2
 * code refactoring and small improvements
 * added tests for `prep.autoscale()`
 
-v.0.9.1
-=======
+v. 0.9.1
+=========
 * all plot functions have new `opacity` parameter for semi-transparent colors
 * several improvements to PLS-DA method for one-class discrimination
 * fixed a bug with wrong estimation of maximum number of components for PCA/SIMCA with cross-validation
 * added chapter on PLS-DA to the tutorial (including last improvements)
 
-v.0.9.0
-=======
+v. 0.9.0
+=========
 * added randomized PCA algorithm (efficient for datasets with large number of rows)
 * added option to inherit and show critical limits on residuals plot for PCA/SIMCA results
 * added support for data driven approach to PCA/SIMCA (DD-SIMCA)
@@ -283,8 +303,8 @@ v.0.9.0
 * added option to use equal axes limits in `plotPrediction()` for PLS results
 * the tutorial has been amended and extended correspondingly
 
-v.0.8.4
-=======
+v. 0.8.4
+=========
 * small improvements to calculation of statistics for regression coefficients
 * `pls.getRegCoeffs()` now also returns standard error and confidence intervals calculated for unstandardized variables
 * new method `summary()` for object with regression coefficients (`regcoeffs`)
@@ -292,24 +312,24 @@ v.0.8.4
 * fixed a bug in some PLS plots where labels for cross-validated results forced to be numbers
 * when using `mdaplot` for data frame with one or more factor columns, the factors are now transofrmed to dummy variables (before it led to an error)
 
-v.0.8.3
-=======
+v. 0.8.3
+=========
 * fixed a bug in `mdaplots` when using factor with more than 8 levels for color grouping led to an error
 * fixed a bug in `pca` with wrong calculation of eigenvalues in NIPALS algorithm
 * bars on a bar plot now can be color grouped
 
-v.0.8.2
-=======
+v. 0.8.2
+=========
 * parameters `lab.cex` and `lab.col` now are also applied to colorbar labels
 
-v.0.8.1
-=======
+v. 0.8.1
+=========
 * fixed a bug in PCA when explained variance was calculated incorrectly for data with excluded rows
 * fixed several issues with SIMCA (cross-validation) and SIMCAM (Cooman's plot)
 * added a chapter about SIMCA to the tutorial
 
-v.0.8.0
-=======
+v. 0.8.0
+=========
 * tutorial has been moved from GitBook to Bookdown and fully rewritten
 * GitHub repo for the package has the tutorial as a static html site in `docs` folder
 * the `mdaplot()` and `mdaplotg()` were rewritten completely and now are more easy to use (check tutorial)
@@ -326,21 +346,21 @@ v.0.8.0
 * added a posibility to exclude selected rows and columns from calculations
 * added support for images (check tutorial)
 
-v.0.7.2
-=======
+v. 0.7.2
+=========
 * corrected a typo in title of selectivity ratio plot
 * `prep.autoscale()` now do not scale columns with coefficient of variation below given threshold
 
-v.0.7.1
-=======
+v. 0.7.1
+=========
 * fixed an issue lead to plot.new() error in some cases
 * documentation was regenerated with new version of Roxygen
 * file People.RData was renamed to people.RData
 * NIPALS method for PCA has been added
 * code optimization to speed calculations up
 
-v.0.7.0
-=======
+v. 0.7.0
+=========
 * interval PLS variable selection (iPLS) is implemented
 * normalization was added to preprocessing methods (`prep.norm`)
 * method `getRegcoeffs` was added to PLS model
@@ -350,41 +370,41 @@ v.0.7.0
 * NAMESPACE file is generated by roxygen2
 * fixed several small bugs and typos
 
-v.0.6.2
-========
+v. 0.6.2
+==========
 * Q2 residuals renamed to Q (Squared residual distance)
 * All plots have parameters `lab.col` and `lab.cex` for changing color and font size for data point labels
 
-v.0.6.1
-========
+v. 0.6.1
+==========
 * fixed a bug led to incorrect calculation of specificity
 * jack-knife confidence intervals now also calculated for PLS-DA models
 * confidence intervals for regression coefficients are shown by default if calculated
 
-v.0.6.0
-========
+v. 0.6.0
+==========
 * randomization test for PLS has been added, see `?randtest`
 * systematic and repeated random cross-validation are available, see `?crossval`
 * fixed bug with labels on bar plot with confidence intervals
 * fixed bug in PLS when using maximum number of components lead to NA values in weights
 
 v. 0.5.3
-========
+==========
 * fixed several small bugs
 * improvemed documentation for basic methods
 
 v. 0.5.2
-========
+==========
 * fixed bug for computing classification performance for numeric class names
 * improvements to SIMCA implementation
 
 v. 0.5.1
-========
+==========
 * added more details to documentation
 * bug fixes for variable selection methods
 
 v. 0.5.0
-========
+==========
 * all documentation has been rewritten using `roxygen2` package
 * added extra preprocessing methods
 * added VIP scores calculation and plot for PLS and PLS-DA models
@@ -394,7 +414,7 @@ v. 0.5.0
 * the first release available in CRAN
 
 v. 0.4.0
-========
+==========
 * New `classres` class for representation and visualisation of classification results
 * in PCA model, limits for T2 and Q2 now are calculated for all available components
 * in PCA results, limits for T2 and Q2 calculated for a model are kept and shown on residuals plot
@@ -405,16 +425,16 @@ v. 0.4.0
 * bug fixes and improvements
 
 v. 0.3.2
-========
+==========
 * Enhancements in group bar plot
 * Fixed bugs with wrong labels of bar plot with negative values
 
 v. 0.3.1
-========
+==========
 * Corrected errors and typos in README.md and small bg fixes
 
 v. 0.3.0
-========
+==========
 * PLS and all related methods were rewritten from the scratch to make them faster, more efficient
 and also to follow the same code conventions as previously rewritten PCA. Here are main changes
 you need to do in your code if you used mdatools PLS before: `selectNumComp(model, ncomp)` instead

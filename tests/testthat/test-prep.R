@@ -150,6 +150,41 @@ test_that("Normalization to IS peak works (one value)", {
    expect_equivalent(pspectra1, pspectra2)
 })
 
+test_that("PQN normalization works correctly", {
+   data(simdata)
+   spectra <- simdata$spectra.c
+   ref.spectrum1 <- apply(simdata$spectra.c[c(1, 20, 30, 80, 80, 100), ], 2, mean)
+   ref.spectrum2 <- apply(spectra, 2, mean)
+
+   expect_error(prep.norm(spectra, "pqn", ref.spectrum = 1))
+   expect_error(prep.norm(spectra, "pqn", ref.spectrum = ref.spectrum1[, 1:10, drop = FALSE]))
+
+   # manual preprocessing of spectra
+   ref.spectrum1 <- ref.spectrum1 / sum(abs(ref.spectrum1))
+   ref.spectrum2 <- ref.spectrum2 / sum(abs(ref.spectrum2))
+   pspectra2 <- pspectra1 <- matrix(0, nrow(spectra), ncol(spectra))
+
+   for (i in seq_len(nrow(spectra))) {
+      s <- spectra[i, ] / sum(abs(spectra[i, ]))
+
+      q1 <- s / ref.spectrum1
+      pspectra1[i, ] <- s / median(q1)
+
+      q2 <- s / ref.spectrum2
+      pspectra2[i, ] <- s / median(q2)
+   }
+
+   # par(mfrow = c(2, 2))
+   # mdaplot(prep.norm(spectra, type = "sum"), type = "l")
+   # mdaplot(pspectra1, type = "l")
+   # mdaplot(pspectra2, type = "l")
+   # mdaplot(prep.norm(spectra, type = "pqn"), type = "l")
+
+   expect_equivalent(prep.norm(spectra, type = "pqn", ref.spectrum = ref.spectrum1), pspectra1)
+   expect_equivalent(prep.norm(spectra, type = "pqn", ref.spectrum = ref.spectrum2), pspectra2)
+   expect_equivalent(prep.norm(spectra, type = "pqn"), pspectra2)
+})
+
 test_that("Kubelka-Munk works correctly", {
    spectra <- simdata$spectra.c
    spectra <- spectra - min(spectra) + 0.01 * max(spectra)
@@ -205,6 +240,40 @@ test_that("SavGol smoothing works correctly", {
    expect_equal(dim(dy3), dim(y))
    expect_equivalent(which((abs(dy3) < 10^-12)), zeros)
 
+   # check for small numeric sets
+   x = matrix(c(1, 1, 1, 3, 4, 7, 4, 3, 1, 1, 1.0), nrow = 1)
+   y = matrix(c(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5.0), nrow = 1)
+   z = matrix(c(4, 6, 4, 6, 4, 6, 4, 6, 4, 6.0), nrow = 1)
+
+   # no derivartive
+   expect_equivalent(prep.savgol(x, width = 5, porder = 1, dorder = 0), c(0.4, 1.2, 2.0, 3.2, 3.8, 4.2, 3.8, 3.2, 2.0, 1.2, 0.4))
+   expect_equivalent(prep.savgol(y, width = 3, porder = 1, dorder = 0), c(5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0))
+   expect_equivalent(prep.savgol(z, width = 5, porder = 1, dorder = 0), c(4.8, 4.8, 4.8, 5.2, 4.8, 5.2, 4.8, 5.2, 5.2, 5.2))
+
+   # first derivartive
+   expect_equivalent(prep.savgol(x, width = 3, porder = 1, dorder = 1), c(0.0, 0.0, 1.0, 1.5, 2.0, 0.0, -2.0, -1.5, -1.0, 0.0, 0.0))
+   expect_equivalent(prep.savgol(y, width = 3, porder = 1, dorder = 1), c(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+   expect_equivalent(prep.savgol(z, width = 3, porder = 1, dorder = 1), c(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+
+   # second derivartive
+   expect_equivalent(prep.savgol(x, width = 3, porder = 2, dorder = 2), c(0.0, 0.0, 2.0, -1.0, 2.0, -6.0, 2.0, -1.0, 2.0, 0.0, 0.0))
+   expect_equivalent(prep.savgol(y, width = 3, porder = 2, dorder = 2), c(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+   expect_equivalent(prep.savgol(z, width = 3, porder = 2, dorder = 2), c(-4.0, -4.0, 4.0, -4.0, 4.0, -4.0, 4.0, -4.0, 4.0, 4.0))
+
+
+   y1 <- prep.savgol(
+      rbind(
+         matrix(c(1, 1, 1, 3, 4, 7, 4, 3, 1, 1, 1.0), nrow = 1),
+         matrix(c(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5.0), nrow = 1)
+      ), width = 5, porder = 1, dorder = 0
+   )
+
+   y2 <- rbind(
+      prep.savgol(matrix(c(1, 1, 1, 3, 4, 7, 4, 3, 1, 1, 1.0), nrow = 1), width = 5, porder = 1, dorder = 0),
+      prep.savgol(matrix(c(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5.0), nrow = 1), width = 5, porder = 1, dorder = 0)
+   )
+
+   expect_equivalent(y1, y2)
 })
 
 context("prep: alsbasecorr")

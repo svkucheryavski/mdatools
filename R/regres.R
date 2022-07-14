@@ -161,8 +161,8 @@ regres.getPerformanceStats <- function(y.pred, y.ref) {
    # remove excluded rows so they are not counted
    # when calculating statistics
    if (length(attrs$exclrows) > 0) {
-      y.pred <- y.pred[-attrs$exclrows, , , drop = F]
-      y.ref <- y.ref[-attrs$exclrows, , drop = F]
+      y.pred <- y.pred[-attrs$exclrows, , , drop = FALSE]
+      y.ref <- y.ref[-attrs$exclrows, , drop = FALSE]
    }
 
    # residuals (errors) based statistics
@@ -234,7 +234,7 @@ regres.err <- function(y.pred, y.ref) {
 #'
 #' @export
 regres.r2 <- function(err, ytot) {
-   r2 <- t(1 - scale(colSums(err^2), center = F, scale = ytot))
+   r2 <- t(1 - scale(colSums(err^2), center = FALSE, scale = ytot))
    return(regress.addattrs(r2, attributes(err), "Coefficient of determination"))
 }
 

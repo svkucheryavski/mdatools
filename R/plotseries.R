@@ -210,7 +210,7 @@ splitPlotData <- function(data, type) {
 
    # 0.12.0: yaxis.name must not be used as axis label in line and bar plots
    if (type %in% c("b", "l", "e", "h")) {
-      attrs$yaxis.name = NULL
+      attrs$yaxis.name <- NULL
    }
 
    # prepare x-axis values for other types of plots
@@ -315,7 +315,7 @@ getPlotColors <- function(ps, col, opacity, cgroup, colmap) {
 getConfidenceEllipse <- function(points, conf.level = 0.95, n = 100) {
 
    # compute igen vectors and values
-   e <- eigen(cov(points));
+   e <- eigen(cov(points))
 
    # get angle between the x-axis and the largest eigenvector
    phi <- atan2(e$vectors[[2]], e$vectors[[1]])
@@ -647,11 +647,6 @@ plotBars <- function(ps, col = ps$col, bwd = 0.8, border = NA, force.x.values = 
    y <- ps$y_values[1, ]
 
    if (length(x) > 1) {
-      # this gives variable width for bars and does not work well
-      #bwd_left <- c(x[seq(2, length(x))] - x[seq(1, length(x) - 1)])
-      #bwd_right <- -c(x[seq(1, length(x) - 1)] - x[seq(2, length(x))])
-      #bwd_left <- c(bwd_left[1], bwd_left) * bwd / 2
-      #bwd_right <- c(bwd_right, bwd_right[length(bwd_right)]) * bwd / 2
       dx <- min(diff(x))
       bwd_right <- bwd_left <- dx * bwd / 2
    } else {

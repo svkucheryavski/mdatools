@@ -1,4 +1,15 @@
 
+#' Plot for ratio RMSEC/RMSECV vs RMSECV
+#' @param obj
+#' object with any regression model
+#' @param ...
+#' other parameters
+#'
+#' @export
+plotRMSERatio <- function(obj, ...) {
+   UseMethod("plotRMSERatio")
+}
+
 #' Plot purity spectra
 #' @param obj
 #' object with mcr pure case

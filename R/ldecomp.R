@@ -142,8 +142,12 @@ plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", labels = 
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotScores.ldecomp <- function(obj, comp = c(1, 2), type = "p", show.axes = TRUE,
+plotScores.ldecomp <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type = "p", show.axes = TRUE,
    show.plot = TRUE, ...) {
+
+   if (min(comp) < 1 || max(comp) > ncol(obj$scores)) {
+      stop("Wrong values for 'comp' parameter.")
+   }
 
    # get scores for given components and generate column names with explained variance
    plot_data <- mda.subset(obj$scores, select = comp)
@@ -418,7 +422,6 @@ ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
 ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
 
    # get names and attributes
-   rows_excluded <- attr(scores, "exclrows")
    cols_excluded <- attr(loadings, "exclrows")
 
    # get sizes
@@ -431,35 +434,23 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
       residuals <- residuals[, -cols_excluded, drop = FALSE]
    }
 
-   # get rid of hidden scores and residuals (needed for some calculations)
-   scores_visible <- scores
-   residuals_visible <- residuals
-   if (length(rows_excluded) > 0) {
-      scores_visible <- scores_visible[-rows_excluded, , drop = FALSE]
-      residuals_visible <- residuals_visible[-rows_excluded, , drop = FALSE]
+   # helper function to compute orthogonal distances for given number of components in a model
+   getResiduals <- function(scores, loadings, residuals, a) {
+      ncomp <- ncol(scores)
+      if (a == ncomp) return(residuals)
+
+      residuals + tcrossprod(
+         scores[, (a + 1):ncomp, drop = FALSE],
+         loadings[, (a + 1):ncomp, drop = FALSE]
+      )
    }
 
-   # normalize the scores
-   scoresn <- scale(scores, center = FALSE, scale = sqrt(eigenvals))
+   # compute matrices with orthogonal and score distances
+   Q <- sapply(seq_len(ncomp), function(a) rowSums(getResiduals(scores, loadings, residuals, a)^2))
+   dim(Q) <- c(nobj, ncomp)
 
-   # prepare zero matrices for the and model power
-   T2 <- matrix(0, nrow = nobj, ncol = ncomp)
-   Q <- matrix(0, nrow = nobj, ncol = ncomp)
-
-   # calculate distances and model power for each possible number of components in model
-   for (i in seq_len(ncomp)) {
-      res <- residuals
-      if (i < ncomp) {
-         res <- res +
-            tcrossprod(
-               scores[, (i + 1):ncomp, drop = F],
-               loadings[, (i + 1):ncomp, drop = F]
-            )
-      }
-
-      Q[, i] <- rowSums(res^2)
-      T2[, i] <- rowSums(scoresn[, seq_len(i), drop = F]^2)
-   }
+   T2 <- t(apply(scale(scores^2, center = FALSE, scale = eigenvals), 1, cumsum))
+   dim(T2) <- c(nobj, ncomp)
 
    # set attributes for Q
    Q <- mda.setattr(Q, mda.getattr(scores), type = "row")
@@ -512,7 +503,7 @@ jm.crit <- function(residuals, eigenvals, alpha = 0.05, gamma = 0.01) {
    t2 <- rev(cumsum(rev(eigenvals)^2))[seq_len(ncomp)]
    t3 <- rev(cumsum(rev(eigenvals)^3))[seq_len(ncomp)]
 
-   h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2);
+   h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2)
    ifelse(h0 < 0.001, h0 <- 0.001, h0)
 
    # inverse error function
@@ -556,7 +547,7 @@ jm.prob <- function(u, eigenvals, ncomp) {
    t2 <- rev(cumsum(rev(eigenvals)^2))[ncomp]
    t3 <- rev(cumsum(rev(eigenvals)^3))[ncomp]
 
-   h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2);
+   h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2)
    ifelse(h0 < 0.001, h0 <- 0.001, h0)
 
    h1 <- (u / t1)^h0

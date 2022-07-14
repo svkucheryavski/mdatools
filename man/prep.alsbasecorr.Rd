@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep.R
 \name{prep.alsbasecorr}
 \alias{prep.alsbasecorr}
-\title{Baseline correction using assymetric least squares}
+\title{Baseline correction using asymetric least squares}
 \usage{
 prep.alsbasecorr(data, plambda = 5, p = 0.1, max.niter = 10)
 }
@@ -19,7 +19,7 @@ prep.alsbasecorr(data, plambda = 5, p = 0.1, max.niter = 10)
 preprocessed spectra.
 }
 \description{
-Baseline correction using assymetric least squares
+Baseline correction using asymetric least squares
 }
 \details{
 The function implements baseline correction algorithm based on Whittaker smoother. The method

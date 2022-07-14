@@ -299,44 +299,40 @@ crossval.simca <- function(obj, x, cv) {
 
    # remove excluded rows
    if (length(attrs$exclrows) > 0) {
-      x <- x[-attrs$exclrows, , drop = F]
+      x <- x[-attrs$exclrows, , drop = FALSE]
    }
 
    # remove excluded columns
    if (length(attrs$exclcols) > 0) {
-      x <- x[, -attrs$exclcols, drop = F]
+      x <- x[, -attrs$exclcols, drop = FALSE]
    }
 
    # get matrix with indices for cv segments
    nobj <- nrow(x)
    idx <- crossval(cv, nobj)
-   nseg <- nrow(idx);
-   nrep <- dim(idx)[3]
+   nseg <- max(idx)
+   nrep <- ncol(idx)
 
    p.pred <- array(0, dim = c(nobj, ncomp, 1))
-
    # loop over segments
    for (iRep in seq_len(nrep)) {
       for (iSeg in seq_len(nseg)) {
-         ind <- na.exclude(idx[iSeg, , iRep])
+         ind <- which(idx[, iRep] == iSeg)
+         x.cal <- x[-ind, , drop = FALSE]
+         x.val <- x[ind, , drop = FALSE]
 
-         if (length(ind) > 0) {
-            x.cal <- x[-ind, , drop = F]
-            x.val <- x[ind, , drop = F]
+         # calibrate PCA model and set distance limits
+         m.loc <- pca(x.cal, obj$ncomp, center = obj$center, scale = obj$scale,
+            method = obj$method, rand = obj$rand, lim.type = obj$lim.type, alpha = obj$alpha,
+            gamma = obj$gamma)
 
-            # calibrate PCA model and set distance limits
-            m.loc <- pca(x.cal, obj$ncomp, center = obj$center, scale = obj$scale,
-               method = obj$method, rand = obj$rand, lim.type = obj$lim.type, alpha = obj$alpha,
-               gamma = obj$gamma)
+         # make prediction for validation subset
+         res.loc <- predict.pca(m.loc, x.val)
 
-            # make prediction for validation subset
-            res.loc <- predict.pca(m.loc, x.val)
-
-            # compute and save probabilities
-            for (i in seq_len(obj$ncomp)) {
-               p.pred[ind, i, 1] <- p.pred[ind, i, 1] +
-                  getProbabilities.simca(m.loc, i, res.loc$Q[, i], res.loc$T2[, i])
-            }
+         # compute and save probabilities
+         for (i in seq_len(obj$ncomp)) {
+            p.pred[ind, i, 1] <- p.pred[ind, i, 1] +
+               getProbabilities.simca(m.loc, i, res.loc$Q[, i], res.loc$T2[, i])
          }
       }
    }

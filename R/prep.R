@@ -108,10 +108,12 @@ prep.snv <- function(data) {
 #' @param data
 #' a matrix with data values
 #' @param type
-#' type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, or \code{"is"}.
+#' type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, \code{"is"}, or \code{"pqn"}.
 #' @param col.ind
 #' indices of columns (can be either integer or logical valuws) for normalization to internal
 #' standard peak.
+#' @param ref.spectrum
+#' reference spectrum for PQN normalization, if not provided a mean spectrum for data is used
 #'
 #' @details
 #' The \code{"area"}, \code{"length"}, \code{"sum"} types do preprocessing to unit area (sum of
@@ -122,15 +124,25 @@ prep.snv <- function(data) {
 #' of this peak. If `col.ind` points on several adjucent vales, the rows are normalized to the area
 #' under the peak - sum of the intensities.
 #'
+#' The \code{"pqn"} is Probabilistic Quotient Normalization as described in [1]. In this case you also
+#' need to provide a reference spectrum (e.g. mean or median of spectra for some reference samples). If
+#' reference spectrum is not provided it will be computed as mean of the spectra to be
+#' preprocessed (parameter \code{data}).
+#'
+#' @references
+#' 1. F. Dieterle, A. Ross, H. Senn. Probabilistic Quotient Normalization as Robust Method to
+#' Account for Dilution of Complex Biological Mixtures. Application in 1 H NMR Metabonomics.
+#' Anal. Chem. 2006, 78, 4281–4290.
+#'
 #' @return
 #' data matrix with normalized values
 #'
 #' @export
-prep.norm <- function(data, type = "area", col.ind = NULL) {
+prep.norm <- function(data, type = "area", col.ind = NULL, ref.spectrum = NULL) {
 
    if (type == "snv") return(prep.snv(data))
 
-   if (type == "is" && is.null(col.ind) ) {
+   if (type == "is" && is.null(col.ind)) {
       stop("For 'is' normalization you need to provide indices for IS peak.")
    }
 
@@ -142,21 +154,45 @@ prep.norm <- function(data, type = "area", col.ind = NULL) {
       stop("Values for 'col.ind' seem to be wrong.")
    }
 
-   f <- function(data, type, col.ind) {
+   if (type == "pqn" && is.null(ref.spectrum)) {
+      ref.spectrum <- apply(data, 2, mean)
+   }
+
+   pqn <- function(data, ref.spectrum) {
+
+      if (length(ref.spectrum) != ncol(data)) {
+         stop("prep.norm: 'ref.spectrum' should have the same number of values as the number of columns in 'data'.")
+      }
+
+      # 1. unit area normalization
+      ref.spectrum <- as.numeric(ref.spectrum)
+      ref.spectrum <- ref.spectrum / sum(abs(ref.spectrum))
+
+      # 2. compute  and return median quotients for each spectrum
+      return(apply(sweep(data, 2, ref.spectrum, "/"), 1, median))
+   }
+
+   f <- function(data, type, col.ind, ref.spectrum) {
+
+      # preliminary normalize the dataset to unit sum
+      if (type == "pqn") {
+         data <- prep.norm(data, type = "area")
+      }
 
       w <- switch(
          type,
          "area" = apply(abs(data), 1, sum),
          "length" = sqrt(apply(data^2, 1, sum)),
          "sum" = apply(data, 1, sum),
-         "is" = apply(data[, col.ind, drop = FALSE], 1, sum)
+         "is" = apply(data[, col.ind, drop = FALSE], 1, sum),
+         "pqn" = pqn(data, ref.spectrum)
       )
 
       if (is.null(w)) stop("Wrong value for argument 'type'.")
       return(sweep(data, 1, w, "/"))
    }
 
-   return(prep.generic(data, f, type = type, col.ind = col.ind))
+   return(prep.generic(data, f, type = type, col.ind = col.ind, ref.spectrum = ref.spectrum))
 }
 
 #' Savytzky-Golay filter
@@ -193,8 +229,8 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
    # compute grams polynomials
    gram <- function(i, m, k, s) {
       if (k > 0) {
-         return( (4 * k - 2) / (k * (2 * m - k + 1)) * (i * gram(i, m, k - 1, s) + s * gram(i, m, k - 1, s - 1)) -
-            ((k - 1) * (2 * m + k)) / (k * (2 * m - k + 1)) * gram(i, m, k - 2, s) )
+         return((4 * k - 2) / (k * (2 * m - k + 1)) * (i * gram(i, m, k - 1, s) + s * gram(i, m, k - 1, s - 1)) -
+            ((k - 1) * (2 * m + k)) / (k * (2 * m - k + 1)) * gram(i, m, k - 2, s))
       }
       if (k == 0 && s == 0) return(1)
       return(0)
@@ -202,11 +238,11 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
 
    # compute generalized factorial
    genfact <- function(a, b) {
-      f <- 1;
+      f <- 1
       if ((a - b + 1) > a) return(f)
 
       for (i in (a - b + 1):a) {
-         f <- f * i;
+         f <- f * i
       }
 
       return(f)
@@ -216,33 +252,29 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0) {
    weight <- function(i, t, m, n, s) {
       sum <- 0
       for (k in 0:n) {
-         sum <- sum + (2 * k + 1) * (genfact(2 * m, k) / genfact(2 * m + k + 1, k + 1)) * gram(i, m, k, 0) * gram(t, m, k, s)
+         sum <- sum + (2 * k + 1) * (genfact(2 * m, k) / genfact(2 * m + k + 1, k + 1)) *
+            gram(i, m, k, 0) * gram(t, m, k, s)
       }
       return(sum)
    }
 
-   f <- function(data, width, porder, dorder) {
+   f <- function(x, width, porder, dorder) {
 
-      nobj <- nrow(data)
-      nvar <- ncol(data)
-      pdata <- matrix(0, ncol = nvar, nrow = nobj)
-
-      m <- (width - 1) / 2
+      nvar <- ncol(x)
+      px <- matrix(0.0, nrow(x), ncol(x))
+      m <- round((width - 1) / 2)
       w <- outer(-m:m, -m:m, function(x, y) weight(x, y, m, porder, dorder))
-      n <- ncol(data)
 
-      for (j in seq_len(nobj)) {
-         for (i in 1:m) {
-            pdata[j, i] <- convolve(data[j, 1:(2 * m + 1)], w[, i], type = "filter")
-            pdata[j, n - i + 1] <- convolve(data[j, (n - 2 * m):n], w[, width - i + 1], type = "filter")
-         }
-
-         for (i in (m+1):(n-m)) {
-            pdata[j, i] <- convolve(data[j, (i - m):(i + m)], w[, m + 1], type = "filter")
-         }
+      for (i in seq_len(m)) {
+         px[, i] <- apply(x[, seq_len(2 * m + 1), drop = FALSE], 1,
+            function(xx) convolve(xx, w[, i], type = "filter")[1])
+         px[, nvar - i + 1] <- apply(x[, (nvar - 2 * m):nvar, drop = FALSE], 1,
+            function(xx) convolve(xx, w[, width - i + 1], type = "filter")[1])
       }
 
-      return(pdata)
+      px[, (m + 1):(nvar - m)] <- t(apply(x, 1, function(xx) convolve(xx, w[, m + 1], type = "filter")))
+
+      return(px)
    }
 
    return(prep.generic(data, f, width = width, porder = porder, dorder = dorder))
@@ -333,7 +365,7 @@ prep.ref2km <- function(data) {
    return(prep.generic(data, f))
 }
 
-#' Baseline correction using assymetric least squares
+#' Baseline correction using asymetric least squares
 #'
 #' @param data
 #' matrix with spectra (rows correspond to individual spectra)
@@ -372,34 +404,34 @@ prep.ref2km <- function(data) {
 #' }
 #'
 #' @importFrom Matrix Matrix Diagonal
+#' @importFrom methods as
 #'
 #' @export
 prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
    attrs <- mda.getattr(data)
    dimnames <- dimnames(data)
 
-   baseline <- function(y) {
+   m <- ncol(data)
+   baseline <- matrix(0, nrow(data), ncol(data))
+   LDD <- Matrix::Matrix((10^plambda) * crossprod(diff(diag(m), difference = 2)), sparse = TRUE)
+   w.ini <- matrix(rep(1, m))
 
-      m <- length(y)
-      D <- Matrix::Matrix(diff(diag(m), difference = 2), sparse = TRUE)
-      LDD <- (10^plambda) * Matrix::crossprod(D)
-      w <- Matrix::Matrix(1, nrow = m, ncol = 1, sparse = TRUE)
-
-      for (i in seq_len(max.niter)) {
+   for (i in seq_len(nrow(data))) {
+      y <- data[i, ]
+      w <- w.ini
+      for (j in seq_len(max.niter)) {
          W <- Matrix::Diagonal(x = as.numeric(w))
-         z <- Matrix::solve(W + LDD, w * y)
+         z <- Matrix::solve(as(W + LDD, "dgCMatrix"), w * y, sparse = TRUE)
          w.old <- w
          w <- p * (y > z) + (1 - p) * (y < z)
 
-         if (sum(abs(w - w.old)) < 10^-12) {
-            break
-         }
+         if (sum(abs(w - w.old)) < 10^-10) break
       }
 
-      return(as.numeric(z))
+      baseline[i, ] <- as.numeric(z)
    }
 
-   pspectra <- t(apply(data, 1, function(x) x - baseline(x)))
+   pspectra <- data - baseline
    pspectra <- mda.setattr(pspectra, attrs)
    dimnames(pspectra) <- dimnames
 
@@ -558,7 +590,7 @@ getImplementedPrepMethods <- function() {
          method = prep.norm,
          params = list(type = "area", col.ind = NULL),
          params.info = list(
-            type = "type of normalization ('area', 'sum', 'length', 'is', 'snv').",
+            type = "type of normalization ('area', 'sum', 'length', 'is', 'snv', 'pqn').",
             col.ind = "indices of columns (variables) for normalization to internal standard peak."
          ),
          info = "Normalization."
@@ -709,7 +741,8 @@ prep <- function(name, params = NULL, method = NULL) {
 #' @export
 employ.prep <- function(obj, x, ...) {
 
-   stopifnot("employ.prep: the first argument must be a list with preprocessing methods" = is.list(obj) && class(obj[[1]]) == "prep")
+   stopifnot("employ.prep: the first argument must be a list with preprocessing methods" =
+      is.list(obj) && class(obj[[1]]) == "prep")
    for (p in obj) {
       x <- do.call(p$method, c(list(data = x), p$params))
    }

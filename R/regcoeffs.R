@@ -165,7 +165,7 @@ summary.regcoeffs <- function(object, ncomp = 1, ny = 1, alpha = 0.05, ...) {
    }
 
    attrs <- mda.getattr(object$values)
-   coeffs <- object$values[, ncomp, ny, drop = F]
+   coeffs <- object$values[, ncomp, ny, drop = FALSE]
    dim(coeffs) <- c(dim(object$values)[1], 1)
    colnames(coeffs)[1] <- "Coeffs"
    if (!is.null(object$se)) {
@@ -382,5 +382,5 @@ plot.regcoeffs <- function(x, ncomp = 1, ny = 1, type = (if (x$nvar > 30) "l" el
 
    err <- (ci[, 2] - ci[, 1]) / 2
    mdaplotg(list(plot_data, mda.rbind(plot_data, err)), type = c(type, "e"), show.legend = FALSE,
-      col = col[c(2, 1)], show.grid = T, show.lines = show.lines, ylab = ylab, ...)
+      col = col[c(2, 1)], show.grid = TRUE, show.lines = show.lines, ylab = ylab, ...)
 }

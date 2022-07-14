@@ -432,7 +432,7 @@ plotModelDistance.simcam <- function(obj, nc = 1, type = "h", xticks = seq_len(o
       stop("Wrong values for 'nc' parameter.")
    }
 
-   mdaplot(mda.t(obj$moddist[, nc, drop = F]), type = type, xticks = xticks,
+   mdaplot(mda.t(obj$moddist[, nc, drop = FALSE]), type = type, xticks = xticks,
       xticklabels = xticklabels, main = main, xlab = xlab, ylab = ylab, ...)
 }
 

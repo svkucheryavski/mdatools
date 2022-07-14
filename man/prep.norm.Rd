@@ -4,15 +4,17 @@
 \alias{prep.norm}
 \title{Normalization}
 \usage{
-prep.norm(data, type = "area", col.ind = NULL)
+prep.norm(data, type = "area", col.ind = NULL, ref.spectrum = NULL)
 }
 \arguments{
 \item{data}{a matrix with data values}
 
-\item{type}{type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, or \code{"is"}.}
+\item{type}{type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, \code{"is"}, or \code{"pqn"}.}
 
 \item{col.ind}{indices of columns (can be either integer or logical valuws) for normalization to internal
 standard peak.}
+
+\item{ref.spectrum}{reference spectrum for PQN normalization, if not provided a mean spectrum for data is used}
 }
 \value{
 data matrix with normalized values
@@ -28,4 +30,14 @@ does the Standard Normal Variate normalization, similar to \code{\link{prep.snv}
 parameter `col.ind`. If the position is a single value, the rows are normalized to the height
 of this peak. If `col.ind` points on several adjucent vales, the rows are normalized to the area
 under the peak - sum of the intensities.
+
+The \code{"pqn"} is Probabilistic Quotient Normalization as described in [1]. In this case you also
+need to provide a reference spectrum (e.g. mean or median of spectra for some reference samples). If
+reference spectrum is not provided it will be computed as mean of the spectra to be
+preprocessed (parameter \code{data}).
+}
+\references{
+1. F. Dieterle, A. Ross, H. Senn. Probabilistic Quotient Normalization as Robust Method to
+Account for Dilution of Complex Biological Mixtures. Application in 1 H NMR Metabonomics.
+Anal. Chem. 2006, 78, 4281–4290.
 }

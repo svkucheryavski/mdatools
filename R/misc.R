@@ -201,12 +201,12 @@ mda.subset <- function(x, subset = NULL, select = NULL) {
    attrs <- mda.getattr(x)
 
    if (!is.null(subset)) {
-      if (is.logical(subset) & !is.null(attrs$exclrows))
+      if (is.logical(subset) && !is.null(attrs$exclrows))
          subset <- subset[-attrs$exclrows]
 
       # remove excluded rows first
       if (!is.null(attrs$exclrows))
-         x <- x[-attrs$exclrows, , drop = F]
+         x <- x[-attrs$exclrows, , drop = FALSE]
 
       # get numeric indices for the rows and subset them
       subset <- mda.getexclind(subset, rownames(x), nrow(x))
@@ -227,11 +227,11 @@ mda.subset <- function(x, subset = NULL, select = NULL) {
 
       # remove excluded rows first
       if (!is.null(attrs$exclcols))
-         x <- x[, -attrs$exclcols, drop = F]
+         x <- x[, -attrs$exclcols, drop = FALSE]
 
       # get numeric indices for the rows and subset them
       select <- mda.getexclind(select, colnames(x), ncol(x))
-      x <- x[, select, drop = F]
+      x <- x[, select, drop = FALSE]
 
       # correct attributes
       if (!is.null(attrs$xaxis.values)) {
