@@ -169,10 +169,11 @@ getRegcoeffs.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, full 
    out <- obj$coeffs$values[, ncomp, ny]
 
    # get center values and scale factors
-   sx <- if (is.logical(obj$xscale)) rep(1, nrow(out)) else obj$xscale
-   mx <- if (is.logical(obj$xcenter)) rep(0, nrow(out)) else obj$xcenter
-   sy <- if (is.logical(obj$yscale)) rep(1, ncol(out)) else obj$yscale[ny]
-   my <- if (is.logical(obj$ycenter)) rep(0, ncol(out)) else obj$ycenter[ny]
+   sx <- if (is.logical(obj$xscale)) rep(1, length(out)) else obj$xscale
+   mx <- if (is.logical(obj$xcenter)) rep(0, length(out)) else obj$xcenter
+
+   sy <- if (is.logical(obj$yscale)) rep(1, 1) else obj$yscale[ny]
+   my <- if (is.logical(obj$ycenter)) rep(0, 1) else obj$ycenter[ny]
 
 
    # rescale coefficients and find intercept
