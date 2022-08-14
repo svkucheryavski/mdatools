@@ -184,13 +184,15 @@ getRegcoeffs.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, full 
 
 
    if (full && !is.null(obj$coeffs$se)) {
-      ci <- rbind(c(NA, NA), confint(obj$coeffs, level = 1 - alpha))
-      se <- c(NA, obj$coeffs$se[, ncomp, ny] * s)
       t  <- c(NA, obj$coeffs$t.values[, ncomp, ny])
       p  <- c(NA, obj$coeffs$p.values[, ncomp, ny])
+
+      # standard error also needs to be rescaled and then new CI is computed
+      se <- c(NA, obj$coeffs$se[, ncomp, ny] * s)
+      ci <- cbind(out + qt(alpha/2, obj$coeffs$DoF) * se, out + qt(1 - alpha/2, obj$coeffs$DoF) * se)
+
       out <- cbind(out, se, t, p, ci)
-      colnames(out)[2:6] <- c("Std. err.", "t-value", "p-value",
-         paste0(round(c(alpha / 2, 1 - alpha / 2) * 100, 2), "%"))
+      colnames(out)[2:6] <- c("Std. err.", "t-value", "p-value", paste0(round(c(alpha / 2, 1 - alpha / 2) * 100, 2), "%"))
    }
 
    attr(out, "exclrows") <- attrs$exclrows

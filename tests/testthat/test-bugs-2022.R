@@ -118,11 +118,22 @@ test_that("the bug is fixed in PLS2", {
       b2 <- m$coeffs$values[, m$ncomp.selected, 1]
       expect_equivalent(b1,  c(my[1] - sum(s * b2 * mx), s * b2))
 
+      bfull <- getRegcoeffs(m, ny = 1, full = TRUE)
+      expect_true(all(bfull[-1, 1] > bfull[-1, 5] & bfull[-1, 1 ] < bfull[-1, 6]))
+      expect_equivalent(bfull[-1, 5], bfull[-1, 1] + qt(0.025, m$coeffs$DoF) *  bfull[-1, 2])
+      expect_equivalent(bfull[-1, 6], bfull[-1, 1] + qt(0.975, m$coeffs$DoF) *  bfull[-1, 2])
+
       # for ny = 2
       s <- sy[2] / sx
       b1 <- getRegcoeffs(m, ny = 2)
       b2 <- m$coeffs$values[, m$ncomp.selected, 2]
       expect_equivalent(b1,  c(my[2] - sum(s * b2 * mx), s * b2))
+
+      bfull <- getRegcoeffs(m, ny = 2, full = TRUE)
+      expect_true(all(bfull[-1, 1] > bfull[-1, 5] & bfull[-1, 1 ] < bfull[-1, 6]))
+      expect_equivalent(bfull[-1, 5], bfull[-1, 1] + qt(0.025, m$coeffs$DoF) *  bfull[-1, 2])
+      expect_equivalent(bfull[-1, 6], bfull[-1, 1] + qt(0.975, m$coeffs$DoF) *  bfull[-1, 2])
+
    }
 
    X <- people[, -c(4, 6)]
