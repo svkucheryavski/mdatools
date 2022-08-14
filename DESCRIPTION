@@ -1,7 +1,7 @@
 Package: mdatools
 Title: Multivariate Data Analysis for Chemometrics
-Version: 0.13.0
-Date: 2022-07-09
+Version: 0.13.1
+Date: 2022-09-01
 Author: Sergey Kucheryavskiy (<https://orcid.org/0000-0002-3145-7244>)
 Maintainer: Sergey Kucheryavskiy <svkucheryavski@gmail.com>
 Description: Projection based methods for preprocessing,
