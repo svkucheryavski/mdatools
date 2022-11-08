@@ -3,6 +3,8 @@ v. 0.13.1
 
 * fixed a bug in method `getRegcoeffs()`, which did not work correctly with regression models created without scaling or centering.
 
+* `ipls()` got a new logical parameter, `full`. If you set `full = TRUE` the procedure will not stop when no improvement is observed, it will continue until the maximum number of iterations is reached.
+
 
 v. 0.13.0
 ==========
