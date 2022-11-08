@@ -7,9 +7,9 @@
 \method{plot}{ipls}(x, ...)
 }
 \arguments{
-\item{x}{a  (object of class \code{pca})}
+\item{x}{a  (object of class \code{pca}).}
 
-\item{...}{other arguments}
+\item{...}{other arguments.}
 }
 \description{
 Shows a plot for iPLS results.

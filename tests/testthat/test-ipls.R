@@ -164,3 +164,82 @@ expect_silent(m <- ipls(d$xc, d$yc, method = "backward", int.width = 10, glob.nc
 expect_output(summary(m))
 expect_silent(plot(m))
 expect_equivalent(m$int.selected, c(3, 4, 8, 13))
+
+
+### ! added 2022-11-07 ###
+context("ipls: check that parameters 'full' and 'int.niter' work correctly.")
+
+data(simdata)
+X = simdata$spectra.c
+y = simdata$conc.c[, 2, drop = FALSE]
+
+# check forward method
+
+## - default settings (full = FALSE)
+m1 = ipls(X, y, glob.ncomp = 4, int.num = 15)
+expect_equivalent(m1$int.selected, c(6, 1, 11, 3, 12))
+
+## - with full = TRUE
+m2 = ipls(X, y, glob.ncomp = 4, int.num = 15, full = TRUE)
+expect_equal(length(m2$int.selected), 15)
+expect_equivalent(m2$int.selected[1:5], c(6, 1, 11, 3, 12))
+
+## - default settings (full = FALSE) + different int.num
+m3 = ipls(X, y, glob.ncomp = 4, int.num = 50)
+expect_equal(length(m3$int.selected), 20)
+
+## - with full = TRUE and different int.num
+m4 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE)
+expect_equal(length(m4$int.selected), 30)
+
+## - with full = TRUE and different int.num + larger max.niter
+m5 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE, int.niter = 40)
+expect_equal(length(m5$int.selected), 40)
+
+## - with full = TRUE and different int.num + very large max.niter
+m6 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE, int.niter = 100)
+expect_equal(length(m6$int.selected), 50)
+
+# check backward method
+
+## - default settings (full = FALSE)
+m1 = ipls(X, y, glob.ncomp = 4, int.num = 15, method = "backward")
+expect_equivalent(m1$int.selected, c(1, 3, 5, 9, 11))
+
+## - with full = TRUE
+m2 = ipls(X, y, glob.ncomp = 4, int.num = 15, full = TRUE, method = "backward")
+expect_equal(length(m2$int.selected), 2)
+expect_equivalent(m2$int.selected, c(1, 5))
+
+## - default settings (full = FALSE) + different int.num
+m3 = ipls(X, y, glob.ncomp = 4, int.num = 50, method = "backward")
+expect_equal(length(m3$int.selected), 20)
+
+## - with full = TRUE and different int.num
+m4 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE, method = "backward")
+expect_equal(length(m4$int.selected), 20)
+
+## - with full = TRUE and different int.num + larger max.niter
+m5 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE, int.niter = 40, method = "backward")
+expect_equal(length(m5$int.selected), 10)
+
+## - with full = TRUE and different int.num + very large max.niter
+m6 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE, int.niter = 100, method = "backward")
+expect_equal(length(m6$int.selected), 2)
+
+# compare with the paper: Anderson, Bro, JChem, 2010
+
+d <- read.csv2("Beer.csv")
+y <- d[1:40, 1, drop = FALSE]
+X <- d[1:40, 2:ncol(d)]
+w <- seq(400, 2250, by = 2)
+attr(X, "xaxis.values") <- w
+attr(X, "xaxis.name") <- "Wavelength, nm"
+
+# 20 intervals: 1240-1330
+mb <- ipls(X, y, cv = 1, int.num = 20)
+expect_equal(length(mb$int.selected), 1)
+expect_equal(max(w[mb$var.selected]), 1330)
+expect_equal(max(w[mb$var.selected]), 1330)
+expect_equal(round(mb$int.stat$RMSE[2], 2), 0.14)
+expect_equivalent(mb$glob.stat$nComp[2:21], c(2, 1, 1, 1, 1, 3, 3, 6, 5, 7, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1))

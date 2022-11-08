@@ -22,45 +22,48 @@ ipls(
   method = "forward",
   x.test = NULL,
   y.test = NULL,
-  silent = FALSE
+  silent = FALSE,
+  full = FALSE
 )
 }
 \arguments{
-\item{x}{a matrix with predictor values}
+\item{x}{a matrix with predictor values.}
 
-\item{y}{a vector with response values}
+\item{y}{a vector with response values.}
 
-\item{glob.ncomp}{maximum number of components for a global PLS model}
+\item{glob.ncomp}{maximum number of components for a global PLS model.}
 
-\item{center}{logical, center or not the data values}
+\item{center}{logical, center or not the data values.}
 
-\item{scale}{logical, standardize or not the data values}
+\item{scale}{logical, standardize or not the data values.}
 
-\item{cv}{cross-validation settings (see details)}
+\item{cv}{cross-validation settings (see details).}
 
-\item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values)}
+\item{exclcols}{columns of x to be excluded from calculations (numbers, names or vector with logical values).}
 
-\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values)}
+\item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values).}
 
-\item{int.ncomp}{maximum number of components for interval PLS models}
+\item{int.ncomp}{maximum number of components for interval PLS models.}
 
-\item{int.num}{number of intervals}
+\item{int.num}{number of intervals.}
 
-\item{int.width}{width of intervals}
+\item{int.width}{width of intervals.}
 
-\item{int.limits}{a two column matrix with manual intervals specification}
+\item{int.limits}{a two column matrix with manual intervals specification.}
 
-\item{int.niter}{maximum number of iterations (if NULL it will be the same as number of intervals)}
+\item{int.niter}{maximum number of iterations (if NULL it will be the smallest of two values: number of intervals and 30).}
 
-\item{ncomp.selcrit}{criterion for selecting optimal number of components ('min' for minimum of RMSECV)}
+\item{ncomp.selcrit}{criterion for selecting optimal number of components ('min' for minimum of RMSECV).}
 
-\item{method}{iPLS method (\code{'forward'} or \code{'backward'})}
+\item{method}{iPLS method (\code{'forward'} or \code{'backward'}).}
 
 \item{x.test}{matrix with predictors for test set (by default is NULL, if specified, is used instead of cv).}
 
 \item{y.test}{matrix with responses for test set.}
 
-\item{silent}{logical, show or not information about selection process}
+\item{silent}{logical, show or not information about selection process.}
+
+\item{full}{logical, if TRUE the procedure will continue even if no improvements is observed.}
 }
 \value{
 object of 'ipls' class with several fields, including:
@@ -75,8 +78,8 @@ object of 'ipls' class with several fields, including:
    \item{om}{optimized PLS model with selected variables}
 }
 \description{
-Applies iPLS alrogithm to find variable intervals most important for
-prediction
+Applies iPLS algorithm to find variable intervals most important for
+prediction.
 }
 \details{
 The algorithm splits the predictors into several intervals and tries to find a combination
@@ -85,7 +88,8 @@ of the intervals, which gives best prediction performance. There are two selecti
 are successively excluded from a model. On the first step the algorithm finds the best
 (forward) or the worst (backward) individual interval. Then it tests the others to find the
 one which gives the best model in a combination with the already selected/excluded one. The
-procedure continues until the maximum number of iteration is reached.
+procedure continues until no improvements is observed or the maximum number of iteration
+is reached.
 
 There are several ways to specify the intervals. First of all either number of intervals
 (\code{int.num}) or width of the intervals (\code{int.width}) can be provided. Alternatively

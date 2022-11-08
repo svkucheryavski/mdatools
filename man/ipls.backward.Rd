@@ -4,18 +4,20 @@
 \alias{ipls.backward}
 \title{Runs the backward iPLS algorithm}
 \usage{
-ipls.backward(x, y, obj, int.stat, glob.stat)
+ipls.backward(x, y, obj, int.stat, glob.stat, full)
 }
 \arguments{
-\item{x}{a matrix with predictor values}
+\item{x}{a matrix with predictor values.}
 
-\item{y}{a vector with response values}
+\item{y}{a vector with response values.}
 
-\item{obj}{object with initial settings for iPLS algorithm}
+\item{obj}{object with initial settings for iPLS algorithm.}
 
-\item{int.stat}{data frame with initial interval statistics}
+\item{int.stat}{data frame with initial interval statistics.}
 
-\item{glob.stat}{data frame with initial global statistics}
+\item{glob.stat}{data frame with initial global statistics.}
+
+\item{full}{logical, if TRUE the procedure will continue even if no improvements is observed.}
 }
 \description{
 Runs the backward iPLS algorithm

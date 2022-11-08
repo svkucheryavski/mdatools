@@ -16,25 +16,25 @@
 )
 }
 \arguments{
-\item{obj}{iPLS results (object of class ipls)}
+\item{obj}{iPLS results (object of class ipls).}
 
-\item{glob.ncomp}{number of components for global PLS model with all intervals}
+\item{glob.ncomp}{number of components for global PLS model with all intervals.}
 
-\item{main}{main title for the plot}
+\item{main}{main title for the plot.}
 
-\item{xlab}{label for x-axis}
+\item{xlab}{label for x-axis.}
 
-\item{ylab}{label for y-axis}
+\item{ylab}{label for y-axis.}
 
-\item{xlim}{limits for x-axis}
+\item{xlim}{limits for x-axis.}
 
-\item{ylim}{limits for y-axis}
+\item{ylim}{limits for y-axis.}
 
-\item{...}{other arguments}
+\item{...}{other arguments.}
 }
 \description{
 Shows how RMSE develops for each iteration of iPLS selection
-algorithm
+algorithm.
 }
 \details{
 The plot shows RMSE values obtained at each iteration of the iPLS algorithm as bars. The first
