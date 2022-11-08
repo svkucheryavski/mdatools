@@ -3,8 +3,9 @@ v. 0.13.1
 
 * fixed a bug in method `getRegcoeffs()`, which did not work correctly with regression models created without scaling or centering.
 
-* `ipls()` got a new logical parameter, `full`. If you set `full = TRUE` the procedure will not stop when no improvement is observed, it will continue until the maximum number of iterations is reached.
+* `ipls()` got a new logical parameter, `full`. If `full = TRUE` the procedure will continue even if no improvement is observed, until the maximum number of iterations is reached. Use it with caution, check the [tutorial](https://mda.tools/docs/ipls.html#running-full-procedure).
 
+* Small fixes and improvements.
 
 v. 0.13.0
 ==========
