@@ -1,3 +1,12 @@
+v. 0.13.1
+==========
+
+* fixed a bug in method `getRegcoeffs()`, which did not work correctly with regression models created without scaling or centering.
+
+* `ipls()` got a new logical parameter, `full`. If `full = TRUE` the procedure will continue even if no improvement is observed, until the maximum number of iterations is reached. Use it with caution, check the [tutorial](https://mda.tools/docs/ipls.html#running-full-procedure).
+
+* Small fixes and improvements.
+
 v. 0.13.0
 ==========
 This release brings an updated implementation of PLS algorithm (SIMPLS) which is more numerically stable and gives sufficiently less warnings about using too many components in case when you work with small y-values. The speed of `pls()` method in general has been also improved.

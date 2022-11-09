@@ -169,10 +169,11 @@ getRegcoeffs.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, full 
    out <- obj$coeffs$values[, ncomp, ny]
 
    # get center values and scale factors
-   sx <- if (is.logical(obj$xscale)) rep(1, nrow(out)) else obj$xscale
-   mx <- if (is.logical(obj$xcenter)) rep(0, nrow(out)) else obj$xcenter
-   sy <- if (is.logical(obj$yscale)) rep(1, ncol(out)) else obj$yscale[ny]
-   my <- if (is.logical(obj$ycenter)) rep(0, ncol(out)) else obj$ycenter[ny]
+   sx <- if (is.logical(obj$xscale)) rep(1, length(out)) else obj$xscale
+   mx <- if (is.logical(obj$xcenter)) rep(0, length(out)) else obj$xcenter
+
+   sy <- if (is.logical(obj$yscale)) rep(1, 1) else obj$yscale[ny]
+   my <- if (is.logical(obj$ycenter)) rep(0, 1) else obj$ycenter[ny]
 
 
    # rescale coefficients and find intercept
@@ -183,13 +184,15 @@ getRegcoeffs.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, full 
 
 
    if (full && !is.null(obj$coeffs$se)) {
-      ci <- rbind(c(NA, NA), confint(obj$coeffs, level = 1 - alpha))
-      se <- c(NA, obj$coeffs$se[, ncomp, ny] * s)
       t  <- c(NA, obj$coeffs$t.values[, ncomp, ny])
       p  <- c(NA, obj$coeffs$p.values[, ncomp, ny])
+
+      # standard error also needs to be rescaled and then new CI is computed
+      se <- c(NA, obj$coeffs$se[, ncomp, ny] * s)
+      ci <- cbind(out + qt(alpha/2, obj$coeffs$DoF) * se, out + qt(1 - alpha/2, obj$coeffs$DoF) * se)
+
       out <- cbind(out, se, t, p, ci)
-      colnames(out)[2:6] <- c("Std. err.", "t-value", "p-value",
-         paste0(round(c(alpha / 2, 1 - alpha / 2) * 100, 2), "%"))
+      colnames(out)[2:6] <- c("Std. err.", "t-value", "p-value", paste0(round(c(alpha / 2, 1 - alpha / 2) * 100, 2), "%"))
    }
 
    attr(out, "exclrows") <- attrs$exclrows

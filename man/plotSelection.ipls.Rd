@@ -16,25 +16,25 @@
 )
 }
 \arguments{
-\item{obj}{iPLS results (object of class ipls)}
+\item{obj}{iPLS results (object of class ipls).}
 
-\item{glob.ncomp}{number of components for global PLS model with all intervals}
+\item{glob.ncomp}{number of components for global PLS model with all intervals.}
 
-\item{main}{main title for the plot}
+\item{main}{main title for the plot.}
 
-\item{xlab}{label for x-axis}
+\item{xlab}{label for x-axis.}
 
-\item{ylab}{label for y-axis}
+\item{ylab}{label for y-axis.}
 
-\item{xlim}{limits for x-axis}
+\item{xlim}{limits for x-axis.}
 
-\item{ylim}{limits for y-axis}
+\item{ylim}{limits for y-axis.}
 
-\item{...}{other arguments}
+\item{...}{other arguments.}
 }
 \description{
 Shows PLS performance for each selected or excluded intervals at the
-first iteration
+first iteration.
 }
 \details{
 The plot shows intervals as bars, which height corresponds to RMSECV obtained when particular

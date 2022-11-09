@@ -3,45 +3,47 @@
 #' Variable selection with interval PLS
 #'
 #' @description
-#' Applies iPLS alrogithm to find variable intervals most important for
-#' prediction
+#' Applies iPLS algorithm to find variable intervals most important for
+#' prediction.
 #'
 #' @param x
-#' a matrix with predictor values
+#' a matrix with predictor values.
 #' @param y
-#' a vector with response values
+#' a vector with response values.
 #' @param glob.ncomp
-#' maximum number of components for a global PLS model
+#' maximum number of components for a global PLS model.
 #' @param center
-#' logical, center or not the data values
+#' logical, center or not the data values.
 #' @param scale
-#' logical, standardize or not the data values
+#' logical, standardize or not the data values.
 #' @param cv
-#' cross-validation settings (see details)
+#' cross-validation settings (see details).
 #' @param exclcols
-#' columns of x to be excluded from calculations (numbers, names or vector with logical values)
+#' columns of x to be excluded from calculations (numbers, names or vector with logical values).
 #' @param exclrows
-#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' rows to be excluded from calculations (numbers, names or vector with logical values).
 #' @param int.ncomp
-#' maximum number of components for interval PLS models
+#' maximum number of components for interval PLS models.
 #' @param int.num
-#' number of intervals
+#' number of intervals.
 #' @param int.width
-#' width of intervals
+#' width of intervals.
 #' @param int.limits
-#' a two column matrix with manual intervals specification
+#' a two column matrix with manual intervals specification.
 #' @param int.niter
-#' maximum number of iterations (if NULL it will be the same as number of intervals)
+#' maximum number of iterations (if NULL it will be the smallest of two values: number of intervals and 30).
 #' @param ncomp.selcrit
-#' criterion for selecting optimal number of components ('min' for minimum of RMSECV)
+#' criterion for selecting optimal number of components ('min' for minimum of RMSECV).
 #' @param method
-#' iPLS method (\code{'forward'} or \code{'backward'})
+#' iPLS method (\code{'forward'} or \code{'backward'}).
 #' @param x.test
 #' matrix with predictors for test set (by default is NULL, if specified, is used instead of cv).
 #' @param y.test
 #' matrix with responses for test set.
 #' @param silent
-#' logical, show or not information about selection process
+#' logical, show or not information about selection process.
+#' @param full
+#' logical, if TRUE the procedure will continue even if no improvements is observed.
 #'
 #' @return
 #' object of 'ipls' class with several fields, including:
@@ -62,7 +64,8 @@
 #' are successively excluded from a model. On the first step the algorithm finds the best
 #' (forward) or the worst (backward) individual interval. Then it tests the others to find the
 #' one which gives the best model in a combination with the already selected/excluded one. The
-#' procedure continues until the maximum number of iteration is reached.
+#' procedure continues until no improvements is observed or the maximum number of iteration
+#' is reached.
 #'
 #' There are several ways to specify the intervals. First of all either number of intervals
 #' (\code{int.num}) or width of the intervals (\code{int.width}) can be provided. Alternatively
@@ -113,7 +116,7 @@
 ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list("ven", 10),
    exclcols = NULL, exclrows = NULL,  int.ncomp = glob.ncomp, int.num = NULL, int.width = NULL,
    int.limits = NULL, int.niter = NULL, ncomp.selcrit = "min", method = "forward",
-   x.test = NULL, y.test = NULL, silent = FALSE) {
+   x.test = NULL, y.test = NULL, silent = FALSE, full = FALSE) {
 
    # process names and values for xaxis
    x <- mda.df2mat(x)
@@ -199,7 +202,13 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
    colnames(int.limits) <- c("Left", "Right")
 
    # define number of iterations
-   int.niter <- if (!is.null(int.niter) || int.num < 30) int.num else 30
+   if (is.null(int.niter)) {
+      int.niter <- min(30, int.num)
+   }
+
+   if (int.niter > int.num) {
+      int.niter <- int.num
+   }
 
    # build an object
    obj <- list(
@@ -252,14 +261,16 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
 
    # do iPLS
    obj <- switch(method,
-      "forward" = ipls.forward(x, y, obj, int.stat, glob.stat),
-      "backward" = ipls.backward(x, y, obj, int.stat, glob.stat),
+      "forward" = ipls.forward(x, y, obj, int.stat, glob.stat, full),
+      "backward" = ipls.backward(x, y, obj, int.stat, glob.stat, full),
       stop("Wrong value for parameter 'method'.")
    )
 
+   # correct columns of int.stat
    if (!is.null(obj$int.stat)) {
       rownames(obj$int.stat) <- seq_len(nrow(obj$int.stat))
       obj$int.stat$R2 <- round(obj$int.stat$R2, 3)
+      obj$int.stat$selected <- obj$int.stat$n %in% obj$int.selected
    }
 
 
@@ -268,7 +279,6 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
    obj$var.selected <- apply(int.limits, 1, function(x) seq(x[1], x[2]))
    if (is.list(obj$var.selected)) obj$var.selected <- do.call(c, obj$var.selected)
    names(obj$var.selected) <- dim(obj$var.selected) <- NULL
-   obj$var.selected <- sort(obj$var.selected)
 
    obj$om <- pls(x[, obj$var.selected, drop = FALSE], y, ncomp = obj$int.ncomp, center = obj$center,
       scale = obj$scale, cv = obj$cv, ncomp.selcrit = obj$ncomp.selcrit,
@@ -315,17 +325,19 @@ ipls.getintlimits <- function(int.limits, int.width, int.num, npred) {
 #' Runs the forward iPLS algorithm
 #'
 #' @param x
-#' a matrix with predictor values
+#' a matrix with predictor values.
 #' @param y
-#' a vector with response values
+#' a vector with response values.
 #' @param obj
-#' object with initial settings for iPLS algorithm
+#' object with initial settings for iPLS algorithm.
 #' @param int.stat
-#' data frame with initial interval statistics
+#' data frame with initial interval statistics.
 #' @param glob.stat
-#' data frame with initial global statistics
+#' data frame with initial global statistics.
+#' @param full
+#' logical, if TRUE the procedure will continue even if no improvements is observed.
 #'
-ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
+ipls.forward <- function(x, y, obj, int.stat, glob.stat, full) {
 
    # define vectors with status, selected and non-selected intervals
    int.nonselected <- seq_len(obj$int.num)
@@ -344,6 +356,7 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
       if (!obj$silent) fprintf("Iteration %3d/%3d... ", i, obj$int.niter)
 
       sel <- NULL
+      rmse_loc <- Inf
       for (l in int.nonselected) {
 
          # combine already selected intervals with the current
@@ -354,7 +367,6 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
          # build a model
          m <- pls(xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale, cv = obj$cv,
             ncomp.selcrit = obj$ncomp.selcrit, x.test = xt, y.test = obj$y.test)
-
          lres <- if (is.null(obj$cv)) m$res$test else m$res$cv
 
          # if first round, build a data frame with statistics for each interval
@@ -370,19 +382,22 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
          }
 
          # else check if rmse has been improved
-         if (rmse > lres$rmse[1, m$ncomp.selected]) {
+         if (rmse_loc > lres$rmse[1, m$ncomp.selected]) {
             ncomp <- m$ncomp.selected
-            rmse <- lres$rmse[1, m$ncomp.selected]
+            rmse_loc <- lres$rmse[1, m$ncomp.selected]
             r2 <- lres$r2[1, m$ncomp.selected]
             sel <- l
          }
       }
 
-
-      if (is.null(sel)) {
+      # if no global improvements and parameter "full" is FALSE - stop
+      if (rmse_loc > rmse && !full) {
          if (!obj$silent) cat("no improvements, stop.\n\n")
          break
       }
+
+      # if do not stop set new RMSE value and continue
+      rmse  <- rmse_loc
 
       selind <- c(selind, obj$int.limits[sel, 1]:obj$int.limits[sel, 2])
       int.nonselected <- int.nonselected[int.nonselected != sel]
@@ -398,7 +413,7 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
       ))
 
       if (!obj$silent) {
-         fprintf("selected interval %3d (RMSE = %f, nLV = %d)\n", sel, rmse, m$ncomp.selected)
+         fprintf("selected interval %3d (RMSE = %f, nLV = %d)\n", sel, rmse, ncomp)
       }
 
    }
@@ -406,7 +421,10 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
    # return the selection results
    obj$glob.stat <- glob.stat
    obj$int.stat <- int.stat
-   obj$int.selected <- int.selected
+
+   # take only intervals which result in global RMSE minimum
+   iter <- which.min(int.stat$RMSE[2:nrow(int.stat)])
+   obj$int.selected <- int.stat$n[2:(iter + 1)]
 
    return(obj)
 }
@@ -414,17 +432,19 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat) {
 #' Runs the backward iPLS algorithm
 #'
 #' @param x
-#' a matrix with predictor values
+#' a matrix with predictor values.
 #' @param y
-#' a vector with response values
+#' a vector with response values.
 #' @param obj
-#' object with initial settings for iPLS algorithm
+#' object with initial settings for iPLS algorithm.
 #' @param int.stat
-#' data frame with initial interval statistics
+#' data frame with initial interval statistics.
 #' @param glob.stat
-#' data frame with initial global statistics
+#' data frame with initial global statistics.
+#' @param full
+#' logical, if TRUE the procedure will continue even if no improvements is observed.
 #'
-ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
+ipls.backward <- function(x, y, obj, int.stat, glob.stat, full) {
 
    # define vectors with status, selected and non-selected intervals
    int.selected <- seq_len(obj$int.num)
@@ -440,6 +460,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
    rmse <- Inf
    for (i in seq_len(obj$int.niter)) {
 
+      # if only one interval is left - stop
       if (length(int.selected) == 1) break
 
       if (!obj$silent) {
@@ -448,6 +469,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
 
       # do loop to select an interval
       unsel <- NULL
+      rmse_loc <- Inf
       for (l in int.selected) {
          ind <- obj$int.limits[l, 1]:obj$int.limits[l, 2]
 
@@ -473,34 +495,26 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
             ))
          }
 
-         # if last two intervals are left keep them both
-         if (length(int.selected) == 2) {
-            int.stat <- rbind(int.stat, data.frame(
-               "n" = l,
-               "start" = obj$int.limits[l, 1],
-               "end" = obj$int.limits[l, 2],
-               "selected" = FALSE,
-               "nComp" = m$ncomp.selected,
-               "RMSE" = lres$rmse[1, m$ncomp.selected],
-               "R2" = lres$r2[1, m$ncomp.selected]
-            ))
-            unsel <- NULL
-            break
-         }
-
          # else check if rmse has been improved
-         if (rmse > lres$rmse[1, m$ncomp.selected]) {
+         if (rmse_loc > lres$rmse[1, m$ncomp.selected]) {
             ncomp <- m$ncomp.selected
-            rmse <- lres$rmse[1, m$ncomp.selected]
+            rmse_loc <- lres$rmse[1, m$ncomp.selected]
             r2 <- lres$r2[1, m$ncomp.selected]
             unsel <- l
          }
       }
 
-      if (is.null(unsel)) {
+      # if no global improvements and parameter "full" is FALSE - stop
+      if (rmse_loc > rmse && !full) {
          if (!obj$silent) cat("no improvements, stop.\n\n")
          break
       }
+
+      # if unsel is not set - stop
+      if (is.null(unsel)) break
+
+      # if do not stop set new RMSE value and continue
+      rmse  <- rmse_loc
 
       unselind <- c(unselind, obj$int.limits[unsel, 1]:obj$int.limits[unsel, 2])
       int.selected <- int.selected[int.selected != unsel]
@@ -524,7 +538,10 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
    # return the selection results
    obj$glob.stat <- glob.stat
    obj$int.stat <- int.stat
-   obj$int.selected <- int.selected
+
+   # take only intervals which result in global RMSE minimum
+   iter <- which.min(int.stat$RMSE[2:nrow(int.stat)])
+   obj$int.selected <- seq_len(obj$int.num)[-int.stat$n[2:(iter + 1)]]
 
    return(obj)
 }
@@ -533,24 +550,24 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat) {
 #'
 #' @description
 #' Shows PLS performance for each selected or excluded intervals at the
-#' first iteration
+#' first iteration.
 #'
 #' @param obj
-#' iPLS results (object of class ipls)
+#' iPLS results (object of class ipls).
 #' @param glob.ncomp
-#' number of components for global PLS model with all intervals
+#' number of components for global PLS model with all intervals.
 #' @param main
-#' main title for the plot
+#' main title for the plot.
 #' @param xlab
-#' label for x-axis
+#' label for x-axis.
 #' @param ylab
-#' label for y-axis
+#' label for y-axis.
 #' @param xlim
-#' limits for x-axis
+#' limits for x-axis.
 #' @param ylim
-#' limits for y-axis
+#' limits for y-axis.
 #' @param ...
-#' other arguments
+#' other arguments.
 #'
 #' @details
 #' The plot shows intervals as bars, which height corresponds to RMSECV obtained when particular
@@ -599,22 +616,16 @@ plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "
    # make plot
    plot(0, 0, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, ...)
 
-   # show intervals as gray bars
-   dim(rmse) <- c(1, length(rmse))
-   plotBars(
-      list(x_values = mids, y_values = rmse),
-      col = rgb(0.9, 0.9, 0.9),
-      bwd = 1,
-      border = rgb(0.8, 0.8, 0.8))
+   # show intervals as bars (gray - non selected, green - selected)
+   nint <- obj$int.num
+   selected <- rep(FALSE, nint)
+   selected[obj$int.selected] <- TRUE
 
-   # show selected intervals as green bars
-   rmse[, -obj$int.selected] <- 0
-   plotBars(
-      list(x_values = mids, y_values = rmse),
-      col = rgb(0.5, 1.0, 0.6),
-      bwd = 1,
-      border = rgb(0.75, 0.8, 0.75)
+   rect(int[, 1], 0, c(int[2:nint, 1], int[nint, 2]), rmse,
+      border = ifelse(selected, rgb(0.70, 0.80, 0.70), rgb(0.80, 0.80, 0.80)),
+      col = ifelse(selected, rgb(0.5, 1.0, 0.6), rgb(0.9, 0.9, 0.9))
    )
+
 
    # show mean signal
    lines(xlabels, xmean, col = rgb(1.0, 0.7, 0.7), lwd = 2)
@@ -633,24 +644,24 @@ plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "
 #'
 #' @description
 #' Shows how RMSE develops for each iteration of iPLS selection
-#' algorithm
+#' algorithm.
 #'
 #' @param obj
-#' iPLS results (object of class ipls)
+#' iPLS results (object of class ipls).
 #' @param glob.ncomp
-#' number of components for global PLS model with all intervals
+#' number of components for global PLS model with all intervals.
 #' @param main
-#' main title for the plot
+#' main title for the plot.
 #' @param xlab
-#' label for x-axis
+#' label for x-axis.
 #' @param ylab
-#' label for y-axis
+#' label for y-axis.
 #' @param xlim
-#' limits for x-axis
+#' limits for x-axis.
 #' @param ylim
-#' limits for y-axis
+#' limits for y-axis.
 #' @param ...
-#' other arguments
+#' other arguments.
 #'
 #' @details
 #' The plot shows RMSE values obtained at each iteration of the iPLS algorithm as bars. The first
@@ -688,9 +699,9 @@ plotRMSE.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "RMSE 
 #' Shows a plot for iPLS results.
 #'
 #' @param x
-#' a  (object of class \code{pca})
+#' a  (object of class \code{pca}).
 #' @param ...
-#' other arguments
+#' other arguments.
 #'
 #' @details
 #' See details for \code{\link{plotSelection.ipls}}.
@@ -732,11 +743,11 @@ print.ipls <- function(x, ...) {
 #' Shows statistics and algorithm parameters for iPLS results.
 #'
 #' @param object
-#' a iPLS (object of class \code{ipls})
+#' a iPLS (object of class \code{ipls}).
 #' @param glob.ncomp
-#' number of components for global PLS model with all intervals
+#' number of components for global PLS model with all intervals.
 #' @param ...
-#' other arguments
+#' other arguments.
 #'
 #' @details
 #' The method shows information on the algorithm parameters as well as a table with selected or
