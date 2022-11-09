@@ -266,9 +266,11 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
       stop("Wrong value for parameter 'method'.")
    )
 
+   # correct columns of int.stat
    if (!is.null(obj$int.stat)) {
       rownames(obj$int.stat) <- seq_len(nrow(obj$int.stat))
       obj$int.stat$R2 <- round(obj$int.stat$R2, 3)
+      obj$int.stat$selected <- obj$int.stat$n %in% obj$int.selected
    }
 
 
@@ -419,7 +421,10 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat, full) {
    # return the selection results
    obj$glob.stat <- glob.stat
    obj$int.stat <- int.stat
-   obj$int.selected <- int.selected
+
+   # take only intervals which result in global RMSE minimum
+   iter <- which.min(int.stat$RMSE[2:nrow(int.stat)])
+   obj$int.selected <- int.stat$n[2:(iter + 1)]
 
    return(obj)
 }
@@ -455,6 +460,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full) {
    rmse <- Inf
    for (i in seq_len(obj$int.niter)) {
 
+      # if only one interval is left - stop
       if (length(int.selected) == 1) break
 
       if (!obj$silent) {
@@ -487,21 +493,6 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full) {
                "RMSE" = lres$rmse[1, m$ncomp.selected],
                "R2" = lres$r2[1, m$ncomp.selected]
             ))
-         }
-
-         # if last two intervals are left keep them both
-         if (length(int.selected) == 2) {
-            int.stat <- rbind(int.stat, data.frame(
-               "n" = l,
-               "start" = obj$int.limits[l, 1],
-               "end" = obj$int.limits[l, 2],
-               "selected" = FALSE,
-               "nComp" = m$ncomp.selected,
-               "RMSE" = lres$rmse[1, m$ncomp.selected],
-               "R2" = lres$r2[1, m$ncomp.selected]
-            ))
-            unsel <- NULL
-            break
          }
 
          # else check if rmse has been improved
@@ -547,7 +538,10 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full) {
    # return the selection results
    obj$glob.stat <- glob.stat
    obj$int.stat <- int.stat
-   obj$int.selected <- int.selected
+
+   # take only intervals which result in global RMSE minimum
+   iter <- which.min(int.stat$RMSE[2:nrow(int.stat)])
+   obj$int.selected <- seq_len(obj$int.num)[-int.stat$n[2:(iter + 1)]]
 
    return(obj)
 }
@@ -622,22 +616,16 @@ plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "
    # make plot
    plot(0, 0, type = "n", main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, ...)
 
-   # show intervals as gray bars
-   dim(rmse) <- c(1, length(rmse))
-   plotBars(
-      list(x_values = mids, y_values = rmse),
-      col = rgb(0.9, 0.9, 0.9),
-      bwd = 1,
-      border = rgb(0.8, 0.8, 0.8))
+   # show intervals as bars (gray - non selected, green - selected)
+   nint <- obj$int.num
+   selected <- rep(FALSE, nint)
+   selected[obj$int.selected] <- TRUE
 
-   # show selected intervals as green bars
-   rmse[, -obj$int.selected] <- 0
-   plotBars(
-      list(x_values = mids, y_values = rmse),
-      col = rgb(0.5, 1.0, 0.6),
-      bwd = 1,
-      border = rgb(0.75, 0.8, 0.75)
+   rect(int[, 1], 0, c(int[2:nint, 1], int[nint, 2]), rmse,
+      border = ifelse(selected, rgb(0.70, 0.80, 0.70), rgb(0.80, 0.80, 0.80)),
+      col = ifelse(selected, rgb(0.5, 1.0, 0.6), rgb(0.9, 0.9, 0.9))
    )
+
 
    # show mean signal
    lines(xlabels, xmean, col = rgb(1.0, 0.7, 0.7), lwd = 2)
