@@ -27,7 +27,6 @@ So far the following modelling and validation methods are implemented:
       \code{\link{ipls}} \tab Interval PLS variable.\cr
       \code{\link{mcrals}} \tab Multivariate Curve Resolution with Alternating Least Squares.\cr
       \code{\link{mcrpure}} \tab Multivariate Curve Resolution with Purity approach.\cr
-      \code{\link{pcv}} \tab Procrustes Cross Validation.\cr
 }
 
 Methods for data preprocessing:
