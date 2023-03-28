@@ -194,47 +194,47 @@ y = simdata$conc.c[, 2, drop = FALSE]
 
 ## - default settings (full = FALSE)
 m1 = ipls(X, y, glob.ncomp = 4, int.num = 15)
-expect_equal(nrow(m1$int.stat), 6)
-expect_equal(length(m1$int.selected), 5)
-expect_equivalent(m1$int.selected, c(6, 1, 11, 3, 12))
+expect_equal(nrow(m1$int.stat), 7)
+expect_equal(length(m1$int.selected), 6)
+expect_equivalent(m1$int.selected, c(6, 11, 1, 2, 13, 12))
 
 ## - with full = TRUE
 m2 = ipls(X, y, glob.ncomp = 4, int.num = 15, full = TRUE)
 expect_equal(nrow(m2$int.stat), 16)
-expect_equal(length(m2$int.selected), 8)
-expect_equivalent(m2$int.selected, c(6, 1, 11, 3, 12, 4, 9, 13))
+expect_equal(length(m2$int.selected), 6)
+expect_equivalent(m2$int.selected, c(6, 11, 1, 2, 13, 12))
 
 ## - default settings (full = FALSE) + different int.num
 m3 = ipls(X, y, glob.ncomp = 4, int.num = 50)
-expect_equal(nrow(m3$int.stat), 21)
-expect_equal(length(m3$int.selected), 20)
+expect_equal(nrow(m3$int.stat), 15)
+expect_equal(length(m3$int.selected), 14)
 
 ## - with full = TRUE and different int.num
 m4 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE)
 expect_equal(nrow(m4$int.stat), 31)
-expect_equal(length(m4$int.selected), 20)
+expect_equal(length(m4$int.selected), 27)
 
 ## - with full = TRUE and different int.num + larger max.niter
 m5 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE, int.niter = 40)
 expect_equal(nrow(m5$int.stat), 41)
-expect_equal(length(m5$int.selected), 20)
+expect_equal(length(m5$int.selected), 27)
 
 ## - with full = TRUE and different int.num + very large max.niter
 m6 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE, int.niter = 100)
 expect_equal(nrow(m6$int.stat), 51)
-expect_equal(length(m6$int.selected), 20)
+expect_equal(length(m6$int.selected), 27)
 
 # check backward method - in this case number of iterations is less than number of intervals - 1
 
 ## - default settings (full = FALSE)
 m1 = ipls(X, y, glob.ncomp = 4, int.num = 15, method = "backward")
-expect_equal(nrow(m1$int.stat), 11)
-expect_equivalent(m1$int.selected, c(1, 3, 5, 9, 11))
+expect_equal(nrow(m1$int.stat), 10)
+expect_equivalent(m1$int.selected, c(1, 3, 5, 9, 11, 13))
 
 ## - with full = TRUE
 m2 = ipls(X, y, glob.ncomp = 4, int.num = 15, full = TRUE, method = "backward")
 expect_equal(nrow(m2$int.stat), 15)
-expect_equivalent(m2$int.selected, c(1, 3, 5, 9, 11))
+expect_equivalent(m2$int.selected, c(1, 3, 5, 9, 11, 13))
 
 ## - default settings (full = FALSE) + different int.num
 m3 = ipls(X, y, glob.ncomp = 4, int.num = 50, method = "backward")
@@ -244,12 +244,12 @@ expect_equal(length(m3$int.selected), 20) # 50 in total minus 30 excluded
 ## - with full = TRUE and different int.num + large max.niter
 m4 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE, int.niter = 40, method = "backward")
 expect_equal(nrow(m4$int.stat), 41)
-expect_equal(length(m4$int.selected), 16) # 50 in total minus 34 excluded
+expect_equal(length(m4$int.selected), 13) # 50 in total minus 37 excluded
 
 ## - with full = TRUE and different int.num + very large max.niter
 m5 = ipls(X, y, glob.ncomp = 4, int.num = 50, full = TRUE, int.niter = 100, method = "backward")
 expect_equal(nrow(m5$int.stat), 50) # not 51 because last interval can not be excluded, so general model + 49 iterations
-expect_equal(length(m5$int.selected), 16) # 50 in total minus 34 excluded
+expect_equal(length(m5$int.selected), 13) # 50 in total minus 37 excluded
 
 
 ###############################

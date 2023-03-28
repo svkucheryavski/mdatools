@@ -1,3 +1,19 @@
+v. 0.14.0
+==========
+
+The changes are relatively small, but some of them can be potentially breaking, hence the version is bumped up to 0.14.0.
+
+* Procrustes cross-validation method, `pcv()`, has been recently improved and extended. It was decided to move it to a separate dedicated R package, `pcv`. Check [GitHub repo](https://github.com/svkucheryavski/pcv) for details. The documentation chapter has been updated accordingly.
+
+* Fixed a bug related to generating segment indices for Venetian blinds cross-validation for regression. In case of regression, the indices are generating by taking into account the order of the response values. There was a small bug in this implementation, now it is fixed. Remember, that you can always provide manually generated vector og segment indices as value of `cv` argument.
+
+* Made small changes in `prep.alsbasecorr()` to meet new requirements of the `Matrix` package. So if you saw warning message from this package last couple of month, this update will fix this.
+
+* fixed bug [#109](https://github.com/svkucheryavski/mdatools/issues/109)
+
+* small improvements in documentation.
+
+
 v. 0.13.1
 ==========
 
