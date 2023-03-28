@@ -117,7 +117,7 @@ as.matrix.simcares <- function(x, ncomp = NULL, ...) {
    out[, 1:2] <- round(out[, 1:2], 2)
 
    colnames(out) <- c("Expvar", "Cumexpvar", "TP", "FP", "TN", "FN",
-      "Spec.", "Sens.", "Accuracy")
+      "Spec.", "Sens.", "Accuracy")[seq_len(ncol(out))]
 
    return(out)
 }
