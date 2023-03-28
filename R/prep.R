@@ -413,15 +413,17 @@ prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
 
    m <- ncol(data)
    baseline <- matrix(0, nrow(data), ncol(data))
+
    LDD <- Matrix::Matrix((10^plambda) * crossprod(diff(diag(m), difference = 2)), sparse = TRUE)
    w.ini <- matrix(rep(1, m))
 
    for (i in seq_len(nrow(data))) {
       y <- data[i, ]
       w <- w.ini
+
       for (j in seq_len(max.niter)) {
          W <- Matrix::Diagonal(x = as.numeric(w))
-         z <- Matrix::solve(as(W + LDD, "dgCMatrix"), w * y, sparse = TRUE)
+         z <- Matrix::solve(as(W + LDD, "generalMatrix"), w * y, sparse = TRUE)
          w.old <- w
          w <- p * (y > z) + (1 - p) * (y < z)
 
