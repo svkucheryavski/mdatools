@@ -23,7 +23,8 @@ ipls(
   x.test = NULL,
   y.test = NULL,
   silent = FALSE,
-  full = FALSE
+  full = FALSE,
+  cv.scope = "local"
 )
 }
 \arguments{
@@ -64,6 +65,9 @@ ipls(
 \item{silent}{logical, show or not information about selection process.}
 
 \item{full}{logical, if TRUE the procedure will continue even if no improvements is observed.}
+
+\item{cv.scope}{scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
+or 'local' — recompute new for each local calibration set.}
 }
 \value{
 object of 'ipls' class with several fields, including:

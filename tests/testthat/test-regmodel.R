@@ -45,22 +45,27 @@ test.cal <- function(x, y, center, scale, ncomp = 1, method = "mlr", cv = FALSE)
    return(m)
 }
 
-predict.testmodel <- function(obj, x, y = NULL, cv = FALSE) {
+test.pred <- function(x, coeffs, ycenter, yscale) {
 
-   x <- prep.autoscale(x, center = obj$xcenter, scale = obj$xscale)
-   y.pred <- x %*% obj$coeffs$values
-   y.pred <- if (is.numeric(obj$yscale)) sweep(y.pred, 2, obj$yscale, "*") else y.pred
-   y.pred <- if (is.numeric(obj$ycenter)) sweep(y.pred, 2, obj$ycenter, "+") else y.pred
-   dim(y.pred) <- c(nrow(x), 1, 1)
-   dimnames(y.pred) <- list(
+   yp <- x %*% coeffs
+
+   # unscale predicted y values
+   yp <- if (is.numeric(yscale)) sweep(yp, 2, yscale, "*") else yp
+
+   # uncenter predicted y values
+   yp <- if (is.numeric(ycenter)) sweep(yp, 2, ycenter, "+") else yp
+
+
+   dim(yp) <- c(nrow(x), 1, 1)
+   dimnames(yp) <- list(
       rownames(x),
-      dimnames(obj$coeffs$values)[[2]],
-      dimnames(obj$coeffs$values)[[3]]
+      dimnames(coeffs)[[2]],
+      dimnames(coeffs)[[3]]
    )
-   return(regres(y.pred = y.pred, y.ref = y, ncomp.selected = 1))
+
+   return (yp)
 }
 
-assign("predict.testmodel", predict.testmodel, envir = .GlobalEnv)
 
 # we remove sex several other variables to ret rid of collinearity
 data(people)
@@ -68,44 +73,45 @@ x <- people[, -c(4, 1, 3, 9, 10, 11)]
 y <- people[,  4, drop = FALSE]
 
 m <- test.cal(x, y, center = TRUE, scale = TRUE)
-r <- predict(m, x)
+yp <- test.pred(prep.autoscale(x, m$xcenter, m$xscale), m$coeffs$values, ycenter = m$ycenter, yscale = m$yscale)
+r <- regres(y.pred = yp, y.ref = y, ncomp.selected = 1)
 
 
 # tests for performance statistics
-context(sprintf("regmodel: cross-validation"))
-test_that("leave one out works correctly", {
+context("regmodel: cross-validation")
+
+test_that("cross-validation works correctly", {
    # leave one out
-   cvres <- crossval.regmodel(m, x, y, cv = 1, cal.fun = test.cal)
+   cvres <- crossval.regmodel(m, x, y, cv = 1, cal.fun = test.cal, pred.fun = test.pred)
+
    expect_equal(dim(cvres$y.pred), c(nrow(x), 1, 1))
    expect_equal(dim(cvres$jk.coeffs), c(ncol(x), 1, 1, nrow(x)))
    expect_gt(cor(y, cvres$y.pred[, 1, 1]), 0.9)
    expect_lt(cor(y, cvres$y.pred[, 1, 1]), cor(y, r$y.pred))
 
    # random without repetitions
-   cvres <- crossval.regmodel(m, x, y, cv = 8, cal.fun = test.cal)
+   cvres <- crossval.regmodel(m, x, y, cv = 8, cal.fun = test.cal, pred.fun = test.pred)
    expect_equal(dim(cvres$y.pred), c(nrow(x), 1, 1))
    expect_equal(dim(cvres$jk.coeffs), c(ncol(x), 1, 1, 8))
    expect_gt(cor(y, cvres$y.pred[, 1, 1]), 0.9)
    expect_lt(cor(y, cvres$y.pred[, 1, 1]), cor(y, r$y.pred))
 
    # random with repetitions
-   cvres <- crossval.regmodel(m, x, y, cv = list("rand", 8, 6), cal.fun = test.cal)
+   cvres <- crossval.regmodel(m, x, y, cv = list("rand", 8, 6), cal.fun = test.cal, pred.fun = test.pred)
    expect_equal(dim(cvres$y.pred), c(nrow(x), 1, 1))
    expect_equal(dim(cvres$jk.coeffs), c(ncol(x), 1, 1, 8))
    expect_gt(cor(y, cvres$y.pred[, 1, 1]), 0.9)
    expect_lt(cor(y, cvres$y.pred[, 1, 1]), cor(y, r$y.pred))
 
    # systematic
-   cvres <- crossval.regmodel(m, x, y, cv = list("ven", 10), cal.fun = test.cal)
+   cvres <- crossval.regmodel(m, x, y, cv = list("ven", 10), cal.fun = test.cal, pred.fun = test.pred)
    expect_equal(dim(cvres$y.pred), c(nrow(x), 1, 1))
    expect_equal(dim(cvres$jk.coeffs), c(ncol(x), 1, 1, 10))
    expect_gt(cor(y, cvres$y.pred[, 1, 1]), 0.9)
    expect_lt(cor(y, cvres$y.pred[, 1, 1]), cor(y, r$y.pred))
-
 })
 
-context(sprintf("regmodel: getRegCoeffs"))
-
+context("regmodel: getRegCoeffs")
 test_that("getRegcoeffs works well without inference", {
    mfull <- lm(y~x)
    coeffs <- getRegcoeffs.regmodel(m, ncomp = 1)
@@ -114,7 +120,7 @@ test_that("getRegcoeffs works well without inference", {
 
 test_that("getRegcoeffs works well without inference", {
    mfull <- lm(y~x)
-   cvres <- crossval.regmodel(m, x, y, cv = 1, cal.fun = test.cal)
+   cvres <- crossval.regmodel(m, x, y, cv = 1, cal.fun = test.cal, pred.fun = test.pred)
    m$coeffs <- regcoeffs(m$coeffs$values, cvres$jk.coeffs)
    coeffs <- getRegcoeffs.regmodel(m, ncomp = 1, full = TRUE)
 
@@ -139,9 +145,10 @@ test_that("getRegcoeffs works well without inference", {
 
 test_that("main plots works fine", {
    m <- test.cal(x, y, center = TRUE, scale = TRUE)
-   cvres <- crossval.regmodel(m, x, y, cv = 1, cal.fun = test.cal)
+   ypc <- test.pred(prep.autoscale(x, m$xcenter, m$xscale), m$coeffs$values, m$ycenter, m$yscale)
+   cvres <- crossval.regmodel(m, x, y, cv = 1, cal.fun = test.cal, pred.fun = test.pred)
    m$res <- list()
-   m$res[["cal"]] <- predict(m, x, y)
+   m$res[["cal"]] <- regres(ypc, y)
    m$res[["cv"]] <- regres(cvres$y.pred, y)
    m$coeffs <- regcoeffs(m$coeffs$values, cvres$jk.coeffs)
 
@@ -177,9 +184,10 @@ test_that("main plots works fine", {
 
 test_that("text outcome works fine", {
    m <- test.cal(x, y, center = TRUE, scale = TRUE)
-   cvres <- crossval.regmodel(m, x, y, cv = 1, cal.fun = test.cal)
+   ypc <- test.pred(prep.autoscale(x, m$xcenter, m$xscale), m$coeffs$values, m$ycenter, m$yscale)
+   cvres <- crossval.regmodel(m, x, y, cv = 1, cal.fun = test.cal, pred.fun = test.pred)
    m$res <- list()
-   m$res[["cal"]] <- predict(m, x, y)
+   m$res[["cal"]] <- regres(ypc, y)
    m$res[["cv"]] <- regres(cvres$y.pred, y)
    m$coeffs <- regcoeffs(m$coeffs$values, cvres$jk.coeffs)
 

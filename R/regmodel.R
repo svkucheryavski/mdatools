@@ -16,12 +16,21 @@ regmodel <- function(...) {
 #' number of segments (if cv = 1, full cross-validation will be used)
 #' @param cal.fun
 #' reference to function for model calibration
+#' @param pred.fun
+#' reference to function for getting predicted y-values (see description)
+#' @param cv.scope
+#' scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
+#' or 'local' — recompute new for each local calibration set.
 #'
 #' @return
 #' object of class \code{plsres} with results of cross-validation
 #'
+#' Function `pred.fun` must take four agruments: autoscaled x-values, array with regression
+#' coefficients, vectors for centring and scaling of y-values (if used). The function must
+#' return predicted y-values in original units (unscaled and uncentered).
+#'
 #' @export
-crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
+crossval.regmodel <- function(obj, x, y, cv, cal.fun, pred.fun, cv.scope = 'local') {
 
    # get attributes
    x.attrs <- attributes(x)
@@ -63,6 +72,17 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
    yp.cv <- array(0, dim = c(nobj, ncomp, nresp))
    jk.coeffs <- array(0, dim = c(nvar, ncomp, nresp, nseg))
 
+   # define values for global scaling
+   xcenter <- obj$xcenter
+   ycenter <- obj$ycenter
+   xscale  <- obj$xscale
+   yscale  <- obj$yscale
+
+   if (cv.scope == 'global') {
+      x <- prep.autoscale(x, xcenter, xscale)
+      y <- prep.autoscale(y, ycenter, yscale)
+   }
+
    # loop over segments and repetitions
    for (ir in seq_len(nrep)) {
       for (is in seq_len(nseg)) {
@@ -73,9 +93,21 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
          yc <- y[-ind, , drop = FALSE]
          xt <- x[ind, , drop = FALSE]
 
+         # redefine values for local scaling if selected
+         if (cv.scope != 'global') {
+            xcenter <- if (obj$center) apply(xc, 2, mean) else rep(0, ncol(xc))
+            ycenter <- if (obj$center) apply(yc, 2, mean) else rep(0, ncol(yc))
+            xscale <- if (obj$scale)  apply(xc, 2, sd) else rep(1, ncol(xc))
+            yscale <- if (obj$scale)  apply(yc, 2, sd) else rep(1, ncol(yc))
+
+            xc <- prep.autoscale(xc, xcenter, xscale)
+            yc <- prep.autoscale(yc, ycenter, yscale)
+            xt <- prep.autoscale(xt, xcenter, xscale)
+         }
+
+
          # create a model
-         m.loc <- cal.fun(xc, yc, ncomp, method = obj$method, center = obj$center,
-            scale = obj$scale, cv = TRUE)
+         m.loc <- cal.fun(xc, yc, ncomp, method = obj$method, center = FALSE, scale = FALSE, cv = TRUE)
 
          if (m.loc$ncomp < ncomp) {
              stop(
@@ -85,15 +117,16 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun) {
              )
          }
 
-         r.loc <- predict(m.loc, xt, cv = TRUE)
+         yp <- pred.fun(xt, m.loc$coeffs$values, ycenter = ycenter, yscale = yscale)
+
 
          # if any have NA values quit
-         if (any(is.na(r.loc$y.pred))) {
+         if (any(is.na(yp))) {
             stop("NA results produced during cross-validation.")
          }
 
          # save results
-         yp.cv[ind, , ] <- yp.cv[ind, , , drop = FALSE] + r.loc$y.pred
+         yp.cv[ind, , ] <- yp.cv[ind, , , drop = FALSE] + yp
          jk.coeffs[, , , is] <- jk.coeffs[, , , is, drop = FALSE] +
             array(m.loc$coeffs$values, dim = c(dim(m.loc$coeffs$values), 1))
       }
