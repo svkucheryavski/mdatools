@@ -3,8 +3,8 @@
 ###########################################################
 
 setup({
-   pdf(file = tempfile("mdatools-test-new-2023-", fileext = ".pdf"))
-   sink(tempfile("mdatools-test-test-new-2923-", fileext = ".txt"), append = FALSE, split = FALSE)
+   #pdf(file = tempfile("mdatools-test-new-2023-", fileext = ".pdf"))
+   #sink(tempfile("mdatools-test-test-new-2923-", fileext = ".txt"), append = FALSE, split = FALSE)
 })
 
 teardown({
@@ -12,9 +12,48 @@ teardown({
    sink()
 })
 
+######################################
+# new bugs                           #
+######################################
 
-# testing the new parameter cv.scope
-context("tests for cv scaling scope.")
+######################################
+# bug fixes for v. 0.14.1            #
+######################################
+context("tests fo bug to be fixed in 0.14.1.")
+
+
+test_that("bug #114 is fixed", {
+   data(people)
+   X <- people[, -4]
+   Y <- people[, 4]
+   cv <- rep(1:4, 8)
+
+   m <- pls(X, Y, 10, cv = cv)
+   summary(m)
+})
+
+test_that("bug #111 is fixed", {
+   data(people)
+   m = pca(people, scale = TRUE)
+
+   # plot has no labels
+   p = plotResiduals(m$res$cal, show.labels = TRUE)
+})
+
+test_that("bug #111 is fixed", {
+   data(people)
+   X <- people[, -4]
+   Y <- people[, 4]
+
+   expect_warning({m = pls(people[, -4], people[, 4], 7)})
+   expect_silent({m = selectCompNum(m, 7)})
+})
+
+
+######################################
+# testing the new parameter cv.scope #
+######################################
+context("regmodel: tests for cv-scope.")
 
 # simple function for calibration of MLR model
 test.cal <- function(x, y, center, scale, ncomp = 1, method = "mlr", cv = FALSE) {
@@ -231,9 +270,8 @@ test_that("global scaling scope works correctly for venetian blinds", {
 
 })
 
-
 # testing the new parameter cv.scope
-context("pls: tests for cv scaling scope.")
+context("pls: tests for cv-scope.")
 
 test_that("global scaling scope works correctly for PLS", {
 
