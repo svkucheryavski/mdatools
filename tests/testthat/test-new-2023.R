@@ -3,13 +3,13 @@
 ###########################################################
 
 setup({
-   #pdf(file = tempfile("mdatools-test-new-2023-", fileext = ".pdf"))
-   #sink(tempfile("mdatools-test-test-new-2923-", fileext = ".txt"), append = FALSE, split = FALSE)
+   pdf(file = tempfile("mdatools-test-new-2023-", fileext = ".pdf"))
+   sink(tempfile("mdatools-test-test-new-2923-", fileext = ".txt"), append = FALSE, split = FALSE)
 })
 
 teardown({
-   #dev.off()
-   #sink()
+   dev.off()
+   sink()
 })
 
 ######################################
@@ -39,7 +39,8 @@ test_that("bug #112 is fixed", {
    m <- pca(people, scale = TRUE)
 
    # plot has no labels
-   p <- plotResiduals(m$res$cal, show.labels = TRUE)
+   p1 <- plotResiduals(m$res$cal, show.labels = TRUE)
+   expect_equivalent(p1$labels, rownames(people))
 })
 
 test_that("bug #111 is fixed", {
