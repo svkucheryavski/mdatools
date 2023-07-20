@@ -102,5 +102,9 @@ test_that("systematic cross-validation works correctly", {
    y = c(9, 1, 6, 2, 12, 10, 4, 3, 8,  7, 5, 11)
    expect_equivalent(crossval(list("ven", 4), 12, y), matrix(c(1, 1, 2, 2, 4, 2, 4, 3, 4, 3, 1, 3), ncol = 1))
 
+   expect_equivalent(crossval.str(rep(1:4, 10)), "user defined with 4 segments")
+   expect_equivalent(crossval.str(rep(1:10, 4)), "user defined with 10 segments")
+   expect_equivalent(crossval.str(c(2, 4, 1, 2, 4, 1)), "user defined with 3 segments")
+
 })
 

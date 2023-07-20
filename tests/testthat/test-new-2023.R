@@ -8,8 +8,8 @@ setup({
 })
 
 teardown({
-   dev.off()
-   sink()
+   #dev.off()
+   #sink()
 })
 
 ######################################
@@ -29,15 +29,17 @@ test_that("bug #114 is fixed", {
    cv <- rep(1:4, 8)
 
    m <- pls(X, Y, 10, cv = cv)
-   summary(m)
+   expect_output(summary(m))
+   expect_equivalent(crossval.str(cv), "user defined with 4 segments")
+   expect_equivalent(crossval.str(rep(1:10, 4)), "user defined with 10 segments")
 })
 
-test_that("bug #111 is fixed", {
+test_that("bug #112 is fixed", {
    data(people)
-   m = pca(people, scale = TRUE)
+   m <- pca(people, scale = TRUE)
 
    # plot has no labels
-   p = plotResiduals(m$res$cal, show.labels = TRUE)
+   p <- plotResiduals(m$res$cal, show.labels = TRUE)
 })
 
 test_that("bug #111 is fixed", {
@@ -45,8 +47,8 @@ test_that("bug #111 is fixed", {
    X <- people[, -4]
    Y <- people[, 4]
 
-   expect_warning({m = pls(people[, -4], people[, 4], 7)})
-   expect_silent({m = selectCompNum(m, 7)})
+   expect_warning({m <- pls(people[, -4], people[, 4], 7)})
+   expect_silent({m <- selectCompNum(m, 7)})
 })
 
 
