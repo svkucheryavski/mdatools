@@ -355,6 +355,7 @@ getProbabilities.pca <- function(obj, ncomp, q, h, ...) {
 #' @param obj
 #' object with PCA model
 #'
+#' @export
 getCalibrationData.pca <- function(obj) {
    x <- obj$res[["cal"]]$scores %*% t(obj$loadings) + obj$res[["cal"]]$residuals
 
