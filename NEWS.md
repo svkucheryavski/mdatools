@@ -1,3 +1,11 @@
+v. 0.14.1
+=========
+
+* Added `cv.scope` parameter for PLS, PLS-DA and iPLS methods. The parameter sets the scope for center/scale operations inside cross-validation loop: `"global"` — centering and scaling will be done using globally computed means and standard deviations, `"local"` — centering and scaling will be done using locally computed means and standard deviations (for each local calibration set). In other words, in case of the global scope, all cross-validation local models will have the same center as the global one, in case of the local scope, each local model will have its own center in the variable space. The default value is `"local"`, as it was before, so this change will not break your previous code.
+
+* Fixed several minor bugs (#111, #112, #114) and added small updates and improvements to [documentation](https://mda.tools/docs/index.html).
+
+
 v. 0.14.0
 ==========
 
