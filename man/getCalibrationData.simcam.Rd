@@ -4,12 +4,10 @@
 \alias{getCalibrationData.simcam}
 \title{Get calibration data}
 \usage{
-\method{getCalibrationData}{simcam}(obj, ...)
+\method{getCalibrationData}{simcam}(obj)
 }
 \arguments{
 \item{obj}{SIMCAM model (object of class \code{simcam})}
-
-\item{...}{other arguments}
 }
 \description{
 Get data, used for calibration of the SIMCAM individual models and combine to one dataset.

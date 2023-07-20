@@ -589,6 +589,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
 #'  @seealso
 #'  \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
 #'
+#' @export
 plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "iPLS results",
    xlab = obj$xaxis.name, ylab = if (is.null(obj$cv)) "RMSEP" else "RMSECV", xlim = NULL, ylim = NULL, ...) {
 

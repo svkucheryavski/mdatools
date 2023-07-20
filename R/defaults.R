@@ -300,11 +300,9 @@ plotDiscriminationPower <- function(obj, ...) {
 #'
 #' @param obj
 #' a model object
-#' @param ...
-#' other arguments
 #'
 #' @export
-getCalibrationData <- function(obj, ...) {
+getCalibrationData <- function(obj) {
    UseMethod("getCalibrationData")
 }
 
