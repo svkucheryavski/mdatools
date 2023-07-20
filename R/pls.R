@@ -398,7 +398,7 @@ selectCompNum.pls <- function(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ..
    name <- intersect(c("cv", "test", "cal"), names(obj$res))[1]
    res <- obj$res[[name]]
 
-   if (name == "cal") {
+   if (name == "cal" && is.null(ncomp)) {
       warning("No validation results were found.")
    }
 
