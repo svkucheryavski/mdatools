@@ -190,10 +190,6 @@ plotScores.ldecomp <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, ty
 #' logical, normalize distance values or not (see details)
 #' @param log
 #' logical, apply log tranformation to the distances or not (see details)
-#' @param show.labels
-#' logical, show or not labels for the plot objects
-#' @param labels
-#' what to show as labels if necessary
 #' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...

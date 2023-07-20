@@ -9,8 +9,6 @@
   ncomp = obj$ncomp.selected,
   norm = FALSE,
   log = FALSE,
-  show.labels = FALSE,
-  labels = "names",
   show.plot = TRUE,
   ...
 )
@@ -23,10 +21,6 @@
 \item{norm}{logical, normalize distance values or not (see details)}
 
 \item{log}{logical, apply log tranformation to the distances or not (see details)}
-
-\item{show.labels}{logical, show or not labels for the plot objects}
-
-\item{labels}{what to show as labels if necessary}
 
 \item{show.plot}{logical, shall plot be created or just plot series object is needed}
 
