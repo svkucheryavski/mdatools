@@ -200,8 +200,7 @@ plotScores.ldecomp <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, ty
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected, norm = FALSE, log = FALSE,
-   show.labels = FALSE, labels = "names", show.plot = TRUE, ...) {
+plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected, norm = FALSE, log = FALSE, show.plot = TRUE, ...) {
 
    attrs <- mda.getattr(obj$Q)
 
