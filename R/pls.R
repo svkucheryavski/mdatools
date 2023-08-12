@@ -37,6 +37,9 @@
 #' @param ncomp.selcrit
 #' criterion for selecting optimal number of components (\code{'min'} for
 #' first local minimum of RMSECV and \code{'wold'} for Wold's rule.)
+#' @param cv.scope
+#' scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
+#' or 'local' — recompute new for each local calibration set.
 #'
 #' @return
 #' Returns an object of \code{pls} class with following fields:
@@ -249,7 +252,8 @@
 #' @export
 pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
    cv = NULL, exclcols = NULL, exclrows = NULL, x.test = NULL, y.test = NULL, method = "simpls",
-   info = "", ncomp.selcrit = "min", lim.type = "ddmoments", alpha = 0.05, gamma = 0.01) {
+   info = "", ncomp.selcrit = "min", lim.type = "ddmoments", alpha = 0.05, gamma = 0.01,
+   cv.scope = "local") {
 
    # if y is a vector, convert it to matrix
    if (is.null(dim(y))) {
@@ -280,7 +284,7 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
 
    # do cross-validation if needed
    if (!is.null(cv)) {
-      cvres <- crossval.regmodel(model, x, y, cv, cal.fun = pls.cal)
+      cvres <- crossval.regmodel(model, x, y, cv, cal.fun = pls.cal, pred.fun = pls.getpredictions, cv.scope = cv.scope)
       model$res[["cv"]] <- plsres(cvres$y.pred, cvres$y.ref, ncomp.selected = model$ncomp)
       model$res[["cv"]]$info <- "cross-validation results"
       model$cvres <- model$res[["cv"]]
@@ -394,7 +398,7 @@ selectCompNum.pls <- function(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ..
    name <- intersect(c("cv", "test", "cal"), names(obj$res))[1]
    res <- obj$res[[name]]
 
-   if (name == "cal") {
+   if (name == "cal" && is.null(ncomp)) {
       warning("No validation results were found.")
    }
 
@@ -526,6 +530,7 @@ setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
 #' vector with names used for components
 #'
 #' @return array with predicted y-values
+#'
 pls.getpredictions <- function(x, coeffs, ycenter, yscale, ynames = NULL, y.attrs = NULL, objnames = NULL,
    compnames = NULL) {
 

@@ -44,6 +44,9 @@
 #' logical, show or not information about selection process.
 #' @param full
 #' logical, if TRUE the procedure will continue even if no improvements is observed.
+#' @param cv.scope
+#' scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
+#' or 'local' — recompute new for each local calibration set.
 #'
 #' @return
 #' object of 'ipls' class with several fields, including:
@@ -116,7 +119,7 @@
 ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list("ven", 10),
    exclcols = NULL, exclrows = NULL,  int.ncomp = glob.ncomp, int.num = NULL, int.width = NULL,
    int.limits = NULL, int.niter = NULL, ncomp.selcrit = "min", method = "forward",
-   x.test = NULL, y.test = NULL, silent = FALSE, full = FALSE) {
+   x.test = NULL, y.test = NULL, silent = FALSE, full = FALSE, cv.scope = "local") {
 
    # process names and values for xaxis
    x <- mda.df2mat(x)
@@ -233,7 +236,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
 
    # make a global model
    obj$gm <- pls(x, y, ncomp = obj$glob.ncomp, center = obj$center, scale = obj$scale, cv = obj$cv,
-      ncomp.selcrit = obj$ncomp.selcrit, x.test = obj$x.test, y.test = obj$y.test)
+      ncomp.selcrit = obj$ncomp.selcrit, x.test = obj$x.test, y.test = obj$y.test, cv.scope = cv.scope)
 
 
    # get statistics for global model
@@ -261,8 +264,8 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
 
    # do iPLS
    obj <- switch(method,
-      "forward" = ipls.forward(x, y, obj, int.stat, glob.stat, full),
-      "backward" = ipls.backward(x, y, obj, int.stat, glob.stat, full),
+      "forward" = ipls.forward(x, y, obj, int.stat, glob.stat, full, cv.scope),
+      "backward" = ipls.backward(x, y, obj, int.stat, glob.stat, full, cv.scope),
       stop("Wrong value for parameter 'method'.")
    )
 
@@ -282,7 +285,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
 
    obj$om <- pls(x[, obj$var.selected, drop = FALSE], y, ncomp = obj$int.ncomp, center = obj$center,
       scale = obj$scale, cv = obj$cv, ncomp.selcrit = obj$ncomp.selcrit,
-      x.test = obj$x.test[, obj$var.selected, drop = FALSE], y.test = obj$y.test)
+      x.test = obj$x.test[, obj$var.selected, drop = FALSE], y.test = obj$y.test, cv.scope = cv.scope)
 
    obj$call <- match.call()
    class(obj) <- "ipls"
@@ -336,8 +339,11 @@ ipls.getintlimits <- function(int.limits, int.width, int.num, npred) {
 #' data frame with initial global statistics.
 #' @param full
 #' logical, if TRUE the procedure will continue even if no improvements is observed.
+#' @param cv.scope
+#' scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
+#' or 'local' — recompute new for each local calibration set.
 #'
-ipls.forward <- function(x, y, obj, int.stat, glob.stat, full) {
+ipls.forward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
 
    # define vectors with status, selected and non-selected intervals
    int.nonselected <- seq_len(obj$int.num)
@@ -366,7 +372,7 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat, full) {
 
          # build a model
          m <- pls(xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale, cv = obj$cv,
-            ncomp.selcrit = obj$ncomp.selcrit, x.test = xt, y.test = obj$y.test)
+            ncomp.selcrit = obj$ncomp.selcrit, x.test = xt, y.test = obj$y.test, cv.scope = cv.scope)
          lres <- if (is.null(obj$cv)) m$res$test else m$res$cv
 
          # if first round, build a data frame with statistics for each interval
@@ -443,8 +449,11 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat, full) {
 #' data frame with initial global statistics.
 #' @param full
 #' logical, if TRUE the procedure will continue even if no improvements is observed.
+#' @param cv.scope
+#' scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
+#' or 'local' — recompute new for each local calibration set.
 #'
-ipls.backward <- function(x, y, obj, int.stat, glob.stat, full) {
+ipls.backward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
 
    # define vectors with status, selected and non-selected intervals
    int.selected <- seq_len(obj$int.num)
@@ -479,7 +488,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full) {
 
          # build a model
          m <- pls(xc, y, ncomp = obj$int.ncomp, center = obj$center, scale = obj$scale, cv = obj$cv,
-            ncomp.selcrit = obj$ncomp.selcrit, x.test = xt, y.test = obj$y.test)
+            ncomp.selcrit = obj$ncomp.selcrit, x.test = xt, y.test = obj$y.test, cv.scope = cv.scope)
 
          lres <- if (is.null(obj$cv)) m$res$test else m$res$cv
 
@@ -580,6 +589,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full) {
 #'  @seealso
 #'  \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
 #'
+#' @export
 plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "iPLS results",
    xlab = obj$xaxis.name, ylab = if (is.null(obj$cv)) "RMSEP" else "RMSECV", xlim = NULL, ylim = NULL, ...) {
 

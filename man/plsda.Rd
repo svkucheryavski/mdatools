@@ -21,7 +21,8 @@ plsda(
   gamma = 0.01,
   info = "",
   ncomp.selcrit = "min",
-  classname = NULL
+  classname = NULL,
+  cv.scope = "local"
 )
 }
 \arguments{
@@ -61,6 +62,9 @@ RMSECV and \code{'wold'} for Wold's rule.)}
 
 \item{classname}{name (label) of class in case if PLS-DA is used for one-class discrimination model. In this case
 it is expected that parameter `c` will be a vector with logical values.}
+
+\item{cv.scope}{scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
+or 'local' — recompute new for each local calibration set.}
 }
 \value{
 Returns an object of \code{plsda} class with following fields (most inherited from class

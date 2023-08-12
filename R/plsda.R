@@ -41,6 +41,9 @@
 #' @param classname
 #' name (label) of class in case if PLS-DA is used for one-class discrimination model. In this case
 #' it is expected that parameter `c` will be a vector with logical values.
+#' @param cv.scope
+#' scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
+#' or 'local' — recompute new for each local calibration set.
 #'
 #' @return
 #' Returns an object of \code{plsda} class with following fields (most inherited from class
@@ -153,7 +156,7 @@
 plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
    cv = NULL, exclcols = NULL, exclrows = NULL, x.test = NULL, c.test = NULL, method = "simpls",
    lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "", ncomp.selcrit = "min",
-   classname = NULL) {
+   classname = NULL, cv.scope = "local") {
 
    # check vector with class values and adjust if necessary
    c <- classmodel.processRefValues(c, classname)
@@ -182,7 +185,7 @@ plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, sc
    if (!is.null(cv)) {
 
       # cross-validation for regression model
-      res <- crossval.regmodel(model, x, y, cv, pls.cal)
+      res <- crossval.regmodel(model, x, y, cv, cal.fun = pls.cal, pred.fun = pls.getpredictions, cv.scope = cv.scope)
 
       # classification results
       c.pred <- classify.plsda(model, res$y.pred)

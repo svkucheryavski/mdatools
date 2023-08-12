@@ -4,12 +4,10 @@
 \alias{getCalibrationData}
 \title{Calibration data}
 \usage{
-getCalibrationData(obj, ...)
+getCalibrationData(obj)
 }
 \arguments{
 \item{obj}{a model object}
-
-\item{...}{other arguments}
 }
 \description{
 Calibration data

@@ -624,7 +624,6 @@ test_that("PLS gives results comparable to other software", {
    # compare cross-validation results
    rmsecv <- c(1.1044, 0.8673, 0.8627, 0.8186)
    r2cv <- c(0.9173, 0.9489, 0.9498, 0.9545)
-
    expect_equivalent(m$res$cv$rmse, rmsecv, tolerance = 10^-3)
    expect_equivalent(m$res$cv$r2, r2cv, tolerance = 10^-3)
 })

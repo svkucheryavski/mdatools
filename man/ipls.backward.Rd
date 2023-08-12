@@ -4,7 +4,7 @@
 \alias{ipls.backward}
 \title{Runs the backward iPLS algorithm}
 \usage{
-ipls.backward(x, y, obj, int.stat, glob.stat, full)
+ipls.backward(x, y, obj, int.stat, glob.stat, full, cv.scope)
 }
 \arguments{
 \item{x}{a matrix with predictor values.}
@@ -18,6 +18,9 @@ ipls.backward(x, y, obj, int.stat, glob.stat, full)
 \item{glob.stat}{data frame with initial global statistics.}
 
 \item{full}{logical, if TRUE the procedure will continue even if no improvements is observed.}
+
+\item{cv.scope}{scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
+or 'local' — recompute new for each local calibration set.}
 }
 \description{
 Runs the backward iPLS algorithm

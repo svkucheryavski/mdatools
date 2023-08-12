@@ -168,14 +168,12 @@ predict.simcam <- function(object, x, c.ref = NULL, ...) {
 #'
 #' @param obj
 #' SIMCAM model (object of class \code{simcam})
-#' @param ...
-#' other arguments
 #'
 #' @details
 #' See examples in help for \code{\link{simcam}} function.
 #'
 #' @export
-getCalibrationData.simcam <- function(obj, ...) {
+getCalibrationData.simcam <- function(obj) {
    x <- NULL
    c.ref <- NULL
 

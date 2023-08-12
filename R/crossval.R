@@ -128,11 +128,17 @@ crossval.str <- function(cv) {
    if (length(cv) == 0) return("none")
 
    if (is.numeric(cv)) {
+
+      if (length(cv) > 1) {
+         return (sprintf("user defined with %d segments", length(unique((cv)))))
+      }
+
       return(
          if (cv == 1) "full (leave one out)"
-         else sprintf("random with %.0f segments", cv)
+         else sprintf("random with %d segments", cv)
       )
    }
+
 
    type <- cv[[1]]
    if (type == "loo") {

@@ -20,7 +20,8 @@ pls(
   ncomp.selcrit = "min",
   lim.type = "ddmoments",
   alpha = 0.05,
-  gamma = 0.01
+  gamma = 0.01,
+  cv.scope = "local"
 )
 }
 \arguments{
@@ -56,6 +57,9 @@ first local minimum of RMSECV and \code{'wold'} for Wold's rule.)}
 \item{alpha}{significance level for extreme limits for T2 and Q disances.}
 
 \item{gamma}{significance level for outlier limits for T2 and Q distances.}
+
+\item{cv.scope}{scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
+or 'local' — recompute new for each local calibration set.}
 }
 \value{
 Returns an object of \code{pls} class with following fields:

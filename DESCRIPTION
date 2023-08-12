@@ -1,7 +1,7 @@
 Package: mdatools
-Version: 0.14.0
+Version: 0.14.1
 Title: Multivariate Data Analysis for Chemometrics
-Date: 2023-03-28
+Date: 2023-08-12
 Authors@R: c(person("Sergey", "Kucheryavskiy", role = c("aut", "cre"), email="svkucheryavski@gmail.com", comment = c(ORCID = "0000-0002-3145-7244")))
 Maintainer: Sergey Kucheryavskiy <svkucheryavski@gmail.com>
 Description: Projection based methods for preprocessing, exploring and analysis of multivariate data used in chemometrics. S. Kucheryavskiy (2020) <doi:10.1016/j.chemolab.2020.103937>.
@@ -9,9 +9,9 @@ Encoding: UTF-8
 License: MIT + file LICENSE
 Imports: methods, graphics, grDevices, stats, Matrix
 RoxygenNote: 7.2.3
-Suggests: testthat
+Suggests: testthat, pcv
 NeedsCompilation: no
 Packaged: 2019-05-24 11:03:33 UTC; svkucheryavski
 Depends: R (>= 3.5.0)
-URL: https://github.com/svkucheryavski/mdatools
+URL: https://mda.tools
 BugReports: https://github.com/svkucheryavski/mdatools/issues
