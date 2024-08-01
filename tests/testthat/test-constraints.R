@@ -112,8 +112,10 @@ x  <- 1:500
 y1 <- dnorm(x, m = 100, s = 20) * 0.8  + dnorm(x, m = 200, s = 10) * 0.2
 y2 <- dnorm(x, m = 100, s = 10) * 0.2  + dnorm(x, m = 200, s = 20) * 0.8
 y3 <- dnorm(x, m = 250, s = 20)
-y <- cbind(y1, y2, y3)
-y <- y + matrix(rnorm(length(y), 0, max(y) * 0.05), nrow(y), ncol(y))
+y4 <- dnorm(x, m = 1, s = 20) * 0.7 + dnorm(x, m = 500, s = 20) * 0.3 ## main peak at first column
+y5 <- dnorm(x, m = 1, s = 20) * 0.3 + dnorm(x, m = 500, s = 20) * 0.7 ## main peak at last column
+y <- cbind(y1, y2, y3, y4, y5)
+yn <- y + matrix(rnorm(length(y), 0, max(y) * 0.01), nrow(y), ncol(y))
 
 check_unimodality <- function(y, tol = 0) {
    n <- length(y)
@@ -123,14 +125,25 @@ check_unimodality <- function(y, tol = 0) {
    return(sum(dl > tol) + sum(dr > tol))
 }
 
-test_that("Unimodality constraint works correctly", {
+matplot(y, type = "l")
+test_that("Unimodality constraint works correctly for data without noise", {
    cn1 <- constraint("unimod")
    y.new1 <- employ.constraint(cn1, y, NULL)
-
    cn2 <- constraint("unimod", params = list(tol = 0.2))
    y.new2 <- employ.constraint(cn2, y, NULL)
 
    expect_true(all(apply(y, 2, check_unimodality, tol = 0) > 0))
+   expect_true(all(apply(y.new1, 2, check_unimodality, tol = 0) < 0.00000001))
+   expect_true(all(apply(y.new2, 2, check_unimodality, tol = 0.2) < 0.20))
+})
+
+test_that("Unimodality constraint works correctly for data with noise", {
+   cn1 <- constraint("unimod")
+   y.new1 <- employ.constraint(cn1, yn, NULL)
+   cn2 <- constraint("unimod", params = list(tol = 0.2))
+   y.new2 <- employ.constraint(cn2, yn, NULL)
+
+   expect_true(all(apply(yn, 2, check_unimodality, tol = 0) > 0))
    expect_true(all(apply(y.new1, 2, check_unimodality, tol = 0) < 0.00000001))
    expect_true(all(apply(y.new2, 2, check_unimodality, tol = 0.2) < 0.20))
 })
