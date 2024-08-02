@@ -132,13 +132,17 @@ constraintUnimod <- function(x, d, tol = 0) {
    # process each component separately
    for (a in seq_len(ncol(x))) {
 
-      # flatten peaks to the left of maximum
-      left_part <- (peak.ind[a] - 1):1
-      x[, a] <- f(x[, a], max = x[peak.ind[a], a], indseq = left_part, step = +1)
+      if (peak.ind[a] != 1) {
+          # flatten peaks to the left of maximum
+          left_part <- (peak.ind[a] - 1):1
+          x[, a] <- f(x[, a], max = x[peak.ind[a], a], indseq = left_part, step = +1)
+      }
 
-      # flatten peaks to the right of maximum
-      right_part <- (peak.ind[a] + 1):nvar
-      x[, a] <- f(x[, a], max = x[peak.ind[a], a], indseq = right_part, step = -1)
+      if (peak.ind[a] != nvar) {
+          # flatten peaks to the right of maximum
+          right_part <- (peak.ind[a] + 1):nvar
+          x[, a] <- f(x[, a], max = x[peak.ind[a], a], indseq = right_part, step = -1)
+      }
    }
 
    return(x)
