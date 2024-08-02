@@ -125,16 +125,21 @@ check_unimodality <- function(y, tol = 0) {
    return(sum(dl > tol) + sum(dr > tol))
 }
 
-matplot(y, type = "l")
 test_that("Unimodality constraint works correctly for data without noise", {
    cn1 <- constraint("unimod")
    y.new1 <- employ.constraint(cn1, y, NULL)
    cn2 <- constraint("unimod", params = list(tol = 0.2))
    y.new2 <- employ.constraint(cn2, y, NULL)
-
-   expect_true(all(apply(y, 2, check_unimodality, tol = 0) > 0))
+   expect_true(sum(apply(y, 2, check_unimodality, tol = 0) > 0) == 4)
    expect_true(all(apply(y.new1, 2, check_unimodality, tol = 0) < 0.00000001))
    expect_true(all(apply(y.new2, 2, check_unimodality, tol = 0.2) < 0.20))
+
+   # uncomment for visual inspection
+   # par(mfrow = c(3, 1))
+   # matplot(y, type = "l")
+   # matplot(y.new1, type = "l")
+   # matplot(y.new2, type = "l")
+
 })
 
 test_that("Unimodality constraint works correctly for data with noise", {
@@ -146,6 +151,13 @@ test_that("Unimodality constraint works correctly for data with noise", {
    expect_true(all(apply(yn, 2, check_unimodality, tol = 0) > 0))
    expect_true(all(apply(y.new1, 2, check_unimodality, tol = 0) < 0.00000001))
    expect_true(all(apply(y.new2, 2, check_unimodality, tol = 0.2) < 0.20))
+
+   # uncomment for visual inspection
+   # par(mfrow = c(3, 1))
+   # matplot(yn, type = "l")
+   # matplot(y.new1, type = "l")
+   # matplot(y.new2, type = "l")
+
 })
 
 
