@@ -527,6 +527,7 @@ pinv <- function(data) {
 #'
 #'
 prep.generic <- function(x, f, ...) {
+   stopifnot("First argument of preprocessing function should be a matrix." = is.matrix(x))
    attrs <- mda.getattr(x)
    dimnames <- dimnames(x)
    x.p <- f(x, ...)
