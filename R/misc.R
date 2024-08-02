@@ -844,5 +844,11 @@ prepCalData <- function(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.
       stop(sprintf("Dataset should contain at least %d variables (columns).", min.ncols))
    }
 
+   if (is.data.frame((x))) {
+      nvar <- ncol(x)
+      x <- mda.df2mat(x)
+      stopifnot("The provided data frame has non-numeric columns, convert them to the numbers first." = ncol(x) == nvar)
+   }
+
    return(x)
 }
