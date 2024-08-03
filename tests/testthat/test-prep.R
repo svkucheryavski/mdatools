@@ -1,8 +1,38 @@
 # new tests on top
 
-context("prep: autoscale")
+context("prep: checks")
 
 data(simdata)
+
+# spectra as data frame or vector — should show error
+Xe <- as.data.frame(simdata$spectra.c)
+xe <- 1:10
+
+test_that("Preprocessing methods raise error if data is not a matrix", {
+
+   expect_error(prep.snv((Xe)))
+   expect_error(prep.snv((xe)))
+
+   expect_error(prep.msc((Xe)))
+   expect_error(prep.msc((xe)))
+
+   expect_error(prep.norm((Xe)))
+   expect_error(prep.norm((xe)))
+
+   expect_error(prep.km((Xe)))
+   expect_error(prep.km((xe)))
+
+   expect_error(prep.savgol((Xe)))
+   expect_error(prep.savgol((xe)))
+
+   expect_error(prep.alsbasecorr((Xe)))
+   expect_error(prep.alsbasecorr((xe)))
+
+   expect_error(prep.varsel((Xe)))
+   expect_error(prep.varsel((xe)))
+})
+
+context("prep: autoscale")
 
 # normal spectra
 X1 <- simdata$spectra.c

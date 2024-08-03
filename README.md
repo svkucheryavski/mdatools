@@ -18,7 +18,7 @@ If you want to cite the package, please use the following: Sergey Kucheryavskiy,
 What is new
 -----------
 
-Latest release (0.14.1, August 2023) is available both from GitHub and CRAN. You can see the full list of changes [here](NEWS.md). The Bookdown tutorial has been also updated and contains the description of new methods added in the last release.
+Latest release (0.14.2, August 2024) is available both from GitHub and CRAN. You can see the full list of changes [here](NEWS.md). The Bookdown tutorial has been also updated and contains the description of new methods added in the last release.
 
 
 How to install
