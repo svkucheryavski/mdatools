@@ -1,7 +1,7 @@
 v. 0.14.2
 =========
 * fixed bug [#118](https://github.com/svkucheryavski/mdatools/issues/118) (thanks to @gongyh).
-* added additional sanity checks to preprocessing matrix (most of them work correctly only with matirces).
+* added additional sanity checks to preprocessing methods (most of them work correctly only with matrices).
 * added automatic data frame to matrix conversion to methods for model training.
 
 v. 0.14.1
