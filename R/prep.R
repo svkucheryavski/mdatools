@@ -1,3 +1,66 @@
+#' Remove spikes from Raman spectra
+#'
+#' @description
+#' Remove spikes from Raman spectra using
+#'
+#' @param width
+#' width of the moving median filter
+#' @param threshold
+#' threshold to compare modified z-score value with to detect the spike.
+#'
+#' @return
+#' data matrix with processed values
+#'
+#' @description
+#'
+#'
+#' @references
+#' https://doi.org/10.1016/j.chemolab.2018.06.009
+#' @export
+prep.spikes <- function(data, width = 5, threshold = 6) {
+
+   stopifnot("Parameter 'width' should be at least equal to 3." = width > 2)
+   stopifnot("Parameter 'width' should be an odd integer number." = width %% 2 == 1)
+
+   f <- function(data, width, threshold) {
+
+      n <- ncol(data)
+      half <- round((width - 1) / 2)
+
+      z <- apply(data, 1, function(x) {
+         dx <- diff(x)
+         med <- median(dx, na.rm = TRUE)
+         mad <- mad(dx, na.rm = TRUE)
+
+         # correct mad value to avoid division by zero
+         if (mad < 1e-10) mad <- 1
+
+         abs(0.6745 * (dx - med) / mad)
+      })
+
+      z <- t(rbind(rep(0, ncol(z)), z))
+      spikes.map <- z > threshold
+      spikes.rows <- which(rowSums(spikes.map) > 0)
+      if (length(spikes.rows) > 0) {
+         for (rr in spikes.rows) {
+            spikes.cols <- which(spikes.map[rr, ] > 0)
+            for (cc in spikes.cols) {
+               cc.ind <- seq(max(cc - half, 1),min(cc + half, n))
+               cc.ind <- cc.ind[spikes.map[rr, cc.ind] == 0]
+               data[rr, cc] <- mean(data[rr, cc.ind])
+            }
+         }
+      }
+
+      return (data)
+   }
+
+   return(prep.generic(data, f, width = width, threshold = threshold))
+}
+
+
+
+
 #' Autoscale values
 #'
 #' @description
@@ -27,6 +90,7 @@
 prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0) {
 
    f <- function(data, center, scale, max.cov) {
+
       # define values for centering
       if (is.logical(center) && center) center <- apply(data, 2, mean)
 

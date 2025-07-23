@@ -531,3 +531,25 @@ test_that("Method works with user defined preprocessing method", {
    expect_equal(px1, px2)
    expect_equal(mda.getattr(px1), mda.getattr(px2))
 })
+
+
+context("prep: spikes")
+
+test_that("Removing spikes works correctly", {
+   data(carbs)
+   spectra <- carbs$D
+   sspectra <- spectra
+   sspectra[1,  110] <- sspectra[1,  110] * 10
+   sspectra[10, 220] <- sspectra[10, 220] * 10
+   sspectra[15, 330] <- sspectra[15, 330] * 10
+   sspectra[20, 450] <- sspectra[20, 450] * 10
+
+   expect_silent(pspectra <- prep.spikes(sspectra, width = 5, threshold = 6))
+   ind2 <- which(abs(spectra - pspectra) / abs(spectra) > 0.5)
+   ind1 <- which(abs(spectra - sspectra) / abs(spectra) > 0.5)
+
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equal(length(ind2), 0)
+   expect_equal(length(ind1), 4)
+
+})
