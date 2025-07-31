@@ -1,8 +1,11 @@
 #' Remove spikes from Raman spectra
 #'
 #' @description
-#' Remove spikes from Raman spectra using
+#' Removes spikes from Raman spectra using median absolute deviation computed for signal
+#' differences. See [1] for more details
 #'
+#' @param data
+#' a matrix with data values
 #' @param width
 #' width of the moving median filter
 #' @param threshold
@@ -11,11 +14,11 @@
 #' @return
 #' data matrix with processed values
 #'
-#' @description
-#'
-#'
 #' @references
-#' https://doi.org/10.1016/j.chemolab.2018.06.009
+#' 1. Darren A. Whitaker, Kevin Hayes, A simple algorithm for despiking Raman spectra,
+#' Chemometrics and Intelligent Laboratory Systems, 179, 2018, pp. 82-84,
+#' 10.1016/j.chemolab.2018.06.009.
+#'
 #' @export
 prep.spikes <- function(data, width = 5, threshold = 6) {
 
@@ -35,7 +38,8 @@ prep.spikes <- function(data, width = 5, threshold = 6) {
          # correct mad value to avoid division by zero
          if (mad < 1e-10) mad <- 1
 
-         abs(0.6745 * (dx - med) / mad)
+         # compute z here we do not multiply to constant because mad() does this already
+         abs((dx - med) / mad)
       })
 
       z <- t(rbind(rep(0, ncol(z)), z))
@@ -47,7 +51,8 @@ prep.spikes <- function(data, width = 5, threshold = 6) {
             for (cc in spikes.cols) {
                cc.ind <- seq(max(cc - half, 1),min(cc + half, n))
                cc.ind <- cc.ind[spikes.map[rr, cc.ind] == 0]
-               data[rr, cc] <- mean(data[rr, cc.ind])
+               if (length(cc.ind) > 0)
+                  data[rr, cc] <- mean(data[rr, cc.ind])
             }
          }
       }
