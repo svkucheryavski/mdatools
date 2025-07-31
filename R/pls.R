@@ -690,6 +690,8 @@ pls.getyscores <- function(y, yloadings, xscores) {
 
    return(yscores)
 }
+
+
 #' PLS predictions
 #'
 #' @description
@@ -797,7 +799,14 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
       attr(ydecomp$Q, "Nu") <- object$Zlim[4, ]
    }
 
-   return(plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, xdecomp = xdecomp, ydecomp = ydecomp))
+   res <- plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, xdecomp = xdecomp, ydecomp = ydecomp)
+   res$center <- object$center
+   res$scale <- object$scale
+   res$exclcols <- object$exclcols
+   res$exclrows <- x.attrs$exclrows
+
+
+   return(res)
 }
 
 #' Categorize data rows based on PLS results and critical limits for total distance.
