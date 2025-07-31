@@ -378,7 +378,8 @@ ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
    }
 
    # compute total variance
-   totvar <- sum(tcrossprod(scores, loadings)^2) + sum(residuals^2)
+   #totvar <- sum(tcrossprod(scores, loadings)^2) + sum(residuals^2)
+   totvar <- sum((tcrossprod(scores, loadings) + residuals)^2)
 
    # compute explained variance
    cumexpvar <- 100 * (1 - colSums(Q) / totvar)
