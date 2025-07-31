@@ -1,3 +1,20 @@
+#' Method to write outcomes of any result object to CSV file
+#'
+#' @param res
+#' result object (\code{plsres}, \code{pcares}, etc.).
+#' @param fileName
+#' name (or full path) to CSV file to be created.
+#' @param name
+#' short name of the result object (e.g. \code{"cal"}, \code{"test"}. etc.).
+#' @param sep
+#' values separator (either \code{","} or \code{";"}).
+#' @param dataFile
+#' optional, name of the data file used to create the results.
+#'
+#' @export
+writeCSV <- function(res, fileName, name, sep = ",", dataFile = "") UseMethod("writeCSV")
+
+
 
 #' Plot for ratio RMSEC/RMSECV vs RMSECV
 #' @param obj
