@@ -489,6 +489,11 @@ predict.pca <- function(object, x, ...) {
    attr(res$T2, "u0") <- object$T2lim[3, ]
    attr(res$T2, "Nu") <- object$T2lim[4, ]
 
+   res$center <- object$center
+   res$scale <- object$scale
+   res$exclcols <- object$exclcols
+   res$exclrows <- attrs$exclrows
+
    return(res)
 }
 

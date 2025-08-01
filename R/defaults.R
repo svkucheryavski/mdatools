@@ -10,9 +10,11 @@
 #' values separator (either \code{","} or \code{";"}).
 #' @param dataFile
 #' optional, name of the data file used to create the results.
+#' @param ...
+#' other optional parameters
 #'
 #' @export
-writeCSV <- function(res, fileName, name, sep = ",", dataFile = "") UseMethod("writeCSV")
+writeCSV <- function(res, fileName, name, sep = ",", dataFile = "", ...) UseMethod("writeCSV")
 
 
 

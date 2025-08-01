@@ -283,9 +283,11 @@ print.plsres <- function(x, ...) {
 #' values separator (either \code{","} or \code{";"}).
 #' @param dataFile
 #' optional, name of the data file used to create the results.
+#' @param ...
+#' other optional parameters
 #'
 #' @export
-writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "") {
+writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "", ...) {
 
    paste1 <- function(...) {
       paste0(..., collapse = "")
@@ -303,7 +305,7 @@ writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "") {
    n <- nAll - nOut
 
    # number of responses and components
-   nCompSelected = res$ncomp.selected
+   nCompSelected <- res$ncomp.selected
    nRespModel <- dim(res$y.pred)[3]
    nResp <- if (is.null(res$y.ref)) 0 else ncol(res$y.ref)
    nComp <- res$ncomp
@@ -313,7 +315,7 @@ writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "") {
    filler <- paste1(rep('', nComp), sep)
 
    # vector with component names/labels and values separator
-   compNames = paste1("LV", 1:nComp, sep)
+   compNames <- paste1("LV", 1:nComp, sep)
 
    # function for adding component based outcomes for every row
    addChunk <- function (name, values, out) {
@@ -421,10 +423,9 @@ writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "") {
 
    # add header
    out <- c(paste1('Data filename:', sep, dataFile, filler), out)
-   out <- c (paste1(paste1('PLS results (',  name, ')'), sep, 'https://mda.tools/pls/', filler), ' ', out);
-#   print(out)
-   writeLines(out, fileName)
+   out <- c(paste1(paste1('PLS results (',  name, ')'), sep, 'https://mda.tools/pls/', filler), ' ', out);
 
+   writeLines(out, fileName)
 }
 
 
