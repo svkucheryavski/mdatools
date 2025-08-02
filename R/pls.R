@@ -674,18 +674,28 @@ pls.getxscores <- function(x, weights, xloadings) {
 #' matrix with Y-loadings
 #' @param  xscores
 #' matrix with X-scores (needed for orthogonalization)
+#' @oaram exclrows
 #'
 #' @return matrix with Y-scores
-pls.getyscores <- function(y, yloadings, xscores) {
+pls.getyscores <- function(y, yloadings, xscores, exclrows) {
 
    ncomp <- ncol(yloadings)
    yscores <- as.matrix(y) %*% yloadings
    if (ncomp < 2) return(yscores)
 
+   # outliers should not be involved to ortogonalization
+   if (length(exclrows) > 0) {
+      xscoresno <- xscores[-exclrows, , drop = FALSE]
+      yscoresno <- yscores[-exclrows, , drop = FALSE]
+   } else {
+      xscoresno <- xscores
+      yscoresno <- yscores
+   }
+
    # orthogonalize
    for (a in 2:ncomp) {
       yscores[, a] <- yscores[, a] - xscores[, 1:(a - 1), drop = FALSE] %*%
-         crossprod(xscores[, 1:(a - 1), drop = FALSE], yscores[, a])
+         crossprod(xscoresno[, 1:(a - 1), drop = FALSE], yscoresno[, a])
    }
 
    return(yscores)
@@ -787,7 +797,7 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 
       # autoscale y-values
       y <- prep.autoscale(y, center = object$ycenter, scale = object$yscale)
-      yscores <- pls.getyscores(as.matrix(y), object$yloadings, xscores)
+      yscores <- pls.getyscores(as.matrix(y), object$yloadings, xscores, x.attrs$exclrows)
 
       # below we use xdecomp$scores instead of xscores to provide all names and attributes
       ydecomp <- pls.getydecomp(y, yscores, xdecomp$scores, object$yloadings, object$yeigenvals,
