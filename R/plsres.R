@@ -326,19 +326,14 @@ writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "", ...) 
       }
 
 
-      # n - is number of rows in result objects without outliers
-      # j - is an iterator along these rows
-      # nAll - is a number of rows in original dataset
-      # i - is an interator along these rows
-      j <- 1;
+      # in contrast to web apps here results contains outcomes for all rows,
+      # including outliers
       for (i in seq_len(nAll)) {
-
          # outlier
          if (nOut > 0 && i %in% outliers) {
             out <- c(out, paste1(rowLabels[i], sep, paste1(rep('-', nComp), sep)))
          } else {
-            out <- c(out, paste1(rowLabels[i], sep, paste1(values[j, ], sep)))
-            j <- j + 1
+            out <- c(out, paste1(rowLabels[i], sep, paste1(values[i, ], sep)))
          }
       }
 
