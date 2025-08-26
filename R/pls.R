@@ -674,7 +674,8 @@ pls.getxscores <- function(x, weights, xloadings) {
 #' matrix with Y-loadings
 #' @param  xscores
 #' matrix with X-scores (needed for orthogonalization)
-#' @oaram exclrows
+#' @param exclrows
+#' vector with indices of excluded rows if any
 #'
 #' @return matrix with Y-scores
 pls.getyscores <- function(y, yloadings, xscores, exclrows) {
