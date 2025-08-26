@@ -4,7 +4,7 @@
 \alias{prep.savgol}
 \title{Savytzky-Golay filter}
 \usage{
-prep.savgol(data, width = 3, porder = 1, dorder = 0)
+prep.savgol(data, width = 3, porder = 1, dorder = 0, w = NULL)
 }
 \arguments{
 \item{data}{a matrix with data values}
@@ -14,6 +14,8 @@ prep.savgol(data, width = 3, porder = 1, dorder = 0)
 \item{porder}{order of polynomial used for smoothing}
 
 \item{dorder}{order of derivative to take (0 - no derivative)}
+
+\item{w}{do not use, required for training of preprocessing model.}
 }
 \description{
 Applies Savytzky-Golay filter to the rows of data matrix

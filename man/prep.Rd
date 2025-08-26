@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep.R
 \name{prep}
 \alias{prep}
-\title{Class for preprocessing object}
+\title{Class for preprocessing object/item.}
 \usage{
 prep(name, params = NULL, method = NULL)
 }
@@ -14,7 +14,7 @@ prep(name, params = NULL, method = NULL)
 \item{method}{method to call when applying the preprocessing, provide it only for user defined methods.}
 }
 \description{
-Class for preprocessing object
+Class for preprocessing object/item.
 }
 \details{
 Use this class to create a list with a sequence of preprocessing methods to keep them together
