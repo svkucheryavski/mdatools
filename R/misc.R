@@ -852,3 +852,16 @@ prepCalData <- function(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.
 
    return(x)
 }
+
+
+#' Generates unique pseudo-hash number based on current time and date
+#' @return string with the hash
+#' @export
+genhash <- function() {
+  now <- Sys.time()
+  ms <- format(as.numeric(now) %% 1, digits = 3) # fractional seconds
+  ms <- sprintf("%03d", as.integer(as.numeric(ms) * 1000))
+
+  hash <- format(now, "%Y%m%d%H%M%S")
+  paste0(hash, ms)
+}
