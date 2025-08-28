@@ -1549,13 +1549,15 @@ employ.prep <- function(obj, x, ...) {
 #' list with preprocssing methods (created using \code{prep.fit} function).
 #'
 #' @returns stringified JSON.
-prep.as.json <- function(obj) {
+#'
+#' @export
+prep.asjson <- function(obj) {
 
    npred <- obj[["_npred"]]
-   if (npred < 1) stop("prep.as.json: preprocessing object does not contain information about number of predictors.")
+   if (npred < 1) stop("prep.asjson: preprocessing object does not contain information about number of predictors.")
 
    left <- 0
-   right <- 0
+   right <- npred
    left.tot <- 0
 
    ml <- NULL
@@ -1569,7 +1571,7 @@ prep.as.json <- function(obj) {
    scale.flag <- FALSE
    for (p in obj) {
       if (!is.list(p)) next
-      if (is.null(p[["jmethod"]])) stop("prep.as.json: preprocessing list contains method, which can not be converted to JSON.")
+      if (is.null(p[["jmethod"]])) stop("prep.asjson: preprocessing list contains method, which can not be converted to JSON.")
 
       out <- do.call(p[["jmethod"]], list(params = p[["params"]], npred = npred, left = left, right = right))
 
@@ -1757,7 +1759,7 @@ prep.from.json <- function(str) {
 #'
 #' @export
 prep.writeJSON <- function(obj, fileName) {
-   m <- prep.as.json(obj)
+   m <- prep.asjson(obj)
    fileConn <- file(fileName)
    writeLines(m, fileConn)
    close(fileConn)
