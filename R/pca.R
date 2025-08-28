@@ -29,10 +29,10 @@
 #' significance level for outlier limits for T2 and Q distances.
 #' @param info
 #' a short text with model description.
+#' @param prep
+#' optional list with preprocessing methods created using `\code{\link{prep}}` function.
 #'
 #' @details
-#'
-#' Note, that from v. 0.10.0 cross-validation is no more supported in PCA.
 #'
 #' If number of components is not specified, a minimum of number of objects - 1 and number of
 #' variables in calibration set is used. One can also specified an optimal number of component,
@@ -85,9 +85,22 @@
 #'
 #' In case of PCA the critical limits are just shown on residual plot as lines and can be used for
 #' detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for
-#' classification in SIMCA (see \code{\link{simca}}) the limits are also employed for
-#' classification of objects.
+#' classification in SIMCA (see \code{\link{simca}}) or DD-SIMCA (\code{\link{ddsimca}})
+#' the limits are also employed for classification of objects.
 #'
+#' If you provide a list with preprocessing methods, PCA will apply them to the training set
+#' before excluding the columns and rows (if specified). The list will be used to train a preprocessing
+#' model which becomes a part of the PCA modle object. So when you use method `predict()` the provided
+#' dataset will be automatically preprocessed by the preprocessing model.
+#'
+#' Any PCA model (with or without preprocessing) developed in this package can be saved as JSON file
+#' using method \code{\link{readJSON.pca()}} and then be loaded to interactive web-application for
+#' PCA available at https://mda.tools/pca. Likewise one can develop a model in the app, save it to
+#' JSON file and then load it to R by using method \code{\link{pca.readJSON()}}. In this case,
+#' however, the model object will not contain calibration/training results, so some of
+#' the plots and statistics will not be available.
+#'
+#' web-applications
 #' @return
 #' Returns an object of \code{pca} class with following fields:
 #' \item{ncomp }{number of components included to the model.}
@@ -133,6 +146,8 @@
 #'    \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
 #'    \code{\link{setDistanceLimits.pca}} \tab set critical limits for residuals\cr
 #'    \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr
+#'    \code{\link{writeJSON.pca}} \tab saves PCA model to a JSON file so it can be used in web-applications.\cr
+#'    \code{\link{pca.readJSON}} \tab loads PCA model from a JSON file to \code{pca} object.\cr
 #' }
 #'
 #' Plotting methods for \code{pca} objects:
@@ -141,7 +156,7 @@
 #'    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
 #'    \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
 #'    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
-#'    \code{\link{plotResiduals.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
+#'    \code{\link{plotDistances.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
 #'    \code{\link{plotBiplot.pca}} \tab shows bi-plot.\cr
 #'    \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr
 #'    \code{\link{plotT2DoF}} \tab plot with degrees of freedom for score distance.\cr
@@ -182,13 +197,47 @@
 #' plotResiduals(model, ncomp = 2, show.labels = TRUE)
 #' par(mfrow = c(1, 1))
 #'
+#' ## 4. Use list with preprocessing methods
+#'
+#' # get the data (calibration and test set)
+#' data(simdata)
+#' Xc <- simdata$spectra.c
+#' Xt <- simdata$spectra.t
+#'
+#' # create a list with two preprocessing methods
+#' p <- list(
+#'    prep("savgol", list(width = 7, porder = 2, dorder = 2)),
+#'    prep("snv")
+#' )
+#'
+#' # build a PCA model with and without preprocessing
+#' m1 <- pca(Xc, 5, prep = p)
+#' m2 <- pca(Xc, 5)
+#'
+#' # apply the models to test set
+#' r1 <- predict(m1, Xt)
+#' r2 <- predict(m2, Xt)
+#'
+#' # check scores
+#' par(mfrow = c(1, 2))
+#' plotScores(m1, c(1, 2), res = list(cal = m1$calres, test = r1), main = "With preprocessing")
+#' plotScores(m2, c(1, 2), res = list(cal = m2$calres, test = r2), main = "Without preprocessing")
+#'
 #' @export
 pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
    exclrows = NULL, exclcols = NULL, x.test = NULL, method = "svd", rand = NULL,
-   lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "") {
+   lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "", prep = NULL) {
+
 
    # check calibration data and process excluded rows and columns
    x <- prepCalData(x, exclrows = exclrows, exclcols = exclcols, min.nrows = 2, min.ncols = 2)
+
+
+   # if preprocessing is available, apply it
+   if (!is.null(prep)) {
+      prep <- prep.fit(prep, x)
+      x <- prep.apply(prep, x)
+   }
 
    # calibrate model and set distance limits
    model <- pca.cal(x, ncomp, center = center, scale = scale, method = method, rand = rand)
@@ -199,6 +248,10 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
    model$res <- list()
    model$res[["cal"]] <- predict.pca(model, x)
    model$calres <- model$res[["cal"]]
+
+   # add prep here so it will not influence prediction for calibration set
+   # which is already preprocessed
+   model$prep <- prep
 
    # compute critical limit parameters
    model$limParams <- list(
@@ -455,6 +508,11 @@ predict.pca <- function(object, x, ...) {
    # check datasets and convert to matrix if needed
    attrs <- attributes(x)
    rownames <- rownames(x)
+
+   if (!is.null(object$prep)) {
+      x <- prep.apply(object$prep, x)
+   }
+
    x <- prepCalData(x, min.nrows = 1, min.ncols = nrow(object$loadings) - length(attrs$exclcols))
 
    if (ncol(x) != nrow(object$loadings)) {
@@ -1007,6 +1065,135 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
    return(model)
 }
 
+################################
+# JSON methods                 #
+################################
+
+asvector.pca <- function(obj) {
+
+   do_center = !is.logical(obj$center)
+   do_scale = !is.logical(obj$scale)
+
+
+   if (do_center) {
+      mX = obj$center
+   } else {
+      mX = rep(0, nrow(obj$loadings))
+   }
+
+   if (do_scale) {
+      sX = obj$scale
+   } else {
+      sX = rep(1, nrow(obj$loadings))
+   }
+
+   ncols <- nrow(obj$loadings)
+   if (!is.null(obj$exclcols)) {
+      mX <- mX[-obj$exclcols]
+      sX <- sX[-obj$exclcols]
+      ncols <- ncols - length(obj$exclcols)
+   }
+
+   G <- mda.purge(obj$calres$G)
+   R <- mda.purge(obj$calres$R)
+   H <- mda.purge(obj$calres$T2)
+   Q <- mda.purge(obj$calres$Q)
+
+   gpc <- ddmoments.param(G)
+   gpr <- ddrobust.param(G)
+   rpc <- ddmoments.param(R)
+   rpr <- ddrobust.param(R)
+
+   hpc <- ddmoments.param(H)
+   hpr <- ddrobust.param(H)
+   qpc <- ddmoments.param(Q)
+   qpr <- ddrobust.param(Q)
+
+
+   mv <- c(
+      ncols,           # nc
+      ncol(obj$loadings),           # ncomp
+      mX,                           # mX
+      sX,                           # sX
+      as.vector(mda.purge(obj$loadings)),      # P
+      as.vector(obj$eigenvals),     # eigenvals
+
+      as.vector(qpc$u0),            # q0c
+      as.vector(round(qpc$Nu)),     # Nqc
+      as.vector(qpr$u0),            # q0r
+      as.vector(round(qpr$Nu)),     # Nqr
+
+      as.vector(hpc$u0),            # h0c
+      as.vector(round(hpc$Nu)),     # Nhc
+      as.vector(hpr$u0),            # h0r
+      as.vector(round(hpr$Nu)),     # Nhr
+
+      as.vector(rpc$u0),            # r0c
+      as.vector(round(rpc$Nu)),     # Nrc
+      as.vector(rpr$u0),            # r0r
+      as.vector(round(rpr$Nu)),     # Nrr
+
+      as.vector(gpc$u0),            # g0c
+      as.vector(round(gpc$Nu)),     # Ngc
+      as.vector(gpr$u0),            # g0r
+      as.vector(round(gpr$Nu))      # Ngr
+   )
+   names(mv) <- NULL
+   return(mv);
+}
+
+asjson.pca <- function(obj) {
+
+   v <- asvector(obj)
+
+   ncomp <- ncol(obj$loadings)
+   ncols <- nrow(obj$loadings)
+   nrows <- nrow(obj$calres$scores) - length(obj$exclrows)
+   center <- if(is.logical(obj$center) && obj$center == FALSE) "false" else "true"
+   scale <- if(is.logical(obj$scale) && obj$center == FALSE) "false" else "true"
+
+   varlabels <- rownames(obj$loadings)
+   varvalues <- if(!is.null(attr(obj$loadings, "xaxis.values"))) attr(obj$loadings, "xaxis.values") else 1:ncols
+
+   exclvars <- "[]"
+   if (!is.null(obj$exclcols)) {
+      varlabels <- varlabels[-obj$exclcols]
+      varvalues <- varvalues[-obj$exclcols]
+      exclvars <- paste0("[", paste0(obj$exclcols - 1, collapse = ","), "]")
+      ncols <- ncols - length(obj$exclcols)
+   }
+
+   varrev <- if (varvalues[2] < varvalues[1]) "true" else "false"
+   varindices <- 0:(ncols-1)
+   varlabels <- paste0("'", varlabels, "'", collapse = ",")
+   varvalues <- paste0(varvalues, collapse = ",")
+   varindices <- paste0(varindices, collapse = ",")
+   varvaluesName <- if(!is.null(attr(obj$loadings, "xaxis.name"))) attr(obj$loadings, "xaxis.name") else "''"
+
+   prep <- if (is.null(obj$prep)) "{}" else prep.asjson(obj$prep)
+   hash <- paste0("'", genhash(), "'")
+
+
+   m <- paste0(
+      "{'class':['pcamodel'],",
+      "'v':{'__type':'Float64Array','data':[",
+      paste0(v, collapse = ","),
+      "]}, 'ncomp':", ncomp, ",'nrows':", nrows, ",'ncols':", ncols, ",",
+      "'exclvars':", exclvars, ",'center':", center, ",'scale':", scale, ",'hash':", hash, ",",
+      "'varlabels':[", varlabels, "],'varindices':[", varindices, "],'varvalues':[", varvalues, "],",
+      "'varvaluesName':'", varvaluesName, "','varvaluesUnits':'', 'varrev':", varrev, ",",
+      "'prep':", prep, "}"
+   )
+
+   m <- gsub("\'", "\"", m)
+}
+
+writeJSON.pca <- function(obj, fileName) {
+   m <- asjson(obj)
+   fileConn <- file(fileName)
+   writeLines(m, fileConn)
+   close(fileConn)
+}
 
 ################################
 #  Plotting methods            #
@@ -1180,7 +1367,7 @@ plotScores.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type =
 #' See examples in help for \code{\link{pca}} function.
 #'
 #' @export
-plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
+plotDistances.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
    norm = TRUE, cgroup = NULL, xlim = NULL, ylim = NULL, show.limits = TRUE,
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    res = obj$res, show.legend = TRUE, ...) {
@@ -1195,6 +1382,16 @@ plotResiduals.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
       cgroup = cgroup, xlim = xlim, ylim = ylim, show.limits = show.limits, lim.col = lim.col,
       lim.lwd = lim.lwd, show.legend = show.legend, ...)
 }
+
+
+#' Shortcut to plotDistances()
+#'
+#' @param ...
+#' any parameter from \code{\link{plotDistances.pca()}}
+#'
+#' @export
+plotResiduals.pca <- function(...) - plotDistances.pca(...)
+
 
 #' Loadings plot for PCA model
 #'
