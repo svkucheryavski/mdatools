@@ -419,34 +419,76 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
 
    # get names and attributes
    cols_excluded <- attr(loadings, "exclrows")
+   rows_excluded <- attr(scores, "exclrows")
 
    # get sizes
    ncomp <- ncol(scores)
    nobj <- nrow(scores)
+   nvar <- nrow(loadings)
+
+   # define vector with rows which are not excluded
+   rows.ind <- rep(TRUE, nobj)
+   if (length(rows_excluded) > 0) {
+      rows.ind[rows_excluded] <- FALSE
+   }
+
 
    # remove excluded variables from loadings and residuals
+   cols.ind <- rep(TRUE, nvar)
    if (length(cols_excluded) > 0) {
-      loadings <- loadings[-cols_excluded, , drop = FALSE]
-      residuals <- residuals[, -cols_excluded, drop = FALSE]
+      # loadings <- loadings[-cols_excluded, , drop = FALSE]
+      # residuals <- residuals[, -cols_excluded, drop = FALSE]
+      cols.ind[cols_excluded] <- FALSE
    }
 
-   # helper function to compute orthogonal distances for given number of components in a model
-   getResiduals <- function(scores, loadings, residuals, a) {
-      ncomp <- ncol(scores)
-      if (a == ncomp) return(residuals)
+   # # helper function to compute orthogonal distances for given number of components in a model
+   # getResiduals <- function(scores, loadings, residuals, a) {
+   #    ncomp <- ncol(scores)
+   #    if (a == ncomp) return(residuals)
 
-      residuals + tcrossprod(
-         scores[, (a + 1):ncomp, drop = FALSE],
-         loadings[, (a + 1):ncomp, drop = FALSE]
-      )
+   #    residuals + tcrossprod(
+   #       scores[, (a + 1):ncomp, drop = FALSE],
+   #       loadings[, (a + 1):ncomp, drop = FALSE]
+   #    )
+   # }
+   # # compute matrices with orthogonal and score distances
+   # Q <- sapply(seq_len(ncomp), function(a) rowSums(getResiduals(scores, loadings, residuals, a)^2))
+   # dim(Q) <- c(nobj, ncomp)
+
+   # T2 <- t(apply(scale(scores^2, center = FALSE, scale = eigenvals), 1, cumsum))
+   # dim(T2) <- c(nobj, ncomp)
+
+   G <- matrix(0, nvar, ncomp)
+   R <- matrix(0, nvar, ncomp)
+   Q <- matrix(0, nobj, ncomp)
+   H <- matrix(0, nobj, ncomp)
+
+   X <- tcrossprod(scores, loadings) + residuals
+   U <- scores %*% diag(1 / sqrt(eigenvals), ncomp, ncomp)
+   U2 <- U * U
+
+   # this is needed for G-distances like U but divided to eigenvalues
+   Ue <- scores %*% diag(1 / eigenvals, ncomp, ncomp)
+
+   for (a in seq_len(ncomp)) {
+
+      # row based distances
+      Xhat <- tcrossprod(scores[, 1:a, drop = FALSE], loadings[, 1:a, drop = FALSE])
+      E2 <- (X - Xhat)^2
+      Q[, a] <- rowSums(E2[, cols.ind])
+      H[, a] <- rowSums(U2[, 1:a, drop = FALSE])
+
+
+      # column based distances
+      R[cols.ind, a] <- colSums(E2[rows.ind, cols.ind])
+      for (c in seq_len(nvar)) {
+         if (!cols.ind[c]) next
+         for (aa in seq_len(a)) {
+            g <- t(Ue[rows.ind, aa, drop = FALSE]) %*% (X[rows.ind, c, drop = FALSE] %*% loadings[c, aa, drop = FALSE])
+            G[c, a] <- G[c, a] + g
+         }
+      }
    }
-
-   # compute matrices with orthogonal and score distances
-   Q <- sapply(seq_len(ncomp), function(a) rowSums(getResiduals(scores, loadings, residuals, a)^2))
-   dim(Q) <- c(nobj, ncomp)
-
-   T2 <- t(apply(scale(scores^2, center = FALSE, scale = eigenvals), 1, cumsum))
-   dim(T2) <- c(nobj, ncomp)
 
    # set attributes for Q
    Q <- mda.setattr(Q, mda.getattr(scores), type = "row")
@@ -454,14 +496,23 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
    attr(Q, "xaxis.name") <- "Components"
 
    # set attributes for T2
-   T2 <- mda.setattr(T2, mda.getattr(Q))
-   attr(T2, "name") <- "Score distance (h)"
+   H <- mda.setattr(H, mda.getattr(Q))
+   attr(H, "name") <- "Score distance (h)"
 
-   colnames(Q) <- colnames(T2) <- colnames(loadings)
-   rownames(Q) <- rownames(T2) <- rownames(scores)
+   # set attributes for R
+   R <- mda.setattr(R, mda.getattr(loadings), type = "row")
+   attr(R, "name") <- "Quared variable distance (r)"
+
+   # set attributes for T2
+   G <- mda.setattr(G, mda.getattr(R))
+   attr(G, "name") <- "Score variable distance (g)"
+
+   colnames(R) <- colnames(G) <- colnames(Q) <- colnames(H) <- colnames(loadings)
+   rownames(Q) <- rownames(H) <- rownames(scores)
+   rownames(R) <- rownames(G) <- rownames(loadings)
 
    # return the results
-   return(list(Q = Q, T2 = T2))
+   return(list(Q = Q, T2 = H, R = R, G = G))
 }
 
 ###############################
