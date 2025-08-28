@@ -1,3 +1,32 @@
+#' S3 implementation of asjson() method
+#'
+#' @param obj
+#' object of any class, e.g. \code{pca}
+#'
+#' @export
+asjson <- function(obj) UseMethod("asjson")
+
+
+#' S3 implementation of as.vector() method
+#'
+#' @param obj
+#' object of any class, e.g. \code{pca}
+#'
+#' @export
+asvector <- function(obj) UseMethod("asvector")
+
+
+#' Save model as JSON file
+#'
+#' @param obj
+#' model object, e.g. \code{pca}
+#' @param fileName
+#' name (or full path) to JSON file to be created.
+#'
+#' @export
+writeJSON <- function(obj, fileName) UseMethod("writeJSON")
+
+
 #' Method to write outcomes of any result object to CSV file
 #'
 #' @param res
