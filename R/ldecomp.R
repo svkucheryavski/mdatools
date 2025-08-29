@@ -361,13 +361,12 @@ ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
 
    # get names and attributes
    rows_excluded <- attr(scores, "exclrows")
-   cols_excluded <- attr(scores, "exclcols")
-
+   cols_excluded <- attr(loadings, "exclrows")
 
    # remove excluded columns from loadings and residuals
    if (length(cols_excluded) > 0) {
       loadings <- loadings[-cols_excluded, , drop = FALSE]
-      residuals <- residuals[-cols_excluded, , drop = FALSE]
+      residuals <- residuals[, -cols_excluded, drop = FALSE]
    }
 
    # remove excluded rows from scores, residuals and Q
