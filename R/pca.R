@@ -94,9 +94,9 @@
 #' dataset will be automatically preprocessed by the preprocessing model.
 #'
 #' Any PCA model (with or without preprocessing) developed in this package can be saved as JSON file
-#' using method \code{\link{readJSON.pca()}} and then be loaded to interactive web-application for
+#' using method \code{\link{writeJSON}} and then be loaded to interactive web-application for
 #' PCA available at https://mda.tools/pca. Likewise one can develop a model in the app, save it to
-#' JSON file and then load it to R by using method \code{\link{pca.readJSON()}}. In this case,
+#' JSON file and then load it to R by using method \code{\link{pca.readJSON}}. In this case,
 #' however, the model object will not contain calibration/training results, so some of
 #' the plots and statistics will not be available.
 #'
@@ -267,7 +267,6 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
 
    # set distance limits
    model <- setDistanceLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
-
    class(model) <- c("pca")
    return(model)
 }
@@ -506,14 +505,27 @@ categorize.pca <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
 predict.pca <- function(object, x, ...) {
 
    # check datasets and convert to matrix if needed
-   attrs <- attributes(x)
+   attrs <- mda.getattr(x)
    rownames <- rownames(x)
 
+   x <- prepCalData(x, min.nrows = 1, min.ncols = nrow(object$loadings) - length(attrs$exclcols))
+
+   # apply preprocessing if any
    if (!is.null(object$prep)) {
       x <- prep.apply(object$prep, x)
    }
 
-   x <- prepCalData(x, min.nrows = 1, min.ncols = nrow(object$loadings) - length(attrs$exclcols))
+   # check if loadings already do not contain excluded variables (e.g. because model was
+   # loaded from JSON file), in this case remove them from x as well
+   exclcols <- object$exclcols
+   if (!is.null(exclcols) && ncol(x) == (nrow(object$loadings) + length(exclcols))) {
+      x <- mda.exclcols(x, exclcols)
+      x <- mda.purgeCols(x)
+      if (!is.null(attrs$dimnames[[2]])) attrs$dimnames[[2]] <- attrs$dimnames[[2]][-exclcols]
+      if (!is.null(attrs$xaxis.values)) attrs$xaxis.values <- attrs$xaxis.values[-exclcols]
+      attrs$exclcols <- NULL
+      exclcols <- NULL
+   }
 
    if (ncol(x) != nrow(object$loadings)) {
       stop("Number and type of data columns should be the same as in calibration dataset.")
@@ -527,14 +539,16 @@ predict.pca <- function(object, x, ...) {
    # set names
    rownames(scores) <- rownames(residuals) <- rownames
    colnames(scores) <- colnames(object$loadings)
-   colnames(residuals) <- attrs$dimnames[[2]]
+   colnames(residuals) <- colnames(x)
 
    # set attributes
    scores <- mda.setattr(scores, attrs, "row")
    residuals <- mda.setattr(residuals, attrs)
+
    attr(scores, "name") <- "Scores"
    attr(scores, "xaxis.name") <- "Components"
    attr(residuals, "name") <- "Residuals"
+   attr(residuals, "exclcols") <- exclcols
 
    if (is.null(attrs$yaxis.name)) {
       attr(scores, "yaxis.name") <- "Objects"
@@ -549,7 +563,7 @@ predict.pca <- function(object, x, ...) {
 
    res$center <- object$center
    res$scale <- object$scale
-   res$exclcols <- object$exclcols
+   res$exclcols <- exclcols
    res$exclrows <- attrs$exclrows
 
    return(res)
@@ -1065,10 +1079,205 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
    return(model)
 }
 
+
+#' Converts JSON string created in mda.tools/pca app to \code{pca} object
+#'
+#' @param str
+#' sttringified JSON (from model file)
+#'
+#' @return
+#' object of \code{\link{pca}} class
+#'
+pca.fromjson <- function(str) {
+
+   # extract values and arrays from the JSON
+   ncomp <- extractValue(str, "ncomp")
+   ncols <- extractValue(str, "ncols")
+   nobj <- extractValue(str, "nrows")
+
+   varvaluesName <- extractValue(str, "varvaluesName")
+   varvalues <- extractStringArray(str, "varvalues")
+   varlabels <- extractStringArray(str, "varlabels")
+   exclcols <- extractStringArray(str, "exclvars")
+   js.center <- extractValue(str, "center")
+   js.scale <- extractValue(str, "scale")
+
+   varvalues <- as.numeric(strsplit(varvalues, ",")[[1]])
+   exclcols <- if (length(exclcols) > 0 && nchar(exclcols) > 2) as.numeric(strsplit(exclcols, ",")[[1]]) else NULL
+
+   if (!is.null(exclcols) && length(exclcols) > 0) {
+      exclcols <- exclcols + 1
+   } else {
+      exclcols <- NULL
+   }
+
+   complabels <- paste0("Comp ", seq_len(ncomp))
+
+
+   # Structure of vector with PCA model:
+   # - nc and ncomp: 2
+   # - mX: 1 x ncols
+   # - sX: 1 x ncols
+   # - P: ncols x ncomp
+   # - eigenvals: 1 x ncomp
+   # - cq0: 1 x ncomp
+   # - cNq: 1 x ncomp
+   # - rq0: 1 x ncomp
+   # - rNq: 1 x ncomp
+   # - ch0: 1 x ncomp
+   # - cNh: 1 x ncomp
+   # - rh0: 1 x ncomp
+   # - rNh: 1 x ncomp
+   # - cr0: 1 x ncomp
+   # - cNr: 1 x ncomp
+   # - rr0: 1 x ncomp
+   # - rNr: 1 x ncomp
+   # - cg0: 1 x ncomp
+   # - cNg: 1 x ncomp
+   # - rg0: 1 x ncomp
+   # - rNg: 1 x ncomp
+   v <- extractArray(str, "v")
+
+
+   s <- 3; e <- s + ncols - 1
+   if (js.center != "false") {
+      center <- v[s:e]
+   } else {
+      center <- FALSE
+   }
+
+   s <- e + 1; e <- s + ncols - 1
+   if (js.scale != "false") {
+      scale <- v[s:e]
+   } else {
+      scale <- FALSE
+   }
+
+   s <- e + 1; e <- s + ncols * ncomp - 1
+   loadings <- matrix(v[s:e], ncols, ncomp)
+   colnames(loadings) <- complabels
+   rownames(loadings) <- varlabels
+
+   if (!all(varvalues == 1:ncols)) attr(loadings, "yaxis.values") <- varvalues
+   attr(loadings, "yaxis.name") <- gsub('"', '', varvaluesName)
+   attr(loadings, "xaxis.name") <- "Components"
+   attr(loadings, "name") <- "Loadings"
+
+   s <- e + 1; e <- s + ncomp - 1
+   eigenvals <- v[s:e]
+   names(eigenvals) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   cq0 <- v[s:e]
+   names(cq0) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   cNq <- v[s:e]
+   names(cNq) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   rq0 <- v[s:e]
+   names(rq0) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   rNq <- v[s:e]
+   names(rNq) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   ch0 <- v[s:e]
+   names(ch0) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   cNh <- v[s:e]
+   names(cNh) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   rh0 <- v[s:e]
+   names(rh0) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   rNh <- v[s:e]
+   names(rNh) <- complabels
+
+
+   limParams <- list(
+      Q = list(
+         moments = list(u0 = cq0, Nu = cNq, nobj = nobj),
+         robust  = list(u0 = rq0, Nu = rNq, nobj = nobj),
+         nobj = nobj
+      ),
+      T2 = list(
+         moments = list(u0 = ch0, Nu = cNh, nobj = nobj),
+         robust  = list(u0 = rh0, Nu = rNh, nobj = nobj),
+         nobj = nobj
+      )
+   )
+
+   Qlim <- ldecomp.getQLimits("ddmoments", 0.05, 0.01, limParams)
+   T2lim <- ldecomp.getT2Limits("ddmoments", 0.05, 0.01, limParams)
+
+   prepStr <- extractPrep(str)
+   prep <- if(length(prepStr) > 0 && nchar(prepStr) > 10) prep.fromjson(prepStr) else NULL
+
+   # by defaul we assume that moments/classic method is applied
+   m <- list(
+      center = center,
+      scale = scale,
+      eigenvals = eigenvals,
+      loadings = loadings,
+      limParams = limParams,
+      Qlim = Qlim,
+      T2lim = T2lim,
+      calres = NULL,
+      res = NULL,
+
+      ncomp = ncomp,
+      ncomp.selected = ncomp,
+      alpha = 0.05,
+      gamma = 0.01,
+      lim.type = "ddmoments",
+      info = "",
+
+      prep = prep,
+      exclcols = exclcols,
+      method = "svd"
+   )
+
+   m$call <- match.call()
+   class(m) <- "pca"
+   return (m)
+}
+
+
+#' Reads PCA model from JSON file made in web-application (mda.tools/pca).
+#'
+#' @param fileName
+#' file name (or full path) to JSON file.
+#'
+#' @returns list with PCA model similar to what \code{pca()} creates.
+#'
+#' @export
+pca.readJSON <- function(fileName) {
+   fileConn <- file(fileName)
+   str <- readLines(fileConn, warn = FALSE)
+   close(fileConn)
+   return (pca.fromjson(str))
+}
+
+
+
 ################################
 # JSON methods                 #
 ################################
 
+#' Converts object with PCA model to numeric vector compatible with web-application.
+#'
+#' @param obj
+#' Object with PCA model (from \code{\link{pca}}).
+#'
+#' @return vector with values.
+#'
+#' @export
 asvector.pca <- function(obj) {
 
    do_center = !is.logical(obj$center)
@@ -1142,6 +1351,15 @@ asvector.pca <- function(obj) {
    return(mv);
 }
 
+
+#' Converts object with PCA model to JSON string compatible with web-application.
+#'
+#' @param obj
+#' Object with PCA model (from \code{\link{pca}}).
+#'
+#' @return stringigied JSON
+#'
+#' @export
 asjson.pca <- function(obj) {
 
    v <- asvector(obj)
@@ -1153,7 +1371,7 @@ asjson.pca <- function(obj) {
    scale <- if(is.logical(obj$scale) && obj$center == FALSE) "false" else "true"
 
    varlabels <- rownames(obj$loadings)
-   varvalues <- if(!is.null(attr(obj$loadings, "xaxis.values"))) attr(obj$loadings, "xaxis.values") else 1:ncols
+   varvalues <- if(!is.null(attr(obj$loadings, "yaxis.values"))) attr(obj$loadings, "yaxis.values") else seq_len(ncols)
 
    exclvars <- "[]"
    if (!is.null(obj$exclcols)) {
@@ -1168,7 +1386,7 @@ asjson.pca <- function(obj) {
    varlabels <- paste0("'", varlabels, "'", collapse = ",")
    varvalues <- paste0(varvalues, collapse = ",")
    varindices <- paste0(varindices, collapse = ",")
-   varvaluesName <- if(!is.null(attr(obj$loadings, "xaxis.name"))) attr(obj$loadings, "xaxis.name") else "''"
+   varvaluesName <- if(!is.null(attr(obj$loadings, "yaxis.name"))) attr(obj$loadings, "yaxis.name") else "''"
 
    prep <- if (is.null(obj$prep)) "{}" else prep.asjson(obj$prep)
    hash <- paste0("'", genhash(), "'")
@@ -1188,12 +1406,26 @@ asjson.pca <- function(obj) {
    m <- gsub("\'", "\"", m)
 }
 
+
+#' Saves PCA model as JSON file compatible with web-application (https://mda.tools/pca).
+#'
+#' @description
+#' You can load created JSON file to web-app and use it for prediction.
+#'
+#' @param obj
+#' Object with PCA model (from \code{\link{pca}}).
+#' @param fileName
+#' Name or full path to JSON file to be created.
+#'
+#' @export
 writeJSON.pca <- function(obj, fileName) {
    m <- asjson(obj)
    fileConn <- file(fileName)
    writeLines(m, fileConn)
    close(fileConn)
 }
+
+
 
 ################################
 #  Plotting methods            #
@@ -1386,11 +1618,13 @@ plotDistances.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
 
 #' Shortcut to plotDistances()
 #'
+#' @param obj
+#' a PCA model (object of class \code{pca})
 #' @param ...
-#' any parameter from \code{\link{plotDistances.pca()}}
+#' any parameter from \code{\link{plotDistances.pca}}
 #'
 #' @export
-plotResiduals.pca <- function(...) - plotDistances.pca(...)
+plotResiduals.pca <- function(obj, ...) plotDistances.pca(obj, ...)
 
 
 #' Loadings plot for PCA model
