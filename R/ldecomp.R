@@ -474,12 +474,12 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
       # row based distances
       Xhat <- tcrossprod(scores[, 1:a, drop = FALSE], loadings[, 1:a, drop = FALSE])
       E2 <- (X - Xhat)^2
-      Q[, a] <- rowSums(E2[, cols.ind])
+      Q[, a] <- rowSums(E2[, cols.ind, drop = FALSE])
       H[, a] <- rowSums(U2[, 1:a, drop = FALSE])
 
 
       # column based distances
-      R[cols.ind, a] <- colSums(E2[rows.ind, cols.ind])
+      R[cols.ind, a] <- colSums(E2[rows.ind, cols.ind, drop = FALSE])
       for (c in seq_len(nvar)) {
          if (!cols.ind[c]) next
          for (aa in seq_len(a)) {
