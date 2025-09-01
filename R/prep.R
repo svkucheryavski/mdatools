@@ -1658,7 +1658,7 @@ prep.asjson <- function(obj) {
 #' string with JSON
 #'
 #' @return list with the methods.
-prep.from.json <- function(str) {
+prep.fromjson <- function(str) {
 
    # list of methods for conversion of every item
    methods <- list(
@@ -1671,12 +1671,12 @@ prep.from.json <- function(str) {
    )
 
    # extract values and array from the JSON
-   npred <- extract_value(str, "npred")
-   ml <- extract_array(str, "ml")
-   mp <- extract_array(str, "mp")
-   mpl <- extract_array(str, "mpl")
-   mp_new <- extract_array(str, "mp_new")
-   mpl_new <- extract_array(str, "mpl_new")
+   npred <- extractValue(str, "npred")
+   ml <- extractArray(str, "ml")
+   mp <- extractArray(str, "mp")
+   mpl <- extractArray(str, "mpl")
+   mp_new <- extractArray(str, "mp_new")
+   mpl_new <- extractArray(str, "mpl_new")
 
    left <- 0
    right <- npred
@@ -1778,7 +1778,7 @@ prep.readJSON <- function(fileName) {
    fileConn <- file(fileName)
    str <- readLines(fileConn, warn = FALSE)
    close(fileConn)
-   return (prep.from.json(str))
+   return (prep.fromjson(str))
 }
 
 
@@ -1786,75 +1786,7 @@ prep.readJSON <- function(fileName) {
 # Service methods                                          #
 ############################################################
 
-#' Extract string array from JSON string
-#'
-#' @param js
-#' stringified JSON.
-#' @param key
-#' name of the element.
-#'
-#' @return array of strings.
-extract_string_array <- function(js, key) {
-  # Capture the array part for the given key
-  pattern <- paste0('"', key, '"\\s*:\\s*\\[(.*?)\\]')
-  m <- regmatches(js, regexpr(pattern, js, perl=TRUE))
-  if (length(m) == 0) return(NULL)
 
-  inside <- sub(pattern, "\\1", m, perl=TRUE)
-
-  # Split on commas that follow a closing quote
-  parts <- strsplit(inside, '"\\s*,\\s*"', perl=TRUE)[[1]]
-
-  # Clean outer quotes
-  parts <- gsub('^"|"$', '', parts)
-
-  parts
-}
-
-
-#' Extract numeric array from JSON string
-#'
-#' @param js
-#' stringified JSON.
-#' @param key
-#' name of the element.
-#'
-#' @return array of numbers.
-extract_array <- function(js, key) {
-  # Find the specific "data":[ ... ] for the given key
-  pattern <- paste0('"', key, '".*?"data":\\[([^\\]]*)\\]')
-  m <- regmatches(js, regexpr(pattern, js, perl=TRUE))
-  if (length(m) == 0) return(NULL)
-
-  # Extract just the inside numbers
-  nums <- sub(pattern, "\\1", m, perl=TRUE)
-
-  # Split into numeric vector
-  as.numeric(strsplit(nums, ",")[[1]])
-}
-
-
-#' Extract single value from JSON string
-#'
-#' @param js
-#' stringified JSON.
-#' @param key
-#' name of the element.
-#'
-#' @return value
-extract_value <- function(js, key) {
-  # Match "key": some_number
-  pattern <- paste0('"', key, '"\\s*:\\s*([^,}\\s]+)')
-  m <- regmatches(js, regexpr(pattern, js, perl=TRUE))
-  if (length(m) == 0) return(NULL)
-
-  # Extract just the numeric part
-  val <- sub(pattern, "\\1", m, perl=TRUE)
-
-  # Try to convert to number if possible
-  out <- suppressWarnings(as.numeric(val))
-  if (is.na(out)) val else out
-}
 
 
 #' Pseudo-inverse matrix

@@ -865,3 +865,120 @@ genhash <- function() {
   hash <- format(now, "%Y%m%d%H%M%S")
   paste0(hash, ms)
 }
+
+
+#' Extract string array from JSON string
+#'
+#' @param js
+#' stringified JSON.
+#' @param key
+#' name of the element.
+#'
+#' @return array of strings.
+#'
+#' @export
+extractStringArray <- function(js, key) {
+  # Capture the array part for the given key
+  pattern <- paste0('"', key, '"\\s*:\\s*\\[(.*?)\\]')
+  m <- regmatches(js, regexpr(pattern, js, perl=TRUE))
+  if (length(m) == 0) return(NULL)
+
+  inside <- sub(pattern, "\\1", m, perl=TRUE)
+
+  # Split on commas that follow a closing quote
+  parts <- strsplit(inside, '"\\s*,\\s*"', perl=TRUE)[[1]]
+
+  # Clean outer quotes
+  parts <- gsub('^"|"$', '', parts)
+
+  parts
+}
+
+
+#' Extract numeric array from JSON string
+#'
+#' @param js
+#' stringified JSON.
+#' @param key
+#' name of the element.
+#'
+#' @return array of numbers.
+#'
+#' @export
+extractArray <- function(js, key) {
+  # Find the specific "data":[ ... ] for the given key
+  pattern <- paste0('"', key, '".*?"data":\\[([^\\]]*)\\]')
+  m <- regmatches(js, regexpr(pattern, js, perl=TRUE))
+  if (length(m) == 0) return(NULL)
+
+  # Extract just the inside numbers
+  nums <- sub(pattern, "\\1", m, perl=TRUE)
+
+  # Split into numeric vector
+  as.numeric(strsplit(nums, ",")[[1]])
+}
+
+
+#' Extract single value from JSON string
+#'
+#' @param js
+#' stringified JSON.
+#' @param key
+#' name of the element.
+#'
+#' @return value
+#'
+#' @export
+extractValue <- function(js, key) {
+  # Match "key": some_number
+  pattern <- paste0('"', key, '"\\s*:\\s*([^,}\\s]+)')
+  m <- regmatches(js, regexpr(pattern, js, perl=TRUE))
+  if (length(m) == 0) return(NULL)
+
+  # Extract just the numeric part
+  val <- sub(pattern, "\\1", m, perl=TRUE)
+
+  # Try to convert to number if possible
+  out <- suppressWarnings(as.numeric(val))
+  if (is.na(out)) val else out
+}
+
+
+
+#' Extracts JSON related to preprocessing model
+#'
+#' @param js
+#' stringified JSON with model
+#'
+#' @return string with part of the JSON string related to preprocessing
+#'
+#' @export
+extractPrep <- function(js) {
+  # locate "prep":
+  m <- regexpr('"prep"\\s*:', js)
+  if (m == -1) return(NULL)
+
+  start <- m + attr(m, "match.length")  # first char after "prep":
+
+  # find first '{'
+  open_pos <- regexpr("\\{", substr(js, start, nchar(js))) + start - 1
+  if (open_pos == start - 1) return(NULL)
+
+  # now scan forward and count braces
+  depth <- 0
+  end_pos <- NA
+  for (i in open_pos:nchar(js)) {
+    ch <- substr(js, i, i)
+    if (ch == "{") depth <- depth + 1
+    if (ch == "}") depth <- depth - 1
+    if (depth == 0) {
+      end_pos <- i
+      break
+    }
+  }
+
+  if (is.na(end_pos)) return(NULL)
+
+  substr(js, open_pos, end_pos)
+}
+
