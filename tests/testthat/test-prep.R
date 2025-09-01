@@ -754,25 +754,7 @@ test_that("fitting prep model works correctly (case HS-)", {
    expect_equivalent(Xcp, Xcp.ref)
 })
 
-testList <- function(l1, l2) {
 
-   expect_equal(names(l1), names(l2))
-   expect_equal(names(l1$params), names(l2$params))
-   for (n in names(l1$params)) {
-      v1 <- l1$params[[n]]
-      v2 <- l2$params[[n]]
-      dim(v1) <- NULL
-      dim(v2) <- NULL
-
-      # if (any(v1 != v2)) {
-      #    print(n)
-      #    print(if (length(v1) < 10) v1 else v1[1:9])
-      #    print(if (length(v2) < 10) v2 else v2[1:9])
-      # }
-
-      expect_equal(v1, v2)
-   }
-}
 
 testCase <- function(p, Xc, jsonFilename) {
 
@@ -781,13 +763,13 @@ testCase <- function(p, Xc, jsonFilename) {
    pm  <- prep.fit(p, Xc)
 
    # test JSON strings
-   json1 <- prep.as.json(pm)
+   json1 <- prep.asjson(pm)
    fileConn <- file(jsonFilename)
    json2 <- readLines(fileConn, warn = FALSE)
    close(fileConn)
 
-   expect_equal(extract_string_array(json1, "info"), extract_string_array(json2, "info"))
-   expect_equal(extract_value(json1, "npred"), extract_value(json2, "npred"))
+   expect_equal(extractStringArray(json1, "info"), extractStringArray(json2, "info"))
+   expect_equal(extractValue(json1, "npred"), extractValue(json2, "npred"))
 
 
    # save it to JSON file and then load it back
@@ -800,8 +782,8 @@ testCase <- function(p, Xc, jsonFilename) {
    # all models should be the same
    for (n in seq_along(pm)) {
       if (!is.list(pm[[n]])) next
-      testList(pm[[n]], pm1[[n]])
-      testList(pm[[n]], pm2[[n]])
+      testList(pm[[n]]$params, pm1[[n]]$params)
+      testList(pm[[n]]$params, pm2[[n]]$params)
    }
 }
 

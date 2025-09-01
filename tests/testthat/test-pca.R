@@ -899,6 +899,57 @@ v.exp3 <- c(12,5,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,-0.006512845883
 # expected vector for case 4: People, A = 5, no center, no scale, excluded outliers: 1, 18, preprocessing: median centering, pareto scaling, excluded variables: 2, 7, 8
 v.exp4 <- c(9,5,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0.006439085455613531,0.0005530714130669823,0.004846691510345359,0.026137205755654785,0.9995992896687314,-0.00024725031505873005,0.005772797111865385,-0.003929750974699295,-0.00200478902348955,-0.6527918842836696,0.23984775742079564,-0.41390007631831655,-0.03846214833252279,0.010305320547422654,0.2520730372064941,-0.5284607909968222,0.024537576783166218,0.0048252491609501276,0.012122140012400818,0.06131374462793386,-0.0016493747635598697,-0.05744481103670594,-0.0009114675549412477,0.05308929111056793,0.03291133717853047,-0.03546303120375522,-0.993796239371183,0.08785146554955976,0.22853210456310086,-0.12010213987393817,-0.8184788302250368,0.018858811613371513,0.3022716245881942,0.2815538405649365,-0.27411474246227646,0.09791746870315325,0.21112100979685539,0.5795189821621545,-0.10450746628509879,0.2555651854887526,-0.0070941745210474794,0.3896342451827627,0.27749605424463336,0.5597686164592998,0.03376621932484878,9354.453615457029,19.554594181724475,12.497407958413431,4.200395556954394,1.2315830709943258,36.982336873284765,18.07956249761766,5.998734804484688,1.9383524327620996,0.7478221308009176,6,3,2,2,4,34.45177900466982,18.975968943597355,5.047895565922706,1.6436459267347594,0.7980768840069301,6,4,2,4,4,0.9666666666666702,1.9333333333333396,2.9000000000000106,3.86666666666668,4.833333333333347,1,3,6,7,12,1.051793299956409,1.743635843683613,2.9287103846480305,3.782628404324857,4.430159278242252,1,2,7,5,10,123.27445624428252,60.265208325392194,19.995782681615623,6.461174775873667,2.4927404360030585,2,1,1,3,4,118.10893361526027,22.20382607266186,19.102541478833622,5.589133549014062,3.1942254535888455,2,4,5,11,5,3.222222222222223,6.444444444444465,9.666666666666696,12.888888888888934,16.11111111111116,1,1,1,3,7,0.0009855834490419266,5.314329537810869,9.793316124306301,14.355841046777572,14.622772945567407,2,1,1,2,7)
 
+compareResults <- function(rr, rjs) {
+   expect_equal(abs(rjs$scores), abs(rr$scores))
+   expect_equal(rjs$Q, rr$Q)
+   expect_equal(rjs$T2, rr$T2)
+   expect_equal(rjs$expvar, rr$expvar)
+   expect_equal(rjs$cumexpvar, rr$cumexpvar)
+
+   rr.res <- mda.purgeCols(rr$residuals)
+   rjs.res <- mda.purgeCols(rjs$residuals)
+
+   attr(rr.res, "exclcols") <- NULL
+   attr(rjs.res, "exclcols") <- NULL
+   attr(rr.res, "prep:center") <- NULL
+   attr(rjs.res, "prep:center") <- NULL
+   attr(rr.res, "prep:scale") <- NULL
+   attr(rjs.res, "prep:scale") <- NULL
+
+   expect_equal(rr.res, rjs.res)
+}
+
+compareModels <- function(mr, mjs) {
+
+   if (is.null(attr(mr$loadings, "yaxis.values"))) {
+      attr(mjs$loadings, "yaxis.values") <- NULL
+   }
+
+   expect_equal(abs(mjs$loadings), abs(mda.purge(mr$loadings)))
+   expect_equal(mr$eigenvals, mjs$eigenvals)
+
+   # we need to round DoF in R as they are rounded in web version
+   mr$limParams$Q$moments$Nu <- round(mr$limParams$Q$moments$Nu)
+   mr$limParams$Q$robust$Nu <- round(mr$limParams$Q$robust$Nu)
+   mr$limParams$T2$moments$Nu <- round(mr$limParams$T2$moments$Nu)
+   mr$limParams$T2$robust$Nu <- round(mr$limParams$T2$robust$Nu)
+   testList(mr$limParams, mjs$limParams)
+
+   # same for Qlim/T2lim
+   expect_equal(mr$Qlim, mjs$Qlim)
+   expect_equal(mr$T2lim, mjs$T2lim)
+
+   # prep
+   ncr <- ncol(mr$loadings)
+   ncjs <- ncol(mjs$loadings)
+   if (!is.null(mr$prep) && ncr == ncjs) {
+      for (n in seq_along(mr$prep)) {
+         if (!is.list(mr$prep[[n]])) next
+         testList(mr$prep[[n]]$params, mjs$prep[[n]]$params)
+      }
+   }
+}
+
 test_that("asvector.pca works correctly", {
    data(people)
 
@@ -907,11 +958,34 @@ test_that("asvector.pca works correctly", {
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp1), tolerance = 0.0001)
 
+   writeJSON(m, "pca-model-1-r.json")
+   m1 <- pca.readJSON("pca-model-1-r.json")
+   m2 <- pca.readJSON("pca-model-1.json")
+   compareModels(m, m1)
+
+   r <- predict(m, people)
+   r1 <- predict(m1, people)
+   r2 <- predict(m2, people)
+   compareResults(r, r1)
+   compareResults(r, r2)
+
 
    # case 2
    m <- pca(people, 5, scale = TRUE, exclrows = c(1, 18))
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp2), tolerance = 0.0001)
+
+   writeJSON(m, "pca-model-2-r.json")
+   m1 <- pca.readJSON("pca-model-2-r.json")
+   m2 <- pca.readJSON("pca-model-2.json")
+   compareModels(m, m1)
+
+   r <- predict(m, people)
+   r1 <- predict(m1, people)
+   r2 <- predict(m2, people)
+   compareResults(r, r1)
+   compareResults(r, r2)
+
 
    # case 3
    p <- list(
@@ -923,12 +997,47 @@ test_that("asvector.pca works correctly", {
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp3), tolerance = 0.0001)
 
-   # case 4
+   writeJSON(m, "pca-model-3-r.json")
+   m1 <- pca.readJSON("pca-model-3-r.json")
+   m2 <- pca.readJSON("pca-model-3.json")
+   compareModels(m, m1)
+
+   r <- predict(m, people)
+   r1 <- predict(m1, people)
+   r2 <- predict(m2, people)
+   compareResults(r, r1)
+   compareResults(r, r2)
+
+   # case 4: without comparing with web-app
    m <- pca(people, 5, center = FALSE, scale = FALSE, exclrows = c(1, 18), prep = p, exclcols = c(2, 7, 8))
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp4), tolerance = 0.0001)
 
    writeJSON(m, "pca-model-4-r.json")
+   m1 <- pca.readJSON("pca-model-4-r.json")
+   compareModels(m, m1)
+
+   r <- predict(m, people)
+   r1 <- predict(m1, people)
+   compareResults(r, r1)
+
+   # case 4: with comparing with web-app (to do this we remove columns)
+   people_exclvars <- people[, -c(2, 7, 8)]
+   m <- pca(people_exclvars, 5, center = FALSE, scale = FALSE, exclrows = c(1, 18), prep = p)
+   v <- asvector(m)
+   expect_equivalent(abs(v), abs(v.exp4), tolerance = 0.0001)
+
+   writeJSON(m, "pca-model-4-r.json")
+   m1 <- pca.readJSON("pca-model-4-r.json")
+   m2 <- pca.readJSON("pca-model-4.json")
+   compareModels(m, m1)
+   compareModels(m, m2)
+
+   r <- predict(m, people_exclvars)
+   r1 <- predict(m1, people_exclvars)
+   r2 <- predict(m2, people_exclvars)
+   compareResults(r, r1)
+   compareResults(r, r2)
 
 })
 
