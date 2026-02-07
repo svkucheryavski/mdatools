@@ -16,7 +16,7 @@
 )
 }
 \arguments{
-\item{res}{PLS results (object of class \code{plsres})}
+\item{res}{PCA results (object of class \code{pcares})}
 
 \item{fileName}{name (or full path) to CSV file to be created.}
 

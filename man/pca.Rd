@@ -17,7 +17,8 @@ pca(
   lim.type = "ddmoments",
   alpha = 0.05,
   gamma = 0.01,
-  info = ""
+  info = "",
+  prep = NULL
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ pca(
 \item{gamma}{significance level for outlier limits for T2 and Q distances.}
 
 \item{info}{a short text with model description.}
+
+\item{prep}{optional list with preprocessing methods created using `\code{\link{prep}}` function.}
 }
 \value{
 Returns an object of \code{pca} class with following fields:
@@ -68,8 +71,6 @@ More details and examples can be found in the Bookdown tutorial.
 \code{pca} is used to build and explore a principal component analysis (PCA) model.
 }
 \details{
-Note, that from v. 0.10.0 cross-validation is no more supported in PCA.
-
 If number of components is not specified, a minimum of number of objects - 1 and number of
 variables in calibration set is used. One can also specified an optimal number of component,
 once model is calibrated (\code{ncomp.selected}). The optimal number of components is used to
@@ -121,8 +122,22 @@ that you current PCA/SIMCA model is stored in variable \code{m}):
 
 In case of PCA the critical limits are just shown on residual plot as lines and can be used for
 detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for
-classification in SIMCA (see \code{\link{simca}}) the limits are also employed for
-classification of objects.
+classification in SIMCA (see \code{\link{simca}}) or DD-SIMCA (\code{\link{ddsimca}})
+the limits are also employed for classification of objects.
+
+If you provide a list with preprocessing methods, PCA will apply them to the training set
+before excluding the columns and rows (if specified). The list will be used to train a preprocessing
+model which becomes a part of the PCA modle object. So when you use method `predict()` the provided
+dataset will be automatically preprocessed by the preprocessing model.
+
+Any PCA model (with or without preprocessing) developed in this package can be saved as JSON file
+using method \code{\link{writeJSON}} and then be loaded to interactive web-application for
+PCA available at https://mda.tools/pca. Likewise one can develop a model in the app, save it to
+JSON file and then load it to R by using method \code{\link{pca.readJSON}}. In this case,
+however, the model object will not contain calibration/training results, so some of
+the plots and statistics will not be available.
+
+web-applications
 }
 \examples{
 library(mdatools)
@@ -153,6 +168,32 @@ plotResiduals(model, show.labels = TRUE)
 plotResiduals(model, ncomp = 2, show.labels = TRUE)
 par(mfrow = c(1, 1))
 
+## 4. Use list with preprocessing methods
+
+# get the data (calibration and test set)
+data(simdata)
+Xc <- simdata$spectra.c
+Xt <- simdata$spectra.t
+
+# create a list with two preprocessing methods
+p <- list(
+   prep("savgol", list(width = 7, porder = 2, dorder = 2)),
+   prep("snv")
+)
+
+# build a PCA model with and without preprocessing
+m1 <- pca(Xc, 5, prep = p)
+m2 <- pca(Xc, 5)
+
+# apply the models to test set
+r1 <- predict(m1, Xt)
+r2 <- predict(m2, Xt)
+
+# check scores
+par(mfrow = c(1, 2))
+plotScores(m1, c(1, 2), res = list(cal = m1$calres, test = r1), main = "With preprocessing")
+plotScores(m2, c(1, 2), res = list(cal = m2$calres, test = r2), main = "Without preprocessing")
+
 }
 \references{
 1. N. Halko, P.G. Martinsson, J.A. Tropp. Finding structure with randomness: probabilistic
@@ -179,6 +220,8 @@ Methods for \code{pca} objects:
    \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
    \code{\link{setDistanceLimits.pca}} \tab set critical limits for residuals\cr
    \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr
+   \code{\link{writeJSON.pca}} \tab saves PCA model to a JSON file so it can be used in web-applications.\cr
+   \code{\link{pca.readJSON}} \tab loads PCA model from a JSON file to \code{pca} object.\cr
 }
 
 Plotting methods for \code{pca} objects:
@@ -187,7 +230,7 @@ Plotting methods for \code{pca} objects:
    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
    \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
-   \code{\link{plotResiduals.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
+   \code{\link{plotDistances.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
    \code{\link{plotBiplot.pca}} \tab shows bi-plot.\cr
    \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr
    \code{\link{plotT2DoF}} \tab plot with degrees of freedom for score distance.\cr

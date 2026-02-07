@@ -4,7 +4,7 @@
 \alias{pls.getyscores}
 \title{Compute and orthogonalize matrix with Y-scores}
 \usage{
-pls.getyscores(y, yloadings, xscores)
+pls.getyscores(y, yloadings, xscores, exclrows)
 }
 \arguments{
 \item{y}{matrix with response values, already preprocessed and cleaned}
@@ -12,6 +12,8 @@ pls.getyscores(y, yloadings, xscores)
 \item{yloadings}{matrix with Y-loadings}
 
 \item{xscores}{matrix with X-scores (needed for orthogonalization)}
+
+\item{exclrows}{vector with indices of excluded rows if any}
 }
 \value{
 matrix with Y-scores
