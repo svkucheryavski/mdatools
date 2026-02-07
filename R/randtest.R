@@ -30,7 +30,7 @@
 #' \item{stat }{statistic values calculated for each component.}
 #' \item{alpha }{alpha values calculated for each component.}
 #' \item{statperm }{matrix with statistic values for each permutation.}
-#' \item{corrperm }{matrix with correlation between predicted and reference y-vales for each
+#' \item{corrperm }{matrix with correlation between predicted and reference y-values for each
 #' permutation.}
 #' \item{ncomp.selected }{suggested number of components.}
 #'
@@ -44,12 +44,12 @@
 #' the same statistic, calculated for original data without permutations.
 #'
 #' If a component is important, then the covariance for unpermuted data should be larger than the
-#' covariance for permuted data and therefore the value for \code{alpha} will be quie small (there
+#' covariance for permuted data and therefore the value for \code{alpha} will be quite small (there
 #' is still a small chance to get similar covariance). This makes \code{alpha} very similar to
 #' p-value in a statistical test.
 #'
 #' The \code{randtest} procedure calculates alpha for each component, the values can be observed
-#' using \code{summary} or \code{plot} functions. There are also several function, allowing e.g.
+#' using \code{summary} or \code{plot} functions. There are also several functions, allowing e.g.
 #' to show distribution of statistics and the critical value for each component.
 #'
 #' @references
@@ -123,7 +123,7 @@ randtest <- function(x, y, ncomp = 15, center = TRUE, scale = FALSE, nperm = 100
    m <- NULL
    for (icomp in seq_len(ncomp)) {
 
-      if (!silent) fprintf("Permutations for component #%d...\n", icomp)
+      if (!silent) message(sprintf("Permutations for component #%d...", icomp))
 
       if (icomp > 1) {
          x <- x - xscores %*% t(m$xloadings)
@@ -133,9 +133,9 @@ randtest <- function(x, y, ncomp = 15, center = TRUE, scale = FALSE, nperm = 100
       m <- pls.simpls(x, y, 1)
       xscores <- x %*% (m$weights %*% solve(crossprod(m$xloadings, m$weights)))
 
-      stat[icomp] <- (t(xscores) %*% y) / nobj
+      stat[icomp] <- crossprod(xscores, y) / nobj
       for (iperm in seq_len(nperm)) {
-         yp <- y[sample(1:nobj)]
+         yp <- y[sample.int(nobj)]
          mp <- pls.simpls(x, yp, 1)
          pxscores <- x %*% (mp$weights %*% solve(crossprod(mp$xloadings, mp$weights)))
          statperm[iperm, icomp] <- crossprod(pxscores, yp) / nobj
@@ -145,7 +145,7 @@ randtest <- function(x, y, ncomp = 15, center = TRUE, scale = FALSE, nperm = 100
       alpha[icomp] <- sum(statperm[, icomp] > stat[icomp]) / nperm
    }
 
-   ncomp.selected <- max(which(alpha <= sig.level))
+   ncomp.selected <- if (any(alpha <= sig.level)) max(which(alpha <= sig.level)) else 0
    colnames(alpha) <- colnames(stat) <- paste("Comp", seq_len(ncomp))
    colnames(statperm) <- colnames(corrperm) <- paste("Comp", seq_len(ncomp))
    rownames(statperm) <- rownames(corrperm) <- seq_len(nperm)
@@ -243,7 +243,7 @@ plotCorr.randtest <- function(obj, ncomp = obj$ncomp.selected, ylim = NULL,
    mdaplotg(plot_data, type = "p", ylim = ylim, xlab = xlab, ylab = ylab,
       legend.position = "bottomright", ...)
 
-   fit_data <- rbind(apply(plot_data[[1]], 2, mean), plot_data[[2]])
+   fit_data <- rbind(colMeans(plot_data[[1]]), plot_data[[2]])
    lines(fit_data[, 1], fit_data[, 2], col = rgb(0.6, 0.6, 0.6), lty = 2, lwd = 0.75)
 }
 
@@ -314,6 +314,6 @@ print.randtest <- function(x, ...) {
    cat("$alpha - vector with alpha values calculated for each component.\n")
    cat("$stat - vector with statistic values calculated for each component.\n")
    cat("$statperm - matrix with statistic values for each permutation.\n")
-   cat("$corrperm - correlations between predicted and reference y-vales for permutations.\n")
+   cat("$corrperm - correlations between predicted and reference y-values for permutations.\n")
    cat("\nTry summary(obj) and plot(obj) to see the test results.\n")
 }

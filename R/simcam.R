@@ -6,15 +6,15 @@
 #' @param models
 #' list with SIMCA models (\code{simca} objects).
 #' @param info
-#' optional text with information about the the object.
+#' optional text with information about the object.
 #'
 #' @details
 #' Besides the possibility for multiclass classification, SIMCAM also provides tools for
 #' investigation of relationship among individual models (classes), such as discrimination power of
 #' variables, Cooman's plot, model distance, etc.
 #'
-#' When create \code{simcam} object, the calibration data from all individual SIMCA models is
-#' extracted and combined for making predictions and calculate performance of the multi-class model.
+#' When creating a \code{simcam} object, the calibration data from all individual SIMCA models is
+#' extracted and combined for making predictions and calculating performance of the multi-class model.
 #' The results are stored in \code{$calres} field of the model object.
 #'
 #' @return
@@ -22,15 +22,15 @@
 #' \item{models }{a list with provided SIMCA models.}
 #' \item{dispower }{an array with discrimination power of variables for each pair of individual
 #' models.}
-#' \item{moddist }{a matrix with distance between each each pair of individual models.}
+#' \item{moddist }{a matrix with distance between each pair of individual models.}
 #' \item{classnames }{vector with names of individual classes.}
 #' \item{nclasses }{number of classes in the object.}
-#' \item{info }{information provided by user when create the object.}
+#' \item{info }{information provided by user when creating the object.}
 #' \item{calres }{an object of class \code{\link{simcamres}} with classification results for a
 #' calibration data.}
 #'
 #' @seealso
-#' Methods for \code{simca} objects:
+#' Methods for \code{simcam} objects:
 #' \tabular{ll}{
 #'  \code{print.simcam} \tab shows information about the object.\cr
 #'  \code{summary.simcam} \tab shows summary statistics for the models.\cr
@@ -148,7 +148,7 @@ predict.simcam <- function(object, x, c.ref = NULL, ...) {
    simca.res <- list()
    for (i in seq_len(object$nclasses)) {
       simca.res[[i]] <- predict.simca(object$models[[i]], x, c.ref)
-      c.pred[, , i] <- simca.res[[i]]$c.pred[, object$models[[i]]$ncomp.selected, ]
+      c.pred[, , i] <- simca.res[[i]]$c.pred[, object$models[[i]]$ncomp.selected, , drop = FALSE]
    }
 
    c.pred <- mda.setattr(c.pred, attrs, "row")
@@ -230,7 +230,7 @@ print.simcam <- function(x, ...) {
    print(x$call)
 
    cat("\nMajor fields:\n")
-   cat("$models - list wth individual SIMCA models for each class\n")
+   cat("$models - list with individual SIMCA models for each class\n")
    cat("$classnames - vector with names of classes\n")
    cat("$moddist - matrix with distance between the models\n")
    cat("$dispower - matrix with discrimination power values\n")
@@ -356,7 +356,7 @@ simcam.getPerformanceStats <- function(models, classnames) {
 #' Model distance plot for SIMCAM model
 #'
 #' @description
-#' Shows a plot with distance between one SIMCA model to others.
+#' Shows a plot with distance between one SIMCA model and others.
 #'
 #' @param obj
 #' a SIMCAM model (object of class \code{simcam})
@@ -410,7 +410,7 @@ simcam.getPerformanceStats <- function(models, classnames) {
 #' x1 <- iris[1:25, 1:4]
 #' x2 <- iris[51:75, 1:4]
 #'
-#' # create to SIMCA models with A = 2
+#' # create two SIMCA models with A = 2
 #' m1 <- simca(x1, 'setosa', ncomp = 2)
 #' m2 <- simca(x2, 'versicolor', ncomp = 2)
 #'
@@ -427,7 +427,7 @@ plotModelDistance.simcam <- function(obj, nc = 1, type = "h", xticks = seq_len(o
    xlab = "Models", ylab = "", ...) {
 
    if (length(nc) != 1 || nc < 1 || nc > obj$nclasses) {
-      stop("Wrong values for 'nc' parameter.")
+      stop("Wrong values for 'nc' parameter.", call. = FALSE)
    }
 
    mdaplot(mda.t(obj$moddist[, nc, drop = FALSE]), type = type, xticks = xticks,
@@ -456,18 +456,18 @@ plotModelDistance.simcam <- function(obj, nc = 1, type = "h", xticks = seq_len(o
 #'
 #' @details
 #' Discrimination power shows an ability of variables to separate classes. The power is computed
-#' similar to model distance, using variance of residuals. However in this case instead of sum the
+#' similar to model distance, using variance of residuals. However in this case instead of summing the
 #' variance across all variables, we take the ratio separately for individual variables.
 #'
-#' Discrimination power equal or above 3 is considered as high.
+#' Discrimination power equal to or above 3 is considered as high.
 #'
 #' @export
 plotDiscriminationPower.simcam <- function(obj, nc = c(1, 2), type = "h",
-   main = paste0("Discrimination power: ", obj$classnames[nc[1]], " vs. ", obj$classname[nc[2]]),
+   main = paste0("Discrimination power: ", obj$classnames[nc[1]], " vs. ", obj$classnames[nc[2]]),
    xlab = attr(obj$dispower, "xaxis.name"), ylab = "", ...) {
 
    if (length(nc) != 2 || min(nc) < 1 || max(nc) > obj$nclasses) {
-      stop("Wrong values for 'nc' parameter.")
+      stop("Wrong values for 'nc' parameter.", call. = FALSE)
    }
 
    attrs <- mda.getattr(obj$dispower)
@@ -518,11 +518,11 @@ plotCooman.simcam <- function(obj, nc = c(1, 2), res = list("cal" = obj$res[["ca
    groupby = res[[1]]$c.ref, main = "Cooman's plot", show.limits = TRUE, ...) {
 
    if (!is.list(res)) {
-      stop("Parameter 'res' should be list with 'simcamres' objects.")
+      stop("Parameter 'res' should be list with 'simcamres' objects.", call. = FALSE)
    }
 
    if (length(nc) != 2 || min(nc) < 1 || max(nc) > obj$nclasses) {
-      stop("Wrong values for 'nc' parameter.")
+      stop("Wrong values for 'nc' parameter.", call. = FALSE)
    }
 
    plot_data <- list()
@@ -551,8 +551,8 @@ plotCooman.simcam <- function(obj, nc = c(1, 2), res = list("cal" = obj$res[["ca
                "Nu" = m2$Qlim[4, m2$ncomp.selected],
                "nobj" = 1 # we do not need outliers limit
             ),
-            m1$alpha,
-            m1$gamma
+            m2$alpha,
+            m2$gamma
          )[1]
       )
    }
@@ -606,8 +606,8 @@ plotPredictions.simcam <- function(obj, nc = seq_len(obj$nclasses),
 #'
 #' @export
 plot.simcam <- function(x, nc = c(1, 2), ...) {
-   par(mfrow = c(2, 1))
+   op <- par(mfrow = c(2, 1))
+   on.exit(par(op))
    plotDiscriminationPower(x, nc)
    plotModelDistance(x, nc[1])
-   par(mfrow = c(1, 1))
 }

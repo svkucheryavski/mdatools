@@ -32,7 +32,7 @@
 regcoeffs <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 
    if (is.null(dim(coeffs)) || length(dim(coeffs)) != 3) {
-      stop("Coefficients must be provided as 3-way array.")
+      stop("Coefficients must be provided as 3-way array.", call. = FALSE)
    }
 
    obj <- list()
@@ -55,13 +55,13 @@ regcoeffs <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 #' Confidence intervals for regression coefficients
 #'
 #' @description
-#' returns matrix with confidence intervals for regression coeffocoents
+#' returns matrix with confidence intervals for regression coefficients
 #' for given response number and number of components.
 #'
 #' @param object
 #' regression coefficients object (class \code{regcoeffs})
 #' @param parm
-#' not used, needed for compatiility with general method
+#' not used, needed for compatibility with general method
 #' @param level
 #' confidence level
 #' @param ncomp
@@ -75,19 +75,19 @@ regcoeffs <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 confint.regcoeffs <- function(object, parm = NULL, level = 0.95, ncomp = 1, ny = 1, ...) {
 
    if (length(ncomp) != 1) {
-      stop("Parameter 'ncomp' should be just one value.")
+      stop("Parameter 'ncomp' should be just one value.", call. = FALSE)
    }
 
    if (ncomp < 1 || ncomp > dim(object$values)[2]) {
-      stop("Wrong value for parameter 'ncomp'.")
+      stop("Wrong value for parameter 'ncomp'.", call. = FALSE)
    }
 
    if (length(ny) != 1) {
-      stop("Parameter 'ny' should be just one value.")
+      stop("Parameter 'ny' should be just one value.", call. = FALSE)
    }
 
    if (ny < 1 || ny > dim(object$values)[3]) {
-      stop("Wrong value for parameter 'ny'.")
+      stop("Wrong value for parameter 'ny'.", call. = FALSE)
    }
 
    alpha <- 1 - level
@@ -110,7 +110,7 @@ confint.regcoeffs <- function(object, parm = NULL, level = 0.95, ncomp = 1, ny =
 #' as.matrix method for regression coefficients class
 #'
 #' @description
-#' returns matrix with regression coeffocoents for given response number and amount of components
+#' returns matrix with regression coefficients for given response number and amount of components
 #'
 #' @param x
 #' regression coefficients object (class \code{regcoeffs})
@@ -143,25 +143,25 @@ as.matrix.regcoeffs <- function(x, ncomp = 1, ny = 1, ...) {
 #' other arguments
 #'
 #' @details
-#' Statistcs are shown if Jack-Knifing was used when model is calibrated.
+#' Statistics are shown if Jack-Knifing was used when model is calibrated.
 #'
 #' @export
 summary.regcoeffs <- function(object, ncomp = 1, ny = 1, alpha = 0.05, ...) {
 
    if (length(ncomp) != 1) {
-      stop("Parameter 'ncomp' should be just one value.")
+      stop("Parameter 'ncomp' should be just one value.", call. = FALSE)
    }
 
    if (ncomp < 1 || ncomp > dim(object$values)[2]) {
-      stop("Wrong value for parameter 'ncomp'.")
+      stop("Wrong value for parameter 'ncomp'.", call. = FALSE)
    }
 
    if (length(ny) != 1) {
-      stop("Parameter 'ny' should be just one value.")
+      stop("Parameter 'ny' should be just one value.", call. = FALSE)
    }
 
    if (ny < 1 || ny > dim(object$values)[3]) {
-      stop("Wrong value for parameter 'ny'.")
+      stop("Wrong value for parameter 'ny'.", call. = FALSE)
    }
 
    attrs <- mda.getattr(object$values)
@@ -196,7 +196,7 @@ summary.regcoeffs <- function(object, ncomp = 1, ny = 1, alpha = 0.05, ...) {
 #' print method for regression coefficients class
 #'
 #' @description
-#' prints regression coeffocoent values for given response number and amount of components
+#' prints regression coefficient values for given response number and amount of components
 #'
 #' @param x
 #' regression coefficients object (class \code{regcoeffs})
@@ -223,7 +223,7 @@ print.regcoeffs <- function(x, ...) {
 ################################
 
 
-#' Distribution statistics for regression coeffificents
+#' Distribution statistics for regression coefficients
 #'
 #' @description
 #' calculates standard error, t-values and p-values for
@@ -240,7 +240,7 @@ print.regcoeffs <- function(x, ...) {
 #' computed for global model) are used as mean.
 #'
 #' @return
-#' a list with statistics three arrays: srandard error, t-values and p-values computed for
+#' a list with statistics three arrays: standard error, t-values and p-values computed for
 #' each regression coefficient.
 #'
 #' @export
@@ -249,7 +249,7 @@ regcoeffs.getStats <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
    if (is.null(ci.coeffs)) return()
 
    if (is.null(dim(ci.coeffs)) || length(dim(ci.coeffs)) != 4) {
-      stop("Coefficients for distribution statistics must be provided as 4-way array.")
+      stop("Coefficients for distribution statistics must be provided as 4-way array.", call. = FALSE)
    }
 
    # get attributes and prepare arrays
@@ -271,7 +271,7 @@ regcoeffs.getStats <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 
    # check the dimension
    if (any(dim(coeffs) != dim(ci.coeffs)[1:3])) {
-      stop("Dimension of coefficients for distribution statistics does not much the 'coeffs'.")
+      stop("Dimension of coefficients for distribution statistics does not much the 'coeffs'.", call. = FALSE)
    }
 
    # compute mean if needed
@@ -345,19 +345,19 @@ plot.regcoeffs <- function(x, ncomp = 1, ny = 1, type = (if (x$nvar > 30) "l" el
    alpha = 0.05, ylab = paste0("Coefficients (", x$respnames[ny], ")"), ...) {
 
    if (length(ncomp) != 1) {
-      stop("Parameter 'ncomp' should be just one value.")
+      stop("Parameter 'ncomp' should be just one value.", call. = FALSE)
    }
 
    if (ncomp < 1 || ncomp > dim(x$values)[2]) {
-      stop("Wrong value for parameter 'ncomp'.")
+      stop("Wrong value for parameter 'ncomp'.", call. = FALSE)
    }
 
    if (length(ny) != 1) {
-      stop("Parameter 'ny' should be just one value.")
+      stop("Parameter 'ny' should be just one value.", call. = FALSE)
    }
 
    if (ny < 1 || ny > dim(x$values)[3]) {
-      stop("Wrong value for parameter 'ny'.")
+      stop("Wrong value for parameter 'ny'.", call. = FALSE)
    }
 
    plot_data <- matrix(x$values[, ncomp, ny], nrow = 1)

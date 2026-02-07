@@ -51,7 +51,7 @@ mda.setimbg <- function(data, bgpixels) {
    attrs <- mda.getattr(data)
 
    if (length(attrs$exclrows) > 0) {
-      stop("You can not set background pixels if some of them have been already excluded.")
+      stop("You can not set background pixels if some of them have been already excluded.", call. = FALSE)
    }
 
    # unfold bgpixels to a vector
@@ -89,7 +89,7 @@ mda.setimbg <- function(data, bgpixels) {
 #' @param main
 #' main title for the image
 #' @param colmap
-#' colormap using to show the intensity levels
+#' colormap used to show the intensity levels
 #'
 #' @export
 imshow <- function(data, channels = 1, show.excluded = FALSE,
@@ -155,7 +155,7 @@ mda.show <- function(x, n = 50) {
 
    name <- attr(x, "name", exact = TRUE)
 
-   if (!is.null(name) && nchar(name) > 0) {
+   if (!is.null(name) && nzchar(name)) {
       fprintf("%s\n%s\n", name, paste(rep("-", nchar(name)), collapse = ""))
    }
 
@@ -171,7 +171,7 @@ mda.show <- function(x, n = 50) {
    show(x[seq_len(n), , drop = FALSE])
 }
 
-#' A wrapper for subset() method with proper set of attributed
+#' A wrapper for subset() method with proper set of attributes
 #'
 #' @param x
 #' dataset (data frame or matrix)
@@ -185,12 +185,12 @@ mda.show <- function(x, n = 50) {
 #'
 #' @details
 #' The method works similar to the standard \code{subset()} method, with minor differences. First
-#' of all it keeps (and correct, if necessary) all important attributes. If only columns are
+#' of all it keeps (and corrects, if necessary) all important attributes. If only columns are
 #' selected, it keeps all excluded rows as excluded. If only rows are selected, it keeps all
-#' excluded columns. If both rows and columns are selected it removed all excluded elements first
+#' excluded columns. If both rows and columns are selected it removes all excluded elements first
 #' and then makes the subset.
 #'
-#' The parameters \code{subset} and \code{select} may each be a vector with numbers or nanes
+#' The parameters \code{subset} and \code{select} may each be a vector with numbers or names
 #' without excluded elements, or a logical expression.
 #'
 #' @export
@@ -264,16 +264,18 @@ mda.rbind <- function(...) {
    out.yaxis.values <- attrs$yaxis.values
 
    out.x <- objects[[1]]
-   for (i in 2:nobj) {
-      x <- objects[[i]]
-      exclrows <- attr(x, "exclrows", exact = TRUE)
-      yaxis.values <- attr(x, "yaxis.values")
-      if (!is.null(exclrows)) out.exclrows <- c(out.exclrows, exclrows + nrow(out.x))
-      if (is.null(out.yaxis.values) || is.null(yaxis.values))
-         out.yaxis.values <- NULL
-      else
-         out.yaxis.values <- c(out.yaxis.values, yaxis.values)
-      out.x <- rbind(out.x, x)
+   if (nobj >= 2) {
+      for (i in 2:nobj) {
+         x <- objects[[i]]
+         exclrows <- attr(x, "exclrows", exact = TRUE)
+         yaxis.values <- attr(x, "yaxis.values")
+         if (!is.null(exclrows)) out.exclrows <- c(out.exclrows, exclrows + nrow(out.x))
+         if (is.null(out.yaxis.values) || is.null(yaxis.values))
+            out.yaxis.values <- NULL
+         else
+            out.yaxis.values <- c(out.yaxis.values, yaxis.values)
+         out.x <- rbind(out.x, x)
+      }
    }
 
    out.x <- mda.setattr(out.x, attrs)
@@ -301,17 +303,19 @@ mda.cbind <- function(...) {
    out.xaxis.values <- attrs$xaxis.values
    out.x <- objects[[1]]
 
-   for (i in 2:nobj) {
-      x <- objects[[i]]
-      exclcols <- attr(x, "exclcols")
-      xaxis.values <- attr(x, "xaxis.values")
-      if (!is.null(exclcols))
-         out.exclcols <- c(out.exclcols, exclcols + ncol(out.x))
-      if (is.null(out.xaxis.values) || is.null(xaxis.values))
-         out.xaxis.values <- NULL
-      else
-         out.xaxis.values <- c(out.xaxis.values, xaxis.values)
-      out.x <- cbind(out.x, x)
+   if (nobj >= 2) {
+      for (i in 2:nobj) {
+         x <- objects[[i]]
+         exclcols <- attr(x, "exclcols")
+         xaxis.values <- attr(x, "xaxis.values")
+         if (!is.null(exclcols))
+            out.exclcols <- c(out.exclcols, exclcols + ncol(out.x))
+         if (is.null(out.xaxis.values) || is.null(xaxis.values))
+            out.xaxis.values <- NULL
+         else
+            out.xaxis.values <- c(out.xaxis.values, xaxis.values)
+         out.x <- cbind(out.x, x)
+      }
    }
 
    out.x <- mda.setattr(out.x, attrs)
@@ -355,7 +359,7 @@ mda.t <- function(x) {
 #' dataset with excluded rows
 #'
 #' @details
-#' The method assign attribute 'exclrows', which contains number of rows, which should be
+#' The method assigns attribute 'exclrows', which contains number of rows, which should be
 #' excluded/hidden from calculations and plots (without removing them physically). The
 #' argument \code{ind} should contain rows numbers (excluding already hidden), names or logical
 #' values.
@@ -384,7 +388,7 @@ mda.exclrows <- function(x, ind) {
 
    # check that number of rows is still sufficient
    if (is.null(nrow(x)) || nrow(x) == 0) {
-      stop("No rows left when excluded hidden values.")
+      stop("No rows left when excluded hidden values.", call. = FALSE)
    }
 
    return(x)
@@ -423,7 +427,7 @@ mda.inclrows <- function(x, ind) {
 #' dataset with excluded columns
 #'
 #' @details
-#' The method assign attribute 'exclcols', which contains number of columns, which should be
+#' The method assigns attribute 'exclcols', which contains number of columns, which should be
 #' excluded/hidden from calculations and plots (without removing them physically). The argument
 #' \code{ind} should contain column numbers (excluding already hidden), names or logical values.
 #'
@@ -461,7 +465,7 @@ mda.exclcols <- function(x, ind) {
 #' dataset with included columns.
 #'
 #' @description
-#' include colmns specified by user (earlier excluded using mda.exclcols)
+#' include columns specified by user (earlier excluded using mda.exclcols)
 #'
 #' @export
 mda.inclcols <- function(x, ind) {
@@ -553,10 +557,10 @@ mda.getexclind <- function(excl, names, n) {
       excl <- which(excl)
 
    if (length(excl) < nitems)
-      stop("At least one index or name is incorrect.")
+      stop("At least one index or name is incorrect.", call. = FALSE)
 
    if (length(excl) > 0 && (!is.numeric(excl) || min(excl) < 1 || max(excl) > n))
-      stop("At least one index or name is incorrect.")
+      stop("At least one index or name is incorrect.", call. = FALSE)
 
    return(excl)
 }
@@ -592,7 +596,7 @@ mda.df2mat <- function(x, full = FALSE) {
       x <- data.frame(x)
    }
 
-   if (any(sapply(x, is.character))) {
+   if (any(vapply(x, is.character, logical(1)))) {
       stop("At least one column in the provided data frame has text values.", call. = FALSE)
    }
 
@@ -675,7 +679,7 @@ mda.purgeRows <- function(data) {
    return(new_data)
 }
 
-#' Removes excluded (hidden) colmns from data
+#' Removes excluded (hidden) columns from data
 #'
 #' @param data
 #' data frame or matrix with data
@@ -692,7 +696,7 @@ mda.purgeCols <- function(data) {
    return(new_data)
 }
 
-#' Removes excluded (hidden) rows and colmns from data
+#' Removes excluded (hidden) rows and columns from data
 #'
 #' @param data
 #' data frame or matrix with data
@@ -713,8 +717,8 @@ mda.purge <- function(data) {
 #' number of components to select, provided by user
 #'
 #' @details
-#' Depedning on a user choice it returns optimal number of component for the model (if
-#' use did not provide any value) or check the user choice for correctness and returns
+#' Depending on a user choice it returns optimal number of component for the model (if
+#' user did not provide any value) or check the user choice for correctness and returns
 #' it back
 #'
 getSelectedComponents <- function(obj, ncomp = NULL) {
@@ -735,14 +739,14 @@ getSelectedComponents <- function(obj, ncomp = NULL) {
 #' default title for the plot
 #'
 #' @details
-#' Depedning on a user choice it returns main title for a plot
+#' Depending on a user choice it returns main title for a plot
 #'
 getMainTitle <- function(main, ncomp, default) {
    if (!is.null(main)) return(main)
    return(if (is.null(ncomp)) default else sprintf("%s (ncomp = %d)", default, ncomp))
 }
 
-#' Imitation of fprinf() function
+#' Imitation of fprintf() function
 #'
 #' @param ...
 #' arguments for sprintf function
@@ -750,6 +754,31 @@ getMainTitle <- function(main, ncomp, default) {
 #' @export
 fprintf <- function(...) {
    cat(sprintf(...))
+}
+
+#' Paste values together with no separator and collapse into a single string
+#'
+#' @param ...
+#' values to paste
+#'
+paste1 <- function(...) {
+   paste0(..., collapse = "")
+}
+
+#' Create a factor with categories (regular, extreme, outlier)
+#'
+#' @param nobj
+#' number of objects
+#' @param extremes_ind
+#' logical or numeric indices for extreme objects
+#' @param outliers_ind
+#' logical or numeric indices for outlier objects
+#'
+create_categories <- function(nobj, extremes_ind, outliers_ind) {
+   categories <- rep(1, nobj)
+   categories[extremes_ind] <- 2
+   categories[outliers_ind] <- 3
+   return(factor(categories, levels = 1:3, labels = c("regular", "extreme", "outlier")))
 }
 
 #' Return list with valid results
@@ -763,13 +792,13 @@ fprintf <- function(...) {
 getRes <- function(res, classname = "ldecomp") {
 
    if (!is.list(res)) {
-      stop("Parameter 'res' should be a list with result objects.")
+      stop("Parameter 'res' should be a list with result objects.", call. = FALSE)
    }
 
-   res <- res[sapply(res, function(x) classname %in% class(x))]
+   res <- res[vapply(res, function(x) inherits(x, classname), logical(1))]
 
    if (length(res) == 0) {
-      stop("No valid results provided.")
+      stop("No valid results provided.", call. = FALSE)
    }
 
    return(res)
@@ -778,14 +807,14 @@ getRes <- function(res, classname = "ldecomp") {
 #' Capitalize text or vector with text values
 #'
 #' @param str
-#' text of vector with text values
+#' text or vector with text values
 #'
 #' @export
 capitalize <- function(str) {
-   return(sapply(str,  function(s) paste0(toupper(substring(s, 1, 1)), substring(s, 2))))
+   return(vapply(str, function(s) paste0(toupper(substring(s, 1, 1)), substring(s, 2)), character(1)))
 }
 
-#' Replicate matric x
+#' Replicate matrix x
 #'
 #' @param x
 #' original matrix
@@ -820,7 +849,7 @@ prepCalData <- function(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.
    # check that x has a dimension
    stopifnot("Data values must be provided in form of a matrix or a data frame." = !is.null(dim(x)))
 
-   if (is.data.frame(x) && any(sapply(x, is.character))) {
+   if (is.data.frame(x) && any(vapply(x, is.character, logical(1)))) {
       stop("At least one column in the provided data frame has text values.", call. = FALSE)
    }
 
@@ -836,12 +865,12 @@ prepCalData <- function(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.
 
    # check number of rows
    if (nrow(x) - length(attr(x, "exclrows")) < min.nrows) {
-      stop(sprintf("Dataset should contain at least %d measurements (rows).", min.nrows))
+      stop(sprintf("Dataset should contain at least %d measurements (rows).", min.nrows), call. = FALSE)
    }
 
    # check number of columns
    if (ncol(x) - length(attr(x, "exclcols")) < min.ncols) {
-      stop(sprintf("Dataset should contain at least %d variables (columns).", min.ncols))
+      stop(sprintf("Dataset should contain at least %d variables (columns).", min.ncols), call. = FALSE)
    }
 
    if (is.data.frame((x))) {
@@ -982,3 +1011,13 @@ extractPrep <- function(js) {
   substr(js, open_pos, end_pos)
 }
 
+
+#' Converts array (vector) with number of excluded variables to intervals
+#'
+#' @param arr
+#' array with the variable indices
+#'
+#' @export
+arr2int <- function(arr) {
+
+}

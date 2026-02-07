@@ -31,8 +31,8 @@
 #' (\code{\link{pcares}}), in PLS and other methods. The class also includes methods for
 #' calculation of residual distances and explained variance.
 #'
-#' There is no need to use the \code{ldecomp} manually. For example, when build PCA model
-#' with \code{\link{pca}} or apply it to a new data, the results will automatically inherit
+#' There is no need to use the \code{ldecomp} class manually. For example, when building a PCA model
+#' with \code{\link{pca}} or apply it to new data, the results will automatically inherit
 #' all methods of \code{ldecomp}.
 #'
 #' @importFrom methods show
@@ -135,7 +135,7 @@ plotVariance.ldecomp <- function(obj, type = "b", variance = "expvar", labels = 
 #' @param type
 #' type of the plot
 #' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
+#' logical, show or not axes lines crossing origin (0,0)
 #' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
@@ -146,7 +146,7 @@ plotScores.ldecomp <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, ty
    show.plot = TRUE, ...) {
 
    if (min(comp) < 1 || max(comp) > ncol(obj$scores)) {
-      stop("Wrong values for 'comp' parameter.")
+      stop("Wrong values for 'comp' parameter.", call. = FALSE)
    }
 
    # get scores for given components and generate column names with explained variance
@@ -189,7 +189,7 @@ plotScores.ldecomp <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, ty
 #' @param norm
 #' logical, normalize distance values or not (see details)
 #' @param log
-#' logical, apply log tranformation to the distances or not (see details)
+#' logical, apply log transformation to the distances or not (see details)
 #' @param show.plot
 #' logical, shall plot be created or just plot series object is needed
 #' @param ...
@@ -269,7 +269,7 @@ print.ldecomp <- function(x, str = NULL, ...) {
       str <- "Results of data decomposition (class ldecomp)."
    }
 
-   if (nchar(str) > 0) {
+   if (nzchar(str)) {
       fprintf("\n%s\n", str)
    }
 
@@ -312,7 +312,7 @@ as.matrix.ldecomp <- function(x, ncomp = NULL, ...) {
 #' Summary statistics for linear decomposition
 #'
 #' @description
-#' Generic \code{summary} function for linear decomposition. Prints statistic about
+#' Generic \code{summary} function for linear decomposition. Prints statistics about
 #' the decomposition.
 #'
 #' @param object
@@ -500,7 +500,7 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
 
    # set attributes for R
    R <- mda.setattr(R, mda.getattr(loadings), type = "row")
-   attr(R, "name") <- "Quared variable distance (r)"
+   attr(R, "name") <- "Squared variable distance (r)"
 
    # set attributes for T2
    G <- mda.setattr(G, mda.getattr(R))
@@ -550,7 +550,7 @@ jm.crit <- function(residuals, eigenvals, alpha = 0.05, gamma = 0.01) {
    t3 <- rev(cumsum(rev(eigenvals)^3))[seq_len(ncomp)]
 
    h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2)
-   ifelse(h0 < 0.001, h0 <- 0.001, h0)
+   h0 <- pmax(h0, 0.001)
 
    # inverse error function
    erfinv <- function(x) qnorm((1 + x) / 2) / sqrt(2)
@@ -594,7 +594,7 @@ jm.prob <- function(u, eigenvals, ncomp) {
    t3 <- rev(cumsum(rev(eigenvals)^3))[ncomp]
 
    h0 <- 1 - 2 * t1 * t3 / 3 / (t2^2)
-   ifelse(h0 < 0.001, h0 <- 0.001, h0)
+   h0 <- pmax(h0, 0.001)
 
    h1 <- (u / t1)^h0
    h2 <- t2 * h0 * (h0 - 1) / t1^2
@@ -729,7 +729,7 @@ ddmoments.param <- function(U) {
 
    if (is.null(dim(U))) dim(U) <- c(length(U), 1)
 
-   u0 <- apply(U, 2, mean)
+   u0 <- colMeans(U)
    su <- apply(U, 2, sd)
    Nu <- 2 * (u0 / su)^2
 
@@ -796,7 +796,7 @@ ldecomp.getLimParams <- function(U) {
 #' @param residuals
 #' matrix with residuals (E)
 #' @param eigenvals
-#' egenvalues for the components used to decompose the data
+#' eigenvalues for the components used to decompose the data
 #'
 #' @export
 ldecomp.getQLimits <- function(lim.type, alpha, gamma, params, residuals, eigenvals) {
@@ -823,7 +823,7 @@ ldecomp.getQLimits <- function(lim.type, alpha, gamma, params, residuals, eigenv
          "chisq" = chisq.crit(pQ, alpha, gamma),
          "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
          "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
-         stop("Wrong value for 'lim.type' parameter.")
+         stop("Wrong value for 'lim.type' parameter.", call. = FALSE)
       )
 
       lim <- rbind(lim, pQ$u0, DoF)
@@ -868,7 +868,7 @@ ldecomp.getT2Limits <- function(lim.type, alpha, gamma, params) {
       "chisq" = hotelling.crit(pT2$nobj, seq_len(ncomp), alpha, gamma),
       "ddmoments" = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
       "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pT2$u0),
-      stop("Wrong value for 'lim.type' parameter.")
+      stop("Wrong value for 'lim.type' parameter.", call. = FALSE)
    )
 
    lim <- rbind(lim, pT2$u0, DoF)
@@ -913,7 +913,7 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
 
    # check that show.limits is logical
    if (!all(is.logical(show.limits))) {
-      stop("Parameter 'show.limits' must have logical value(s).")
+      stop("Parameter 'show.limits' must have logical value(s).", call. = FALSE)
    }
 
    # if show.limits has only one value - duplicate it
@@ -979,7 +979,7 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
 #' @param ncomp
 #' how many components to use (by default optimal value selected for the model will be used)
 #' @param log
-#' logical, apply log tranformation to the distances or not (see details)
+#' logical, apply log transformation to the distances or not (see details)
 #' @param norm
 #' logical, normalize distance values or not (see details)
 #' @param cgroup
@@ -1010,14 +1010,14 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
 #' @details
 #' The function is a bit more advanced version of \code{\link{plotResiduals.ldecomp}}. It allows to
 #' show distance values for several result objects (e.g. calibration and test set or calibration
-#' and new prediction set) as well as display the correspondng critical limits in form of lines
+#' and new prediction set) as well as display the corresponding critical limits in form of lines
 #' or curves.
 #'
 #' Depending on how many result objects your model has or how many you specified manually,
 #' using the \code{res} parameter, the plot behaves in a bit different way.
 #'
 #' If only one result object is provided, then it allows to colorise the points using \code{cgroup}
-#' parameter. If two or more result objects are provided, then the function show
+#' parameter. If two or more result objects are provided, then the function shows
 #' distances in groups, and adds corresponding legend.
 #'
 #' The function can show distance values normalised (h/h0 and q/q0) as well as with log
@@ -1039,12 +1039,12 @@ ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE, norm = F
    getPlotLim <- function(lim, pd, ld, dim) {
       if (!is.null(lim) || all(!show.limits)) return(lim)
       limits <- if (show.limits[[2]]) max(ld$outliers[, dim]) else max(ld$extremes[, dim])
-      return(c(0, max(sapply(pd, function(x) max(c(getValues(x, dim), limits)) * 1.05))))
+      return(c(0, max(vapply(pd, function(x) max(c(getValues(x, dim), limits)) * 1.05, numeric(1)))))
    }
 
    # check that show.limits is logical
    if (!all(is.logical(show.limits))) {
-      stop("Parameter 'show.limits' must have logical value(s).")
+      stop("Parameter 'show.limits' must have logical value(s).", call. = FALSE)
    }
 
    # if show.limits has only one value - duplicate it

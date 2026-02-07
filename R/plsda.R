@@ -1,7 +1,7 @@
 #' Partial Least Squares Discriminant Analysis
 #'
 #' @description
-#' \code{plsda} is used to calibrate, validate and use of partial least squares discrimination
+#' \code{plsda} is used to calibrate, validate and apply partial least squares discriminant
 #' analysis (PLS-DA) model.
 #'
 #' @param x
@@ -30,7 +30,7 @@
 #' @param lim.type
 #' which method to use for calculation of critical limits for residual distances (see details)
 #' @param alpha
-#' significance level for extreme limits for T2 and Q disances.
+#' significance level for extreme limits for T2 and Q distances.
 #' @param gamma
 #' significance level for outlier limits for T2 and Q distances.
 #' @param info
@@ -54,7 +54,7 @@
 #' \item{yloadings }{matrix with loading values for y (c)  decomposition.}
 #' \item{weights }{matrix with PLS weights.}
 #' \item{coeffs }{matrix with regression coefficients calculated for each component.}
-#' \item{info }{information about the model, provided by user when build the model.}
+#' \item{info }{information about the model, provided by user when building the model.}
 #' \item{calres }{an object of class \code{\link{plsdares}} with PLS-DA results for a calibration
 #' data.}
 #' \item{testres }{an object of class \code{\link{plsdares}} with PLS-DA results for a test data,
@@ -64,13 +64,13 @@
 #'
 #' @details
 #' The \code{plsda} class is based on \code{pls} with extra functions and plots covering
-#' classification functionality. All plots for \code{pls} can be used. E.g. of you want to see the
+#' classification functionality. All plots for \code{pls} can be used. E.g. if you want to see the
 #' real predicted values (y in PLS) instead of classes use \code{plotPredictions.pls(model)} instead
 #' of \code{plotPredictions(model)}.
 #'
 #' Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
 #' will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
-#' cross-validation will be preformed). If it is a list, the following syntax can be used:
+#' cross-validation will be performed). If it is a list, the following syntax can be used:
 #' \code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg}
 #' segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits
 #' to \code{nseg} segments ('venetian blinds').
@@ -81,7 +81,7 @@
 #' @seealso
 #' Specific methods for \code{plsda} class:
 #' \tabular{ll}{
-#'  \code{print.plsda} \tab prints information about a \code{pls} object.\cr
+#'  \code{print.plsda} \tab prints information about a \code{plsda} object.\cr
 #'  \code{summary.plsda} \tab shows performance statistics for the model.\cr
 #'  \code{plot.plsda} \tab shows plot overview of the model.\cr
 #'  \code{\link{predict.plsda}} \tab applies PLS-DA model to a new data.\cr
@@ -189,7 +189,7 @@ plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, sc
 
       # classification results
       c.pred <- classify.plsda(model, res$y.pred)
-      c.ref <- if (length(attr(x, "exclrows") > 0)) c[-attr(x, "exclrows")] else c
+      c.ref <- if (length(attr(x, "exclrows")) > 0) c[-attr(x, "exclrows")] else c
       class_res <- classres(c.pred, c.ref = c.ref, p.pred = res$y.pred, ncomp.selected = ncomp)
 
       # regression results
@@ -269,7 +269,7 @@ predict.plsda <- function(object, x, c.ref = NULL, ...) {
    if (!is.null(c.ref)) {
       attrs <- mda.getattr(c.ref)
       c.ref <- classmodel.processRefValues(c.ref, object$classnames)
-      y.ref <- sapply(object$classnames, function(c) c == c.ref) * 2 - 1
+      y.ref <- vapply(object$classnames, function(cn) cn == c.ref, logical(length(c.ref))) * 2 - 1
       y.ref <- mda.setattr(y.ref, attrs)
       colnames(y.ref) <- object$classnames
       rownames(y.ref) <- rownames(x)
@@ -336,15 +336,15 @@ classify.plsda <- function(model, y) {
 plot.plsda <- function(x, ncomp = x$ncomp.selected, nc = 1, show.legend = TRUE, ...) {
 
    if (!is.null(ncomp) && (ncomp <= 0 || ncomp > x$ncomp)) {
-      stop("Wrong value for number of components.")
+      stop("Wrong value for number of components.", call. = FALSE)
    }
 
-   par(mfrow = c(2, 2))
+   op <- par(mfrow = c(2, 2))
+   on.exit(par(op))
    plotXResiduals(x, ncomp = ncomp, show.legend = show.legend, ...)
    plotRegcoeffs(x, ncomp = ncomp, ny = nc, ...)
    plotMisclassified(x, nc = nc, show.legend = show.legend, ...)
    plotPredictions(x, ncomp = ncomp, show.colorbar = show.legend, ...)
-   par(mfrow = c(1, 1))
 }
 
 #' Summary method for PLS-DA model object
@@ -366,7 +366,7 @@ summary.plsda <- function(object, ncomp = object$ncomp.selected,
    nc = seq_len(object$nclasses), ...) {
 
    if (length(ncomp) != 1 || ncomp < 0 || ncomp > object$ncomp) {
-      stop("Wrong value for the 'ncomp' parameter.")
+      stop("Wrong value for the 'ncomp' parameter.", call. = FALSE)
    }
 
    cat("\nPLS-DA model (class plsda) summary\n")
@@ -381,7 +381,6 @@ summary.plsda <- function(object, ncomp = object$ncomp.selected,
       out <- do.call(rbind, lapply(object$res, as.matrix, nc = n, ncomp = ncomp))
       rownames(out) <- capitalize(names(object$res))
 
-      if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
       out[, 1:4] <- round(out[, 1:4], 2)
       print(out[, -c(1, 3), drop = FALSE])
       cat("\n")
@@ -407,10 +406,10 @@ print.plsda <- function(x, ...) {
    cat("\nMajor fields:\n")
    cat("$ncomp - number of calculated components\n")
    cat("$ncomp.selected - number of selected components\n")
-   cat("$coeffs - vector with regression coefficients\n")
-   cat("$xloadings - vector with x loadings\n")
-   cat("$yloadings - vector with Y loadings\n")
-   cat("$weights - vector with weights\n")
+   cat("$coeffs - matrix with regression coefficients\n")
+   cat("$xloadings - matrix with x loadings\n")
+   cat("$yloadings - matrix with y loadings\n")
+   cat("$weights - matrix with weights\n")
    cat("$calres - results for calibration set\n")
 
    cat("\nTry summary(model) and plot(model) to see the model performance.\n")

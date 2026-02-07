@@ -1,6 +1,6 @@
 #' PLS-DA results
 #' @description
-#' \code{plsdares} is used to store and visualize results of applying a PLS-DA model to a new data.
+#' \code{plsdares} is used to store and visualize results of applying a PLS-DA model to new data.
 #'
 #' @param plsres
 #' PLS results for the data.
@@ -14,7 +14,7 @@
 #' function \code{\link{predict.plsda}}.
 #'
 #' The object gives access to all PLS-DA results as well as to the plotting methods for
-#' visualisation of the results. The \code{plsidares} class also inherits all properties and methods
+#' visualisation of the results. The \code{plsdares} class also inherits all properties and methods
 #' of \code{classres} and \code{plsres} classes.
 #'
 #' If no reference values provided, classification statistics will not be calculated and
@@ -53,7 +53,7 @@
 #'    \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
 #'    \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
 #'    \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
-#'    \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y
+#'    \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for x
 #'    decomposition.\cr
 #'    \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y
 #'    decomposition.\cr
@@ -159,20 +159,20 @@ plsdares <- function(plsres, cres) {
 plot.plsdares <- function(x, nc = 1, ncomp = x$ncomp.selected, show.labels = FALSE, ...) {
 
    if (is.null(x$c.ref)) {
-      par(mfrow = c(2, 2))
+      op <- par(mfrow = c(2, 2))
+      on.exit(par(op))
       plotXResiduals.plsres(x, ncomp = ncomp, show.labels = show.labels)
       plotYVariance.plsres(x, ncomp = ncomp, show.labels = show.labels)
       plotPredictions.classres(x, ncomp = ncomp, show.labels = show.labels)
-      par(mfrow = c(1, 1))
       return()
    }
 
-   par(mfrow = c(2, 2))
+   op <- par(mfrow = c(2, 2))
+   on.exit(par(op))
    plotXResiduals.plsres(x, ncomp = ncomp, show.labels = show.labels)
    plotYVariance.plsres(x, ncomp = ncomp, show.labels = show.labels)
    plotPerformance.classres(x, nc = nc, show.labels = show.labels)
    plotPredictions.classres(x, ncomp = ncomp, show.labels = show.labels)
-   par(mfrow = c(1, 1))
 }
 
 #' as.matrix method for PLS-DA results

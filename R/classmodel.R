@@ -12,8 +12,8 @@ classmodel.processRefValues <- function(c.ref, classnames = NULL) {
    attrs <- mda.getattr(c.ref)
 
    if (is.logical(c.ref)) {
-      if (length(classnames) > 1) stop("Logical class values can't be used with multiclass model.")
-      if (length(classnames) == 0) stop("Classname must be specified with logical class values.")
+      if (length(classnames) > 1) stop("Logical class values can't be used with multiclass model.", call. = FALSE)
+      if (length(classnames) == 0) stop("Classname must be specified with logical class values.", call. = FALSE)
       return(mda.setattr(as.factor(ifelse(c.ref, classnames, "None")), attrs))
    }
 
@@ -21,7 +21,7 @@ classmodel.processRefValues <- function(c.ref, classnames = NULL) {
       return(mda.setattr(as.factor(c.ref), attrs))
    }
 
-   stop("Parameter c.ref should be either a factor or vector with logical or text values.")
+   stop("Parameter c.ref should be either a factor or vector with logical or text values.", call. = FALSE)
 }
 
 #' Predictions plot for classification model
@@ -53,13 +53,13 @@ plotPredictions.classmodel <- function(obj, res.name = NULL, nc = seq_len(obj$nc
 
    if (is.null(res.name)) {
       res_names <- c("test", "cv", "cal")
-      name_ind <- which(res_names %in% names(obj$res[!sapply(obj$res, is.null)]))[1]
+      name_ind <- which(res_names %in% names(obj$res[!vapply(obj$res, is.null, logical(1))]))[1]
       res.name <- res_names[name_ind]
    }
 
    res <- obj$res[[res.name]]
    if (is.null(res)) {
-      stop("Wong value for 'res.name' parameter.")
+      stop("Wrong value for 'res.name' parameter.", call. = FALSE)
    }
 
    if (is.null(ncomp)) {
@@ -161,7 +161,7 @@ plotPerformance.classmodel <- function(obj, nc = 1, param = "misclassified", typ
    xticks = seq_len(dim(obj$res$cal$c.pred)[2]), res = obj$res, ...) {
 
    if (length(param) != 1) {
-      stop("Specify which paramete you want to make the plot for.")
+      stop("Specify which parameter you want to make the plot for.", call. = FALSE)
    }
 
    plot_data <- lapply(res, plotPerformance, nc = nc, param = param, show.plot = FALSE)

@@ -20,7 +20,7 @@
 #' @param bty
 #' border type for the legend
 #' @param position
-#' legend position ("topright", "topleft', "bottomright", "bottomleft", "top", "bottom")
+#' legend position ("topright", "topleft", "bottomright", "bottomleft", "top", "bottom")
 #' @param plot
 #' logical, show legend or just calculate and return its size
 #' @param ...
@@ -34,7 +34,7 @@ mdaplotg.showLegend <- function(legend, col, pt.bg = NA, pch = NULL, lty = NULL,
    multcolpos <- c("top", "bottom")
 
    if (!(position %in% c(onecolpos, multcolpos))) {
-      stop("Wrong values for 'legend.position' argument!")
+      stop("Wrong values for 'legend.position' argument!", call. = FALSE)
    }
 
    # compute number of columns
@@ -70,19 +70,19 @@ mdaplotg.showLegend <- function(legend, col, pt.bg = NA, pch = NULL, lty = NULL,
 #' The method should prepare data as a list of datasets (matrices or data frames). One list
 #' element will be used to create one plot series.
 #'
-#' If `data` is matrix or data frame and not `groupby` parameter is provided, then every row
+#' If `data` is matrix or data frame and no `groupby` parameter is provided, then every row
 #' will be taken as separate set. This option is available only for line or bar plots.
 #'
 mdaplotg.prepareData <- function(data, type, groupby) {
 
    # if already a list - remove NULL elements and return
-   if (is.list(data) && !is.data.frame(data)) return(data[!sapply(data, is.null)])
+   if (is.list(data) && !is.data.frame(data)) return(data[!vapply(data, is.null, logical(1))])
 
    if (is.null(groupby)) {
       # take every row of matrix or data frame as separate group
 
       if (!all(type %in% c("h", "l", "b"))) {
-         stop("Group plot with matrix or data frame can be made only for types 'h', 'l' and 'b'.")
+         stop("Group plot with matrix or data frame can be made only for types 'h', 'l' and 'b'.", call. = FALSE)
       }
 
       # add fake row names
@@ -106,7 +106,7 @@ mdaplotg.prepareData <- function(data, type, groupby) {
    if (!is.data.frame(groupby)) groupby <- as.data.frame(groupby)
 
    if (!all(unlist(lapply(groupby, is.factor)))) {
-      stop("Parameter 'groupby' should be a factor or data frame with several factors.")
+      stop("Parameter 'groupby' should be a factor or data frame with several factors.", call. = FALSE)
    }
 
    attrs <- mda.getattr(data)
@@ -143,11 +143,11 @@ mdaplotg.processParam <- function(param, name, is.type, ngroups) {
    param <- if (length(param) == 1) rep(param, ngroups) else param
 
    if (!all(is.type(param))) {
-      stop(paste0('Parameter "', name, '" mush be numeric!'))
+      stop(paste0('Parameter "', name, '" must be numeric!'), call. = FALSE)
    }
 
    if (length(param) != ngroups)
-      stop(paste0('Parameter "', name, '" should be specified for each group or one for all!'))
+      stop(paste0('Parameter "', name, '" should be specified for each group or one for all!'), call. = FALSE)
 
    return(param)
 }
@@ -173,11 +173,11 @@ mdaplotg.getLegend <- function(ps, data.names, legend = NULL) {
    }
 
    if (is.null(legend)) {
-      stop("Can not find values for the legend items.")
+      stop("Can not find values for the legend items.", call. = FALSE)
    }
 
    if (length(legend) != length(ps)) {
-      stop("Number of values for 'legend' is not the same as number of plot series.")
+      stop("Number of values for 'legend' is not the same as number of plot series.", call. = FALSE)
    }
 
    return(legend)
@@ -253,7 +253,7 @@ mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, show.labels,
 #' @param legend.position
 #' position of legend on the plot (if shown)
 #' @param show.labels
-#' logical, will data ponit labels also be shown
+#' logical, will data point labels also be shown
 #'
 #' @return
 #' vector with two values
@@ -344,7 +344,7 @@ mdaplotg.getYLim <- function(ps, ylim, show.excluded, show.legend, legend.positi
 #' @param show.grid
 #' logical, show or not a grid for the plot.
 #' @param grid.lwd
-#' line thinckness (width) for the grid
+#' line thickness (width) for the grid
 #' @param grid.col
 #' line color for the grid
 #' @param xticks
@@ -465,13 +465,14 @@ mdaplotg <- function(
    nbarplots <- sum(type == "h")
 
    # make a plot for each group
+   show.labels.orig <- show.labels
    for (i in seq_len(ngroups)) {
 
       # decide if x values should be forced as group index
       force.x.values <- if (type[i] == "h") c(i, nbarplots) else NA
 
       # if error bars are shown and i > 1 do not show labels
-      show.labels <- if (i > 1 && type[i] == "e") FALSE else show.labels
+      show.labels <- if (i > 1 && type[i] == "e") FALSE else show.labels.orig
 
       # use mdaplot with show.axes = FALSE to create the plot
       mdaplot(ps = ps[[i]], type = type[i], col = col[i], pch = pch[i], lty = lty[i],
@@ -486,7 +487,7 @@ mdaplotg <- function(
    if (show.legend == TRUE) {
       legend <- mdaplotg.getLegend(ps, names(data), legend)
       if (length(legend) != ngroups) {
-         stop("Number of values for 'legend' is not the same as number of plot series.")
+         stop("Number of values for 'legend' is not the same as number of plot series.", call. = FALSE)
       }
 
       lty[type == "p" | type == "h"] <- 0

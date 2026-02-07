@@ -1,7 +1,7 @@
 #' Multivariate curve resolution based on pure variables
 #'
 #' @description
-#' \code{mcrpure} allows to resolve spectroscopic data to linear combination of individual spectra
+#' \code{mcrpure} allows resolving spectroscopic data to linear combination of individual spectra
 #' and contributions using the pure variables approach.
 #'
 #' @param x
@@ -24,7 +24,7 @@
 #' spectral data into spectra (`resspec`) and contributions (`rescont`) of individual
 #' chemical components by ordinary least squares.
 #'
-#' The pure variabes are identified using stepwise maximum angle calculations and described in
+#' The pure variables are identified using stepwise maximum angle calculations and described in
 #' detail in [1]. So the purity of a spectral variable (wavelength, wavenumber) is actually an
 #' angle (measured in degrees) between the variable and vector of ones for the first component;
 #' and between the variable and space formed by previously found pure variables for the other
@@ -41,7 +41,7 @@
 #' \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
 #' \item{offset}{offset value used to compute the purity}
 #' \item{ncomp}{number of resolved components}
-#' \item{info }{information about the model, provided by user when build the model.}
+#' \item{info }{information about the model, provided by user when building the model.}
 #'
 #'
 #' More details and examples can be found in the Bookdown tutorial.
@@ -76,7 +76,7 @@
 #' @examples
 #' library(mdatools)
 #'
-#' # resolve mixture of carbonhydrates Raman spectra
+#' # resolve mixture of carbohydrates Raman spectra
 #'
 #' data(carbs)
 #' m = mcrpure(carbs$D, ncomp = 3)
@@ -144,7 +144,7 @@ mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, exclrows = NULL, e
 
    stopifnot("Parameter 'offset' should be within [0, 1)." = offset < 1 && offset >= 0)
    stopifnot("Provided pure variables have wrong values." =
-      is.null(purevars) || (min(purevars) > 0 & max(purevars) <= ncol(x)))
+      is.null(purevars) || (min(purevars) > 0 && max(purevars) <= ncol(x)))
 
    # get pure variables and unmix data
    x <- prepCalData(x, exclrows, exclcols, min.nrows = 2, min.ncols = 2)
@@ -179,7 +179,7 @@ unmix.mcrpure <- function(obj, x) {
 
    # resolve spectra and concentrations
    St <- tryCatch(
-      t(x) %*% Dr %*% solve(crossprod(Dr)),
+      crossprod(x, Dr) %*% solve(crossprod(Dr)),
       error = function(e) {
          stop("Unable to resolve the components, perhaps 'ncomp' is too large.", call. = FALSE)
       }
@@ -194,8 +194,8 @@ unmix.mcrpure <- function(obj, x) {
 
    # scale
    f <- as.matrix(rowSums(x))
-   a <- solve(crossprod(Ct)) %*% t(Ct) %*% f
-   A <- if (length(a) == 1) a else diag(as.vector(a))
+   a <- solve(crossprod(Ct), crossprod(Ct, f))
+   A <- if (length(a) == 1) a else diag(as.vector(a), length(a), length(a))
    St <- St %*% A %*% solve(crossprod(A))
    Ct <- Ct %*% A
 
@@ -234,8 +234,8 @@ predict.mcrpure <- function(object, x, ...) {
    St <- object$resspec
    Ct <- x %*% St %*% solve(crossprod(St))
    f <- as.matrix(rowSums(x))
-   a <- solve(crossprod(Ct)) %*% t(Ct) %*% f
-   A <- if (length(a) == 1) a else diag(as.vector(a))
+   a <- solve(crossprod(Ct), crossprod(Ct, f))
+   A <- if (length(a) == 1) a else diag(as.vector(a), length(a), length(a))
    Ct <- Ct %*% A
    colnames(Ct) <- colnames(object$rescont)
    Ct <- mda.setattr(Ct, attrs, "row")
@@ -256,7 +256,7 @@ predict.mcrpure <- function(object, x, ...) {
 print.mcrpure <- function(x, ...) {
    cat("\nMCR Purity unmixing case (class mcrpure)\n")
 
-   if (length(x$info) > 1) {
+   if (nzchar(x$info)) {
       cat("\nInfo:\n")
       cat(x$info)
    }
@@ -291,7 +291,7 @@ print.mcrpure <- function(x, ...) {
 summary.mcrpure <- function(object, ...) {
    cat("\nSummary for MCR Purity case (class mcrpure)\n")
 
-   if (length(object$info) > 1) {
+   if (nzchar(object$info)) {
       fprintf("\nInfo:\n%s\n", object$info)
    }
 
@@ -331,12 +331,12 @@ summary.mcrpure <- function(object, ...) {
 #' @param ncomp
 #' number of pure components
 #' @param purevars
-#' user provided values gor pure variables (no calculation will be run in this case)
+#' user provided values for pure variables (no calculation will be run in this case)
 #' @param offset
 #' offset (between 0 and 1) for calculation of parameter alpha
 #'
 #' @return
-#' The function returns a list with with following fields:
+#' The function returns a list with the following fields:
 #' \item{ncomp }{number of pure components.}
 #' \item{purvars }{vector with indices for pure variables.}
 #' \item{purityspec }{matrix with purity values for each resolved components.}
@@ -372,7 +372,7 @@ getPureVariables <- function(D, ncomp, purevars, offset) {
    }
 
    # calculate statistics and noise correction vector
-   mu <- apply(D, 2, mean)
+   mu <- colMeans(D)
    n <- mu / (mu + offset * max(mu))
    n <- (1 + offset) * n
 
@@ -381,7 +381,7 @@ getPureVariables <- function(D, ncomp, purevars, offset) {
    purevals <- rep(0, ncomp)
 
    # scale columns of the original spectra to unit length
-   Dr <- D %*% diag(1 / sqrt(colSums(D^2)))
+   Dr <- D %*% diag(1 / sqrt(colSums(D^2)), ncol(D), ncol(D))
 
    # initialize loadings
    for (i in seq_len(ncomp)) {

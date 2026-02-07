@@ -24,7 +24,7 @@
 #' @param lim.type
 #' which method to use for calculation of critical limits for residual distances (see details)
 #' @param alpha
-#' significance level for extreme limits for T2 and Q disances.
+#' significance level for extreme limits for T2 and Q distances.
 #' @param gamma
 #' significance level for outlier limits for T2 and Q distances.
 #' @param info
@@ -35,22 +35,22 @@
 #' @details
 #'
 #' If number of components is not specified, a minimum of number of objects - 1 and number of
-#' variables in calibration set is used. One can also specified an optimal number of component,
+#' variables in calibration set is used. One can also specify an optimal number of components,
 #' once model is calibrated (\code{ncomp.selected}). The optimal number of components is used to
-#' build a residuals distance plot, as well as for SIMCA classification.
+#' build a residual distance plot, as well as for SIMCA classification.
 #'
 #' If some of rows of calibration set should be excluded from calculations (e.g. because they are
 #' outliers) you can provide row numbers, names, or logical values as parameter \code{exclrows}. In
-#' this case they will be completely ignored we model is calibrated. However, score and residuls
+#' this case they will be completely ignored when the model is calibrated. However, score and residual
 #' distances will be computed for these rows as well and then hidden. You can show them
 #' on corresponding plots by using parameter \code{show.excluded = TRUE}.
 #'
-#' It is also possible to exclude selected columns from calculations by provideing parameter
+#' It is also possible to exclude selected columns from calculations by providing parameter
 #' \code{exclcols} in form of column numbers, names or logical values. In this case loading matrix
-#' will have zeros for these columns. This allows to compute PCA models for selected variables
+#' will have zeros for these columns. This allows computing PCA models for selected variables
 #' without removing them physically from a dataset.
 #'
-#' Take into account that if you see other packages to make plots (e.g. ggplot2) you will
+#' Take into account that if you use other packages to make plots (e.g. ggplot2) you will
 #' not be able to distinguish between hidden and normal objects.
 #'
 #' By default loadings are computed for the original dataset using either SVD or NIPALS algorithm.
@@ -58,7 +58,7 @@
 #' possibility to run algorithms based on random permutations [1, 2]. In this case you have
 #' to define parameter \code{rand} as a vector with two values: \code{p} - oversampling parameter
 #' and \code{k} - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)}
-#' are good options, which give quite almost precise solution but much faster.
+#' are good options, which give quite precise solutions but much faster.
 #'
 #' There are several ways to calculate critical limits for orthogonal (Q, q) and score (T2, h)
 #' distances. In \code{mdatools} you can specify one of the following methods via parameter
@@ -66,12 +66,12 @@
 #' chi-square distribution [4], \code{"ddmoments"} and \code{"ddrobust"} - related to data
 #' driven method proposed in [5]. The \code{"ddmoments"} is based on method of moments for
 #' estimation of distribution parameters (also known as "classical" approach) while
-#' \code{"ddrobust"} is based in robust estimation.
+#' \code{"ddrobust"} is based on robust estimation.
 #'
 #' If \code{lim.type="chisq"} or \code{lim.type="jm"} is used, only limits for Q-distances are
 #' computed based on corresponding approach, limits for T2-distances are computed using
 #' Hotelling's T-squared distribution. The methods utilizing the data driven approach calculate
-#' limits for combination of the distances bases on chi-square distribution and parameters
+#' limits for combination of the distances based on chi-square distribution and parameters
 #' estimated from the calibration data.
 #'
 #' The critical limits are calculated for a significance level defined by parameter \code{'alpha'}.
@@ -79,7 +79,7 @@
 #' limit for outliers (shown as dashed line on residual distance plot).
 #'
 #' You can also recalculate the limits for existent model by using different values for alpha and
-#' gamme, without recomputing the model itself. In this case use the following code (it is assumed
+#' gamma, without recomputing the model itself. In this case use the following code (it is assumed
 #' that you current PCA/SIMCA model is stored in variable \code{m}):
 #' \code{m = setDistanceLimits(m, lim.type, alpha, gamma)}.
 #'
@@ -90,7 +90,7 @@
 #'
 #' If you provide a list with preprocessing methods, PCA will apply them to the training set
 #' before excluding the columns and rows (if specified). The list will be used to train a preprocessing
-#' model which becomes a part of the PCA modle object. So when you use method `predict()` the provided
+#' model which becomes a part of the PCA model object. So when you use method `predict()` the provided
 #' dataset will be automatically preprocessed by the preprocessing model.
 #'
 #' Any PCA model (with or without preprocessing) developed in this package can be saved as JSON file
@@ -111,7 +111,7 @@
 #' \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
 #' \item{T2lim }{statistical limit for T2 distance.}
 #' \item{Qlim }{statistical limit for Q residuals.}
-#' \item{info }{information about the model, provided by user when build the model.}
+#' \item{info }{information about the model, provided by user when building the model.}
 #' \item{calres }{an object of class \code{\link{pcares}} with PCA results for a calibration data.}
 #' \item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it
 #' was provided.}
@@ -229,6 +229,9 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
    lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "", prep = NULL) {
 
 
+   method <- match.arg(method, c("svd", "nipals"))
+   lim.type <- match.arg(lim.type, c("ddmoments", "ddrobust", "jm", "chisq"))
+
    # check calibration data and process excluded rows and columns
    x <- prepCalData(x, exclrows = exclrows, exclcols = exclcols, min.nrows = 2, min.ncols = 2)
 
@@ -289,7 +292,7 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
 #' @export
 selectCompNum.pca <- function(obj, ncomp, ...) {
    if (ncomp < 1 || ncomp > obj$ncomp) {
-      stop("Wrong number of selected components.")
+      stop("Wrong number of selected components.", call. = FALSE)
    }
 
    obj$ncomp.selected <- ncomp
@@ -307,7 +310,7 @@ selectCompNum.pca <- function(obj, ncomp, ...) {
 #' Compute and set statistical limits for Q and T2 residual distances.
 #'
 #' @description
-#' Computes statisticsl limits for orthogonal and score distances (based on calibration set)
+#' Computes statistical limits for orthogonal and score distances (based on calibration set)
 #' and assign the calculated values as model properties.
 #'
 #' @param obj
@@ -330,7 +333,7 @@ selectCompNum.pca <- function(obj, ncomp, ...) {
 #' degrees of freedom.
 #'
 #' @return
-#' Object models with the two fields updated.
+#' Model object with the two fields updated.
 #'
 #' @export
 setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alpha,
@@ -364,7 +367,7 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
 #' Probabilities for residual distances
 #'
 #' @details
-#' Computes p-value for every object being from the same populaion as calibration set
+#' Computes p-value for every object being from the same population as calibration set
 #' based on its orthogonal and score distances.
 #'
 #' @param obj
@@ -447,13 +450,6 @@ getCalibrationData.pca <- function(obj) {
 #' @export
 categorize.pca <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, ...) {
 
-   create_categories <- function(nobj, extremes_ind, outliers_ind) {
-      categories <- rep(1, nobj)
-      categories[extremes_ind] <- 2
-      categories[outliers_ind] <- 3
-      return(factor(categories, levels = 1:3, labels = c("regular", "extreme", "outlier")))
-   }
-
    # get distance values for selected number of components
    h <- res$T2[, ncomp]
    q <- res$Q[, ncomp]
@@ -528,7 +524,7 @@ predict.pca <- function(object, x, ...) {
    }
 
    if (ncol(x) != nrow(object$loadings)) {
-      stop("Number and type of data columns should be the same as in calibration dataset.")
+      stop("Number and type of data columns should be the same as in calibration dataset.", call. = FALSE)
    }
 
    # compute scores and residuals
@@ -584,7 +580,7 @@ print.pca <- function(x, ...) {
 
    cat("\nPCA model (class pca)\n")
 
-   if (length(x$info) > 1) {
+   if (nzchar(x$info)) {
       cat("\nInfo:\n")
       cat(x$info)
    }
@@ -621,7 +617,7 @@ summary.pca <- function(object, ...) {
 
    cat("\nSummary for PCA model (class pca)\n")
 
-   if (length(object$info) > 1) {
+   if (nzchar(object$info)) {
       fprintf("\nInfo:\n%s\n", object$info)
    }
 
@@ -730,7 +726,7 @@ pca.mvreplace <- function(x, center = TRUE, scale = FALSE, maxncomp = 10, expvar
    # check if any column has more than 20% values
    nmv_cols <- colSums(mvidx) / nrow(x)
    if (any(nmv_cols > 0.2)) {
-      stop("Some of columns have more than 20% missing values.")
+      stop("Some of columns have more than 20% missing values.", call. = FALSE)
    }
 
    # make initial estimates with mean values for each column
@@ -771,7 +767,7 @@ pca.mvreplace <- function(x, center = TRUE, scale = FALSE, maxncomp = 10, expvar
 
       # get and trancate scores and loadings and reestimate the values
       scoresp <- scores
-      loadings <- res$loadings[, seq_len(ncomp)]
+      loadings <- res$loadings[, seq_len(ncomp), drop = FALSE]
       scores <- x %*% loadings
       x_new <- tcrossprod(scores, loadings)
 
@@ -785,7 +781,7 @@ pca.mvreplace <- function(x, center = TRUE, scale = FALSE, maxncomp = 10, expvar
       if (n > 2) {
          # calculate difference between scores for convergence
          ncompcond <- min(ncol(scores), ncol(scoresp))
-         cond <- sum((scores[, seq_len(ncompcond)] - scoresp[, seq_len(ncompcond)])^2)
+         cond <- sum((scores[, seq_len(ncompcond), drop = FALSE] - scoresp[, seq_len(ncompcond), drop = FALSE])^2)
       }
 
       n <- n + 1
@@ -812,7 +808,7 @@ pca.mvreplace <- function(x, center = TRUE, scale = FALSE, maxncomp = 10, expvar
 #' @param k
 #' rank of X (number of components)
 #' @param rand
-#' a vector with two values - number of iterations (q) and oversmapling parameter (p)
+#' a vector with two values - number of iterations (q) and oversampling parameter (p)
 #' @param dist
 #' distribution for generating random numbers, 'unif' or 'norm'
 #'
@@ -901,7 +897,7 @@ pca.nipals <- function(x, ncomp = min(ncol(x), nrow(x) - 1), tol = 10^-10) {
    nvar <- ncol(x)
 
    if (ncomp < 1 || ncomp > min(nobj - 1, nvar)) {
-      stop("Wrong number of components")
+      stop("Wrong number of components", call. = FALSE)
    }
 
    scores <- matrix(0, nrow = nobj, ncol = ncomp)
@@ -954,7 +950,7 @@ pca.run <- function(x, ncomp, method, rand = NULL) {
       method,
       "svd" = pca.svd,
       "nipals" = pca.nipals,
-      stop("Wrong value for PCA method!")
+      stop("Wrong value for PCA method!", call. = FALSE)
    )
 
    # use proper function to compute scores, loadings and eigenvalues
@@ -986,7 +982,7 @@ pca.run <- function(x, ncomp, method, rand = NULL) {
 #' @param scale
 #' logical, do standardization or not
 #' @param method
-#' algorithm for compiting PC space (only 'svd' and 'nipals' are supported so far)
+#' algorithm for computing PC space (only 'svd' and 'nipals' are supported so far)
 #' @param rand
 #' vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)
 #'
@@ -997,7 +993,7 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
 
    # check if data has missing values
    if (any(is.na(x))) {
-      stop("Data has missing values, try to fix this using pca.mvreplace.")
+      stop("Data has missing values, try to fix this using pca.mvreplace.", call. = FALSE)
    }
 
    # prepare empty list for model object
@@ -1083,7 +1079,7 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
 #' Converts JSON string created in mda.tools/pca app to \code{pca} object
 #'
 #' @param str
-#' sttringified JSON (from model file)
+#' stringified JSON (from model file)
 #'
 #' @return
 #' object of \code{\link{pca}} class
@@ -1158,7 +1154,7 @@ pca.fromjson <- function(str) {
    colnames(loadings) <- complabels
    rownames(loadings) <- varlabels
 
-   if (!all(varvalues == 1:ncols)) attr(loadings, "yaxis.values") <- varvalues
+   if (!all(varvalues == seq_len(ncols))) attr(loadings, "yaxis.values") <- varvalues
    attr(loadings, "yaxis.name") <- gsub('"', '', varvaluesName)
    attr(loadings, "xaxis.name") <- "Components"
    attr(loadings, "name") <- "Loadings"
@@ -1219,7 +1215,7 @@ pca.fromjson <- function(str) {
    prepStr <- extractPrep(str)
    prep <- if(length(prepStr) > 0 && nchar(prepStr) > 10) prep.fromjson(prepStr) else NULL
 
-   # by defaul we assume that moments/classic method is applied
+   # by default we assume that moments/classic method is applied
    m <- list(
       center = center,
       scale = scale,
@@ -1254,7 +1250,7 @@ pca.fromjson <- function(str) {
 #' @param fileName
 #' file name (or full path) to JSON file.
 #'
-#' @returns list with PCA model similar to what \code{pca()} creates.
+#' @return list with PCA model similar to what \code{pca()} creates.
 #'
 #' @export
 pca.readJSON <- function(fileName) {
@@ -1328,24 +1324,24 @@ asvector.pca <- function(obj) {
       as.vector(obj$eigenvals),     # eigenvals
 
       as.vector(qpc$u0),            # q0c
-      as.vector(round(qpc$Nu)),     # Nqc
+      pmax(as.vector(round(qpc$Nu)), 1),     # Nqc
       as.vector(qpr$u0),            # q0r
-      as.vector(round(qpr$Nu)),     # Nqr
+      pmax(as.vector(round(qpr$Nu)), 1),     # Nqr
 
       as.vector(hpc$u0),            # h0c
-      as.vector(round(hpc$Nu)),     # Nhc
+      pmax(as.vector(round(hpc$Nu)), 1),     # Nhc
       as.vector(hpr$u0),            # h0r
-      as.vector(round(hpr$Nu)),     # Nhr
+      pmax(as.vector(round(hpr$Nu)), 1),     # Nhr
 
       as.vector(rpc$u0),            # r0c
-      as.vector(round(rpc$Nu)),     # Nrc
+      pmax(as.vector(round(rpc$Nu)), 1),     # Nrc
       as.vector(rpr$u0),            # r0r
-      as.vector(round(rpr$Nu)),     # Nrr
+      pmax(as.vector(round(rpr$Nu)), 1),     # Nrr
 
       as.vector(gpc$u0),            # g0c
-      as.vector(round(gpc$Nu)),     # Ngc
+      pmax(as.vector(round(gpc$Nu)), 1),     # Ngc
       as.vector(gpr$u0),            # g0r
-      as.vector(round(gpr$Nu))      # Ngr
+      pmax(as.vector(round(gpr$Nu)), 1)      # Ngr
    )
    names(mv) <- NULL
    return(mv);
@@ -1357,7 +1353,7 @@ asvector.pca <- function(obj) {
 #' @param obj
 #' Object with PCA model (from \code{\link{pca}}).
 #'
-#' @return stringigied JSON
+#' @return stringified JSON
 #'
 #' @export
 asjson.pca <- function(obj) {
@@ -1368,7 +1364,7 @@ asjson.pca <- function(obj) {
    ncols <- nrow(obj$loadings)
    nrows <- nrow(obj$calres$scores) - length(obj$exclrows)
    center <- if(is.logical(obj$center) && obj$center == FALSE) "false" else "true"
-   scale <- if(is.logical(obj$scale) && obj$center == FALSE) "false" else "true"
+   scale <- if(is.logical(obj$scale) && obj$scale == FALSE) "false" else "true"
 
    varlabels <- rownames(obj$loadings)
    varvalues <- if(!is.null(attr(obj$loadings, "yaxis.values"))) attr(obj$loadings, "yaxis.values") else seq_len(ncols)
@@ -1466,6 +1462,7 @@ plotVariance.pca <- function(obj, type = "b", labels = "values", variance = "exp
    mdaplotg(plot_data, xticks = xticks, labels = labels, type = type, ylab = ylab, ...)
 }
 
+
 #' Cumulative explained variance plot for PCA model
 #'
 #' @description
@@ -1486,6 +1483,7 @@ plotCumVariance.pca <- function(obj, legend.position = "bottomright", ...) {
    plotVariance(obj, variance = "cumexpvar", legend.position = legend.position, ...)
 }
 
+
 #' Scores plot for PCA model
 #'
 #' @description
@@ -1498,11 +1496,11 @@ plotCumVariance.pca <- function(obj, legend.position = "bottomright", ...) {
 #' @param type
 #' type of the plot ("p", "l", "b", "h")
 #' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
+#' logical, show or not axes lines crossing origin (0,0)
 #' @param show.legend
 #' logical, show or not a legend on the plot
 #' @param res
-#' list with result objects to show the variance for
+#' list with result objects to show the scores for
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1521,7 +1519,7 @@ plotScores.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type =
    show.legend = TRUE, res = obj$res, ...) {
 
    if (min(comp) < 1 || max(comp) > ncol(obj$loadings)) {
-      stop("Wrong values for 'comp' parameter.")
+      stop("Wrong values for 'comp' parameter.", call. = FALSE)
    }
 
    res <- getRes(res, "ldecomp")
@@ -1530,7 +1528,7 @@ plotScores.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type =
    }
 
    if (type != "p") {
-      stop("You have several result objects in model, only scatter plot is available for scores.")
+      stop("You have several result objects in model, only scatter plot is available for scores.", call. = FALSE)
    }
 
    # set up values for showing axes lines
@@ -1543,6 +1541,7 @@ plotScores.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type =
    mdaplotg(plot_data, type = type, show.lines = show.lines, show.legend = show.legend, ...)
 }
 
+
 #' Residuals distance plot for PCA model
 #'
 #' @description
@@ -1554,7 +1553,7 @@ plotScores.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type =
 #' @param ncomp
 #' how many components to use (by default optimal value selected for the model will be used)
 #' @param log
-#' logical, apply log tranformation to the distances or not (see details)
+#' logical, apply log transformation to the distances or not (see details)
 #' @param norm
 #' logical, normalize distance values or not (see details)
 #' @param cgroup
@@ -1574,14 +1573,14 @@ plotScores.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type =
 #' @param lim.lty
 #' vector with two values - line type for extreme and outlier limits
 #' @param res
-#' list with result objects to show the plot for (by defaul, model results are used)
+#' list with result objects to show the plot for (by default, model results are used)
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
 #' @details
 #' The function is a bit more advanced version of \code{\link{plotResiduals.ldecomp}}. It allows to
 #' show distance values for several result objects (e.g. calibration and test set or calibration
-#' and new prediction set) as well as display the correspondng critical limits in form of lines
+#' and new prediction set) as well as display the corresponding critical limits in form of lines
 #' or curves.
 #'
 #' Depending on how many result objects your model has or how many you specified manually,
@@ -1589,7 +1588,7 @@ plotScores.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type =
 #'
 #' If only one result object is provided, then it allows to colorise the points using \code{cgroup}
 #' parameter. If you specify \code{cgroup = "categories"} then it will show points as three groups:
-#' normal, extreme and outliers. If two or more result objects are provided, then the function show
+#' normal, extreme and outliers. If two or more result objects are provided, then the function shows
 #' distances in groups, and adds corresponding legend.
 #'
 #' The function can show distance values normalised (h/h0 and q/q0) as well as with log
@@ -1641,7 +1640,7 @@ plotResiduals.pca <- function(obj, ...) plotDistances.pca(obj, ...)
 #' @param show.legend
 #' logical, show or not a legend on the plot
 #' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
+#' logical, show or not axes lines crossing origin (0,0)
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1650,11 +1649,11 @@ plotResiduals.pca <- function(obj, ...) plotDistances.pca(obj, ...)
 #'
 #' @export
 plotLoadings.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1,
-   type = (if (length(comp == 2)) "p" else "l"),
+   type = (if (length(comp) == 2) "p" else "l"),
    show.legend = TRUE, show.axes = TRUE, ...) {
 
    if (min(comp) < 1 || max(comp) > ncol(obj$loadings)) {
-      stop("Wrong values for 'comp' parameter.")
+      stop("Wrong values for 'comp' parameter.", call. = FALSE)
    }
 
    plot_data <- mda.subset(obj$loadings, select = comp)
@@ -1675,6 +1674,7 @@ plotLoadings.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1,
    attr(plot_data, "yaxis.name") <- "Loading"
    mdaplotg(plot_data, show.legend = show.legend, type = type, show.lines = show.lines, ...)
 }
+
 
 #' PCA biplot
 #'
@@ -1698,7 +1698,7 @@ plotLoadings.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1,
 #' @param show.labels
 #' logical, show or not labels for the plot objects
 #' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
+#' logical, show or not axes lines crossing origin (0,0)
 #' @param show.excluded
 #' logical, show or hide rows marked as excluded (attribute `exclrows`)
 #' @param lab.col
@@ -1711,7 +1711,7 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
    show.excluded = FALSE, lab.col = adjustcolor(col, alpha.f = 0.5), ...) {
 
    if (length(comp) != 2) {
-      stop("Biplot can be made only for two principal components!")
+      stop("Biplot can be made only for two principal components!", call. = FALSE)
    }
 
    show.lines <- if (show.axes) c(0, 0) else FALSE
@@ -1737,6 +1737,7 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
    segments(0, 0, loadings[, 1], loadings[, 2], col = col[2], lty = lty, lwd = lwd)
 }
 
+
 #' Degrees of freedom plot for score distance (Nh)
 #'
 #' @description
@@ -1757,13 +1758,13 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
 #' @details
-#' Work only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
+#' Works only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
 plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ylab = "Nh", ...) {
 
    if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
-      stop("This plot can not be made for selected 'lim.type' method.")
+      stop("This plot can not be made for selected 'lim.type' method.", call. = FALSE)
    }
 
    plot_data <- mda.subset(obj$T2lim, subset = 4)
@@ -1772,10 +1773,11 @@ plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$n
    mdaplot(plot_data, xticks = xticks, labels = labels, type = type, ylab = ylab, ...)
 }
 
-#' Degrees of freedom plot for orthogonal distance (Nh)
+
+#' Degrees of freedom plot for orthogonal distance (Nq)
 #'
 #' @description
-#' Shows a plot with degrees of freedom computed for score distances at given number
+#' Shows a plot with degrees of freedom computed for orthogonal distances at given number
 #' of components using data driven approach ("ddmoments" or "ddrobust").
 #'
 #' @param obj
@@ -1792,13 +1794,13 @@ plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$n
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
 #' @details
-#' Work only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
+#' Works only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
 plotQDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ylab = "Nq", ...) {
 
    if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
-      stop("This plot can not be made for selected 'lim.type' method.")
+      stop("This plot can not be made for selected 'lim.type' method.", call. = FALSE)
    }
 
    plot_data <- mda.subset(obj$Qlim, subset = 4)
@@ -1806,6 +1808,7 @@ plotQDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$nc
    attr(plot_data, "xaxis.name") <- attr(obj$loadings, "xaxis.name")
    mdaplot(plot_data, type = type, labels = labels, xticks = xticks, ylab = ylab, ...)
 }
+
 
 #' Degrees of freedom plot for both distances
 #'
@@ -1825,13 +1828,13 @@ plotQDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$nc
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
 #' @details
-#' Work only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
+#' Works only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
 plotDistDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...) {
 
    if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
-      stop("This plot can not be made for selected 'lim.type' method.")
+      stop("This plot can not be made for selected 'lim.type' method.", call. = FALSE)
    }
 
    plot_data <- rbind(
@@ -1844,6 +1847,7 @@ plotDistDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj
    attr(plot_data, "name") <- "Degrees of freedom"
    mdaplotyy(plot_data, type = type, labels = labels, xticks = xticks, ...)
 }
+
 
 #' Extreme plot
 #'
@@ -1888,11 +1892,11 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
    ellipse.col = "#cceeff", legend.position = "bottomright", ...) {
 
    if (min(comp) < 1 || max(comp) > obj$ncomp) {
-      stop("Wrong value for parameter 'ncomp'.")
+      stop("Wrong value for parameter 'ncomp'.", call. = FALSE)
    }
 
    if (is.null(res$T2)) {
-      stop("Wrong value for 'res' parameter.")
+      stop("Wrong value for 'res' parameter.", call. = FALSE)
    }
 
    # remove excluded values if any
@@ -1908,13 +1912,14 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
    expected <- seq_len(nobj)
 
    # show axes, grid and diagonal
-   par(mar = c(5, 4, 4, 2) + 0.1)
+   op <- par(mar = c(5, 4, 4, 2) + 0.1)
+   on.exit(par(op))
    plot(0, type = "n", xlim = c(0, nobj), ylim = c(0, nobj), main = main, xlab =  xlab, ylab = ylab)
    grid()
    lines(c(0, expected), c(0, expected), type = "l", col = ellipse.col)
 
    # compute and show the tolerance ellipse
-   i <- 1:nobj
+   i <- seq_len(nobj)
    alpha <- i / nobj
    D <- 2 * sqrt(i * (1 - alpha))
    Nm <- i - D
@@ -1947,6 +1952,7 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
       position = legend.position)
 }
 
+
 #' Model overview plot for PCA
 #'
 #' @description
@@ -1972,10 +1978,10 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
 plot.pca <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected,
    show.labels = FALSE, show.legend = TRUE, ...) {
 
-   par(mfrow = c(2, 2))
+   op <- par(mfrow = c(2, 2))
+   on.exit(par(op))
    plotScores(x, comp = comp, show.labels = show.labels, show.legend = show.legend)
    plotLoadings(x, comp = comp, show.labels = show.labels, show.legend = show.legend)
    plotResiduals(x, ncomp = ncomp,  show.labels = show.labels, show.legend = show.legend)
    plotCumVariance(x, show.legend = show.legend)
-   par(mfrow = c(1, 1))
 }

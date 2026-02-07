@@ -81,7 +81,7 @@ constraints.list <- function() {
 #' @param d
 #' matrix with the original spectral values
 #' @param sum
-#' which value the specra or contributions should sum up to
+#' which value the spectra or contributions should sum up to
 #'
 #' @export
 constraintClosure <- function(x, d, sum = 1) {
@@ -106,7 +106,7 @@ constraintClosure <- function(x, d, sum = 1) {
 #' @param d
 #' matrix with the original spectral values
 #' @param tol
-#' tolerance (value between 0 and 1) to take make method stable to small fluctuations
+#' tolerance (value between 0 and 1) to make the method stable to small fluctuations
 #'
 #' @export
 constraintUnimod <- function(x, d, tol = 0) {
@@ -178,8 +178,7 @@ constraintNonNegativity <- function(x, d) {
 #'
 #' @export
 constraintNorm <- function(x, d, type = "length") {
-   types <- c("area", "length", "sum")
-   stopifnot("Parameter 'type' should be either 'area', 'length' or 'sum'." = type %in% types )
+   type <- match.arg(type, c("area", "length", "sum"))
    return(t(prep.norm(t(x), type)))
 }
 
@@ -221,13 +220,13 @@ constraintAngle <- function(x, d, weight = 0.05) {
 #' method to call when applying the constraint, provide it only for user defined constraints
 #'
 #' @details
-#' Use this class to create constraints and add them to a list for MCR-ALS curve resuliton (see
+#' Use this class to create constraints and add them to a list for MCR-ALS curve resolution (see
 #' \code{\link{mcrals}}). Either provide name and parameters to one of the existing constraint
 #' implementations or make your own. See the list of implemented constraints by running
 #' \code{constraints()}
 #'
 #' For your own constraint you need to create a method, which takes matrix with values (either
-#' spectra or contributions being resolved) as the first argument, does something and then return
+#' spectra or contributions being resolved) as the first argument, does something and then returns
 #' a matrix with the same dimension as the result. The method can have any number of optional
 #' parameters.
 #'
@@ -246,7 +245,7 @@ constraint <- function(name, params = NULL, method = NULL) {
       # 2. check the parameters
       if (is.null(params)) params <- item$params
       if (length(params) > 0 && !(names(params) %in% names(item$params))) {
-         stop("Provided constraint parameters have wrong name.")
+         stop("Provided constraint parameters have wrong name.", call. = FALSE)
       }
 
       method <- item$method
@@ -254,8 +253,8 @@ constraint <- function(name, params = NULL, method = NULL) {
       # user defined constraint, check that it works
       res <- tryCatch(
          do.call(method, c(matrix(runif(25, 5, 10)), params)),
-         error = function(m) stop("The method you provided raises an error: \n", m),
-         warning = function(m) stop("The method you provided raises a warning: \n", m)
+         error = function(m) stop("The method you provided raises an error: \n", m, call. = FALSE),
+         warning = function(m) stop("The method you provided raises a warning: \n", m, call. = FALSE)
       )
 
       stopifnot("The method you provided does not return matrix with correct dimension." =

@@ -65,7 +65,7 @@ crossval.getParams <- function(cv, nobj) {
 #' @param cv
 #' cross-validation settings, can be a number or a list. If cv is a number, it will be
 #' used as a number of segments for random cross-validation (if cv = 1, full cross-validation
-#' will be preformed), if it is a list, the following syntax can be used:
+#' will be performed), if it is a list, the following syntax can be used:
 #' cv = list('rand', nseg, nrep) for random repeated cross-validation with nseg segments and nrep
 #' repetitions or cv = list('ven', nseg) for systematic splits to nseg segments ('venetian blinds').
 #' @param resp
@@ -85,17 +85,17 @@ crossval <- function(cv = 1, nobj = NULL, resp = NULL) {
 
    p <- crossval.getParams(cv = cv, nobj = nobj)
    if (!(p$type %in% c("rand", "ven", "loo"))) {
-      stop("Wrong name for cross-validation method.")
+      stop("Wrong name for cross-validation method.", call. = FALSE)
    }
 
    # check number of repetitions
    if (p$nrep < 1 || p$nrep > 100) {
-      stop("Wrong value for cv repetitions (should be between 1 and 100).")
+      stop("Wrong value for cv repetitions (should be between 1 and 100).", call. = FALSE)
    }
 
    # check number of segments
    if (p$nseg < 2 || p$nseg > nobj) {
-      stop("Wrong value for number of segments (should be between 2 and number of objects).")
+      stop("Wrong value for number of segments (should be between 2 and number of objects).", call. = FALSE)
    }
 
    if (p$type == "loo") {
@@ -103,7 +103,7 @@ crossval <- function(cv = 1, nobj = NULL, resp = NULL) {
    }
 
    if (p$type == "rand") {
-      return(sapply(seq_len(p$nrep), function(i) rep(seq_len(p$nseg), length.out = nobj)[sample(nobj)]))
+      return(vapply(seq_len(p$nrep), function(i) rep(seq_len(p$nseg), length.out = nobj)[sample(nobj)], integer(nobj)))
    }
 
    if (p$type == "ven") {
@@ -112,7 +112,7 @@ crossval <- function(cv = 1, nobj = NULL, resp = NULL) {
       return(matrix(rep(seq_len(p$nseg), length.out = nobj)[ind], ncol = 1))
    }
 
-   stop("Something went wrong.")
+   stop("Something went wrong.", call. = FALSE)
 }
 
 #' String with description of cross-validation method

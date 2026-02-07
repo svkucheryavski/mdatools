@@ -1,7 +1,7 @@
 #' Partial Least Squares regression
 #'
 #' @description
-#' \code{pls} is used to calibrate, validate and use of partial least squares (PLS)
+#' \code{pls} is used to calibrate, validate and apply partial least squares (PLS)
 #' regression model.
 #'
 #' @param x
@@ -29,7 +29,7 @@
 #' @param lim.type
 #' which method to use for calculation of critical limits for residual distances (see details)
 #' @param alpha
-#' significance level for extreme limits for T2 and Q disances.
+#' significance level for extreme limits for T2 and Q distances.
 #' @param gamma
 #' significance level for outlier limits for T2 and Q distances.
 #' @param info
@@ -43,7 +43,7 @@
 #'
 #' @return
 #' Returns an object of \code{pls} class with following fields:
-#' \item{ncomp }{number of components included to the model.}
+#' \item{ncomp }{number of components included in the model.}
 #' \item{ncomp.selected }{selected (optimal) number of components.}
 #' \item{xcenter }{vector with values used to center the predictors (x).}
 #' \item{ycenter }{vector with values used to center the responses (y).}
@@ -56,8 +56,8 @@
 #' \item{weights }{matrix with PLS weights.}
 #' \item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated
 #' for each component.}
-#' \item{info }{information about the model, provided by user when build the model.}
-#' \item{cv }{information cross-validation method used (if any).}
+#' \item{info }{information about the model, provided by user when building the model.}
+#' \item{cv }{information about cross-validation method used (if any).}
 #' \item{res }{a list with result objects (e.g. calibration, cv, etc.)}
 #'
 #' @details
@@ -68,18 +68,18 @@
 #' number of objects - 1, number of x variables and the default or provided value. Regression
 #' coefficients, predictions and other results are calculated for each set of components from 1
 #' to \code{ncomp}: 1, 1:2, 1:3, etc. The optimal number of components, (\code{ncomp.selected}),
-#' is found using first local minumum, but can be also forced to user defined value using function
+#' is found using first local minimum, but can be also forced to user defined value using function
 #' (\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all
 #' default operations - predictions, plots, etc.
 #'
 #' Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
 #' will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
-#' cross-validation will be preformed). If it is a list, the following syntax can be used:
+#' cross-validation will be performed). If it is a list, the following syntax can be used:
 #' \code{cv = list("rand", nseg, nrep)} for random repeated cross-validation with \code{nseg}
 #' segments and \code{nrep} repetitions or \code{cv = list("ven", nseg)} for systematic splits
 #' to \code{nseg} segments ('venetian blinds').
 #'
-#' Calculation of confidence intervals and p-values for regression coefficients can by done
+#' Calculation of confidence intervals and p-values for regression coefficients can be done
 #' based on Jack-Knifing resampling. This is done automatically if cross-validation is used.
 #' However it is recommended to use at least 10 segments for stable JK result. See help for
 #' \code{\link{regcoeffs}} objects for more details.
@@ -113,7 +113,7 @@
 #'  \code{\link{plotXYLoadings.pls}} \tab shows loadings plot for x and y decomposition.\cr
 #'  \code{\link{plotXVariance.pls}} \tab shows explained variance plot for x decomposition.\cr
 #'  \code{\link{plotYVariance.pls}} \tab shows explained variance plot for y decomposition.\cr
-#'  \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for y
+#'  \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for x
 #'  decomposition.\cr
 #'  \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y
 #'  decomposition.\cr
@@ -329,7 +329,7 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
 #'
 #' @details
 #'
-#' The method sets \code{ncomp.selected} parameter for the model and return it back. The parameter
+#' The method sets \code{ncomp.selected} parameter for the model and returns it back. The parameter
 #' points out to the optimal number of components in the model. You can either specify it manually,
 #' as argument \code{ncomp}, or use one of the algorithms for automatic selection.
 #'
@@ -338,12 +338,12 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
 #' not available as well, the model will use calibration results and give a warning as in this case
 #' the selected number of components will lead to overfitted model.
 #'
-#' There are two algorithms for automatic selection you can chose between: either first local
+#' There are two algorithms for automatic selection you can choose between: either first local
 #' minimum of RMSE (`selcrit="min"`) or Wold's rule (`selcrit="wold"`).
 #'
 #' The first local minimum criterion finds at which component, A, error of prediction starts
-#' raising and selects (A - 1) as the optimal number. The Wold's criterion finds which component A
-#' does not make error smaller at least by 5% comparing to the previous value and selects (A - 1)
+#' rising and selects (A - 1) as the optimal number. The Wold's criterion finds which component A
+#' does not make error smaller at least by 5% compared to the previous value and selects (A - 1)
 #' as the optimal number.
 #'
 #' If model is PLS2 model (has several response variables) the method computes optimal number of
@@ -412,12 +412,12 @@ selectCompNum.pls <- function(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ..
 
    # if NULL - somthing went wrong
    if (is.null(ncomp)) {
-      stop("Can not estimate correct number of PLS components.")
+      stop("Can not estimate correct number of PLS components.", call. = FALSE)
    }
 
    # if not, check that value is meaningful
    if (ncomp > obj$ncomp || ncomp < 0) {
-      stop("Wrong number of selected components.")
+      stop("Wrong number of selected components.", call. = FALSE)
    }
 
    # correct number of model and calibration results
@@ -444,8 +444,8 @@ selectCompNum.pls <- function(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ..
 #' Compute and set statistical limits for residual distances.
 #'
 #' @description
-#' Computes statisticsl limits for orthogonal and score distances (x-decomposition) and
-#' orthogonal distance (y-decomposition) based on calibration set and assign the calculated
+#' Computes statistical limits for orthogonal and score distances (x-decomposition) and
+#' orthogonal distance (y-decomposition) based on calibration set and assigns the calculated
 #' values as model properties.
 #'
 #' @param obj
@@ -468,7 +468,7 @@ selectCompNum.pls <- function(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ..
 #' \code{lim.type = "ddrobust"}) and last row contains the degrees of freedom.
 #'
 #' @return
-#' Object models with the three fields updated.
+#' Model object with the three fields updated.
 #'
 #' @export
 setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alpha,
@@ -568,7 +568,7 @@ pls.getpredictions <- function(x, coeffs, ycenter, yscale, ynames = NULL, y.attr
 #' @param y.attrs
 #' list with response attributes (e.g. from reference values if any)
 #' @param x.attrs
-#' list with preditors attributes
+#' list with predictors attributes
 #' @param objnames
 #' vector with names of objects (rows of x)
 #' @param compnames
@@ -622,7 +622,7 @@ pls.getydecomp <- function(y, yscores, xscores, yloadings, yeigenvals, ynames = 
 #' @param xnames
 #' vector with names of the predictors
 #' @param x.attrs
-#' list with preditors attributes
+#' list with predictors attributes
 #' @param objnames
 #' vector with names of objects (rows of x)
 #' @param compnames
@@ -694,9 +694,11 @@ pls.getyscores <- function(y, yloadings, xscores, exclrows) {
    }
 
    # orthogonalize
-   for (a in 2:ncomp) {
-      yscores[, a] <- yscores[, a] - xscores[, 1:(a - 1), drop = FALSE] %*%
-         crossprod(xscoresno[, 1:(a - 1), drop = FALSE], yscoresno[, a])
+   if (ncomp >= 2) {
+      for (a in 2:ncomp) {
+         yscores[, a] <- yscores[, a] - xscores[, 1:(a - 1), drop = FALSE] %*%
+            crossprod(xscoresno[, 1:(a - 1), drop = FALSE], yscoresno[, a])
+      }
    }
 
    return(yscores)
@@ -750,7 +752,7 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 
    # check dimensions of predictors
    if (ncol(x) != dim(object$coeffs$values)[1]) {
-      stop("Wrong number of columns in matrix with predictors (x).")
+      stop("Wrong number of columns in matrix with predictors (x).", call. = FALSE)
    }
 
    # autoscale x
@@ -786,11 +788,11 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
       if (is.null(dim(y))) dim(y) <- c(length(y), 1)
 
       if (nrow(x) != nrow(y)) {
-         stop("Matrices with predictors (x) and response (y) should have the same number of rows.")
+         stop("Matrices with predictors (x) and response (y) should have the same number of rows.", call. = FALSE)
       }
 
       if (ncol(y) != nresp) {
-         stop("Wrong number of columns in matrix with response values (y).")
+         stop("Wrong number of columns in matrix with response values (y).", call. = FALSE)
       }
 
       y.attrs <- mda.getattr(y)
@@ -828,9 +830,9 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 #' corresponding objects as "regular", "extreme" or "outlier".
 #'
 #' @param obj
-#' object with PCA model
+#' object with PLS model
 #' @param res
-#' object with PCA results
+#' object with PLS results
 #' @param ncomp
 #' number of components to use for the categorization
 #' @param ...
@@ -850,16 +852,10 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 #' @export
 categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, ...) {
 
-   create_categories <- function(extremes_ind, outliers_ind) {
-      categories <- rep(1, length(extremes_ind))
-      categories[extremes_ind] <- 2
-      categories[outliers_ind] <- 3
-      return(factor(categories, levels = 1:3, labels = c("regular", "extreme", "outlier")))
-   }
 
    # if not data driven - quit
    if (!(obj$lim.type %in% c("ddmoments", "ddrobust"))) {
-      stop("categorize.pls() works only with data driven limit types ('ddoments' or 'ddrobust').")
+      stop("categorize.pls() works only with data driven limit types ('ddmoments' or 'ddrobust').", call. = FALSE)
    }
 
    # get distance values for selected number of components
@@ -908,7 +904,7 @@ categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
    outliers_ind <- g > out_lim
    extremes_ind <- g > ext_lim & g < out_lim
 
-   return(create_categories(extremes_ind, outliers_ind))
+   return(create_categories(length(extremes_ind), extremes_ind, outliers_ind))
 }
 
 #' Summary method for PLS model object
@@ -919,7 +915,7 @@ categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
 #' @param object
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
-#' how many components to count.
+#' how many components to show.
 #' @param ny
 #' which y variables to show the summary for (can be a vector)
 #' @param ...
@@ -929,8 +925,8 @@ categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
 summary.pls <- function(object, ncomp = object$ncomp.selected,
    ny = seq_len(nrow(object$yloadings)), ...) {
 
-   if (length(ncomp) != 1 || ncomp < 0 || ncomp > object$ncomp) {
-      stop("Wrong value for the 'ncomp' parameter.")
+   if (length(ncomp) != 1 || ncomp < 1 || ncomp > object$ncomp) {
+      stop("Wrong value for the 'ncomp' parameter.", call. = FALSE)
    }
 
    cat("\nPLS model (class pls) summary\n")
@@ -977,9 +973,9 @@ print.pls <- function(x, ...) {
    cat("$ncomp - number of calculated components\n")
    cat("$ncomp.selected - number of selected components\n")
    cat("$coeffs - object (regcoeffs) with regression coefficients\n")
-   cat("$xloadings - vector with x loadings\n")
-   cat("$yloadings - vector with y loadings\n")
-   cat("$weights - vector with weights\n")
+   cat("$xloadings - matrix with x loadings\n")
+   cat("$yloadings - matrix with y loadings\n")
+   cat("$weights - matrix with weights\n")
    cat("$res - list with results (calibration, cv, etc)\n")
 
    cat("\nTry summary(model) and plot(model) to see the model performance.\n")
@@ -1095,7 +1091,7 @@ plotYCumVariance.pls <- function(obj, type = "b", main = "Cumulative variance (Y
 #' @param labels
 #' what to show as labels for plot objects.
 #' @param res
-#' list with result objects to show the plot for (by defaul, model results are used)
+#' list with result objects to show the plot for (by default, model results are used)
 #' @param ylab
 #' label for y-axis
 #' @param ...
@@ -1122,11 +1118,11 @@ plotVariance.pls <- function(obj, decomp = "xdecomp", variance = "expvar", type 
 #' @param comp
 #' which components to show the plot for (one or vector with several values)
 #' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
+#' logical, show or not axes lines crossing origin (0,0)
 #' @param main
 #' main plot title
 #' @param res
-#' list with result objects to show the plot for (by defaul, model results are used)
+#' list with result objects to show the plot for (by default, model results are used)
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1138,7 +1134,7 @@ plotXScores.pls <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, show.
    res = obj$res, ...) {
 
    if (min(comp) < 1 || max(comp) > ncol(obj$weights)) {
-      stop("Wrong values for 'comp' parameter.")
+      stop("Wrong values for 'comp' parameter.", call. = FALSE)
    }
 
    # set up values for showing axes lines
@@ -1161,9 +1157,9 @@ plotXScores.pls <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, show.
 #' @param ncomp
 #' which component to show the plot for
 #' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
+#' logical, show or not axes lines crossing origin (0,0)
 #' @param res
-#' list with result objects to show the plot for (by defaul, model results are used)
+#' list with result objects to show the plot for (by default, model results are used)
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1188,7 +1184,7 @@ plotXYScores.pls <- function(obj, ncomp = 1, show.axes = TRUE,  res = obj$res, .
 #' @param ncomp
 #' how many components to use (by default optimal value selected for the model will be used)
 #' @param log
-#' logical, apply log tranformation to the distances or not (see details)
+#' logical, apply log transformation to the distances or not (see details)
 #' @param norm
 #' logical, normalize distance values or not (see details)
 #' @param cgroup
@@ -1212,7 +1208,7 @@ plotXYScores.pls <- function(obj, ncomp = 1, show.axes = TRUE,  res = obj$res, .
 #' @param legend.position
 #' position of legend (if shown)
 #' @param res
-#' list with result objects to show the plot for (by defaul, model results are used)
+#' list with result objects to show the plot for (by default, model results are used)
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1226,8 +1222,8 @@ plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log
    lim.lty = c(2, 3), show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
 
    # get xdecomp from list with result objects
-   res <- lapply(res, function(x) if ("ldecomp" %in% class(x$xdecomp)) x$xdecomp)
-   res <- res[!sapply(res, is.null)]
+   res <- lapply(res, function(x) if (inherits(x$xdecomp, "ldecomp")) x$xdecomp)
+   res <- res[!vapply(res, is.null, logical(1))]
 
    ldecomp.plotResiduals(res, obj$Qlim, obj$T2lim, ncomp = ncomp, log = log, norm = norm,
       cgroup = cgroup, xlim = xlim, ylim = ylim, show.limits = show.limits, lim.col = lim.col,
@@ -1244,7 +1240,7 @@ plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log
 #' @param ncomp
 #' how many components to use (by default optimal value selected for the model will be used)
 #' @param log
-#' logical, apply log tranformation to the distances or not (see details)
+#' logical, apply log transformation to the distances or not (see details)
 #' @param norm
 #' logical, normalize distance values or not (see details)
 #' @param cgroup
@@ -1268,7 +1264,7 @@ plotXResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, log
 #' @param legend.position
 #' position of legend (if shown)
 #' @param res
-#' list with result objects to show the plot for (by defaul, model results are used)
+#' list with result objects to show the plot for (by default, model results are used)
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1291,7 +1287,7 @@ plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, lo
    lim.lty = c(2, 3), show.legend = TRUE, legend.position = "topright", res = obj$res, ...) {
 
    if (!(obj$lim.type %in% c("ddmoments", "ddrobust"))) {
-      stop("plotXYResiduals() works only with data driven limit types ('ddoments' or 'ddrobust')")
+      stop("plotXYResiduals() works only with data driven limit types ('ddmoments' or 'ddrobust')", call. = FALSE)
    }
 
    # generate values for cgroup if categories should be used
@@ -1300,19 +1296,19 @@ plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, lo
    }
 
    # get xdecomp from list with result objects
-   res <- lapply(res, function(x) if ("ldecomp" %in% class(x$xdecomp)) x)
-   res <- res[!sapply(res, is.null)]
+   res <- lapply(res, function(x) if (inherits(x$xdecomp, "ldecomp")) x)
+   res <- res[!vapply(res, is.null, logical(1))]
 
    # function to compute plot limits
    getPlotLim <- function(lim, pd, ld, dim, show.limits) {
       if (!is.null(lim) || all(!show.limits)) return(lim)
       limits <- if (show.limits[[2]]) ld$outliers else ld$extremes
-      return(c(0, max(sapply(pd, function(x) max(x[, dim])), limits[, dim])) * 1.05)
+      return(c(0, max(vapply(pd, function(x) max(x[, dim]), numeric(1)), limits[, dim])) * 1.05)
    }
 
    # check that show.limits is logical
    if (!all(is.logical(show.limits))) {
-      stop("Parameter 'show.limits' must have logical value(s).")
+      stop("Parameter 'show.limits' must have logical value(s).", call. = FALSE)
    }
 
    # if show.limits has only one value - duplicate it
@@ -1363,7 +1359,7 @@ plotXYResiduals.pls <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, lo
 #' @param type
 #' type of the plot
 #' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
+#' logical, show or not axes lines crossing origin (0,0)
 #' @param show.legend
 #' logical, show or not legend on the plot (when it is available)
 #' @param ...
@@ -1377,7 +1373,7 @@ plotXLoadings.pls <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, typ
    show.legend = TRUE, ...) {
 
    if (min(comp) < 1 || max(comp) > ncol(obj$weights)) {
-      stop("Wrong values for 'comp' parameter.")
+      stop("Wrong values for 'comp' parameter.", call. = FALSE)
    }
 
    plot_data <- mda.subset(obj$xloadings, select = comp)
@@ -1399,10 +1395,10 @@ plotXLoadings.pls <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, typ
    mdaplotg(plot_data, show.legend = show.legend, type = type, show.lines = show.lines, ...)
 }
 
-#' X loadings plot for PLS
+#' Weights plot for PLS
 #'
 #' @description
-#' Shows plot with X loading values for selected components.
+#' Shows plot with weight values for selected components.
 #'
 #' @param obj
 #' a PLS model (object of class \code{pls})
@@ -1411,7 +1407,7 @@ plotXLoadings.pls <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, typ
 #' @param type
 #' type of the plot
 #' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
+#' logical, show or not axes lines crossing origin (0,0)
 #' @param show.legend
 #' logical, show or not a legend
 #' @param ...
@@ -1453,7 +1449,7 @@ plotWeights.pls <- function(obj, comp = 1, type = (if (nrow(obj$weights) < 20) "
 #' @param comp
 #' which components to show the plot for (one or vector with several values)
 #' @param show.axes
-#' logical, show or not a axes lines crossing origin (0,0)
+#' logical, show or not axes lines crossing origin (0,0)
 #' @param ...
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
@@ -1464,7 +1460,7 @@ plotWeights.pls <- function(obj, comp = 1, type = (if (nrow(obj$weights) < 20) "
 plotXYLoadings.pls <- function(obj, comp = c(1, 2), show.axes = TRUE, ...) {
 
    if (length(comp) != 2) {
-      stop("This plot can be made for only two components.")
+      stop("This plot can be made for only two components.", call. = FALSE)
    }
 
    plot_data <- list(
@@ -1490,7 +1486,7 @@ plotXYLoadings.pls <- function(obj, comp = c(1, 2), show.axes = TRUE, ...) {
 #' @param ny
 #' which response to plot the values for (if y is multivariate), can be a vector.
 #' @param ncomp
-#' number of components to count
+#' number of components to show
 #' @param type
 #' type of the plot
 #' @param ...
@@ -1518,14 +1514,14 @@ plotVIPScores.pls <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
 #' @param ny
 #' which response to plot the values for (if y is multivariate), can be a vector.
 #' @param ncomp
-#' number of components to count
+#' number of components to show
 #' @param type
 #' type of the plot
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
 #' @details
-#' See \code{\link{vipscores}} for more details.
+#' See \code{\link{selratio}} for more details.
 #'
 #' @export
 plotSelectivityRatio.pls <- function(obj, ny = 1,
@@ -1558,15 +1554,15 @@ plotSelectivityRatio.pls <- function(obj, ny = 1,
 plot.pls <- function(x, ncomp = x$ncomp.selected, ny = 1, show.legend = TRUE, ...) {
 
    if (!is.null(ncomp) && (ncomp <= 0 || ncomp > x$ncomp)) {
-      stop("Wrong value for number of components.")
+      stop("Wrong value for number of components.", call. = FALSE)
    }
 
-   par(mfrow = c(2, 2))
+   op <- par(mfrow = c(2, 2))
+   on.exit(par(op))
    plotXResiduals(x, ncomp = ncomp, show.legend = show.legend)
    plotRegcoeffs(x, ncomp = ncomp, ny = ny)
    plotRMSE(x, ny = ny, show.legend = show.legend)
    plotPredictions(x, ncomp = ncomp, ny = ny, show.legend = show.legend)
-   par(mfrow = c(1, 1))
 }
 
 
@@ -1592,13 +1588,13 @@ plot.pls <- function(x, ncomp = x$ncomp.selected, ny = 1, show.legend = TRUE, ..
 pls.run <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x)), method = "simpls", cv = FALSE) {
 
    if (ncomp < 1 || ncomp > min(nrow(x) - 1, ncol(x))) {
-      stop("Wrong value for 'ncomp' parameter.")
+      stop("Wrong value for 'ncomp' parameter.", call. = FALSE)
    }
 
    methods <- list("simpls" = pls.simpls)
 
    if (!(method %in% names(methods))) {
-      stop("Method with this name is not supported.")
+      stop("Method with this name is not supported.", call. = FALSE)
    }
 
    return(methods[[method]](x, y, ncomp, cv = cv))
@@ -1823,7 +1819,7 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
 
    # check dimensions
    if (nrow(x) != nrow(y)) {
-      stop("Number of rows for predictors and responses should be the same.")
+      stop("Number of rows for predictors and responses should be the same.", call. = FALSE)
    }
 
    # convert data to a matrix
@@ -1836,11 +1832,11 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
 
    # check if data has missing values
    if (any(is.na(x))) {
-      stop("Predictors have missing values, try to fix this using pca.mvreplace.")
+      stop("Predictors have missing values, try to fix this using pca.mvreplace.", call. = FALSE)
    }
 
    if (any(is.na(y))) {
-      stop("Responses have missing values, try to fix this using pca.mvreplace.")
+      stop("Responses have missing values, try to fix this using pca.mvreplace.", call. = FALSE)
    }
 
    # set column names for predictors if missing
@@ -2001,13 +1997,13 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
 #' @param obj
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
-#' number of components to count
+#' number of components to show
 #'
 #' @return
 #' matrix \code{nvar x ny} with VIP score values (columns correspond to responses).
 #'
 #' @details
-#' May take some time in case of large number of predictors Returns results as a column-vector,
+#' May take some time in case of large number of predictors. Returns results as a column-vector,
 #' with all necessary attributes inherited (e.g. xaxis.values, excluded variables, etc.). If you
 #' want to make a plot use for example: \code{mdaplot(mda.t(v), type = "l")}, where \code{v} is
 #' a vector with computed VIP scores. Or just try \code{\link{plotVIPScores.pls}}.
@@ -2019,7 +2015,7 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
 vipscores <- function(obj, ncomp = obj$ncomp.selected) {
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
-      stop("Wrong value for the 'ncomp' parameter.")
+      stop("Wrong value for the 'ncomp' parameter.", call. = FALSE)
    }
 
    # subset needed model parameters
@@ -2074,7 +2070,7 @@ vipscores <- function(obj, ncomp = obj$ncomp.selected) {
 #' @param obj
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
-#' number of components to count
+#' number of components to show
 #' @param ...
 #' other parameters
 #'
@@ -2084,7 +2080,7 @@ vipscores <- function(obj, ncomp = obj$ncomp.selected) {
 #' @export
 getVIPScores.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
 
-   warning("This function is deprecated and will be removed in future. Use 'vipscores()' insted.")
+   warning("This function is deprecated and will be removed in future. Use 'vipscores()' instead.")
    return(vipscores(obj, ncomp = ncomp))
 }
 
@@ -2097,7 +2093,7 @@ getVIPScores.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
 #' @param obj
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
-#' number of components to count
+#' number of components to show
 #'
 #' @references
 #' [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
@@ -2109,7 +2105,7 @@ getVIPScores.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
 selratio <- function(obj, ncomp = obj$ncomp.selected) {
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
-      stop("Wrong value for the 'ncomp' parameter.")
+      stop("Wrong value for the 'ncomp' parameter.", call. = FALSE)
    }
 
    # get number and indices of variables and adjust dimension for regcoeffs
@@ -2190,7 +2186,7 @@ selratio <- function(obj, ncomp = obj$ncomp.selected) {
 #'
 #' @export
 getSelectivityRatio.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
-   warning("This function is deprecated and will be removed in future. Use 'selratio()' insted.")
+   warning("This function is deprecated and will be removed in future. Use 'selratio()' instead.")
    return(selratio(obj, ncomp = ncomp))
 }
 

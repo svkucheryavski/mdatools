@@ -79,7 +79,7 @@ prep.spikes <- function(data, width = 5, threshold = 6) {
 #' @param type
 #' type of normalization \code{"area"}, \code{"length"}, \code{"sum"}, \code{"snv"}, \code{"is"}, or \code{"pqn"}.
 #' @param col.ind
-#' indices of columns (can be either integer or logical valuws) for normalization to internal
+#' indices of columns (can be either integer or logical values) for normalization to internal
 #' standard peak.
 #' @param ref.spectrum
 #' reference spectrum for PQN normalization, if not provided a mean spectrum for data is used
@@ -90,7 +90,7 @@ prep.spikes <- function(data, width = 5, threshold = 6) {
 #' does the Standard Normal Variate normalization, similar to \code{\link{prep.snv}}. Type
 #' \code{"is"} does the normalization to internal standard peak, whose position is defined by
 #' parameter `col.ind`. If the position is a single value, the rows are normalized to the height
-#' of this peak. If `col.ind` points on several adjucent vales, the rows are normalized to the area
+#' of this peak. If `col.ind` points to several adjacent values, the rows are normalized to the area
 #' under the peak - sum of the intensities.
 #'
 #' The \code{"pqn"} is Probabilistic Quotient Normalization as described in [1]. In this case you also
@@ -109,10 +109,11 @@ prep.spikes <- function(data, width = 5, threshold = 6) {
 #' @export
 prep.norm <- function(data, type = "area", col.ind = NULL, ref.spectrum = NULL) {
 
+   type <- match.arg(type, c("area", "length", "sum", "snv", "is", "pqn"))
    if (type == "snv") return(prep.snv(data))
 
    if (type == "is" && is.null(col.ind)) {
-      stop("For 'is' normalization you need to provide indices for IS peak.")
+      stop("For 'is' normalization you need to provide indices for IS peak.", call. = FALSE)
    }
 
    if (is.logical(col.ind)) {
@@ -120,17 +121,17 @@ prep.norm <- function(data, type = "area", col.ind = NULL, ref.spectrum = NULL) 
    }
 
    if (!is.null(col.ind) && (min(col.ind) < 1 || max(col.ind) > ncol(data))) {
-      stop("Values for 'col.ind' seem to be wrong.")
+      stop("Values for 'col.ind' seem to be wrong.", call. = FALSE)
    }
 
    if (type == "pqn" && is.null(ref.spectrum)) {
-      ref.spectrum <- apply(data, 2, mean)
+      ref.spectrum <- colMeans(data)
    }
 
    pqn <- function(data, ref.spectrum) {
 
       if (length(ref.spectrum) != ncol(data)) {
-         stop("prep.norm: 'ref.spectrum' should have the same number of values as the number of columns in 'data'.")
+         stop("prep.norm: 'ref.spectrum' should have the same number of values as the number of columns in 'data'.", call. = FALSE)
       }
 
       # 1. unit area normalization
@@ -150,14 +151,14 @@ prep.norm <- function(data, type = "area", col.ind = NULL, ref.spectrum = NULL) 
 
       w <- switch(
          type,
-         "area" = apply(abs(data), 1, sum),
-         "length" = sqrt(apply(data^2, 1, sum)),
-         "sum" = apply(data, 1, sum),
-         "is" = apply(data[, col.ind, drop = FALSE], 1, sum),
+         "area" = rowSums(abs(data)),
+         "length" = sqrt(rowSums(data^2)),
+         "sum" = rowSums(data),
+         "is" = rowSums(data[, col.ind, drop = FALSE]),
          "pqn" = pqn(data, ref.spectrum)
       )
 
-      if (is.null(w)) stop("Wrong value for argument 'type'.")
+      if (is.null(w)) stop("Wrong value for argument 'type'.", call. = FALSE)
       return(sweep(data, 1, w, "/"))
    }
 
@@ -165,10 +166,10 @@ prep.norm <- function(data, type = "area", col.ind = NULL, ref.spectrum = NULL) 
 }
 
 
-#' Savytzky-Golay filter
+#' Savitzky-Golay filter
 #'
 #' @description
-#' Applies Savytzky-Golay filter to the rows of data matrix
+#' Applies Savitzky-Golay filter to the rows of data matrix
 #'
 #' @param data
 #' a matrix with data values
@@ -196,7 +197,7 @@ prep.savgol <- function(data, width = 3, porder = 1, dorder = 0, w = NULL) {
    stopifnot("Filter width ('width') should be an odd integer number." = width %% 2 == 1)
    stopifnot("Wrong value for the derivative order (should be 0, 1, or 2)." = dorder %in% (0:2))
    stopifnot("Wrong value for the polynomial degree (should be integer number between 0 and 4)." = porder %in% (0:4))
-   stopifnot("Polynomal degree ('porder') should not be smaller the derivative order ('dorder')." = porder >= dorder)
+   stopifnot("Polynomial degree ('porder') should not be smaller than the derivative order ('dorder')." = porder >= dorder)
 
    f <- function(x) {
       if (is.null(w)) {
@@ -249,14 +250,14 @@ prep.ref2km <- function(data) {
 }
 
 
-#' Baseline correction using asymetric least squares
+#' Baseline correction using asymmetric least squares
 #'
 #' @param data
 #' matrix with spectra (rows correspond to individual spectra)
 #' @param plambda
 #' power of the penalty parameter (e.g. if plambda = 5, lambda = 10^5)
 #' @param p
-#' assymetry ratio (should be between 0 and 1)
+#' asymmetry ratio (should be between 0 and 1)
 #' @param max.niter
 #' maximum number of iterations
 #'
@@ -266,7 +267,7 @@ prep.ref2km <- function(data) {
 #' @details
 #' The function implements baseline correction algorithm based on Whittaker smoother. The method
 #' was first shown in [1]. The function has two main parameters - power of a penalty parameter
-#' (usually varies betwen 2 and 9) and the ratio of assymetry (usually between 0.1 and 0.001). The
+#' (usually varies between 2 and 9) and the ratio of asymmetry (usually between 0.1 and 0.001). The
 #' choice of the parameters depends on how broad the disturbances of the baseline are and how
 #' narrow the original spectral peaks are.
 #'
@@ -302,7 +303,7 @@ prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
 
   # Build the second-difference penalty matrix D
   D <- spam(0, m - 2, m)
-  for (i in 1:(m - 2)) {
+  for (i in seq_len(m - 2)) {
     D[i, i]     <- 1
     D[i, i + 1] <- -2
     D[i, i + 2] <- 1
@@ -310,12 +311,12 @@ prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
 
   # Compute LDD = lambda * t(D) %*% D
   lambda <- 10^plambda
-  LDD <- lambda * (t(D) %*% D)
+  LDD <- lambda * crossprod(D)
 
   # Precompute initial weight vector
   w.ini <- rep(1, m)
 
-  for (i in 1:n) {
+  for (i in seq_len(n)) {
     y <- data[i, ]
     w <- w.ini
 
@@ -347,7 +348,7 @@ prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
 #' Transformation
 #'
 #' @description
-#' Transforms values from using any mathematical function (e.g. log).
+#' Transforms values using any mathematical function (e.g. log).
 #'
 #' @param data
 #' a matrix with data values
@@ -391,7 +392,7 @@ prep.transform <- function(data, fun, ...) {
 #' @param data
 #' a matrix with data values
 #' @param var.ind
-#' indices of variables (columns) to select, can bet either numeric or logical
+#' indices of variables (columns) to select, can be either numeric or logical
 #'
 #' @return
 #' data matrix with the selected variables (columns)
@@ -399,7 +400,7 @@ prep.transform <- function(data, fun, ...) {
 #' @export
 prep.varsel <- function(data, var.ind) {
    if (!is.null(attr(data, "exclcols"))) {
-      stop("prep.varsel() can not be used for dataset with excluded (hidden) columns.")
+      stop("prep.varsel() can not be used for dataset with excluded (hidden) columns.", call. = FALSE)
    }
    return(mda.subset(data, select = var.ind))
 }
@@ -410,7 +411,7 @@ prep.varsel <- function(data, var.ind) {
 #' @param data
 #' a matrix with data values.
 #' @param type
-#' type of statistic to use for centring ('mean', or 'median').
+#' type of statistic to use for centering ('mean', or 'median').
 #' @param center
 #' do not use, required for training of preprocessing model.
 #'
@@ -429,7 +430,7 @@ prep.center <- function(data, type = "mean", center = NULL) {
       }
 
       if (length(center) != ncol(data)) {
-         stop("Number of values in 'center' should be the same as number of columns in 'data'")
+         stop("Number of values in 'center' should be the same as number of columns in 'data'", call. = FALSE)
       }
 
       # make autoscaling and attach preprocessing attributes
@@ -471,7 +472,7 @@ prep.scale <- function(data, type = "sd", max.cov = 0, scale = NULL) {
       }
 
       if (length(scale) != ncol(data)) {
-         stop("Number of values in 'scale' should be the same as number of columns in 'data'")
+         stop("Number of values in 'scale' should be the same as number of columns in 'data'", call. = FALSE)
       }
 
       # make autoscaling and attach preprocessing attributes
@@ -505,7 +506,7 @@ prep.emsc <- function(data, degree = 0, mspectrum = NULL, lnorm = NULL, A = NULL
    f <- function(data) {
 
       # define values for centering
-      if (is.null(A) | is.null(lnorm)) {
+      if (is.null(A) || is.null(lnorm)) {
          params <- prep.emsc.params(data, degree, mspectrum)
          mspectrum <- params$mspectrum
          A <- params$A
@@ -513,7 +514,7 @@ prep.emsc <- function(data, degree = 0, mspectrum = NULL, lnorm = NULL, A = NULL
       }
 
       if (length(mspectrum) != ncol(data)) {
-         stop("Number of values in 'mspectrum' should be the same as number of columns in 'data'")
+         stop("Number of values in 'mspectrum' should be the same as number of columns in 'data'", call. = FALSE)
       }
 
       # solve A * C = X'
@@ -547,7 +548,7 @@ prep.emsc <- function(data, degree = 0, mspectrum = NULL, lnorm = NULL, A = NULL
 #' @param data
 #' a matrix with data values.
 #' @param type
-#' type of statistic to use for centring (\code{'mean'}, or \code{'median'}).
+#' type of statistic to use for centering (\code{'mean'}, or \code{'median'}).
 #' @param center
 #' vector with precomputed values for centering.
 #'
@@ -555,6 +556,7 @@ prep.emsc <- function(data, degree = 0, mspectrum = NULL, lnorm = NULL, A = NULL
 #' list with parameter values
 prep.center.params <- function(data, type = "mean", center = NULL) {
 
+   type <- match.arg(type, c("mean", "median"))
    if (!is.null(center)) {
       return (list(center = center))
    }
@@ -562,9 +564,10 @@ prep.center.params <- function(data, type = "mean", center = NULL) {
    data <- mda.purgeRows(data)
    f <- c("mean" = mean, "median" = median)
    if (!(type %in% names(f))) {
-      stop("prep.center: wrong value for 'type' parameter.")
+      stop("prep.center: wrong value for 'type' parameter.", call. = FALSE)
    }
-   return (list(type = type, center = apply(data, 2, f[[type]])))
+   center <- if (type == "mean") colMeans(data) else apply(data, 2, f[[type]])
+   return (list(type = type, center = center))
 }
 
 
@@ -584,6 +587,7 @@ prep.center.params <- function(data, type = "mean", center = NULL) {
 #' list with parameter values
 prep.scale.params <- function(data, type = "sd", max.cov = 0, scale = NULL) {
 
+   type <- match.arg(type, c("sd", "iqr", "range", "pareto"))
    if (!is.null(scale)) {
       return (list(scale = scale))
    }
@@ -591,13 +595,13 @@ prep.scale.params <- function(data, type = "sd", max.cov = 0, scale = NULL) {
    data <- mda.purgeRows(data)
    f <- c("sd" = sd, "iqr" = IQR, "range" = function(x) max(x) - min(x), "pareto" = function(x) sqrt(sd(x)))
    if (!(type %in% names(f))) {
-      stop("prep.scale: wrong value for 'type' parameter.")
+      stop("prep.scale: wrong value for 'type' parameter.", call. = FALSE)
    }
 
    scale <- apply(data, 2, f[[type]])
 
    if (max.cov > 0) {
-      m <- apply(data, 2, mean)
+      m <- colMeans(data)
       cv <- scale / abs(m) * 100
       scale[is.nan(cv) | cv <= max.cov] <- 1
    }
@@ -625,7 +629,7 @@ prep.emsc.params <- function(data, degree = 0, mspectrum = NULL) {
    lnorm <- seq(-1, 1, length.out = nx)
 
    if (is.null(mspectrum)) {
-      mspectrum <- apply(data, 2, mean)
+      mspectrum <- colMeans(data)
    }
    dim(mspectrum) <- NULL
    names(mspectrum) <- NULL
@@ -634,7 +638,7 @@ prep.emsc.params <- function(data, degree = 0, mspectrum = NULL) {
    A <- matrix(1.0, nx, p)    # first column is just ones for intercept
    A[, 2] <- mspectrum        # second column contains reference spectum (slope)
    if ( degree > 0) {
-      for (d in 1:degree) {
+      for (d in seq_len(degree)) {
          A[, d + 2] <- lnorm^(d)
       }
    }
@@ -741,7 +745,7 @@ prep.varsel.asjson <- function(params, npred, left = NULL, right = NULL) {
 #' @param mp
 #' model parameters from JSON (user defined)
 #' @param mp_new
-#' mode parameters from JSON after training
+#' model parameters from JSON after training
 #' @param left
 #' index of first variable after trimming (if any)
 #' @param right
@@ -794,7 +798,7 @@ prep.spikes.asjson <- function(params, npred, left = NULL, right = NULL) {
 #' @param mp
 #' model parameters from JSON (user defined)
 #' @param mp_new
-#' mode parameters from JSON after training
+#' model parameters from JSON after training
 #' @param left
 #' index of first variable after trimming (if any)
 #' @param right
@@ -849,7 +853,7 @@ prep.norm.asjson <- function(params, npred, left = 0, right = 1) {
 #' @param mp
 #' model parameters from JSON (user defined)
 #' @param mp_new
-#' mode parameters from JSON after training
+#' model parameters from JSON after training
 #' @param left
 #' index of first variable after trimming (if any)
 #' @param right
@@ -904,7 +908,7 @@ prep.savgol.asjson <- function(params, npred, left = 0, right = 1) {
 #' @param mp
 #' model parameters from JSON (user defined)
 #' @param mp_new
-#' mode parameters from JSON after training
+#' model parameters from JSON after training
 #' @param left
 #' index of first variable after trimming (if any)
 #' @param right
@@ -966,7 +970,7 @@ prep.emsc.asjson <- function(params, npred, left = 0, right = 1) {
 #' @param mp
 #' model parameters from JSON (user defined)
 #' @param mp_new
-#' mode parameters from JSON after training
+#' model parameters from JSON after training
 #' @param left
 #' index of first variable after trimming (if any)
 #' @param right
@@ -1045,7 +1049,7 @@ prep.center.asjson <- function(params, npred, left = 0, right = 1) {
 #' @param mp
 #' model parameters from JSON (user defined)
 #' @param mp_new
-#' mode parameters from JSON after training
+#' model parameters from JSON after training
 #' @param left
 #' index of first variable after trimming (if any)
 #' @param right
@@ -1112,7 +1116,7 @@ prep.scale.asjson <- function(params, npred, left = 0, right = 1) {
 #' @param mp
 #' model parameters from JSON (user defined)
 #' @param mp_new
-#' mode parameters from JSON after training
+#' model parameters from JSON after training
 #' @param left
 #' index of first variable after trimming (if any)
 #' @param right
@@ -1169,7 +1173,7 @@ prep.alsbasecorr.asjson <- function(params, npred, left = 0, right = 1) {
 #' @param mp
 #' model parameters from JSON (user defined)
 #' @param mp_new
-#' mode parameters from JSON after training
+#' model parameters from JSON after training
 #' @param left
 #' index of first variable after trimming (if any)
 #' @param right
@@ -1298,7 +1302,7 @@ getImplementedPrepMethods <- function() {
          jmethod = prep.alsbasecorr.asjson,
          params.info = list(
             plambda = "power of the penalty parameter (e.g. if plambda = 5, lambda = 10^5)",
-            p = "assymetry ratio (should be between 0 and 1)",
+            p = "asymmetry ratio (should be between 0 and 1)",
             max.niter = "maximum number of iterations"
          ),
          info = "Asymmetric least squares baseline correction."
@@ -1417,7 +1421,7 @@ prep.list <- function() {
 #'
 #' For your own preprocessing method you need to create a function, which takes matrix with values
 #' (dataset) as the first argument, does something and then return a matrix with the same dimension
-#' and same attributes as the result. The method can have any number of optional  parameters.
+#' and same attributes as the result. The method can have any number of optional parameters.
 #'
 #' See Bookdown tutorial for details.
 #'
@@ -1425,7 +1429,7 @@ prep.list <- function() {
 prep <- function(name, params = NULL, method = NULL) {
 
    if (!is.null(params) && !is.list(params)) {
-      stop("prep: argument 'params' must be a list with parameter names and values.")
+      stop("prep: argument 'params' must be a list with parameter names and values.", call. = FALSE)
    }
 
    pmethod <- NULL
@@ -1440,7 +1444,7 @@ prep <- function(name, params = NULL, method = NULL) {
       # 2. check the parameters
       if (is.null(params)) params <- item$params
       if (length(params) > 0 && !all(names(params) %in% names(item$params))) {
-         stop("prep: provided preprocessing parameters have wrong name.")
+         stop("prep: provided preprocessing parameters have wrong name.", call. = FALSE)
       }
 
       method <- item$method
@@ -1450,8 +1454,8 @@ prep <- function(name, params = NULL, method = NULL) {
       # user defined method, check that it works
       res <- tryCatch(
          do.call(method, c(list(data = matrix(runif(50, 1, 10), 5, 10)), params)),
-         error = function(m) stop("prep: the method you provided raises an error: \n", m),
-         warning = function(m) stop("prep: the method you provided raises a warning: \n", m)
+         error = function(m) stop("prep: the method you provided raises an error: \n", m, call. = FALSE),
+         warning = function(m) stop("prep: the method you provided raises a warning: \n", m, call. = FALSE)
       )
 
       stopifnot("prep: the method you provided does not return matrix with correct dimension." =
@@ -1474,18 +1478,18 @@ prep <- function(name, params = NULL, method = NULL) {
 #' Fits preprocessing model
 #'
 #' @param obj
-#' list with preprocssing methods (created using \code{prep} or \code{prep.fit} function).
+#' list with preprocessing methods (created using \code{prep} or \code{prep.fit} function).
 #' @param x
 #' matrix with training set to be used for computing data dependent parameters
 #'
 #' @return same list but with updated methods parameters computed based on
-#' the trainin set.
+#' the training set.
 #'
 #' @export
 prep.fit <- function(obj, x) {
 
    stopifnot("prep.fit: the first argument must be a list with preprocessing methods" =
-      is.list(obj) && class(obj[[1]]) == "prep")
+      is.list(obj) && inherits(obj[[1]], "prep"))
    stopifnot("prep.fit: argument 'x' must be a matrix" =
       !is.null(x) && is.matrix(x))
 
@@ -1508,7 +1512,7 @@ prep.fit <- function(obj, x) {
 #' Applies a list with preprocessing methods to a dataset
 #'
 #' @param obj
-#' list with preprocssing methods (created using \code{prep} or \code{prep.fit} function).
+#' list with preprocessing methods (created using \code{prep} or \code{prep.fit} function).
 #' @param x
 #' matrix with dataset
 #'
@@ -1521,7 +1525,7 @@ prep.apply <- function(obj, x) {
 #' Applies a list with preprocessing methods to a dataset
 #'
 #' @param obj
-#' list with preprocssing methods (created using \code{prep} function).
+#' list with preprocessing methods (created using \code{prep} function).
 #' @param x
 #' matrix with dataset
 #' @param ...
@@ -1531,7 +1535,7 @@ prep.apply <- function(obj, x) {
 employ.prep <- function(obj, x, ...) {
 
    stopifnot("employ.prep: the first argument must be a list with preprocessing methods" =
-      is.list(obj) && class(obj[[1]]) == "prep")
+      is.list(obj) && inherits(obj[[1]], "prep"))
    stopifnot("employ.prep: argument 'x' must be a matrix" =
       !is.null(x) && is.matrix(x))
 
@@ -1546,7 +1550,7 @@ employ.prep <- function(obj, x, ...) {
 #' Converts preprocessing model to JSON elements.
 #'
 #' @param obj
-#' list with preprocssing methods (created using \code{prep.fit} function).
+#' list with preprocessing methods (created using \code{prep.fit} function).
 #'
 #' @returns stringified JSON.
 #'
@@ -1554,7 +1558,7 @@ employ.prep <- function(obj, x, ...) {
 prep.asjson <- function(obj) {
 
    npred <- obj[["_npred"]]
-   if (npred < 1) stop("prep.asjson: preprocessing object does not contain information about number of predictors.")
+   if (npred < 1) stop("prep.asjson: preprocessing object does not contain information about number of predictors.", call. = FALSE)
 
    left <- 0
    right <- npred
@@ -1571,7 +1575,7 @@ prep.asjson <- function(obj) {
    scale.flag <- FALSE
    for (p in obj) {
       if (!is.list(p)) next
-      if (is.null(p[["jmethod"]])) stop("prep.asjson: preprocessing list contains method, which can not be converted to JSON.")
+      if (is.null(p[["jmethod"]])) stop("prep.asjson: preprocessing list contains method, which can not be converted to JSON.", call. = FALSE)
 
       out <- do.call(p[["jmethod"]], list(params = p[["params"]], npred = npred, left = left, right = right))
 
@@ -1753,7 +1757,7 @@ prep.fromjson <- function(str) {
 #' Saves preprocessing model to JSON file which can be loaded to web-application (mda.tools/prep).
 #'
 #' @param obj
-#' list with preprocssing methods (created using \code{prep.fit} function).
+#' list with preprocessing methods (created using \code{prep.fit} function).
 #' @param fileName
 #' file name (or full path) to JSON file to save the model into.
 #'
@@ -1801,7 +1805,7 @@ prep.readJSON <- function(fileName) {
 pinv <- function(data) {
    # Calculates pseudo-inverse of data matrix
    s <- svd(data)
-   s$v %*% diag(1 / s$d) %*% t(s$u)
+   tcrossprod(s$v %*% diag(1 / pmax(s$d, .Machine$double.eps), length(s$d), length(s$d)), s$u)
 }
 
 
@@ -1842,23 +1846,23 @@ prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0) {
    f <- function(data, center, scale, max.cov) {
 
       # define values for centering
-      if (is.logical(center) && center) center <- apply(data, 2, mean)
+      if (is.logical(center) && center) center <- colMeans(data)
 
       if (is.numeric(center) && length(center) != ncol(data)) {
-         stop("Number of values in 'center' should be the same as number of columns in 'daata'")
+         stop("Number of values in 'center' should be the same as number of columns in 'data'", call. = FALSE)
       }
 
       # define values for weigting
       if (is.logical(scale) && scale) scale <- apply(data, 2, sd)
 
       if (is.numeric(scale) && length(scale) != ncol(data)) {
-         stop("Number of values in 'scale' should be the same as number of columns in 'daata'")
+         stop("Number of values in 'scale' should be the same as number of columns in 'data'", call. = FALSE)
       }
 
       # compute coefficient of variation and set scale to 1 if it is below
       # a user defined threshold
       if (is.numeric(scale)) {
-         m <- if (is.numeric(center)) center else apply(data, 2, mean)
+         m <- if (is.numeric(center)) center else colMeans(data)
          cv <- scale / abs(m) * 100
          scale[is.nan(cv) | cv <= max.cov] <- 1
       }
@@ -1929,7 +1933,7 @@ prep.snv <- function(data) {
 #' other optional components
 #'
 #' @return
-#' preprocessed spectra (calculated mean spectrum is assigned as attribut 'mspectrum')
+#' preprocessed spectra (calculated mean spectrum is assigned as attribute 'mspectrum')
 #'
 #' @details
 #' MSC is used to remove scatter effects (baseline offset and slope) from

@@ -27,11 +27,11 @@
 regres <- function(y.pred, y.ref = NULL, ncomp.selected = 1) {
 
    if (is.null(y.pred) || length(dim(y.pred)) != 3) {
-      stop("Parameter 'y.pred' should be a 3-way array.")
+      stop("Parameter 'y.pred' should be a 3-way array.", call. = FALSE)
    }
 
    if (ncomp.selected > dim(y.pred)[2]) {
-      stop("Wrong value for 'ncomp.selected' parameter.")
+      stop("Wrong value for 'ncomp.selected' parameter.", call. = FALSE)
    }
 
    if (!is.null(y.ref)) y.ref <- as.matrix(y.ref)
@@ -225,7 +225,7 @@ regres.err <- function(y.pred, y.ref) {
 #' Determination coefficient
 #'
 #' @description
-#' Calculates matrix with coeffient of determination for every response and components
+#' Calculates matrix with coefficient of determination for every response and components
 #'
 #' @param err
 #' vector with difference between reference and predicted y-values
@@ -331,11 +331,11 @@ plotPredictions.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected, show
    axes.equal = TRUE, show.plot = TRUE, ...) {
 
    if (length(ny) != 1) {
-      stop("You can show prediction plot only for one selected response variable.")
+      stop("You can show prediction plot only for one selected response variable.", call. = FALSE)
    }
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
-      stop("Wrong value for ncomp argument.")
+      stop("Wrong value for ncomp argument.", call. = FALSE)
    }
 
    if (is.null(obj$y.ref)) {
@@ -360,7 +360,7 @@ plotPredictions.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected, show
       return(plot_data)
    }
 
-   if (axes.equal && !is.null(obj$yref)) {
+   if (axes.equal && !is.null(obj$y.ref)) {
       xlim <- ylim <- range(plot_data)
    }
 
@@ -396,7 +396,7 @@ plotPredictions.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected, show
 #' @param ncomp
 #' complexity of model (e.g. number of components) to show the plot for
 #' @param show.lines
-#' allows to show the horisontal line at y = 0
+#' allows to show the horizontal line at y = 0
 #' @param show.plot
 #' logical, show plot or just return plot data
 #' @param ...
@@ -407,15 +407,15 @@ plotResiduals.regres <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
    show.lines = c(NA, 0), show.plot = TRUE, ...) {
 
    if (is.null(obj$y.ref)) {
-      stop("Y-residuals can not be plotted without reference values.")
+      stop("Y-residuals can not be plotted without reference values.", call. = FALSE)
    }
 
    if (length(ny) != 1) {
-      stop("You can make residuals plot only for one selected response variable.")
+      stop("You can make residuals plot only for one selected response variable.", call. = FALSE)
    }
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
-      stop("Wrong value for ncomp argument.")
+      stop("Wrong value for ncomp argument.", call. = FALSE)
    }
 
    plot_data <- cbind(obj$y.ref[, ny], obj$y.ref[, ny] - obj$y.pred[, ncomp, ny])
@@ -460,11 +460,11 @@ plotRMSE.regres <- function(obj, ny = 1, type = "b", xticks = seq_len(obj$ncomp)
    labels = "values", show.plot = TRUE, ylab = paste0("RMSE (", obj$respnames[ny], ")"), ...) {
 
    if (is.null(obj$rmse)) {
-      stop("RMSE values are not available.")
+      stop("RMSE values are not available.", call. = FALSE)
    }
 
    if (length(ny) != 1) {
-      stop("You can make residuals plot only for one selected response variable.")
+      stop("You can make residuals plot only for one selected response variable.", call. = FALSE)
    }
 
    plot_data <- mda.subset(obj$rmse, ny)

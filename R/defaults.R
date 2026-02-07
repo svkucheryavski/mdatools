@@ -1,3 +1,25 @@
+#' Acceptance plot for DDSIMCA model and results (generic function)
+#'
+#' @param obj
+#' model or result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the plot
+#'
+#' @export
+plotDistances <- function(obj, ...) UseMethod("plotDistances")
+
+
+#' Acceptance plot for DDSIMCA model and results (generic function)
+#'
+#' @param obj
+#' model or result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the plot
+#'
+#' @export
+plotAcceptance <- function(obj, ...) UseMethod("plotAcceptance")
+
+
 #' S3 implementation of asjson() method
 #'
 #' @param obj
@@ -162,7 +184,7 @@ getProbabilities <- function(obj, ...) {
 #' Set residual distance limits
 #'
 #' @description
-#' Calculates and set critical limits for residuals of PCA model
+#' Calculates and sets critical limits for residuals of PCA model
 #'
 #' @param obj
 #' a model object
@@ -177,7 +199,7 @@ setDistanceLimits <- function(obj, ...) {
 #' Show residual distance limits
 #'
 #' @description
-#' Calculates and set critical limits for residuals of PCA model
+#' Calculates and sets critical limits for residuals of PCA model
 #'
 #' @param obj
 #' a model object
@@ -372,7 +394,7 @@ plotModellingPower <- function(obj, ...) {
 #' Misclassification ratio plot
 #'
 #' @details
-#' Generic function for plotting missclassification values for classification model or results
+#' Generic function for plotting misclassification values for classification model or results
 #'
 #' @param obj
 #' a model or a result object
@@ -729,7 +751,7 @@ plotXLoadings <- function(obj, ...) {
    UseMethod("plotXLoadings")
 }
 
-#' X loadings plot
+#' XY loadings plot
 #'
 #' @details
 #' Generic function for plotting loadings values for decomposition of x and y data

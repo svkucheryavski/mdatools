@@ -1,7 +1,7 @@
 #' PLS results
 #'
 #' @description
-#' \code{plsres} is used to store and visualize results of applying a PLS model to a new data.
+#' \code{plsres} is used to store and visualize results of applying a PLS model to new data.
 #'
 #' @param y.pred
 #' predicted y values.
@@ -62,7 +62,7 @@
 #'    \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
 #'    \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
 #'    \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
-#'    \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y
+#'    \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for x
 #'    decomposition.\cr
 #'    \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y
 #'    decomposition.\cr
@@ -289,11 +289,6 @@ print.plsres <- function(x, ...) {
 #' @export
 writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "", ...) {
 
-   paste1 <- function(...) {
-      paste0(..., collapse = "")
-   }
-
-
    # for future use
    outliers <- res$exclrows
    exclvars <- res$exclcols
@@ -315,7 +310,7 @@ writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "", ...) 
    filler <- paste1(rep('', nComp), sep)
 
    # vector with component names/labels and values separator
-   compNames <- paste1("LV", 1:nComp, sep)
+   compNames <- paste1("LV", seq_len(nComp), sep)
 
    # function for adding component based outcomes for every row
    addChunk <- function (name, values, out) {
@@ -343,7 +338,7 @@ writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "", ...) 
    # general information
    out <- NULL
    out <- c(out, paste1('Number of LVs:', sep, nComp, filler))
-   out <- c(out, paste1('Optinal number of LVs:', sep, nCompSelected, filler))
+   out <- c(out, paste1('Optimal number of LVs:', sep, nCompSelected, filler))
    out <- c(out, paste1('Center:', sep, ifelse(res$center, 'true', 'false'), filler))
    out <- c(out, paste1('Scale:', sep, ifelse(res$scale, 'true', 'false'), filler))
 
@@ -436,7 +431,7 @@ writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "", ...) 
 #' @param obj
 #' PLS results (object of class \code{plsres})
 #' @param decomp
-#' which dcomposition to use ("xdecomp" or "ydecomp")
+#' which decomposition to use ("xdecomp" or "ydecomp")
 #' @param variance
 #' which variance to use ("expvar", "cumexpvar")
 #' @param ...
@@ -577,7 +572,7 @@ plotXYScores.plsres <- function(obj, ncomp = 1, show.plot = TRUE, ...) {
    if (is.null(obj$xdecomp) || is.null(obj$ydecomp)) return(invisible(NULL))
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
-      stop("Wrong value for ncomp argument.")
+      stop("Wrong value for ncomp argument.", call. = FALSE)
    }
 
    plot_data <- cbind(
@@ -613,7 +608,7 @@ plotXYScores.plsres <- function(obj, ncomp = 1, show.plot = TRUE, ...) {
 #' @param norm
 #' logical, normalize distance values or not (see details)
 #' @param log
-#' logical, apply log tranformation to the distances or not (see details)
+#' logical, apply log transformation to the distances or not (see details)
 #' @param main
 #' main title for the plot
 #' @param ...
@@ -629,7 +624,7 @@ plotXResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, norm = TRUE, 
    if (is.null(obj$xdecomp)) return(invisible(NULL))
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
-      stop("Wrong value for ncomp argument.")
+      stop("Wrong value for ncomp argument.", call. = FALSE)
    }
 
    return(plotResiduals.ldecomp(obj$xdecomp, ncomp = ncomp, main = main,
@@ -682,19 +677,19 @@ plotYResiduals.plsres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 plot.plsres <- function(x, ncomp = x$ncomp.selected, ny = 1, show.labels = FALSE, ...) {
 
    if (is.null(x$y.ref)) {
-      par(mfrow = c(1, 2))
+      op <- par(mfrow = c(1, 2))
+      on.exit(par(op))
       plotXResiduals(x, ...)
       plotPredictions.regres(x, ncomp = ncomp, ny = ny, ...)
-      par(mfrow = c(1, 1))
       return()
    }
 
-   par(mfrow = c(2, 2))
+   op <- par(mfrow = c(2, 2))
+   on.exit(par(op))
    plotXResiduals(x, ncomp = ncomp, ...)
    plotYVariance(x, ...)
    plotRMSE(x, ny = ny, ...)
    plotPredictions.regres(x, ncomp = ncomp, ny = ny, ...)
-   par(mfrow = c(1, 1))
 }
 
 #' Residual distance plot
@@ -703,13 +698,13 @@ plot.plsres <- function(x, ncomp = x$ncomp.selected, ny = 1, show.labels = FALSE
 #' Shows a plot with orthogonal (Q, q) vs. score (T2, h) distances for data objects.
 #'
 #' @param obj
-#' object of \code{ldecomp} class.
+#' object of \code{plsres} class.
 #' @param ncomp
 #' number of components to show the plot for (if NULL, selected by model value will be used).
 #' @param norm
 #' logical, normalize distance values or not (see details)
 #' @param log
-#' logical, apply log tranformation to the distances or not (see details)
+#' logical, apply log transformation to the distances or not (see details)
 #' @param show.labels
 #' logical, show or not labels for the plot objects
 #' @param labels

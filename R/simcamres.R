@@ -12,7 +12,7 @@
 #' Class \code{simcamres} inherits all properties and methods of class \code{\link{classres}}, plus
 #' store values necessary to visualise prediction decisions (e.g. Cooman's plot or Residuals plot).
 #'
-#' In cotrast to \code{simcares} here only values for optimal (selected) number of components in
+#' In contrast to \code{simcares} here only values for optimal (selected) number of components in
 #' each individual SIMCA models are presented.
 #'
 #' There is no need to create a \code{simcamres} object manually, it is created automatically when
@@ -32,7 +32,7 @@
 #'
 #' The following fields are available only if reference values were provided.
 #' \item{tp}{number of true positives.}
-#' \item{fp}{nmber of false positives.}
+#' \item{fp}{number of false positives.}
 #' \item{fn}{number of false negatives.}
 #' \item{specificity}{specificity of predictions.}
 #' \item{sensitivity}{sensitivity of predictions.}
@@ -81,7 +81,7 @@ simcamres <- function(cres, pred.res) {
 #'
 #' @export
 as.matrix.simcamres <- function(x, nc = seq_len(x$nclasses), ...) {
-   comp <- sapply(x$pred.res, function(r) r$ncomp.selected)
+   comp <- vapply(x$pred.res, function(r) r$ncomp.selected, numeric(1))
 
    out <- do.call(rbind, lapply(nc, function(n) as.matrix.classres(x, nc = n)))
    out <- cbind(comp, out)
