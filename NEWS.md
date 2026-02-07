@@ -1,3 +1,62 @@
+v. 0.15.0
+=========
+
+This release aims at extending the functionality of the package as well as introducing interoperability with interactive web-applications for chemometircs available at [mda.tools](https://mda.tools). Any model created using mdatools for R can be saved to a JSON file and then be uploaded to the corresponding web-application for testing or making predictions. And vice versa, if you develop a model in one of the web-apps, you can save it into JSON file and then load it to R to be used with *mdatools* package.
+
+Here are all release details.
+
+### New preprocessing methods
+
+There are several new methods for preprocessing, including:
+
+* `prep.spikes()` for cosmic spikes removal from Raman spectra.
+* `prep.center()` for centering of data columns (more flexible than `prep.autoscale()`).
+* `prep.scale()` for scaling of data columns (more flexible than `prep.autoscale()`).
+* `prep.emsc()` for extended multiplicative scatter correction.
+
+The following methods are considered as legacy, you can still use them (they will be kept for compatibility), but for new code it is recommeded to use the alternatives:
+
+* `prep.autoscale()` — use `prep.center()` and `prep.scale()` instead.
+* `prep.snv()` — use `prep.norm()` with parameter `type = "snv"` as an alternative.
+* `prep.msc()` — use `prep.emsc()` with parameter `degree = 0`.
+* `employ.prep()` — use `prep.apply()`
+
+In addition to that, from this version you can calibrate a preprocessing model using method `prep.fit()`. This will let you to precompute and save preprocessing parameters which depends
+
+Check the [updated documentation]() for all details.
+
+### New modellling methods
+
+Method `ddsimca` can now be used for training, testing and applying of [Data Driven SIMCA]() models. It matches functionality of the corresponding web-application, including all plots and figures of merits (for example estimation of beta, selectivity, etc.). It also lets you change decision boundary parameters without rebuilding the main model.
+
+Method `ddsimcamb` implements [multiblock DD-SIMCA]() by combining several `ddsimca` models developed for the same set of samples but different blocks of variables.
+
+See all details in the [tutorial]().
+
+The original method `simca` is also available for compatibility.
+
+### New functions for model and result objects
+
+* when you create a model using `pca`, `pls`, `ddsimca`, or, `plsda` methods, you can provide a list with preprocessing methods using parameter `prep`. This list will be trained into a preprocessing model and be automatically applied to the training set as well as to new datasets when you use the model with method `predict()`. Hence you can skip manual preprocessing of test set or new set of measurements as it will be done automatically.
+
+* any model object created using `pca`, `pls`, and `ddsimca` has a method `writeJSON()` which saves the corresponding model into a JSON file, which then can be loaded to corresponding web-application, similar to `prep.writeJSON()`.
+
+* there are also class specific methods, `pca.readJSON()`, `pls.readJSON()`, `ddsimca.readJSON()`, which load model create in a web-application from JSON file and let you use the model for predictions in R.
+
+* result object from `pca`, `pls`, and `ddsimca` methods now have class specific method `writeCSV()`. The method creates CSV files with main results outcomes with a structure identical to produced using [mdatools web-applications](https://mda.tools/).
+
+### Improvements and changes
+
+* method `prep.alsbasecorr()` is now several times faster, thanks to `spam` package (which replaced the previosly used `Matrix`).
+
+* method `plotResiduals()` for all models and results objects where it was avaiable now is named `plotDistances()`. The old name, however, will work as well to ensure compatibility with old code.
+
+### Bug fixes
+
+* fixed issue with y-scores orthogonalization in `pls`, which could give wrong y-scores when data contains outliers.
+
+
+
 v. 0.14.2
 =========
 * fixed bug [#118](https://github.com/svkucheryavski/mdatools/issues/118) (thanks to @gongyh).
