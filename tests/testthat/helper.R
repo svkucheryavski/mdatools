@@ -16,7 +16,6 @@ testList <- function(l1, l2) {
       if (is.list(v1)) testList(v1, v2)
       dim(v1) <- NULL
       dim(v2) <- NULL
-
       expect_equal(v1, v2)
    }
 }

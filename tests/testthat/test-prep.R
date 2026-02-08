@@ -429,7 +429,6 @@ test_that("List of available methods is shown corectly", {
 })
 
 test_that("Errors are raised when necessary", {
-   expect_error(prep("varsel", var.ind = 50:150))
    expect_error(prep("snv120"))
 })
 
@@ -443,7 +442,7 @@ test_that("Method works with one preprocessing method in the list", {
    x <- mda.exclrows(x, c(1, 20, 30, 70))
 
    p <- list(
-      prep("savgol", list(width = 11, porder = 2, dorder = 1))
+      prep("savgol", width = 11, porder = 2, dorder = 1)
    )
 
    px1 <- employ.prep(p, x)
@@ -464,16 +463,21 @@ test_that("Method works with several preprocessing methods in the list", {
    x <- mda.exclrows(x, c(1, 20, 30, 70))
 
    p <- list(
-      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
-      prep("snv"),
-      prep("autoscale", list(center = TRUE, scale = TRUE))
+      prep("savgol", width = 11, porder = 2, dorder = 1),
+      prep("norm", type="snv"),
+      prep("center", type = "median"),
+      prep("scale", type = "iqr")
    )
 
-   px1 <- employ.prep(p, x)
+   p <- prep.fit(p, x)
+
+   px1 <- prep.apply(p, x)
+
    px2 <- x
    px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
-   px2 <- prep.snv(px2)
-   px2 <- prep.autoscale(px2, center = TRUE, scale = TRUE)
+   px2 <- prep.norm(px2, type = "snv")
+   px2 <- prep.center(px2, type="median")
+   px2 <- prep.scale(px2, type="iqr")
 
    expect_equal(px1, px2)
    expect_equal(mda.getattr(px1), mda.getattr(x))
@@ -490,17 +494,21 @@ test_that("Method works with preprocessing methods and varable selection", {
    x <- mda.exclrows(x, c(1, 20, 30, 70))
 
    p <- list(
-      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
-      prep("snv"),
-      prep("autoscale", list(center = TRUE, scale = TRUE)),
-      prep("varsel", list(var.ind = 50:130))
+      prep("savgol", width = 11, porder = 2, dorder = 1),
+      prep("norm", type = "snv"),
+      prep("center"),
+      prep("scale"),
+      prep("varsel", var.ind = 50:130)
    )
 
-   px1 <- employ.prep(p, x)
+   p <- prep.fit(p, x)
+
+   px1 <- prep.apply(p, x)
    px2 <- x
    px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
-   px2 <- prep.snv(px2)
-   px2 <- prep.autoscale(px2, center = TRUE, scale = TRUE)
+   px2 <- prep.norm(px2, type = "snv")
+   px2 <- prep.center(px2)
+   px2 <- prep.scale(px2)
    px2 <- mda.subset(px2, select = 50:130)
 
    expect_equal(px1, px2)
@@ -518,15 +526,14 @@ test_that("Method works with user defined preprocessing method", {
    x <- mda.exclrows(x, c(1, 20, 30, 70))
 
    p <- list(
-      prep("r2a", method = function(data) log(1/abs(data))),
-      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
-      prep("snv")
+      prep("savgol", width = 11, porder = 2, dorder = 1),
+      prep("norm", type = "snv")
    )
 
-   px1 <- employ.prep(p, x)
-   px2 <- log(1/abs(x))
+   px1 <- prep.apply(p, x)
+   px2 <- x
    px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
-   px2 <- prep.snv(px2)
+   px2 <- prep.norm(px2, "snv")
 
    expect_equal(px1, px2)
    expect_equal(mda.getattr(px1), mda.getattr(px2))
@@ -713,13 +720,13 @@ test_that("fitting prep model works correctly (case Tecator)", {
    Xtp.ref <- as.matrix(dtp.ref[, -1])
 
    p <- list(
-      prep("spikes", list(width = 5, threshold = 5)),
-      prep("savgol", list(width = 7, porder = 2, dorder = 2)),
-      prep("varsel", list(var.ind = 11:90)),
-      prep("norm", list(type = "snv")),
-      prep("emsc", list(degree = 2)),
-      prep("center", list(type = "mean")),
-      prep("scale", list(type = "pareto"))
+      prep("spikes", width = 5, threshold = 5),
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("varsel", var.ind = 11:90),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2),
+      prep("center", type = "mean"),
+      prep("scale", type = "pareto")
    )
 
 
@@ -740,13 +747,13 @@ test_that("fitting prep model works correctly (case HS-)", {
    Xcp.ref <- as.matrix(dcp.ref[, -1])
 
    p <- list(
-      prep("varsel", list(var.ind = 121:1755)),
-      prep("spikes", list(width = 5, threshold = 10)),
-      prep("savgol", list(width = 5, porder = 1, dorder = 0)),
-      prep("alsbasecorr", list(plambda = 2.5, p = 0.008)),
-      prep("varsel", list(var.ind = 81:1580)),
-      prep("norm", list(type = "is", col.ind = 976)),
-      prep("center", list(type = "mean"))
+      prep("varsel", var.ind = 121:1755),
+      prep("spikes", width = 5, threshold = 10),
+      prep("savgol", width = 5, porder = 1, dorder = 0),
+      prep("alsbasecorr", plambda = 2.5, p = 0.008),
+      prep("varsel", var.ind = 81:1580),
+      prep("norm", type = "is", col.ind = 976),
+      prep("center", type = "mean")
    )
 
    pm  <- prep.fit(p, Xc)
@@ -761,7 +768,7 @@ testCase <- function(p, Xc, jsonFilename) {
 
    # fit pm model
    pm  <- prep.fit(p, Xc)
-
+   #print(pm)
    # test JSON strings
    json1 <- prep.asjson(pm)
    fileConn <- file(jsonFilename)
@@ -794,69 +801,67 @@ test_that("JSON() and readJSON() methods work correctly.", {
 
    # one method
    p <- list(
-      prep("emsc", list(degree = 2))
+      prep("emsc", degree = 2)
    )
    testCase(p, Xc, "./preprocessing-model-1.json")
 
    # two methods
    p <- list(
-      prep("norm", list(type = "snv")),
-      prep("emsc", list(degree = 2))
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2)
    )
    testCase(p, Xc, "./preprocessing-model-2.json")
 
    # three methods
    p <- list(
-      prep("spikes", list(width = 5, threshold = 5)),
-      prep("norm", list(type = "snv")),
-      prep("emsc", list(degree = 2))
+      prep("spikes", width = 5, threshold = 5),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2)
    )
    testCase(p, Xc, "./preprocessing-model-3.json")
 
    # four methods
    p <- list(
-      prep("spikes", list(width = 5, threshold = 5)),
-      prep("savgol", list(width = 7, porder = 2, dorder = 2)),
-      prep("norm", list(type = "snv")),
-      prep("emsc", list(degree = 2))
+      prep("spikes", width = 5, threshold = 5),
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2)
    )
    testCase(p, Xc, "./preprocessing-model-4.json")
 
    # five methods
    p <- list(
-      prep("spikes", list(width = 5, threshold = 5)),
-      prep("savgol", list(width = 7, porder = 2, dorder = 2)),
-      prep("varsel", list(var.ind = 11:90)),
-      prep("norm", list(type = "snv")),
-      prep("emsc", list(degree = 2)),
-      prep("center", list(type = "mean")),
-      prep("scale", list(type = "pareto"))
+      prep("spikes", width = 5, threshold = 5),
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("varsel", var.ind = 11:90),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2),
+      prep("center", type = "mean"),
+      prep("scale", type = "pareto")
    )
    testCase(p, Xc, "./preprocessing-model-full-tecator.json")
 
 
    # five methods only scale
    p <- list(
-      prep("spikes", list(width = 5, threshold = 5)),
-      prep("savgol", list(width = 7, porder = 2, dorder = 2)),
-      prep("varsel", list(var.ind = 11:90)),
-      prep("norm", list(type = "snv")),
-      prep("emsc", list(degree = 2)),
-      prep("scale", list(type = "range"))
+      prep("spikes", width = 5, threshold = 5),
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("varsel", var.ind = 11:90),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2),
+      prep("scale", type = "range")
    )
-
    testCase(p, Xc, "./preprocessing-model-full-tecator-scale.json")
 
    # five methods only center
    p <- list(
-      prep("spikes", list(width = 5, threshold = 5)),
-      prep("savgol", list(width = 7, porder = 2, dorder = 2)),
-      prep("varsel", list(var.ind = 11:90)),
-      prep("norm", list(type = "snv")),
-      prep("emsc", list(degree = 2)),
-      prep("center", list(type = "median"))
+      prep("spikes", width = 5, threshold = 5),
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("varsel", var.ind = 11:90),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2),
+      prep("center", type = "median")
    )
-
    testCase(p, Xc, "./preprocessing-model-full-tecator-center.json")
 
    # full hs- case
@@ -865,13 +870,13 @@ test_that("JSON() and readJSON() methods work correctly.", {
    Xc <- as.matrix(dc[, -1])
 
    p <- list(
-      prep("varsel", list(var.ind = 121:1755)),
-      prep("spikes", list(width = 5, threshold = 10)),
-      prep("savgol", list(width = 5, porder = 1, dorder = 0)),
-      prep("alsbasecorr", list(plambda = 2.5, p = 0.008)),
-      prep("varsel", list(var.ind = 81:1580)),
-      prep("norm", list(type = "is", col.ind = 976)),
-      prep("center", list(type = "mean"))
+      prep("varsel", var.ind = 121:1755),
+      prep("spikes", width = 5, threshold = 10),
+      prep("savgol", width = 5, porder = 1, dorder = 0),
+      prep("alsbasecorr", plambda = 2.5, p = 0.008),
+      prep("varsel", var.ind = 81:1580),
+      prep("norm", type = "is", col.ind = 976),
+      prep("center", type = "mean")
    )
 
    testCase(p, Xc, "./preprocessing-model-full-hs.json")

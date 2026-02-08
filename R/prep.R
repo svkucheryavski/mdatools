@@ -294,54 +294,54 @@ prep.ref2km <- function(data) {
 #' @export
 prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
 
-  attrs <- mda.getattr(data)
-  dimnames <- dimnames(data)
+   attrs <- mda.getattr(data)
+   dimnames <- dimnames(data)
 
-  n <- nrow(data)
-  m <- ncol(data)
-  baseline <- matrix(0, n, m)
+   n <- nrow(data)
+   m <- ncol(data)
+   baseline <- matrix(0, n, m)
 
-  # Build the second-difference penalty matrix D
-  D <- spam(0, m - 2, m)
-  for (i in seq_len(m - 2)) {
-    D[i, i]     <- 1
-    D[i, i + 1] <- -2
-    D[i, i + 2] <- 1
-  }
+   # Build the second-difference penalty matrix D
+   D <- spam(0, m - 2, m)
+   for (i in seq_len(m - 2)) {
+      D[i, i]     <- 1
+      D[i, i + 1] <- -2
+      D[i, i + 2] <- 1
+   }
 
-  # Compute LDD = lambda * t(D) %*% D
-  lambda <- 10^plambda
-  LDD <- lambda * crossprod(D)
+   # Compute LDD = lambda * t(D) %*% D
+   lambda <- 10^plambda
+   LDD <- lambda * crossprod(D)
 
-  # Precompute initial weight vector
-  w.ini <- rep(1, m)
+   # Precompute initial weight vector
+   w.ini <- rep(1, m)
 
-  for (i in seq_len(n)) {
-    y <- data[i, ]
-    w <- w.ini
+   for (i in seq_len(n)) {
+      y <- data[i, ]
+      w <- w.ini
 
-    for (j in seq_len(max.niter)) {
-      W <- diag.spam(w)
-      A <- W + LDD
-      b <- w * y
+      for (j in seq_len(max.niter)) {
+         W <- diag.spam(w)
+         A <- W + LDD
+         b <- w * y
 
-      # Solve (W + LDD) z = w * y
-      z <- solve(A, b)
+         # Solve (W + LDD) z = w * y
+         z <- solve(A, b)
 
-      w.old <- w
-      w <- p * (y > z) + (1 - p) * (y < z)
+         w.old <- w
+         w <- p * (y > z) + (1 - p) * (y < z)
 
-      if (sum(abs(w - w.old)) < 1e-10) break
-    }
+         if (sum(abs(w - w.old)) < 1e-10) break
+      }
 
-    baseline[i, ] <- as.numeric(z)
-  }
+      baseline[i, ] <- as.numeric(z)
+   }
 
-  pspectra <- data - baseline
-  pspectra <- mda.setattr(pspectra, attrs)
-  dimnames(pspectra) <- dimnames
+   pspectra <- data - baseline
+   pspectra <- mda.setattr(pspectra, attrs)
+   dimnames(pspectra) <- dimnames
 
-  return(pspectra)
+   return(pspectra)
 }
 
 
@@ -758,7 +758,7 @@ prep.varsel.asjson <- function(params, npred, left = NULL, right = NULL) {
 prep.varsel.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) {
    right.local <- mp[2] - left.tot
    left.local  <- mp[1] - left.tot + 1
-   p <- prep("varsel", list(var.ind = left.local:right.local))
+   p <- prep("varsel", var.ind = left.local:right.local)
    return (p)
 }
 
@@ -812,7 +812,7 @@ prep.spikes.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) 
    width <- mp[1]
    threshold <- mp[2]
 
-   p <- prep("spikes", list(width = width, threshold = threshold))
+   p <- prep("spikes", width = width, threshold = threshold)
    return (p)
 }
 
@@ -867,8 +867,8 @@ prep.norm.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) {
    types <- c("snv", "area", "length", "is")
    type <- types[mp[1] + 1]
    col.ind <- mp[2] - left.tot + 1
-   p <- prep("norm", if (type == "is") list(type = type, col.ind = col.ind) else list(type = type))
-   return (p)
+   p <- if (type == "is") prep("norm", type = type, col.ind = col.ind) else prep("norm", type = type)
+   return(p)
 }
 
 
@@ -924,7 +924,7 @@ prep.savgol.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) 
    porder <- mp[2]
    dorder <- mp[3]
    w <- matrix(mp_new, width, width)
-   p <- prep("savgol", list(width = width, porder = porder, dorder = dorder))
+   p <- prep("savgol", width = width, porder = porder, dorder = dorder)
    p$params <- list(width = width, porder = porder, dorder = dorder, w = w)
 
    return (p)
@@ -1001,7 +1001,7 @@ prep.emsc.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) {
    mspectrum <- mp_new[s:e]
 
 
-   p <- prep("emsc", list(degree = degree))
+   p <- prep("emsc", degree = degree)
    p$params <- list(mspectrum = mspectrum, lnorm = lnorm, A = A)
 
    return (p)
@@ -1068,7 +1068,7 @@ prep.center.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) 
    center <- mp_new[1:nvar]
 
    type <- types[mp[1]]
-   p <- prep("center", list(type = type))
+   p <- prep("center", type = type)
    p$params <- list(type = type, center = center)
 
    return (p)
@@ -1135,7 +1135,7 @@ prep.scale.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) {
    scale <- mp_new[(nvar + 1):(2 * nvar)]
 
    type <- types[mp[2]]
-   p <- prep("scale", list(type = type))
+   p <- prep("scale", type = type)
    p$params <- list(type = type, scale = scale)
 
    return (p)
@@ -1184,7 +1184,7 @@ prep.alsbasecorr.asjson <- function(params, npred, left = 0, right = 1) {
 #' @returns \code{prep} object for the method
 #'
 prep.alsbasecorr.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) {
-   p <- prep("alsbasecorr", list(plambda = mp[2], p = mp[3]))
+   p <- prep("alsbasecorr", plambda = mp[2], p = mp[3])
    return (p)
 }
 
@@ -1220,41 +1220,6 @@ prep.generic <- function(x, f, ...) {
 #' @export
 getImplementedPrepMethods <- function() {
    list(
-      # prep.snv <- function(data)
-      "snv" = list(
-         name = "snv",
-         method = prep.snv,
-         params = list(),
-         params.info = list(),
-         info = "Standard normal variate normalization."
-      ),
-
-      # prep.ref2km <- function(spectra)
-      "ref2km" = list(
-         name = "ref2km",
-         method = prep.ref2km,
-         params = list(),
-         params.info = list(),
-         info = "Transform reflectance spectra to Kubelka-Munk units."
-      ),
-
-      # prep.msc <- function(spectra, mspectrum = NULL)
-      "msc" = list(
-         name = "msc",
-         method = prep.msc,
-         params = list(mspectrum = NULL),
-         params.info = list(mspectrum = "mean spectrum (if NULL will be computed based on data)."),
-         info = "Multiplicative scatter correction."
-      ),
-
-      # prep.transform <- function(data, fun, ...)
-      "transform" = list(
-         name = "transform",
-         method = prep.transform,
-         params = list(fun = log),
-         params.info = list(fun = "function to transform the values (e.g. 'log')"),
-         info = "Transformation of data values using math functions (log, sqrt, etc.)."
-      ),
 
       # prep.varsel <- function(data, var.ind)
       "varsel" = list(
@@ -1308,20 +1273,6 @@ getImplementedPrepMethods <- function() {
          info = "Asymmetric least squares baseline correction."
       ),
 
-      # prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0)
-      "autoscale" = list(
-         name = "autoscale",
-         method = prep.autoscale,
-         params = list(center = TRUE, scale = FALSE, max.cov = 0),
-         params.info = list(
-            center = "a logical value or vector with numbers for centering.",
-            scale = "a logical value or vector with numbers for weighting.",
-            max.cov = "columns with coefficient of variation (in percent) below `max.cov` will not be scaled"
-         ),
-         info = "Autoscale (mean center and standardize) columns of the dataset."
-      ),
-
-      # prep.scale <- function(data, type = "sd", max.cov = 0, scale = NULL)
       "spikes" = list(
          name = "spikes",
          method = prep.spikes,
@@ -1346,11 +1297,10 @@ getImplementedPrepMethods <- function() {
          info = "Center dataset columns."
       ),
 
-      # prep.scale <- function(data, type = "sd", max.cov = 0, scale = NULL)
       "scale" = list(
          name = "scale",
          method = prep.scale,
-         params = list(type = "scale"),
+         params = list(type = "sd"),
          pmethod = prep.scale.params,
          jmethod = prep.scale.asjson,
          params.info = list(
@@ -1426,41 +1376,26 @@ prep.list <- function() {
 #' See Bookdown tutorial for details.
 #'
 #' @export
-prep <- function(name, params = NULL, method = NULL) {
+prep <- function(name, ...) {
 
-   if (!is.null(params) && !is.list(params)) {
-      stop("prep: argument 'params' must be a list with parameter names and values.", call. = FALSE)
-   }
-
+   params <- list(...)
    pmethod <- NULL
    jmethod <- NULL
-   if (is.null(method)) {
-      # assuming it is one of the standard methods
-      # 1. first check name
-      item <- getImplementedPrepMethods()[[name]]
-      stopifnot("prep: either name of preprocessing method is wrong or you need to provide a reference to
+
+   # 1. first check name
+   item <- getImplementedPrepMethods()[[name]]
+   stopifnot("prep: either name of preprocessing method is wrong or you need to provide a reference to
          function implementing the method if it is user defined." = !is.null(item))
 
-      # 2. check the parameters
-      if (is.null(params)) params <- item$params
-      if (length(params) > 0 && !all(names(params) %in% names(item$params))) {
-         stop("prep: provided preprocessing parameters have wrong name.", call. = FALSE)
-      }
-
-      method <- item$method
-      pmethod <- item$pmethod
-      jmethod <- item$jmethod
-   } else {
-      # user defined method, check that it works
-      res <- tryCatch(
-         do.call(method, c(list(data = matrix(runif(50, 1, 10), 5, 10)), params)),
-         error = function(m) stop("prep: the method you provided raises an error: \n", m, call. = FALSE),
-         warning = function(m) stop("prep: the method you provided raises a warning: \n", m, call. = FALSE)
-      )
-
-      stopifnot("prep: the method you provided does not return matrix with correct dimension." =
-         dim(res) == c(5, 10))
+   # 2. check the parameters
+   if (is.null(params)) params <- item$params
+   if (length(params) > 0 && !all(names(params) %in% names(item$params))) {
+      stop("prep: provided preprocessing parameters have wrong name.", call. = FALSE)
    }
+
+   method <- item$method
+   pmethod <- item$pmethod
+   jmethod <- item$jmethod
 
    obj <- list(
       name = name,
@@ -1498,7 +1433,7 @@ prep.fit <- function(obj, x) {
    i = 1
    for (p in obj) {
       if (!is.null(p[["pmethod"]])) {
-         p$params = do.call(p[["pmethod"]], c(list(data = x), p$params))
+         p[["params"]] = do.call(p[["pmethod"]], c(list(data = x), p[["params"]]))
       }
       x <- do.call(p[["method"]], c(list(data = x), p[["params"]]))
       out[[i]] = p
