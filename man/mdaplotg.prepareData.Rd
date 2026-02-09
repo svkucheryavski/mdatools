@@ -19,7 +19,7 @@ list of datasets
 The method should prepare data as a list of datasets (matrices or data frames). One list
 element will be used to create one plot series.
 
-If `data` is matrix or data frame and not `groupby` parameter is provided, then every row
+If `data` is matrix or data frame and no `groupby` parameter is provided, then every row
 will be taken as separate set. This option is available only for line or bar plots.
 }
 \description{

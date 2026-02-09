@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep.R
 \name{prep.savgol}
 \alias{prep.savgol}
-\title{Savytzky-Golay filter}
+\title{Savitzky-Golay filter}
 \usage{
 prep.savgol(data, width = 3, porder = 1, dorder = 0, w = NULL)
 }
@@ -18,7 +18,7 @@ prep.savgol(data, width = 3, porder = 1, dorder = 0, w = NULL)
 \item{w}{do not use, required for training of preprocessing model.}
 }
 \description{
-Applies Savytzky-Golay filter to the rows of data matrix
+Applies Savitzky-Golay filter to the rows of data matrix
 }
 \details{
 The function implements algorithm described in [1] which handles the edge points correctly and

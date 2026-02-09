@@ -24,7 +24,7 @@ mdaplotg.getYLim(
 
 \item{legend.position}{position of legend on the plot (if shown)}
 
-\item{show.labels}{logical, will data ponit labels also be shown}
+\item{show.labels}{logical, will data point labels also be shown}
 }
 \value{
 vector with two values

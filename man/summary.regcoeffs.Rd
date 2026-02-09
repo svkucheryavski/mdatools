@@ -21,5 +21,5 @@
 Shows estimated coefficients and statistics (if available).
 }
 \details{
-Statistcs are shown if Jack-Knifing was used when model is calibrated.
+Statistics are shown if Jack-Knifing was used when model is calibrated.
 }

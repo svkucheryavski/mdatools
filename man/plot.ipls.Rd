@@ -7,7 +7,7 @@
 \method{plot}{ipls}(x, ...)
 }
 \arguments{
-\item{x}{a  (object of class \code{pca}).}
+\item{x}{an iPLS object (object of class \code{ipls}).}
 
 \item{...}{other arguments.}
 }

@@ -7,13 +7,13 @@
 prep.fit(obj, x)
 }
 \arguments{
-\item{obj}{list with preprocssing methods (created using \code{prep} or \code{prep.fit} function).}
+\item{obj}{list with preprocessing methods (created using \code{prep} or \code{prep.fit} function).}
 
 \item{x}{matrix with training set to be used for computing data dependent parameters}
 }
 \value{
 same list but with updated methods parameters computed based on
-the trainin set.
+the training set.
 }
 \description{
 Fits preprocessing model

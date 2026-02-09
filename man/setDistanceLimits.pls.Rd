@@ -24,11 +24,11 @@
 \item{...}{other arguments}
 }
 \value{
-Object models with the three fields updated.
+Model object with the three fields updated.
 }
 \description{
-Computes statisticsl limits for orthogonal and score distances (x-decomposition) and
-orthogonal distance (y-decomposition) based on calibration set and assign the calculated
+Computes statistical limits for orthogonal and score distances (x-decomposition) and
+orthogonal distance (y-decomposition) based on calibration set and assigns the calculated
 values as model properties.
 }
 \details{

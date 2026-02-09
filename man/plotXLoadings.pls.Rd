@@ -20,7 +20,7 @@
 
 \item{type}{type of the plot}
 
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+\item{show.axes}{logical, show or not axes lines crossing origin (0,0)}
 
 \item{show.legend}{logical, show or not legend on the plot (when it is available)}
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{repmat}
 \alias{repmat}
-\title{Replicate matric x}
+\title{Replicate matrix x}
 \usage{
 repmat(x, nrows, ncols = nrows)
 }
@@ -14,5 +14,5 @@ repmat(x, nrows, ncols = nrows)
 \item{ncols}{number of times replicate matrix columns wise}
 }
 \description{
-Replicate matric x
+Replicate matrix x
 }

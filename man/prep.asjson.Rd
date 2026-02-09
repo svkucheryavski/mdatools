@@ -7,7 +7,7 @@
 prep.asjson(obj)
 }
 \arguments{
-\item{obj}{list with preprocssing methods (created using \code{prep.fit} function).}
+\item{obj}{list with preprocessing methods (created using \code{prep.fit} function).}
 }
 \value{
 stringified JSON.

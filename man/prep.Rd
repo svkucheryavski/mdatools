@@ -4,14 +4,12 @@
 \alias{prep}
 \title{Class for preprocessing object/item.}
 \usage{
-prep(name, params = NULL, method = NULL)
+prep(name, ...)
 }
 \arguments{
 \item{name}{short text with name for the preprocessing method.}
 
-\item{params}{a list with parameters for the method (if NULL - default parameters will be used).}
-
-\item{method}{method to call when applying the preprocessing, provide it only for user defined methods.}
+\item{...}{a list with named parameters for the method (if empty - default parameters will be used).}
 }
 \description{
 Class for preprocessing object/item.
@@ -25,7 +23,7 @@ method \code{predict}.
 
 For your own preprocessing method you need to create a function, which takes matrix with values
 (dataset) as the first argument, does something and then return a matrix with the same dimension
-and same attributes as the result. The method can have any number of optional  parameters.
+and same attributes as the result. The method can have any number of optional parameters.
 
 See Bookdown tutorial for details.
 }

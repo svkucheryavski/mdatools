@@ -17,13 +17,13 @@ constraint(name, params = NULL, method = NULL)
 Class for MCR-ALS constraint
 }
 \details{
-Use this class to create constraints and add them to a list for MCR-ALS curve resuliton (see
+Use this class to create constraints and add them to a list for MCR-ALS curve resolution (see
 \code{\link{mcrals}}). Either provide name and parameters to one of the existing constraint
 implementations or make your own. See the list of implemented constraints by running
 \code{constraints()}
 
 For your own constraint you need to create a method, which takes matrix with values (either
-spectra or contributions being resolved) as the first argument, does something and then return
+spectra or contributions being resolved) as the first argument, does something and then returns
 a matrix with the same dimension as the result. The method can have any number of optional
 parameters.
 

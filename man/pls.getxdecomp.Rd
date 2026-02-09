@@ -26,7 +26,7 @@ pls.getxdecomp(
 
 \item{xnames}{vector with names of the predictors}
 
-\item{x.attrs}{list with preditors attributes}
+\item{x.attrs}{list with predictors attributes}
 
 \item{objnames}{vector with names of objects (rows of x)}
 

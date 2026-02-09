@@ -9,7 +9,7 @@
 \arguments{
 \item{obj}{PLS results (object of class \code{plsres})}
 
-\item{decomp}{which dcomposition to use ("xdecomp" or "ydecomp")}
+\item{decomp}{which decomposition to use ("xdecomp" or "ydecomp")}
 
 \item{variance}{which variance to use ("expvar", "cumexpvar")}
 

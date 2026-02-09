@@ -25,8 +25,8 @@ or 'local' — recompute new for each local calibration set.}
 \value{
 object of class \code{plsres} with results of cross-validation
 
-Function `pred.fun` must take four agruments: autoscaled x-values, array with regression
-coefficients, vectors for centring and scaling of y-values (if used). The function must
+Function `pred.fun` must take four arguments: autoscaled x-values, array with regression
+coefficients, vectors for centering and scaling of y-values (if used). The function must
 return predicted y-values in original units (unscaled and uncentered).
 }
 \description{

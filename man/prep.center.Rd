@@ -9,7 +9,7 @@ prep.center(data, type = "mean", center = NULL)
 \arguments{
 \item{data}{a matrix with data values.}
 
-\item{type}{type of statistic to use for centring ('mean', or 'median').}
+\item{type}{type of statistic to use for centering ('mean', or 'median').}
 
 \item{center}{do not use, required for training of preprocessing model.}
 }

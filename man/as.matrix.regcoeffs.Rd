@@ -16,5 +16,5 @@
 \item{...}{other arguments}
 }
 \description{
-returns matrix with regression coeffocoents for given response number and amount of components
+returns matrix with regression coefficients for given response number and amount of components
 }

@@ -7,7 +7,7 @@
 mdaplot.prepareColors(palette, ncolors, opacity)
 }
 \arguments{
-\item{palette}{vector with main colors for current pallette}
+\item{palette}{vector with main colors for current palette}
 
 \item{ncolors}{number of colors to generate}
 

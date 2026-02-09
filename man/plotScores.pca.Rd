@@ -21,11 +21,11 @@
 
 \item{type}{type of the plot ("p", "l", "b", "h")}
 
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+\item{show.axes}{logical, show or not axes lines crossing origin (0,0)}
 
 \item{show.legend}{logical, show or not a legend on the plot}
 
-\item{res}{list with result objects to show the variance for}
+\item{res}{list with result objects to show the scores for}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

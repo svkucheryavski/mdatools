@@ -23,24 +23,24 @@ classres(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = 1)
 The following fields are available only if reference values were provided.
 \item{tp}{number of true positives.}
 \item{tn}{number of true negatives.}
-\item{fp}{nmber of false positives.}
+\item{fp}{number of false positives.}
 \item{fn}{number of false negatives.}
 \item{specificity}{specificity of predictions.}
 \item{sensitivity}{sensitivity of predictions.}
 \item{misclassified}{ratio of misclassified objects.}
 }
 \description{
-\code{classres} is used to store results classification for one or multiple classes.
+\code{classres} is used to store results of classification for one or multiple classes.
 }
 \details{
 There is no need to create a \code{classres} object manually, it is created automatically when
-build a classification model (e.g. using \code{\link{simca}} or \code{\link{plsda}}) or apply
+building a classification model (e.g. using \code{\link{simca}} or \code{\link{plsda}}) or apply
 the model to new data. For any classification method from \code{mdatools}, a class using to
 represent results of classification (e.g. \code{\link{simcares}}) inherits fields and methods of
 \code{classres}.
 }
 \seealso{
-Methods \code{classres} class:
+Methods for \code{classres} class:
 \tabular{ll}{
  \code{\link{showPredictions.classres}} \tab shows table with predicted values.\cr
  \code{\link{plotPredictions.classres}} \tab makes plot with predicted values.\cr

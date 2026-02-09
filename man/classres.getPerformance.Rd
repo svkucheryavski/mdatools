@@ -2,7 +2,7 @@
 % Please edit documentation in R/classres.R
 \name{classres.getPerformance}
 \alias{classres.getPerformance}
-\title{Calculation of  classification performance parameters}
+\title{Calculation of classification performance parameters}
 \usage{
 classres.getPerformance(c.ref, c.pred)
 }

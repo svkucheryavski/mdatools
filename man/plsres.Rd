@@ -43,7 +43,7 @@ Returns an object of \code{plsres} class with following fields:
 \item{info }{information about the object.}
 }
 \description{
-\code{plsres} is used to store and visualize results of applying a PLS model to a new data.
+\code{plsres} is used to store and visualize results of applying a PLS model to new data.
 }
 \details{
 Do not use \code{plsres} manually, the object is created automatically when one applies a PLS
@@ -134,7 +134,7 @@ Methods for \code{plsres} objects:
    \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
    \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
    \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
-   \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y
+   \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for x
    decomposition.\cr
    \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y
    decomposition.\cr

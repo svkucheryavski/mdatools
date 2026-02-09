@@ -16,7 +16,7 @@ Returns an object of \code{plsdares} class with fields, inherited from \code{\li
 and \code{\link{plsres}}.
 }
 \description{
-\code{plsdares} is used to store and visualize results of applying a PLS-DA model to a new data.
+\code{plsdares} is used to store and visualize results of applying a PLS-DA model to new data.
 }
 \details{
 Do not use \code{plsdares} manually, the object is created automatically when one applies a
@@ -25,7 +25,7 @@ and validation results in PLS-DA model are stored as objects of \code{plsdares} 
 function \code{\link{predict.plsda}}.
 
 The object gives access to all PLS-DA results as well as to the plotting methods for
-visualisation of the results. The \code{plsidares} class also inherits all properties and methods
+visualisation of the results. The \code{plsdares} class also inherits all properties and methods
 of \code{classres} and \code{plsres} classes.
 
 If no reference values provided, classification statistics will not be calculated and
@@ -117,7 +117,7 @@ Methods for \code{plsres} objects:
    \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
    \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
    \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
-   \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y
+   \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for x
    decomposition.\cr
    \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y
    decomposition.\cr

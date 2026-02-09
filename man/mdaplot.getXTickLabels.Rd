@@ -7,7 +7,7 @@
 mdaplot.getXTickLabels(xticklabels, xticks, excluded_cols)
 }
 \arguments{
-\item{xticklabels}{xticklables provided by user (if any)}
+\item{xticklabels}{xticklabels provided by user (if any)}
 
 \item{xticks}{xticks (provided or computed)}
 

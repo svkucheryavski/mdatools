@@ -27,19 +27,19 @@ mcrals(
 
 \item{ncomp}{number of components to calculate.}
 
-\item{cont.constraints}{a list with constraints to be applied to contributions  (see details).}
+\item{cont.constraints}{a list with constraints to be applied to contributions (see details).}
 
-\item{spec.constraints}{a list with constraints to be applied to spectra  (see details).}
+\item{spec.constraints}{a list with constraints to be applied to spectra (see details).}
 
 \item{spec.ini}{a matrix with initial estimation of the pure components spectra.}
 
-\item{cont.forced}{a matrix which allows to force some of the concentration values (see details).}
+\item{cont.forced}{a matrix that allows forcing some of the concentration values (see details).}
 
-\item{spec.forced}{a matrix which allows to force some of the spectra values (see details).}
+\item{spec.forced}{a matrix that allows forcing some of the spectra values (see details).}
 
-\item{cont.solver}{which function to use as a solver for resolving of pure components contributions (see detials).}
+\item{cont.solver}{which function to use as a solver for resolving of pure components contributions (see details).}
 
-\item{spec.solver}{which function to use as a solver for resolving of pure components spectra (see detials).}
+\item{spec.solver}{which function to use as a solver for resolving of pure components spectra (see details).}
 
 \item{exclrows}{rows to be excluded from calculations (numbers, names or vector with logical values).}
 
@@ -54,7 +54,7 @@ mcrals(
 \item{info}{a short text with description of the case (optional).}
 }
 \value{
-Returns an object of \code{\link{mcrpure}} class with the following fields:
+Returns an object of \code{\link{mcrals}} class with the following fields:
 \item{resspec}{matrix with resolved spectra.}
 \item{rescont}{matrix with resolved contributions.}
 \item{cont.constraints}{list with contribution constraints provided by user.}
@@ -63,13 +63,13 @@ Returns an object of \code{\link{mcrpure}} class with the following fields:
 \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
 \item{ncomp}{number of resolved components}
 \item{max.niter}{maximum number of iterations}
-\item{info }{information about the model, provided by user when build the model.}
+\item{info }{information about the model, provided by user when building the model.}
 
 
 More details and examples can be found in the Bookdown tutorial.
 }
 \description{
-\code{mcralls} allows to resolve spectroscopic data to linear combination of individual spectra
+\code{mcrals} allows resolving spectroscopic data to linear combination of individual spectra
 and contributions using the alternating least squares (ALS) algorithm with constraints.
 }
 \details{
@@ -77,7 +77,7 @@ The method implements the iterative ALS algorithm, where, at each iteration, spe
 contributions of each chemical component are estimated and then a set of constraints is
 applied to each. The method is well described in [1, 2].
 
-The method assumes that the spectra (D) is a linear combination of pure components spectra (S)
+The method assumes that the spectral data (D) is a linear combination of pure components spectra (S)
 and pure component concentrations (C):
 
 D = CS' + E
@@ -103,11 +103,11 @@ The algorithm iteratively resolves C and S and checks how well CS' is to D. The 
 either when number exceeds value in \code{max.niter} or when improvements (difference between
 explained variance on current and previous steps) is smaller than \code{tol} value.
 
-Parameters \code{cont.force} and \code{spec.force} allows you to force some parts of the
+Parameters \code{cont.forced} and \code{spec.forced} allow you to force some parts of the
 contributions or the spectra to be equal to particular pre-defined values. In this case you need
-to provide the parameters (or just one of them) in form of a matrix. For example \code{cont.force}
-should have as many rows as many you have in the original spectral data \code{x} and as many
-columns as many pure components you want to resolve. Feel all values of this matrix with
+to provide the parameters (or just one of them) in form of a matrix. For example \code{cont.forced}
+should have as many rows as you have in the original spectral data \code{x} and as many
+columns as many pure components you want to resolve. Fill all values of this matrix with
 \code{NA} and the values you want to force with real numbers. For example if you know that in
 the first measurement concentration of 2 and 3 components was zero, set the corresponding
 values of \code{cont.force} to zero. See also the last case in the examples section.
@@ -118,7 +118,7 @@ values of \code{cont.force} to zero. See also the last case in the examples sect
 
 library(mdatools)
 
-# resolve mixture of carbonhydrates Raman spectra
+# resolve mixture of carbohydrates Raman spectra
 
 data(carbs)
 
@@ -134,7 +134,7 @@ cs <- list(
 )
 
 # because by default initial approximation is made by using random numbers
-# we need to seed the generator in order to get reproducable results
+# we need to seed the generator in order to get reproducible results
 set.seed(6)
 
 # run ALS

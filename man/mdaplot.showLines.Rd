@@ -16,7 +16,7 @@ mdaplot.showLines(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.2))
 \item{col}{color of lines}
 }
 \description{
-Shows horisontal and vertical lines on a plot.
+Shows horizontal and vertical lines on a plot.
 }
 \details{
 If it is needed to show only one line, the other coordinate shall be set to NA.

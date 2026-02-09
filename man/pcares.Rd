@@ -43,7 +43,7 @@ library(mdatools)
 
 data(people)
 x = people[seq(1, 32, 2), ]
-x.new = people[seq(1, 32, 2), ]
+x.new = people[seq(2, 32, 2), ]
 
 model = pca(people, scale = TRUE, info = "Simple PCA model")
 model = selectCompNum(model, 4)

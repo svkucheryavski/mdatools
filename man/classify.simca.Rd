@@ -17,7 +17,7 @@ classify.simca(obj, pca.res, c.ref = NULL)
 vector with predicted class values (\code{c.pred})
 }
 \description{
-Make classification based on calculated T2 and Q values and corresponding limits
+Makes classification based on calculated T2 and Q values and corresponding limits
 }
 \details{
 This is a service function for SIMCA class, do not use it manually.

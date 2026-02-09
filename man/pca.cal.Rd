@@ -15,7 +15,7 @@ pca.cal(x, ncomp, center, scale, method, rand = NULL)
 
 \item{scale}{logical, do standardization or not}
 
-\item{method}{algorithm for compiting PC space (only 'svd' and 'nipals' are supported so far)}
+\item{method}{algorithm for computing PC space (only 'svd' and 'nipals' are supported so far)}
 
 \item{rand}{vector with parameters for randomized PCA methods (if NULL, conventional PCA is used instead)}
 }

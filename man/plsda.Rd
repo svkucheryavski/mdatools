@@ -51,7 +51,7 @@ multiple classes or a vector with logical values in case of one class model).}
 
 \item{lim.type}{which method to use for calculation of critical limits for residual distances (see details)}
 
-\item{alpha}{significance level for extreme limits for T2 and Q disances.}
+\item{alpha}{significance level for extreme limits for T2 and Q distances.}
 
 \item{gamma}{significance level for outlier limits for T2 and Q distances.}
 
@@ -75,7 +75,7 @@ Returns an object of \code{plsda} class with following fields (most inherited fr
 \item{yloadings }{matrix with loading values for y (c)  decomposition.}
 \item{weights }{matrix with PLS weights.}
 \item{coeffs }{matrix with regression coefficients calculated for each component.}
-\item{info }{information about the model, provided by user when build the model.}
+\item{info }{information about the model, provided by user when building the model.}
 \item{calres }{an object of class \code{\link{plsdares}} with PLS-DA results for a calibration
 data.}
 \item{testres }{an object of class \code{\link{plsdares}} with PLS-DA results for a test data,
@@ -84,18 +84,18 @@ if it was provided.}
 if this option was chosen.}
 }
 \description{
-\code{plsda} is used to calibrate, validate and use of partial least squares discrimination
+\code{plsda} is used to calibrate, validate and apply partial least squares discriminant
 analysis (PLS-DA) model.
 }
 \details{
 The \code{plsda} class is based on \code{pls} with extra functions and plots covering
-classification functionality. All plots for \code{pls} can be used. E.g. of you want to see the
+classification functionality. All plots for \code{pls} can be used. E.g. if you want to see the
 real predicted values (y in PLS) instead of classes use \code{plotPredictions.pls(model)} instead
 of \code{plotPredictions(model)}.
 
 Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
 will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
-cross-validation will be preformed). If it is a list, the following syntax can be used:
+cross-validation will be performed). If it is a list, the following syntax can be used:
 \code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg}
 segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits
 to \code{nseg} segments ('venetian blinds').
@@ -159,7 +159,7 @@ par(mfrow = c(1, 1))
 \seealso{
 Specific methods for \code{plsda} class:
 \tabular{ll}{
- \code{print.plsda} \tab prints information about a \code{pls} object.\cr
+ \code{print.plsda} \tab prints information about a \code{plsda} object.\cr
  \code{summary.plsda} \tab shows performance statistics for the model.\cr
  \code{plot.plsda} \tab shows plot overview of the model.\cr
  \code{\link{predict.plsda}} \tab applies PLS-DA model to a new data.\cr

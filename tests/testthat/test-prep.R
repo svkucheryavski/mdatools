@@ -10,11 +10,8 @@ xe <- 1:10
 
 test_that("Preprocessing methods raise error if data is not a matrix", {
 
-   expect_error(prep.snv((Xe)))
-   expect_error(prep.snv((xe)))
-
-   expect_error(prep.msc((Xe)))
-   expect_error(prep.msc((xe)))
+   expect_error(prep.emsc((Xe)))
+   expect_error(prep.emsc((xe)))
 
    expect_error(prep.norm((Xe)))
    expect_error(prep.norm((xe)))
@@ -91,7 +88,7 @@ context("prep: snv, msc, norm, km")
 
 test_that("SNV works correctly", {
    spectra <- simdata$spectra.c
-   expect_silent(pspectra <- prep.snv(spectra))
+   expect_warning(pspectra <- prep.snv(spectra))
    expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
    expect_equivalent(apply(pspectra, 1, mean), rep(0, nrow(spectra)))
    expect_equivalent(apply(pspectra, 1, sd), rep(1, nrow(spectra)))
@@ -110,10 +107,10 @@ test_that("MSC works correctly", {
    md <- apply(spectra, 2, median)
 
    spectra <- simdata$spectra.c
-   expect_silent(pspectra1 <- prep.msc(spectra))
-   expect_silent(pspectra2 <- prep.msc(spectra, mspectrum = mn))
-   expect_silent(pspectra3 <- prep.msc(spectra, mspectrum = md))
-   expect_silent(pspectra4 <- prep.msc(spectra, mspectrum = matrix(md)))
+   expect_silent(pspectra1 <- prep.emsc(spectra))
+   expect_silent(pspectra2 <- prep.emsc(spectra, mspectrum = mn))
+   expect_silent(pspectra3 <- prep.emsc(spectra, mspectrum = md))
+   expect_silent(pspectra4 <- prep.emsc(spectra, mspectrum = matrix(md)))
 
    expect_equivalent(attr(pspectra1, "mspectrum"), mn)
    expect_equivalent(attr(pspectra2, "mspectrum"), mn)
@@ -129,8 +126,8 @@ test_that("MSC works correctly", {
    expect_equal(mda.getattr(spectra), mda.getattr(pspectra4))
 
    # wrong scenario
-   expect_error(prep.msc(spectra, mspectrum = c(1, 2, 3)))
-   expect_error(prep.msc(spectra, mspectrum = matrix(1:10, ncol = 5)))
+   expect_error(prep.emsc(spectra, mspectrum = c(1, 2, 3)))
+   expect_error(prep.emsc(spectra, mspectrum = matrix(1:10, ncol = 5)))
 })
 
 test_that("Normalization to unit area works correctly", {
@@ -461,7 +458,7 @@ test_that("Method works with one preprocessing method in the list", {
       prep("savgol", width = 11, porder = 2, dorder = 1)
    )
 
-   px1 <- employ.prep(p, x)
+   px1 <- prep.apply(p, x)
    px2 <- prep.savgol(x, width = 11, porder = 2, dorder = 1)
 
    expect_equal(px1, px2)
@@ -796,11 +793,11 @@ testCase <- function(p, Xc, jsonFilename) {
 
 
    # save it to JSON file and then load it back
-   prep.writeJSON(pm, './preprocessing-tmp.json')
-   pm1 <- prep.readJSON('./preprocessing-tmp.json')
+   writeJSON(pm, './preprocessing-tmp.json')
+   pm1 <- readJSON('./preprocessing-tmp.json')
 
    # load model developed in web-app
-   pm2 <- prep.readJSON(jsonFilename)
+   pm2 <- readJSON(jsonFilename)
 
    # all models should be the same
    for (n in seq_along(pm)) {
@@ -896,6 +893,22 @@ test_that("JSON() and readJSON() methods work correctly.", {
    )
 
    testCase(p, Xc, "./preprocessing-model-full-hs.json")
+
+   # error cases
+   p <- list(
+      prep("varsel"),
+      prep("center", type = "mean")
+   )
+   pm  <- prep.fit(p, Xc)
+   expect_error(json <- prep.asjson(pm))
+
+
+   p <- list(
+      prep("varsel", var.ind = c(10:20, 30:40)),
+      prep("center", type = "mean")
+   )
+   pm  <- prep.fit(p, Xc)
+   expect_error(json <- prep.asjson(pm))
 
 })
 

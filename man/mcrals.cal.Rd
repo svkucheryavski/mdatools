@@ -2,7 +2,7 @@
 % Please edit documentation in R/mcrals.R
 \name{mcrals.cal}
 \alias{mcrals.cal}
-\title{Identifies pure variables}
+\title{MCR-ALS calibration}
 \usage{
 mcrals.cal(
   D,
@@ -24,19 +24,19 @@ mcrals.cal(
 
 \item{ncomp}{number of pure components}
 
-\item{cont.constraints}{a list with constraints to be applied to contributions  (see details).}
+\item{cont.constraints}{a list with constraints to be applied to contributions (see details).}
 
-\item{spec.constraints}{a list with constraints to be applied to spectra  (see details).}
+\item{spec.constraints}{a list with constraints to be applied to spectra (see details).}
 
 \item{spec.ini}{a matrix with initial estimation of the pure components spectra.}
 
-\item{cont.forced}{a matrix which allows to force some of the concentration values (see details).}
+\item{cont.forced}{a matrix that allows forcing some of the concentration values (see details).}
 
-\item{spec.forced}{a matrix which allows to force some of the spectra values (see details).}
+\item{spec.forced}{a matrix that allows forcing some of the spectra values (see details).}
 
-\item{cont.solver}{which function to use as a solver for resolving of pure components contributions (see detials).}
+\item{cont.solver}{which function to use as a solver for resolving of pure components contributions (see details).}
 
-\item{spec.solver}{which function to use as a solver for resolving of pure components spectra (see detials).}
+\item{spec.solver}{which function to use as a solver for resolving of pure components spectra (see details).}
 
 \item{max.niter}{maximum number of iterations.}
 
@@ -45,7 +45,7 @@ mcrals.cal(
 \item{verbose}{logical, if TRUE information about every iteration will be shown.}
 }
 \value{
-The function returns a list with with following fields:
+The function returns a list with the following fields:
 \item{ncomp }{number of pure components.}
 \item{resspec}{matrix with resolved spectra.}
 \item{rescont}{matrix with resolved contributions.}
@@ -54,6 +54,6 @@ The function returns a list with with following fields:
 \item{max.niter}{maximum number of iterations}
 }
 \description{
-The method identifies indices of pure variables using the SIMPLISMA
-algorithm.
+The method resolves spectral data into pure component spectra and contributions
+using the Alternating Least Squares algorithm with constraints.
 }

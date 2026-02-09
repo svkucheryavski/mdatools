@@ -7,7 +7,7 @@
 pca.fromjson(str)
 }
 \arguments{
-\item{str}{sttringified JSON (from model file)}
+\item{str}{stringified JSON (from model file)}
 }
 \value{
 object of \code{\link{pca}} class

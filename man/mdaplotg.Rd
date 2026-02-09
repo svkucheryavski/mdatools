@@ -87,7 +87,7 @@ mdaplotg(
 
 \item{show.grid}{logical, show or not a grid for the plot.}
 
-\item{grid.lwd}{line thinckness (width) for the grid}
+\item{grid.lwd}{line thickness (width) for the grid}
 
 \item{grid.col}{line color for the grid}
 

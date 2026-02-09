@@ -17,7 +17,7 @@ ipls.backward(x, y, obj, int.stat, glob.stat, full, cv.scope)
 
 \item{glob.stat}{data frame with initial global statistics.}
 
-\item{full}{logical, if TRUE the procedure will continue even if no improvements is observed.}
+\item{full}{logical, if TRUE the procedure will continue even if no improvement is observed.}
 
 \item{cv.scope}{scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
 or 'local' — recompute new for each local calibration set.}

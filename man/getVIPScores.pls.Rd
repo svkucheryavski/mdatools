@@ -9,7 +9,7 @@
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{number of components to count}
+\item{ncomp}{number of components to show}
 
 \item{...}{other parameters}
 }

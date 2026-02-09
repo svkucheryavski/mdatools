@@ -7,7 +7,7 @@
 mdaplot.getYTickLabels(yticklabels, yticks, excluded_rows)
 }
 \arguments{
-\item{yticklabels}{yticklables provided by user (if any)}
+\item{yticklabels}{yticklabels provided by user (if any)}
 
 \item{yticks}{yticks (provided or computed)}
 

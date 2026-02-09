@@ -14,7 +14,7 @@ prep.msc(data, mspectrum = NULL, ...)
 \item{...}{other optional components}
 }
 \value{
-preprocessed spectra (calculated mean spectrum is assigned as attribut 'mspectrum')
+preprocessed spectra (calculated mean spectrum is assigned as attribute 'mspectrum')
 }
 \description{
 Applies Multiplicative Scatter Correction (MSC) transformation to data matrix (spectra)

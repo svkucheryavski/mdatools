@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{mda.purge}
 \alias{mda.purge}
-\title{Removes excluded (hidden) rows and colmns from data}
+\title{Removes excluded (hidden) rows and columns from data}
 \usage{
 mda.purge(data)
 }
@@ -10,5 +10,5 @@ mda.purge(data)
 \item{data}{data frame or matrix with data}
 }
 \description{
-Removes excluded (hidden) rows and colmns from data
+Removes excluded (hidden) rows and columns from data
 }

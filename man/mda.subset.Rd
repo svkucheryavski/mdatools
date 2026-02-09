@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{mda.subset}
 \alias{mda.subset}
-\title{A wrapper for subset() method with proper set of attributed}
+\title{A wrapper for subset() method with proper set of attributes}
 \usage{
 mda.subset(x, subset = NULL, select = NULL)
 }
@@ -17,15 +17,15 @@ mda.subset(x, subset = NULL, select = NULL)
 a data with the subset
 }
 \description{
-A wrapper for subset() method with proper set of attributed
+A wrapper for subset() method with proper set of attributes
 }
 \details{
 The method works similar to the standard \code{subset()} method, with minor differences. First
-of all it keeps (and correct, if necessary) all important attributes. If only columns are
+of all it keeps (and corrects, if necessary) all important attributes. If only columns are
 selected, it keeps all excluded rows as excluded. If only rows are selected, it keeps all
-excluded columns. If both rows and columns are selected it removed all excluded elements first
+excluded columns. If both rows and columns are selected it removes all excluded elements first
 and then makes the subset.
 
-The parameters \code{subset} and \code{select} may each be a vector with numbers or nanes
+The parameters \code{subset} and \code{select} may each be a vector with numbers or names
 without excluded elements, or a logical expression.
 }

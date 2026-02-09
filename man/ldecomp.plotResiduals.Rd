@@ -33,7 +33,7 @@ ldecomp.plotResiduals(
 
 \item{ncomp}{how many components to use (by default optimal value selected for the model will be used)}
 
-\item{log}{logical, apply log tranformation to the distances or not (see details)}
+\item{log}{logical, apply log transformation to the distances or not (see details)}
 
 \item{norm}{logical, normalize distance values or not (see details)}
 
@@ -66,14 +66,14 @@ limits for given number of components.
 \details{
 The function is a bit more advanced version of \code{\link{plotResiduals.ldecomp}}. It allows to
 show distance values for several result objects (e.g. calibration and test set or calibration
-and new prediction set) as well as display the correspondng critical limits in form of lines
+and new prediction set) as well as display the corresponding critical limits in form of lines
 or curves.
 
 Depending on how many result objects your model has or how many you specified manually,
 using the \code{res} parameter, the plot behaves in a bit different way.
 
 If only one result object is provided, then it allows to colorise the points using \code{cgroup}
-parameter. If two or more result objects are provided, then the function show
+parameter. If two or more result objects are provided, then the function shows
 distances in groups, and adds corresponding legend.
 
 The function can show distance values normalised (h/h0 and q/q0) as well as with log

@@ -36,7 +36,7 @@
 
 \item{show.labels}{logical, show or not labels for the plot objects}
 
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+\item{show.axes}{logical, show or not axes lines crossing origin (0,0)}
 
 \item{show.excluded}{logical, show or hide rows marked as excluded (attribute `exclrows`)}
 

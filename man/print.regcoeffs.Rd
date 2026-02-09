@@ -12,5 +12,5 @@
 \item{...}{other arguments}
 }
 \description{
-prints regression coeffocoent values for given response number and amount of components
+prints regression coefficient values for given response number and amount of components
 }

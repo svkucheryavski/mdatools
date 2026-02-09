@@ -7,7 +7,7 @@
 getConfidenceEllipse(points, conf.level = 0.95, n = 100)
 }
 \arguments{
-\item{points}{matrix of data frame with coordinates of the points}
+\item{points}{matrix or data frame with coordinates of the points}
 
 \item{conf.level}{confidence level for the ellipse}
 

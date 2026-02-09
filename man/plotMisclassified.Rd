@@ -15,5 +15,5 @@ plotMisclassified(obj, ...)
 Misclassification ratio plot
 }
 \details{
-Generic function for plotting missclassification values for classification model or results
+Generic function for plotting misclassification values for classification model or results
 }

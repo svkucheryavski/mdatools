@@ -46,7 +46,7 @@ mdaplot.plotAxes(
 
 \item{show.grid}{logical, show or not axes grid}
 
-\item{grid.lwd}{line thinckness (width) for the grid}
+\item{grid.lwd}{line thickness (width) for the grid}
 
 \item{grid.col}{line color for the grid}
 }

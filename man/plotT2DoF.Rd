@@ -31,5 +31,5 @@ Shows a plot with degrees of freedom computed for score distances at given numbe
 of components using data driven approach ("ddmoments" or "ddrobust").
 }
 \details{
-Work only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
+Works only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 }

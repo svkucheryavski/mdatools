@@ -20,7 +20,7 @@
 
 \item{ny}{number of response variable to make the plot for (if y is multivariate)}
 
-\item{show.lines}{allows to show the horizonta line at 0 level}
+\item{show.lines}{allows to show the horizontal line at 0 level}
 
 \item{res}{list with result objects}
 

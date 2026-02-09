@@ -54,7 +54,7 @@ first local minimum of RMSECV and \code{'wold'} for Wold's rule.)}
 
 \item{lim.type}{which method to use for calculation of critical limits for residual distances (see details)}
 
-\item{alpha}{significance level for extreme limits for T2 and Q disances.}
+\item{alpha}{significance level for extreme limits for T2 and Q distances.}
 
 \item{gamma}{significance level for outlier limits for T2 and Q distances.}
 
@@ -63,7 +63,7 @@ or 'local' — recompute new for each local calibration set.}
 }
 \value{
 Returns an object of \code{pls} class with following fields:
-\item{ncomp }{number of components included to the model.}
+\item{ncomp }{number of components included in the model.}
 \item{ncomp.selected }{selected (optimal) number of components.}
 \item{xcenter }{vector with values used to center the predictors (x).}
 \item{ycenter }{vector with values used to center the responses (y).}
@@ -76,12 +76,12 @@ Returns an object of \code{pls} class with following fields:
 \item{weights }{matrix with PLS weights.}
 \item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated
 for each component.}
-\item{info }{information about the model, provided by user when build the model.}
-\item{cv }{information cross-validation method used (if any).}
+\item{info }{information about the model, provided by user when building the model.}
+\item{cv }{information about cross-validation method used (if any).}
 \item{res }{a list with result objects (e.g. calibration, cv, etc.)}
 }
 \description{
-\code{pls} is used to calibrate, validate and use of partial least squares (PLS)
+\code{pls} is used to calibrate, validate and apply partial least squares (PLS)
 regression model.
 }
 \details{
@@ -92,18 +92,18 @@ Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) a
 number of objects - 1, number of x variables and the default or provided value. Regression
 coefficients, predictions and other results are calculated for each set of components from 1
 to \code{ncomp}: 1, 1:2, 1:3, etc. The optimal number of components, (\code{ncomp.selected}),
-is found using first local minumum, but can be also forced to user defined value using function
+is found using first local minimum, but can be also forced to user defined value using function
 (\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all
 default operations - predictions, plots, etc.
 
 Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
 will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
-cross-validation will be preformed). If it is a list, the following syntax can be used:
+cross-validation will be performed). If it is a list, the following syntax can be used:
 \code{cv = list("rand", nseg, nrep)} for random repeated cross-validation with \code{nseg}
 segments and \code{nrep} repetitions or \code{cv = list("ven", nseg)} for systematic splits
 to \code{nseg} segments ('venetian blinds').
 
-Calculation of confidence intervals and p-values for regression coefficients can by done
+Calculation of confidence intervals and p-values for regression coefficients can be done
 based on Jack-Knifing resampling. This is done automatically if cross-validation is used.
 However it is recommended to use at least 10 segments for stable JK result. See help for
 \code{\link{regcoeffs}} objects for more details.
@@ -246,7 +246,7 @@ Plotting methods for \code{pls} objects:
  \code{\link{plotXYLoadings.pls}} \tab shows loadings plot for x and y decomposition.\cr
  \code{\link{plotXVariance.pls}} \tab shows explained variance plot for x decomposition.\cr
  \code{\link{plotYVariance.pls}} \tab shows explained variance plot for y decomposition.\cr
- \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for y
+ \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for x
  decomposition.\cr
  \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y
  decomposition.\cr

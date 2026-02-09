@@ -59,7 +59,7 @@ mdaplot(
 
 \item{col}{a color for markers or lines (same as \code{plot} parameter).}
 
-\item{bg}{background color for scatter plots wich `pch=21:25`.}
+\item{bg}{background color for scatter plots with `pch=21:25`.}
 
 \item{bwd}{a width of a bar as a percent of a maximum space available for each bar.}
 
@@ -95,7 +95,7 @@ mdaplot(
 
 \item{show.grid}{logical, show or not a grid for the plot.}
 
-\item{grid.lwd}{line thinckness (width) for the grid.}
+\item{grid.lwd}{line thickness (width) for the grid.}
 
 \item{grid.col}{line color for the grid.}
 
@@ -128,7 +128,7 @@ mdaplot(
 
 \item{opacity}{opacity for plot colors (value between 0 and 1).}
 
-\item{pch.colinv}{allows to swap values for `col` and `bg` for scatter plots with `pch` valyes from 21 to 25.}
+\item{pch.colinv}{allows to swap values for `col` and `bg` for scatter plots with `pch` values from 21 to 25.}
 
 \item{...}{other plotting arguments.}
 }
@@ -140,7 +140,7 @@ Most of the parameters are similar to what are used with standard \code{plot} fu
 differences are described below.
 
 The function makes a plot of one set of objects. It can be a set of points (scatter plot),
-bars, lines, scatter-lines, errorbars og an image. The data is organized as a data frame,
+bars, lines, scatter-lines, errorbars or an image. The data is organized as a data frame,
 matrix or vector. For scatter and only first two columns will be used, for bar plot only
 values from the first row. It is recommended to use \code{\link{mda.subset}} method if plot
 should be made only for a subset of the data, especially if you have any excluded rows or
@@ -158,7 +158,7 @@ allows to turn off and on a color bar legend for this option.
 
 The used color scheme is defined by the \code{colmap} parameter. The default scheme is based
 on color brewer (colorbrewer2.org) diverging scheme with eight colors. There is also a gray
-scheme (\code{colmap = "gray"}) and user can define its own just by specifing the needed
+scheme (\code{colmap = "gray"}) and user can define its own just by specifying the needed
 sequence of colors (e.g. \code{colmap = c("red", "yellow", "green")}, two colors is minimum).
 The scheme will then be generated automatically as a gradient among the colors.
 

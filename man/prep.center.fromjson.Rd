@@ -9,7 +9,7 @@ prep.center.fromjson(mp, mp_new, left = 0, right = 1, left.tot = 0)
 \arguments{
 \item{mp}{model parameters from JSON (user defined)}
 
-\item{mp_new}{mode parameters from JSON after training}
+\item{mp_new}{model parameters from JSON after training}
 
 \item{left}{index of first variable after trimming (if any)}
 

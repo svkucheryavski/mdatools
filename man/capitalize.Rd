@@ -7,7 +7,7 @@
 capitalize(str)
 }
 \arguments{
-\item{str}{text of vector with text values}
+\item{str}{text or vector with text values}
 }
 \description{
 Capitalize text or vector with text values

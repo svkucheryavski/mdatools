@@ -11,7 +11,7 @@
 
 \item{ny}{which response to plot the values for (if y is multivariate), can be a vector.}
 
-\item{ncomp}{number of components to count}
+\item{ncomp}{number of components to show}
 
 \item{type}{type of the plot}
 

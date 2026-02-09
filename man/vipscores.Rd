@@ -9,7 +9,7 @@ vipscores(obj, ncomp = obj$ncomp.selected)
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{number of components to count}
+\item{ncomp}{number of components to show}
 }
 \value{
 matrix \code{nvar x ny} with VIP score values (columns correspond to responses).
@@ -19,7 +19,7 @@ Calculates VIP (Variable Importance in Projection) scores for predictors for giv
 of components and response variable.
 }
 \details{
-May take some time in case of large number of predictors Returns results as a column-vector,
+May take some time in case of large number of predictors. Returns results as a column-vector,
 with all necessary attributes inherited (e.g. xaxis.values, excluded variables, etc.). If you
 want to make a plot use for example: \code{mdaplot(mda.t(v), type = "l")}, where \code{v} is
 a vector with computed VIP scores. Or just try \code{\link{plotVIPScores.pls}}.

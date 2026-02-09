@@ -9,7 +9,7 @@ selratio(obj, ncomp = obj$ncomp.selected)
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{number of components to count}
+\item{ncomp}{number of components to show}
 }
 \value{
 array \code{nvar x ncomp x ny} with selectivity ratio values

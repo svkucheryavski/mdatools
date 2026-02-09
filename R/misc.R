@@ -1021,3 +1021,33 @@ extractPrep <- function(js) {
 arr2int <- function(arr) {
 
 }
+
+
+
+#' Reads models from JSON file made in web-application (mda.tools).
+#'
+#' @param fileName
+#' file name (or full path) to JSON file.
+#'
+#' @returns object with model (prep, pls, pca, ddsimca, pls1da, pls2da).
+#'
+#' @export
+readJSON <- function(fileName) {
+   fileConn <- file(fileName)
+   str <- readLines(fileConn, warn = FALSE)
+   close(fileConn)
+
+   class <- extractStringArray(str, "class")
+   if (is.null(class) || length(class) == 0) {
+      stop("Selected JSON file does not contain any supported model.", call. = FALSE)
+   }
+
+   if ("prepmodel" %in% class) {
+      return (prep.fromjson(str))
+   } else {
+      stop("Selected JSON file does not contain any supported model.", call. = FALSE)
+   }
+
+}
+
+

@@ -40,13 +40,13 @@ Returns an object of \code{\link{mcrpure}} class with the following fields:
 \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
 \item{offset}{offset value used to compute the purity}
 \item{ncomp}{number of resolved components}
-\item{info }{information about the model, provided by user when build the model.}
+\item{info }{information about the model, provided by user when building the model.}
 
 
 More details and examples can be found in the Bookdown tutorial.
 }
 \description{
-\code{mcrpure} allows to resolve spectroscopic data to linear combination of individual spectra
+\code{mcrpure} allows resolving spectroscopic data to linear combination of individual spectra
 and contributions using the pure variables approach.
 }
 \details{
@@ -54,7 +54,7 @@ The method estimates purity of each variable and then uses the purest ones to de
 spectral data into spectra (`resspec`) and contributions (`rescont`) of individual
 chemical components by ordinary least squares.
 
-The pure variabes are identified using stepwise maximum angle calculations and described in
+The pure variables are identified using stepwise maximum angle calculations and described in
 detail in [1]. So the purity of a spectral variable (wavelength, wavenumber) is actually an
 angle (measured in degrees) between the variable and vector of ones for the first component;
 and between the variable and space formed by previously found pure variables for the other
@@ -63,7 +63,7 @@ components.
 \examples{
 library(mdatools)
 
-# resolve mixture of carbonhydrates Raman spectra
+# resolve mixture of carbohydrates Raman spectra
 
 data(carbs)
 m = mcrpure(carbs$D, ncomp = 3)

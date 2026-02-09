@@ -2,7 +2,7 @@
 % Please edit documentation in R/pca.R
 \name{plotQDoF}
 \alias{plotQDoF}
-\title{Degrees of freedom plot for orthogonal distance (Nh)}
+\title{Degrees of freedom plot for orthogonal distance (Nq)}
 \usage{
 plotQDoF(
   obj,
@@ -27,9 +27,9 @@ plotQDoF(
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
-Shows a plot with degrees of freedom computed for score distances at given number
+Shows a plot with degrees of freedom computed for orthogonal distances at given number
 of components using data driven approach ("ddmoments" or "ddrobust").
 }
 \details{
-Work only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
+Works only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 }

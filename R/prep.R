@@ -87,7 +87,7 @@ prep.spikes <- function(data, width = 5, threshold = 6) {
 #' @details
 #' The \code{"area"}, \code{"length"}, \code{"sum"} types do preprocessing to unit area (sum of
 #' absolute values), length or sum of all values in every row of data matrix. Type \code{"snv"}
-#' does the Standard Normal Variate normalization, similar to \code{\link{prep.snv}}. Type
+#' does the Standard Normal Variate normalization. Type
 #' \code{"is"} does the normalization to internal standard peak, whose position is defined by
 #' parameter `col.ind`. If the position is a single value, the rows are normalized to the height
 #' of this peak. If `col.ind` points to several adjacent values, the rows are normalized to the area
@@ -110,7 +110,6 @@ prep.spikes <- function(data, width = 5, threshold = 6) {
 prep.norm <- function(data, type = "area", col.ind = NULL, ref.spectrum = NULL) {
 
    type <- match.arg(type, c("area", "length", "sum", "snv", "is", "pqn"))
-   if (type == "snv") return(prep.snv(data))
 
    if (type == "is" && is.null(col.ind)) {
       stop("For 'is' normalization you need to provide indices for IS peak.", call. = FALSE)
@@ -149,8 +148,13 @@ prep.norm <- function(data, type = "area", col.ind = NULL, ref.spectrum = NULL) 
          data <- prep.norm(data, type = "area")
       }
 
+      if (type == "snv") {
+         data <- sweep(data, 1, rowMeans(data), "-")
+      }
+
       w <- switch(
          type,
+         "snv" = apply(data, 1, sd),
          "area" = rowSums(abs(data)),
          "length" = sqrt(rowSums(data^2)),
          "sum" = rowSums(data),
@@ -739,6 +743,18 @@ prep.savgol.params <- function(data, width = 3, porder = 1, dorder = 0) {
 prep.varsel.asjson <- function(params, npred, left = NULL, right = NULL) {
 
    ind <- params$var.ind
+   if (is.null(ind)) {
+      stop("Parameter 'var.ind' is not specified.", call. = FALSE)
+   }
+
+   if (is.logical(ind)) {
+      ind <- which(ind)
+   }
+
+   if (any(diff(ind) != 1)) {
+      stop("Parameter 'var.ind' should be specified as a single interval without 'holes' inside.", call. = FALSE)
+   }
+
    left.local <- if (is.null(left)) min(ind) else min(ind) + left
    right.local <- if (is.null(left)) max(ind) else max(ind) + left
    return (list(
@@ -1381,10 +1397,8 @@ prep.list <- function() {
 #'
 #' @param name
 #' short text with name for the preprocessing method.
-#' @param params
-#' a list with parameters for the method (if NULL - default parameters will be used).
-#' @param method
-#' method to call when applying the preprocessing, provide it only for user defined methods.
+#' @param ...
+#' a list with named parameters for the method (if empty - default parameters will be used).
 #'
 #' @details
 #' Use this class to create a list with a sequence of preprocessing methods to keep them together
@@ -1464,6 +1478,7 @@ prep.fit <- function(obj, x) {
       i <- i + 1
    }
    out[["_npred"]] <- npred
+   class(out) <- c("prepmodel")
    return (out)
 }
 
@@ -1477,25 +1492,9 @@ prep.fit <- function(obj, x) {
 #'
 #' @export
 prep.apply <- function(obj, x) {
-   return(employ.prep(obj, x))
-}
-
-
-#' Applies a list with preprocessing methods to a dataset
-#'
-#' @param obj
-#' list with preprocessing methods (created using \code{prep} function).
-#' @param x
-#' matrix with dataset
-#' @param ...
-#' other arguments
-#'
-#' @export
-employ.prep <- function(obj, x, ...) {
-
-   stopifnot("employ.prep: the first argument must be a list with preprocessing methods" =
+   stopifnot("prep.apply: the first argument must be a list with preprocessing methods" =
       is.list(obj) && inherits(obj[[1]], "prep"))
-   stopifnot("employ.prep: argument 'x' must be a matrix" =
+   stopifnot("prep.apply: argument 'x' must be a matrix" =
       !is.null(x) && is.matrix(x))
 
    for (p in obj) {
@@ -1504,6 +1503,7 @@ employ.prep <- function(obj, x, ...) {
    }
    return(x)
 }
+
 
 
 #' Converts preprocessing model to JSON elements.
@@ -1623,6 +1623,11 @@ prep.asjson <- function(obj) {
 #' @return list with the methods.
 prep.fromjson <- function(str) {
 
+   class <- extractStringArray(str, "class")
+   if (is.null(class) || length(class) != 1 || !("prepmodel" %in% class)) {
+      stop("Selected JSON file does not contain a preprocessing model.", call. = FALSE)
+   }
+
    # list of methods for conversion of every item
    methods <- list(
       prep.norm.fromjson,
@@ -1721,7 +1726,7 @@ prep.fromjson <- function(str) {
 #' file name (or full path) to JSON file to save the model into.
 #'
 #' @export
-prep.writeJSON <- function(obj, fileName) {
+writeJSON.prepmodel <- function(obj, fileName) {
    m <- prep.asjson(obj)
    fileConn <- file(fileName)
    writeLines(m, fileConn)
@@ -1729,20 +1734,7 @@ prep.writeJSON <- function(obj, fileName) {
 }
 
 
-#' Reads preprocessing model from JSON file made in web-application (mda.tools/prep).
-#'
-#' @param fileName
-#' file name (or full path) to JSON file.
-#'
-#' @returns list with preprocessing model similar to what \code{prep.fit()} creates.
-#'
-#' @export
-prep.readJSON <- function(fileName) {
-   fileConn <- file(fileName)
-   str <- readLines(fileConn, warn = FALSE)
-   close(fileConn)
-   return (prep.fromjson(str))
-}
+
 
 
 ############################################################
@@ -1873,9 +1865,8 @@ prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0) {
 #'
 #' @export
 prep.snv <- function(data) {
-
-   f <- function(data) t(scale(t(data), center = TRUE, scale = TRUE))
-   return(prep.generic(data, f))
+   .Deprecated("prep.norm")
+   return(prep.norm(data, type = "snv"))
 }
 
 
@@ -1914,5 +1905,23 @@ prep.snv <- function(data) {
 #'
 #' @export
 prep.msc <- function(data, mspectrum = NULL, ...) {
+   .Deprecated("prep.emsc")
    return (prep.emsc(data, degree = 0, mspectrum = mspectrum, ...))
+}
+
+
+
+#' Applies a list with preprocessing methods to a dataset
+#'
+#' @param obj
+#' list with preprocessing methods (created using \code{prep} function).
+#' @param x
+#' matrix with dataset
+#' @param ...
+#' other arguments
+#'
+#' @export
+employ.prep <- function(obj, x, ...) {
+   .Deprecated("prep.apply")
+   prep.apply(obj, x)
 }

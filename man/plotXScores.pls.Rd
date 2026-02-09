@@ -18,11 +18,11 @@
 
 \item{comp}{which components to show the plot for (one or vector with several values)}
 
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+\item{show.axes}{logical, show or not axes lines crossing origin (0,0)}
 
 \item{main}{main plot title}
 
-\item{res}{list with result objects to show the plot for (by defaul, model results are used)}
+\item{res}{list with result objects to show the plot for (by default, model results are used)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

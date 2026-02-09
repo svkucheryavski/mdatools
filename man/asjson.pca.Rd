@@ -10,7 +10,7 @@
 \item{obj}{Object with PCA model (from \code{\link{pca}}).}
 }
 \value{
-stringigied JSON
+stringified JSON
 }
 \description{
 Converts object with PCA model to JSON string compatible with web-application.

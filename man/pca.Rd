@@ -42,7 +42,7 @@ pca(
 
 \item{lim.type}{which method to use for calculation of critical limits for residual distances (see details)}
 
-\item{alpha}{significance level for extreme limits for T2 and Q disances.}
+\item{alpha}{significance level for extreme limits for T2 and Q distances.}
 
 \item{gamma}{significance level for outlier limits for T2 and Q distances.}
 
@@ -60,7 +60,7 @@ Returns an object of \code{pca} class with following fields:
 \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
 \item{T2lim }{statistical limit for T2 distance.}
 \item{Qlim }{statistical limit for Q residuals.}
-\item{info }{information about the model, provided by user when build the model.}
+\item{info }{information about the model, provided by user when building the model.}
 \item{calres }{an object of class \code{\link{pcares}} with PCA results for a calibration data.}
 \item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it
 was provided.}
@@ -72,22 +72,22 @@ More details and examples can be found in the Bookdown tutorial.
 }
 \details{
 If number of components is not specified, a minimum of number of objects - 1 and number of
-variables in calibration set is used. One can also specified an optimal number of component,
+variables in calibration set is used. One can also specify an optimal number of components,
 once model is calibrated (\code{ncomp.selected}). The optimal number of components is used to
-build a residuals distance plot, as well as for SIMCA classification.
+build a residual distance plot, as well as for SIMCA classification.
 
 If some of rows of calibration set should be excluded from calculations (e.g. because they are
 outliers) you can provide row numbers, names, or logical values as parameter \code{exclrows}. In
-this case they will be completely ignored we model is calibrated. However, score and residuls
+this case they will be completely ignored when the model is calibrated. However, score and residual
 distances will be computed for these rows as well and then hidden. You can show them
 on corresponding plots by using parameter \code{show.excluded = TRUE}.
 
-It is also possible to exclude selected columns from calculations by provideing parameter
+It is also possible to exclude selected columns from calculations by providing parameter
 \code{exclcols} in form of column numbers, names or logical values. In this case loading matrix
-will have zeros for these columns. This allows to compute PCA models for selected variables
+will have zeros for these columns. This allows computing PCA models for selected variables
 without removing them physically from a dataset.
 
-Take into account that if you see other packages to make plots (e.g. ggplot2) you will
+Take into account that if you use other packages to make plots (e.g. ggplot2) you will
 not be able to distinguish between hidden and normal objects.
 
 By default loadings are computed for the original dataset using either SVD or NIPALS algorithm.
@@ -95,7 +95,7 @@ However, for datasets with large number of rows (e.g. hyperspectral images), the
 possibility to run algorithms based on random permutations [1, 2]. In this case you have
 to define parameter \code{rand} as a vector with two values: \code{p} - oversampling parameter
 and \code{k} - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)}
-are good options, which give quite almost precise solution but much faster.
+are good options, which give quite precise solutions but much faster.
 
 There are several ways to calculate critical limits for orthogonal (Q, q) and score (T2, h)
 distances. In \code{mdatools} you can specify one of the following methods via parameter
@@ -103,12 +103,12 @@ distances. In \code{mdatools} you can specify one of the following methods via p
 chi-square distribution [4], \code{"ddmoments"} and \code{"ddrobust"} - related to data
 driven method proposed in [5]. The \code{"ddmoments"} is based on method of moments for
 estimation of distribution parameters (also known as "classical" approach) while
-\code{"ddrobust"} is based in robust estimation.
+\code{"ddrobust"} is based on robust estimation.
 
 If \code{lim.type="chisq"} or \code{lim.type="jm"} is used, only limits for Q-distances are
 computed based on corresponding approach, limits for T2-distances are computed using
 Hotelling's T-squared distribution. The methods utilizing the data driven approach calculate
-limits for combination of the distances bases on chi-square distribution and parameters
+limits for combination of the distances based on chi-square distribution and parameters
 estimated from the calibration data.
 
 The critical limits are calculated for a significance level defined by parameter \code{'alpha'}.
@@ -116,7 +116,7 @@ You can also specify another parameter, \code{'gamma'}, which is used to calcula
 limit for outliers (shown as dashed line on residual distance plot).
 
 You can also recalculate the limits for existent model by using different values for alpha and
-gamme, without recomputing the model itself. In this case use the following code (it is assumed
+gamma, without recomputing the model itself. In this case use the following code (it is assumed
 that you current PCA/SIMCA model is stored in variable \code{m}):
 \code{m = setDistanceLimits(m, lim.type, alpha, gamma)}.
 
@@ -127,7 +127,7 @@ the limits are also employed for classification of objects.
 
 If you provide a list with preprocessing methods, PCA will apply them to the training set
 before excluding the columns and rows (if specified). The list will be used to train a preprocessing
-model which becomes a part of the PCA modle object. So when you use method `predict()` the provided
+model which becomes a part of the PCA model object. So when you use method `predict()` the provided
 dataset will be automatically preprocessed by the preprocessing model.
 
 Any PCA model (with or without preprocessing) developed in this package can be saved as JSON file
@@ -177,8 +177,8 @@ Xt <- simdata$spectra.t
 
 # create a list with two preprocessing methods
 p <- list(
-   prep("savgol", list(width = 7, porder = 2, dorder = 2)),
-   prep("snv")
+   prep("savgol", width = 7, porder = 2, dorder = 2),
+   prep("norm", type = "snv")
 )
 
 # build a PCA model with and without preprocessing

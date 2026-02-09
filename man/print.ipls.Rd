@@ -7,7 +7,7 @@
 \method{print}{ipls}(x, ...)
 }
 \arguments{
-\item{x}{a iPLS (object of class \code{ipls})}
+\item{x}{an iPLS (object of class \code{ipls})}
 
 \item{...}{other arguments}
 }

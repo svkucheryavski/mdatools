@@ -9,7 +9,7 @@ prep.center.params(data, type = "mean", center = NULL)
 \arguments{
 \item{data}{a matrix with data values.}
 
-\item{type}{type of statistic to use for centring (\code{'mean'}, or \code{'median'}).}
+\item{type}{type of statistic to use for centering (\code{'mean'}, or \code{'median'}).}
 
 \item{center}{vector with precomputed values for centering.}
 }
