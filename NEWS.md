@@ -1,29 +1,42 @@
 v. 0.15.0
 =========
 
-This release aims at extending the functionality of the package as well as introducing interoperability with interactive web-applications for chemometircs available at [mda.tools](https://mda.tools). Any model created using mdatools for R can be saved to a JSON file and then be uploaded to the corresponding web-application for testing or making predictions. And vice versa, if you develop a model in one of the web-apps, you can save it into JSON file and then load it to R to be used with *mdatools* package.
+This release contains numerous small and large improvements, bug fixes, and new methods. It aims at extending the functionality of the package as well as introducing interoperability with interactive web-applications for chemometircs available at [mda.tools](https://mda.tools). Any model created using mdatools for R can now be saved to a JSON file and then be uploaded to the corresponding web-application for testing or making predictions. And vice versa, if you develop a model in one of the web-apps, you can save it into JSON file and then load it to R to be used with *mdatools* package.
 
 Here are all release details.
 
-### New preprocessing methods
+### Improvements to preprocessing methods
 
 There are several new methods for preprocessing, including:
 
 * `prep.spikes()` for cosmic spikes removal from Raman spectra.
-* `prep.center()` for centering of data columns (more flexible than `prep.autoscale()`).
-* `prep.scale()` for scaling of data columns (more flexible than `prep.autoscale()`).
+* `prep.center()` for centering of data columns.
+* `prep.scale()` for scaling of data columns.
 * `prep.emsc()` for extended multiplicative scatter correction.
 
-The following methods are considered as legacy, you can still use them (they will be kept for compatibility), but for new code it is recommeded to use the alternatives:
+The following methods are considered as *deprecated*, you can still use them (they will be kept for compatibility), but for new code it is recommended to use the alternatives:
 
 * `prep.autoscale()` — use `prep.center()` and `prep.scale()` instead.
 * `prep.snv()` — use `prep.norm()` with parameter `type = "snv"` as an alternative.
 * `prep.msc()` — use `prep.emsc()` with parameter `degree = 0`.
-* `employ.prep()` — use `prep.apply()`
+* `employ.prep()` — use `prep.apply()` instead.
 
-In addition to that, from this version you can calibrate a preprocessing model using method `prep.fit()`. This will let you to precompute and save preprocessing parameters which depends
 
-Check the [updated documentation]() for all details.
+In addition to that, the possibility to combine the preprocessing methods together into preprocessing chain (we will call it *preprocessing model*) has been improved. However, these improvements **cause breaking changes**, so if you used it before, check the text below and the updated user guides very carefully.
+
+First of all, the syntax for creating preprocessing items has changed — parameters are now passed as named arguments instead of a list:
+
+* Old: `prep("savgol", list(width = 7, porder = 2, dorder = 2))`
+* New: `prep("savgol", width = 7, porder = 2, dorder = 2)`
+
+Also, the option to add user defined preprocessing methods into a preprocessing model has been removed as it caused issues and non-stable behavior in some cases. From this version, only selected methods can be combined together to a preprocessing model. You can see a full list of the currently supported methods by running `prep.list()`. This list will be extended eventually. And you can still use user defined methods and methods which are not in the list separately.
+
+Second, the list of combined methods can be passed as argument `prep` to functions `pls`, `pca`, `simca`, `ddsimca`, and `plsda`. These functions will compute all necessary parameters of the preprocessing methods from the list and save them as a part of the corresponding model (e.g. PLS). So next time you run `predict()` for applying e.g. PLS model to new data, it will do the preprocessing automatically.
+
+Finally, the list of preprocessing methods can be also *trained* independently of any other model. This means they can pre-compute the parameters which depend on training set (e.g. values for centering, scaling or reference spectrum for EMSC). This can be done by using method `prep.fit()`. Applying the trained preprocessing model to a new dataset can be done by using method `prep.apply()`.
+
+Please check the [updated documentation](https://mda.tools/docs/preprocessing.html) for all details and examples.
+
 
 ### New modellling methods
 
@@ -54,6 +67,9 @@ The original method `simca` is also available for compatibility.
 ### Bug fixes
 
 * fixed issue with y-scores orthogonalization in `pls`, which could give wrong y-scores when data contains outliers.
+* fixed PQN normalization (`prep.norm()` with `type = "pqn"`) not storing reference spectrum when used in a preprocessing pipeline — test data was normalized against its own mean instead of the training mean.
+* fixed JSON export for scaling method with `type = "sd"`.
+* `prep.savgol()` now requires polynomial degree between 1 and 4 (was 0–4).
 
 
 
