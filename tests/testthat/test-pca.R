@@ -852,8 +852,8 @@ test_that("preprocessing is applied to training set and becomes part of a model"
    xt <- mda.exclrows(xc, c(10, 40))
 
    p <- list(
-      prep("savgol", list(width = 7, porder = 2, dorder = 2)),
-      prep("norm", list(type = "snv"))
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("norm", type = "snv")
    )
 
    pm <- prep.fit(p, xc)
@@ -989,8 +989,8 @@ test_that("asvector.pca works correctly", {
 
    # case 3
    p <- list(
-      prep("center", list(type = "median")),
-      prep("scale", list(type = "pareto"))
+      prep("center", type = "median"),
+      prep("scale", type = "pareto")
    )
 
    m <- pca(people, 5, center = FALSE, scale = FALSE, exclrows = c(1, 18), prep = p)

@@ -215,6 +215,22 @@ test_that("PQN normalization works correctly", {
    expect_equivalent(prep.norm(spectra, type = "pqn"), pspectra2)
 })
 
+test_that("PQN normalization works correctly in pipeline", {
+   spectra <- simdata$spectra.c
+   train <- spectra[1:50, ]
+   test  <- spectra[51:100, ]
+   ref <- colMeans(train)
+
+   p <- list(prep("norm", type = "pqn"))
+   pm <- prep.fit(p, train)
+   result_train <- prep.apply(pm, train)
+   result_test  <- prep.apply(pm, test)
+
+   # test data should be normalized against training mean, not its own
+   expected_test <- prep.norm(test, type = "pqn", ref.spectrum = ref)
+   expect_equal(result_test, expected_test)
+})
+
 test_that("Kubelka-Munk works correctly", {
    spectra <- simdata$spectra.c
    spectra <- spectra - min(spectra) + 0.01 * max(spectra)

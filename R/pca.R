@@ -206,8 +206,8 @@
 #'
 #' # create a list with two preprocessing methods
 #' p <- list(
-#'    prep("savgol", list(width = 7, porder = 2, dorder = 2)),
-#'    prep("snv")
+#'    prep("savgol", width = 7, porder = 2, dorder = 2),
+#'    prep("norm", type = "snv")
 #' )
 #'
 #' # build a PCA model with and without preprocessing
