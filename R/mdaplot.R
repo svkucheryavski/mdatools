@@ -104,35 +104,37 @@ mdaplot.showColorbar <- function(cgroup, colmap = "default", lab.col = "darkgray
    # define if colorbar should be discrete (for factors) or not
    shift <- ifelse(is.factor(cgroup), 1, 0)
 
+   scale_exp <- 0
+
    if (!is.factor(cgroup) && length(unique(cgroup)) > 12) {
-         # get colors for 8 groups based on colormap
-         col <- mdaplot.getColors(ngroups = 12, colmap = colmap)
-         ncol <- length(unique(col))
+         # get pretty breakpoints that cover the data range
+         vals <- pretty(range(cgroup), n = 10)
+         ncol <- length(vals) - 1
 
-         # split values to intervals
-         cgroupl <- levels(cut(as.vector(cgroup), ncol))
-
-         # get left and right values for the intervals
-         lvals <- as.numeric(sub("\\((.+),.*", "\\1", cgroupl))
-         rvals <- as.numeric(sub("[^,]*,([^]]*)\\]", "\\1", cgroupl))
-
-         # correct issue with first element
-         if (min(cgroup) != lvals[1]) {
-            lvals[1] <- min(cgroup)
+         # rescale for compact labels if values are very large or very small
+         max_abs <- max(abs(vals[vals != 0]), 0)
+         if (max_abs >= 10000 || (max_abs > 0 && max_abs < 0.01)) {
+            scale_exp <- 3 * floor(floor(log10(max_abs)) / 3)
+            vals <- vals / 10^scale_exp
          }
 
-         # combine values and define matrix for labels
-         vals <- c(lvals, rvals[ncol])
+         # format vals with consistent decimal places based on step size
+         step <- diff(vals)[1]
+         ndec <- max(0, -floor(log10(abs(step) + .Machine$double.eps)))
+         vals <- formatC(vals, format = "f", digits = ndec)
+
+         # get colors for computed number of segments
+         col <- mdaplot.getColors(ngroups = ncol, colmap = colmap)
          labels <- matrix(0, ncol = 2, nrow = ncol + 1)
    } else {
       if (!is.factor(cgroup)) {
          cgroup <- factor(cgroup)
       }
 
-      nlevels <- length(attr(cgroup, "levels"))
+      ngrp <- nlevels(cgroup)
 
       # no splitting is needed, just use factors as labels
-      col <- mdaplot.getColors(ngroups = nlevels, colmap = colmap)
+      col <- mdaplot.getColors(ngroups = ngrp, colmap = colmap)
       ncol <- length(unique(col))
       vals <- levels(cgroup)
       labels <- matrix(0, ncol = 2, nrow = ncol)
@@ -169,6 +171,13 @@ mdaplot.showColorbar <- function(cgroup, colmap = "default", lab.col = "darkgray
 
    # show labels for colorbar regions
    text(labels[, 1], labels[, 2], labels = rownames(labels), pos = 1, col = lab.col, cex = lab.cex)
+
+   # show exponent annotation if values were rescaled
+   if (scale_exp != 0) {
+      text(labels[nrow(labels), 1], labels[nrow(labels), 2],
+         labels = as.expression(bquote("\u00d7" ~ 10^.(scale_exp))),
+         pos = 4, col = lab.col, cex = lab.cex)
+   }
 }
 
 #' Plot lines
@@ -333,7 +342,7 @@ mdaplot.getXAxisLim <- function(ps, xlim, show.labels = FALSE, show.lines = FALS
    # x axis limits in case of bar plot
    if (ps$type == "h") {
       values <- ps$x_values
-      bwd <- if (length(values) == 1) 2 * bwd else bwd * min(diff(values))
+      bwd <- if (length(values) == 1) bwd else bwd * min(diff(values))
       return(c(min(values) - bwd / 2, max(values) + bwd / 2))
    }
 
@@ -341,7 +350,7 @@ mdaplot.getXAxisLim <- function(ps, xlim, show.labels = FALSE, show.lines = FALS
    xlim <- ps$xlim
 
    # correct if limits are equal
-   if (diff(xlim) == 0) xlim <- xlim * c(0.95, 1.05)
+   if (diff(xlim) == 0) xlim <- if (xlim[1] == 0) c(-0.5, 0.5) else xlim * c(0.95, 1.05)
 
    if (show.excluded && !is.null(ps$x_values_excluded)) {
       xlim_excluded <- range(ps$x_values_excluded)
@@ -404,7 +413,7 @@ mdaplot.getYAxisLim <- function(ps, ylim, show.lines = FALSE, show.excluded = FA
    ylim <- ps$ylim
 
    # correct if limits are equal
-   if (diff(ylim) == 0) ylim <- ylim * c(0.95, 1.05)
+   if (diff(ylim) == 0) ylim <- if (ylim[1] == 0) c(-0.5, 0.5) else ylim * c(0.95, 1.05)
 
    # if excluded values must be shown - correct internal limits
    if (show.excluded && !is.null(ps$y_values_excluded)) {
@@ -513,16 +522,13 @@ mdaplot.getXTickLabels <- function(xticklabels, xticks, excluded_cols) {
 #' yticklabels provided by user (if any)
 #' @param yticks
 #' yticks (provided or computed)
-#' @param excluded_rows
-#' rows excluded from plot data (if any)
-#'
 #' @export
-mdaplot.getYTickLabels <- function(yticklabels, yticks, excluded_rows) {
+mdaplot.getYTickLabels <- function(yticklabels, yticks) {
 
    if (is.null(yticklabels)) return(TRUE)
    if (is.null(yticks)) stop("You need to specify both 'yticklabels' and 'yticks'", call. = FALSE)
 
-   # if yticklabels were provided - remove excluded rows if any and check the length
+   # if yticklabels were provided - check the length matches yticks
    if (length(yticks) != length(yticklabels)) {
       stop('Number of elements in "yticks" and "yticklabels" should be the same', call. = FALSE)
    }
@@ -761,7 +767,7 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
       xticks <- mdaplot.getXTicks(xticks, xlim, ps$x_values, type)
 
       # check and prepare yticklabels
-      yticklabels <- mdaplot.getYTickLabels(yticklabels, yticks, ps$excluded_rows)
+      yticklabels <- mdaplot.getYTickLabels(yticklabels, yticks)
       yticks <- mdaplot.getYTicks(yticks, ylim, ps$y_values, type)
 
       # define title and labels
@@ -783,7 +789,7 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
       "d" = plotDensity(ps, nbins = nbins, colmap = colmap),
       "l" = plotLines(ps, pch = pch, lwd = lwd, lty = lty, cex = cex, show.excluded = show.excluded,
          col.excluded = col.excluded, ...),
-      "b" = plotLines(ps, pch = pch, lwd = lwd, cex = cex, show.excluded = show.excluded,
+      "b" = plotLines(ps, pch = pch, lwd = lwd, lty = lty, cex = cex, show.excluded = show.excluded,
          col.excluded = col.excluded, ...),
       "h" = plotBars(ps, bwd = bwd, border = border, force.x.values = force.x.values, ...),
       "e" = plotErrorbars(ps, pch = pch, lwd = lwd, cex = cex, ...),
@@ -795,7 +801,7 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
       mdaplot.showLines(show.lines)
    }
 
-   # show lables
+   # show labels
    if (show.labels) {
       showLabels(ps, show.excluded = show.excluded, col = lab.col, cex = lab.cex,
          force.x.values = force.x.values, bwd = bwd)
@@ -921,7 +927,7 @@ mdaplotyy <- function(data, type = "l", col = mdaplot.getColors(2), lty = c(1, 1
    xticks <- mdaplot.getXTicks(xticks, xlim, ps1$x_values, type)
 
    # check and prepare yticklabels
-   yticklabels <- mdaplot.getYTickLabels(NULL, NULL, NULL)
+   yticklabels <- mdaplot.getYTickLabels(NULL, NULL)
    yticks <- mdaplot.getYTicks(NULL, ylim1, ps1$y_values, type)
 
    # define title and labels

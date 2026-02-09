@@ -64,12 +64,21 @@ The original method `simca` is also available for compatibility.
 
 * method `plotResiduals()` for all models and results objects where it was avaiable now is named `plotDistances()`. The old name, however, will work as well to ensure compatibility with old code.
 
+* colorbar legend for continuous color grouping now uses pretty breakpoints with consistent decimal formatting; very large or very small values are shown with a compact multiplier (e.g. ×10³).
+
+
+
 ### Bug fixes
 
 * fixed issue with y-scores orthogonalization in `pls`, which could give wrong y-scores when data contains outliers.
 * fixed PQN normalization (`prep.norm()` with `type = "pqn"`) not storing reference spectrum when used in a preprocessing pipeline — test data was normalized against its own mean instead of the training mean.
 * fixed JSON export for scaling method with `type = "sd"`.
 * `prep.savgol()` now requires polynomial degree between 1 and 4 (was 0–4).
+* fixed legend symbol for error bar plot type `"e"` in `mdaplotg()`.
+* fixed zero-range axis limits (e.g. when all data values are zero) producing collapsed margins.
+* fixed single-bar width in `plotBars()` being proportional to the x-position instead of constant.
+* fixed `lty` parameter being ignored for plot type `"b"` (scatter-line) in `mdaplot()`.
+* fixed `plotErrorbars()` ignoring the `col` parameter for error bar segments.
 
 
 

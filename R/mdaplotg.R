@@ -143,7 +143,7 @@ mdaplotg.processParam <- function(param, name, is.type, ngroups) {
    param <- if (length(param) == 1) rep(param, ngroups) else param
 
    if (!all(is.type(param))) {
-      stop(paste0('Parameter "', name, '" must be numeric!'), call. = FALSE)
+      stop(paste0('Parameter "', name, '" has invalid values!'), call. = FALSE)
    }
 
    if (length(param) != ngroups)
@@ -438,7 +438,7 @@ mdaplotg <- function(
    xticks <- mdaplot.getXTicks(xticks, xlim = xlim)
 
    # check and prepare yticklabels
-   yticklabels <- mdaplot.getYTickLabels(yticklabels, yticks, NULL)
+   yticklabels <- mdaplot.getYTickLabels(yticklabels, yticks)
    yticks <- mdaplot.getYTicks(yticks, ylim = ylim)
 
    # define main title if not provided (either as "name" or as "name" attr of first dataset)
@@ -490,7 +490,7 @@ mdaplotg <- function(
          stop("Number of values for 'legend' is not the same as number of plot series.", call. = FALSE)
       }
 
-      lty[type == "p" | type == "h"] <- 0
+      lty[type == "p" | type == "h" | type == "e"] <- 0
       pch[type == "l"] <- NA_integer_
       pch[type == "h"] <- 15
 

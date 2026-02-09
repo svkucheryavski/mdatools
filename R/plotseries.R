@@ -148,7 +148,7 @@ preparePlotData <- function(data) {
       attrs$yaxis.values <- attrs$yaxis.values[-excluded_rows]
    }
 
-   # reassign some attribues to data
+   # reassign some attributes to data
    attr(data, "xaxis.values") <- attrs$xaxis.values
    attr(data, "yaxis.values") <- attrs$yaxis.values
    attr(data, "xaxis.name") <- attrs$xaxis.name
@@ -617,9 +617,9 @@ plotErrorbars <- function(ps, col = ps$col, pch = 16, lwd = 1, cex = 1, ...) {
 
    dx <- diff(ps$xlim) / max(50, (length(x) * 3))
 
-   segments(x, y[2, ], x, y[3, ], col = ps$col, lwd = lwd)
-   segments(x - dx, y[2, ], x + dx, y[2, ], col = ps$col, lwd = lwd)
-   segments(x - dx, y[3, ], x + dx, y[3, ], col = ps$col, lwd = lwd)
+   segments(x, y[2, ], x, y[3, ], col = col, lwd = lwd)
+   segments(x - dx, y[2, ], x + dx, y[2, ], col = col, lwd = lwd)
+   segments(x - dx, y[3, ], x + dx, y[3, ], col = col, lwd = lwd)
    points(x, y[1, ], col = col, pch = pch, cex = cex, ...)
 }
 
@@ -650,7 +650,7 @@ plotBars <- function(ps, col = ps$col, bwd = 0.8, border = NA, force.x.values = 
       dx <- min(diff(x))
       bwd_right <- bwd_left <- dx * bwd / 2
    } else {
-      bwd_left <- bwd_right <- bwd * x / 2
+      bwd_left <- bwd_right <- bwd / 2
    }
 
    # correct x_values if they were forced by bwd
@@ -969,10 +969,14 @@ plotHotellingEllipse <- function(p, conf.lim = 0.95, col = "#a0a0a0", lty = 3, .
    t1 <- as.numeric(p$x_values)
    t2 <- as.numeric(p$y_values)
 
+   nobj <- length(t1)
+   if (nobj < 3) {
+      warning("Hotelling ellipse requires at least 3 data points, skipping.", call. = FALSE)
+      return(invisible(NULL))
+   }
+
    s1 <- sd(t1)^2
    s2 <- sd(t2)^2
-
-   nobj <- length(t1)
    T2lim <- (2 * (nobj - 1) / (nobj - 2)) * qf(conf.lim, 2, (nobj - 2))
 
    a <- sqrt(T2lim * s1)
