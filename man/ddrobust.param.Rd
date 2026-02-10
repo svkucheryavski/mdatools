@@ -4,16 +4,10 @@
 \alias{ddrobust.param}
 \title{Calculates critical limits for distance values using Data Driven robust approach}
 \usage{
-ddrobust.param(U, ncomp, alpha, gamma)
+ddrobust.param(U)
 }
 \arguments{
 \item{U}{matrix or vector with distance values}
-
-\item{ncomp}{number of components}
-
-\item{alpha}{significance level for extreme objects}
-
-\item{gamma}{significance level for outliers}
 }
 \description{
 Calculates critical limits for distance values using Data Driven robust approach

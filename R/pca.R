@@ -156,6 +156,7 @@
 #'    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
 #'    \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
 #'    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
+#'    \code{\link{plotEigenvalues.pca}} \tab shows eigenvalues plot.\cr
 #'    \code{\link{plotDistances.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
 #'    \code{\link{plotBiplot.pca}} \tab shows bi-plot.\cr
 #'    \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr
@@ -1525,6 +1526,61 @@ plotVariance.pca <- function(obj, type = "b", labels = "values", variance = "exp
 #' @export
 plotCumVariance.pca <- function(obj, legend.position = "bottomright", ...) {
    plotVariance(obj, variance = "cumexpvar", legend.position = legend.position, ...)
+}
+
+
+#' Eigenvalues plot for PCA model
+#'
+#' @description
+#' Shows a plot with eigenvalues vs. number of components, optionally with log or sqrt
+#' transformation applied.
+#'
+#' @param obj
+#' a PCA model (object of class \code{pca})
+#' @param type
+#' type of the plot ("l", "b", "h")
+#' @param labels
+#' what to show as labels for plot objects.
+#' @param transform
+#' transformation to apply to eigenvalues: "none", "log", or "sqrt"
+#' @param xticks
+#' vector with ticks for x-axis
+#' @param ylab
+#' label for y-axis
+#' @param ...
+#' other plot parameters (see \code{mdaplot} for details)
+#'
+#' @details
+#' The eigenvalues represent the variance captured by each principal component. Transformations
+#' can be useful for identifying the number of significant components: \code{"log"} applies
+#' \code{log(eigenvalues)} and \code{"sqrt"} applies \code{sqrt(eigenvalues)}.
+#'
+#' @export
+plotEigenvalues.pca <- function(obj, type = "b", labels = "values", transform = "none",
+   xticks = seq_len(obj$ncomp), ylab = NULL, ...) {
+
+   transform <- match.arg(transform, c("none", "log", "sqrt"))
+
+   ev <- obj$eigenvals
+   ev <- switch(transform,
+      "log"  = log(ev),
+      "sqrt" = sqrt(ev),
+      ev
+   )
+
+   if (is.null(ylab)) {
+      ylab <- switch(transform,
+         "log"  = "log(Eigenvalues)",
+         "sqrt" = "sqrt(Eigenvalues)",
+         "Eigenvalues"
+      )
+   }
+
+   attr(ev, "name") <- ylab
+   attr(ev, "xaxis.name") <- "Components"
+   names(ev) <- names(obj$eigenvals)
+
+   mdaplot(ev, xticks = xticks, labels = labels, type = type, ylab = ylab, ...)
 }
 
 

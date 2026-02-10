@@ -736,6 +736,21 @@ plotVariance <- function(obj, ...) {
    UseMethod("plotVariance")
 }
 
+#' Eigenvalues plot
+#'
+#' @details
+#' Generic function for plotting eigenvalues vs. number of components
+#'
+#' @param obj
+#' a model object
+#' @param ...
+#' other arguments
+#'
+#' @export
+plotEigenvalues <- function(obj, ...) {
+   UseMethod("plotEigenvalues")
+}
+
 #' X loadings plot
 #'
 #' @details

@@ -94,7 +94,7 @@ By default loadings are computed for the original dataset using either SVD or NI
 However, for datasets with large number of rows (e.g. hyperspectral images), there is a
 possibility to run algorithms based on random permutations [1, 2]. In this case you have
 to define parameter \code{rand} as a vector with two values: \code{p} - oversampling parameter
-and \code{k} - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)}
+and \code{q} - number of power iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)}
 are good options, which give quite precise solutions but much faster.
 
 There are several ways to calculate critical limits for orthogonal (Q, q) and score (T2, h)
@@ -230,6 +230,7 @@ Plotting methods for \code{pca} objects:
    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
    \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
+   \code{\link{plotEigenvalues.pca}} \tab shows eigenvalues plot.\cr
    \code{\link{plotDistances.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
    \code{\link{plotBiplot.pca}} \tab shows bi-plot.\cr
    \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr

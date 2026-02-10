@@ -2,7 +2,7 @@
 % Please edit documentation in R/pca.R
 \name{plotResiduals.pca}
 \alias{plotResiduals.pca}
-\title{Shortcut to plotDistances()}
+\title{Residuals distance plot for PCA model (legacy, use \code{\link{plotResiduals}} instead).}
 \usage{
 \method{plotResiduals}{pca}(obj, ...)
 }
@@ -12,5 +12,5 @@
 \item{...}{any parameter from \code{\link{plotDistances.pca}}}
 }
 \description{
-Shortcut to plotDistances()
+Residuals distance plot for PCA model (legacy, use \code{\link{plotResiduals}} instead).
 }
