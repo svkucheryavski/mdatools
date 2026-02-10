@@ -66,6 +66,8 @@ The original method `simca` is also available for compatibility.
 
 * colorbar legend for continuous color grouping now uses pretty breakpoints with consistent decimal formatting; very large or very small values are shown with a compact multiplier (e.g. ×10³).
 
+* new method `plotEigenvalues()` for PCA models shows eigenvalues vs. number of components with optional `transform` parameter (`"none"`, `"log"`, `"sqrt"`).
+
 
 
 ### Bug fixes
