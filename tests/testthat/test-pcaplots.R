@@ -222,8 +222,11 @@ tf <- function(x.cal, x.test, name) {
       expect_silent(plotResiduals(m1))
       mtext(test_name, side = 3, line = -1, outer = TRUE, cex = 0.75, col = "gray")
       expect_silent(plotResiduals(m2))
+      expect_silent(plotDistances(m2))
       expect_silent(plotResiduals(m3))
+      expect_silent(plotDistances(m3))
       expect_silent(plotResiduals(m4))
+      expect_silent(plotDistances(m4))
    })
 
    par(mfrow = c(2, 2))

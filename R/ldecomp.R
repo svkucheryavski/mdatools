@@ -177,7 +177,8 @@ plotScores.ldecomp <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, ty
    return(mdaplotg(plot_data, type = type, show.lines = show.lines, ...))
 }
 
-#' Residual distance plot
+
+#' Distance plot
 #'
 #' @description
 #' Shows a plot with orthogonal (Q, q) vs. score (T2, h) distances for data objects.
@@ -196,7 +197,7 @@ plotScores.ldecomp <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, ty
 #' most of graphical parameters from \code{\link{mdaplot}} function can be used.
 #'
 #' @export
-plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected, norm = FALSE, log = FALSE, show.plot = TRUE, ...) {
+plotDistances.ldecomp <- function(obj, ncomp = obj$ncomp.selected, norm = FALSE, log = FALSE, show.plot = TRUE, ...) {
 
    attrs <- mda.getattr(obj$Q)
 
@@ -249,6 +250,22 @@ plotResiduals.ldecomp <- function(obj, ncomp = obj$ncomp.selected, norm = FALSE,
    # show plot
    return(mdaplot(plot_data, ...))
 }
+
+
+
+#' Residuals distance plot for a set of ldecomp objects (legacy, use \code{\link{plotDistances.ldecomp}} instead).
+#'
+#' @param obj
+#' object of \code{ldecomp} class.
+#' @param ...
+#' other parameters.
+#'
+#' @export
+plotResiduals.ldecomp <- function(obj, ...) {
+   return(plotDistances.ldecomp(obj, ...))
+}
+
+
 
 #' Print method for linear decomposition
 #'

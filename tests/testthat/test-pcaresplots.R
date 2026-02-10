@@ -26,6 +26,13 @@ test_that("residuals plot works fine in general.", {
       plotResiduals(m$calres, 2, show.labels = T, colmap = c("red", "green"))
       plotResiduals(m$calres, 3, cgroup = x[, 1], show.labels = T, colmap = c("red", "green"), pch = 17)
    })
+   expect_silent({
+      par(mfrow = c(2, 2))
+      plotDistances(m$calres)
+      plotDistances(m$calres, 1, show.labels = T)
+      plotDistances(m$calres, 2, show.labels = T, colmap = c("red", "green"))
+      plotDistances(m$calres, 3, cgroup = x[, 1], show.labels = T, colmap = c("red", "green"), pch = 17)
+   })
 })
 
 test_that("residuals plot work find with different norm and log settings.", {
@@ -35,6 +42,14 @@ test_that("residuals plot work find with different norm and log settings.", {
       plotResiduals(m$calres, 1, norm = F, log = T, show.labels = T)
       plotResiduals(m$calres, 1, norm = T, log = F, show.labels = T)
       plotResiduals(m$calres, 1, norm = T, log = T, show.labels = T)
+   })
+
+   expect_silent({
+      par(mfrow = c(2, 2))
+      plotDistances(m$calres, 1, norm = F, log = F, show.labels = T)
+      plotDistances(m$calres, 1, norm = F, log = T, show.labels = T)
+      plotDistances(m$calres, 1, norm = T, log = F, show.labels = T)
+      plotDistances(m$calres, 1, norm = T, log = T, show.labels = T)
    })
 })
 
@@ -53,6 +68,14 @@ test_that("residuals plot works well with categorize coloring.", {
       plotResiduals(m$calres, 1, cgroup = cgroup1, show.labels = T)
       plotResiduals(m$calres, 1, log = T, cgroup = cgroup1, show.labels = T)
       plotResiduals(m$calres, 3, cgroup = cgroup2, show.labels = T)
+   })
+
+   expect_silent({
+      par(mfrow = c(2, 2))
+      plotDistances(m$calres, 1, norm = F, cgroup = cgroup1, show.labels = T)
+      plotDistances(m$calres, 1, cgroup = cgroup1, show.labels = T)
+      plotDistances(m$calres, 1, log = T, cgroup = cgroup1, show.labels = T)
+      plotDistances(m$calres, 3, cgroup = cgroup2, show.labels = T)
    })
 })
 
