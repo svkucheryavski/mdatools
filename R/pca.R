@@ -57,7 +57,7 @@
 #' However, for datasets with large number of rows (e.g. hyperspectral images), there is a
 #' possibility to run algorithms based on random permutations [1, 2]. In this case you have
 #' to define parameter \code{rand} as a vector with two values: \code{p} - oversampling parameter
-#' and \code{k} - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)}
+#' and \code{q} - number of power iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)}
 #' are good options, which give quite precise solutions but much faster.
 #'
 #' There are several ways to calculate critical limits for orthogonal (Q, q) and score (T2, h)
@@ -250,7 +250,6 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
    # apply the model to calibration set
    model$res <- list()
    model$res[["cal"]] <- predict.pca(model, x)
-   model$calres <- model$res[["cal"]]
 
    # add prep here so it will not influence prediction for calibration set
    # which is already preprocessed
@@ -265,14 +264,29 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
    # apply model to test set if provided
    if (!is.null(x.test)) {
       model$res[["test"]] <- predict.pca(model, x.test)
-      model$testres <- model$res[["test"]]
    }
 
    # set distance limits
    model <- setDistanceLimits(model, lim.type = lim.type, alpha = alpha, gamma = gamma)
+   model <- pca.syncResAliases(model)
    class(model) <- c("pca")
    return(model)
 }
+
+#' Sync calres/testres aliases with the canonical res[["cal"]]/res[["test"]] fields.
+#'
+#' @param obj model object
+#' @return model object with aliases updated
+#'
+pca.syncResAliases <- function(obj) {
+   if (!is.null(obj[["res"]])) {
+      if (!is.null(obj$res[["cal"]])) obj$calres <- obj$res[["cal"]]
+      if (!is.null(obj$res[["test"]])) obj$testres <- obj$res[["test"]]
+   }
+   return(obj)
+}
+
+
 
 #' Select optimal number of components for PCA model
 #'
@@ -291,17 +305,18 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
 #'
 #' @export
 selectCompNum.pca <- function(obj, ncomp, ...) {
+
    if (ncomp < 1 || ncomp > obj$ncomp) {
       stop("Wrong number of selected components.", call. = FALSE)
    }
 
-   obj$ncomp.selected <- ncomp
-   obj$res[["cal"]]$ncomp.selected <- ncomp
-   obj$calres <- obj$res[["cal"]]
 
-   if (!is.null(obj$res$test)) {
-      obj$res[["test"]]$ncomp.selected <- ncomp
-      obj$testres <- obj$res[["test"]]
+   obj$ncomp.selected <- ncomp
+
+   if (!is.null(obj[["res"]])) {
+      if (!is.null(obj$res[["cal"]])) obj$res[["cal"]]$ncomp.selected <- ncomp
+      if (!is.null(obj$res[["test"]])) obj$res[["test"]]$ncomp.selected <- ncomp
+      obj <- pca.syncResAliases(obj)
    }
 
    return(obj)
@@ -339,6 +354,11 @@ selectCompNum.pca <- function(obj, ncomp, ...) {
 setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alpha,
    gamma = obj$gamma, ...) {
 
+   if (is.null(obj[["res"]]) || is.null(obj$res[["cal"]])) {
+      stop("Calibration results not found (most probably this model is loaded from web-application).", call. = FALSE)
+   }
+
+
    obj$T2lim <- ldecomp.getT2Limits(lim.type, alpha, gamma, obj$limParams)
    obj$Qlim <- ldecomp.getQLimits(lim.type, alpha, gamma, obj$limParams,
       obj$res[["cal"]]$residuals, obj$eigenvals)
@@ -351,17 +371,15 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
    attr(obj$res[["cal"]]$Q, "Nu") <- obj$Qlim[4, ]
    attr(obj$res[["cal"]]$T2, "u0") <- obj$T2lim[3, ]
    attr(obj$res[["cal"]]$T2, "Nu") <- obj$T2lim[4, ]
-   obj$calres <- obj$res[["cal"]]
 
    if (!is.null(obj$res$test)) {
       attr(obj$res[["test"]]$Q, "u0") <- obj$Qlim[3, ]
       attr(obj$res[["test"]]$Q, "Nu") <- obj$Qlim[4, ]
       attr(obj$res[["test"]]$T2, "u0") <- obj$T2lim[3, ]
       attr(obj$res[["test"]]$T2, "Nu") <- obj$T2lim[4, ]
-      obj$testres <- obj$res[["test"]]
    }
 
-   return(obj)
+   return(pca.syncResAliases(obj))
 }
 
 #' Probabilities for residual distances
@@ -412,6 +430,11 @@ getProbabilities.pca <- function(obj, ncomp, q, h, ...) {
 #'
 #' @export
 getCalibrationData.pca <- function(obj) {
+
+   if (is.null(obj[["res"]]) || is.null(obj$res[["cal"]])) {
+      stop("Calibration results not found (most probably this model is loaded from web-application).", call. = FALSE)
+   }
+
    x <- obj$res[["cal"]]$scores %*% t(obj$loadings) + obj$res[["cal"]]$residuals
 
    if (!is.logical(obj$scale) && length(obj$scale) == ncol(x)) {
@@ -449,6 +472,10 @@ getCalibrationData.pca <- function(obj) {
 #'
 #' @export
 categorize.pca <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, ...) {
+
+   if (is.null(res)) {
+      stop("Object with results is not provided.", call. = FALSE)
+   }
 
    # get distance values for selected number of components
    h <- res$T2[, ncomp]
@@ -631,13 +658,18 @@ summary.pca <- function(object, ...) {
    }
 
    if (length(object$exclcols) > 0) {
-      fprintf("Excluded coumns: %d\n", length(object$exclcols))
+      fprintf("Excluded columns: %d\n", length(object$exclcols))
    }
 
    fprintf("Type of limits: %s\n", object$lim.type)
    fprintf("Alpha: %s\n", object$alpha)
    fprintf("Gamma: %s\n", object$gamma)
    cat("\n")
+
+   if (is.null(object[["res"]]) || is.null(object$res[["cal"]])) {
+      message("Calibration results not found (most probably this model is loaded from web-application).")
+      return(invisible(NULL))
+   }
 
    data <- cbind(
       round(object$eigenvals, 3),
@@ -808,11 +840,13 @@ pca.mvreplace <- function(x, center = TRUE, scale = FALSE, maxncomp = 10, expvar
 #' @param k
 #' rank of X (number of components)
 #' @param rand
-#' a vector with two values - number of iterations (q) and oversampling parameter (p)
+#' a vector with two values - oversampling parameter (p) and number of iterations (q)
 #' @param dist
 #' distribution for generating random numbers, 'unif' or 'norm'
 #'
 #' @import stats
+#'
+#' @export
 pca.getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
 
    if (is.null(rand)) {
@@ -821,11 +855,11 @@ pca.getB <- function(X, k = NULL, rand = NULL, dist = "unif") {
 
    ncols <- ncol(X)
 
-   q <- rand[1]
-   p <- rand[2]
-   k <- if (is.null(k)) ncols else 2 * k
-
+   p <- rand[1]
+   q <- rand[2]
+   k <- if (is.null(k)) ncols else min(2 * k, ncols)
    l <- k + p
+
    Y <- if (dist == "unif")
             X %*% matrix(runif(ncols * l, -1, 1), ncols, l)
          else
@@ -907,14 +941,15 @@ pca.nipals <- function(x, ncomp = min(ncol(x), nrow(x) - 1), tol = 10^-10) {
    for (i in seq_len(ncomp)) {
       ind <- which.max(apply(E, 2, sd))
       t <- E[, ind, drop = FALSE]
-      tau <- th <- 99999999
-      while (th > tol * tau) {
+      tau <- Inf
+      repeat {
          p <- crossprod(E, t) / as.vector(crossprod(t))
          p <- p / as.vector(crossprod(p)) ^ 0.5
-         t <- (E %*% p) / as.vector(crossprod(p))
+         t <- E %*% p
 
-         th <- abs(tau - as.vector(crossprod(t)))
-         tau <- as.vector(crossprod(t))
+         new_tau <- as.vector(crossprod(t))
+         if (abs(tau - new_tau) <= tol * new_tau) break
+         tau <- new_tau
       }
 
       E <- E - tcrossprod(t, p)
@@ -1276,6 +1311,10 @@ pca.readJSON <- function(fileName) {
 #' @export
 asvector.pca <- function(obj) {
 
+   if (is.null(obj$calres)) {
+      stop("Calibration results not found (most probably this model is loaded from web-application).", call. = FALSE)
+   }
+
    do_center = !is.logical(obj$center)
    do_scale = !is.logical(obj$scale)
 
@@ -1457,6 +1496,11 @@ writeJSON.pca <- function(obj, fileName) {
 plotVariance.pca <- function(obj, type = "b", labels = "values", variance = "expvar",
    xticks = seq_len(obj$ncomp), res = obj$res, ylab = "Explained variance, %", ...) {
 
+
+   if (is.null(res)) {
+      stop("Object with results not found (most probably this model is loaded from web-application).", call. = FALSE)
+   }
+
    res <- getRes(res, "ldecomp")
    plot_data <- lapply(res, plotVariance, variance = variance, show.plot = FALSE)
    mdaplotg(plot_data, xticks = xticks, labels = labels, type = type, ylab = ylab, ...)
@@ -1518,6 +1562,10 @@ plotCumVariance.pca <- function(obj, legend.position = "bottomright", ...) {
 plotScores.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type = "p", show.axes = TRUE,
    show.legend = TRUE, res = obj$res, ...) {
 
+   if (is.null(res)) {
+      stop("Object with results not found (most probably this model is loaded from web-application).", call. = FALSE)
+   }
+
    if (min(comp) < 1 || max(comp) > ncol(obj$loadings)) {
       stop("Wrong values for 'comp' parameter.", call. = FALSE)
    }
@@ -1542,7 +1590,7 @@ plotScores.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1, type =
 }
 
 
-#' Residuals distance plot for PCA model
+#' Distance plot for PCA model
 #'
 #' @description
 #' Shows a plot with score (T2, h) vs orthogonal (Q, q) distances and corresponding critical
@@ -1603,19 +1651,22 @@ plotDistances.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    res = obj$res, show.legend = TRUE, ...) {
 
+   if (is.null(res)) {
+      stop("Object with results not found (most probably this model is loaded from web-application).", call. = FALSE)
+   }
 
    # generate values for cgroup if categories should be used
    if (length(cgroup) == 1 && cgroup == "categories") {
       cgroup <- categorize(obj, res[[1]], ncomp = ncomp)
    }
 
-   ldecomp.plotResiduals(res, obj$Qlim, obj$T2lim, ncomp = ncomp, log = log, norm = norm,
+   ldecomp.plotDistances(res, obj$Qlim, obj$T2lim, ncomp = ncomp, log = log, norm = norm,
       cgroup = cgroup, xlim = xlim, ylim = ylim, show.limits = show.limits, lim.col = lim.col,
       lim.lwd = lim.lwd, show.legend = show.legend, ...)
 }
 
 
-#' Shortcut to plotDistances()
+#' Residuals distance plot for PCA model (legacy, use \code{\link{plotResiduals}} instead).
 #'
 #' @param obj
 #' a PCA model (object of class \code{pca})
@@ -1657,7 +1708,12 @@ plotLoadings.pca <- function(obj, comp = if (obj$ncomp > 1) c(1, 2) else 1,
    }
 
    plot_data <- mda.subset(obj$loadings, select = comp)
-   colnames(plot_data) <- paste0("Comp ", comp, " (", round(obj$res[["cal"]]$expvar[comp], 2), "%)")
+
+   if (is.null(obj[["res"]]) || is.null(obj$res[["cal"]])) {
+      colnames(plot_data) <- paste0("Comp ", comp)
+   } else {
+      colnames(plot_data) <- paste0("Comp ", comp, " (", round(obj$res[["cal"]]$expvar[comp], 2), "%)")
+   }
    attr(plot_data, "name") <- "Loadings"
 
    # set up values for showing axes lines
@@ -1712,6 +1768,10 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
 
    if (length(comp) != 2) {
       stop("Biplot can be made only for two principal components!", call. = FALSE)
+   }
+
+   if (is.null(obj$calres)) {
+      stop("Object with results not found (most probably this model is loaded from web-application).", call. = FALSE)
    }
 
    show.lines <- if (show.axes) c(0, 0) else FALSE
@@ -1890,6 +1950,11 @@ plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.select
    bg = mdaplot.getColors(length(comp)), col = rep("white", length(comp)),
    lwd = ifelse(pch %in% 21:25, 0.25, 1), cex = rep(1.2, length(comp)),
    ellipse.col = "#cceeff", legend.position = "bottomright", ...) {
+
+
+   if (is.null(res)) {
+      stop("Object with results not found (most probably this model is loaded from web-application).", call. = FALSE)
+   }
 
    if (min(comp) < 1 || max(comp) > obj$ncomp) {
       stop("Wrong value for parameter 'ncomp'.", call. = FALSE)

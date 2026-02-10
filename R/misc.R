@@ -907,6 +907,8 @@ genhash <- function() {
 #'
 #' @export
 extractStringArray <- function(js, key) {
+  if (is.null(js) || !nzchar(js)) return(NULL)
+
   # Capture the array part for the given key
   pattern <- paste0('"', key, '"\\s*:\\s*\\[(.*?)\\]')
   m <- regmatches(js, regexpr(pattern, js, perl=TRUE))
@@ -935,6 +937,8 @@ extractStringArray <- function(js, key) {
 #'
 #' @export
 extractArray <- function(js, key) {
+  if (is.null(js) || !nzchar(js)) return(NULL)
+
   # Find the specific "data":[ ... ] for the given key
   pattern <- paste0('"', key, '".*?"data":\\[([^\\]]*)\\]')
   m <- regmatches(js, regexpr(pattern, js, perl=TRUE))
@@ -959,6 +963,8 @@ extractArray <- function(js, key) {
 #'
 #' @export
 extractValue <- function(js, key) {
+  if (is.null(js) || !nzchar(js)) return(NULL)
+
   # Match "key": some_number
   pattern <- paste0('"', key, '"\\s*:\\s*([^,}\\s]+)')
   m <- regmatches(js, regexpr(pattern, js, perl=TRUE))
@@ -983,6 +989,8 @@ extractValue <- function(js, key) {
 #'
 #' @export
 extractPrep <- function(js) {
+  if (is.null(js) || !nzchar(js)) return(NULL)
+
   # locate "prep":
   m <- regexpr('"prep"\\s*:', js)
   if (m == -1) return(NULL)
@@ -1044,6 +1052,8 @@ readJSON <- function(fileName) {
 
    if ("prepmodel" %in% class) {
       return (prep.fromjson(str))
+   } else if ("pcamodel" %in% class) {
+      return (pca.fromjson(str))
    } else {
       stop("Selected JSON file does not contain any supported model.", call. = FALSE)
    }

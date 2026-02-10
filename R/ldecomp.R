@@ -376,8 +376,8 @@ ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
       Q <- Q[-rows_excluded, , drop = FALSE]
    }
 
-   # compute total variance
-   #totvar <- sum(tcrossprod(scores, loadings)^2) + sum(residuals^2)
+   # compute total variance as sum of squares of reconstructed data
+   # note: this equals true total variance only when data is mean-centered
    totvar <- sum((tcrossprod(scores, loadings) + residuals)^2)
 
    # compute explained variance
@@ -469,24 +469,26 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
    # this is needed for G-distances like U but divided to eigenvalues
    Ue <- scores %*% diag(1 / eigenvals, ncomp, ncomp)
 
+   # precompute for vectorized G-distance: M[k, j] = sum_i Ue[i,k] * X[i,j]
+   # then G[j, a] = sum_{k=1}^{a} loadings[j,k] * M[k,j]
+   M <- crossprod(Ue[rows.ind, , drop = FALSE], X[rows.ind, , drop = FALSE])
+   LM <- loadings * t(M)
+   if (any(!cols.ind)) LM[!cols.ind, ] <- 0
+
+   Xhat <- matrix(0, nobj, nvar)
    for (a in seq_len(ncomp)) {
 
-      # row based distances
-      Xhat <- tcrossprod(scores[, 1:a, drop = FALSE], loadings[, 1:a, drop = FALSE])
+      # row based distances — incremental update avoids redundant matrix multiplication
+      Xhat <- Xhat + tcrossprod(scores[, a, drop = FALSE], loadings[, a, drop = FALSE])
       E2 <- (X - Xhat)^2
       Q[, a] <- rowSums(E2[, cols.ind, drop = FALSE])
-      H[, a] <- rowSums(U2[, 1:a, drop = FALSE])
-
+      H[, a] <- if (a == 1) U2[, 1] else H[, a - 1] + U2[, a]
 
       # column based distances
       R[cols.ind, a] <- colSums(E2[rows.ind, cols.ind, drop = FALSE])
-      for (c in seq_len(nvar)) {
-         if (!cols.ind[c]) next
-         for (aa in seq_len(a)) {
-            g <- t(Ue[rows.ind, aa, drop = FALSE]) %*% (X[rows.ind, c, drop = FALSE] %*% loadings[c, aa, drop = FALSE])
-            G[c, a] <- G[c, a] + g
-         }
-      }
+
+      # G-distance: cumulative sum of loadings * M contributions
+      G[, a] <- if (a == 1) LM[, 1] else G[, a - 1] + LM[, a]
    }
 
    # set attributes for Q
@@ -619,10 +621,18 @@ jm.prob <- function(u, eigenvals, ncomp) {
 #'
 #' @export
 hotelling.crit <- function(nobj, ncomp, alpha = 0.05, gamma = 0.01) {
+   denom_df <- nobj - ncomp
+   if (any(denom_df < 1)) {
+      warning("Hotelling T2 limits are undefined when nobj <= ncomp.", call. = FALSE)
+   }
+   if (any(denom_df >= 1 & denom_df < 3)) {
+      warning("Hotelling T2 limits may be unreliable (denominator df < 3).", call. = FALSE)
+   }
+   scale_factor <- ncomp * (nobj - 1) / denom_df
    return(
       rbind(
-         (ncomp * (nobj - 1) / (nobj - ncomp)) * qf(1 - alpha, ncomp, (nobj - ncomp)),
-         (ncomp * (nobj - 1) / (nobj - ncomp)) * qf((1 - gamma) ^ (1 / nobj), ncomp, (nobj - ncomp))
+         scale_factor * qf(1 - alpha, ncomp, denom_df),
+         scale_factor * qf((1 - gamma) ^ (1 / nobj), ncomp, denom_df)
       )
    )
 }
@@ -733,6 +743,9 @@ ddmoments.param <- function(U) {
    su <- apply(U, 2, sd)
    Nu <- 2 * (u0 / su)^2
 
+   # guard against NaN/Inf when all distances are zero or constant (sd = 0)
+   Nu[is.nan(Nu) | is.infinite(Nu)] <- 1
+
    return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
 }
 
@@ -740,15 +753,9 @@ ddmoments.param <- function(U) {
 #'
 #' @param U
 #' matrix or vector with distance values
-#' @param ncomp
-#' number of components
-#' @param alpha
-#' significance level for extreme objects
-#' @param gamma
-#' significance level for outliers
 #'
 #' @export
-ddrobust.param <- function(U, ncomp, alpha, gamma) {
+ddrobust.param <- function(U) {
 
    if (is.null(dim(U))) dim(U) <- c(length(U), 1)
 
@@ -759,6 +766,9 @@ ddrobust.param <- function(U, ncomp, alpha, gamma) {
    Nu <- round(exp((1.380948 * log(2.68631 / RM)) ^ 1.185785))
    Nu[RM > 2.685592117] <- 1
    Nu[RM < 0.194565995] <- 100
+
+   # guard against NaN/Inf when both median and IQR are zero
+   Nu[is.nan(Nu) | is.infinite(Nu)] <- 1
 
    u0 <- 0.5 * Nu * (Mu / qchisq(0.50, Nu) + Su / (qchisq(0.75, Nu) - qchisq(0.25, Nu)))
    return(list(u0 = u0, Nu = Nu, nobj = nrow(U)))
@@ -936,19 +946,33 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
       ## slope and intercepts
       eB <- Qlim[1, ncomp]
       oB <- Qlim[2, ncomp]
-      eA <- oA <- -1 * (q0 / h0) * (Nh / Nq)
 
-      hE <- seq(-0.95, -eB / eA, length.out = 100)
-      hO <- seq(-0.95, -oB / oA, length.out = 100)
-      qE <- eA * hE + eB
-      qO <- oA * hO + oB
+      # guard against degenerate cases where slope is infinite or NaN
+      # (e.g. when h0 = 0 or Nq = 0, meaning all distances are zero for one type)
+      if (h0 <= 0 || Nq <= 0 || !is.finite(q0 / h0 * Nh / Nq)) {
+         # fall back to rectangular limits (like jm/chisq)
+         hE <- c(0, T2lim[1, ncomp], T2lim[1, ncomp])
+         hO <- c(0, T2lim[2, ncomp], T2lim[2, ncomp])
+         qE <- c(Qlim[1, ncomp], Qlim[1, ncomp], 0)
+         qO <- c(Qlim[2, ncomp], Qlim[2, ncomp], 0)
+      } else {
+         eA <- oA <- -1 * (q0 / h0) * (Nh / Nq)
+         hE <- seq(-0.95, -eB / eA, length.out = 100)
+         hO <- seq(-0.95, -oB / oA, length.out = 100)
+         qE <- eA * hE + eB
+         qO <- oA * hO + oB
+      }
    }
 
    if (norm) {
-      hE <- hE / h0
-      qE <- qE / q0
-      hO <- hO / h0
-      qO <- qO / q0
+      if (h0 > 0) {
+         hE <- hE / h0
+         hO <- hO / h0
+      }
+      if (q0 > 0) {
+         qE <- qE / q0
+         qO <- qO / q0
+      }
    }
 
    if (log) {
@@ -964,7 +988,7 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
    ))
 }
 
-#' Residuals distance plot for a set of ldecomp objects
+#' Distance plot for a set of ldecomp objects
 #'
 #' @description
 #' Shows a plot with score (T2, h) vs orthogonal (Q, q) distances and corresponding critical
@@ -1025,7 +1049,7 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
 #' points is skewed and most of them are densely located around bottom left corner.
 #'
 #' @export
-ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE, norm = FALSE,
+ldecomp.plotDistances <- function(res, Qlim, T2lim, ncomp, log = FALSE, norm = FALSE,
    cgroup = NULL, xlim = NULL, ylim = NULL, show.limits = c(TRUE, TRUE),
    lim.col = c("darkgray", "darkgray"), lim.lwd = c(1, 1), lim.lty = c(2, 3),
    show.legend = TRUE, legend.position = "topright", show.excluded = FALSE, ...) {
@@ -1083,4 +1107,21 @@ ldecomp.plotResiduals <- function(res, Qlim, T2lim, ncomp, log = FALSE, norm = F
       lines(lim_data$outliers[, 1], lim_data$outliers[, 2],
          col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
    }
+}
+
+
+#' Residuals distance plot for a set of ldecomp objects (legacy, use \code{\link{ldecomp.plotDistances}} instead).
+#'
+#' @description
+#' Shows a plot with score (T2, h) vs orthogonal (Q, q) distances and corresponding critical
+#' limits for given number of components.
+#'
+#' @param res
+#' list with result objects to show the plot for
+#' @param ...
+#' other parameters
+#'
+#' @export
+ldecomp.plotResiduals <- function(res, ...) {
+   return(ldecomp.plotDistances(res, ...))
 }
