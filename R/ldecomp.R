@@ -715,6 +715,21 @@ chisq.prob <- function(u, param) {
    return(pchisq(Nu * u / u0, DoF))
 }
 
+#' Round and clamp degrees of freedom to valid range [1, 250]
+#'
+#' @param x
+#' vector with raw degrees of freedom values
+#'
+#' @return vector with rounded and clamped values
+#'
+clamp.dof <- function(x) {
+   x <- round(x)
+   x[x < 1] <- 1
+   x[x > 250] <- 250
+   return(x)
+}
+
+
 #' Calculates critical limits for distance values using Data Driven moments approach
 #'
 #' @param paramQ
@@ -730,13 +745,8 @@ chisq.prob <- function(u, param) {
 dd.crit <- function(paramQ, paramT2, alpha = 0.05, gamma = 0.01) {
 
    nobj <- paramQ$nobj
-   Nq <- round(paramQ$Nu)
-   Nq[Nq < 1] <- 1
-   Nq[Nq > 250] <- 250
-
-   Nh <- round(paramT2$Nu)
-   Nh[Nh < 1] <- 1
-   Nh[Nh > 250] <- 250
+   Nq <- clamp.dof(paramQ$Nu)
+   Nh <- clamp.dof(paramT2$Nu)
 
    return(
       rbind(
@@ -842,9 +852,7 @@ ldecomp.getQLimits <- function(lim.type, alpha, gamma, params, residuals, eigenv
    } else {
       # methods based on chi-square distribution
       pT2 <- if (regexpr("robust", lim.type) > 0) params$T2$robust else params$T2$moments
-      DoF <- round(pQ$Nu)
-      DoF[DoF < 1] <- 1
-      DoF[DoF > 250] <- 250
+      DoF <- clamp.dof(pQ$Nu)
 
       lim <- switch(lim.type,
          "chisq" = chisq.crit(pQ, alpha, gamma),
@@ -884,9 +892,7 @@ ldecomp.getT2Limits <- function(lim.type, alpha, gamma, params) {
    pT2 <- if (regexpr("robust", lim.type) > 0) params$T2$robust else params$T2$moments
    ncomp <- length(pT2$u0)
 
-   DoF <- round(pT2$Nu)
-   DoF[DoF < 1] <- 1
-   DoF[DoF > 250] <- 250
+   DoF <- clamp.dof(pT2$Nu)
 
    if (lim.type %in% c("jm", "chisq")) DoF <- pT2$nobj
 

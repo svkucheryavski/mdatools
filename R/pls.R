@@ -273,7 +273,6 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    model$res <- list()
    model$res[["cal"]] <- predict.pls(model, x, y)
    model$res[["cal"]]$info <- "calibration results"
-   model$calres <- model$res[["cal"]]
 
    # compute critical limit parameters
    model$limParams <- list(
@@ -287,7 +286,6 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
       cvres <- crossval.regmodel(model, x, y, cv, cal.fun = pls.cal, pred.fun = pls.getpredictions, cv.scope = cv.scope)
       model$res[["cv"]] <- plsres(cvres$y.pred, cvres$y.ref, ncomp.selected = model$ncomp)
       model$res[["cv"]]$info <- "cross-validation results"
-      model$cvres <- model$res[["cv"]]
       model$coeffs <- regcoeffs(model$coeffs$values, cvres$jk.coeffs)
    }
 
@@ -295,7 +293,6 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    if (!is.null(x.test) && !is.null(y.test)) {
       model$res[["test"]] <- predict.pls(model, x.test, y.test)
       model$res[["test"]]$info <- "test set validation results"
-      model$testres <- model$res[["test"]]
    }
 
    # select optimal number of components
@@ -308,6 +305,24 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
 
    return(model)
 }
+
+
+#' Sync result aliases (calres, cvres, testres) from canonical res list
+#'
+#' @param obj
+#' PLS model (object of class \code{pls})
+#'
+#' @return model object with aliases updated
+#'
+pls.syncResAliases <- function(obj) {
+   if (!is.null(obj[["res"]])) {
+      if (!is.null(obj$res[["cal"]])) obj$calres <- obj$res[["cal"]]
+      if (!is.null(obj$res[["cv"]])) obj$cvres <- obj$res[["cv"]]
+      if (!is.null(obj$res[["test"]])) obj$testres <- obj$res[["test"]]
+   }
+   return(obj)
+}
+
 
 #' Select optimal number of components for PLS model
 #'
@@ -423,22 +438,19 @@ selectCompNum.pls <- function(obj, ncomp = NULL, selcrit = obj$ncomp.selcrit, ..
    # correct number of model and calibration results
    obj$ncomp.selected <- ncomp
    obj$res[["cal"]]$ncomp.selected <- ncomp
-   obj$calres <- obj$res[["cal"]]
 
    # correct number of components for cross-validation results
    if (!is.null(obj$res[["cv"]])) {
       obj$res[["cv"]]$ncomp.selected <- ncomp
-      obj$cvres <- obj$res[["cv"]]
    }
 
    # correct number of components for test set results
    if (!is.null(obj$res[["test"]])) {
       obj$res[["test"]]$ncomp.selected <- ncomp
-      obj$testres <- obj$res[["test"]]
    }
 
    obj$call <- match.call()
-   return(obj)
+   return(pls.syncResAliases(obj))
 }
 
 #' Compute and set statistical limits for residual distances.
@@ -489,10 +501,10 @@ setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
    attr(obj$res[["cal"]]$xdecomp$T2, "u0") <- obj$T2lim[3, ]
    attr(obj$res[["cal"]]$xdecomp$T2, "Nu") <- obj$T2lim[4, ]
 
-   attr(obj$res[["cal"]]$ydecomp$Q, "u0") <- obj$Zlim[3, ]
-   attr(obj$res[["cal"]]$ydecomp$Q, "Nu") <- obj$Zlim[4, ]
-
-   obj$calres <- obj$res[["cal"]]
+   if (!is.null(obj$Zlim)) {
+      attr(obj$res[["cal"]]$ydecomp$Q, "u0") <- obj$Zlim[3, ]
+      attr(obj$res[["cal"]]$ydecomp$Q, "Nu") <- obj$Zlim[4, ]
+   }
 
    if (!is.null(obj$res$test)) {
       attr(obj$res[["test"]]$xdecomp$Q, "u0") <- obj$Qlim[3, ]
@@ -501,13 +513,13 @@ setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
       attr(obj$res[["test"]]$xdecomp$T2, "u0") <- obj$T2lim[3, ]
       attr(obj$res[["test"]]$xdecomp$T2, "Nu") <- obj$T2lim[4, ]
 
-      attr(obj$res[["test"]]$ydecomp$Q, "u0") <- obj$Zlim[3, ]
-      attr(obj$res[["test"]]$ydecomp$Q, "Nu") <- obj$Zlim[4, ]
-
-      obj$testres <- obj$res[["test"]]
+      if (!is.null(obj$Zlim)) {
+         attr(obj$res[["test"]]$ydecomp$Q, "u0") <- obj$Zlim[3, ]
+         attr(obj$res[["test"]]$ydecomp$Q, "Nu") <- obj$Zlim[4, ]
+      }
    }
 
-   return(obj)
+   return(pls.syncResAliases(obj))
 }
 
 #' Compute predictions for response values
@@ -534,7 +546,7 @@ setDistanceLimits.pls <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
 pls.getpredictions <- function(x, coeffs, ycenter, yscale, ynames = NULL, y.attrs = NULL, objnames = NULL,
    compnames = NULL) {
 
-   yp <- apply(coeffs, 3, function(x, y) (y %*% x), x)
+   yp <- apply(coeffs, 3, function(b, data) (data %*% b), x)
    dim(yp) <- c(nrow(x), dim(coeffs)[2], dim(coeffs)[3])
 
    # unscale predicted y values
@@ -590,10 +602,6 @@ pls.getydecomp <- function(y, yscores, xscores, yloadings, yeigenvals, ynames = 
    colnames(yresiduals) <- ynames
 
    # set attributes
-   yscores <- mda.setattr(yscores, y.attrs, "row")
-   yresiduals <- mda.setattr(yresiduals, y.attrs)
-
-   # set attributes
    yscores <- mda.setattr(yscores, x.attrs, "row")
    yresiduals <- mda.setattr(yresiduals, y.attrs)
 
@@ -601,8 +609,9 @@ pls.getydecomp <- function(y, yscores, xscores, yloadings, yeigenvals, ynames = 
    attr(yscores, "xaxis.name") <- "Components"
    attr(yresiduals, "name") <- "Residuals"
 
-   # create ydecomp object (we use xscores as residuals for different components are computed
-   # as xscores %*% t(yloadings)), but then we assign correct residuals
+   # Create ydecomp object using xscores because Y = xscores %*% t(yloadings) + E,
+   # so distances and explained variance must be computed from xscores, not yscores.
+   # After construction, we replace scores with yscores for storage and plotting.
    ydecomp <- ldecomp(scores = xscores, loadings = yloadings, residuals = yresiduals, eigenvals = yeigenvals)
    ydecomp$scores <- yscores
 
@@ -694,11 +703,9 @@ pls.getyscores <- function(y, yloadings, xscores, exclrows) {
    }
 
    # orthogonalize
-   if (ncomp >= 2) {
-      for (a in 2:ncomp) {
-         yscores[, a] <- yscores[, a] - xscores[, 1:(a - 1), drop = FALSE] %*%
-            crossprod(xscoresno[, 1:(a - 1), drop = FALSE], yscoresno[, a])
-      }
+   for (a in 2:ncomp) {
+      yscores[, a] <- yscores[, a] - xscores[, 1:(a - 1), drop = FALSE] %*%
+         crossprod(xscoresno[, 1:(a - 1), drop = FALSE], yscoresno[, a])
    }
 
    return(yscores)
@@ -808,8 +815,10 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
       ydecomp$ncomp.selected <- object$ncomp.selected
 
       # add u0 and Nu parameters as arguments, so the z-distance values can be normalized
-      attr(ydecomp$Q, "u0") <- object$Zlim[3, ]
-      attr(ydecomp$Q, "Nu") <- object$Zlim[4, ]
+      if (!is.null(object$Zlim)) {
+         attr(ydecomp$Q, "u0") <- object$Zlim[3, ]
+         attr(ydecomp$Q, "Nu") <- object$Zlim[4, ]
+      }
    }
 
    res <- plsres(yp, y.ref = y.ref, ncomp.selected = object$ncomp.selected, xdecomp = xdecomp, ydecomp = ydecomp)
@@ -882,15 +891,9 @@ categorize.pls <- function(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, .
    q0 <- obj$Qlim[3, ncomp]
    z0 <- obj$Zlim[3, ncomp]
 
-   # process degrees of freedom for (Z)
-   Nz <- round(Nz)
-   Nz[Nz < 1] <- 1
-   Nz[Nz > 250] <- 250
-
-   # process degrees of freedom for (F)
-   Nf <- round(Nf)
-   Nf[Nf < 1] <- 1
-   Nf[Nf > 250] <- 250
+   # process degrees of freedom
+   Nz <- clamp.dof(Nz)
+   Nf <- clamp.dof(Nf)
 
    # compute total distance and DoF for it
    g <- Nh * h / h0 + Nq * q / q0 + Nz * z / z0
@@ -1485,10 +1488,13 @@ plotXYLoadings.pls <- function(obj, comp = c(1, 2), show.axes = TRUE, ...) {
 #' a PLS model (object of class \code{pls})
 #' @param ny
 #' which response to plot the values for (if y is multivariate), can be a vector.
+#' Ignored when \code{vip.type = "combined"}.
 #' @param ncomp
 #' number of components to show
 #' @param type
 #' type of the plot
+#' @param vip.type
+#' type of VIP scores: \code{"individual"} or \code{"combined"} (see \code{\link{vipscores}})
 #' @param ...
 #' other plot parameters (see \code{mdaplot} for details)
 #'
@@ -1497,10 +1503,10 @@ plotXYLoadings.pls <- function(obj, comp = c(1, 2), show.axes = TRUE, ...) {
 #'
 #' @export
 plotVIPScores.pls <- function(obj, ny = 1, ncomp = obj$ncomp.selected,
-   type = "l", ...) {
+   type = "l", vip.type = "individual", ...) {
 
-   vipscores <- vipscores(obj, ncomp = ncomp)
-   mdaplotg(mda.t(mda.subset(vipscores, select = ny)), type = type, ...)
+   v <- vipscores(obj, ncomp = ncomp, type = vip.type)
+   mdaplotg(mda.t(mda.subset(v, select = ny)), type = type, ...)
 }
 
 #' Selectivity ratio plot for PLS model
@@ -1679,98 +1685,6 @@ pls.simpls <- function(x, y, ncomp, cv = FALSE) {
    }
 
    return(list(coeffs = B, weights = R, xloadings = P, xscores = TT, yloadings = Q, yscores = U, ncomp = a))
-}
-
-#' SIMPLS algorithm (old implementation)
-#'
-#' @description
-#' SIMPLS algorithm for calibration of PLS model (old version)
-#'
-#' @param x
-#' a matrix with x values (predictors)
-#' @param y
-#' a matrix with y values (responses)
-#' @param ncomp
-#' number of components to calculate
-#' @param cv
-#' logical, is model calibrated during cross-validation or not
-#'
-#' @return
-#' a list with computed regression coefficients, loadings and scores for x and y matrices,
-#' and weights.
-#'
-#' @references
-#' [1]. S. de Jong. SIMPLS: An Alternative approach to partial least squares regression.
-#' Chemometrics and Intelligent Laboratory Systems, 18, 1993 (251-263).
-#'
-pls.simplsold <- function(x, y, ncomp, cv = FALSE) {
-
-   x <- as.matrix(x)
-   y <- as.matrix(y)
-
-   npred <- ncol(x)
-   nresp <- ncol(y)
-
-   # initial estimation
-   A <- crossprod(x, y)
-   M <- crossprod(x, x)
-   C <- diag(npred)
-
-   # prepare space for results
-   B <- array(0, dim = c(npred, ncomp, nresp))
-   W <- matrix(0, nrow = npred, ncol = ncomp)
-   P <- matrix(0, nrow = npred, ncol = ncomp)
-   Q <- matrix(0, nrow = nresp, ncol = ncomp)
-
-   # loop for each components
-   for (n in seq_len(ncomp)) {
-      # get the dominate eigenvector of A'A
-      e <- eigen(crossprod(A))
-      q <- e$vectors[seq_len(nresp)]
-
-      # calculate and store weights
-      w <- A %*% q
-      c <- as.numeric(crossprod(w, (M %*% w)))
-
-      # stop cycle since c-value is very small and can result in singular matrix
-      if (c < .Machine$double.eps) {
-         n <- n - 1
-         warning(paste0(
-            "PLS can not compute more than ", n, " components (eigenvalues are too small). "
-         ), call. = FALSE)
-         break
-      }
-
-      w <- w / sqrt(c)
-      W[, n] <- w
-
-      # calculate and store x loadings
-      p <- M %*% w
-      P[, n] <- p
-
-      # calculate and store y loadings
-      q <- crossprod(A, w)
-      Q[, n] <- q
-
-      v <- C %*% p
-      v <- v / sqrt(as.numeric(crossprod(v)))
-
-      # compute coefficients for current component
-      B[, n, ] <- tcrossprod(W[, seq_len(n), drop = FALSE], Q[, seq_len(n), drop = FALSE])
-
-      # recalculate matrices for the next compnonent
-      C <- C - tcrossprod(v)
-      M <- M - tcrossprod(p)
-      A <- C %*% A
-   }
-
-   # truncate results if n is smaller than ncomp
-   W <- W[, seq_len(n), drop = FALSE]
-   P <- P[, seq_len(n), drop = FALSE]
-   Q <- Q[, seq_len(n), drop = FALSE]
-   B <- B[, seq_len(n), , drop = FALSE]
-
-   return(list(coeffs = B, weights = W, xloadings = P, yloadings = Q, ncomp = n))
 }
 
 #' PLS model calibration
@@ -1998,24 +1912,37 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
 #' number of components to show
+#' @param type
+#' type of VIP scores: \code{"individual"} computes separate VIP scores for each response variable
+#' (returns \code{nvar x nresp} matrix), \code{"combined"} computes a single VIP vector by summing
+#' explained Y-variance across all responses before normalizing as described in [1]
+#' (returns \code{nvar x 1} matrix). For PLS1 models both types give identical results.
 #'
 #' @return
-#' matrix \code{nvar x ny} with VIP score values (columns correspond to responses).
+#' matrix with VIP score values. If \code{type = "individual"}, dimensions are \code{nvar x nresp}
+#' (columns correspond to responses). If \code{type = "combined"}, dimensions are \code{nvar x 1}.
 #'
 #' @details
-#' May take some time in case of large number of predictors. Returns results as a column-vector,
-#' with all necessary attributes inherited (e.g. xaxis.values, excluded variables, etc.). If you
-#' want to make a plot use for example: \code{mdaplot(mda.t(v), type = "l")}, where \code{v} is
-#' a vector with computed VIP scores. Or just try \code{\link{plotVIPScores.pls}}.
+#' The \code{"individual"} type computes VIP scores separately for each response variable, weighting
+#' by the Y-variance explained per response. The \code{"combined"} type follows the original formula
+#' from [1], which sums explained Y-variance across all responses to produce a single VIP value
+#' per predictor. For PLS1 models (single response), both types are equivalent.
+#'
+#' If you want to make a plot use for example: \code{mdaplot(mda.t(v), type = "l")}, where \code{v}
+#' is a vector with computed VIP scores. Or just try \code{\link{plotVIPScores.pls}}.
 #'
 #' @references
 #' [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.
 #'
 #' @export
-vipscores <- function(obj, ncomp = obj$ncomp.selected) {
+vipscores <- function(obj, ncomp = obj$ncomp.selected, type = "individual") {
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > obj$ncomp) {
       stop("Wrong value for the 'ncomp' parameter.", call. = FALSE)
+   }
+
+   if (!(type %in% c("individual", "combined"))) {
+      stop("Parameter 'type' must be either 'individual' or 'combined'.", call. = FALSE)
    }
 
    # subset needed model parameters
@@ -2036,21 +1963,26 @@ vipscores <- function(obj, ncomp = obj$ncomp.selected) {
       var_ind <- var_ind[-obj$exclcols]
    }
 
-   # prepare matrix for vipscores
-   vipscores <- matrix(0, nrow = nvar, ncol = nrow(yloads))
-
    # normalize weights
    wnorm <- sweep(weights, 2, sqrt(colSums(weights^2)), "/")
 
-   # compute sum of squares for explained y variance and normalize it
-   ssq <- yloads^2 %*% diag(xeigenvals, nrow = ncomp, ncol = ncomp)
-   ssq <- sweep(ssq, 1, rowSums(ssq), "/")
-
-   # compute VIP scores
-   vipscores[var_ind, ] <- sqrt(nvar * wnorm^2 %*% t(ssq))
+   if (type == "individual") {
+      # per-response VIP: each response gets its own VIP vector
+      vipscores <- matrix(0, nrow = nvar, ncol = nrow(yloads))
+      ssq <- yloads^2 %*% diag(xeigenvals, nrow = ncomp, ncol = ncomp)
+      ssq <- sweep(ssq, 1, rowSums(ssq), "/")
+      vipscores[var_ind, ] <- sqrt(nvar * wnorm^2 %*% t(ssq))
+      colnames(vipscores) <- rownames(obj$yloadings)
+   } else {
+      # combined VIP: sum explained variance across all responses first
+      vipscores <- matrix(0, nrow = nvar, ncol = 1)
+      ssq <- colSums(yloads^2) * xeigenvals
+      ssq <- ssq / sum(ssq)
+      vipscores[var_ind, 1] <- sqrt(nvar * wnorm^2 %*% ssq)
+      colnames(vipscores) <- "VIP"
+   }
 
    rownames(vipscores) <- rownames(obj$xloadings)
-   colnames(vipscores) <- rownames(obj$yloadings)
 
    attr(vipscores, "exclrows") <- obj$exclcols
    attr(vipscores, "yaxis.values") <- attr(obj$xloadings, "yaxis.values")
@@ -2209,9 +2141,7 @@ pls.getZLimits <- function(lim.type, alpha, gamma, params) {
    }
 
    pZ <- if (regexpr("robust", lim.type) > 0) params$Z$robust else params$Z$moments
-   DoF <- round(pZ$Nu)
-   DoF[DoF < 1] <- 1
-   DoF[DoF > 250] <- 250
+   DoF <- clamp.dof(pZ$Nu)
 
    ncomp <- length(pZ$u0)
    lim <- rbind(0, 0, pZ$u0, DoF)
@@ -2259,15 +2189,9 @@ pls.getLimitsCoordinates <- function(Qlim, T2lim, Zlim, nobj, ncomp, norm, log) 
    z0 <- Zlim[3, ncomp]
    f0 <- Nf
 
-   # process degrees of freedom for (Z)
-   Nz <- round(Nz)
-   Nz[Nz < 1] <- 1
-   Nz[Nz > 250] <- 250
-
-   # process degrees of freedom for (F)
-   Nf <- round(Nf)
-   Nf[Nf < 1] <- 1
-   Nf[Nf > 250] <- 250
+   # process degrees of freedom
+   Nz <- clamp.dof(Nz)
+   Nf <- clamp.dof(Nf)
 
    # get limit parameters
    alpha <- attr(Qlim, "alpha")

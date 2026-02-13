@@ -96,7 +96,7 @@ confint.regcoeffs <- function(object, parm = NULL, level = 0.95, ncomp = 1, ny =
       repmat(object$values[, ncomp, ny], 1, 2)
 
    if (length(attr(object$values, "exclrows"))) {
-      ci[attr(object$values, "exclrows"), ] <- 0
+      ci[attr(object$values, "exclrows"), ] <- NA
    }
 
    ci <- mda.setattr(ci, mda.getattr(object$values))
@@ -257,10 +257,7 @@ regcoeffs.getStats <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
    dim_names <- dimnames(coeffs)
    DoF <- dim(ci.coeffs)[4] - 1
    attrs <- mda.getattr(coeffs)
-   se <- p.values <- t.values <- array(0, dim = dim(coeffs))
-
-   # to make sure p-values for excluded predictors are 1 (not important)
-   p.values <- p.values + 1
+   se <- p.values <- t.values <- array(NA_real_, dim = dim(coeffs))
 
    # prepare correct indices for predictors taking into accound excluded variables
    row_ind <- seq_len(dim(coeffs)[1])

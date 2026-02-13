@@ -279,7 +279,7 @@ regres.slope <- function(y.pred, y.ref) {
    ncomp <- ncol(y.pred)
    slope <- matrix(0, nrow = nresp, ncol = ncomp)
    for (i in seq_len(nresp)) {
-      slope[i, ] <- matrix(coefficients(lm(y.pred[, , i] ~ y.ref[, i])), nrow = 2)[2, ]
+      slope[i, ] <- cov(y.ref[, i], y.pred[, , i]) / var(y.ref[, i])
    }
 
    return(slope)
