@@ -91,9 +91,8 @@ constraintClosure <- function(x, d, sum = 1) {
    rsums <- rowSums(x)
    rsums[rsums == 0] <- 1
 
-   # scale the values so for evert row they sum up to 1
-   s <- diag(sum / rsums, nrow(x), nrow(x))
-   return(s %*% x)
+   # scale the values so for every row they sum up to 1
+   return(x * (sum / rsums))
 }
 
 #' Method for unimodality constraint
@@ -244,21 +243,22 @@ constraint <- function(name, params = NULL, method = NULL) {
 
       # 2. check the parameters
       if (is.null(params)) params <- item$params
-      if (length(params) > 0 && !(names(params) %in% names(item$params))) {
+      if (length(params) > 0 && !all(names(params) %in% names(item$params))) {
          stop("Provided constraint parameters have wrong name.", call. = FALSE)
       }
 
       method <- item$method
    } else {
       # user defined constraint, check that it works
+      test_x <- matrix(runif(50), 5, 10)
       res <- tryCatch(
-         do.call(method, c(matrix(runif(25, 5, 10)), params)),
+         do.call(method, c(list(x = test_x, d = test_x), params)),
          error = function(m) stop("The method you provided raises an error: \n", m, call. = FALSE),
          warning = function(m) stop("The method you provided raises a warning: \n", m, call. = FALSE)
       )
 
       stopifnot("The method you provided does not return matrix with correct dimension." =
-         dim(res) == c(5, 10))
+         all(dim(res) == c(5, 10)))
    }
 
    obj <- list(

@@ -173,8 +173,8 @@ plotCumVariance.mcr <- function(obj, type = "b", labels = "values", main = "Cumu
 plot.mcr <- function(x, ...) {
    op <- par(mfrow = c(2, 2))
    on.exit(par(op))
-   plotSpectra(x)
-   plotContributions(x)
-   plotVariance(x)
-   plotCumVariance(x)
+   plotSpectra(x, ...)
+   plotContributions(x, ...)
+   plotVariance(x, ...)
+   plotCumVariance(x, ...)
 }

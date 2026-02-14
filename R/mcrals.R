@@ -245,7 +245,7 @@ mcrals <- function(x, ncomp,
    model$variance <- getVariance.mcr(model, x)
 
    # add class name, call and info and return
-   class(model) <- c("mcr", "mcrals")
+   class(model) <- c("mcrals", "mcr")
    model$call <- match.call()
    model$info <- info
 
@@ -301,7 +301,7 @@ print.mcrals <- function(x, ...) {
    cat("\nMajor model fields:\n")
    cat("$ncomp - number of calculated components\n")
    cat("$resspec - matrix with resolved spectra\n")
-   cat("$rescons - matrix with resolved concentrations\n")
+   cat("$rescont - matrix with resolved contributions\n")
    cat("$expvar - vector with explained variance\n")
    cat("$cumexpvar - vector with cumulative explained variance\n")
    cat("$info - case info provided by user\n")
@@ -331,7 +331,7 @@ summary.mcrals <- function(object, ...) {
    }
 
    if (length(object$exclcols) > 0) {
-      fprintf("Excluded coumns: %d\n", length(object$exclcols))
+      fprintf("Excluded columns: %d\n", length(object$exclcols))
    }
 
    cat("\nConstraints for spectra:\n")
@@ -492,9 +492,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini,
       var <- tryCatch(
          1 - sum((D - tcrossprod(cont.solver(D, St), St))^2) / totvar,
          error = function(e) {
-            print(e)
-            stop("Unable to resolve the components, perhaps 'ncomp' is too large.\n
-               or initial estimates for spectra are not good enough.", call. = FALSE)
+            stop("Unable to resolve the components, perhaps 'ncomp' is too large or initial estimates for spectra are not good enough.", call. = FALSE)
          }
       )
 
@@ -509,9 +507,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini,
    Ct <- tryCatch(
       cont.solver(D, St),
       error = function(e) {
-         print(e)
-         stop("Unable to resolve the components, perhaps 'ncomp' is too large.\n
-            or initial estimates for spectra are not good enough.", call. = FALSE)
+         stop("Unable to resolve the components, perhaps 'ncomp' is too large or initial estimates for spectra are not good enough.", call. = FALSE)
       }
    )
 
@@ -640,8 +636,9 @@ mcrals.nnls <- function(D, A,
             iter <- iter + 1
 
             if (iter > itmax) {
-               # too many iterations, exitint with current solution
-               return(b.hat)
+               B[v, ] <- b.hat
+               warning("NNLS did not converge within maximum number of iterations.")
+               return(B)
             }
 
             # find which values in current solution are negative but they are in positive lest

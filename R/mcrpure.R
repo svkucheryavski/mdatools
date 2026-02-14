@@ -155,7 +155,7 @@ mcrpure <- function(x, ncomp, purevars = NULL, offset = 0.05, exclrows = NULL, e
    model$variance <- getVariance.mcr(model, x)
 
    # combine everything as an S3 object
-   class(model) <- c("mcr", "mcrpure")
+   class(model) <- c("mcrpure", "mcr")
    model$call <- match.call()
    model$info <- info
 
@@ -300,7 +300,7 @@ summary.mcrpure <- function(object, ...) {
    }
 
    if (length(object$exclcols) > 0) {
-      fprintf("Excluded coumns: %d\n", length(object$exclcols))
+      fprintf("Excluded columns: %d\n", length(object$exclcols))
    }
 
    data <- cbind(
@@ -338,9 +338,9 @@ summary.mcrpure <- function(object, ...) {
 #' @return
 #' The function returns a list with the following fields:
 #' \item{ncomp }{number of pure components.}
-#' \item{purvars }{vector with indices for pure variables.}
+#' \item{purevars }{vector with indices for pure variables.}
 #' \item{purityspec }{matrix with purity values for each resolved components.}
-#' \item{purity }{vector with purity values for resolved components.}
+#' \item{purevals }{vector with purity values for resolved components.}
 #'
 #' @export
 getPureVariables <- function(D, ncomp, purevars, offset) {
@@ -376,7 +376,7 @@ getPureVariables <- function(D, ncomp, purevars, offset) {
    n <- mu / (mu + offset * max(mu))
    n <- (1 + offset) * n
 
-   # prepare vectores for resultss
+   # prepare vectors for results
    purityspec <- matrix(0, nrow = ncomp, ncol = nvar)
    purevals <- rep(0, ncomp)
 
