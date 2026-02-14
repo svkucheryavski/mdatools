@@ -54,7 +54,7 @@ prep.spikes <- function(data, width = 5, threshold = 6) {
          for (rr in spikes.rows) {
             spikes.cols <- which(spikes.map[rr, ] > 0)
             for (cc in spikes.cols) {
-               cc.ind <- seq(max(cc - half, 1),min(cc + half, n))
+               cc.ind <- seq(max(cc - half, 1), min(cc + half, n))
                cc.ind <- cc.ind[spikes.map[rr, cc.ind] == 0]
                if (length(cc.ind) > 0)
                   data[rr, cc] <- mean(data[rr, cc.ind])
@@ -507,7 +507,7 @@ prep.emsc <- function(data, degree = 0, mspectrum = NULL, lnorm = NULL, A = NULL
 
    f <- function(data) {
 
-      # define values for centering
+      # define values for EMSC
       if (is.null(A) || is.null(lnorm)) {
          params <- prep.emsc.params(data, degree, mspectrum)
          mspectrum <- params$mspectrum
@@ -652,8 +652,8 @@ prep.emsc.params <- function(data, degree = 0, mspectrum = NULL) {
 
    # build design matrix A: nx x p
    A <- matrix(1.0, nx, p)    # first column is just ones for intercept
-   A[, 2] <- mspectrum        # second column contains reference spectum (slope)
-   if ( degree > 0) {
+   A[, 2] <- mspectrum        # second column contains reference spectrum (slope)
+   if (degree > 0) {
       for (d in seq_len(degree)) {
          A[, d + 2] <- lnorm^(d)
       }
@@ -1319,7 +1319,8 @@ getImplementedPrepMethods <- function() {
          params = list(width = 5, threshold = 6),
          jmethod = prep.spikes.asjson,
          params.info = list(
-            type = "width and threshold"
+            width = "width of the moving median filter",
+            threshold = "threshold for spike detection"
          ),
          info = "Removes cosmic spikes."
       ),
@@ -1566,7 +1567,7 @@ prep.asjson <- function(obj) {
          s2 <- regexec("/", out[["info"]])[[1]]
          n2 <- nchar(out[["info"]])
 
-         # select all befor "/" and combine with scaling type
+         # select all before "/" and combine with scaling type
          info[n - 1] <- paste0(substring(info[n - 1], 1, s1), substring(out[["info"]], s2 + 1, n2), "'")
 
          # skip the code below
@@ -1690,7 +1691,7 @@ prep.fromjson <- function(str) {
             f <- if (mp_i[1] != 0) prep.center.fromjson else prep.scale.fromjson
          }
       } else if (ml[ip] == 3) {
-         # this is basline method, depending on mp[1] value it can me emsc or als
+         # this is baseline method, depending on mp[1] value it can be emsc or als
          f <- methods[[ml[ip] + 1]][[mp_i[1] + 1]]
       } else {
          f <- methods[[ml[ip] + 1]]
@@ -1784,7 +1785,7 @@ pinv <- function(data) {
 #' @return
 #' data matrix with processed values
 #'
-#' @description
+#' @details
 #'
 #' The use of `max.cov` allows to avoid overestimation of inert variables, which vary
 #' very little. Note, that the `max.cov` value is already in percent, e.g. if `max.cov = 0.1` it
@@ -1803,7 +1804,7 @@ prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0) {
          stop("Number of values in 'center' should be the same as number of columns in 'data'", call. = FALSE)
       }
 
-      # define values for weigting
+      # define values for weighting
       if (is.logical(scale) && scale) scale <- apply(data, 2, sd)
 
       if (is.numeric(scale) && length(scale) != ncol(data)) {
@@ -1847,7 +1848,7 @@ prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0) {
 #' SNV is a simple preprocessing to remove scatter effects (baseline offset and slope) from
 #' spectral data, e.g. NIR spectra.
 #'
-#'  @examples
+#' @examples
 #'
 #'  ### Apply SNV to spectra from simdata
 #'
@@ -1889,7 +1890,7 @@ prep.snv <- function(data) {
 #' MSC is used to remove scatter effects (baseline offset and slope) from
 #' spectral data, e.g. NIR spectra.
 #'
-#'  @examples
+#' @examples
 #'
 #'  ### Apply MSC to spectra from simdata
 #'
