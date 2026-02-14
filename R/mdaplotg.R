@@ -40,7 +40,7 @@ mdaplotg.showLegend <- function(legend, col, pt.bg = NA, pch = NULL, lty = NULL,
    # compute number of columns
    ncol <- if (position %in% onecolpos) 1 else length(legend)
 
-   # calculate inset values depending on a ration between width and height of a plot
+   # calculate inset values depending on a ratio between width and height of a plot
    lim <- par("plt")
 
    dx <- lim[2] - lim[1]
@@ -62,7 +62,7 @@ mdaplotg.showLegend <- function(legend, col, pt.bg = NA, pch = NULL, lty = NULL,
 #' @param type
 #' vector with type for dataset
 #' @param groupby
-#' factor or  data frame with factors - used to split data matrix into groups
+#' factor or data frame with factors - used to split data matrix into groups
 #'
 #' @return
 #' list of datasets
@@ -222,7 +222,7 @@ mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, show.labels,
    # compute limits for all plot series and combine into matrix
    xlim <- matrix(unlist(lapply(ps, f)), ncol = 2, byrow = TRUE)
 
-   # get the smallest of min and larges of max
+   # get the smallest of min and largest of max
    xlim <- c(min(xlim[, 1]), max(xlim[, 2]))
 
    # add extra margins if legend must be shown
@@ -276,8 +276,7 @@ mdaplotg.getYLim <- function(ps, ylim, show.excluded, show.legend, legend.positi
    # compute limits for all plot series and combine into matrix
    ylim <- matrix(unlist(lapply(ps, f)), ncol = 2, byrow = TRUE)
 
-
-   # get the smallest of min and larges of max
+   # get the smallest of min and largest of max
    ylim <- c(min(ylim[, 1]), max(ylim[, 2]))
 
    # add extra margins if legend must be shown
