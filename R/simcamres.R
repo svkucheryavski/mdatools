@@ -10,13 +10,13 @@
 #'
 #' @details
 #' Class \code{simcamres} inherits all properties and methods of class \code{\link{classres}}, plus
-#' store values necessary to visualise prediction decisions (e.g. Cooman's plot or Residuals plot).
+#' stores values necessary to visualise prediction decisions (e.g. Cooman's plot or Residuals plot).
 #'
 #' In contrast to \code{simcares} here only values for optimal (selected) number of components in
 #' each individual SIMCA models are presented.
 #'
 #' There is no need to create a \code{simcamres} object manually, it is created automatically when
-#' make a SIMCAM model (see \code{\link{simcam}}) or apply the model to a new data (see
+#' you make a SIMCAM model (see \code{\link{simcam}}) or apply the model to a new data (see
 #' \code{\link{predict.simcam}}). The object can be used to show summary and plots for the results.
 #'
 #' @return
@@ -73,7 +73,7 @@ simcamres <- function(cres, pred.res) {
 #' values for specific class.
 #'
 #' @param x
-#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' classification results (object of class \code{simcamres}).
 #' @param nc
 #' vector with classes to use.
 #' @param ...
@@ -196,7 +196,7 @@ plotCooman.simcamres <- function(obj, nc = c(1, 2), main = "Cooman's plot",
 #' Makes a plot with predicted class values for classification results.
 #'
 #' @param obj
-#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' classification results (object of class \code{simcamres}).
 #' @param nc
 #' vector with classes to show predictions for.
 #' @param main
@@ -228,5 +228,5 @@ plotPredictions.simcamres <- function(obj, nc = seq_len(obj$nclasses), main = "P
 #'
 #' @export
 plot.simcamres <- function(x, ...) {
-   plotPredictions(x)
+   plotPredictions(x, ...)
 }

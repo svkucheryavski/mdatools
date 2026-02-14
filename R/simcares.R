@@ -1,6 +1,6 @@
 #' Results of SIMCA one-class classification
 #'
-#'  @description
+#' @description
 #' \code{simcares} is used to store results for SIMCA one-class classification.
 #' @param class.res
 #' results of classification (class \code{classres}).
@@ -96,7 +96,7 @@ simcares <- function(class.res, pca.res = NULL) {
 #' values for specific class.
 #'
 #' @param x
-#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' classification results (object of class \code{simcares}).
 #' @param ncomp
 #' model complexity (number of components) to show the parameters for.
 #' @param ...

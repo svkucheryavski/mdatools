@@ -608,6 +608,6 @@ plotPredictions.simcam <- function(obj, nc = seq_len(obj$nclasses),
 plot.simcam <- function(x, nc = c(1, 2), ...) {
    op <- par(mfrow = c(2, 1))
    on.exit(par(op))
-   plotDiscriminationPower(x, nc)
-   plotModelDistance(x, nc[1])
+   plotDiscriminationPower(x, nc, ...)
+   plotModelDistance(x, nc[1], ...)
 }
