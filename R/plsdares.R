@@ -25,11 +25,11 @@
 #' and \code{\link{plsres}}.
 #'
 #' @seealso
-#' Methods for \code{plsda} objects:
+#' Methods for \code{plsdares} objects:
 #' \tabular{ll}{
-#'  \code{print.plsda} \tab shows information about the object.\cr
-#'  \code{summary.plsda} \tab shows statistics for results of classification.\cr
-#'  \code{plot.plsda} \tab shows plots for overview of the results.\cr
+#'  \code{print.plsdares} \tab shows information about the object.\cr
+#'  \code{summary.plsdares} \tab shows statistics for results of classification.\cr
+#'  \code{plot.plsdares} \tab shows plots for overview of the results.\cr
 #' }
 #'
 #' Methods, inherited from \code{\link{classres}} class:
@@ -161,18 +161,18 @@ plot.plsdares <- function(x, nc = 1, ncomp = x$ncomp.selected, show.labels = FAL
    if (is.null(x$c.ref)) {
       op <- par(mfrow = c(2, 2))
       on.exit(par(op))
-      plotXResiduals.plsres(x, ncomp = ncomp, show.labels = show.labels)
-      plotYVariance.plsres(x, ncomp = ncomp, show.labels = show.labels)
-      plotPredictions.classres(x, ncomp = ncomp, show.labels = show.labels)
+      plotXResiduals.plsres(x, ncomp = ncomp, show.labels = show.labels, ...)
+      plotYVariance.plsres(x, ncomp = ncomp, show.labels = show.labels, ...)
+      plotPredictions.classres(x, ncomp = ncomp, show.labels = show.labels, ...)
       return()
    }
 
    op <- par(mfrow = c(2, 2))
    on.exit(par(op))
-   plotXResiduals.plsres(x, ncomp = ncomp, show.labels = show.labels)
-   plotYVariance.plsres(x, ncomp = ncomp, show.labels = show.labels)
-   plotPerformance.classres(x, nc = nc, show.labels = show.labels)
-   plotPredictions.classres(x, ncomp = ncomp, show.labels = show.labels)
+   plotXResiduals.plsres(x, ncomp = ncomp, show.labels = show.labels, ...)
+   plotYVariance.plsres(x, ncomp = ncomp, show.labels = show.labels, ...)
+   plotPerformance.classres(x, nc = nc, show.labels = show.labels, ...)
+   plotPredictions.classres(x, ncomp = ncomp, show.labels = show.labels, ...)
 }
 
 #' as.matrix method for PLS-DA results
@@ -214,7 +214,7 @@ as.matrix.plsdares <- function(x, ncomp = NULL, nc = 1, ...) {
 #' @export
 summary.plsdares <- function(object, nc = seq_len(object$nclasses), ...) {
    cat("\nPLS-DA results (class plsdares) summary:\n")
-   fprintf("Number of selected components: %.0f\n", object$ncomp.selected)
+   fprintf("Number of selected components: %d\n", object$ncomp.selected)
 
    if (is.null(object$c.ref)) {
       cat("No reference data available.\n")
@@ -222,7 +222,7 @@ summary.plsdares <- function(object, nc = seq_len(object$nclasses), ...) {
    }
 
    for (n in nc) {
-      fprintf("\nClass #%.0f (%s):\n", n, object$classnames[n])
+      fprintf("\nClass #%d (%s):\n", n, object$classnames[n])
       out <- as.matrix(object, nc = n)
       if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
       print(out)

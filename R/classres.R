@@ -38,7 +38,7 @@
 #' \tabular{ll}{
 #'  \code{\link{showPredictions.classres}} \tab shows table with predicted values.\cr
 #'  \code{\link{plotPredictions.classres}} \tab makes plot with predicted values.\cr
-#'  \code{\link{plotSensitivity.classres}} \tab makes sn plot.\cr
+#'  \code{\link{plotSensitivity.classres}} \tab makes sensitivity plot.\cr
 #'  \code{\link{plotSpecificity.classres}} \tab makes specificity plot.\cr
 #'  \code{\link{plotMisclassified.classres}} \tab makes ms ratio plot.\cr
 #'  \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ratio, specificity
@@ -238,7 +238,7 @@ print.classres <- function(x, str = "Classification results (class classres)\nMa
       cat("$fp - number of false positives\n")
       cat("$fn - number of false negatives\n")
       cat("$specificity - specificity of predictions\n")
-      cat("$sensitivity - sn of predictions\n")
+      cat("$sensitivity - sensitivity of predictions\n")
       cat("$misclassified - misclassification ratio for predictions\n")
    }
 }
@@ -301,9 +301,9 @@ summary.classres <- function(object, ncomp = object$ncomp.selected,
 #'    \code{$fn} \tab number of false negatives (nclasses x ncomponents) \cr
 #'    \code{$fp} \tab number of false positives (nclasses x ncomponents) \cr
 #'    \code{$tp} \tab number of true positives (nclasses x ncomponents) \cr
-#'    \code{$sensitivity} \tab sn values (nclasses x ncomponents) \cr
+#'    \code{$sensitivity} \tab sensitivity values (nclasses x ncomponents) \cr
 #'    \code{$specificity} \tab specificity values (nclasses x ncomponents) \cr
-#'    \code{$specificity} \tab ms ratio values (nclasses x ncomponents) \cr
+#'    \code{$misclassified} \tab misclassification ratio values (nclasses x ncomponents) \cr
 #' }
 #'
 #' @details
@@ -359,7 +359,7 @@ classres.getPerformance <- function(c.ref, c.pred) {
    row_names <- dimnames(c.pred)[[3]]
    col_names <- dimnames(c.pred)[[2]]
    rownames(fn) <- rownames(fp) <- rownames(tp) <- rownames(tn) <- row_names
-   colnames(fn) <- colnames(fp) <- colnames(tp) <- colnames(sn) <- colnames(sp) <- col_names
+   colnames(fn) <- colnames(fp) <- colnames(tp) <- colnames(tn) <- colnames(sn) <- colnames(sp) <- colnames(ms) <- col_names
    rownames(sn) <- rownames(sp) <- rownames(ms) <- c(row_names, "Total")
 
    # in case of one class classifier set sensitivity NULL
@@ -428,7 +428,7 @@ plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, 
 #' Sensitivity plot for classification results
 #'
 #' @description
-#' Makes a plot with sn values vs. model complexity (e.g. number of components) for
+#' Makes a plot with sensitivity values vs. model complexity (e.g. number of components) for
 #' classification results.
 #'
 #' @param obj
@@ -528,7 +528,7 @@ plotPerformance.classres <- function(obj, nc = 1, type = "b",
    # check if parameters requested are not NULL
    param <- param[param %in% names(Filter(Negate(is.null), obj))]
    if (length(param) == 0) {
-      stop("Performance parameteres you requested are not available in this result object.", call. = FALSE)
+      stop("Performance parameters you requested are not available in this result object.", call. = FALSE)
    }
 
    # prepare plot data

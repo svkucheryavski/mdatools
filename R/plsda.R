@@ -198,7 +198,6 @@ plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, sc
       # redefine regression coefficients
       model$coeffs <- regcoeffs(model$coeffs$values, res$jk.coeffs)
 
-      # redefine
       cvres <- plsdares(pls_res, class_res)
       cvres$info <- "cross-validation results"
    }
@@ -211,7 +210,6 @@ plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, sc
    # get calibration results
    model$res[["cal"]] <- predict.plsda(model, x, c)
    model$res[["cal"]]$info <- "calibration results"
-   model$calres <- model$res[["cal"]]
 
    # compute critical limit parameters
    model$limParams <- list(
@@ -222,13 +220,11 @@ plsda <- function(x, c, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, sc
 
    # assign cross-validation results to the model (so they are under calibration)
    model$res[["cv"]] <- cvres
-   model$cvres <- model$res[["cv"]]
 
    # do test set validation if provided
    if (!is.null(x.test) && !is.null(c.test)) {
       model$res[["test"]] <- predict.plsda(model, x.test, c.test)
       model$res[["test"]]$info <- "test set validation results"
-      model$testres <- model$res[["test"]]
    }
 
    model$ncomp.selcrit <- ncomp.selcrit
@@ -365,7 +361,7 @@ plot.plsda <- function(x, ncomp = x$ncomp.selected, nc = 1, show.legend = TRUE, 
 summary.plsda <- function(object, ncomp = object$ncomp.selected,
    nc = seq_len(object$nclasses), ...) {
 
-   if (length(ncomp) != 1 || ncomp < 0 || ncomp > object$ncomp) {
+   if (length(ncomp) != 1 || ncomp < 1 || ncomp > object$ncomp) {
       stop("Wrong value for the 'ncomp' parameter.", call. = FALSE)
    }
 
