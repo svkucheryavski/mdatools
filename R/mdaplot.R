@@ -66,7 +66,7 @@ mdaplot.prepareColors <- function(palette, ncolors, opacity) {
       return(colors)
    }
 
-   # repeate opacity values for each color
+   # repeat opacity values for each color
    if (length(opacity) == 1) {
       opacity <- rep(opacity, ncolors)
    }
@@ -235,7 +235,7 @@ mdaplot.showLines <- function(point, lty = 2, lwd = 0.75, col = rgb(0.2, 0.2, 0.
 mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
    opacity = 1, maxsplits = 64) {
 
-   # if non of the main arguments defined assume only one color is needed
+   # if none of the main arguments defined assume only one color is needed
    if (is.null(ngroups) && is.null(cgroup)) {
       ngroups <- 1
    }
@@ -267,10 +267,10 @@ mdaplot.getColors <- function(ngroups = NULL, cgroup = NULL, colmap = "default",
    palette <- if (length(colmap) > 1) colmap else colmaps[[colmap]]
 
    if (!all(mdaplot.areColors(palette))) {
-      stop("Parameter 'colmap' must contains valid color values or name of palette.", call. = FALSE)
+      stop("Parameter 'colmap' must contain valid color values or name of palette.", call. = FALSE)
    }
 
-   # if grayscale palette and only one color is needed reorder pallete so the black is first
+   # if grayscale palette and only one color is needed reorder palette so the black is first
    if (all(colmap == "gray") && is.null(cgroup) && ngroups == 1) {
       palette <- rev(palette)
    }
@@ -691,7 +691,7 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #'
 #' The function makes a plot of one set of objects. It can be a set of points (scatter plot),
 #' bars, lines, scatter-lines, errorbars or an image. The data is organized as a data frame,
-#' matrix or vector. For scatter and only first two columns will be used, for bar plot only
+#' matrix or vector. For scatter plots only the first two columns will be used, for bar plot only
 #' values from the first row. It is recommended to use \code{\link{mda.subset}} method if plot
 #' should be made only for a subset of the data, especially if you have any excluded rows or
 #' columns or other special attributed, described in the Bookdown tutorial.
