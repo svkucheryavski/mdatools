@@ -130,7 +130,7 @@ crossval.str <- function(cv) {
    if (is.numeric(cv)) {
 
       if (length(cv) > 1) {
-         return (sprintf("user defined with %d segments", length(unique((cv)))))
+         return(sprintf("user defined with %d segments", length(unique(cv))))
       }
 
       return(
@@ -139,18 +139,17 @@ crossval.str <- function(cv) {
       )
    }
 
-
    type <- cv[[1]]
    if (type == "loo") {
       return("full (leave one out)")
    }
 
    if (type == "ven") {
-      return(sprintf("venetian blinds with %.0f segments", cv[[2]]))
+      return(sprintf("venetian blinds with %d segments", cv[[2]]))
    }
 
    return(
-      sprintf("random with %.0f segments%s",
+      sprintf("random with %d segments%s",
          cv[[2]], if (length(cv) == 3) paste(" and", cv[[3]], "repetitions") else "")
    )
 }

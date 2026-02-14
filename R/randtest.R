@@ -172,7 +172,7 @@ randtest <- function(x, y, ncomp = 15, center = TRUE, scale = FALSE, nperm = 100
 #'
 #' @description
 #' Makes a histogram for statistic values distribution for particular component, also
-#' show critical value as a vertical line.
+#' shows critical value as a vertical line.
 #'
 #' @param obj
 #' results of randomization test (object of class `randtest`)
@@ -188,6 +188,7 @@ randtest <- function(x, y, ncomp = 15, center = TRUE, scale = FALSE, nperm = 100
 #'
 #' @export
 plotHist.randtest <- function(obj, ncomp = obj$ncomp.selected, bwd = 0.9, ...) {
+   stopifnot("Parameter 'ncomp' must be >= 1." = ncomp >= 1)
 
    h <- hist(obj$statperm[, ncomp], plot = FALSE)
    plot_data <- h$counts
@@ -224,6 +225,7 @@ plotHist.randtest <- function(obj, ncomp = obj$ncomp.selected, bwd = 0.9, ...) {
 #' @export
 plotCorr.randtest <- function(obj, ncomp = obj$ncomp.selected, ylim = NULL,
    xlab = expression(r^2), ylab = "Test statistic", ...) {
+   stopifnot("Parameter 'ncomp' must be >= 1." = ncomp >= 1)
 
    plot_data <- list(
       "perm" = cbind(obj$corrperm[, ncomp]^2, obj$statperm[, ncomp]),
