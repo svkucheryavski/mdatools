@@ -542,7 +542,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
       ))
 
       if (!obj$silent) {
-         message(sprintf("excluded interval %3d (RMSE = %f, nLV = %d)", unsel, rmse, m$ncomp.selected))
+         message(sprintf("excluded interval %3d (RMSE = %f, nLV = %d)", unsel, rmse, ncomp))
       }
    }
 
@@ -588,8 +588,8 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
 #'
 #' See examples in help for \code{\link{ipls}} function.
 #'
-#'  @seealso
-#'  \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
+#' @seealso
+#' \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
 #'
 #' @export
 plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "iPLS results",
@@ -647,8 +647,9 @@ plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "
       col = rgb(0.4, 0.4, 0.4), cex = 0.85)
 
    dx <- diff(xlim) / 50
-   abline(h = obj$gm$cvres$rmse[1, glob.ncomp], lty = 2, col = rgb(0.5, 0.5, 0.5))
-   text(xlim[2] + dx, obj$gm$cvres$rmse[1, glob.ncomp], glob.ncomp, cex = 0.85,
+   gmres <- if (is.null(obj$cv)) obj$gm$res$test else obj$gm$res$cv
+   abline(h = gmres$rmse[1, glob.ncomp], lty = 2, col = rgb(0.5, 0.5, 0.5))
+   text(xlim[2] + dx, gmres$rmse[1, glob.ncomp], glob.ncomp, cex = 0.85,
         col = rgb(0.3, 0.3, 0.3), font = 2, pos = 3)
 }
 
@@ -775,9 +776,11 @@ summary.ipls <- function(object, glob.ncomp = object$gm$ncomp.selected, ...) {
       stop("Wrong value for number of components.", call. = FALSE)
    }
 
-   glob.rmse <- object$gm$cvres$rmse[1, glob.ncomp]
+   gm.res <- if (is.null(object$cv)) object$gm$res$test else object$gm$res$cv
+   glob.rmse <- gm.res$rmse[1, glob.ncomp]
    opt.ncomp <- object$om$ncomp.selected
-   opt.rmse <- object$om$cvres$rmse[1, opt.ncomp]
+   om.res <- if (is.null(object$cv)) object$om$res$test else object$om$res$cv
+   opt.rmse <- om.res$rmse[1, opt.ncomp]
    rmse.suffix <- if (is.null(object$cv)) "P" else "CV"
 
    cat("\niPLS variable selection results\n")
