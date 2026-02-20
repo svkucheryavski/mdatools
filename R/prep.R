@@ -1264,6 +1264,7 @@ getImplementedPrepMethods <- function() {
          name = "varsel",
          method = prep.varsel,
          params = list(var.ind = NULL),
+         params.show = c("var.ind"),
          jmethod = prep.varsel.asjson,
          params.info = list(var.ind = "indices of variables (columns) to select."),
          info = "Select user-defined variables (columns of dataset)."
@@ -1274,6 +1275,7 @@ getImplementedPrepMethods <- function() {
          name = "norm",
          method = prep.norm,
          params = list(type = "area", col.ind = NULL, ref.spectrum = NULL),
+         params.show = c("type", "col.ind"),
          pmethod = prep.norm.params,
          jmethod = prep.norm.asjson,
          params.info = list(
@@ -1289,6 +1291,7 @@ getImplementedPrepMethods <- function() {
          name = "savgol",
          method = prep.savgol,
          params = list(width = 3, porder = 1, dorder = 0),
+         params.show = c("width", "porder", "dorder"),
          pmethod = prep.savgol.params,
          jmethod = prep.savgol.asjson,
          params.info = list(
@@ -1304,6 +1307,7 @@ getImplementedPrepMethods <- function() {
          name = "alsbasecorr",
          method = prep.alsbasecorr,
          params = list(plambda = 5, p = 0.1, max.niter = 10),
+         params.show = c("plambda", "p"),
          jmethod = prep.alsbasecorr.asjson,
          params.info = list(
             plambda = "power of the penalty parameter (e.g. if plambda = 5, lambda = 10^5)",
@@ -1317,6 +1321,7 @@ getImplementedPrepMethods <- function() {
          name = "spikes",
          method = prep.spikes,
          params = list(width = 5, threshold = 6),
+         params.show = c("width", "threshold"),
          jmethod = prep.spikes.asjson,
          params.info = list(
             width = "width of the moving median filter",
@@ -1330,6 +1335,7 @@ getImplementedPrepMethods <- function() {
          name = "center",
          method = prep.center,
          params = list(type = "mean"),
+         params.show = c("type"),
          pmethod = prep.center.params,
          jmethod = prep.center.asjson,
          params.info = list(
@@ -1342,6 +1348,7 @@ getImplementedPrepMethods <- function() {
          name = "scale",
          method = prep.scale,
          params = list(type = "sd"),
+         params.show = c("type"),
          pmethod = prep.scale.params,
          jmethod = prep.scale.asjson,
          params.info = list(
@@ -1355,6 +1362,7 @@ getImplementedPrepMethods <- function() {
          name = "emsc",
          method = prep.emsc,
          params = list(degree = 0, mspectrum = NULL),
+         params.show = c("degree"),
          pmethod = prep.emsc.params,
          jmethod = prep.emsc.asjson,
          params.info = list(
@@ -1715,6 +1723,7 @@ prep.fromjson <- function(str) {
    }
 
    m[["_npred"]] <- npred
+   class(m) <- c("prepmodel")
    return (m)
 }
 
@@ -1735,15 +1744,56 @@ writeJSON.prepmodel <- function(obj, fileName) {
 }
 
 
+#' Show summry about the preprocessing model.
+#'
+#' @param object
+#' preprocessing model (created by \code{\link{prep.fit}}).
+#' @param ...
+#' potential further arguments (required for Method/Generic reasons).
+#'
+#' @export
+summary.prepmodel <- function(object, ...) {
+   cat("\nPreprocessing model:\n")
+   cat(str(object))
+   cat("\n")
+}
 
 
+#' Show the information about methods in the preprocessing model.
+#'
+#' @param object
+#' preprocessing model (created by \code{\link{prep.fit}}).
+#' @param ...
+#' potential further arguments (required for Method/Generic reasons).
+#'
+#' @export
+str.prepmodel <- function(object, ...) {
+   out <- ""
+   prep.list = getImplementedPrepMethods()
+
+   par2str <- function(n, p) {
+      if (is.null(p)) return("")
+      if (is.vector(p) && length(p) > 1) return(paste0(n, " = ", min(p), ":", max(p)))
+      return(paste0(n, " = ", p))
+   }
+
+   for (p in object) {
+      if (!is.list(p)) next
+      name <- p[["name"]]
+      params <- p[["params"]]
+      params.list <- prep.list[[name]][["params.show"]]
+      out <- paste0(out, " - ", name)
+      params.out <- sapply(params.list, function(n) par2str(n, params[[n]]))
+      if (length(params.out) > 0)
+         out <- paste0(out, ": ", paste0(params.out, collapse = ", "))
+      out <- paste0(out, "\n")
+   }
+   return(out)
+}
 
 ############################################################
 # Service methods                                          #
 ############################################################
-
-
-
 
 #' Pseudo-inverse matrix
 #'
@@ -1765,7 +1815,6 @@ pinv <- function(data) {
 #################################################################################
 # Legacy methods - still supported but no development and not part of prep.     #
 #################################################################################
-
 
 #' Autoscale values
 #'
