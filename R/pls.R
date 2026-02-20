@@ -40,6 +40,8 @@
 #' @param cv.scope
 #' scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
 #' or 'local' — recompute new for each local calibration set.
+#' @param prep
+#' optional list with preprocessing methods created using `\code{\link{prep}}` function.
 #'
 #' @return
 #' Returns an object of \code{pls} class with following fields:
@@ -57,6 +59,7 @@
 #' \item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated
 #' for each component.}
 #' \item{info }{information about the model, provided by user when building the model.}
+#' \item{prep }{trained preprocessing model (if specified)}
 #' \item{cv }{information about cross-validation method used (if any).}
 #' \item{res }{a list with result objects (e.g. calibration, cv, etc.)}
 #'
@@ -83,6 +86,18 @@
 #' based on Jack-Knifing resampling. This is done automatically if cross-validation is used.
 #' However it is recommended to use at least 10 segments for stable JK result. See help for
 #' \code{\link{regcoeffs}} objects for more details.
+#'
+#' If you provide a list with preprocessing methods, PLS will apply them to the training set
+#' before excluding the columns and rows (if specified). The list will be used to train a preprocessing
+#' model which becomes a part of the PLS model object. So when you use method `predict()` the provided
+#' dataset will be automatically preprocessed by the preprocessing model.
+#'
+#' Any PLS model (with or without preprocessing) developed in this package can be saved as JSON file
+#' using method \code{\link{writeJSON}} and then be loaded to interactive web-application for
+#' PLS available at https://mda.tools/pls. Likewise one can develop a model in the app, save it to
+#' JSON file and then load it to R by using method \code{\link{readJSON}}. In this case,
+#' however, the model object will not contain calibration/training results, so some of
+#' the plots and statistics will not be available.
 #'
 #' @references
 #' 1. S. de Jong, Chemometrics and Intelligent Laboratory Systems 18 (1993) 251-263.
@@ -249,11 +264,39 @@
 #'
 #' par(mfrow = c(1, 1))
 #'
+#' ## 12. Use list with preprocessing methods
+#'
+#' # get the data (calibration and test set)
+#' data(simdata)
+#' Xc <- simdata$spectra.c
+#' Xt <- simdata$spectra.t
+#' yc <- simdata$conc.c[, 3]
+#' yt <- simdata$conc.t[, 3]
+#'
+#' # create a list with two preprocessing methods
+#' p <- list(
+#'    prep("savgol", width = 7, porder = 2, dorder = 2),
+#'    prep("norm", type = "snv")
+#' )
+#'
+#' # build a PLS model with and without preprocessing
+#' m1 <- pca(Xc, yc, 5, prep = p)
+#' m2 <- pca(Xc, yc, 5)
+#'
+#' # apply the models to test set
+#' r1 <- predict(m1, Xt, yt)
+#' r2 <- predict(m2, Xt, yt)
+#'
+#' # check scores
+#' par(mfrow = c(1, 2))
+#' plotPredictions(m1, res = list(cal = m1$calres, test = r1), main = "With preprocessing")
+#' plotPredictions(m2, res = list(cal = m2$calres, test = r2), main = "Without preprocessing")
+#'
 #' @export
 pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
    cv = NULL, exclcols = NULL, exclrows = NULL, x.test = NULL, y.test = NULL, method = "simpls",
    info = "", ncomp.selcrit = "min", lim.type = "ddmoments", alpha = 0.05, gamma = 0.01,
-   cv.scope = "local") {
+   cv.scope = "local", prep = NULL) {
 
    # if y is a vector, convert it to matrix
    if (is.null(dim(y))) {
@@ -264,6 +307,14 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    x <- prepCalData(x, exclrows = exclrows, exclcols = exclcols, min.nrows = 2, min.ncols = 1)
    y <- prepCalData(y, exclrows = exclrows, exclcols = NULL, min.nrows = 2, min.ncols = 1)
 
+
+   # if preprocessing is available, apply it
+   if (!is.null(prep)) {
+      prep <- prep.fit(prep, x)
+      x <- prep.apply(prep, x)
+   }
+
+
    # build a model and apply to calibration set
    model <- pls.cal(x, y, ncomp, center = center, scale = scale, method = method, cv = cv)
    model$info <- info
@@ -273,6 +324,10 @@ pls <- function(x, y, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scal
    model$res <- list()
    model$res[["cal"]] <- predict.pls(model, x, y)
    model$res[["cal"]]$info <- "calibration results"
+
+   # add prep here so it will not influence prediction for calibration set
+   # which is already preprocessed
+   model$prep <- prep
 
    # compute critical limit parameters
    model$limParams <- list(
@@ -712,6 +767,496 @@ pls.getyscores <- function(y, yloadings, xscores, exclrows) {
 }
 
 
+
+################################
+# JSON methods                 #
+################################
+
+
+#' Converts JSON string created in mda.tools/pls app to \code{pls} object
+#'
+#' @param str
+#' stringified JSON (from model file)
+#'
+#' @return
+#' object of \code{\link{pls}} class
+#'
+pls.fromjson <- function(str) {
+
+   # extract values and arrays from the JSON
+   ncomp <- extractValue(str, "ncomp")
+   npred <- extractValue(str, "npred")
+   nresp <- extractValue(str, "nresp")
+   nobj <- extractValue(str, "nrows")
+   ncomp_selected <- extractValue(str, "ncomp_selected")
+
+   varvaluesName <- extractValue(str, "varvaluesName")
+   varvaluesName <- gsub('"', '', varvaluesName)
+   varvalues <- extractStringArray(str, "varvalues")
+   varlabels <- extractStringArray(str, "varlabels")
+
+   # ! this is needed because of the difference in names in R vs webapps
+   if (varvaluesName == "Variables") varvaluesName <- "Predictors"
+   xvarvalues <- extractStringArray(str, "xvarvalues")
+   xvarlabels <- extractStringArray(str, "xvarlabels")
+   exclcols <- extractStringArray(str, "exclvars")
+
+   yvarlabels <- varlabels[1:nresp]
+
+   js.center <- extractValue(str, "center")
+   js.scale <- extractValue(str, "scale")
+
+   varvalues <- as.numeric(strsplit(varvalues, ",")[[1]])
+   xvarvalues <- as.numeric(strsplit(xvarvalues, ",")[[1]])
+   exclcols <- if (length(exclcols) > 0 && nchar(exclcols) > 2) as.numeric(strsplit(exclcols, ",")[[1]]) else NULL
+
+   prednames <- xvarlabels
+   respnames <- varlabels[1:nresp]
+
+   if (!is.null(exclcols) && length(exclcols) > 0) {
+      exclcols <- exclcols + 1
+   } else {
+      exclcols <- NULL
+   }
+
+   complabels <- paste0("Comp ", seq_len(ncomp))
+   # Structure of PLS model - same as PCA with extra fields at the end:
+   # 3 +               // nx, ny and ncomp values
+   # 2 * (nx + ny) +   // mean and sd vectors for dataset (x and y together)
+   # nx * ncomp +      // x-loadings (P)
+   # ncomp +           // x-eigenvalues
+   # 4 * ncomp +       // statistics for q-distances
+   # 4 * ncomp +       // statistics for h-distances
+   # 4 * ncomp +       // statistics for z-distances
+   # nx * ncomp +      // weights (R)
+   # ny * ncomp +      // y-loadings (C)
+   # ncomp;            // y-eigenvalues
+
+   v <- extractArray(str, "v")
+   s <- 4; e <- s + (nresp + npred) - 1
+   if (js.center != "false") {
+      center.values <- v[s:e]
+      ycenter <- center.values[1:nresp]
+      xcenter <- center.values[(nresp + 1):(npred + nresp)]
+      center <- TRUE
+   } else {
+      ycenter <- rep(0, nresp)
+      xcenter <- rep(0, npred)
+      center <- FALSE
+   }
+
+   s <- e + 1; e <- s + (nresp + npred) - 1
+   if (js.scale != "false") {
+      scale.values <- v[s:e]
+      yscale <- scale.values[1:nresp]
+      xscale <- scale.values[(nresp + 1):(npred + nresp)]
+      scale <- TRUE
+   } else {
+      yscale <- rep(1, nresp)
+      xscale <- rep(1, npred)
+      scale <- FALSE
+   }
+
+   s <- e + 1; e <- s + npred * ncomp - 1
+   xloadings <- matrix(v[s:e], npred, ncomp)
+   colnames(xloadings) <- complabels
+   rownames(xloadings) <- xvarlabels
+
+   if (!all(xvarvalues == seq_len(npred))) attr(weights, "yaxis.values") <- xvarvalues
+   attr(xloadings, "yaxis.name") <- varvaluesName
+   attr(xloadings, "xaxis.name") <- "Components"
+   attr(xloadings, "name") <- "X loadings"
+
+   s <- e + 1; e <- s + ncomp - 1
+   xeigenvals <- v[s:e]
+   attr(xeigenvals, "DoF") <- (nobj - 1)
+
+   # Q
+   s <- e + 1; e <- s + ncomp - 1
+   cq0 <- v[s:e]
+   names(cq0) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   cNq <- v[s:e]
+   names(cNq) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   rq0 <- v[s:e]
+   names(rq0) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   rNq <- v[s:e]
+   names(rNq) <- complabels
+
+   # T2
+   s <- e + 1; e <- s + ncomp - 1
+   ch0 <- v[s:e]
+   names(ch0) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   cNh <- v[s:e]
+   names(cNh) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   rh0 <- v[s:e]
+   names(rh0) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   rNh <- v[s:e]
+   names(rNh) <- complabels
+
+   # Z
+   s <- e + 1; e <- s + ncomp - 1
+   cz0 <- v[s:e]
+   names(cz0) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   cNz <- v[s:e]
+   names(cNz) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   rz0 <- v[s:e]
+   names(rz0) <- complabels
+
+   s <- e + 1; e <- s + ncomp - 1
+   rNz <- v[s:e]
+   names(rNz) <- complabels
+
+   limParams <- list(
+      Q = list(
+         moments = list(u0 = cq0, Nu = cNq, nobj = nobj),
+         robust  = list(u0 = rq0, Nu = rNq, nobj = nobj),
+         nobj = nobj
+      ),
+      T2 = list(
+         moments = list(u0 = ch0, Nu = cNh, nobj = nobj),
+         robust  = list(u0 = rh0, Nu = rNh, nobj = nobj),
+         nobj = nobj
+      ),
+      Z = list(
+         moments = list(u0 = cz0, Nu = cNz, nobj = nobj),
+         robust  = list(u0 = rz0, Nu = rNz, nobj = nobj),
+         nobj = nobj
+      )
+   )
+
+   Qlim <- ldecomp.getQLimits("ddmoments", 0.05, 0.01, limParams)
+   T2lim <- ldecomp.getT2Limits("ddmoments", 0.05, 0.01, limParams)
+   Zlim <- pls.getZLimits("ddmoments", 0.05, 0.01, limParams)
+
+   # R
+   s <- e + 1; e <- s + npred * ncomp - 1
+   weights <- matrix(v[s:e], npred, ncomp)
+   colnames(weights) <- complabels
+   rownames(weights) <- xvarlabels
+
+   if (!all(xvarvalues == seq_len(npred))) attr(weights, "yaxis.values") <- xvarvalues
+   attr(weights, "yaxis.name") <- varvaluesName
+   attr(weights, "xaxis.name") <- "Components"
+   attr(weights, "name") <- "Weights"
+
+   # C
+   s <- e + 1; e <- s + nresp * ncomp - 1
+   yloadings <- matrix(v[s:e], nresp, ncomp)
+   colnames(yloadings) <- complabels
+   rownames(yloadings) <- yvarlabels
+   attr(yloadings, "yaxis.name") <- "Responses"
+   attr(yloadings, "xaxis.name") <- "Components"
+   attr(yloadings, "name") <- "Y loadings"
+
+   # y-eigen
+   s <- e + 1; e <- s + ncomp - 1
+   yeigenvals <- v[s:e]
+   attr(yeigenvals, "DoF") <- (nobj - 1)
+
+   # coeffs
+   coeffs <- extractArray(str, "coeffs")
+   dim(coeffs) <- c(npred, ncomp, nresp)
+   dimnames(coeffs) <- list(xvarlabels, complabels, yvarlabels)
+
+
+   if (!all(xvarvalues == seq_len(npred))) attr(coeffs, "yaxis.values") <- xvarvalues
+   coeffs <- regcoeffs(coeffs)
+   attr(coeffs$values, "yaxis.name") <- varvaluesName
+
+   # preprocessing
+   prepStr <- extractPrep(str)
+   prep <- if(length(prepStr) > 0 && nchar(prepStr) > 10) prep.fromjson(prepStr) else NULL
+
+   # by default we assume that moments/classic method is applied
+   m <- list(
+      method = "simpls",
+      center  = center,
+      xcenter = xcenter,
+      ycenter = ycenter,
+
+      scale = scale,
+      xscale = xscale,
+      yscale = yscale,
+
+      xeigenvals = xeigenvals,
+      yeigenvals = yeigenvals,
+      xloadings = xloadings,
+      yloadings = yloadings,
+      weights = weights,
+      coeffs = coeffs,
+
+      limParams = limParams,
+      Qlim = Qlim,
+      T2lim = T2lim,
+      Zlim = Zlim,
+
+      res = NULL,
+      calres = NULL,
+
+      ncomp = ncomp,
+      ncomp.selected = ncomp_selected,
+      alpha = 0.05,
+      gamma = 0.01,
+      lim.type = "ddmoments",
+      info = "",
+
+      prep = prep,
+      exclcols = exclcols,
+      method = "svd"
+   )
+
+   m$call <- match.call()
+   class(m) <- c("pls", "regmodel")
+   return (m)
+}
+
+
+#' Reads PLS model from JSON file made in web-application (mda.tools/pls).
+#'
+#' @param fileName
+#' file name (or full path) to JSON file.
+#'
+#' @return list with PLS model similar to what \code{pls()} creates.
+#'
+#' @export
+pls.readJSON <- function(fileName) {
+   fileConn <- file(fileName)
+   str <- readLines(fileConn, warn = FALSE)
+   close(fileConn)
+   return (pls.fromjson(str))
+}
+
+
+#' Converts object with PLS model to numeric vector compatible with web-application.
+#'
+#' @param obj
+#' Object with PLS model (from \code{\link{pls}}).
+#'
+#' @return vector with values.
+#'
+#' @export
+asvector.pls <- function(obj) {
+
+   if (is.null(obj[["res"]]) || is.null(obj$res[["cal"]])) {
+      stop("Calibration results not found (most probably this model is loaded from web-application).", call. = FALSE)
+   }
+
+   do_center = obj$center
+   do_scale = obj$scale
+
+   if (do_center) {
+      mX = obj$xcenter
+      mY = obj$ycenter
+   } else {
+      mX = rep(0, nrow(obj$xloadings))
+      mY = rep(0, nrow(obj$yloadings))
+   }
+
+   if (do_scale) {
+      sX = obj$xscale
+      sY = obj$yscale
+   } else {
+      sX = rep(1, nrow(obj$xloadings))
+      sY = rep(1, nrow(obj$yloadings))
+   }
+
+   npred <- nrow(obj$xloadings)
+   if (!is.null(obj$exclcols)) {
+      mX <- mX[-obj$exclcols]
+      sX <- sX[-obj$exclcols]
+      npred <- npred - length(obj$exclcols)
+   }
+
+   nresp <- nrow(obj$yloadings)
+
+   H <- mda.purge(obj$calres$xdecomp$T2)
+   Q <- mda.purge(obj$calres$xdecomp$Q)
+   Z <- mda.purge(obj$calres$ydecomp$Q)
+
+   hpc <- ddmoments.param(H)
+   hpr <- ddrobust.param(H)
+   qpc <- ddmoments.param(Q)
+   qpr <- ddrobust.param(Q)
+   zpc <- ddmoments.param(Z)
+   zpr <- ddrobust.param(Z)
+
+   mv <- c(
+      nresp,                                 # ny
+      npred,                                 # nc
+      ncol(obj$xloadings),                   # ncomp
+      c(mY, mX),                             # mY + mX
+      c(sY, sX),                             # sY + sX
+      as.vector(mda.purge(obj$xloadings)),   # P
+      as.vector(obj$xeigenvals),             # xeigenvals
+
+      as.vector(qpc$u0),                     # q0c
+      pmax(as.vector(round(qpc$Nu)), 1),     # Nqc
+      as.vector(qpr$u0),                     # q0r
+      pmax(as.vector(round(qpr$Nu)), 1),     # Nqr
+
+      as.vector(hpc$u0),                     # h0c
+      pmax(as.vector(round(hpc$Nu)), 1),     # Nhc
+      as.vector(hpr$u0),                     # h0r
+      pmax(as.vector(round(hpr$Nu)), 1),     # Nhr
+
+      as.vector(zpc$u0),                     # z0c
+      pmax(as.vector(round(zpc$Nu)), 1),     # Nzc
+      as.vector(zpr$u0),                     # z0r
+      pmax(as.vector(round(zpr$Nu)), 1),     # Nzr
+
+      as.vector(mda.purge(obj$weights)),     # R
+      as.vector(mda.purge(obj$yloadings)),   # C
+      as.vector(obj$yeigenvals)              # yeigenvals
+
+   )
+   names(mv) <- NULL
+   return(mv);
+}
+
+
+#' Converts object with PLS model to JSON string compatible with web-application.
+#'
+#' @param obj
+#' Object with PLS model (from \code{\link{pls}}).
+#'
+#' @return stringified JSON
+#'
+#' @export
+asjson.pls <- function(obj) {
+
+   v <- asvector(obj)
+
+   ncomp <- ncol(obj$xloadings)
+   npred <- nrow(obj$xloadings)
+   nresp <- nrow(obj$yloadings)
+
+   nrows <- obj$limParams$Q$nobj
+   center <- if(is.logical(obj$center) && obj$center == FALSE) "false" else "true"
+   scale <- if(is.logical(obj$scale) && obj$scale == FALSE) "false" else "true"
+
+
+   xvarvalues <- if(!is.null(attr(obj$xloadings, "yaxis.values"))) attr(obj$xloadings, "yaxis.values") else seq_len(npred)
+   xvarlabels <- rownames(obj$xloadings)
+   exclvars <- "[]"
+
+   if (!is.null(obj$exclcols) && length(obj$exclcols) > 0) {
+      xvarlabels <- xvarlabels[-obj$exclcols]
+      xvarvalues <- xvarvalues[-obj$exclcols]
+      exclvars <- paste0("[", paste0(obj$exclcols - 1, collapse = ","), "]")
+      npred <- npred - length(obj$exclcols)
+   }
+   xvarindices <- 0:(npred-1)
+
+   yvarlabels  <- rownames(obj$yloadings)
+   yvarvalues  <- seq_len(nresp)
+   yvarindices <- 0:(npred-1)
+
+   varindices <- c(yvarindices, xvarindices)
+   varlabels  <- c(yvarlabels, xvarlabels)
+   varvalues  <- c(yvarvalues, xvarvalues)
+
+   varrev <- if (varvalues[2] < varvalues[1]) "true" else "false"
+
+   varlabels <- paste0("'", varlabels, "'", collapse = ",")
+   varvalues <- paste0(varvalues, collapse = ",")
+   varindices <- paste0(varindices, collapse = ",")
+   xvarlabels <- paste0("'", xvarlabels, "'", collapse = ",")
+   xvarvalues <- paste0(xvarvalues, collapse = ",")
+   xvarindices <- paste0(xvarindices, collapse = ",")
+   varvaluesName <- if(!is.null(attr(obj$xloadings, "yaxis.name"))) attr(obj$xloadings, "yaxis.name") else "''"
+
+   prep <- if (is.null(obj$prep)) "{}" else prep.asjson(obj$prep)
+   hash <- paste0("'", genhash(), "'")
+
+
+   if (length(obj$exclcols) > 0) {
+      coeffs.values  <-  obj$coeffs$values[-obj$exclcols, , , drop = FALSE]
+      coeffs <-  as.numeric(coeffs.values)
+      vip <- array(0, dim(coeffs.values))
+      sr <- array(0, dim(coeffs.values))
+      for (a in seq_len(ncomp)) {
+         vp <- vipscores(obj, ncomp = a)
+         vip[, a, ] <- vipscores(obj, ncomp = a)[-obj$exclcols, , drop = FALSE]
+         sr[, a, ] <- selratio(obj, ncomp = a)[-obj$exclcols, , drop = FALSE]
+      }
+   } else {
+      coeffs <-  as.numeric(obj$coeffs$values)
+      vip <- array(0, dim(obj$coeffs$values))
+      sr <- array(0, dim(obj$coeffs$values))
+      for (a in seq_len(ncomp)) {
+         vip[, a, ] <- vipscores(obj, ncomp = a)
+         sr[, a, ] <- selratio(obj, ncomp = a)
+      }
+   }
+
+   m <- paste0(
+      "{'",
+         "class':['plsmodel', 'pcamodel']",
+         ",'v':{'__type':'Float64Array','data':[", paste0(v, collapse = ","),"]}",
+
+         ",'hash':", hash,
+         ",'ncomp':", ncomp,
+         ",'nrows':", nrows,
+         ",'npred':", npred,
+         ",'nresp':", nresp,
+         ",'exclvars':", exclvars,
+         ",'center':", center,
+         ",'scale':", scale,
+
+         ",'coeffs':{'__type':'Float64Array','data':[", paste0(coeffs, collapse = ","),"]}",
+         ",'vip':{'__type':'Float64Array','data':[", paste0(vip, collapse = ","),"]}",
+         ",'sr':{'__type':'Float64Array','data':[", paste0(sr, collapse = ","),"]}",
+         ",'prep':", prep,
+         ",'varlabels':[", varlabels, "]",
+         ",'varindices':[", varindices, "]",
+         ",'varvalues':[", varvalues, "]",
+         ",'xvarvalues':[", xvarvalues, "]",
+         ",'xvarlabels':[", xvarlabels, "]",
+         ",'xvarindices':[", xvarindices, "]",
+         ",'varvaluesName':'", varvaluesName, "'",
+         ",'varvaluesUnits':'', 'varrev':", varrev,
+         ",'ncomp_selected':", obj$ncomp.selected,
+      "}"
+   )
+   m <- gsub("\'", "\"", m)
+}
+
+
+#' Saves PLS model as JSON file compatible with web-application (https://mda.tools/pls).
+#'
+#' @description
+#' You can load created JSON file to web-app and use it for prediction.
+#'
+#' @param obj
+#' Object with PLS model (from \code{\link{pca}}).
+#' @param fileName
+#' Name or full path to JSON file to be created.
+#'
+#' @export
+writeJSON.pls <- function(obj, fileName) {
+   m <- asjson(obj)
+   fileConn <- file(fileName)
+   writeLines(m, fileConn)
+   close(fileConn)
+}
+
+
 #' PLS predictions
 #'
 #' @description
@@ -745,7 +1290,6 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 
    # preprocess x and calculate scores, total and full variance
    x.attrs <- mda.getattr(x)
-
    # set names for y-axis (rows if it is empty)
    if (is.null(x.attrs$yaxis.name)) {
       x.attrs$yaxis.name <- "Objects"
@@ -753,6 +1297,23 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 
    # check datasets and convert to matrix if needed
    x <- prepCalData(x, min.nrows = 1, min.ncols = nrow(object$xloadings) - length(x.attrs$exclcols))
+
+   # apply preprocessing if any
+   if (!is.null(object$prep)) {
+      x <- prep.apply(object$prep, x)
+   }
+
+   # check if x-loadings already do not contain excluded
+   # variables (e.g. because model was loaded from JSON file), in this case remove them from x as well
+   exclcols <- object$exclcols
+   if (!is.null(exclcols) && ncol(x) == (nrow(object$xloadings) + length(exclcols))) {
+      x <- mda.exclcols(x, exclcols)
+      x <- mda.purgeCols(x)
+      if (!is.null(x.attrs$dimnames[[2]])) x.attrs$dimnames[[2]] <- x.attrs$dimnames[[2]][-exclcols]
+      if (!is.null(x.attrs$xaxis.values)) x.attrs$xaxis.values <- x.attrs$xaxis.values[-exclcols]
+      x.attrs$exclcols <- NULL
+      exclcols <- NULL
+   }
 
    # get dimensions
    nresp <- dim(object$coeffs$values)[3]
@@ -830,6 +1391,7 @@ predict.pls <- function(object, x, y = NULL, cv = FALSE, ...) {
 
    return(res)
 }
+
 
 #' Categorize data rows based on PLS results and critical limits for total distance.
 #'
@@ -938,10 +1500,25 @@ summary.pls <- function(object, ncomp = object$ncomp.selected,
    fprintf("Number of selected components: %d\n", ncomp)
    fprintf("Cross-validation: %s\n", crossval.str(object$cv))
 
+   if (length(object$exclcols) > 0) {
+      fprintf("Excluded columns: %d\n", length(object$exclcols))
+   }
+
+   if (!is.null(object$prep)) {
+      fprintf("\nPreprocessing methods:\n")
+      cat(str.prepmodel(object$prep))
+   }
+
    cat("\n")
+   if (is.null(object[["res"]]) || is.null(object$res[["cal"]])) {
+      message("Objects with results not found (most probably this model is loaded from web-application).")
+      return(invisible(NULL))
+   }
+
    for (y in ny) {
       fprintf("Response variable: %s\n", rownames(object$yloadings)[y])
       out <- do.call(rbind, lapply(object$res, as.matrix, ncomp = ncomp, ny = y))
+      print(out)
       rownames(out) <- capitalize(names(object$res))
 
       if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
@@ -1905,13 +2482,13 @@ pls.cal <- function(x, y, ncomp, center, scale, method = "simpls", cv = FALSE) {
 #' VIP scores for PLS model
 #'
 #' @description
-#' Calculates VIP (Variable Importance in Projection) scores for predictors for given number
-#' of components and response variable.
+#' Calculates VIP (Variable Importance in Projection) scores for predictors either individual for
+#' each response variable or total for the entire model with given number of components.
 #'
 #' @param obj
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
-#' number of components to show
+#' number of components to use in the model for calculation.
 #' @param type
 #' type of VIP scores: \code{"individual"} computes separate VIP scores for each response variable
 #' (returns \code{nvar x nresp} matrix), \code{"combined"} computes a single VIP vector by summing
@@ -2019,19 +2596,19 @@ getVIPScores.pls <- function(obj, ncomp = obj$ncomp.selected, ...) {
 #' Selectivity ratio calculation
 #'
 #' @description
-#' Calculates selectivity ratio for each component and response variable in
-#' the PLS model
+#' Calculates selectivity ratio for all response variables in
+#' the PLS model with given number of components.
 #'
 #' @param obj
 #' a PLS model (object of class \code{pls})
 #' @param ncomp
-#' number of components to show
+#' number of components to use in the model for calculation.
 #'
 #' @references
 #' [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.
 #'
 #' @return
-#' array \code{nvar x ncomp x ny} with selectivity ratio values
+#' array \code{nvar x ny} with selectivity ratio values
 #'
 #' @export
 selratio <- function(obj, ncomp = obj$ncomp.selected) {
