@@ -7,7 +7,7 @@
 \method{as.matrix}{simcamres}(x, nc = seq_len(x$nclasses), ...)
 }
 \arguments{
-\item{x}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
+\item{x}{classification results (object of class \code{simcamres}).}
 
 \item{nc}{vector with classes to use.}
 

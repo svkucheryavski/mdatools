@@ -14,7 +14,7 @@
 \item{...}{other parameters for \code{\link{plotPerformance.classres}}}
 }
 \description{
-Makes a plot with sn values vs. model complexity (e.g. number of components) for
+Makes a plot with sensitivity values vs. model complexity (e.g. number of components) for
 classification results.
 }
 \details{

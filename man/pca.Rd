@@ -61,6 +61,7 @@ Returns an object of \code{pca} class with following fields:
 \item{T2lim }{statistical limit for T2 distance.}
 \item{Qlim }{statistical limit for Q residuals.}
 \item{info }{information about the model, provided by user when building the model.}
+\item{prep }{trained preprocessing model (if specified)}
 \item{calres }{an object of class \code{\link{pcares}} with PCA results for a calibration data.}
 \item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it
 was provided.}
@@ -133,7 +134,7 @@ dataset will be automatically preprocessed by the preprocessing model.
 Any PCA model (with or without preprocessing) developed in this package can be saved as JSON file
 using method \code{\link{writeJSON}} and then be loaded to interactive web-application for
 PCA available at https://mda.tools/pca. Likewise one can develop a model in the app, save it to
-JSON file and then load it to R by using method \code{\link{pca.readJSON}}. In this case,
+JSON file and then load it to R by using method \code{\link{readJSON}}. In this case,
 however, the model object will not contain calibration/training results, so some of
 the plots and statistics will not be available.
 

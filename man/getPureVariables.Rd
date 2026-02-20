@@ -18,9 +18,9 @@ getPureVariables(D, ncomp, purevars, offset)
 \value{
 The function returns a list with the following fields:
 \item{ncomp }{number of pure components.}
-\item{purvars }{vector with indices for pure variables.}
+\item{purevars }{vector with indices for pure variables.}
 \item{purityspec }{matrix with purity values for each resolved components.}
-\item{purity }{vector with purity values for resolved components.}
+\item{purevals }{vector with purity values for resolved components.}
 }
 \description{
 The method identifies indices of pure variables using the SIMPLISMA

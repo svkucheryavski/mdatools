@@ -22,8 +22,8 @@ Applies Multiplicative Scatter Correction (MSC) transformation to data matrix (s
 \details{
 MSC is used to remove scatter effects (baseline offset and slope) from
 spectral data, e.g. NIR spectra.
-
- @examples
+}
+\examples{
 
  ### Apply MSC to spectra from simdata
 
@@ -36,4 +36,5 @@ spectral data, e.g. NIR spectra.
  par(mfrow = c(2, 1))
  mdaplot(spectra, type = "l", main = "Before MSC")
  mdaplot(cspectra, type = "l", main = "After MSC")
+
 }

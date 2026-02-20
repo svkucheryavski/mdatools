@@ -141,7 +141,7 @@ differences are described below.
 
 The function makes a plot of one set of objects. It can be a set of points (scatter plot),
 bars, lines, scatter-lines, errorbars or an image. The data is organized as a data frame,
-matrix or vector. For scatter and only first two columns will be used, for bar plot only
+matrix or vector. For scatter plots only the first two columns will be used, for bar plot only
 values from the first row. It is recommended to use \code{\link{mda.subset}} method if plot
 should be made only for a subset of the data, especially if you have any excluded rows or
 columns or other special attributed, described in the Bookdown tutorial.

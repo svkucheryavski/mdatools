@@ -18,8 +18,8 @@ Applies Standard Normal Variate (SNV) transformation to the rows of data matrix
 \details{
 SNV is a simple preprocessing to remove scatter effects (baseline offset and slope) from
 spectral data, e.g. NIR spectra.
-
- @examples
+}
+\examples{
 
  ### Apply SNV to spectra from simdata
 
@@ -34,4 +34,5 @@ spectral data, e.g. NIR spectra.
  par(mfrow = c(2, 1))
  mdaplot(cbind(wavelength, t(spectra)), type = 'l', main = 'Before SNV')
  mdaplot(cbind(wavelength, t(cspectra)), type = 'l', main = 'After SNV')
+
 }

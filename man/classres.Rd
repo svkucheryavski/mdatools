@@ -44,7 +44,7 @@ Methods for \code{classres} class:
 \tabular{ll}{
  \code{\link{showPredictions.classres}} \tab shows table with predicted values.\cr
  \code{\link{plotPredictions.classres}} \tab makes plot with predicted values.\cr
- \code{\link{plotSensitivity.classres}} \tab makes sn plot.\cr
+ \code{\link{plotSensitivity.classres}} \tab makes sensitivity plot.\cr
  \code{\link{plotSpecificity.classres}} \tab makes specificity plot.\cr
  \code{\link{plotMisclassified.classres}} \tab makes ms ratio plot.\cr
  \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ratio, specificity

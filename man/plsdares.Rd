@@ -89,11 +89,11 @@ par(mfrow = c(1, 1))
 
 }
 \seealso{
-Methods for \code{plsda} objects:
+Methods for \code{plsdares} objects:
 \tabular{ll}{
- \code{print.plsda} \tab shows information about the object.\cr
- \code{summary.plsda} \tab shows statistics for results of classification.\cr
- \code{plot.plsda} \tab shows plots for overview of the results.\cr
+ \code{print.plsdares} \tab shows information about the object.\cr
+ \code{summary.plsdares} \tab shows statistics for results of classification.\cr
+ \code{plot.plsdares} \tab shows plots for overview of the results.\cr
 }
 
 Methods, inherited from \code{\link{classres}} class:

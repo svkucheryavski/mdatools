@@ -11,7 +11,7 @@ mdaplotg.prepareData(data, type, groupby)
 
 \item{type}{vector with type for dataset}
 
-\item{groupby}{factor or  data frame with factors - used to split data matrix into groups}
+\item{groupby}{factor or data frame with factors - used to split data matrix into groups}
 }
 \value{
 list of datasets

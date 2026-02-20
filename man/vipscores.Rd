@@ -4,25 +4,34 @@
 \alias{vipscores}
 \title{VIP scores for PLS model}
 \usage{
-vipscores(obj, ncomp = obj$ncomp.selected)
+vipscores(obj, ncomp = obj$ncomp.selected, type = "individual")
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{number of components to show}
+\item{ncomp}{number of components to use in the model for calculation.}
+
+\item{type}{type of VIP scores: \code{"individual"} computes separate VIP scores for each response variable
+(returns \code{nvar x nresp} matrix), \code{"combined"} computes a single VIP vector by summing
+explained Y-variance across all responses before normalizing as described in [1]
+(returns \code{nvar x 1} matrix). For PLS1 models both types give identical results.}
 }
 \value{
-matrix \code{nvar x ny} with VIP score values (columns correspond to responses).
+matrix with VIP score values. If \code{type = "individual"}, dimensions are \code{nvar x nresp}
+(columns correspond to responses). If \code{type = "combined"}, dimensions are \code{nvar x 1}.
 }
 \description{
-Calculates VIP (Variable Importance in Projection) scores for predictors for given number
-of components and response variable.
+Calculates VIP (Variable Importance in Projection) scores for predictors either individual for
+each response variable or total for the entire model with given number of components.
 }
 \details{
-May take some time in case of large number of predictors. Returns results as a column-vector,
-with all necessary attributes inherited (e.g. xaxis.values, excluded variables, etc.). If you
-want to make a plot use for example: \code{mdaplot(mda.t(v), type = "l")}, where \code{v} is
-a vector with computed VIP scores. Or just try \code{\link{plotVIPScores.pls}}.
+The \code{"individual"} type computes VIP scores separately for each response variable, weighting
+by the Y-variance explained per response. The \code{"combined"} type follows the original formula
+from [1], which sums explained Y-variance across all responses to produce a single VIP value
+per predictor. For PLS1 models (single response), both types are equivalent.
+
+If you want to make a plot use for example: \code{mdaplot(mda.t(v), type = "l")}, where \code{v}
+is a vector with computed VIP scores. Or just try \code{\link{plotVIPScores.pls}}.
 }
 \references{
 [1] Il-Gyo Chong, Chi-Hyuck Jun. Chemometrics and Laboratory Systems, 78 (2005), pp. 103-112.

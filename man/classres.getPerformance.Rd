@@ -17,9 +17,9 @@ Returns a list with following fields:
    \code{$fn} \tab number of false negatives (nclasses x ncomponents) \cr
    \code{$fp} \tab number of false positives (nclasses x ncomponents) \cr
    \code{$tp} \tab number of true positives (nclasses x ncomponents) \cr
-   \code{$sensitivity} \tab sn values (nclasses x ncomponents) \cr
+   \code{$sensitivity} \tab sensitivity values (nclasses x ncomponents) \cr
    \code{$specificity} \tab specificity values (nclasses x ncomponents) \cr
-   \code{$specificity} \tab ms ratio values (nclasses x ncomponents) \cr
+   \code{$misclassified} \tab misclassification ratio values (nclasses x ncomponents) \cr
 }
 }
 \description{

@@ -25,7 +25,6 @@ The following fields are available only if reference values were provided.
 \item{sensitivity}{sensitivity of predictions.}
 }
 \description{
-@description
 \code{simcares} is used to store results for SIMCA one-class classification.
 }
 \details{

@@ -34,13 +34,13 @@ The following fields are available only if reference values were provided.
 }
 \details{
 Class \code{simcamres} inherits all properties and methods of class \code{\link{classres}}, plus
-store values necessary to visualise prediction decisions (e.g. Cooman's plot or Residuals plot).
+stores values necessary to visualise prediction decisions (e.g. Cooman's plot or Residuals plot).
 
 In contrast to \code{simcares} here only values for optimal (selected) number of components in
 each individual SIMCA models are presented.
 
 There is no need to create a \code{simcamres} object manually, it is created automatically when
-make a SIMCAM model (see \code{\link{simcam}}) or apply the model to a new data (see
+you make a SIMCAM model (see \code{\link{simcam}}) or apply the model to a new data (see
 \code{\link{predict.simcam}}). The object can be used to show summary and plots for the results.
 }
 \examples{
