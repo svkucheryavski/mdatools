@@ -248,7 +248,7 @@ writeCSV.pcares <- function(res, fileName, name, sep = ",", dataFile = "", class
    out <- c(out, paste1('Statistics:', sep, '', sep, '', filler))
 
    if (!is.null(model)) {
-      out <- c(out, paste1('', sep, '', sep, '', 'PC', sep, 'Expvar', sep, 'Cumexpvar', sep, 'Resvar', sep, 'Cumresvar', sep, 'Eigenvalues', fillerStat))
+      out <- c(out, paste1('', sep, '', sep, 'PC', sep, 'Expvar', sep, 'Cumexpvar', sep, 'Resvar', sep, 'Cumresvar', sep, 'Eigenvalues', fillerStat))
 
       for (a in seq_len(nComp)) {
          out <- c(out, paste1('', sep, '', sep, a, sep,

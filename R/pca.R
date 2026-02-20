@@ -96,7 +96,7 @@
 #' Any PCA model (with or without preprocessing) developed in this package can be saved as JSON file
 #' using method \code{\link{writeJSON}} and then be loaded to interactive web-application for
 #' PCA available at https://mda.tools/pca. Likewise one can develop a model in the app, save it to
-#' JSON file and then load it to R by using method \code{\link{pca.readJSON}}. In this case,
+#' JSON file and then load it to R by using method \code{\link{readJSON}}. In this case,
 #' however, the model object will not contain calibration/training results, so some of
 #' the plots and statistics will not be available.
 #'
@@ -112,6 +112,7 @@
 #' \item{T2lim }{statistical limit for T2 distance.}
 #' \item{Qlim }{statistical limit for Q residuals.}
 #' \item{info }{information about the model, provided by user when building the model.}
+#' \item{prep }{trained preprocessing model (if specified)}
 #' \item{calres }{an object of class \code{\link{pcares}} with PCA results for a calibration data.}
 #' \item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it
 #' was provided.}
@@ -627,7 +628,10 @@ print.pca <- function(x, ...) {
    cat("$gamma - significance level for outlier limits\n")
    cat("$Qlim - critical values and parameters for orthogonal distances\n")
    cat("$T2lim - critical values and parameters for score distances\n")
-   cat("$res - list with model results (calibration, test)\n")
+   if (!is.null(x$res))
+      cat("$res - list with model results (calibration, test)\n")
+   if (!is.null(x$prep))
+      cat("$prep - preprocessing model\n")
 }
 
 #' Summary method for PCA model object
@@ -662,9 +666,19 @@ summary.pca <- function(object, ...) {
       fprintf("Excluded columns: %d\n", length(object$exclcols))
    }
 
+   if (!is.null(object$prep)) {
+      # TODO add description of preprocessing methods here!
+   }
+
    fprintf("Type of limits: %s\n", object$lim.type)
    fprintf("Alpha: %s\n", object$alpha)
    fprintf("Gamma: %s\n", object$gamma)
+
+   if (!is.null(object$prep)) {
+      fprintf("\nPreprocessing methods:\n")
+      cat(str(object$prep))
+   }
+
    cat("\n")
 
    if (is.null(object[["res"]]) || is.null(object$res[["cal"]])) {
@@ -1112,6 +1126,11 @@ pca.cal <- function(x, ncomp, center, scale, method, rand = NULL) {
 }
 
 
+################################
+# JSON methods                 #
+################################
+
+
 #' Converts JSON string created in mda.tools/pca app to \code{pca} object
 #'
 #' @param str
@@ -1297,11 +1316,6 @@ pca.readJSON <- function(fileName) {
 }
 
 
-
-################################
-# JSON methods                 #
-################################
-
 #' Converts object with PCA model to numeric vector compatible with web-application.
 #'
 #' @param obj
@@ -1312,7 +1326,7 @@ pca.readJSON <- function(fileName) {
 #' @export
 asvector.pca <- function(obj) {
 
-   if (is.null(obj$calres)) {
+   if (is.null(obj[["res"]]) || is.null(obj$res[["cal"]])) {
       stop("Calibration results not found (most probably this model is loaded from web-application).", call. = FALSE)
    }
 

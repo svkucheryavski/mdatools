@@ -860,7 +860,6 @@ ldecomp.getQLimits <- function(lim.type, alpha, gamma, params, residuals, eigenv
          "ddrobust"  = scale(dd.crit(pQ, pT2, alpha, gamma), center = FALSE, scale = DoF / pQ$u0),
          stop("Wrong value for 'lim.type' parameter.", call. = FALSE)
       )
-
       lim <- rbind(lim, pQ$u0, DoF)
    }
 
