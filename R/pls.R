@@ -280,8 +280,8 @@
 #' )
 #'
 #' # build a PLS model with and without preprocessing
-#' m1 <- pca(Xc, yc, 5, prep = p)
-#' m2 <- pca(Xc, yc, 5)
+#' m1 <- pls(Xc, yc, 5, prep = p)
+#' m2 <- pls(Xc, yc, 5)
 #'
 #' # apply the models to test set
 #' r1 <- predict(m1, Xt, yt)
@@ -862,7 +862,7 @@ pls.fromjson <- function(str) {
    colnames(xloadings) <- complabels
    rownames(xloadings) <- xvarlabels
 
-   if (!all(xvarvalues == seq_len(npred))) attr(weights, "yaxis.values") <- xvarvalues
+   if (!all(xvarvalues == seq_len(npred))) attr(xloadings, "yaxis.values") <- xvarvalues
    attr(xloadings, "yaxis.name") <- varvaluesName
    attr(xloadings, "xaxis.name") <- "Components"
    attr(xloadings, "name") <- "X loadings"
@@ -1017,8 +1017,7 @@ pls.fromjson <- function(str) {
       info = "",
 
       prep = prep,
-      exclcols = exclcols,
-      method = "svd"
+      exclcols = exclcols
    )
 
    m$call <- match.call()
@@ -1057,23 +1056,23 @@ asvector.pls <- function(obj) {
       stop("Calibration results not found (most probably this model is loaded from web-application).", call. = FALSE)
    }
 
-   do_center = obj$center
-   do_scale = obj$scale
+   do_center <- obj$center
+   do_scale <- obj$scale
 
    if (do_center) {
-      mX = obj$xcenter
-      mY = obj$ycenter
+      mX <- obj$xcenter
+      mY <- obj$ycenter
    } else {
-      mX = rep(0, nrow(obj$xloadings))
-      mY = rep(0, nrow(obj$yloadings))
+      mX <- rep(0, nrow(obj$xloadings))
+      mY <- rep(0, nrow(obj$yloadings))
    }
 
    if (do_scale) {
-      sX = obj$xscale
-      sY = obj$yscale
+      sX <- obj$xscale
+      sY <- obj$yscale
    } else {
-      sX = rep(1, nrow(obj$xloadings))
-      sY = rep(1, nrow(obj$yloadings))
+      sX <- rep(1, nrow(obj$xloadings))
+      sY <- rep(1, nrow(obj$yloadings))
    }
 
    npred <- nrow(obj$xloadings)
@@ -1165,7 +1164,7 @@ asjson.pls <- function(obj) {
 
    yvarlabels  <- rownames(obj$yloadings)
    yvarvalues  <- seq_len(nresp)
-   yvarindices <- 0:(npred-1)
+   yvarindices <- 0:(nresp-1)
 
    varindices <- c(yvarindices, xvarindices)
    varlabels  <- c(yvarlabels, xvarlabels)
@@ -1191,7 +1190,6 @@ asjson.pls <- function(obj) {
       vip <- array(0, dim(coeffs.values))
       sr <- array(0, dim(coeffs.values))
       for (a in seq_len(ncomp)) {
-         vp <- vipscores(obj, ncomp = a)
          vip[, a, ] <- vipscores(obj, ncomp = a)[-obj$exclcols, , drop = FALSE]
          sr[, a, ] <- selratio(obj, ncomp = a)[-obj$exclcols, , drop = FALSE]
       }
@@ -1506,7 +1504,7 @@ summary.pls <- function(object, ncomp = object$ncomp.selected,
 
    if (!is.null(object$prep)) {
       fprintf("\nPreprocessing methods:\n")
-      cat(str.prepmodel(object$prep))
+      print(object$prep)
    }
 
    cat("\n")
@@ -1518,7 +1516,6 @@ summary.pls <- function(object, ncomp = object$ncomp.selected,
    for (y in ny) {
       fprintf("Response variable: %s\n", rownames(object$yloadings)[y])
       out <- do.call(rbind, lapply(object$res, as.matrix, ncomp = ncomp, ny = y))
-      print(out)
       rownames(out) <- capitalize(names(object$res))
 
       if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
@@ -1531,6 +1528,8 @@ summary.pls <- function(object, ncomp = object$ncomp.selected,
       print(out[, -c(1, 3), drop = FALSE])
       cat("\n")
    }
+
+   invisible(object)
 }
 
 #' Print method for PLS model object
@@ -1559,6 +1558,8 @@ print.pls <- function(x, ...) {
    cat("$res - list with results (calibration, cv, etc)\n")
 
    cat("\nTry summary(model) and plot(model) to see the model performance.\n")
+
+   invisible(x)
 }
 
 
