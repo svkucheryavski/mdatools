@@ -288,8 +288,6 @@ pca.syncResAliases <- function(obj) {
    return(obj)
 }
 
-
-
 #' Select optimal number of components for PCA model
 #'
 #' @description
@@ -311,7 +309,6 @@ selectCompNum.pca <- function(obj, ncomp, ...) {
    if (ncomp < 1 || ncomp > obj$ncomp) {
       stop("Wrong number of selected components.", call. = FALSE)
    }
-
 
    obj$ncomp.selected <- ncomp
 
@@ -359,7 +356,6 @@ setDistanceLimits.pca <- function(obj, lim.type = obj$lim.type, alpha = obj$alph
    if (is.null(obj[["res"]]) || is.null(obj$res[["cal"]])) {
       stop("Calibration results not found (most probably this model is loaded from web-application).", call. = FALSE)
    }
-
 
    obj$T2lim <- ldecomp.getT2Limits(lim.type, alpha, gamma, obj$limParams)
    obj$Qlim <- ldecomp.getQLimits(lim.type, alpha, gamma, obj$limParams,
@@ -654,7 +650,7 @@ summary.pca <- function(object, ...) {
    }
 
    if (!is.null(object$rand)) {
-      fprintf("\nParameters for randomized algorithm: q = %d, p = %d\n",
+      fprintf("\nParameters for randomized algorithm: p = %d, q = %d\n",
          object$rand[1], object$rand[2])
    }
 
@@ -666,17 +662,13 @@ summary.pca <- function(object, ...) {
       fprintf("Excluded columns: %d\n", length(object$exclcols))
    }
 
-   if (!is.null(object$prep)) {
-      # TODO add description of preprocessing methods here!
-   }
-
    fprintf("Type of limits: %s\n", object$lim.type)
    fprintf("Alpha: %s\n", object$alpha)
    fprintf("Gamma: %s\n", object$gamma)
 
    if (!is.null(object$prep)) {
       fprintf("\nPreprocessing methods:\n")
-      cat(str(object$prep))
+      print(object$prep)
    }
 
    cat("\n")
@@ -1330,20 +1322,19 @@ asvector.pca <- function(obj) {
       stop("Calibration results not found (most probably this model is loaded from web-application).", call. = FALSE)
    }
 
-   do_center = !is.logical(obj$center)
-   do_scale = !is.logical(obj$scale)
-
+   do_center <- !is.logical(obj$center)
+   do_scale <- !is.logical(obj$scale)
 
    if (do_center) {
-      mX = obj$center
+      mX <- obj$center
    } else {
-      mX = rep(0, nrow(obj$loadings))
+      mX <- rep(0, nrow(obj$loadings))
    }
 
    if (do_scale) {
-      sX = obj$scale
+      sX <- obj$scale
    } else {
-      sX = rep(1, nrow(obj$loadings))
+      sX <- rep(1, nrow(obj$loadings))
    }
 
    ncols <- nrow(obj$loadings)
