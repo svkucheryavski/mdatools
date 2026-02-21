@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep.R
 \name{summary.prepmodel}
 \alias{summary.prepmodel}
-\title{Show summry about the preprocessing model.}
+\title{Show summary of the preprocessing model.}
 \usage{
 \method{summary}{prepmodel}(object, ...)
 }
@@ -11,6 +11,9 @@
 
 \item{...}{potential further arguments (required for Method/Generic reasons).}
 }
+\value{
+the \code{object} argument (invisibly).
+}
 \description{
-Show summry about the preprocessing model.
+Show summary of the preprocessing model.
 }

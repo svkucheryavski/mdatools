@@ -1744,32 +1744,38 @@ writeJSON.prepmodel <- function(obj, fileName) {
 }
 
 
-#' Show summry about the preprocessing model.
+#' Show summary of the preprocessing model.
 #'
 #' @param object
 #' preprocessing model (created by \code{\link{prep.fit}}).
 #' @param ...
 #' potential further arguments (required for Method/Generic reasons).
+#'
+#' @return
+#' the \code{object} argument (invisibly).
 #'
 #' @export
 summary.prepmodel <- function(object, ...) {
    cat("\nPreprocessing model:\n")
-   cat(str(object))
+   print(object)
    cat("\n")
+   invisible(object)
 }
 
 
-#' Show the information about methods in the preprocessing model.
+#' Print the information about methods in the preprocessing model.
 #'
-#' @param object
+#' @param x
 #' preprocessing model (created by \code{\link{prep.fit}}).
 #' @param ...
 #' potential further arguments (required for Method/Generic reasons).
 #'
+#' @return
+#' the \code{x} argument (invisibly).
+#'
 #' @export
-str.prepmodel <- function(object, ...) {
-   out <- ""
-   prep.list = getImplementedPrepMethods()
+print.prepmodel <- function(x, ...) {
+   prep.list <- getImplementedPrepMethods()
 
    par2str <- function(n, p) {
       if (is.null(p)) return("")
@@ -1777,18 +1783,18 @@ str.prepmodel <- function(object, ...) {
       return(paste0(n, " = ", p))
    }
 
-   for (p in object) {
+   for (p in x) {
       if (!is.list(p)) next
       name <- p[["name"]]
       params <- p[["params"]]
       params.list <- prep.list[[name]][["params.show"]]
-      out <- paste0(out, " - ", name)
+      out <- paste0(" - ", name)
       params.out <- sapply(params.list, function(n) par2str(n, params[[n]]))
       if (length(params.out) > 0)
          out <- paste0(out, ": ", paste0(params.out, collapse = ", "))
-      out <- paste0(out, "\n")
+      cat(out, "\n")
    }
-   return(out)
+   invisible(x)
 }
 
 ############################################################
