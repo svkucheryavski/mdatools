@@ -973,6 +973,9 @@ extractValue <- function(js, key) {
   # Extract just the numeric part
   val <- sub(pattern, "\\1", m, perl=TRUE)
 
+  # clean outer quotes
+  val <- gsub('^"|"$', '', val)
+
   # Try to convert to number if possible
   out <- suppressWarnings(as.numeric(val))
   if (is.na(out)) val else out
@@ -1051,9 +1054,11 @@ readJSON <- function(fileName) {
    }
 
    if ("prepmodel" %in% class) {
-      return (prep.fromjson(str))
+      return(prep.fromjson(str))
+   } else if ("plsmodel" %in% class) {
+      return(pls.fromjson(str))
    } else if ("pcamodel" %in% class) {
-      return (pca.fromjson(str))
+      return(pca.fromjson(str))
    } else {
       stop("Selected JSON file does not contain any supported model.", call. = FALSE)
    }
