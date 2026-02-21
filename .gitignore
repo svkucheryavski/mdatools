@@ -8,8 +8,8 @@
 .vscode/*
 LICENSE
 
-tests/plots/*.pdf
-tests/plots/*.txt
+tests/testthat/dump/*.pdf
+tests/testthat/dump/*.txt
 tests/matlab
 tests/matlab/*
 
