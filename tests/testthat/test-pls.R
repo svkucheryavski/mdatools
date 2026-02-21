@@ -844,35 +844,4 @@ test_that("JSON methods work correctly", {
    summary(m2$prep)
    summary(m$prep)
 
-   # # case 4: without comparing with web-app
-   # m <- pca(people, 5, center = FALSE, scale = FALSE, exclrows = c(1, 18), prep = p, exclcols = c(2, 7, 8))
-   # v <- asvector(m)
-   # expect_equivalent(abs(v), abs(v.exp4), tolerance = 0.0001)
-
-   # writeJSON(m, "pca-model-4-r.json")
-   # m1 <- pca.readJSON("pca-model-4-r.json")
-   # compareModels(m, m1)
-
-   # r <- predict(m, people)
-   # r1 <- predict(m1, people)
-   # compareResults(r, r1)
-
-   # # case 4: with comparing with web-app (to do this we remove columns)
-   # people_exclvars <- people[, -c(2, 7, 8)]
-   # m <- pca(people_exclvars, 5, center = FALSE, scale = FALSE, exclrows = c(1, 18), prep = p)
-   # v <- asvector(m)
-   # expect_equivalent(abs(v), abs(v.exp4), tolerance = 0.0001)
-
-   # writeJSON(m, "pca-model-4-r.json")
-   # m1 <- pca.readJSON("pca-model-4-r.json")
-   # m2 <- pca.readJSON("pca-model-4.json")
-   # compareModels(m, m1)
-   # compareModels(m, m2)
-
-   # r <- predict(m, people_exclvars)
-   # r1 <- predict(m1, people_exclvars)
-   # r2 <- predict(m2, people_exclvars)
-   # compareResults(r, r1)
-   # compareResults(r, r2)
-
 })

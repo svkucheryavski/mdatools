@@ -1203,6 +1203,11 @@ asjson.pls <- function(obj) {
       }
    }
 
+   stat <- paste0("{",
+      "'xexpvar': [", paste0(as.numeric(obj$res$cal$xdecomp$expvar/100), collapse = ","),"]",
+      ",'yexpvar': [", paste0(as.numeric(obj$res$cal$ydecomp$expvar/100), collapse = ","),"]",
+   "}")
+
    m <- paste0(
       "{'",
          "class':['plsmodel', 'pcamodel']",
@@ -1230,6 +1235,7 @@ asjson.pls <- function(obj) {
          ",'varvaluesName':'", varvaluesName, "'",
          ",'varvaluesUnits':'', 'varrev':", varrev,
          ",'ncomp_selected':", obj$ncomp.selected,
+         ",'stat':", stat,
       "}"
    )
    m <- gsub("\'", "\"", m)
