@@ -81,16 +81,16 @@ plotseries <- function(data, type, cgroup = NULL, col = NULL, opacity = 1,
 #' dataset (vector, matrix or data frame)
 #'
 #' @description
-#' The function checks that `data` contains correct numeric values, check for
+#' The function checks that `data` contains correct numeric values, checks for
 #' mandatory attributes (row and column names, x- and y-axis values and names, etc.)
-#' and add them if necessary.
+#' and adds them if necessary.
 #'
-#' Another things is to remove hidden columns and split the rest to visible and hidden
+#' Another thing is to remove hidden columns and split the rest to visible and hidden
 #' values (if excluded rows are present).
 #'
 preparePlotData <- function(data) {
 
-   # get data attributes to separate variable for shorten code
+   # get data attributes to separate variable for shorter code
    attrs <- attributes(data)
 
    # if it is vector without dimension - make a matrix
@@ -181,14 +181,13 @@ splitPlotData <- function(data, type) {
    # shortcuts to some of parameters
    attrs <- attributes(data)
 
-
    if (type == "p" && ncol(data) == 1) {
       # if data has only one column add y values in front
       data <- cbind(attrs$yaxis.values, data)
       colnames(data)[1] <- if (is.null(attrs$yaxis.name)) "Objects" else attrs$yaxis.name
    }
 
-   if (type %in%  c("p", "d")) {
+   if (type %in% c("p", "d")) {
       # scatter or density plot - take first and second columns as x and y
       x_values <- data[, 1]
       names(x_values) <- rownames(data)
@@ -199,14 +198,13 @@ splitPlotData <- function(data, type) {
    }
 
    if (type == "e") {
-      # errorbar plor - make data consist of three rows: (m, m - err, m + err)
+      # errorbar plot - make data consist of three rows: (m, m - err, m + err)
       data <- rbind(
          data[1, ],
          data[1, ] - data[2, ],
          data[1, ] + if (nrow(data) > 2) data[3, ] else data[2, ]
       )
    }
-
 
    # 0.12.0: yaxis.name must not be used as axis label in line and bar plots
    if (type %in% c("b", "l", "e", "h")) {
@@ -314,7 +312,7 @@ getPlotColors <- function(ps, col, opacity, cgroup, colmap) {
 #'
 getConfidenceEllipse <- function(points, conf.level = 0.95, n = 100) {
 
-   # compute igen vectors and values
+   # compute eigen vectors and values
    e <- eigen(cov(points))
 
    # get angle between the x-axis and the largest eigenvector
@@ -516,7 +514,7 @@ showLabels <- function(ps, show.excluded = FALSE, pos = 3, cex = 0.65, col = "da
 #' @param ps
 #' `plotseries` object
 #' @param pch
-#' size of point markers
+#' marker symbol for the points
 #' @param col
 #' color of the points
 #' @param bg
@@ -725,7 +723,7 @@ plotDensity <- function(ps, nbins = 60, colmap = ps$colmap) {
    yy2 <- getNearest(y, bin_height * sqrt(3), 0)
 
    # find which of the two fits every point best
-   d1 <- (x - xx1)^2 + (y - yy2)^2
+   d1 <- (x - xx1)^2 + (y - yy1)^2
    d2 <- (x - xx2)^2 + (y - yy2)^2
 
    xx <- ifelse(d1 < d2, xx1, xx2)
