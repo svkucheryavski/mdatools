@@ -257,7 +257,7 @@ expect_equal(length(m5$int.selected), 13) # 50 in total minus 37 excluded
 ###############################
 
 # load data used in the paper: Anderson, Bro, JChem, 2010
-d <- read.csv2("Beer.csv")
+d <- read.csv2("datasets/Beer.csv")
 # d <- read.csv2("tests/testthat/Beer.csv")
 y <- d[1:40, 1, drop = FALSE]
 X <- d[1:40, 2:ncol(d)]
