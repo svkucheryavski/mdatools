@@ -720,16 +720,16 @@ context("prep: prep.fit and writeJSON")
 
 test_that("fitting prep model works correctly (case Tecator)", {
 
-   dc <- read.csv2('./tecator_train.csv', row.names = 1, check.names = FALSE)
+   dc <- read.csv2('./datasets/tecator_train.csv', row.names = 1, check.names = FALSE)
    Xc <- as.matrix(dc[, -1])
 
-   dt <- read.csv2('./tecator_test.csv', row.names = 1, check.names = FALSE)
+   dt <- read.csv2('./datasets/tecator_test.csv', row.names = 1, check.names = FALSE)
    Xt <- as.matrix(dt[, -1])
 
-   dcp.ref <- read.csv2('./tecator_train-preprocessed.csv', row.names = 1, check.names = FALSE)
+   dcp.ref <- read.csv2('./datasets/tecator_train-preprocessed.csv', row.names = 1, check.names = FALSE)
    Xcp.ref <- as.matrix(dcp.ref[, -1])
 
-   dtp.ref <- read.csv2('./tecator_test-preprocessed.csv', row.names = 1, check.names = FALSE)
+   dtp.ref <- read.csv2('./datasets/tecator_test-preprocessed.csv', row.names = 1, check.names = FALSE)
    Xtp.ref <- as.matrix(dtp.ref[, -1])
 
    p <- list(
@@ -753,10 +753,10 @@ test_that("fitting prep model works correctly (case Tecator)", {
 
 test_that("fitting prep model works correctly (case HS-)", {
 
-   dc <- read.csv('./hs_train.csv', row.names = 1, check.names = FALSE)
+   dc <- read.csv('./datasets/hs_train.csv', row.names = 1, check.names = FALSE)
    Xc <- as.matrix(dc[, -1])
 
-   dcp.ref <- read.csv('./hs_train-preprocessed.csv', row.names = 1, check.names = FALSE)
+   dcp.ref <- read.csv('./datasets/hs_train-preprocessed.csv', row.names = 1, check.names = FALSE)
    Xcp.ref <- as.matrix(dcp.ref[, -1])
 
    p <- list(
@@ -793,8 +793,8 @@ testCase <- function(p, Xc, jsonFilename) {
 
 
    # save it to JSON file and then load it back
-   writeJSON(pm, './preprocessing-tmp.json')
-   pm1 <- readJSON('./preprocessing-tmp.json')
+   writeJSON(pm, './jsonfiles/preprocessing-tmp.json')
+   pm1 <- readJSON('./jsonfiles/preprocessing-tmp.json')
 
    # load model developed in web-app
    pm2 <- readJSON(jsonFilename)
@@ -809,21 +809,21 @@ testCase <- function(p, Xc, jsonFilename) {
 
 test_that("JSON() and readJSON() methods work correctly.", {
 
-   dc <- read.csv2('./tecator_train.csv', row.names = 1, check.names = FALSE)
+   dc <- read.csv2('./datasets/tecator_train.csv', row.names = 1, check.names = FALSE)
    Xc <- as.matrix(dc[, -1])
 
    # one method
    p <- list(
       prep("emsc", degree = 2)
    )
-   testCase(p, Xc, "./preprocessing-model-1.json")
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-1.json")
 
    # two methods
    p <- list(
       prep("norm", type = "snv"),
       prep("emsc", degree = 2)
    )
-   testCase(p, Xc, "./preprocessing-model-2.json")
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-2.json")
 
    # three methods
    p <- list(
@@ -831,7 +831,7 @@ test_that("JSON() and readJSON() methods work correctly.", {
       prep("norm", type = "snv"),
       prep("emsc", degree = 2)
    )
-   testCase(p, Xc, "./preprocessing-model-3.json")
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-3.json")
 
    # four methods
    p <- list(
@@ -840,7 +840,7 @@ test_that("JSON() and readJSON() methods work correctly.", {
       prep("norm", type = "snv"),
       prep("emsc", degree = 2)
    )
-   testCase(p, Xc, "./preprocessing-model-4.json")
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-4.json")
 
    # five methods
    p <- list(
@@ -852,7 +852,7 @@ test_that("JSON() and readJSON() methods work correctly.", {
       prep("center", type = "mean"),
       prep("scale", type = "pareto")
    )
-   testCase(p, Xc, "./preprocessing-model-full-tecator.json")
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-full-tecator.json")
 
 
    # five methods only scale
@@ -864,7 +864,7 @@ test_that("JSON() and readJSON() methods work correctly.", {
       prep("emsc", degree = 2),
       prep("scale", type = "range")
    )
-   testCase(p, Xc, "./preprocessing-model-full-tecator-scale.json")
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-full-tecator-scale.json")
 
    # five methods only center
    p <- list(
@@ -875,11 +875,11 @@ test_that("JSON() and readJSON() methods work correctly.", {
       prep("emsc", degree = 2),
       prep("center", type = "median")
    )
-   testCase(p, Xc, "./preprocessing-model-full-tecator-center.json")
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-full-tecator-center.json")
 
    # full hs- case
 
-   dc <- read.csv('./hs_train.csv', row.names = 1, check.names = FALSE)
+   dc <- read.csv('./datasets/hs_train.csv', row.names = 1, check.names = FALSE)
    Xc <- as.matrix(dc[, -1])
 
    p <- list(
@@ -891,8 +891,9 @@ test_that("JSON() and readJSON() methods work correctly.", {
       prep("norm", type = "is", col.ind = 976),
       prep("center", type = "mean")
    )
-
-   testCase(p, Xc, "./preprocessing-model-full-hs.json")
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-full-hs.json")
+   pm <- prep.fit(p, Xc)
+   summary(pm)
 
    # error cases
    p <- list(
@@ -911,4 +912,5 @@ test_that("JSON() and readJSON() methods work correctly.", {
    expect_error(json <- prep.asjson(pm))
 
 })
+
 
