@@ -4,12 +4,12 @@
 
 setup({
    pdf(file = "dump/mdatools-test-pls.pdf")
-#   sink("dump/mdatools-test-pls.txt", append = FALSE, split = FALSE)
+   sink("dump/mdatools-test-pls.txt", append = FALSE, split = FALSE)
 })
 
 teardown({
    dev.off()
-#   sink()
+   sink()
 })
 
 #################################################

@@ -1,4 +1,15 @@
-# new tests on top
+######################################
+# Tests for prep  methods            #
+######################################
+
+setup({
+   sink("dump/mdatools-test-prep.txt", append = FALSE, split = FALSE)
+})
+
+teardown({
+   sink()
+})
+
 
 context("prep: checks")
 
