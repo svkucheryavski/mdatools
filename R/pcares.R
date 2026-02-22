@@ -39,7 +39,7 @@
 #'  \code{\link{plotScores.ldecomp}} \tab makes scores plot.\cr
 #'  \code{\link{plotVariance.ldecomp}} \tab makes explained variance plot.\cr
 #'  \code{\link{plotCumVariance.ldecomp}} \tab makes cumulative explained variance plot.\cr
-#'  \code{\link{plotResiduals.ldecomp}} \tab makes Q vs. T2 distance plot.\cr
+#'  \code{\link{plotDistances.ldecomp}} \tab makes Q vs. T2 distance plot.\cr
 #' }
 #'
 #' Check also \code{\link{pca}} and \code{\link{ldecomp}}.
@@ -63,7 +63,7 @@
 #' summary(res)
 #' plot(res)
 #'
-#' ## 1. Make PCA model for People data with autoscaling
+#' ## 2. Make PCA model for People data with autoscaling
 #' ## and full cross-validation and get calibration results
 #'
 #' data(people)
@@ -74,7 +74,7 @@
 #' summary(res)
 #' plot(res)
 #'
-#' ## 2. Show scores plots for the results
+#' ## 3. Show scores plots for the results
 #' par(mfrow = c(2, 2))
 #' plotScores(res)
 #' plotScores(res, cgroup = people[, "Beer"], show.labels = TRUE)
@@ -82,7 +82,7 @@
 #' plotScores(res, comp = 2, type = "h", show.labels = TRUE)
 #' par(mfrow = c(1, 1))
 #'
-#' ## 3. Show residuals and variance plots for the results
+#' ## 4. Show residuals and variance plots for the results
 #' par(mfrow = c(2, 2))
 #' plotVariance(res, type = "h")
 #' plotCumVariance(res, show.labels = TRUE)
@@ -140,6 +140,7 @@ plot.pcares <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, show.labels
 #' @export
 summary.pcares <- function(object, ...) {
    summary.ldecomp(object, "Summary for PCA results", ...)
+   invisible(object)
 }
 
 #' Print method for PCA results object
@@ -156,6 +157,7 @@ summary.pcares <- function(object, ...) {
 print.pcares <- function(x, ...) {
    print.ldecomp(x, "Results for PCA decomposition (class pcares)", ...)
    cat("\n")
+   invisible(x)
 }
 
 
@@ -309,14 +311,14 @@ writeCSV.pcares <- function(res, fileName, name, sep = ",", dataFile = "", class
    out <- addChunk('Orthogonal distances, q', res$Q, out)
 
 
-   # if decimal separator is not ".", replace all "." with the corect separator
+   # if decimal separator is not ".", replace all "." with the correct separator
    if (sep == ';') {
-      out = gsub("\\.", ",", out);
+      out <- gsub("\\.", ",", out)
    }
 
    # add header
    out <- c(paste1('Data filename:', sep, dataFile, sep, '', filler), out)
-   out <- c (paste1(paste1('PCA results (',  name, ')'), sep, 'https://mda.tools/pca/', sep, '', filler), ' ', out);
+   out <- c(paste1(paste1('PCA results (',  name, ')'), sep, 'https://mda.tools/pca/', sep, '', filler), ' ', out)
 
    writeLines(out, fileName)
 }
