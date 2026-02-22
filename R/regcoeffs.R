@@ -191,6 +191,7 @@ summary.regcoeffs <- function(object, ncomp = 1, ny = 1, alpha = 0.05, ...) {
       cat(sprintf("\nDegrees of freedom (Jack-Knifing): %d\n", object$DoF))
    }
    cat("\n")
+   invisible(object)
 }
 
 #' print method for regression coefficients class
@@ -215,6 +216,7 @@ print.regcoeffs <- function(x, ...) {
    cat("$p.values - array with p-values\n")
    cat("$DoF - degrees of freedom for Jack-Knifing\n")
    cat("\nThe last four fields available only if Jack-Knifing was used.\n\n")
+   invisible(x)
 }
 
 
@@ -259,7 +261,7 @@ regcoeffs.getStats <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
    attrs <- mda.getattr(coeffs)
    se <- p.values <- t.values <- array(NA_real_, dim = dim(coeffs))
 
-   # prepare correct indices for predictors taking into accound excluded variables
+   # prepare correct indices for predictors taking into account excluded variables
    row_ind <- seq_len(dim(coeffs)[1])
    if (length(attrs$exclrows) > 0) {
       row_ind <- row_ind[-attrs$exclrows]
@@ -268,7 +270,7 @@ regcoeffs.getStats <- function(coeffs, ci.coeffs = NULL, use.mean = TRUE) {
 
    # check the dimension
    if (any(dim(coeffs) != dim(ci.coeffs)[1:3])) {
-      stop("Dimension of coefficients for distribution statistics does not much the 'coeffs'.", call. = FALSE)
+      stop("Dimension of coefficients for distribution statistics does not match the 'coeffs'.", call. = FALSE)
    }
 
    # compute mean if needed
