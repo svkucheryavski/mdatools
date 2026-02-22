@@ -276,9 +276,10 @@ summary.regmodel <- function(object, ncomp = object$ncomp.selected,
       mda.show(sum_data)
    }
    cat("\n")
+   invisible(object)
 }
 
-#' Print method for PLS model object
+#' Print method for regression model object
 #'
 #' @description
 #' Prints information about the object structure
@@ -299,6 +300,7 @@ print.regmodel <- function(x, ...) {
    cat("$coeffs - object (regcoeffs) with regression coefficients\n")
    cat("$res - list with result objects\n")
    cat("\nTry summary(model) and plot(model) to see the model performance.\n")
+   invisible(x)
 }
 
 
