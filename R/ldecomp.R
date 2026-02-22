@@ -297,6 +297,8 @@ print.ldecomp <- function(x, str = NULL, ...) {
    cat("$ncomp.selected - selected number of components\n")
    cat("$expvar - explained variance for each component\n")
    cat("$cumexpvar - cumulative explained variance\n")
+
+   invisible(x)
 }
 
 #' as.matrix method for ldecomp object
@@ -349,6 +351,8 @@ summary.ldecomp <- function(object, str = NULL, ...) {
    fprintf("\nSelected components: %d\n\n", object$ncomp.selected)
 
    print(round(as.matrix(object), 2))
+
+   invisible(object)
 }
 
 
@@ -452,27 +456,8 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
    # remove excluded variables from loadings and residuals
    cols.ind <- rep(TRUE, nvar)
    if (length(cols_excluded) > 0) {
-      # loadings <- loadings[-cols_excluded, , drop = FALSE]
-      # residuals <- residuals[, -cols_excluded, drop = FALSE]
       cols.ind[cols_excluded] <- FALSE
    }
-
-   # # helper function to compute orthogonal distances for given number of components in a model
-   # getResiduals <- function(scores, loadings, residuals, a) {
-   #    ncomp <- ncol(scores)
-   #    if (a == ncomp) return(residuals)
-
-   #    residuals + tcrossprod(
-   #       scores[, (a + 1):ncomp, drop = FALSE],
-   #       loadings[, (a + 1):ncomp, drop = FALSE]
-   #    )
-   # }
-   # # compute matrices with orthogonal and score distances
-   # Q <- sapply(seq_len(ncomp), function(a) rowSums(getResiduals(scores, loadings, residuals, a)^2))
-   # dim(Q) <- c(nobj, ncomp)
-
-   # T2 <- t(apply(scale(scores^2, center = FALSE, scale = eigenvals), 1, cumsum))
-   # dim(T2) <- c(nobj, ncomp)
 
    G <- matrix(0, nvar, ncomp)
    R <- matrix(0, nvar, ncomp)
@@ -1044,8 +1029,6 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
 #' vector with two values - line width for extreme and outlier limits
 #' @param lim.lty
 #' vector with two values - line type for extreme and outlier limits
-#' @param show.legend
-#' logical, show or not legend on the plot (if more than one result object)
 #' @param legend.position
 #' if legend must be shown, where it should be
 #' @param show.excluded
@@ -1054,7 +1037,7 @@ ldecomp.getLimitsCoordinates <- function(Qlim, T2lim, ncomp, norm, log,
 #' other plot parameters (see \code{mdaplotg} for details)
 #'
 #' @details
-#' The function is a bit more advanced version of \code{\link{plotResiduals.ldecomp}}. It allows to
+#' The function is a bit more advanced version of \code{\link{plotDistances.ldecomp}}. It allows to
 #' show distance values for several result objects (e.g. calibration and test set or calibration
 #' and new prediction set) as well as display the corresponding critical limits in form of lines
 #' or curves.
@@ -1098,7 +1081,7 @@ ldecomp.plotDistances <- function(res, Qlim, T2lim, ncomp, log = FALSE, norm = F
       show.limits <- rep(show.limits, 2)
    }
 
-   # keep only ojects of class "ldecomp" in result list
+   # keep only objects of class "ldecomp" in result list
    res <- getRes(res, "ldecomp")
 
    # compute plot data for each result object
