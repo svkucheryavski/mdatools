@@ -1,4 +1,4 @@
-#' Acceptance plot for DDSIMCA model and results (generic function)
+#' Distance plot for model and results (generic function)
 #'
 #' @param obj
 #' model or result object, e.g. \code{ddsimcares}
@@ -6,7 +6,9 @@
 #' other parameters relevant for the plot
 #'
 #' @export
-plotDistances <- function(obj, ...) UseMethod("plotDistances")
+plotDistances <- function(obj, ...) {
+   UseMethod("plotDistances")
+}
 
 
 #' Acceptance plot for DDSIMCA model and results (generic function)
@@ -17,7 +19,9 @@ plotDistances <- function(obj, ...) UseMethod("plotDistances")
 #' other parameters relevant for the plot
 #'
 #' @export
-plotAcceptance <- function(obj, ...) UseMethod("plotAcceptance")
+plotAcceptance <- function(obj, ...) {
+   UseMethod("plotAcceptance")
+}
 
 
 #' S3 implementation of asjson() method
@@ -26,7 +30,9 @@ plotAcceptance <- function(obj, ...) UseMethod("plotAcceptance")
 #' object of any class, e.g. \code{pca}
 #'
 #' @export
-asjson <- function(obj) UseMethod("asjson")
+asjson <- function(obj) {
+   UseMethod("asjson")
+}
 
 
 #' S3 implementation of as.vector() method
@@ -35,7 +41,9 @@ asjson <- function(obj) UseMethod("asjson")
 #' object of any class, e.g. \code{pca}
 #'
 #' @export
-asvector <- function(obj) UseMethod("asvector")
+asvector <- function(obj) {
+   UseMethod("asvector")
+}
 
 
 #' Save model as JSON file
@@ -46,7 +54,9 @@ asvector <- function(obj) UseMethod("asvector")
 #' name (or full path) to JSON file to be created.
 #'
 #' @export
-writeJSON <- function(obj, fileName) UseMethod("writeJSON")
+writeJSON <- function(obj, fileName) {
+   UseMethod("writeJSON")
+}
 
 
 #' Method to write outcomes of any result object to CSV file
@@ -65,7 +75,9 @@ writeJSON <- function(obj, fileName) UseMethod("writeJSON")
 #' other optional parameters
 #'
 #' @export
-writeCSV <- function(res, fileName, name, sep = ",", dataFile = "", ...) UseMethod("writeCSV")
+writeCSV <- function(res, fileName, name, sep = ",", dataFile = "", ...) {
+   UseMethod("writeCSV")
+}
 
 
 
@@ -199,7 +211,7 @@ setDistanceLimits <- function(obj, ...) {
 #' Show residual distance limits
 #'
 #' @description
-#' Calculates and sets critical limits for residuals of PCA model
+#' Shows critical limits for residuals of PCA model
 #'
 #' @param obj
 #' a model object
