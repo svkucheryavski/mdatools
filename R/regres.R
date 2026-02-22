@@ -114,6 +114,7 @@ summary.regres <- function(object, ncomp = object$ncomp.selected, ny = seq_len(o
       fprintf("\nResponse variable %s:\n", object$respnames[i])
       print(as.matrix.regres(object, ny = i, ncomp = ncomp))
    }
+   invisible(object)
 }
 
 #' print method for regression results object
@@ -145,6 +146,7 @@ print.regres <- function(x, ...) {
    if (ncol(x$y.pred) > 1) {
       cat("$ncomp.selected - number of selected components\n")
    }
+   invisible(x)
 }
 
 
