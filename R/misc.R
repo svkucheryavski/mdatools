@@ -346,6 +346,7 @@ mda.t <- function(x) {
 
    x <- t(x)
    x <- mda.setattr(x, out.attrs)
+   return(x)
 }
 
 #' Exclude/hide rows in a dataset
@@ -873,7 +874,7 @@ prepCalData <- function(x, exclrows = NULL, exclcols = NULL, min.nrows = 1, min.
       stop(sprintf("Dataset should contain at least %d variables (columns).", min.ncols), call. = FALSE)
    }
 
-   if (is.data.frame((x))) {
+   if (is.data.frame(x)) {
       nvar <- ncol(x)
       x <- mda.df2mat(x)
       stopifnot("The provided data frame has non-numeric columns, convert them to the numbers first." = ncol(x) == nvar)
@@ -1022,16 +1023,6 @@ extractPrep <- function(js) {
   substr(js, open_pos, end_pos)
 }
 
-
-#' Converts array (vector) with number of excluded variables to intervals
-#'
-#' @param arr
-#' array with the variable indices
-#'
-#' @export
-arr2int <- function(arr) {
-
-}
 
 
 
