@@ -20,7 +20,7 @@ plotScatter(
 \arguments{
 \item{ps}{`plotseries` object}
 
-\item{pch}{size of point markers}
+\item{pch}{marker symbol for the points}
 
 \item{col}{color of the points}
 

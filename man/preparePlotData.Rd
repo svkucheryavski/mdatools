@@ -10,10 +10,10 @@ preparePlotData(data)
 \item{data}{dataset (vector, matrix or data frame)}
 }
 \description{
-The function checks that `data` contains correct numeric values, check for
+The function checks that `data` contains correct numeric values, checks for
 mandatory attributes (row and column names, x- and y-axis values and names, etc.)
-and add them if necessary.
+and adds them if necessary.
 
-Another things is to remove hidden columns and split the rest to visible and hidden
+Another thing is to remove hidden columns and split the rest to visible and hidden
 values (if excluded rows are present).
 }
