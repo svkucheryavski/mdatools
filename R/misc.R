@@ -982,9 +982,7 @@ extractValue <- function(js, key) {
   if (is.na(out)) val else out
 }
 
-
-
-#' Extracts JSON related to preprocessing model
+#' Extracts a JSON subset in main JSON structure
 #'
 #' @param js
 #' stringified JSON with model
@@ -992,14 +990,14 @@ extractValue <- function(js, key) {
 #' @return string with part of the JSON string related to preprocessing
 #'
 #' @export
-extractPrep <- function(js) {
+extractBlock <- function(js, name) {
   if (is.null(js) || !nzchar(js)) return(NULL)
 
-  # locate "prep":
-  m <- regexpr('"prep"\\s*:', js)
+  # locate subset:
+  m <- regexpr(sprintf('"%s"\\s*:', name), js)
   if (m == -1) return(NULL)
 
-  start <- m + attr(m, "match.length")  # first char after "prep":
+  start <- m + attr(m, "match.length")  # first char after "name"
 
   # find first '{'
   open_pos <- regexpr("\\{", substr(js, start, nchar(js))) + start - 1
@@ -1021,6 +1019,19 @@ extractPrep <- function(js) {
   if (is.na(end_pos)) return(NULL)
 
   substr(js, open_pos, end_pos)
+}
+
+
+#' Extracts JSON related to preprocessing model
+#'
+#' @param js
+#' stringified JSON with model
+#'
+#' @return string with part of the JSON string related to preprocessing
+#'
+#' @export
+extractPrep <- function(js) {
+   return(extractBlock(js, "prep"))
 }
 
 
@@ -1049,7 +1060,10 @@ readJSON <- function(fileName) {
    } else if ("plsmodel" %in% class) {
       return(pls.fromjson(str))
    } else if ("pcamodel" %in% class) {
-      return(pca.fromjson(str))
+      if (nchar(extractBlock(str, "simca")) > 10)
+         return(ddsimca.fromjson(str))
+      else
+         return(pca.fromjson(str))
    } else {
       stop("Selected JSON file does not contain any supported model.", call. = FALSE)
    }
