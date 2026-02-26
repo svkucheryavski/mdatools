@@ -1475,6 +1475,9 @@ prep.fit <- function(obj, x) {
    stopifnot("prep.fit: argument 'x' must be a matrix" =
       !is.null(x) && is.matrix(x))
 
+   # remove excluded rows
+   if (!is.null(attr(x, "exclrows"))) x = mda.purgeRows((x))
+
    npred <- ncol(x)
    out <- list()
    i <- 1
