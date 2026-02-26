@@ -22,9 +22,9 @@ The following methods are considered as *deprecated*, you can still use them (th
 * `employ.prep()` — use `prep.apply()` instead.
 
 
-In addition to that, the possibility to combine the preprocessing methods together into preprocessing chain (we will call it *preprocessing model*) has been improved. However, these improvements **cause breaking changes**, so if you used it before, check the text below and the updated user guides very carefully.
+In addition to that, the possibility to combine the preprocessing methods together into preprocessing chain (we will call it *preprocessing model*) has been improved. However, these improvements **cause breaking changes**, so if you used this feature before, check the text below and the updated user guides very carefully.
 
-First of all, the syntax for creating preprocessing items has changed — parameters are now passed as named arguments instead of a list:
+First of all, the syntax for creating preprocessing items for combining them to the chain has changed — parameters are now passed as named arguments instead of a list:
 
 * Old: `prep("savgol", list(width = 7, porder = 2, dorder = 2))`
 * New: `prep("savgol", width = 7, porder = 2, dorder = 2)`
@@ -41,8 +41,6 @@ Please check the [updated documentation](https://mda.tools/docs/preprocessing.ht
 ### New modellling methods
 
 Method `ddsimca` can now be used for training, testing and applying of [Data Driven SIMCA]() models. It matches functionality of the corresponding web-application, including all plots and figures of merits (for example estimation of beta, selectivity, etc.). It also lets you change decision boundary parameters without rebuilding the main model.
-
-Method `ddsimcamb` implements [multiblock DD-SIMCA]() by combining several `ddsimca` models developed for the same set of samples but different blocks of variables.
 
 See all details in the [tutorial]().
 
