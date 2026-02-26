@@ -790,16 +790,25 @@ ddrobust.param <- function(U) {
 #'
 #' @param U
 #' matrix with residual distances
+#' @param do.round
+#' logical, shall Nu values be rounded or not
 #'
 #' @export
-ldecomp.getLimParams <- function(U) {
+ldecomp.getLimParams <- function(U, do.round = TRUE) {
 
    U <- mda.purgeRows(U)
+   pc <- ddmoments.param(U)
+   pr <- ddrobust.param(U)
+
+   if (do.round) {
+      pc$Nu <- clamp.dof(pc$Nu)
+      pr$Nu <- clamp.dof(pr$Nu)
+   }
 
    return(
       list(
-         "moments" = ddmoments.param(U),
-         "robust" = ddrobust.param(U),
+         "moments" = pc,
+         "robust" = pr,
          "nobj" = nrow(U)
       )
    )
