@@ -315,6 +315,7 @@ selectCompNum.pca <- function(obj, ncomp, ...) {
    if (!is.null(obj[["res"]])) {
       if (!is.null(obj$res[["cal"]])) obj$res[["cal"]]$ncomp.selected <- ncomp
       if (!is.null(obj$res[["test"]])) obj$res[["test"]]$ncomp.selected <- ncomp
+      if (!is.null(obj$res[["pv"]])) obj$res[["pv"]]$ncomp.selected <- ncomp
       obj <- pca.syncResAliases(obj)
    }
 
