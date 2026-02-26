@@ -1,0 +1,802 @@
+#' Data Driven SIMCA
+#'
+#' @description
+#' \code{ddsimca} is used to develop DD-SIMCA (Data Driven SIMCA) model for
+#' one-class classification.
+#'
+#' @param x
+#' a numerical matrix with data values.
+#' @param classname
+#' short text (up to 20 symbols) with class name.
+#' @param ncomp
+#' maximum number of components to calculate.
+#' @param center
+#' logical, do mean centering of data or not.
+#' @param scale
+#' logical, do standardization of data or not.
+#' @param pcv
+#' Procrurstes cross-validation settings (see details).
+#' @param alpha
+#' significance level for making the predictions (can be also adjusted when model is applied to data).
+#' @param gamma
+#' significance level for detection of outliers (can be also adjusted when model is applied to data).
+#' @param exclrows
+#' rows to be excluded from calculations (numbers, names or vector with logical values)
+#' @param exclcols
+#' columns to be excluded from calculations (numbers, names or vector with logical values)
+#' @param prep
+#' optional list with preprocessing methods created using `\code{\link{prep}}` function.
+#' @param ...
+#' any other parameters suitable for \code{\link{pca}} method.
+#'
+#' @details
+#' DD-SIMCA is based on PCA model with additional functionality, so \code{ddsimca} class inherits most
+#' of the functionality of \code{\link{pca}} class.
+#'
+#' In order to make a decision, DDSIMCA uses score and orthogonal distances to PCA model. It combines
+#' the two distances to joint full distance and uses chi-distribution for finding a critical value
+#' which is employed as decision rule. More details about DD-SIMCA can be found in [1] (open access).
+#'
+#' Procrustes cross-validation (PCV) is used to generate a validation set in order to find optimal model
+#' complexity (number of components). The PCV settings are similar to the ones used for conventional
+#' cross-validation. The best way is to set `pcv` value to a list, for example:  \code{pcv = list('ven', nseg)}
+#' for systematic splits or \code{pcv = list('rand', nseg)} for random splits. In case if full cross-validation
+#' must be employed, use \code{pcv = list('loo')}.
+#'
+#' @return
+#' Returns an object of \code{ddsimca} class with following fields:
+#' \item{classname }{a short text with class name.}
+#' \item{calres }{an object of class \code{\link{simcares}} with classification results for a
+#' calibration data.}
+#' \item{pvres }{an object of class \code{\link{simcares}} with classification results for a Procrustes
+#' validation set.}
+#'
+#' Fields, inherited from \code{\link{pca}} class:
+#' \item{ncomp }{number of components included to the model.}
+#' \item{ncomp.selected }{selected (optimal) number of components.}
+#' \item{loadings }{matrix with loading values (nvar x ncomp).}
+#' \item{eigenvals }{vector with eigenvalues for all existent components.}
+#' \item{expvar }{vector with explained variance for each component (in percent).}
+#' \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
+#' \item{info }{information about the model, provided by user when build the model.}
+#'
+#' @references
+#' 1. Kucheryavskiy S, Rodionova O, Pomerantsev A. A comprehensive tutorial on Data-Driven SIMCA:
+#' Theory and implementation in web. Journal of Chemometrics. 2024; 38(7):e3556. doi:10.1002/cem.3556
+#'
+#' 2. S. Kucheryavskiy, O. Rodionova, A. Pomerantsev, Procrustes cross-validation of multivariate
+#' regression models. Analytica Chimica Acta. 2023; 1255:341096. doi:10.1016/j.aca.2023.341096.
+#'
+#' @seealso
+#' Methods for \code{ddsimca} objects:
+#' \tabular{ll}{
+#'  \code{print.ddsimca} \tab shows information about the object.\cr
+#'  \code{summary.ddsimca} \tab shows summary statistics for the model.\cr
+#'  \code{plot.ddsimca} \tab makes an overview of DD-SIMCA model with four plots.\cr
+#'  \code{\link{predict.ddsimca}} \tab applies DD-SIMCA model to a new data.\cr
+#' }
+#'
+#' Methods, inherited from \code{classmodel} class:
+#' \tabular{ll}{
+#'  \code{\link{plotPredictions.classmodel}} \tab shows plot with predicted values.\cr
+#'  \code{\link{plotSensitivity.classmodel}} \tab shows sensitivity plot.\cr
+#'  \code{\link{plotSpecificity.classmodel}} \tab shows specificity plot.\cr
+#'  \code{\link{plotMisclassified.classmodel}} \tab shows misclassified ratio plot.\cr
+#' }
+#'
+#' Methods, inherited from \code{\link{pca}} class:
+#' \tabular{ll}{
+#'  \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
+#'  \code{\link{plotScores.pca}} \tab shows scores plot.\cr
+#'  \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
+#'  \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
+#'  \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
+#' }
+#'
+#' @author
+#' Sergey Kucheryavskiy (svkucheryavski@@gmail.com)
+#'
+#' @examples
+#' ## make a SIMCA model for Iris setosa class with full cross-validation
+#' library(mdatools)
+#'
+#' data = iris[, 1:4]
+#' class = iris[, 5]
+#'
+#' # take first 20 objects of setosa as calibration set
+#' se = data[1:20, ]
+#'
+#' # make SIMCA model and apply to test set
+#' model = ddsimca(se, "setosa", pcv = list("ven", 10))
+#' model = selectCompNum(model, 1)
+#'
+#' # show infromation, summary and plot overview
+#' print(model)
+#' summary(model)
+#' plot(model)
+#'
+#'
+#' @importFrom pcv pcvpca
+#'
+#' @export
+ddsimca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x) - 1, 20), center = TRUE,
+   scale = FALSE, pcv = list("ven", 10), alpha = 0.05, gamma = 0.01, exclrows = NULL, exclcols = NULL, prep = NULL, ...) {
+
+   if (!is.character(classname)) {
+      stop("Argument 'classname' must be a text.")
+   }
+
+   if (nchar(classname) > 20) {
+      stop("Argument 'classname' must have up to 20 symbols.")
+   }
+
+   # check calibration data and process excluded rows and columns
+   x <- prepCalData(x, exclrows = exclrows, exclcols = exclcols, min.nrows = 2, min.ncols = 2)
+   x <- mda.purgeCols(x)
+
+   # correct number of components
+   ncomp <- min(nrow(x) - 1, ncol(x) - 1 - length(attr(x, "exclcols")), ncomp)
+
+   # calibrate model
+   model <- pca(x, ncomp = ncomp, center = center, scale = scale, prep = prep, ...)
+   model$nrows <- nrow(x) - length(attr(x, "exclrows"))
+   model$nclasses <- 1
+   model$classname <- classname
+   model$alpha <- alpha
+   model$gamma <- gamma
+   model$limType <- "moments"
+   model$call <- match.call()
+   class(model) <- c("ddsimca", "pca")
+
+   # apply model to calibration set
+   c.ref <- rep(classname, nrow(x))
+   model$res[["cal"]] <- predict(model, x, c.ref)
+   model$calres <- model$res[["cal"]]
+
+   # do Procrustes cross-validation if needed
+   if (!is.null(pcv)) {
+
+      # remove excluded rows
+      x <- mda.purgeRows(x)
+      c.ref.pv <- if (!is.null(exclrows)) c.ref[-exclrows] else c.ref
+
+      # if preprocessing is available apply it
+      if (!is.null(model$prep)) x <- prep.apply(model$prep, x)
+
+      # generate xpv set
+      xpv <- pcv::pcvpca(x, ncomp = ncomp, cv = pcv, center = center, scale = scale)
+
+      # make a copy of PCA model and remove preprocessing - already applied
+      # then apply the model
+      m <- model
+      m$prep <- NULL
+      model$res[["pv"]] <- predict(m, xpv, c.ref.pv)
+      model$pvres <- model$res[["pv"]]
+   }
+
+   return(model)
+}
+
+
+
+#' DD-SIMCA predictions
+#'
+#' @description
+#' Applies DD-SIMCA model to a new data set
+#'
+#' @param object
+#' a DD-SIMCA model (object of class \code{ddsimca})
+#' @param x
+#' a matrix with x values (predictors)
+#' @param c.ref
+#' a vector with reference class names (same as class names for models)
+#' @param alpha
+#' significance level for making the predictions.
+#' @param gamma
+#' significance level for detection of outliers.
+#' @param ...
+#' other optional parameters.
+#'
+#' @return
+#' DD-SIMCA results (an object of class \code{ddsimcares})
+#'
+#' @details
+#' See examples in help for \code{\link{ddsimca}} function.
+#'
+#' @export
+predict.ddsimca <- function(object, x, c.ref = NULL, alpha = object$alpha, gamma = object$gamma, ...) {
+
+   if (alpha > 0.5 || alpha < 0.00001) {
+      stop("Wrong value for parameter 'alpha'.")
+   }
+
+   if (gamma > 0.5 || gamma < 0.00001) {
+      stop("Wrong value for parameter 'gamma'.")
+   }
+
+   # get PCA results
+   pcares <- predict.pca(object, x)
+   nobj <- nrow(x)
+   nobj.cal <- object$nrows
+   classname <- object$classname
+
+   indIncluded <- rep(TRUE, nobj)
+   if (length(attr(pcares$scores, "exclrows"))> 0) {
+      indIncluded[attr(pcares$scores, "exclrows")] <- FALSE
+   }
+   indExcluded <- !indIncluded
+   nExcluded <- sum(indExcluded)
+
+   # identify indices for strangers, members and object whose class is unknown
+   if (is.null(c.ref)) {
+      indMembers <- NULL
+      indStrangers <- NULL
+      indUnknowns <- indIncluded
+      nMembers <- 0
+      nStrangers <- 0
+      nUnknowns <- sum(indUnknowns)
+   } else {
+      indMembers <- (c.ref == object$classname) & indIncluded
+      indStrangers <- (!indMembers) & indIncluded
+      indUnknowns <- NULL
+      nMembers <- sum(indMembers)
+      nStrangers <- sum(indStrangers)
+      nUnknowns <- 0
+   }
+
+   indices <- list(members = indMembers, strangers = indStrangers, unknown = indUnknowns, excluded = indExcluded)
+   numbers <- list(members = nMembers,   strangers = nStrangers,   unknown = nUnknowns, excluded = nExcluded)
+
+   # compute full distances and probabilities
+   lp <- object$limParams
+   outcomes <- list(
+      "moments" = classify(pcares, indices, numbers, lp$Q[["moments"]], lp$T2[["moments"]], nobj.cal, alpha, gamma, classname, c.ref),
+      "robust" = classify(pcares, indices, numbers, lp$Q[["robust"]],  lp$T2[["robust"]],  nobj.cal, alpha, gamma, classname, c.ref)
+   )
+
+   return(ddsimcares(pcares, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref))
+}
+
+#' Set default parameters for the DD-SIMCA model.
+#'
+#' @param m
+#' a DD-SIMCA model (object of class \code{ddsimca})
+#' @param alpha
+#' significance level for making the predictions.
+#' @param gamma
+#' significance level for detection of outliers.
+#'
+#' @return DD-SIMCA model with the redefined parameters.
+#'
+#' @export
+setParams <- function(m, alpha = m$alpha, gamma = m$gamma) {
+   m$alpha = alpha
+   m$gamma = gamma
+
+   nobj <- m$nrows
+   lp <- m$limParams
+   classname <- m$classname
+   if (!is.null(m[["res"]]) && !is.null(m$res[["cal"]])) {
+
+      r <- m[["res"]][["cal"]]
+      indices <- r$simca$indices
+      numbers <- r$simca$numbers
+      c.ref <- r$simca$c.ref
+
+      outcomes <- list(
+         "moments" = classify(r, indices, numbers, lp$Q[["moments"]], lp$T2[["moments"]], nobj, alpha, gamma, classname, c.ref),
+         "robust" = classify(r, indices, numbers, lp$Q[["robust"]],  lp$T2[["robust"]],  nobj, alpha, gamma, classname, c.ref)
+      )
+
+      m$res$cal = ddsimcares(r, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref)
+      m$calres <- m$res$cal
+   }
+
+   if (!is.null(m[["res"]]) && !is.null(m$res[["pv"]])) {
+
+      r <- m[["res"]][["pv"]]
+      indices <- r$simca$indices
+      numbers <- r$simca$numbers
+      c.ref <- r$simca$c.ref
+
+      outcomes <- list(
+         "moments" = classify(r, indices, numbers, lp$Q[["moments"]], lp$T2[["moments"]], nobj, alpha, gamma, classname, c.ref),
+         "robust" = classify(r, indices, numbers, lp$Q[["robust"]],  lp$T2[["robust"]],  nobj, alpha, gamma, classname, c.ref)
+      )
+
+      m$res$pv = ddsimcares(r, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref)
+      m$pvres <- m$res$pv
+   }
+
+   return(m)
+}
+
+#' Creates classification outcomes for given PCA result objects and distance parameters.
+#'
+#' @param pcares
+#' object of class \code{\link{pcares}}.
+#' @param indices
+#' list with indices of members, strangers, and unknown samples as well as information about excluded objects.
+#' @param numbers
+#' list with numbers of members, strangers, unknown and excluded samples.
+#' @param qp
+#' distirbution parameters for q-distances.
+#' @param hp
+#' distribution parameters for h-distances.
+#' @param nobj.cal
+#' number of objects in calibration set the model was built on (needed for outliers detection).
+#' @param alpha
+#' significance level for decision boundary.
+#' @param gamma
+#' significance level for outlier detection boundary,
+#' @param classname
+#' name of the target class.
+#' @param c.ref
+#' vector with names of the reference classes.
+#'
+classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, gamma = 0.01, classname, c.ref = NULL) {
+
+   # get distances and compute matrix with full distance
+   H <- pcares$T2
+   Q <- pcares$Q
+
+
+   # get distribution parameters
+   q0 <- qp$u0
+   Nq <- qp$Nu
+   h0 <- hp$u0
+   Nh <- hp$Nu
+   Nf <- Nh + Nq
+
+   # compute critical limits
+   fCritE <- qchisq(1 - alpha, Nf)
+   fCritO <- qchisq((1 - gamma)^(1/nobj.cal), Nf)
+
+   ncomp <- ncol(H)
+   nobj <- nrow(H)
+
+   # vectors for main FoMs
+   sns <- rep(0, ncomp)
+   spc <- rep(0, ncomp)
+   sel <- rep(0, ncomp)
+   eff <- rep(0, ncomp)
+   acc <- rep(0, ncomp)
+
+   # vectors for number of objects accepted/rejected
+   nin <- rep(0, ncomp)
+   nout <- rep(0, ncomp)
+
+   # vectors with number of negatives/positives
+   TN <- rep(0, ncomp)
+   TP <- rep(0, ncomp)
+   FN <- rep(0, ncomp)
+   FP <- rep(0, ncomp)
+
+   # list to save the classification outcomes for each component
+   classres <- list()
+
+   for (a in seq_len(ncomp)) {
+
+      ha <- H[, a]
+      qa <- Q[, a]
+      fa <- ha / h0[a] * Nh[a] + qa / q0[a] * Nq[a]
+
+      Nfa <- Nf[a]
+      Nha <- Nh[a]
+      Nqa <- Nq[a]
+
+      fcea <- fCritE[a]
+      fcoa <- fCritO[a]
+      names(fa) <- NULL
+
+      res = list(
+         f = fa,
+         h = ha / h0[a],
+         q = qa / q0[a],
+         Nh = Nha,
+         Nq = Nqa,
+         Nf = Nfa,
+         fce = fcea,
+         fco = fcoa,
+         roles = rep("", nobj),
+         decisions = fa < fcea,
+         TP = 0,
+         FN = 0,
+         TN = 0,
+         FP = 0,
+         beta = 0,
+         s = 0,
+         f0 = 0,
+         hz = 0,
+         Mz = 0,
+         Sz = 0,
+         k = 0,
+         m = 0
+      )
+
+      res$roles[indices$excluded] <- "excluded"
+
+      res <- processMembers(res, indices$members)
+      res <- processStrangers(res, indices$strangers)
+
+      if (!is.null(indices$unknown)) {
+         res <- processStrangers(res, indices$unknown)
+         res$TN <- 0
+         res$FP <- 0
+      }
+
+      TP[a] <- res$TP
+      TN[a] <- res$TN
+      FP[a] <- res$FP
+      FN[a] <- res$FN
+
+      nin[a] <- sum(res$decisions)
+      nout[a] <- sum(!res$decisions)
+
+      sns[a] <- if (res$TP > 0) res$TP / (res$TP + res$FN) else 0
+      spc[a] <- if (res$TN > 0) res$TN / (res$TN + res$FP) else 0
+      sel[a] <- if (res$beta > 0) 1 - res$beta else 0
+      eff[a] <- sqrt(sns[a] * spc[a])
+      acc[a] <- if(res$TP > 0 && res$TN > 0) (res$TP + res$TN) / (res$TP + res$TN + res$FP + res$FN) else 0
+
+      classres[[a]] <- res
+   }
+
+   return (list(values = classres, sns = sns, spc = spc, sel = sel, eff = eff, acc = acc, nin = nin, nout = nout, TP = TP, TN = TN, FP = FP, FN = FN))
+}
+
+#' Computes classification outcomes for target class members.
+#'
+#' @param res
+#' a list with classification outcomes created by method \code{\link\{classify}} (part of it will be filled by this method).
+#' @param indMembers
+#' a vector with logical values pointing on data items corresponding to class members.
+#'
+#' @return
+#' the \code{res} list where roles vector is filled for class members, plus values for TP and FN.
+processMembers <- function(res, indMembers) {
+   if (is.null(indMembers) || sum(indMembers) < 1) return (res)
+
+
+   regular <- indMembers & res$f < res$fce
+   outlier <- indMembers & res$f > res$fco
+   extreme <- indMembers & !regular & !outlier
+
+   if (any(regular)) res$roles[regular] <- "regular"
+   if (any(extreme)) res$roles[extreme] <- "extreme"
+   if (any(outlier)) res$roles[outlier] <- "outlier"
+
+   res$TP = sum(regular)
+   res$FN = sum(outlier) + sum(extreme)
+
+   return(res)
+}
+
+#' Computes classification outcomes for members of non-target classes.
+#'
+#' @param res
+#' a list with classification outcomes created by method \code{\link\{classify}} (part of it will be filled by this method).
+#' @param indStrangers
+#' a vector with logical values pointing on data items corresponding to members of non-target classes.
+#'
+#' @return
+#' the \code{res} list where roles vector is filled for class members, values for TN and FP, as
+#' well as statistics for computing Type II error and related things (beta, s, f0, hz, Mz, Sz, k, m).
+processStrangers <- function(res, indStrangers) {
+
+   if (is.null(indStrangers) || sum(indStrangers) < 1) return (res)
+
+   res$roles[indStrangers] <- "alien"
+   res$TN <- sum(indStrangers & !res$decisions)
+   res$FP <- sum(indStrangers & res$decisions)
+
+
+   # Step 1. Sort all distances
+   # make a copy of strangers indices as we are going to change it
+   indv <- which(indStrangers)
+
+   # sort the indices so the largest will be at the end
+   indv <- indv[order(res$f[indv])]
+   I <- length(indv)
+
+   # sort the distance values as well and save into temporary variable
+   fp <- res$f[indv]
+
+   # Step 2. Try to fit the non-central chi-square
+   Disc <- -1
+   n <- 0
+   m <- 0
+   d <- 0
+   M1 <- 0
+   k <- res$Nf
+
+   while (Disc < 0) {
+      if (n > 0) {
+         # sample with largest f does not fit, so we change its rolw to "external"
+         # and amend the number of aliens and externals
+         res$roles[indv[I]] <- "external"
+         # then we remove this sample from the temporary vector and
+         # assess the next biggest
+         indv <- indv[-I]
+         fp <- fp[-I]
+         I <- I - 1
+      }
+
+      # compute parameters for moments squared equation and
+      # its discriminant
+      m <- mean(fp)
+      d <- var(fp)
+      M1 <- d / (m * m)
+      Disc <- 4 - 2 * k * M1
+      n <- n + 1
+   }
+
+   # Step 3. Calculate  x  by Eq. (18)
+   x <- (2 + sqrt(Disc)) / M1
+
+   # Calculate  s and  f'0 by Eq. (19)
+   s <- (x - k)
+   f0 <- m / x
+
+   # Calculate: z, hz, r, p, Mz, Sz by Eq. (20)
+   z <- res$fce / f0
+   hz <- 1 - 2 * (k + s) * (k + 3 * s) / (3 * (k + 2 * s)^2)
+   r <- (hz - 1) * (1 - 3 * hz)
+   p <- (k + 2 * s) / (k + s)^2
+   Mz <- 1 + hz * p * (hz - 1 - 0.5 * (2 - hz) * r * p)
+   Sz <- hz * sqrt(2 * p) * (1 + 0.5 * r * p)
+
+   # Step 4.	If α is given then calculate β by Eq. (21)
+   beta <- pnorm((((z / (k + s))^hz) - Mz) / Sz)
+
+   res$beta <- beta
+   res$s <- s
+   res$f0 <- f0
+   res$hz <- hz
+   res$Mz <- Mz
+   res$Sz <- Sz
+   res$k <- k
+   res$m <- m
+
+   return(res)
+}
+
+#' Converts JSON string created in mda.tools/ddsimca app to \code{ddsimca} object
+#'
+#' @param str
+#' stringified JSON (from model file)
+#'
+#' @return
+#' object of \code{\link{ddsimca}} class
+#'
+ddsimca.fromjson <- function(str) {
+   m <- pca.fromjson(str)
+   simca.str <- extractBlock(str, "simca")
+
+   m$nrows <- extractValue(str, "nrows")
+   m$nclasses <- 1
+   m$classname <- extractValue(str, "className")
+   m$alpha <- extractValue(str, "alpha") / 100
+   m$gamma <- extractValue(str, "gamma") / 100
+   m$ncomp.selected <- extractValue(simca.str, "ncomp")
+   class(m) <- c("ddsimca", "pca")
+   return(m)
+}
+
+#' Reads DD-SIMCA model from JSON file made in web-application (mda.tools/ddsimca).
+#'
+#' @param fileName
+#' file name (or full path) to JSON file.
+#'
+#' @return list with DD-SIMCA model similar to what \code{ddsimca()} creates.
+#'
+#' @export
+ddsimca.readJSON <- function(fileName) {
+   fileConn <- file(fileName)
+   str <- readLines(fileConn, warn = FALSE)
+   close(fileConn)
+   return (ddsimca.fromjson(str))
+}
+
+#' Converts object with DD-SIMCA model to JSON string compatible with web-application.
+#'
+#' @param obj
+#' Object with DD-SIMCA model (from \code{\link{ddsimca}}).
+#'
+#' @return stringigied JSON
+#'
+#' @export
+asjson.ddsimca <- function(obj, limType = "classic", alpha = obj$alpha, gamma = obj$gamma, ncomp = obj$ncomp.selected) {
+
+   limType <- processLimType(limType)
+   hash <- paste0("'", genhash(), "'")
+
+   Nf <- rep(0, obj$ncomp)
+   eCrit <- rep(0, obj$ncomp)
+   oCrit <- rep(0, obj$ncomp)
+
+   for (i in seq_len(obj$ncomp)) {
+      v <- obj$calres$simca$outcomes[[limType]]$values[[i]]
+      Nf[i] <- v$Nf
+      eCrit[i] <- v$fce
+      oCrit[i] <- v$fco
+   }
+
+   if (limType == "moments") limType = "classic"
+   m <- paste0(
+      "{'pca':", asjson.pca(obj), ", 'simca': {",
+         "'ncomp':", ncomp, ",",
+         "'alpha':", alpha * 100, ",",
+         "'gamma':", gamma * 100, ",",
+         "'limType': '", limType, "',",
+         "'Nf':{'__type':'Float64Array','data':[",paste0(Nf, collapse = ","), "]},",
+         "'eCrit':{'__type':'Float64Array','data':[",paste0(eCrit, collapse = ","), "]},",
+         "'oCrit':{'__type':'Float64Array','data':[",paste0(oCrit, collapse = ","), "]},",
+         "'className':'", obj$classname, "',",
+         "'hash':", hash,
+      "}}"
+   )
+
+   m <- gsub("\'", "\"", m)
+}
+
+
+#' Saves PCA model as JSON file compatible with web-application (https://mda.tools/pca).
+#'
+#' @description
+#' You can load created JSON file to web-app and use it for prediction.
+#'
+#' @param obj
+#' Object with PCA model (from \code{\link{pca}}).
+#' @param fileName
+#' Name or full path to JSON file to be created.
+#'
+#' @export
+writeJSON.ddsimca <- function(obj, fileName, ...) {
+   m <- asjson(obj, ...)
+   fileConn <- file(fileName)
+   writeLines(m, fileConn)
+   close(fileConn)
+}
+
+
+#' Model overview plot for SIMCA
+#'
+#' @description
+#' Shows a set of plots for SIMCA model.
+#'
+#' @param x
+#' a SIMCA model (object of class \code{simca})
+#' @param comp
+#' which components to show on scores and loadings plot
+#' @param ncomp
+#' how many components to use for residuals plot
+#' @param ...
+#' other arguments
+#'
+#' @details
+#' See examples in help for \code{\link{ddsimca}} function.
+#'
+#' @export
+plot.ddsimca <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...) {
+   op <- par(mfrow = c(2, 2))
+   on.exit(par(op))
+   plotScores(x, comp, ...)
+   plotLoadings(x, comp = comp, ...)
+   plotAcceptance(x, ncomp = ncomp, ...)
+   plotSensitivity(x, ...)
+}
+
+
+#' Summary method for SIMCA model object
+#'
+#' @description
+#' Shows performance statistics for the model.
+#'
+#' @param object
+#' a SIMCA model (object of class \code{simca})
+#' @param ncomp
+#' number of components to show summary for
+#' @param res
+#' list of result objects to show summary for
+#' @param ...
+#' other arguments
+#'
+#' @export
+summary.ddsimca <- function(object, ncomp = object$ncomp.selected, res = object$res, ...) {
+
+   fprintf("\nSIMCA model for class '%s' summary\n\n", object$classname)
+
+   if (!is.null(object$info) && nchar(object$info)) {
+      fprintf("Info: %s\n", object$info)
+   }
+
+   if (!is.null(object$rand)) {
+      fprintf("\nParameters for randomized algorithm: q = %d, p = %d\n",
+         object$rand[1], object$rand[2])
+   }
+
+   if (length(object$exclrows) > 0) {
+      fprintf("Excluded rows: %d\n", length(object$exclrows))
+   }
+
+   if (length(object$exclcols) > 0) {
+      fprintf("Excluded coumns: %d\n", length(object$exclcols))
+   }
+
+   fprintf("\nNumber of components: %d\n", ncomp)
+   fprintf("Type of limits: %s\n", object$lim.type)
+   fprintf("Alpha: %s\n", object$alpha)
+   fprintf("Gamma: %s\n", object$gamma)
+   cat("\n")
+
+   sum_data <- do.call(rbind, lapply(res, as.matrix, ncomp = ncomp))
+   rownames(sum_data) <- capitalize(names(res))
+   cat("\n")
+}
+
+
+#' Print method for SIMCA model object
+#'
+#' @description
+#' Prints information about the object structure
+#'
+#' @param x
+#' a SIMCA model (object of class \code{simca})
+#' @param ...
+#' other arguments
+#'
+#' @export
+print.ddsimca <- function(x, ...) {
+   cat("\nSIMCA one class model (class simca)\n")
+
+   cat("\nCall:\n")
+   print(x$call)
+
+   cat("\nMajor fields:\n")
+   cat("$info - information about the model\n")
+   cat("$classname - name of the class\n")
+   cat("$ncomp - number of calculated components\n")
+   cat("$ncomp.selected - number of selected components\n")
+   cat("$loadings - matrix with loadings\n")
+   cat("$eigenvals - eigenvalues for components\n")
+   cat("$center - values for centering data\n")
+   cat("$scale - values for scaling data\n")
+   cat("$alpha - significance level for critical limits\n")
+   cat("$gamma - significance level for outlier limits\n")
+   cat("$Qlim - critical values and parameters for orthogonal distances\n")
+   cat("$T2lim - critical values and parameters for score distances\n")
+   cat("$cv - cross-validation parameters\n")
+   cat("$res - list with result objects ('cal', 'cv', 'test'\n")
+}
+
+
+
+
+#' Acceptance plot for DD-SIMCA model.
+#'
+#' @description
+#' Shows Acceptance plot for calibration of Procrustes validation results (if available).
+#'
+#' @param obj
+#' DD-SIMCA model  (object of class \code{ddsimca}).
+#' @param res
+#' name of the results (either 'cal' or 'pv')
+#' @param ...
+#' any parameters suitable for \code{\link{plotAcceptance.ddsimcares}}.
+plotAcceptance.ddsimca <- function(obj, res = "cal", ...) {
+
+   res <- match.arg(res, c("cal", "pv"))
+
+   if (is.null(obj[["res"]]) || is.null(obj$res[["cal"]])) {
+      message("Calibration results not found (most probably this model is loaded from web-application).")
+      return(invisible(NULL))
+   }
+
+   if (is.null(obj$res[[res]])) {
+      message(sprintf("Result object '%s' not found.", res))
+      return(invisible(NULL))
+   }
+
+   return(plotAcceptance(obj$res[[res]], res.name = res, ...))
+}
