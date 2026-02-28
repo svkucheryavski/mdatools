@@ -1,7 +1,7 @@
 v. 0.15.0
 =========
 
-This release contains numerous small and large improvements, bug fixes, and new methods. It aims at extending the functionality of the package as well as introducing interoperability with interactive web-applications for chemometircs available at [mda.tools](https://mda.tools). Any model created using mdatools for R can now be saved to a JSON file and then be uploaded to the corresponding web-application for testing or making predictions. And vice versa, if you develop a model in one of the web-apps, you can save it into JSON file and then load it to R to be used with *mdatools* package.
+This release contains numerous small and large improvements, bug fixes, and new methods. It aims at extending the functionality of the package as well as introducing interoperability with interactive web-applications for chemometrics available at [mda.tools](https://mda.tools). Any model created using mdatools for R can now be saved to a JSON file and then be uploaded to the corresponding web-application for testing or making predictions. And vice versa, if you develop a model in one of the web-apps, you can save it into JSON file and then load it to R to be used with *mdatools* package.
 
 Here are all release details.
 
@@ -51,19 +51,19 @@ Please check the [updated documentation](https://mda.tools/docs/preprocessing.ht
 
 ### New functions for model and result objects
 
-* when you create a model using `pca`, `pls`, `ddsimca`, or, `plsda` methods, you can provide a list with preprocessing methods using parameter `prep`. This list will be trained into a preprocessing model and be automatically applied to the training set as well as to new datasets when you use the model with method `predict()`. Hence you can skip manual preprocessing of test set or new set of measurements as it will be done automatically.
+* when you create a model using `pca`, `pls`, `ddsimca`, or `plsda` methods, you can provide a list with preprocessing methods using parameter `prep`. This list will be trained into a preprocessing model and be automatically applied to the training set as well as to new datasets when you use the model with method `predict()`. Hence you can skip manual preprocessing of test set or new set of measurements as it will be done automatically.
 
 * any model object created using `pca`, `pls`, and `ddsimca` has a method `writeJSON()` which saves the corresponding model into a JSON file, which then can be loaded to corresponding web-application, similar to `prep.writeJSON()`.
 
-* there are also class specific methods, `pca.readJSON()`, `pls.readJSON()`, `ddsimca.readJSON()`, which load model create in a web-application from JSON file and let you use the model for predictions in R.
+* there are also class specific methods, `pca.readJSON()`, `pls.readJSON()`, `ddsimca.readJSON()`, which load a model created in a web-application from JSON file and let you use the model for predictions in R.
 
-* result object from `pca`, `pls`, and `ddsimca` methods now have class specific method `writeCSV()`. The method creates CSV files with main results outcomes with a structure identical to produced using [mdatools web-applications](https://mda.tools/).
+* result object from `pca`, `pls`, and `ddsimca` methods now have class specific method `writeCSV()`. The method creates CSV files with main results outcomes with a structure identical to the one produced by [mdatools web-applications](https://mda.tools/).
 
 ### Improvements and changes
 
-* method `prep.alsbasecorr()` is now several times faster, thanks to `spam` package (which replaced the previosly used `Matrix`).
+* method `prep.alsbasecorr()` is now several times faster, thanks to `spam` package (which replaced the previously used `Matrix`).
 
-* method `plotResiduals()` for all models and results objects where it was avaiable now is named `plotDistances()`. The old name, however, will work as well to ensure compatibility with old code.
+* method `plotResiduals()` for all models and results objects where it was available now is named `plotDistances()`. The old name, however, will work as well to ensure compatibility with old code.
 
 * colorbar legend for continuous color grouping now uses pretty breakpoints with consistent decimal formatting; very large or very small values are shown with a compact multiplier (e.g. ×10³).
 
