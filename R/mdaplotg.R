@@ -203,6 +203,7 @@ mdaplotg.getLegend <- function(ps, data.names, legend = NULL) {
 #' @return
 #' vector with two values
 #'
+#' @export
 mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, show.labels,
    legend.position, bwd = NULL) {
 
@@ -258,6 +259,7 @@ mdaplotg.getXLim <- function(ps, xlim, show.excluded, show.legend, show.labels,
 #' @return
 #' vector with two values
 #'
+#' @export
 mdaplotg.getYLim <- function(ps, ylim, show.excluded, show.legend, legend.position, show.labels) {
 
    # if user provided ylim values - use them
