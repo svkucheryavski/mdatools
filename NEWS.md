@@ -1,9 +1,7 @@
 v. 0.15.0
 =========
 
-This release contains numerous small and large improvements, bug fixes, and new methods. It aims at extending the functionality of the package as well as introducing interoperability with interactive web-applications for chemometrics available at [mda.tools](https://mda.tools). Any model created using mdatools for R can now be saved to a JSON file and then be uploaded to the corresponding web-application for testing or making predictions. And vice versa, if you develop a model in one of the web-apps, you can save it into JSON file and then load it to R to be used with *mdatools* package.
-
-Here are all release details.
+This release contains numerous improvements, bug fixes, and new methods. The main highlights are a standalone DD-SIMCA implementation, overhauled preprocessing pipelines (with some breaking changes), and JSON/CSV interoperability with the [mda.tools](https://mda.tools) web-applications.
 
 ### New dedicated methods for DD-SIMCA
 
@@ -42,22 +40,20 @@ First of all, the syntax for creating preprocessing items for combining them to 
 
 Also, the option to add user defined preprocessing methods into a preprocessing model has been removed as it caused issues and non-stable behavior in some cases. From this version, only selected methods can be combined together to a preprocessing model. You can see a full list of the currently supported methods by running `prep.list()`. This list will be extended eventually. And you can still use user defined methods and methods which are not in the list separately.
 
-Second, the list of combined methods can be passed as argument `prep` to functions `pls`, `pca`, `simca`, `ddsimca`, and `plsda`. These functions will compute all necessary parameters of the preprocessing methods from the list and save them as a part of the corresponding model (e.g. PLS). So next time you run `predict()` for applying e.g. PLS model to new data, it will do the preprocessing automatically.
+Second, a preprocessing model can now be integrated directly into `pca`, `pls`, `simca`, `ddsimca`, and `plsda` via the `prep` parameter — the model will train the preprocessing pipeline and apply it automatically during calibration and prediction.
 
-Finally, the list of preprocessing methods can be also *trained* independently of any other model. This means they can pre-compute the parameters which depend on training set (e.g. values for centering, scaling or reference spectrum for EMSC). This can be done by using method `prep.fit()`. Applying the trained preprocessing model to a new dataset can be done by using method `prep.apply()`.
+Finally, preprocessing methods can also be *trained* independently using `prep.fit()`, which pre-computes parameters that depend on the training set (e.g. values for centering, scaling, or the reference spectrum for EMSC). Applying the trained preprocessing model to new data is done with `prep.apply()`.
 
 Please check the [updated documentation](https://mda.tools/docs/preprocessing.html) for all details and examples.
 
 
-### New functions for model and result objects
+### JSON and CSV interoperability
 
-* when you create a model using `pca`, `pls`, `ddsimca`, or `plsda` methods, you can provide a list with preprocessing methods using parameter `prep`. This list will be trained into a preprocessing model and be automatically applied to the training set as well as to new datasets when you use the model with method `predict()`. Hence you can skip manual preprocessing of test set or new set of measurements as it will be done automatically.
+Models created with `pca`, `pls`, and `ddsimca` can now be exported to JSON using `writeJSON()` and imported from JSON using `readJSON()` method. This enables round-trip interoperability with the corresponding [mda.tools](https://mda.tools) web-applications — you can build a model in R, upload it to a browser for interactive use, or develop a model in a web-app and load it into R for predictions.
 
-* any model object created using `pca`, `pls`, and `ddsimca` has a method `writeJSON()` which saves the corresponding model into a JSON file, which then can be loaded to corresponding web-application, similar to `prep.writeJSON()`.
+When a model includes a preprocessing pipeline (via the `prep` parameter), the pipeline is saved as part of the JSON file and applied automatically on import.
 
-* there are also class specific methods, `pca.readJSON()`, `pls.readJSON()`, `ddsimca.readJSON()`, which load a model created in a web-application from JSON file and let you use the model for predictions in R.
-
-* result object from `pca`, `pls`, and `ddsimca` methods now have class specific method `writeCSV()`. The method creates CSV files with main results outcomes with a structure identical to the one produced by [mdatools web-applications](https://mda.tools/).
+Result objects from `pca`, `pls`, and `ddsimca` now also have a `writeCSV()` method that exports main outcomes in a format identical to the one produced by the web-applications.
 
 ### Improvements and changes
 
