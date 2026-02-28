@@ -299,12 +299,12 @@ print.mcrals <- function(x, ...) {
    print(x$call)
 
    cat("\nMajor model fields:\n")
-   cat("$ncomp - number of calculated components\n")
-   cat("$resspec - matrix with resolved spectra\n")
-   cat("$rescont - matrix with resolved contributions\n")
-   cat("$expvar - vector with explained variance\n")
-   cat("$cumexpvar - vector with cumulative explained variance\n")
-   cat("$info - case info provided by user\n")
+   cat(" $ncomp - number of calculated components\n")
+   cat(" $resspec - matrix with resolved spectra\n")
+   cat(" $rescont - matrix with resolved contributions\n")
+   cat(" $expvar - vector with explained variance\n")
+   cat(" $cumexpvar - vector with cumulative explained variance\n")
+   cat(" $info - case info provided by user\n")
 }
 
 #' Summary method for mcrals object

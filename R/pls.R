@@ -1555,13 +1555,13 @@ print.pls <- function(x, ...) {
    print(x$call)
 
    cat("\nMajor fields:\n")
-   cat("$ncomp - number of calculated components\n")
-   cat("$ncomp.selected - number of selected components\n")
-   cat("$coeffs - object (regcoeffs) with regression coefficients\n")
-   cat("$xloadings - matrix with x loadings\n")
-   cat("$yloadings - matrix with y loadings\n")
-   cat("$weights - matrix with weights\n")
-   cat("$res - list with results (calibration, cv, etc)\n")
+   cat(" $ncomp - number of calculated components\n")
+   cat(" $ncomp.selected - number of selected components\n")
+   cat(" $coeffs - object (regcoeffs) with regression coefficients\n")
+   cat(" $xloadings - matrix with x loadings\n")
+   cat(" $yloadings - matrix with y loadings\n")
+   cat(" $weights - matrix with weights\n")
+   cat(" $res - list with results (calibration, cv, etc)\n")
 
    cat("\nTry summary(model) and plot(model) to see the model performance.\n")
 

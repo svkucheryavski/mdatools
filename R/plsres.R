@@ -251,19 +251,19 @@ print.plsres <- function(x, ...) {
    print(x$call)
 
    cat("\nMajor fields:\n")
-   cat("$ncomp.selected - number of selected components\n")
-   cat("$y.pred - array with predicted y values\n")
+   cat(" $ncomp.selected - number of selected components\n")
+   cat(" $y.pred - array with predicted y values\n")
 
    if (!is.null(x$y.ref)) {
-      cat("$y.ref - matrix with reference y values\n")
-      cat("$rmse - root mean squared error\n")
-      cat("$r2 - coefficient of determination\n")
-      cat("$slope - slope for predicted vs. measured values\n")
-      cat("$bias - bias for prediction vs. measured values\n")
-      cat("$ydecomp - decomposition of y values (ldecomp object)\n")
+      cat(" $y.ref - matrix with reference y values\n")
+      cat(" $rmse - root mean squared error\n")
+      cat(" $r2 - coefficient of determination\n")
+      cat(" $slope - slope for predicted vs. measured values\n")
+      cat(" $bias - bias for prediction vs. measured values\n")
+      cat(" $ydecomp - decomposition of y values (ldecomp object)\n")
    }
 
-   cat("$xdecomp - decomposition of x values (ldecomp object)\n")
+   cat(" $xdecomp - decomposition of x values (ldecomp object)\n")
 }
 
 

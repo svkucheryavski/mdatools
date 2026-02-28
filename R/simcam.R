@@ -230,12 +230,12 @@ print.simcam <- function(x, ...) {
    print(x$call)
 
    cat("\nMajor fields:\n")
-   cat("$models - list with individual SIMCA models for each class\n")
-   cat("$classnames - vector with names of classes\n")
-   cat("$moddist - matrix with distance between the models\n")
-   cat("$dispower - matrix with discrimination power values\n")
-   cat("$info - information about the object\n")
-   cat("$res - list with calibration results\n")
+   cat(" $models - list with individual SIMCA models for each class\n")
+   cat(" $classnames - vector with names of classes\n")
+   cat(" $moddist - matrix with distance between the models\n")
+   cat(" $dispower - matrix with discrimination power values\n")
+   cat(" $info - information about the object\n")
+   cat(" $res - list with calibration results\n")
 }
 
 

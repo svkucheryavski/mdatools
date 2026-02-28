@@ -134,17 +134,17 @@ print.regres <- function(x, ...) {
    print(x$call)
 
    cat("\nMajor fields:\n")
-   cat("$y.pred - matrix or vector with predicted y values\n")
+   cat(" $y.pred - matrix or vector with predicted y values\n")
    if (!is.null(x$y.ref)) {
-      cat("$y.ref - vector with reference y values\n")
-      cat("$rmse - root mean squared error\n")
-      cat("$r2 - coefficient of determination\n")
-      cat("$slope - slope for predicted vs. measured values\n")
-      cat("$bias - bias for prediction vs. measured values\n")
+      cat(" $y.ref - vector with reference y values\n")
+      cat(" $rmse - root mean squared error\n")
+      cat(" $r2 - coefficient of determination\n")
+      cat(" $slope - slope for predicted vs. measured values\n")
+      cat(" $bias - bias for prediction vs. measured values\n")
    }
 
    if (ncol(x$y.pred) > 1) {
-      cat("$ncomp.selected - number of selected components\n")
+      cat(" $ncomp.selected - number of selected components\n")
    }
    invisible(x)
 }

@@ -232,14 +232,14 @@ print.classres <- function(x, str = "Classification results (class classres)\nMa
    cat("$c.pred - predicted class values\n")
 
    if (!is.null(x$c.ref)) {
-      cat("$c.ref - reference (true) class values\n")
-      cat("$tp - number of true positives\n")
-      cat("$tn - number of true negatives\n")
-      cat("$fp - number of false positives\n")
-      cat("$fn - number of false negatives\n")
-      cat("$specificity - specificity of predictions\n")
-      cat("$sensitivity - sensitivity of predictions\n")
-      cat("$misclassified - misclassification ratio for predictions\n")
+      cat(" $c.ref - reference (true) class values\n")
+      cat(" $tp - number of true positives\n")
+      cat(" $tn - number of true negatives\n")
+      cat(" $fp - number of false positives\n")
+      cat(" $fn - number of false negatives\n")
+      cat(" $specificity - specificity of predictions\n")
+      cat(" $sensitivity - sensitivity of predictions\n")
+      cat(" $misclassified - misclassification ratio for predictions\n")
    }
 }
 

@@ -252,14 +252,14 @@ print.plsdares <- function(x, ...) {
    cat("$c.pred - array with predicted class values\n")
 
    if (!is.null(x$c.ref)) {
-      cat("$c.ref - vector with reference class values\n")
-      cat("$tp - number of true positives\n")
-      cat("$fp - number of false positives\n")
-      cat("$fn - number of false negatives\n")
-      cat("$specificity - specificity of predictions\n")
-      cat("$sensitivity - sensitivity of predictions\n")
-      cat("$misclassified - misclassification ratio for predictions\n")
-      cat("$ydecomp - decomposition of y values (ldecomp object)\n")
+      cat(" $c.ref - vector with reference class values\n")
+      cat(" $tp - number of true positives\n")
+      cat(" $fp - number of false positives\n")
+      cat(" $fn - number of false negatives\n")
+      cat(" $specificity - specificity of predictions\n")
+      cat(" $sensitivity - sensitivity of predictions\n")
+      cat(" $misclassified - misclassification ratio for predictions\n")
+      cat(" $ydecomp - decomposition of y values (ldecomp object)\n")
    }
 
    cat("$xdecomp - decomposition of x values (ldecomp object)\n")

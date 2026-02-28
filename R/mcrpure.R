@@ -265,16 +265,16 @@ print.mcrpure <- function(x, ...) {
    print(x$call)
 
    cat("\nMajor model fields:\n")
-   cat("$ncomp - number of calculated components\n")
-   cat("$resspec - matrix with resolved spectra\n")
-   cat("$rescont - matrix with resolved contributions\n")
-   cat("$purityspec - matrix with purity spectra\n")
-   cat("$purevars - vector with indices of pure variables\n")
-   cat("$purevals - purity values for the selected pure variables\n")
-   cat("$expvar - vector with explained variance\n")
-   cat("$cumexpvar - vector with cumulative explained variance\n")
-   cat("$offset - offset value used to compute the purity\n")
-   cat("$info - case info provided by user\n")
+   cat(" $ncomp - number of calculated components\n")
+   cat(" $resspec - matrix with resolved spectra\n")
+   cat(" $rescont - matrix with resolved contributions\n")
+   cat(" $purityspec - matrix with purity spectra\n")
+   cat(" $purevars - vector with indices of pure variables\n")
+   cat(" $purevals - purity values for the selected pure variables\n")
+   cat(" $expvar - vector with explained variance\n")
+   cat(" $cumexpvar - vector with cumulative explained variance\n")
+   cat(" $offset - offset value used to compute the purity\n")
+   cat(" $info - case info provided by user\n")
 }
 
 #' Summary method for mcrpure object

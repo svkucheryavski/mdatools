@@ -291,12 +291,12 @@ print.ldecomp <- function(x, str = NULL, ...) {
    }
 
    cat("\nMajor fields:\n")
-   cat("$scores - matrix with score values\n")
-   cat("$T2 - matrix with T2 distances\n")
-   cat("$Q - matrix with Q residuals\n")
-   cat("$ncomp.selected - selected number of components\n")
-   cat("$expvar - explained variance for each component\n")
-   cat("$cumexpvar - cumulative explained variance\n")
+   cat(" $scores - matrix with score values\n")
+   cat(" $T2 - matrix with T2 distances\n")
+   cat(" $Q - matrix with Q residuals\n")
+   cat(" $ncomp.selected - selected number of components\n")
+   cat(" $expvar - explained variance for each component\n")
+   cat(" $cumexpvar - cumulative explained variance\n")
 
    invisible(x)
 }
