@@ -1,3 +1,67 @@
+#' Show plot with several figures of merit vs. number of components (generic function).
+#'
+#' @param obj
+#' result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the method
+#'
+#' @export
+plotFoMs <- function(obj, ...) {
+   UseMethod("plotFoMs")
+}
+
+
+#' Show plot with figure of merit vs. number of components (generic function).
+#'
+#' @param obj
+#' result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the method
+#'
+#' @export
+plotFoM <- function(obj, ...) {
+   UseMethod("plotFoM")
+}
+
+
+#' Set model parameters other than number of components (generic function)
+#'
+#' @param obj
+#' model object, e.g. \code{ddsimca}
+#' @param ...
+#' other parameters relevant for the method
+#'
+#' @export
+setParams <- function(obj, ...) {
+   UseMethod("setParams")
+}
+
+
+#' Selectivity vs sensitivity plot for DD-SIMCA results (generic function)
+#'
+#' @param obj
+#' result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the plot
+#'
+#' @export
+plotSelectivityArea <- function(obj, ...) {
+   UseMethod("plotSelectivityArea")
+}
+
+#' Aliens plot for DD-SIMCA results (generic function)
+#'
+#' @param obj
+#' result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the plot
+#'
+#' @export
+plotAliens <- function(obj, ...) {
+   UseMethod("plotAliens")
+}
+
+
 #' Distance plot for model and results (generic function)
 #'
 #' @param obj
@@ -223,19 +287,34 @@ showDistanceLimits <- function(obj, ...) {
    UseMethod("showDistanceLimits")
 }
 
-#' Shows extreme plot for SIMCA model
+#' Shows extreme plot for PCA and DD-SIMCA models
 #'
 #' @description
-#' Generic function for creating extreme plot for SIMCA model
+#' Generic function for creating extreme plot for PCA and DD-SIMCA models
 #'
 #' @param obj
-#' a SIMCA model
+#' a PCA or DD-SIMCA model
 #' @param ...
 #' other parameters
 #'
 #' @export
 plotExtreme <- function(obj, ...) {
    UseMethod("plotExtreme")
+}
+
+#' Shows extreme plot for PCA and DD-SIMCA models
+#'
+#' @description
+#' Generic function for creating extreme plot for PCA and DD-SIMCA models
+#'
+#' @param obj
+#' a PCA or DD-SIMCA model
+#' @param ...
+#' other parameters
+#'
+#' @export
+plotExtremes <- function(obj, ...) {
+   UseMethod("plotExtremes")
 }
 
 #' Get regression coefficients
