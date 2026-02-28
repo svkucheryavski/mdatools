@@ -26,6 +26,8 @@
 #' columns to be excluded from calculations (numbers, names or vector with logical values)
 #' @param prep
 #' optional list with preprocessing methods created using `\code{\link{prep}}` function.
+#' @param do.round
+#' logical, round or not DoF for distances.
 #' @param ...
 #' any other parameters suitable for \code{\link{pca}} method.
 #'
@@ -120,7 +122,8 @@
 #'
 #' @export
 ddsimca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x) - 1, 20), center = TRUE,
-   scale = FALSE, pcv = list("ven", 10), alpha = 0.05, gamma = 0.01, exclrows = NULL, exclcols = NULL, prep = NULL, ...) {
+   scale = FALSE, pcv = list("ven", 10), alpha = 0.05, gamma = 0.01,
+   exclrows = NULL, exclcols = NULL, prep = NULL, do.round = TRUE, ...) {
 
    if (!is.character(classname)) {
       stop("Argument 'classname' must be a text.")
@@ -138,7 +141,7 @@ ddsimca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x) - 1, 20), cen
    ncomp <- min(nrow(x) - 1, ncol(x) - 1 - length(attr(x, "exclcols")), ncomp)
 
    # calibrate model
-   model <- pca(x, ncomp = ncomp, center = center, scale = scale, prep = prep, ...)
+   model <- pca(x, ncomp = ncomp, center = center, scale = scale, prep = prep, do.round = do.round, ...)
    model$nrows <- nrow(x) - length(attr(x, "exclrows"))
    model$nclasses <- 1
    model$classname <- classname
@@ -176,7 +179,6 @@ ddsimca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x) - 1, 20), cen
 
    return(model)
 }
-
 
 
 #' DD-SIMCA predictions
@@ -269,7 +271,7 @@ predict.ddsimca <- function(object, x, c.ref = NULL, alpha = object$alpha, gamma
 #' @return DD-SIMCA model with the redefined parameters.
 #'
 #' @export
-setParams <- function(m, alpha = m$alpha, gamma = m$gamma) {
+setParams.ddsimca <- function(m, alpha = m$alpha, gamma = m$gamma) {
    m$alpha = alpha
    m$gamma = gamma
 
@@ -311,6 +313,139 @@ setParams <- function(m, alpha = m$alpha, gamma = m$gamma) {
    return(m)
 }
 
+
+#' Model overview plot for DD-SIMCA
+#'
+#' @description
+#' Shows a set of plots for DD-SIMCA model.
+#'
+#' @param x
+#' a DD-SIMCA model (object of class \code{ddsimca})
+#' @param comp
+#' which components to show on scores and loadings plot
+#' @param ncomp
+#' how many components to use for residuals plot
+#' @param ...
+#' other arguments
+#'
+#' @details
+#' See examples in help for \code{\link{ddsimca}} function.
+#'
+#' @export
+plot.ddsimca <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...) {
+   op <- par(mfrow = c(2, 2))
+   on.exit(par(op))
+   plotScores(x, comp, ...)
+   plotLoadings(x, comp = comp, ...)
+   plotAcceptance(x, ncomp = ncomp, ...)
+   plotSensitivity(x, ...)
+}
+
+#' Summary method for DD-SIMCA model object
+#'
+#' @description
+#' Shows performance statistics for the model.
+#'
+#' @param object
+#' a DD-SIMCA model (object of class \code{ddsimca})
+#' @param ncomp
+#' number of components to show summary for
+#' @param res
+#' list of result objects to show summary for
+#' @param ...
+#' other arguments
+#'
+#' @export
+summary.ddsimca <- function(object, ncomp = object$ncomp.selected, res = object$res, ...) {
+
+   fprintf("\nSIMCA model for class '%s'\n\n", object$classname)
+
+   if (!is.null(object$info) && nchar(object$info)) {
+      fprintf("Info: %s\n", object$info)
+   }
+
+   if (!is.null(object$rand)) {
+      fprintf("Parameters for randomized algorithm: q = %d, p = %d\n",
+         object$rand[1], object$rand[2])
+   }
+
+   if (length(object$exclrows) > 0) {
+      fprintf("Excluded rows: %d\n", length(object$exclrows))
+   }
+
+   if (length(object$exclcols) > 0) {
+      fprintf("Excluded coumns: %d\n", length(object$exclcols))
+   }
+
+   fprintf("Number of components: %d\n", object$ncomp)
+   fprintf("Number of selected components: %d\n", ncomp)
+   fprintf("Type of limits: %s\n", if (object$limType == "moments") "classic" else "robust")
+   fprintf("Alpha: %s\n", object$alpha)
+   fprintf("Gamma: %s\n", object$gamma)
+
+   if (!is.null(object$prep)) {
+      fprintf("\nPreprocessing methods:\n")
+      print(object$prep)
+   }
+
+   cat("\n")
+
+   sum_data <- do.call(rbind, lapply(res, function(x) as.matrix(x)[ncomp, , drop = FALSE]))
+   rownames(sum_data) <- capitalize(names(res))
+   print(sum_data, 4)
+   cat("\n")
+
+   return(invisible(NULL))
+}
+
+
+#' Print method for DD-SIMCA model object
+#'
+#' @description
+#' Prints information about the object structure
+#'
+#' @param x
+#' a DD-SIMCA model (object of class \code{ddsimca})
+#' @param ...
+#' other arguments
+#'
+#' @export
+print.ddsimca <- function(x, ...) {
+   cat("\nDD-SIMCA model (class 'ddsimca')\n")
+
+   cat("\nCall:\n")
+   print(x$call)
+
+   cat("\nFields inherited from 'pca' class:\n")
+   cat(" $info - information about the model\n")
+   cat(" $classname - name of the class\n")
+   cat(" $ncomp - number of calculated components\n")
+   cat(" $ncomp.selected - number of selected components\n")
+   cat(" $loadings - matrix with loadings\n")
+   cat(" $eigenvals - eigenvalues for components\n")
+   cat(" $center - values for centering data\n")
+   cat(" $scale - values for scaling data\n")
+   cat(" $limParams - parameters for distribution of distances\n")
+
+   cat("\nFields related to 'ddsimcs' class:\n")
+   cat(" $alpha - significance level for critical limits\n")
+   cat(" $gamma - significance level for outlier limits\n")
+   cat(" $classname - name of the target class\n")
+   cat(" $nrows - number of objects in the training set\n")
+
+   if (!is.null(x$res))
+      cat(" $res - list with model results (calibration, PV-set)\n")
+   if (!is.null(x$prep))
+      cat(" $prep - preprocessing model\n")
+
+   return(invisible(NULL))
+}
+
+
+################################
+#  Static and local methods    #
+################################
+
 #' Creates classification outcomes for given PCA result objects and distance parameters.
 #'
 #' @param pcares
@@ -334,6 +469,7 @@ setParams <- function(m, alpha = m$alpha, gamma = m$gamma) {
 #' @param c.ref
 #' vector with names of the reference classes.
 #'
+#' @return a list with classification outcomes for each number of components.
 classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, gamma = 0.01, classname, c.ref = NULL) {
 
    # get distances and compute matrix with full distance
@@ -448,7 +584,7 @@ classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, g
 #' Computes classification outcomes for target class members.
 #'
 #' @param res
-#' a list with classification outcomes created by method \code{\link\{classify}} (part of it will be filled by this method).
+#' a list with classification outcomes created by method \code{\link{classify}} (part of it will be filled by this method).
 #' @param indMembers
 #' a vector with logical values pointing on data items corresponding to class members.
 #'
@@ -475,7 +611,7 @@ processMembers <- function(res, indMembers) {
 #' Computes classification outcomes for members of non-target classes.
 #'
 #' @param res
-#' a list with classification outcomes created by method \code{\link\{classify}} (part of it will be filled by this method).
+#' a list with classification outcomes created by method \code{\link{classify}} (part of it will be filled by this method).
 #' @param indStrangers
 #' a vector with logical values pointing on data items corresponding to members of non-target classes.
 #'
@@ -560,6 +696,11 @@ processStrangers <- function(res, indStrangers) {
 
    return(res)
 }
+
+
+################################
+# JSON methods                 #
+################################
 
 #' Converts JSON string created in mda.tools/ddsimca app to \code{ddsimca} object
 #'
@@ -660,118 +801,71 @@ writeJSON.ddsimca <- function(obj, fileName, ...) {
 }
 
 
-#' Model overview plot for SIMCA
-#'
-#' @description
-#' Shows a set of plots for SIMCA model.
-#'
-#' @param x
-#' a SIMCA model (object of class \code{simca})
-#' @param comp
-#' which components to show on scores and loadings plot
-#' @param ncomp
-#' how many components to use for residuals plot
-#' @param ...
-#' other arguments
-#'
-#' @details
-#' See examples in help for \code{\link{ddsimca}} function.
-#'
+################################
+#  Plotting methods            #
+################################
+
 #' @export
-plot.ddsimca <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...) {
-   op <- par(mfrow = c(2, 2))
-   on.exit(par(op))
-   plotScores(x, comp, ...)
-   plotLoadings(x, comp = comp, ...)
-   plotAcceptance(x, ncomp = ncomp, ...)
-   plotSensitivity(x, ...)
+plotSensitivity.ddsimca <- function(obj,
+   limType = "classic",
+   col = mdaplot.getColors(2),
+   pch = c(1, 1),
+   type = "b",
+   legend.position = "bottomright",
+   ...) {
+
+   if (is.null(obj[["res"]]) || is.null(obj$res[["cal"]])) {
+      message("Calibration results not found (most probably this model is loaded from web-application).")
+      return(invisible(NULL))
+   }
+
+   p <- plotSensitivity.ddsimcares(obj$res[["cal"]], col = col[1], pch = pch[1], limType = limType, ...)
+
+   if (!is.null(obj$res[["pv"]])) {
+      stopifnot("Number of values for 'col' parameter should be 2." = length(col) == 2)
+      stopifnot("Number of values for 'pch' parameter should be 2." = length(pch) == 2)
+
+      pd <- plotSensitivity.ddsimcares(obj$res[["pv"]], limType = limType, show.plot = FALSE, ...)
+      mdaplot(pd, show.axes = FALSE, type = type, col = col[2], pch = pch[2], ...)
+      mdaplotg.showLegend(c("cal", "pv"), col = col, pch = pch, lty = NA, position = legend.position)
+   } else {
+      mdaplotg.showLegend("cal", col = col[1], pch = pch[1], lty = NA, position = legend.position)
+   }
 }
 
 
-#' Summary method for SIMCA model object
-#'
-#' @description
-#' Shows performance statistics for the model.
-#'
-#' @param object
-#' a SIMCA model (object of class \code{simca})
-#' @param ncomp
-#' number of components to show summary for
-#' @param res
-#' list of result objects to show summary for
-#' @param ...
-#' other arguments
-#'
 #' @export
-summary.ddsimca <- function(object, ncomp = object$ncomp.selected, res = object$res, ...) {
-
-   fprintf("\nSIMCA model for class '%s' summary\n\n", object$classname)
-
-   if (!is.null(object$info) && nchar(object$info)) {
-      fprintf("Info: %s\n", object$info)
-   }
-
-   if (!is.null(object$rand)) {
-      fprintf("\nParameters for randomized algorithm: q = %d, p = %d\n",
-         object$rand[1], object$rand[2])
-   }
-
-   if (length(object$exclrows) > 0) {
-      fprintf("Excluded rows: %d\n", length(object$exclrows))
-   }
-
-   if (length(object$exclcols) > 0) {
-      fprintf("Excluded coumns: %d\n", length(object$exclcols))
-   }
-
-   fprintf("\nNumber of components: %d\n", ncomp)
-   fprintf("Type of limits: %s\n", object$lim.type)
-   fprintf("Alpha: %s\n", object$alpha)
-   fprintf("Gamma: %s\n", object$gamma)
-   cat("\n")
-
-   sum_data <- do.call(rbind, lapply(res, as.matrix, ncomp = ncomp))
-   rownames(sum_data) <- capitalize(names(res))
-   cat("\n")
+plotExtreme.ddsimca <- function(obj, ...) {
+   return(plotExtremes.ddsimca(obj, ...))
 }
 
-
-#' Print method for SIMCA model object
-#'
-#' @description
-#' Prints information about the object structure
-#'
-#' @param x
-#' a SIMCA model (object of class \code{simca})
-#' @param ...
-#' other arguments
-#'
 #' @export
-print.ddsimca <- function(x, ...) {
-   cat("\nSIMCA one class model (class simca)\n")
+plotExtremes.ddsimca <- function(obj,
+   ncomp = obj$ncomp.selected,
+   limType = "classic",
+   col = mdaplot.getColors(2),
+   pch = c(1, 1),
+   legend.position = "topleft",
+   ...) {
 
-   cat("\nCall:\n")
-   print(x$call)
+   if (is.null(obj[["res"]]) || is.null(obj$res[["cal"]])) {
+      message("Calibration results not found (most probably this model is loaded from web-application).")
+      return(invisible(NULL))
+   }
 
-   cat("\nMajor fields:\n")
-   cat("$info - information about the model\n")
-   cat("$classname - name of the class\n")
-   cat("$ncomp - number of calculated components\n")
-   cat("$ncomp.selected - number of selected components\n")
-   cat("$loadings - matrix with loadings\n")
-   cat("$eigenvals - eigenvalues for components\n")
-   cat("$center - values for centering data\n")
-   cat("$scale - values for scaling data\n")
-   cat("$alpha - significance level for critical limits\n")
-   cat("$gamma - significance level for outlier limits\n")
-   cat("$Qlim - critical values and parameters for orthogonal distances\n")
-   cat("$T2lim - critical values and parameters for score distances\n")
-   cat("$cv - cross-validation parameters\n")
-   cat("$res - list with result objects ('cal', 'cv', 'test'\n")
+   p <- plotExtremes(obj$res[["cal"]], col = col[1], pch = pch[1], ncomp = ncomp, limType = limType, ...)
+
+   if (!is.null(obj$res[["pv"]])) {
+      stopifnot("Number of values for 'col' parameter should be 2." = length(col) == 2)
+      stopifnot("Number of values for 'pch' parameter should be 2." = length(pch) == 2)
+
+      pd <- plotExtremes(obj$res[["pv"]], limType = limType, ncomp = ncomp, show.plot = FALSE, ...)
+      mdaplot(pd, show.axes = FALSE, col = col[2], pch = pch[2], ...)
+      mdaplotg.showLegend(c("cal", "pv"), col = col, pch = pch, lty = NA, position = legend.position)
+   } else {
+      mdaplotg.showLegend("cal", col = col[1], pch = pch[1], lty = NA, position = legend.position)
+   }
 }
-
-
-
 
 #' Acceptance plot for DD-SIMCA model.
 #'
@@ -800,3 +894,78 @@ plotAcceptance.ddsimca <- function(obj, res = "cal", ...) {
 
    return(plotAcceptance(obj$res[[res]], res.name = res, ...))
 }
+
+
+#' @export
+plotDistances.ddsimca <- function(obj, res = "both",
+   ncomp = obj$ncomp.selected,
+   limType = "classic",
+   distance = "h",
+   pch = 1,
+   log = FALSE,
+   lim.lty = c(2, 3),
+   lim.col = c("darkgray", "darkgray"),
+   lim.lwd = c(1, 1),
+   ylim = NULL, xlim = NULL,
+   ...) {
+
+   if (is.null(obj[["res"]])) {
+      stop("Object with results not found (most probably this model is loaded from web-application).", call. = FALSE)
+   }
+
+   res <- match.arg(res, c(names(obj$res), "both", "diff"))
+
+   if (res == "both" || res == "diff") {
+      plot_data <- lapply(obj$res, plotDistances.ddsimcares, limType = limType, ncomp = ncomp,
+         distance = distance, log = log, show.plot = FALSE, ...)
+   } else {
+      plot_data <- list(plotDistances.ddsimcares(obj$res[[res]], limType = limType, ncomp = ncomp,
+         distance = distance, log = log, show.plot = FALSE, ...))
+      names(plot_data) <- res
+   }
+
+   if (distance != "f") {
+      return(invisible(mdaplotg(plot_data, type = "p", pch = pch, ylim = ylim, ...)))
+   }
+
+   if (res == "diff") {
+      x <- plot_data[[1]][, 1]
+      y <- matrix(abs(plot_data[[1]][, 2] - plot_data[[2]][, 2]), nrow = 1)
+      attr(y, "xaxis.values") <- x
+      attr(y, "xaxis.name") <- colnames(plot_data[[1]])[1]
+      attr(y, "yaxis.name") <- colnames(plot_data[[1]])[2]
+      attr(y, "name") <- attr(plot_data[[1]], "name")
+      rownames(y) <- "abs(cal - pv)"
+      colnames(y) <- rownames(plot_data[[2]])
+      return(invisible(mdaplotg(y, type = "h", ylab = colnames(plot_data[[1]])[2], ...)))
+   }
+
+   limType <- processLimType(limType)
+   res <- obj$res$cal$simca
+   v <- res$outcomes[[limType]]$values[[ncomp]]
+
+   yle <- v$fce / v$Nf
+   ylo <- v$fco / v$Nf
+
+   if (log == TRUE) {
+      yle <- log(1 + yle)
+      ylo <- log(1 + ylo)
+   }
+
+   if (is.null(ylim)) {
+      ymax <- max(vapply(plot_data, function(x) attr(x, "ylim")[2], 0))
+      ylim <- c(0, ymax * 1.2)
+   }
+
+   mdaplotg(plot_data, type = "p", pch = pch, ylim = ylim, ...)
+
+   if (yle > 0 && !is.null(lim.lty) && !is.na(lim.lty[1])) {
+      abline(h = yle, col = lim.col[1], lty = lim.lty[1], lwd = lim.lwd[1])
+   }
+
+   if (ylo > 0 && !is.null(lim.lty) && !is.na(lim.lty[2])) {
+      abline(h = ylo, col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
+   }
+
+}
+

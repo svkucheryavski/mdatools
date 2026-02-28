@@ -2,15 +2,15 @@
 # Tests for all bugs found in 2022 #
 ####################################
 
-# setup({
-#    pdf(file = tempfile("mdatools-test-simca-", fileext = ".pdf"))
-#    sink(tempfile("mdatools-test-test-simca-", fileext = ".txt"), append = FALSE, split = FALSE)
-# })
+setup({
+   pdf(file = "dump/mdatools-test-dsimca.pdf")
+   sink("dump/mdatools-test-test-simca-.txt", append = FALSE, split = FALSE)
+})
 
-# teardown({
-#    dev.off()
-#    sink()
-# })
+teardown({
+   dev.off()
+   sink()
+})
 
 compare_csv_files <- function(file1, file2, sep = ",", tolerance = 1e-3) {
   # Determine decimal separator based on field separator
@@ -148,6 +148,9 @@ src <- "https://mda.tools/ddsimca/"
 
 check_case <- function(m, Xta, cta, Xtf, ctf, Xtn, limType = "classic", caseNum = 1) {
 
+   print(paste0("Testing case ", caseNum))
+
+
    ra <- predict(m, Xta, cta)
    rf <- predict(m, Xtf, ctf)
    rn <- predict(m, Xtn)
@@ -181,6 +184,10 @@ check_case <- function(m, Xta, cta, Xtf, ctf, Xtn, limType = "classic", caseNum 
    m2 <- readJSON(paste0("./jsonfiles/", model.file))
    compareModels(m, m1)
    compareModels(m, m2)
+
+   par(mfcol = c(1, 1))
+   plot(0, type = "n", xlim = c(0, 1), ylim = c(0, 1))
+   text(0.5, 0.5, paste0("Case ", caseNum), cex = 3)
 
    par(mfcol = c(2, 3))
    plotAcceptance(rc)
@@ -219,10 +226,135 @@ check_case <- function(m, Xta, cta, Xtf, ctf, Xtn, limType = "classic", caseNum 
    plotAcceptance(ra)
    plotAcceptance(ra, log = TRUE, pch = 5, show = "strangers", res.name = "test alt")
    plotAcceptance(ra, log = TRUE, ncomp = 10, limType = "robust", pch = 5)
-
    plotAcceptance(rn)
    plotAcceptance(rn, ncomp = 5, res.name = "new")
    plotAcceptance(rn, show.labels = TRUE, show.excluded = TRUE, log = TRUE, pch = 5, show = "all")
+
+
+   par(mfcol = c(3, 2))
+   plotDistances(rc)
+   plotDistances(rc, distance = "q", log = TRUE, show.excluded = TRUE, show.labels = TRUE)
+   plotDistances(rc, distance = "f", ncomp = 5, show.labels = TRUE)
+
+   plotDistances(rf)
+   plotDistances(rf, distance = "q", log = TRUE, show.excluded = TRUE, show.labels = TRUE)
+   plotDistances(rf, distance = "f", log = TRUE, ncomp = 5, show.labels = TRUE)
+
+   par(mfcol = c(3, 2))
+   plotDistances(m)
+   plotDistances(m, distance = "q", log = TRUE, show.excluded = TRUE, show.labels = TRUE)
+   plotDistances(m, distance = "f", ncomp = 5, show.labels = TRUE)
+
+   plotDistances(m, res = "cal")
+   plotDistances(m, res = "pv", distance = "q", log = TRUE, show.excluded = TRUE, show.labels = TRUE)
+   plotDistances(m, res = "diff", col = "darkgray", distance = "f", ncomp = 5, show.labels = TRUE)
+
+   plotDistDoF(m)
+
+   # extremes plot
+   expect_error(plotExtreme(rn))
+   expect_error(plotExtreme(ra))
+   expect_error(plotExtreme(m, col = "blue"))
+   expect_error(plotExtreme(m, pch = 1))
+
+   par(mfrow = c(2, 3))
+   plotExtremes(rc)
+   plotExtremes(rf)
+   plotExtremes(rf, ncomp = 5, limType = "robust", col = "red", pch = 2, cex = 0.8)
+
+   plotExtremes(m)
+   plotExtremes(m, ncomp = 5, limType = "robust")
+   plotExtremes(m, col = c("green", "pink"), pch = c(21, 22), bg = "yellow", cex = 0.8)
+
+   # sensitivity and other FomS
+   expect_error(plotSensitivity(rn))
+   expect_error(plotSensitivity(ra))
+
+   par(mfrow = c(2, 3))
+   plotSensitivity(rc)
+   plotSensitivity(rc, ylim = c(0.8, 1.1), show.ci = TRUE)
+   plotSensitivity(rc, ylim = c(0.8, 1.1), limType = "robust", col = "red", pch = 1)
+   plotSensitivity(rf)
+   plotSensitivity(rf, ylim = c(0.8, 1.1), show.ci = TRUE)
+   plotSensitivity(rf, ylim = c(0.8, 1.1), limType = "robust", col = "red", pch = 1)
+
+   par(mfrow = c(2, 3))
+   plotSensitivity(m)
+   plotSensitivity(m, ylim = c(0.8, 1.1), show.ci = TRUE, ci.col = "#e0e0e0", ci.lty = c(3, 1, 3))
+   plotSensitivity(m, ylim = c(0.7, 1.1), limType = "robust", legend.position = "topleft", col = c("green", "orange"))
+
+   plotLoadings(m)
+   plotScores(m, pch = 1)
+
+   par(mfrow = c(2, 4))
+   plotFoM(rf, "sens")
+   plotFoM(rf, "spec")
+   plotFoM(rf, "eff")
+   plotFoM(rf, "sel", col = "red", pch = 3, ylim = c(0.5, 1.1))
+
+   plotFoM(rc, "sens")
+   plotFoM(ra, "spec")
+   plotFoM(ra, "sel")
+   plotFoM(rf, "acc")
+
+   plotFoMs(rc)
+   plotFoMs(ra)
+   plotFoMs(rf, show.labels = TRUE, labels = "values", type = "h")
+   plotFoMs(rf, c("sens", "spec", "eff"), legend.position = "top")
+
+
+   # selectivity area
+
+   expect_error(plotSelectivityArea(rc))
+   expect_error(plotSelectivityArea(rn))
+
+   par(mfrow = c(2, 2))
+   plotSelectivityArea(rf)
+   plotSelectivityArea(rf, ncomp = 5, limType = "robust")
+   plotSelectivityArea(ra, ncomp = 1, col = "blue")
+   plotSelectivityArea(ra, ncomp = 5, col = "blue")
+
+   # aliens plot
+   expect_error(plotAliens(rn))
+   expect_error(plotAliens(rc))
+
+   par(mfrow = c(2, 3))
+   plotAliens(ra)
+   plotAliens(ra, ncomp = 5)
+   plotAliens(ra, ncomp = 5, limType = "robust", col = "red", pch = 2, cex = 0.8)
+   plotAliens(rf)
+   plotAliens(rf, ncomp = 5)
+   plotAliens(rf, ncomp = 5, limType = "robust", col = "red", pch = 2, cex = 0.8)
+
+   # plot summary
+   plot(m)
+   plot(rc)
+   plot(rf)
+   plot(ra)
+   plot(rn)
+
+   # print methods
+   summary(m)
+   summary(rc)
+   summary(rf, limType = "robust", ncomp = 5)
+   summary(ra)
+   summary(rn)
+
+   print(m)
+   print(rc)
+   print(rf)
+   print(rn)
+   print(ra)
+
+   print(as.matrix(rc))
+   print(as.matrix(rf))
+   print(as.matrix(rn))
+   print(as.matrix(ra))
+
+   print(as.data.frame(rc))
+   print(as.data.frame(rf))
+   print(as.data.frame(rn))
+   print(as.data.frame(ra))
 }
 
 test_that("case1: no prep, no outliers, no exclvars, A = 6, default settings", {
