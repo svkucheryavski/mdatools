@@ -31,6 +31,8 @@
 #' a short text with model description.
 #' @param prep
 #' optional list with preprocessing methods created using `\code{\link{prep}}` function.
+#' @param do.round
+#' logical, round or not DoF for distances.
 #'
 #' @details
 #'
@@ -228,7 +230,8 @@
 #' @export
 pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale = FALSE,
    exclrows = NULL, exclcols = NULL, x.test = NULL, method = "svd", rand = NULL,
-   lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "", prep = NULL) {
+   lim.type = "ddmoments", alpha = 0.05, gamma = 0.01, info = "", prep = NULL,
+   do.round = FALSE) {
 
 
    method <- match.arg(method, c("svd", "nipals"))
@@ -259,8 +262,8 @@ pca <- function(x, ncomp = min(nrow(x) - 1, ncol(x), 20), center = TRUE, scale =
 
    # compute critical limit parameters
    model$limParams <- list(
-      "Q" = ldecomp.getLimParams(model$res[["cal"]]$Q),
-      "T2" = ldecomp.getLimParams(model$res[["cal"]]$T2)
+      "Q" = ldecomp.getLimParams(model$res[["cal"]]$Q, do.round = do.round),
+      "T2" = ldecomp.getLimParams(model$res[["cal"]]$T2, do.round = do.round)
    )
 
    # apply model to test set if provided
@@ -615,20 +618,20 @@ print.pca <- function(x, ...) {
    print(x$call)
 
    cat("\nMajor model fields:\n")
-   cat("$loadings - matrix with loadings\n")
-   cat("$eigenvals - eigenvalues for components\n")
-   cat("$ncomp - number of calculated components\n")
-   cat("$ncomp.selected - number of selected components\n")
-   cat("$center - values for centering data\n")
-   cat("$scale - values for scaling data\n")
-   cat("$alpha - significance level for critical limits\n")
-   cat("$gamma - significance level for outlier limits\n")
-   cat("$Qlim - critical values and parameters for orthogonal distances\n")
-   cat("$T2lim - critical values and parameters for score distances\n")
+   cat(" $loadings - matrix with loadings\n")
+   cat(" $eigenvals - eigenvalues for components\n")
+   cat(" $ncomp - number of calculated components\n")
+   cat(" $ncomp.selected - number of selected components\n")
+   cat(" $center - values for centering data\n")
+   cat(" $scale - values for scaling data\n")
+   cat(" $alpha - significance level for critical limits\n")
+   cat(" $gamma - significance level for outlier limits\n")
+   cat(" $limParams - parameters for distribution of distances\n")
+
    if (!is.null(x$res))
-      cat("$res - list with model results (calibration, test)\n")
+      cat(" $res - list with model results (calibration, test)\n")
    if (!is.null(x$prep))
-      cat("$prep - preprocessing model\n")
+      cat(" $prep - preprocessing model\n")
 }
 
 #' Summary method for PCA model object
@@ -1971,6 +1974,12 @@ plotDistDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj
 }
 
 
+#' @export
+plotExtreme.pca <- function(obj, ...) {
+   return(plotExtremes.pca(obj, ...))
+}
+
+
 #' Extreme plot
 #'
 #' @description
@@ -2007,7 +2016,7 @@ plotDistDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj
 #' other arguments
 #'
 #' @export
-plotExtreme.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.selected,
+plotExtremes.pca <- function(obj, res = obj$res[["cal"]], comp = obj$ncomp.selected,
    main = "Extreme plot", xlab = "Expected", ylab = "Observed", pch = rep(21, length(comp)),
    bg = mdaplot.getColors(length(comp)), col = rep("white", length(comp)),
    lwd = ifelse(pch %in% 21:25, 0.25, 1), cex = rep(1.2, length(comp)),
