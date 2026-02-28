@@ -159,9 +159,10 @@ ddsimca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x) - 1, 20), cen
    # do Procrustes cross-validation if needed
    if (!is.null(pcv)) {
 
-      # remove excluded rows
+      # remove excluded rows (capture processed indices before purging clears them)
+      exclrows_idx <- attr(x, "exclrows")
       x <- mda.purgeRows(x)
-      c.ref.pv <- if (!is.null(exclrows)) c.ref[-exclrows] else c.ref
+      c.ref.pv <- if (length(exclrows_idx) > 0) c.ref[-exclrows_idx] else c.ref
 
       # if preprocessing is available apply it
       if (!is.null(model$prep)) x <- prep.apply(model$prep, x)
@@ -625,6 +626,8 @@ processStrangers <- function(res, indStrangers) {
    res$TN <- sum(indStrangers & !res$decisions)
    res$FP <- sum(indStrangers & res$decisions)
 
+   # not enough strangers to fit non-central chi-square — skip beta computation
+   if (sum(indStrangers) < 2) return(res)
 
    # Step 1. Sort all distances
    # make a copy of strangers indices as we are going to change it
@@ -657,6 +660,9 @@ processStrangers <- function(res, indStrangers) {
          I <- I - 1
       }
 
+      # not enough strangers left to estimate distribution parameters
+      if (I < 2) break
+
       # compute parameters for moments squared equation and
       # its discriminant
       m <- mean(fp)
@@ -665,6 +671,9 @@ processStrangers <- function(res, indStrangers) {
       Disc <- 4 - 2 * k * M1
       n <- n + 1
    }
+
+   # if loop exhausted strangers or all distances are identical (M1 = 0), skip beta
+   if (I < 2 || M1 < .Machine$double.eps) return(res)
 
    # Step 3. Calculate  x  by Eq. (18)
    x <- (2 + sqrt(Disc)) / M1
