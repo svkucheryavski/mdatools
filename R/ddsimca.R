@@ -15,7 +15,7 @@
 #' @param scale
 #' logical, do standardization of data or not.
 #' @param pcv
-#' Procrurstes cross-validation settings (see details).
+#' Procrustes cross-validation settings (see details).
 #' @param alpha
 #' significance level for making the predictions (can be also adjusted when model is applied to data).
 #' @param gamma
@@ -112,7 +112,7 @@
 #' model = ddsimca(se, "setosa", pcv = list("ven", 10))
 #' model = selectCompNum(model, 1)
 #'
-#' # show infromation, summary and plot overview
+#' # show information, summary and plot overview
 #' print(model)
 #' summary(model)
 #' plot(model)
@@ -126,11 +126,11 @@ ddsimca <- function(x, classname, ncomp = min(nrow(x) - 1, ncol(x) - 1, 20), cen
    exclrows = NULL, exclcols = NULL, prep = NULL, do.round = TRUE, ...) {
 
    if (!is.character(classname)) {
-      stop("Argument 'classname' must be a text.")
+      stop("Argument 'classname' must be a text.", call. = FALSE)
    }
 
    if (nchar(classname) > 20) {
-      stop("Argument 'classname' must have up to 20 symbols.")
+      stop("Argument 'classname' must have up to 20 symbols.", call. = FALSE)
    }
 
    # check calibration data and process excluded rows and columns
@@ -272,8 +272,8 @@ predict.ddsimca <- function(object, x, c.ref = NULL, alpha = object$alpha, gamma
 #'
 #' @export
 setParams.ddsimca <- function(m, alpha = m$alpha, gamma = m$gamma) {
-   m$alpha = alpha
-   m$gamma = gamma
+   m$alpha <- alpha
+   m$gamma <- gamma
 
    nobj <- m$nrows
    lp <- m$limParams
@@ -290,7 +290,7 @@ setParams.ddsimca <- function(m, alpha = m$alpha, gamma = m$gamma) {
          "robust" = classify(r, indices, numbers, lp$Q[["robust"]],  lp$T2[["robust"]],  nobj, alpha, gamma, classname, c.ref)
       )
 
-      m$res$cal = ddsimcares(r, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref)
+      m$res$cal <- ddsimcares(r, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref)
       m$calres <- m$res$cal
    }
 
@@ -306,7 +306,7 @@ setParams.ddsimca <- function(m, alpha = m$alpha, gamma = m$gamma) {
          "robust" = classify(r, indices, numbers, lp$Q[["robust"]],  lp$T2[["robust"]],  nobj, alpha, gamma, classname, c.ref)
       )
 
-      m$res$pv = ddsimcares(r, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref)
+      m$res$pv <- ddsimcares(r, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref)
       m$pvres <- m$res$pv
    }
 
@@ -374,7 +374,7 @@ summary.ddsimca <- function(object, ncomp = object$ncomp.selected, res = object$
    }
 
    if (length(object$exclcols) > 0) {
-      fprintf("Excluded coumns: %d\n", length(object$exclcols))
+      fprintf("Excluded columns: %d\n", length(object$exclcols))
    }
 
    fprintf("Number of components: %d\n", object$ncomp)
@@ -395,7 +395,7 @@ summary.ddsimca <- function(object, ncomp = object$ncomp.selected, res = object$
    print(sum_data, 4)
    cat("\n")
 
-   return(invisible(NULL))
+   return(invisible(object))
 }
 
 
@@ -427,7 +427,7 @@ print.ddsimca <- function(x, ...) {
    cat(" $scale - values for scaling data\n")
    cat(" $limParams - parameters for distribution of distances\n")
 
-   cat("\nFields related to 'ddsimcs' class:\n")
+   cat("\nFields related to 'ddsimca' class:\n")
    cat(" $alpha - significance level for critical limits\n")
    cat(" $gamma - significance level for outlier limits\n")
    cat(" $classname - name of the target class\n")
@@ -438,7 +438,7 @@ print.ddsimca <- function(x, ...) {
    if (!is.null(x$prep))
       cat(" $prep - preprocessing model\n")
 
-   return(invisible(NULL))
+   return(invisible(x))
 }
 
 
@@ -455,7 +455,7 @@ print.ddsimca <- function(x, ...) {
 #' @param numbers
 #' list with numbers of members, strangers, unknown and excluded samples.
 #' @param qp
-#' distirbution parameters for q-distances.
+#' distribution parameters for q-distances.
 #' @param hp
 #' distribution parameters for h-distances.
 #' @param nobj.cal
@@ -525,7 +525,7 @@ classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, g
       fcoa <- fCritO[a]
       names(fa) <- NULL
 
-      res = list(
+      res <- list(
          f = fa,
          h = ha / h0[a],
          q = qa / q0[a],
@@ -578,7 +578,7 @@ classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, g
       classres[[a]] <- res
    }
 
-   return (list(values = classres, sns = sns, spc = spc, sel = sel, eff = eff, acc = acc, nin = nin, nout = nout, TP = TP, TN = TN, FP = FP, FN = FN))
+   return(list(values = classres, sns = sns, spc = spc, sel = sel, eff = eff, acc = acc, nin = nin, nout = nout, TP = TP, TN = TN, FP = FP, FN = FN))
 }
 
 #' Computes classification outcomes for target class members.
@@ -591,8 +591,7 @@ classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, g
 #' @return
 #' the \code{res} list where roles vector is filled for class members, plus values for TP and FN.
 processMembers <- function(res, indMembers) {
-   if (is.null(indMembers) || sum(indMembers) < 1) return (res)
-
+   if (is.null(indMembers) || sum(indMembers) < 1) return(res)
 
    regular <- indMembers & res$f < res$fce
    outlier <- indMembers & res$f > res$fco
@@ -602,8 +601,8 @@ processMembers <- function(res, indMembers) {
    if (any(extreme)) res$roles[extreme] <- "extreme"
    if (any(outlier)) res$roles[outlier] <- "outlier"
 
-   res$TP = sum(regular)
-   res$FN = sum(outlier) + sum(extreme)
+   res$TP <- sum(regular)
+   res$FN <- sum(outlier) + sum(extreme)
 
    return(res)
 }
@@ -620,7 +619,7 @@ processMembers <- function(res, indMembers) {
 #' well as statistics for computing Type II error and related things (beta, s, f0, hz, Mz, Sz, k, m).
 processStrangers <- function(res, indStrangers) {
 
-   if (is.null(indStrangers) || sum(indStrangers) < 1) return (res)
+   if (is.null(indStrangers) || sum(indStrangers) < 1) return(res)
 
    res$roles[indStrangers] <- "alien"
    res$TN <- sum(indStrangers & !res$decisions)
@@ -648,7 +647,7 @@ processStrangers <- function(res, indStrangers) {
 
    while (Disc < 0) {
       if (n > 0) {
-         # sample with largest f does not fit, so we change its rolw to "external"
+         # sample with largest f does not fit, so we change its role to "external"
          # and amend the number of aliens and externals
          res$roles[indv[I]] <- "external"
          # then we remove this sample from the temporary vector and
@@ -736,15 +735,23 @@ ddsimca.readJSON <- function(fileName) {
    fileConn <- file(fileName)
    str <- readLines(fileConn, warn = FALSE)
    close(fileConn)
-   return (ddsimca.fromjson(str))
+   return(ddsimca.fromjson(str))
 }
 
 #' Converts object with DD-SIMCA model to JSON string compatible with web-application.
 #'
 #' @param obj
 #' Object with DD-SIMCA model (from \code{\link{ddsimca}}).
+#' @param limType
+#' type of critical limits to use ('classic' or 'robust').
+#' @param alpha
+#' significance level for decision boundary.
+#' @param gamma
+#' significance level for outlier detection boundary.
+#' @param ncomp
+#' number of selected components.
 #'
-#' @return stringigied JSON
+#' @return stringified JSON
 #'
 #' @export
 asjson.ddsimca <- function(obj, limType = "classic", alpha = obj$alpha, gamma = obj$gamma, ncomp = obj$ncomp.selected) {
@@ -763,7 +770,7 @@ asjson.ddsimca <- function(obj, limType = "classic", alpha = obj$alpha, gamma = 
       oCrit[i] <- v$fco
    }
 
-   if (limType == "moments") limType = "classic"
+   if (limType == "moments") limType <- "classic"
    m <- paste0(
       "{'pca':", asjson.pca(obj), ", 'simca': {",
          "'ncomp':", ncomp, ",",
@@ -782,13 +789,13 @@ asjson.ddsimca <- function(obj, limType = "classic", alpha = obj$alpha, gamma = 
 }
 
 
-#' Saves PCA model as JSON file compatible with web-application (https://mda.tools/pca).
+#' Saves DD-SIMCA model as JSON file compatible with web-application (https://mda.tools/ddsimca).
 #'
 #' @description
 #' You can load created JSON file to web-app and use it for prediction.
 #'
 #' @param obj
-#' Object with PCA model (from \code{\link{pca}}).
+#' Object with DD-SIMCA model (from \code{\link{ddsimca}}).
 #' @param fileName
 #' Name or full path to JSON file to be created.
 #'
@@ -878,6 +885,8 @@ plotExtremes.ddsimca <- function(obj,
 #' name of the results (either 'cal' or 'pv')
 #' @param ...
 #' any parameters suitable for \code{\link{plotAcceptance.ddsimcares}}.
+#'
+#' @export
 plotAcceptance.ddsimca <- function(obj, res = "cal", ...) {
 
    res <- match.arg(res, c("cal", "pv"))

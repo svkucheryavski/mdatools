@@ -53,7 +53,7 @@ mdaplot(
 
 \item{ps}{`plotseries` object, if NULL will be created based on the provided data values}
 
-\item{type}{type of the plot ("p", "d", "l", "b", "h", "e").}
+\item{type}{type of the plot ("p", "d", "l", "b", "o", "h", "e").}
 
 \item{pch}{a character for markers (same as \code{plot} parameter).}
 

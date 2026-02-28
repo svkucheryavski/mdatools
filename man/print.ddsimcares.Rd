@@ -2,12 +2,12 @@
 % Please edit documentation in R/ddsimcares.R
 \name{print.ddsimcares}
 \alias{print.ddsimcares}
-\title{Print method for SIMCA results object}
+\title{Print method for DD-SIMCA results}
 \usage{
 \method{print}{ddsimcares}(x, ...)
 }
 \arguments{
-\item{x}{SIMCA results (object of class \code{simcares})}
+\item{x}{DD-SIMCA results (object of class \code{ddsimcares})}
 
 \item{...}{other arguments}
 }

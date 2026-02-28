@@ -16,6 +16,7 @@ ddsimca(
   exclrows = NULL,
   exclcols = NULL,
   prep = NULL,
+  do.round = TRUE,
   ...
 )
 }
@@ -30,7 +31,7 @@ ddsimca(
 
 \item{scale}{logical, do standardization of data or not.}
 
-\item{pcv}{Procrurstes cross-validation settings (see details).}
+\item{pcv}{Procrustes cross-validation settings (see details).}
 
 \item{alpha}{significance level for making the predictions (can be also adjusted when model is applied to data).}
 
@@ -41,6 +42,8 @@ ddsimca(
 \item{exclcols}{columns to be excluded from calculations (numbers, names or vector with logical values)}
 
 \item{prep}{optional list with preprocessing methods created using `\code{\link{prep}}` function.}
+
+\item{do.round}{logical, round or not DoF for distances.}
 
 \item{...}{any other parameters suitable for \code{\link{pca}} method.}
 }
@@ -93,7 +96,7 @@ se = data[1:20, ]
 model = ddsimca(se, "setosa", pcv = list("ven", 10))
 model = selectCompNum(model, 1)
 
-# show infromation, summary and plot overview
+# show information, summary and plot overview
 print(model)
 summary(model)
 plot(model)

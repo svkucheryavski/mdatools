@@ -14,9 +14,17 @@
 }
 \arguments{
 \item{obj}{Object with DD-SIMCA model (from \code{\link{ddsimca}}).}
+
+\item{limType}{type of critical limits to use ('classic' or 'robust').}
+
+\item{alpha}{significance level for decision boundary.}
+
+\item{gamma}{significance level for outlier detection boundary.}
+
+\item{ncomp}{number of selected components.}
 }
 \value{
-stringigied JSON
+stringified JSON
 }
 \description{
 Converts object with DD-SIMCA model to JSON string compatible with web-application.

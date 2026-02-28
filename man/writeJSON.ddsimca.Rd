@@ -2,12 +2,12 @@
 % Please edit documentation in R/ddsimca.R
 \name{writeJSON.ddsimca}
 \alias{writeJSON.ddsimca}
-\title{Saves PCA model as JSON file compatible with web-application (https://mda.tools/pca).}
+\title{Saves DD-SIMCA model as JSON file compatible with web-application (https://mda.tools/ddsimca).}
 \usage{
 \method{writeJSON}{ddsimca}(obj, fileName, ...)
 }
 \arguments{
-\item{obj}{Object with PCA model (from \code{\link{pca}}).}
+\item{obj}{Object with DD-SIMCA model (from \code{\link{ddsimca}}).}
 
 \item{fileName}{Name or full path to JSON file to be created.}
 }

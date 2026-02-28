@@ -64,10 +64,10 @@
 #' class = iris[, 5]
 #'
 #' # take every second of first 50 objects (setosa) as calibration set
-#' se = data[1:2:50, ]
+#' se = data[seq(1, 50, by = 2), ]
 #'
 #' # take the rest as test set
-#' ind.test = c(2:2:50, 51:150)
+#' ind.test = c(seq(2, 50, by = 2), 51:150)
 #' x.test = data[ind.test, ]
 #' c.test = class[ind.test]
 #'
@@ -83,14 +83,14 @@
 #' summary(r)
 #'
 #' # show plots
-#' par(mdrow = c(2, 2))
+#' par(mfrow = c(2, 2))
 #' plotAcceptance(r)
 #' plotFoMs(r)
 #' plotExtremes(r)
 #' plotSelectivity(r)
 #'
 #' @export
-ddsimcares <- function(pcares, outcomes, classname = classname, indices, numbers, alpha, c.ref = NULL) {
+ddsimcares <- function(pcares, outcomes, classname, indices, numbers, alpha, c.ref = NULL) {
    res <- pcares
    res[["simca"]] <- list(
       alpha = alpha,
@@ -109,13 +109,13 @@ ddsimcares <- function(pcares, outcomes, classname = classname, indices, numbers
 #'
 #' @description
 #' The data frame contains object label, class label (if provided), role, decision, as well
-#' ass valued for distances (h/h0, q/q0, f) for every object from dataset used to
+#' as values for distances (h/h0, q/q0, f) for every object from dataset used to
 #' create the results object.
 #'
 #' @param x
-#' classification results (object of class \code{ddsimcamres}).
+#' classification results (object of class \code{ddsimcares}).
 #' @param ncomp
-#' model complexity (number of components) to compute the classiciation results for.
+#' model complexity (number of components) to compute the classification results for.
 #' @param limType
 #' limit type to use ('classic' or 'robust')
 #' @param ...
@@ -164,11 +164,11 @@ as.data.frame.ddsimcares <- function(x, ncomp = x$ncomp.selected, limType = "cla
 #' are provided) main figures of merits (TP, FP, TN, FN, sensitivity, specificity,
 #' efficiency and selectivity).
 #'
-#' If dataset uuse to create the results contained only target class members or only
+#' If dataset used to create the results contained only target class members or only
 #' objects from alternative classes, the FoMs will be reduced accordingly.
 #'
 #' @param x
-#' classification results (object of class \code{ddsimcamres}).
+#' classification results (object of class \code{ddsimcares}).
 #' @param limType
 #' limit type to use ('classic' or 'robust')
 #' @param ...
@@ -379,7 +379,6 @@ writeCSV.ddsimcares <- function(res, fileName, name = "cal", sep = ",", dataFile
    out <- c(out, ' ')
    out <- c(out, paste1('', sep, 'object', sep, 'class', sep, 'role', sep, 'decision', sep, 'h/h0', sep, 'q/q0', sep, 'f'))
 
-   odf <- as.data.frame.ddsimcares(res, limType = limType)
    decision <- ifelse(va$decisions, "in", "out")
 
    for (i in seq_len(nAll)) {
@@ -390,19 +389,19 @@ writeCSV.ddsimcares <- function(res, fileName, name = "cal", sep = ",", dataFile
       if (nOut > 0 && i %in% outliers) {
          out <- c(out, paste1('', sep, rowlabels[i], sep, '-', sep, 'removed', sep, '-', sep, '-', sep, '-', sep, '-'))
       } else {
-         out <- c(out, paste1('', sep, rowlabels[i], sep, classes[i], sep, va$roles[i], sep, decision[i], sep, va$h[i], sep, va$q[i], sep, va$f[i]))
+         out <- c(out, paste1('', sep, rowlabels[i], sep, groupname, sep, va$roles[i], sep, decision[i], sep, va$h[i], sep, va$q[i], sep, va$f[i]))
       }
    }
 
 
-   # if decimal separator is not ".", replace all "." with the corect separator
+   # if decimal separator is not ".", replace all "." with the correct separator
    if (sep == ';') {
-      out = gsub("\\.", ",", out);
+      out <- gsub("\\.", ",", out)
    }
 
    # add header
    out <- c(paste1('Data filename:', sep, dataFile, sep, '', filler), out)
-   out <- c (paste1(paste1('DD-SIMCA results (',  name, ')'), sep, src, sep, '', filler), ' ', out);
+   out <- c(paste1(paste1('DD-SIMCA results (',  name, ')'), sep, src, sep, '', filler), ' ', out)
 
    writeLines(out, fileName)
 }
@@ -461,7 +460,7 @@ plotSelectivityArea.ddsimcares <- function(obj,
    beta <- pnorm(((z * norm1)^v$hz - v$Mz)*norm2)
    area <- sum(beta) * da
    pd <- matrix(c(0, 1, 0, 1), ncol = 2, nrow = 2)
-   attr(pd, "name") <- sprintf("Selecitivity (A = %d, AUC = %.4f)", ncomp, 1 - area)
+   attr(pd, "name") <- sprintf("Selectivity (A = %d, AUC = %.4f)", ncomp, 1 - area)
 
    mdaplot(pd, type = "p", cex = 0, xlab = xlab, ylab = ylab, ...)
    lines(beta, 1 - alpha, col = col)
@@ -559,7 +558,7 @@ plotFoM.ddsimcares <- function(obj, fom = "sens", limType = "classic", type = "b
 }
 
 
-#' Figures of merit plot (multiplt FoMs).
+#' Figures of merit plot (multiple FoMs).
 #'
 #' @param obj
 #' DD-SIMCA results (object of class \code{ddsimcares})
@@ -713,11 +712,7 @@ plotExtremes.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "
    }
 
    # show axes, grid and diagonal
-
-   if (is.null(xlab))
-   if (is.null(ylab)) ylab <- "Number of extremes (observed)"
-
-   plot(0, type = "n", xlim = c(0, nobj), ylim = c(0, nobj), main = main, xlab =  xlab, ylab = ylab)
+   plot(0, type = "n", xlim = c(0, nobj), ylim = c(0, nobj), main = main, xlab = xlab, ylab = ylab)
    grid()
    lines(c(0, expected), c(0, expected), type = "l", col = ellipse.col)
 
@@ -734,6 +729,8 @@ plotExtremes.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "
 
 
 
+#' Aliens plot for DD-SIMCA results.
+#'
 #' @param obj
 #' DD-SIMCA results (object of class \code{ddsimcares})
 #' @param ncomp
@@ -783,17 +780,11 @@ plotAliens.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "cl
    }
 
    # show axes, grid and diagonal
-
-   if (is.null(xlab))
-   if (is.null(ylab)) ylab <- "Number of extremes (observed)"
-
-   plot(0, type = "n", xlim = c(0, nobj), ylim = c(0, nobj), main = main, xlab =  xlab, ylab = ylab)
+   plot(0, type = "n", xlim = c(0, nobj), ylim = c(0, nobj), main = main, xlab = xlab, ylab = ylab)
    grid()
    lines(c(0, expected), c(0, expected), type = "l", col = ellipse.col)
 
    # compute and show the tolerance ellipse
-   i <- seq_len(nobj)
-   D <- 2 * sqrt(i * (1 - beta))
    Nm <- qbinom(0.025, nobj, beta)
    Np <- qbinom(0.975, nobj, beta)
    segments(expected, Nm, expected, Np, col = ellipse.col)
@@ -960,7 +951,7 @@ plotAcceptance.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType =
    # re-assign values for color group categories, so they include the number of
    # objects in each group
    if (!is.null(groups)) {
-      sums <- sapply(levels, function(x) sum(groups == x))
+      sums <- vapply(levels, function(x) sum(groups == x), 0)
       cgroup <- factor(paste0(groups, ": ", sums[groups], ""), levels = paste0(names(sums), ": ", sums, ""))
    } else {
       cgroup <- NULL
@@ -973,7 +964,7 @@ plotAcceptance.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType =
    if (length(colmap) == 1) {
       p <- mdaplot(pd, ylim = ylim, xlim = xlim, pch = pch, ...)
    } else {
-      p <- mdaplot(pd, ylim = ylim, xlim = xlim, colmap = colmap, pch = pch, cgroup = cgroup, lab.cex = lab.cex, lab.col = lab.col,...)
+      p <- mdaplot(pd, ylim = ylim, xlim = xlim, colmap = colmap, pch = pch, cgroup = cgroup, lab.cex = lab.cex, lab.col = lab.col, ...)
    }
 
    # show the critical limits
@@ -1050,7 +1041,7 @@ plotDistances.ddsimcares <- function(obj, ncomp = obj$ncomp.selected,
    colmap <- "default"
 
    if (!is.null(groups) && length(levels) > 1) {
-      sums <- sapply(levels, function(x) sum(groups == x))
+      sums <- vapply(levels, function(x) sum(groups == x), 0)
       cgroup <- factor(paste0(groups, " (", sums[groups], ")"), levels = paste0(names(sums), " (", sums, ")"))
    } else {
       cgroup <- NULL
@@ -1160,7 +1151,7 @@ summary.ddsimcares <- function(object, ncomp = object$ncomp.selected, limType = 
    fprintf("Number of objects: %d\n", nrow(object$scores))
    fprintf(" - target class members: %d\n", object$simca$numbers$members)
    fprintf(" - from non-target classes: %d\n", object$simca$numbers$strangers)
-   fprintf(" - from unknown classses: %d\n", object$simca$numbers$unknown)
+   fprintf(" - from unknown classes: %d\n", object$simca$numbers$unknown)
 
 
    cat("\n")
@@ -1168,7 +1159,10 @@ summary.ddsimcares <- function(object, ncomp = object$ncomp.selected, limType = 
    stat <- as.matrix.ddsimcares(object, limType = limType)
    rownames(stat)[ncomp] <- paste0(rownames(stat)[ncomp], " (s)")
    print(stat, 4)
-   cat("\n")}
+   cat("\n")
+
+   return(invisible(object))
+}
 
 
 #' Plot method for DD-SIMCA results.
@@ -1195,14 +1189,14 @@ plot.ddsimcares <- function(obj, ...) {
 #' Prints information about the object structure
 #'
 #' @param x
-#' SIMCA results (object of class \code{simcares})
+#' DD-SIMCA results (object of class \code{ddsimcares})
 #' @param ...
 #' other arguments
 #'
 #' @export
 print.ddsimcares <- function(x, ...) {
 
-   cat("Result for DD-SIMCA one-class classification (class simcares)\n\n")
+   cat("Result for DD-SIMCA one-class classification (class ddsimcares)\n\n")
 
    cat("\nFields inherited from 'pcares'/'ldecomp' classes:\n")
    cat(" $scores - matrix with score values\n")
@@ -1221,4 +1215,6 @@ print.ddsimcares <- function(x, ...) {
    cat(" $simca$c.ref - vector with reference class labels (if provided).\n")
 
    cat("\n")
+
+   return(invisible(x))
 }

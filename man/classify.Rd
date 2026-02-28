@@ -24,7 +24,7 @@ classify(
 
 \item{numbers}{list with numbers of members, strangers, unknown and excluded samples.}
 
-\item{qp}{distirbution parameters for q-distances.}
+\item{qp}{distribution parameters for q-distances.}
 
 \item{hp}{distribution parameters for h-distances.}
 

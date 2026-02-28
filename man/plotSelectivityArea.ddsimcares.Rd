@@ -9,6 +9,8 @@
   ncomp = obj$ncomp.selected,
   limType = "classic",
   col = "#2679b2",
+  xlab = bquote("1 - selectivity, " ~ beta),
+  ylab = bquote("Sensitivity, 1 - " ~ alpha),
   ...
 )
 }

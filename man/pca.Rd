@@ -18,7 +18,8 @@ pca(
   alpha = 0.05,
   gamma = 0.01,
   info = "",
-  prep = NULL
+  prep = NULL,
+  do.round = FALSE
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ pca(
 \item{info}{a short text with model description.}
 
 \item{prep}{optional list with preprocessing methods created using `\code{\link{prep}}` function.}
+
+\item{do.round}{logical, round or not DoF for distances.}
 }
 \value{
 Returns an object of \code{pca} class with following fields:

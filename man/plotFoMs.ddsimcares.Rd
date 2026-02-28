@@ -2,7 +2,7 @@
 % Please edit documentation in R/ddsimcares.R
 \name{plotFoMs.ddsimcares}
 \alias{plotFoMs.ddsimcares}
-\title{Figures of merit plot (multiplt FoMs).}
+\title{Figures of merit plot (multiple FoMs).}
 \usage{
 \method{plotFoMs}{ddsimcares}(
   obj,
@@ -41,5 +41,5 @@ details in \code{\link{mdaplotg}} method desciption.}
 \item{show.plot}{logical, if FALSE returns only values and does not show the plot.}
 }
 \description{
-Figures of merit plot (multiplt FoMs).
+Figures of merit plot (multiple FoMs).
 }

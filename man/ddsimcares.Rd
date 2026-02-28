@@ -4,15 +4,7 @@
 \alias{ddsimcares}
 \title{Results of DD-SIMCA one-class classification}
 \usage{
-ddsimcares(
-  pcares,
-  outcomes,
-  classname = classname,
-  indices,
-  numbers,
-  alpha,
-  c.ref = NULL
-)
+ddsimcares(pcares, outcomes, classname, indices, numbers, alpha, c.ref = NULL)
 }
 \arguments{
 \item{pcares}{results of PCA decomposition of data (class \code{pcares}).}
@@ -57,10 +49,10 @@ data = iris[, 1:4]
 class = iris[, 5]
 
 # take every second of first 50 objects (setosa) as calibration set
-se = data[1:2:50, ]
+se = data[seq(1, 50, by = 2), ]
 
 # take the rest as test set
-ind.test = c(2:2:50, 51:150)
+ind.test = c(seq(2, 50, by = 2), 51:150)
 x.test = data[ind.test, ]
 c.test = class[ind.test]
 
@@ -76,7 +68,7 @@ print(r)
 summary(r)
 
 # show plots
-par(mdrow = c(2, 2))
+par(mfrow = c(2, 2))
 plotAcceptance(r)
 plotFoMs(r)
 plotExtremes(r)

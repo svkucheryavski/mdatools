@@ -7,9 +7,9 @@
 \method{as.data.frame}{ddsimcares}(x, ncomp = x$ncomp.selected, limType = "classic", ...)
 }
 \arguments{
-\item{x}{classification results (object of class \code{ddsimcamres}).}
+\item{x}{classification results (object of class \code{ddsimcares}).}
 
-\item{ncomp}{model complexity (number of components) to compute the classiciation results for.}
+\item{ncomp}{model complexity (number of components) to compute the classification results for.}
 
 \item{limType}{limit type to use ('classic' or 'robust')}
 
@@ -20,6 +20,6 @@ a data frame.
 }
 \description{
 The data frame contains object label, class label (if provided), role, decision, as well
-ass valued for distances (h/h0, q/q0, f) for every object from dataset used to
+as values for distances (h/h0, q/q0, f) for every object from dataset used to
 create the results object.
 }

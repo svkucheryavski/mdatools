@@ -766,6 +766,38 @@ paste1 <- function(...) {
    paste0(..., collapse = "")
 }
 
+#' Convert a vector of integers to a compact interval string
+#'
+#' @description
+#' Takes a vector of integer values, sorts them, groups consecutive values into
+#' intervals and returns a human-readable string. For example,
+#' \code{c(1, 5, 6, 7, 8, 20, 23, 24, 25)} becomes \code{"1, 5-8, 20, 23-25"}.
+#'
+#' @param x
+#' a numeric vector of integer values.
+#'
+#' @return a character string with the compact representation.
+#'
+#' @export
+arr2int <- function(x) {
+   if (length(x) == 0) return("")
+
+   x <- sort(unique(as.integer(x)))
+   breaks <- which(diff(x) != 1)
+   starts <- c(1, breaks + 1)
+   ends <- c(breaks, length(x))
+
+   parts <- vapply(seq_along(starts), function(i) {
+      if (starts[i] == ends[i]) {
+         as.character(x[starts[i]])
+      } else {
+         paste0(x[starts[i]], "-", x[ends[i]])
+      }
+   }, character(1))
+
+   paste(parts, collapse = ", ")
+}
+
 #' Create a factor with categories (regular, extreme, outlier)
 #'
 #' @param nobj

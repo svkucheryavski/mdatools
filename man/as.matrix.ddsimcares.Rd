@@ -7,7 +7,7 @@
 \method{as.matrix}{ddsimcares}(x, limType = "classic", ...)
 }
 \arguments{
-\item{x}{classification results (object of class \code{ddsimcamres}).}
+\item{x}{classification results (object of class \code{ddsimcares}).}
 
 \item{limType}{limit type to use ('classic' or 'robust')}
 
@@ -23,6 +23,6 @@ explained and cumulative explained variance, as well as (if reference classes
 are provided) main figures of merits (TP, FP, TN, FN, sensitivity, specificity,
 efficiency and selectivity).
 
-If dataset uuse to create the results contained only target class members or only
+If dataset used to create the results contained only target class members or only
 objects from alternative classes, the FoMs will be reduced accordingly.
 }

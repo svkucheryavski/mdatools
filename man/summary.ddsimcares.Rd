@@ -2,7 +2,7 @@
 % Please edit documentation in R/ddsimcares.R
 \name{summary.ddsimcares}
 \alias{summary.ddsimcares}
-\title{Summary method for DD-SIMCA results object}
+\title{Summary method for DD-SIMCA results.}
 \usage{
 \method{summary}{ddsimcares}(object, ncomp = object$ncomp.selected, limType = "classic", ...)
 }
