@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{classification results (object of class \code{ddsimcamres}).}
 
-\item{limType}{method for estimation of critical limits ('classic' or 'robust').}
+\item{limType}{limit type to use ('classic' or 'robust')}
 
 \item{...}{other arguments}
 }

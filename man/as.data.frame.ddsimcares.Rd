@@ -11,7 +11,7 @@
 
 \item{ncomp}{model complexity (number of components) to compute the classiciation results for.}
 
-\item{limType}{method for estimation of critical limits ('classic' or 'robust').}
+\item{limType}{limit type to use ('classic' or 'robust')}
 
 \item{...}{other arguments}
 }

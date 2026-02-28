@@ -4,20 +4,28 @@
 \alias{ddsimcares}
 \title{Results of DD-SIMCA one-class classification}
 \usage{
-ddsimcares(pcares, outcomes, indices, numbers, alpha, classname, c.ref = NULL)
+ddsimcares(
+  pcares,
+  outcomes,
+  classname = classname,
+  indices,
+  numbers,
+  alpha,
+  c.ref = NULL
+)
 }
 \arguments{
 \item{pcares}{results of PCA decomposition of data (class \code{pcares}).}
 
 \item{outcomes}{outcomes of DD-SIMCA classification procedure.}
 
+\item{classname}{short text (up to 20 symbols) with class name.}
+
 \item{indices}{list with the object indices (members, strangers, unknown).}
 
 \item{numbers}{list with the object numbers in each subset (members, strangers, unknown).}
 
-\item{alpha}{significance level for making the predictions (can be also adjusted when model is applied to data).}
-
-\item{classname}{short text (up to 20 symbols) with class name.}
+\item{alpha}{significance level used for making the predictions.}
 
 \item{c.ref}{optional, vector with reference classes.}
 }
@@ -28,8 +36,8 @@ properties:
 }
 \description{
 @description
-\code{ddsimcares} is used to store results for DD-SIMCA one-class classification. Do not create this object manually,
-it will be created automatically by applying DD-SIMCA model.
+\code{ddsimcares} is used to store results for DD-SIMCA one-class classification. Do not create
+this object manually, it will be created automatically by applying DD-SIMCA model.
 }
 \details{
 Class \code{ddsimcares} inherits all properties and methods of class \code{\link{pcares}}, and
@@ -42,23 +50,37 @@ data (see \code{\link{predict.ddsimca}}). The object can be used to show summary
 the results.
 }
 \examples{
-## make a SIMCA model for Iris setosa class and show results for calibration set
+## make a DD-SIMCA model for Iris setosa class and show results for calibration set
 library(mdatools)
 
 data = iris[, 1:4]
 class = iris[, 5]
 
-# take first 30 objects of setosa as calibration set
-se = data[1:30, ]
+# take every second of first 50 objects (setosa) as calibration set
+se = data[1:2:50, ]
 
-# make SIMCA model and apply to test set
-model = ddsimca(se, 'Se')
+# take the rest as test set
+ind.test = c(2:2:50, 51:150)
+x.test = data[ind.test, ]
+c.test = class[ind.test]
+
+# make DD-SIMCA model and set optimal number of components to 1
+model = ddsimca(se, 'setosa', scale = TRUE)
 model = selectCompNum(model, 1)
 
-# show infromation and summary
-print(model$calres)
-summary(model$calres)
+# apply model to test set
+r = predict(model, x.test, c.test)
+print(r)
 
+# show summary
+summary(r)
+
+# show plots
+par(mdrow = c(2, 2))
+plotAcceptance(r)
+plotFoMs(r)
+plotExtremes(r)
+plotSelectivity(r)
 
 }
 \seealso{
@@ -70,14 +92,16 @@ Methods specific for \code{ddsimcares} objects:
  \code{as.matrix.ddsimcares} \tab shows converts summary of DD-SIMCA results into matrix.\cr
  \code{writeCSV.ddsimcares} \tab saves DD-SIMCA results into a CSV file.\cr
  \code{plotAcceptance.ddsimcares} \tab shows acceptance plot (q/q0 vs h/h0) with decision and outlier boundaries.\cr
+ \code{plotExtremes.ddsimcares} \tab shows extremes plot.\cr
+ \code{plotAliens.ddsimcares} \tab shows aliens plot.\cr
+ \code{plotDistance.ddsimcares} \tab shows plot with individual distances (q, h or f).\cr
 }
 
 Methods, inherited from \code{\link{ldecomp}} class:
 \tabular{ll}{
- \code{\link{plotResiduals.ldecomp}} \tab makes Q2 vs. T2 residuals plot.\cr
  \code{\link{plotScores.ldecomp}} \tab makes scores plot.\cr
  \code{\link{plotVariance.ldecomp}} \tab makes explained variance plot.\cr
  \code{\link{plotCumVariance.ldecomp}} \tab makes cumulative explained variance plot.\cr
 }
-Check also \code{\link{simca}} and \code{\link{pcares}}.
+Check also \code{\link{ddsimca}} and \code{\link{pcares}}.
 }

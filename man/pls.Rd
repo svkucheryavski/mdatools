@@ -248,8 +248,8 @@ p <- list(
 )
 
 # build a PLS model with and without preprocessing
-m1 <- pca(Xc, yc, 5, prep = p)
-m2 <- pca(Xc, yc, 5)
+m1 <- pls(Xc, yc, 5, prep = p)
+m2 <- pls(Xc, yc, 5)
 
 # apply the models to test set
 r1 <- predict(m1, Xt, yt)

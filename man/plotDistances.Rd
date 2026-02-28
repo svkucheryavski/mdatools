@@ -2,7 +2,7 @@
 % Please edit documentation in R/defaults.R
 \name{plotDistances}
 \alias{plotDistances}
-\title{Acceptance plot for DDSIMCA model and results (generic function)}
+\title{Distance plot for model and results (generic function)}
 \usage{
 plotDistances(obj, ...)
 }
@@ -12,5 +12,5 @@ plotDistances(obj, ...)
 \item{...}{other parameters relevant for the plot}
 }
 \description{
-Acceptance plot for DDSIMCA model and results (generic function)
+Distance plot for model and results (generic function)
 }

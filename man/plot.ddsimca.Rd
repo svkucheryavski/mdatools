@@ -2,12 +2,12 @@
 % Please edit documentation in R/ddsimca.R
 \name{plot.ddsimca}
 \alias{plot.ddsimca}
-\title{Model overview plot for SIMCA}
+\title{Model overview plot for DD-SIMCA}
 \usage{
 \method{plot}{ddsimca}(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...)
 }
 \arguments{
-\item{x}{a SIMCA model (object of class \code{simca})}
+\item{x}{a DD-SIMCA model (object of class \code{ddsimca})}
 
 \item{comp}{which components to show on scores and loadings plot}
 
@@ -16,7 +16,7 @@
 \item{...}{other arguments}
 }
 \description{
-Shows a set of plots for SIMCA model.
+Shows a set of plots for DD-SIMCA model.
 }
 \details{
 See examples in help for \code{\link{ddsimca}} function.

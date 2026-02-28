@@ -51,7 +51,7 @@ ldecomp.plotDistances(
 
 \item{lim.lty}{vector with two values - line type for extreme and outlier limits}
 
-\item{show.legend}{logical, show or not legend on the plot (if more than one result object)}
+\item{show.legend}{logical, show or not a legend on the plot (needed if several result objects are available)}
 
 \item{legend.position}{if legend must be shown, where it should be}
 
@@ -64,7 +64,7 @@ Shows a plot with score (T2, h) vs orthogonal (Q, q) distances and corresponding
 limits for given number of components.
 }
 \details{
-The function is a bit more advanced version of \code{\link{plotResiduals.ldecomp}}. It allows to
+The function is a bit more advanced version of \code{\link{plotDistances.ldecomp}}. It allows to
 show distance values for several result objects (e.g. calibration and test set or calibration
 and new prediction set) as well as display the corresponding critical limits in form of lines
 or curves.

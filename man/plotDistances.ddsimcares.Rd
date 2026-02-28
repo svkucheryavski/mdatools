@@ -13,19 +13,21 @@
   show.legend = TRUE,
   pch = 1,
   lim.lty = c(2, 3),
-  lim.col = c("#a0a0a0", "#ffa0a0"),
+  lim.col = c("darkgray", "darkgray"),
   lim.lwd = c(1, 1),
   ylim = NULL,
   xlim = NULL,
+  show.plot = TRUE,
+  show.excluded = FALSE,
   ...
 )
 }
 \arguments{
-\item{obj}{the results object (objected created by applying DD-SIMCA model).}
+\item{obj}{DD-SIMCA results (object of class \code{ddsimcares})}
 
 \item{ncomp}{number of components to show the plot for.}
 
-\item{limType}{method for estimation of critical limits ('classic' or 'robust').}
+\item{limType}{limit type to show the plot for ('classic' or 'robust')}
 
 \item{distance}{which distance to show (\code{"h"} for score, \code{"q"} for orthogonal or \code{"f"} for full distance).}
 

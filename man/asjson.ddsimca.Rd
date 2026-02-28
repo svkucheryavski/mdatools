@@ -2,7 +2,7 @@
 % Please edit documentation in R/ddsimca.R
 \name{asjson.ddsimca}
 \alias{asjson.ddsimca}
-\title{Converts object with DDSIMCA model to JSON string compatible with web-application.}
+\title{Converts object with DD-SIMCA model to JSON string compatible with web-application.}
 \usage{
 \method{asjson}{ddsimca}(
   obj,
@@ -13,11 +13,11 @@
 )
 }
 \arguments{
-\item{obj}{Object with PCA model (from \code{\link{pca}}).}
+\item{obj}{Object with DD-SIMCA model (from \code{\link{ddsimca}}).}
 }
 \value{
 stringigied JSON
 }
 \description{
-Converts object with DDSIMCA model to JSON string compatible with web-application.
+Converts object with DD-SIMCA model to JSON string compatible with web-application.
 }

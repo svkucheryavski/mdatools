@@ -17,7 +17,7 @@
 )
 }
 \arguments{
-\item{res}{DDSIMCA results (object of class \code{plsres})}
+\item{res}{DD-SIMCA results (object of class \code{ddsimcares})}
 
 \item{fileName}{name (or full path) to CSV file to be created.}
 
@@ -29,7 +29,7 @@
 
 \item{ncomp}{model complexity (number of components) to compute the classiciation results for.}
 
-\item{limType}{method for estimation of critical limits ('classic' or 'robust').}
+\item{limType}{limit type to use ('classic' or 'robust')}
 
 \item{src}{optional, source of the results}
 

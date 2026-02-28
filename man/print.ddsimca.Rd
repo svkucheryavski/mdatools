@@ -2,12 +2,12 @@
 % Please edit documentation in R/ddsimca.R
 \name{print.ddsimca}
 \alias{print.ddsimca}
-\title{Print method for SIMCA model object}
+\title{Print method for DD-SIMCA model object}
 \usage{
 \method{print}{ddsimca}(x, ...)
 }
 \arguments{
-\item{x}{a SIMCA model (object of class \code{simca})}
+\item{x}{a DD-SIMCA model (object of class \code{ddsimca})}
 
 \item{...}{other arguments}
 }

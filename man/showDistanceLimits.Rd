@@ -12,5 +12,5 @@ showDistanceLimits(obj, ...)
 \item{...}{other parameters}
 }
 \description{
-Calculates and sets critical limits for residuals of PCA model
+Shows critical limits for residuals of PCA model
 }

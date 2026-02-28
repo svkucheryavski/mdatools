@@ -2,12 +2,12 @@
 % Please edit documentation in R/ddsimca.R
 \name{summary.ddsimca}
 \alias{summary.ddsimca}
-\title{Summary method for SIMCA model object}
+\title{Summary method for DD-SIMCA model object}
 \usage{
 \method{summary}{ddsimca}(object, ncomp = object$ncomp.selected, res = object$res, ...)
 }
 \arguments{
-\item{object}{a SIMCA model (object of class \code{simca})}
+\item{object}{a DD-SIMCA model (object of class \code{ddsimca})}
 
 \item{ncomp}{number of components to show summary for}
 

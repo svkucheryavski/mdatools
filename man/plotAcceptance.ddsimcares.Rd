@@ -17,18 +17,21 @@
   lim.lty = c(2, 3),
   lim.col = c("darkgray", "darkgray"),
   lim.lwd = c(1, 1),
+  lab.cex = 0.75,
+  lab.col = "#808080",
   ylim = NULL,
   xlim = NULL,
+  res.name = NULL,
   show.excluded = FALSE,
   ...
 )
 }
 \arguments{
-\item{obj}{classification results (object of class \code{ddsimcamres}).}
+\item{obj}{DD-SIMCA results (object of class \code{ddsimcares})}
 
-\item{ncomp}{number of components to show the plot for.}
+\item{ncomp}{number of components in the model to show the plot for.}
 
-\item{limType}{method for estimation of critical limits ('classic' or 'robust').}
+\item{limType}{limit type to show the plot for ('classic' or 'robust')}
 
 \item{show}{name of subset to show (\code{"members"}, \code{"strangers"}, \code{"all"}, or \code{"auto"}).}
 

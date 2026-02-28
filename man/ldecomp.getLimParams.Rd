@@ -4,10 +4,12 @@
 \alias{ldecomp.getLimParams}
 \title{Compute parameters for critical limits based on calibration results}
 \usage{
-ldecomp.getLimParams(U)
+ldecomp.getLimParams(U, do.round = TRUE)
 }
 \arguments{
 \item{U}{matrix with residual distances}
+
+\item{do.round}{logical, shall Nu values be rounded or not}
 }
 \description{
 Compute parameters for critical limits based on calibration results
