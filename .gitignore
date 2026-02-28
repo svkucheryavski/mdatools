@@ -8,10 +8,8 @@
 .vscode/*
 LICENSE
 
-tests/testthat/dump/*.pdf
-tests/testthat/dump/*.txt
-tests/matlab
-tests/matlab/*
+tests/testthat/dump
+tests/testthat/dump/*.*
 
 linting.R
 mdatools.Rproj
