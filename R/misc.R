@@ -1060,7 +1060,8 @@ readJSON <- function(fileName) {
    } else if ("plsmodel" %in% class) {
       return(pls.fromjson(str))
    } else if ("pcamodel" %in% class) {
-      if (nchar(extractBlock(str, "simca")) > 10)
+      simca <- extractBlock(str, "simca")
+      if (!is.null(simca) && nchar(simca) > 10)
          return(ddsimca.fromjson(str))
       else
          return(pca.fromjson(str))
