@@ -1924,7 +1924,7 @@ prep.autoscale <- function(data, center = TRUE, scale = FALSE, max.cov = 0) {
 #'
 #' @export
 prep.snv <- function(data) {
-   .Deprecated("prep.norm")
+   # .Deprecated("prep.norm")
    return(prep.norm(data, type = "snv"))
 }
 
@@ -1964,7 +1964,7 @@ prep.snv <- function(data) {
 #'
 #' @export
 prep.msc <- function(data, mspectrum = NULL, ...) {
-   .Deprecated("prep.emsc")
+   # .Deprecated("prep.emsc")
    return (prep.emsc(data, degree = 0, mspectrum = mspectrum, ...))
 }
 
@@ -1981,6 +1981,6 @@ prep.msc <- function(data, mspectrum = NULL, ...) {
 #'
 #' @export
 employ.prep <- function(obj, x, ...) {
-   .Deprecated("prep.apply")
+   # .Deprecated("prep.apply")
    prep.apply(obj, x)
 }
