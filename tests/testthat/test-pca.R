@@ -958,8 +958,8 @@ test_that("asvector.pca works correctly", {
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp1), tolerance = 0.0001)
 
-   writeJSON(m, "./jsonfiles/pca-model-1-r.json")
-   m1 <- readJSON("./jsonfiles/pca-model-1-r.json")
+   writeJSON(m, "./dump/pca-model-1-r.json")
+   m1 <- readJSON("./dump/pca-model-1-r.json")
    m2 <- readJSON("./jsonfiles/pca-model-1.json")
    compareModels(m, m1)
 
@@ -975,8 +975,8 @@ test_that("asvector.pca works correctly", {
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp2), tolerance = 0.0001)
 
-   writeJSON(m, "./jsonfiles/pca-model-2-r.json")
-   m1 <- readJSON("./jsonfiles/pca-model-2-r.json")
+   writeJSON(m, "./dump/pca-model-2-r.json")
+   m1 <- readJSON("./dump/pca-model-2-r.json")
    m2 <- readJSON("./jsonfiles/pca-model-2.json")
    compareModels(m, m1)
 
@@ -997,8 +997,8 @@ test_that("asvector.pca works correctly", {
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp3), tolerance = 0.0001)
 
-   writeJSON(m, "./jsonfiles/pca-model-3-r.json")
-   m1 <- readJSON("./jsonfiles/pca-model-3-r.json")
+   writeJSON(m, "./dump/pca-model-3-r.json")
+   m1 <- readJSON("./dump/pca-model-3-r.json")
    m2 <- readJSON("./jsonfiles/pca-model-3.json")
    compareModels(m, m1)
 
@@ -1013,8 +1013,8 @@ test_that("asvector.pca works correctly", {
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp4), tolerance = 0.0001)
 
-   writeJSON(m, "./jsonfiles/pca-model-4-r.json")
-   m1 <- pca.readJSON("./jsonfiles/pca-model-4-r.json")
+   writeJSON(m, "./dump/pca-model-4-r.json")
+   m1 <- pca.readJSON("./dump/pca-model-4-r.json")
    compareModels(m, m1)
 
    r <- predict(m, people)
@@ -1027,8 +1027,8 @@ test_that("asvector.pca works correctly", {
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp4), tolerance = 0.0001)
 
-   writeJSON(m, "./jsonfiles/pca-model-4-r.json")
-   m1 <- pca.readJSON("./jsonfiles/pca-model-4-r.json")
+   writeJSON(m, "./dump/pca-model-4-r.json")
+   m1 <- pca.readJSON("./dump/pca-model-4-r.json")
    m2 <- pca.readJSON("./jsonfiles/pca-model-4.json")
    compareModels(m, m1)
    compareModels(m, m2)

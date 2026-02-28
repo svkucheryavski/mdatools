@@ -756,8 +756,8 @@ test_that("JSON methods work correctly", {
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp1), tolerance = 0.00001)
 
-   writeJSON(m, "jsonfiles/pls-model-1-r.json")
-   m1 <- readJSON("jsonfiles/pls-model-1-r.json")
+   writeJSON(m, "dump/pls-model-1-r.json")
+   m1 <- readJSON("dump/pls-model-1-r.json")
    m2 <- readJSON("jsonfiles/pls-model-1.json")
    compareModels(m, m2)
    compareModels(m, m1)
@@ -776,8 +776,8 @@ test_that("JSON methods work correctly", {
 
    expect_equivalent(abs(v), abs(v.exp2), tolerance = 0.0001)
 
-   writeJSON(m, "jsonfiles/pls-model-2-r.json")
-   m1 <- readJSON("jsonfiles/pls-model-2-r.json")
+   writeJSON(m, "dump/pls-model-2-r.json")
+   m1 <- readJSON("dump/pls-model-2-r.json")
    m2 <- readJSON("jsonfiles/pls-model-2.json")
    compareModels(m, m1)
    compareModels(m, m2)
@@ -799,8 +799,8 @@ test_that("JSON methods work correctly", {
    v <- asvector(m)
    expect_equivalent(abs(v), abs(v.exp3), tolerance = 0.0001)
 
-   writeJSON(m, "jsonfiles/pls-model-3-r.json")
-   m1 <- readJSON("jsonfiles/pls-model-3-r.json")
+   writeJSON(m, "dump/pls-model-3-r.json")
+   m1 <- readJSON("dump/pls-model-3-r.json")
    m2 <- readJSON("jsonfiles/pls-model-3.json")
    compareModels(m, m2)
    compareModels(m, m1)
@@ -823,8 +823,8 @@ test_that("JSON methods work correctly", {
    v <- asvector(m)
    expect_equal(abs(v), abs(v.exp4), tolerance = 0.0001)
 
-   writeJSON(m, "jsonfiles/pls-model-4-r.json")
-   m1 <- readJSON("jsonfiles/pls-model-4-r.json")
+   writeJSON(m, "dump/pls-model-4-r.json")
+   m1 <- readJSON("dump/pls-model-4-r.json")
    m2 <- readJSON("jsonfiles/pls-model-4.json")
    compareModels(m, m2)
    compareModels(m, m1)
