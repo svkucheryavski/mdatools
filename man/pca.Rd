@@ -237,7 +237,7 @@ Plotting methods for \code{pca} objects:
    \code{\link{plotEigenvalues.pca}} \tab shows eigenvalues plot.\cr
    \code{\link{plotDistances.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
    \code{\link{plotBiplot.pca}} \tab shows bi-plot.\cr
-   \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr
+   \code{\link{plotExtremes.pca}} \tab shows extreme plot.\cr
    \code{\link{plotT2DoF}} \tab plot with degrees of freedom for score distance.\cr
    \code{\link{plotQDoF}} \tab plot with degrees of freedom for orthogonal distance.\cr
    \code{\link{plotDistDoF}} \tab plot with degrees of freedom for both distances.\cr

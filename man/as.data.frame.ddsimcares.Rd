@@ -4,16 +4,27 @@
 \alias{as.data.frame.ddsimcares}
 \title{Creates a data frame from DD-SIMCA classification results.}
 \usage{
-\method{as.data.frame}{ddsimcares}(x, ncomp = x$ncomp.selected, limType = "classic", ...)
+\method{as.data.frame}{ddsimcares}(
+  x,
+  row.names = NULL,
+  optional = FALSE,
+  ...,
+  ncomp = x$ncomp.selected,
+  limType = "classic"
+)
 }
 \arguments{
 \item{x}{classification results (object of class \code{ddsimcares}).}
 
+\item{row.names}{NULL or a character vector giving the row names for the data frame (not used).}
+
+\item{optional}{logical, if TRUE, setting row names is optional (not used).}
+
+\item{...}{other arguments}
+
 \item{ncomp}{model complexity (number of components) to compute the classification results for.}
 
 \item{limType}{limit type to use ('classic' or 'robust')}
-
-\item{...}{other arguments}
 }
 \value{
 a data frame.

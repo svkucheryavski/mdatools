@@ -4,10 +4,12 @@
 \alias{plot.ddsimcares}
 \title{Plot method for DD-SIMCA results.}
 \usage{
-\method{plot}{ddsimcares}(obj, ...)
+\method{plot}{ddsimcares}(x, ...)
 }
 \arguments{
-\item{obj}{DD-SIMCA results (object of class \code{ddsimcares})}
+\item{x}{DD-SIMCA results (object of class \code{ddsimcares})}
+
+\item{...}{other arguments}
 }
 \description{
 Plot method for DD-SIMCA results.

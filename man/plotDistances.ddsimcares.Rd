@@ -47,6 +47,10 @@
 
 \item{xlim}{limits for x-axis, if NULL will be estimated automatically.}
 
+\item{show.plot}{logical, if FALSE returns only values and does not show the plot.}
+
+\item{show.excluded}{logical, show or not the excluded rows (objects).}
+
 \item{...}{other parameters compatible with \code{\link{mdaplot}} method.}
 }
 \description{

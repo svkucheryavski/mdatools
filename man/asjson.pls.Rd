@@ -4,10 +4,12 @@
 \alias{asjson.pls}
 \title{Converts object with PLS model to JSON string compatible with web-application.}
 \usage{
-\method{asjson}{pls}(obj)
+\method{asjson}{pls}(obj, ...)
 }
 \arguments{
 \item{obj}{Object with PLS model (from \code{\link{pls}}).}
+
+\item{...}{other arguments}
 }
 \value{
 stringified JSON

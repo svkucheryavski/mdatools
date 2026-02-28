@@ -24,6 +24,22 @@
 \item{ncomp}{number of components in the model to show the plot for.}
 
 \item{limType}{limit type to show the plot for ('classic' or 'robust')}
+
+\item{main}{main title.}
+
+\item{xlab}{label for x-axis.}
+
+\item{ylab}{label for y-axis.}
+
+\item{pch}{marker number or symbol for the plot points.}
+
+\item{col}{color of the plot points.}
+
+\item{ellipse.col}{color of the confidence ellipse elements.}
+
+\item{show.plot}{logical, if FALSE returns only values and does not show the plot.}
+
+\item{...}{other parameters compatible with \code{\link{mdaplot}} method.}
 }
 \description{
 Aliens plot for DD-SIMCA results.

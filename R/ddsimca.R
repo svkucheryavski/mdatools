@@ -262,26 +262,28 @@ predict.ddsimca <- function(object, x, c.ref = NULL, alpha = object$alpha, gamma
 
 #' Set default parameters for the DD-SIMCA model.
 #'
-#' @param m
+#' @param obj
 #' a DD-SIMCA model (object of class \code{ddsimca})
 #' @param alpha
 #' significance level for making the predictions.
 #' @param gamma
 #' significance level for detection of outliers.
+#' @param ...
+#' other arguments
 #'
 #' @return DD-SIMCA model with the redefined parameters.
 #'
 #' @export
-setParams.ddsimca <- function(m, alpha = m$alpha, gamma = m$gamma) {
-   m$alpha <- alpha
-   m$gamma <- gamma
+setParams.ddsimca <- function(obj, alpha = obj$alpha, gamma = obj$gamma, ...) {
+   obj$alpha <- alpha
+   obj$gamma <- gamma
 
-   nobj <- m$nrows
-   lp <- m$limParams
-   classname <- m$classname
-   if (!is.null(m[["res"]]) && !is.null(m$res[["cal"]])) {
+   nobj <- obj$nrows
+   lp <- obj$limParams
+   classname <- obj$classname
+   if (!is.null(obj[["res"]]) && !is.null(obj$res[["cal"]])) {
 
-      r <- m[["res"]][["cal"]]
+      r <- obj[["res"]][["cal"]]
       indices <- r$simca$indices
       numbers <- r$simca$numbers
       c.ref <- r$simca$c.ref
@@ -291,13 +293,13 @@ setParams.ddsimca <- function(m, alpha = m$alpha, gamma = m$gamma) {
          "robust" = classify(r, indices, numbers, lp$Q[["robust"]],  lp$T2[["robust"]],  nobj, alpha, gamma, classname, c.ref)
       )
 
-      m$res$cal <- ddsimcares(r, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref)
-      m$calres <- m$res$cal
+      obj$res$cal <- ddsimcares(r, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref)
+      obj$calres <- obj$res$cal
    }
 
-   if (!is.null(m[["res"]]) && !is.null(m$res[["pv"]])) {
+   if (!is.null(obj[["res"]]) && !is.null(obj$res[["pv"]])) {
 
-      r <- m[["res"]][["pv"]]
+      r <- obj[["res"]][["pv"]]
       indices <- r$simca$indices
       numbers <- r$simca$numbers
       c.ref <- r$simca$c.ref
@@ -307,11 +309,11 @@ setParams.ddsimca <- function(m, alpha = m$alpha, gamma = m$gamma) {
          "robust" = classify(r, indices, numbers, lp$Q[["robust"]],  lp$T2[["robust"]],  nobj, alpha, gamma, classname, c.ref)
       )
 
-      m$res$pv <- ddsimcares(r, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref)
-      m$pvres <- m$res$pv
+      obj$res$pv <- ddsimcares(r, outcomes, indices, numbers, alpha = alpha, classname = classname, c.ref = c.ref)
+      obj$pvres <- obj$res$pv
    }
 
-   return(m)
+   return(obj)
 }
 
 
@@ -759,11 +761,13 @@ ddsimca.readJSON <- function(fileName) {
 #' significance level for outlier detection boundary.
 #' @param ncomp
 #' number of selected components.
+#' @param ...
+#' other arguments
 #'
 #' @return stringified JSON
 #'
 #' @export
-asjson.ddsimca <- function(obj, limType = "classic", alpha = obj$alpha, gamma = obj$gamma, ncomp = obj$ncomp.selected) {
+asjson.ddsimca <- function(obj, limType = "classic", alpha = obj$alpha, gamma = obj$gamma, ncomp = obj$ncomp.selected, ...) {
 
    limType <- processLimType(limType)
    hash <- paste0("'", genhash(), "'")
@@ -807,6 +811,8 @@ asjson.ddsimca <- function(obj, limType = "classic", alpha = obj$alpha, gamma = 
 #' Object with DD-SIMCA model (from \code{\link{ddsimca}}).
 #' @param fileName
 #' Name or full path to JSON file to be created.
+#' @param ...
+#' other arguments (passed to \code{\link{asjson.ddsimca}}).
 #'
 #' @export
 writeJSON.ddsimca <- function(obj, fileName, ...) {

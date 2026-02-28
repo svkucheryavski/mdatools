@@ -22,6 +22,12 @@
 \item{limType}{limit type to show the plot for ('classic' or 'robust').}
 
 \item{col}{color of the plot elements.}
+
+\item{xlab}{label for x-axis.}
+
+\item{ylab}{label for y-axis.}
+
+\item{...}{other parameters compatible with \code{\link{mdaplot}} method.}
 }
 \description{
 The method generates a sequence of values for significance level (alpha) and then

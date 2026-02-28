@@ -10,6 +10,8 @@
 \item{obj}{Object with DD-SIMCA model (from \code{\link{ddsimca}}).}
 
 \item{fileName}{Name or full path to JSON file to be created.}
+
+\item{...}{other arguments (passed to \code{\link{asjson.ddsimca}}).}
 }
 \description{
 You can load created JSON file to web-app and use it for prediction.

@@ -9,6 +9,10 @@
 \arguments{
 \item{object}{DD-SIMCA results (object of class \code{ddsimcares})}
 
+\item{ncomp}{number of components to show the summary for.}
+
+\item{limType}{limit type to use ('classic' or 'robust').}
+
 \item{...}{other arguments}
 }
 \description{

@@ -1018,6 +1018,8 @@ extractValue <- function(js, key) {
 #'
 #' @param js
 #' stringified JSON with model
+#' @param name
+#' name of the JSON block to extract
 #'
 #' @return string with part of the JSON string related to preprocessing
 #'

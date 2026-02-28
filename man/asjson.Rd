@@ -4,10 +4,12 @@
 \alias{asjson}
 \title{S3 implementation of asjson() method}
 \usage{
-asjson(obj)
+asjson(obj, ...)
 }
 \arguments{
 \item{obj}{object of any class, e.g. \code{pca}}
+
+\item{...}{other parameters relevant for the method}
 }
 \description{
 S3 implementation of asjson() method

@@ -37,8 +37,6 @@
 
 Shows several figures of merit values vs. number of components as a group plot (see
 details in \code{\link{mdaplotg}} method desciption.}
-
-\item{show.plot}{logical, if FALSE returns only values and does not show the plot.}
 }
 \description{
 Figures of merit plot (multiple FoMs).

@@ -87,7 +87,7 @@
 #' plotAcceptance(r)
 #' plotFoMs(r)
 #' plotExtremes(r)
-#' plotSelectivity(r)
+#' plotSelectivityArea(r)
 #'
 #' @export
 ddsimcares <- function(pcares, outcomes, classname, indices, numbers, alpha, c.ref = NULL) {
@@ -114,17 +114,21 @@ ddsimcares <- function(pcares, outcomes, classname, indices, numbers, alpha, c.r
 #'
 #' @param x
 #' classification results (object of class \code{ddsimcares}).
+#' @param row.names
+#' NULL or a character vector giving the row names for the data frame (not used).
+#' @param optional
+#' logical, if TRUE, setting row names is optional (not used).
+#' @param ...
+#' other arguments
 #' @param ncomp
 #' model complexity (number of components) to compute the classification results for.
 #' @param limType
 #' limit type to use ('classic' or 'robust')
-#' @param ...
-#' other arguments
 #'
 #' @returns a data frame.
 #'
 #' @export
-as.data.frame.ddsimcares <- function(x, ncomp = x$ncomp.selected, limType = "classic", ...) {
+as.data.frame.ddsimcares <- function(x, row.names = NULL, optional = FALSE, ..., ncomp = x$ncomp.selected, limType = "classic") {
 
   if (ncomp < 1 || ncomp > ncol(x$scores)) {
       stop("Wrong value for 'ncomp' parameter.")
@@ -422,6 +426,12 @@ writeCSV.ddsimcares <- function(res, fileName, name = "cal", sep = ",", dataFile
 #' limit type to show the plot for ('classic' or 'robust').
 #' @param col
 #' color of the plot elements.
+#' @param xlab
+#' label for x-axis.
+#' @param ylab
+#' label for y-axis.
+#' @param ...
+#' other parameters compatible with \code{\link{mdaplot}} method.
 #'
 #' @description
 #' The method generates a sequence of values for significance level (alpha) and then
@@ -472,7 +482,7 @@ plotSelectivityArea.ddsimcares <- function(obj,
 #' @param obj
 #' DD-SIMCA results (object of class \code{ddsimcares}).
 #' @param show.ci
-#' logical, show or not the expected sensitivity and 95% confidence interval for it.
+#' logical, show or not the expected sensitivity and 95\% confidence interval for it.
 #' @param ci.col
 #' color for lines showing expected sensitivity and confidence interval.
 #' @param ci.lty
@@ -480,6 +490,7 @@ plotSelectivityArea.ddsimcares <- function(obj,
 #' @param ...
 #' any parameters suitable for the \code{\link{plotFoM.ddsimcares}} method.
 #'
+#' @details
 #' The method is a wrapper for more general \code{\link{plotFoM.ddsimcares}} method with a
 #' possibility to show confidence interval for the expected sensitivity.
 #'
@@ -576,8 +587,6 @@ plotFoM.ddsimcares <- function(obj, fom = "sens", limType = "classic", type = "b
 #' position of legend on the plot.
 #' @param main
 #' main title.
-#' @param show.plot
-#' logical, if FALSE returns only values and does not show the plot.
 #' @param ...
 #' any parameters for \code{\link{mdaplotg}} method can be provided.
 #'
@@ -662,6 +671,8 @@ plotExtreme.ddsimcares <- function(obj, ...) {
 #' color of the confidence ellipse elements.
 #' @param show.plot
 #' logical, if FALSE returns only values and does not show the plot.
+#' @param ...
+#' other parameters compatible with \code{\link{mdaplot}} method.
 #'
 #' @description
 #' The method generates a sequence of values for significance level (alpha) and then
@@ -737,6 +748,23 @@ plotExtremes.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "
 #' number of components in the model to show the plot for.
 #' @param limType
 #' limit type to show the plot for ('classic' or 'robust')
+#' @param main
+#' main title.
+#' @param xlab
+#' label for x-axis.
+#' @param ylab
+#' label for y-axis.
+#' @param pch
+#' marker number or symbol for the plot points.
+#' @param col
+#' color of the plot points.
+#' @param ellipse.col
+#' color of the confidence ellipse elements.
+#' @param show.plot
+#' logical, if FALSE returns only values and does not show the plot.
+#' @param ...
+#' other parameters compatible with \code{\link{mdaplot}} method.
+#'
 #' @export
 plotAliens.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "classic",
    main = sprintf("Aliens (A = %d)", ncomp),
@@ -828,6 +856,12 @@ plotAliens.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "cl
 #' limits for y-axis, if NULL will be estimated automatically.
 #' @param xlim
 #' limits for x-axis, if NULL will be estimated automatically.
+#' @param lab.cex
+#' font size for data point labels.
+#' @param lab.col
+#' color for data point labels.
+#' @param res.name
+#' optional, short name for the result object (shown in plot title).
 #' @param show.excluded
 #' logical, show or not the excluded rows (objects).
 #' @param ...
@@ -1006,6 +1040,10 @@ plotAcceptance.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType =
 #' limits for y-axis, if NULL will be estimated automatically.
 #' @param xlim
 #' limits for x-axis, if NULL will be estimated automatically.
+#' @param show.plot
+#' logical, if FALSE returns only values and does not show the plot.
+#' @param show.excluded
+#' logical, show or not the excluded rows (objects).
 #' @param ...
 #' other parameters compatible with \code{\link{mdaplot}} method.
 #'
@@ -1129,6 +1167,10 @@ plotDistances.ddsimcares <- function(obj, ncomp = obj$ncomp.selected,
 #'
 #' @param object
 #' DD-SIMCA results (object of class \code{ddsimcares})
+#' @param ncomp
+#' number of components to show the summary for.
+#' @param limType
+#' limit type to use ('classic' or 'robust').
 #' @param ...
 #' other arguments
 #'
@@ -1167,19 +1209,21 @@ summary.ddsimcares <- function(object, ncomp = object$ncomp.selected, limType = 
 
 #' Plot method for DD-SIMCA results.
 #'
-#' @param obj
+#' @param x
 #' DD-SIMCA results (object of class \code{ddsimcares})
+#' @param ...
+#' other arguments
 #'
 #' @export
-plot.ddsimcares <- function(obj, ...) {
+plot.ddsimcares <- function(x, ...) {
 
-   if (!is.null(obj$simca$c.ref)) {
+   if (!is.null(x$simca$c.ref)) {
       op <- par(mfrow = c(1, 2))
       on.exit(par(op))
-      plotAcceptance.ddsimcares(obj)
-      plotFoMs.ddsimcares(obj)
+      plotAcceptance.ddsimcares(x)
+      plotFoMs.ddsimcares(x)
    } else {
-      plotAcceptance.ddsimcares(obj)
+      plotAcceptance.ddsimcares(x)
    }
 }
 

@@ -4,10 +4,12 @@
 \alias{asjson.pca}
 \title{Converts object with PCA model to JSON string compatible with web-application.}
 \usage{
-\method{asjson}{pca}(obj)
+\method{asjson}{pca}(obj, ...)
 }
 \arguments{
 \item{obj}{Object with PCA model (from \code{\link{pca}}).}
+
+\item{...}{other arguments}
 }
 \value{
 stringified JSON

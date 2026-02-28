@@ -5,6 +5,17 @@ This release contains numerous small and large improvements, bug fixes, and new 
 
 Here are all release details.
 
+### New dedicated methods for DD-SIMCA
+
+In previous version DD-SIMCA was implemented via more versatile method `simca`, which lets also use other SIMCA implementations. While versatility is in general good, it limited the DD-SIMCA possibilities and it was decided to implement it separately.
+
+Method `ddsimca` can now be used for training, testing and applying of [Data Driven SIMCA](https://doi.org/10.1002/cem.3556) models. It matches functionality of the corresponding [web-application](https://mda.tools/ddsimca), including all plots and figures of merits (for example estimation of beta, selectivity, etc.). It also lets you change decision boundary parameters without rebuilding the main model.
+
+See all details in the [tutorial](https://mda.tools/docs).
+
+The original method `simca` is still available (and always will) for compatibility.
+
+
 ### Improvements to preprocessing methods
 
 There are several new methods for preprocessing, including:
@@ -37,14 +48,6 @@ Finally, the list of preprocessing methods can be also *trained* independently o
 
 Please check the [updated documentation](https://mda.tools/docs/preprocessing.html) for all details and examples.
 
-
-### New modellling methods
-
-Method `ddsimca` can now be used for training, testing and applying of [Data Driven SIMCA]() models. It matches functionality of the corresponding web-application, including all plots and figures of merits (for example estimation of beta, selectivity, etc.). It also lets you change decision boundary parameters without rebuilding the main model.
-
-See all details in the [tutorial]().
-
-The original method `simca` is also available for compatibility.
 
 ### New functions for model and result objects
 

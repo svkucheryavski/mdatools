@@ -49,9 +49,15 @@
 
 \item{lim.lwd}{vector with two values - thickness of the lines showing critical limits (extreme, outlier).}
 
+\item{lab.cex}{font size for data point labels.}
+
+\item{lab.col}{color for data point labels.}
+
 \item{ylim}{limits for y-axis, if NULL will be estimated automatically.}
 
 \item{xlim}{limits for x-axis, if NULL will be estimated automatically.}
+
+\item{res.name}{optional, short name for the result object (shown in plot title).}
 
 \item{show.excluded}{logical, show or not the excluded rows (objects).}
 

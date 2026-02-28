@@ -8,6 +8,8 @@ extractBlock(js, name)
 }
 \arguments{
 \item{js}{stringified JSON with model}
+
+\item{name}{name of the JSON block to extract}
 }
 \value{
 string with part of the JSON string related to preprocessing

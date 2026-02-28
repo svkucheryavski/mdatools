@@ -92,9 +92,11 @@ plotAcceptance <- function(obj, ...) {
 #'
 #' @param obj
 #' object of any class, e.g. \code{pca}
+#' @param ...
+#' other parameters relevant for the method
 #'
 #' @export
-asjson <- function(obj) {
+asjson <- function(obj, ...) {
    UseMethod("asjson")
 }
 

@@ -1133,11 +1133,13 @@ asvector.pls <- function(obj) {
 #'
 #' @param obj
 #' Object with PLS model (from \code{\link{pls}}).
+#' @param ...
+#' other arguments
 #'
 #' @return stringified JSON
 #'
 #' @export
-asjson.pls <- function(obj) {
+asjson.pls <- function(obj, ...) {
 
    v <- asvector(obj)
 

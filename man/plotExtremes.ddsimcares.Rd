@@ -38,6 +38,8 @@
 \item{ellipse.col}{color of the confidence ellipse elements.}
 
 \item{show.plot}{logical, if FALSE returns only values and does not show the plot.}
+
+\item{...}{other parameters compatible with \code{\link{mdaplot}} method.}
 }
 \description{
 The method generates a sequence of values for significance level (alpha) and then

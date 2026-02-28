@@ -9,7 +9,8 @@
   limType = "classic",
   alpha = obj$alpha,
   gamma = obj$gamma,
-  ncomp = obj$ncomp.selected
+  ncomp = obj$ncomp.selected,
+  ...
 )
 }
 \arguments{
@@ -22,6 +23,8 @@
 \item{gamma}{significance level for outlier detection boundary.}
 
 \item{ncomp}{number of selected components.}
+
+\item{...}{other arguments}
 }
 \value{
 stringified JSON

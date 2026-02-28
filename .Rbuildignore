@@ -1,0 +1,30 @@
+# temporary and hidden files
+^.*\.Rproj$
+^docs/.+$
+^\.Rproj\.user$
+^\figure$
+^\startide$
+^\test$
+.vscode
+.travis.yml
+.lintr
+.xlsx
+.github
+.gitignore
+.claude
+LICENSE.md
+CLAUDE.md
+TODO.md
+
+# do not add tests to builds
+tests
+tests/*
+tests/testthat
+tests/testthat/*
+
+# local tests and linting
+linting.R
+localtests.R
+
+
+

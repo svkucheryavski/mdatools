@@ -4,14 +4,16 @@
 \alias{setParams.ddsimca}
 \title{Set default parameters for the DD-SIMCA model.}
 \usage{
-\method{setParams}{ddsimca}(m, alpha = m$alpha, gamma = m$gamma)
+\method{setParams}{ddsimca}(obj, alpha = obj$alpha, gamma = obj$gamma, ...)
 }
 \arguments{
-\item{m}{a DD-SIMCA model (object of class \code{ddsimca})}
+\item{obj}{a DD-SIMCA model (object of class \code{ddsimca})}
 
 \item{alpha}{significance level for making the predictions.}
 
 \item{gamma}{significance level for detection of outliers.}
+
+\item{...}{other arguments}
 }
 \value{
 DD-SIMCA model with the redefined parameters.

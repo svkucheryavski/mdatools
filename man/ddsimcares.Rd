@@ -72,7 +72,7 @@ par(mfrow = c(2, 2))
 plotAcceptance(r)
 plotFoMs(r)
 plotExtremes(r)
-plotSelectivity(r)
+plotSelectivityArea(r)
 
 }
 \seealso{

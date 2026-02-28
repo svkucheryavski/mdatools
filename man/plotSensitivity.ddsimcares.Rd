@@ -15,17 +15,18 @@
 \arguments{
 \item{obj}{DD-SIMCA results (object of class \code{ddsimcares}).}
 
-\item{show.ci}{logical, show or not the expected sensitivity and 95% confidence interval for it.}
+\item{show.ci}{logical, show or not the expected sensitivity and 95\% confidence interval for it.}
 
 \item{ci.col}{color for lines showing expected sensitivity and confidence interval.}
 
 \item{ci.lty}{type of lines (lower, expected, upper) for the expected sensitivity and confidence interval.}
 
-\item{...}{any parameters suitable for the \code{\link{plotFoM.ddsimcares}} method.
-
-The method is a wrapper for more general \code{\link{plotFoM.ddsimcares}} method with a
-possibility to show confidence interval for the expected sensitivity.}
+\item{...}{any parameters suitable for the \code{\link{plotFoM.ddsimcares}} method.}
 }
 \description{
 Sensitivity plot.
+}
+\details{
+The method is a wrapper for more general \code{\link{plotFoM.ddsimcares}} method with a
+possibility to show confidence interval for the expected sensitivity.
 }
