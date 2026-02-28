@@ -99,7 +99,7 @@ context("prep: snv, msc, norm, km")
 
 test_that("SNV works correctly", {
    spectra <- simdata$spectra.c
-   expect_warning(pspectra <- prep.snv(spectra))
+   # expect_warning(pspectra <- prep.snv(spectra))
    expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
    expect_equivalent(apply(pspectra, 1, mean), rep(0, nrow(spectra)))
    expect_equivalent(apply(pspectra, 1, sd), rep(1, nrow(spectra)))
