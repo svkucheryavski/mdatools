@@ -402,7 +402,6 @@ mdaplot.getXAxisLim <- function(ps, xlim, show.labels = FALSE, show.lines = FALS
 #'
 #' @return
 #' Returns a vector with two limits.
-#'
 mdaplot.getYAxisLim <- function(ps, ylim, show.lines = FALSE, show.excluded = FALSE,
    show.labels = FALSE, show.colorbar = FALSE) {
 
@@ -606,7 +605,7 @@ mdaplot.plotAxes <- function(xticklabels = NULL, yticklabels = NULL,
 #' @param ps
 #' `plotseries` object, if NULL will be created based on the provided data values
 #' @param type
-#' type of the plot ("p", "d", "l", "b", "h", "e").
+#' type of the plot ("p", "d", "l", "b", "o", "h", "e").
 #' @param cgroup
 #' a vector with values to use for make color groups.
 #' @param colmap
@@ -791,6 +790,8 @@ mdaplot <- function(data = NULL, ps = NULL, type = "p",
          col.excluded = col.excluded, ...),
       "b" = plotLines(ps, pch = pch, lwd = lwd, lty = lty, cex = cex, show.excluded = show.excluded,
          col.excluded = col.excluded, ...),
+      "o" = plotLines(ps, pch = pch, lwd = lwd, lty = lty, cex = cex, show.excluded = show.excluded,
+         col.excluded = col.excluded, ...),
       "h" = plotBars(ps, bwd = bwd, border = border, force.x.values = force.x.values, ...),
       "e" = plotErrorbars(ps, pch = pch, lwd = lwd, cex = cex, ...),
       stop("Wrong plot type.", call. = FALSE)
@@ -897,8 +898,8 @@ mdaplotyy <- function(data, type = "l", col = mdaplot.getColors(2), lty = c(1, 1
    xticks = NULL, xticklabels = NULL, xlas = 0, ylas = 0, show.legend = TRUE,
    legend.position = "topright", legend = ylab, ...) {
 
-   if (!(type %in% c("l", "b"))) {
-      stop("YY line plot can only be made for type 'l' or 'b'.", call. = FALSE)
+   if (!(type %in% c("l", "b", "o"))) {
+      stop("YY line plot can only be made for type 'l', 'o', or 'b'.", call. = FALSE)
    }
 
    if (nrow(data) != 2) {
