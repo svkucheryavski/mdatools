@@ -190,11 +190,11 @@ as.matrix.ddsimcares <- function(x, limType = "classic", ...) {
    labels <- c(
       "nin" = "In",
       "nout" = "Out",
-      "sns" = "Sensitivity",
-      "spc" = "Specificity",
-      "sel" = "Selectivity",
-      "eff" = "Efficiency",
-      "acc" = "Accuracy",
+      "sns" = "Sens",
+      "spc" = "Spec",
+      "sel" = "Sel",
+      "eff" = "Eff",
+      "acc" = "Acc",
       "TP" = "TP",
       "FN" = "FN",
       "TN" = "TN",
@@ -526,8 +526,6 @@ plotSensitivity.ddsimcares <- function(obj, show.ci = FALSE, ci.col = "#a0a0a0",
 #' type of plot (can be 'b', 'l', or 'h').
 #' @param ylim
 #' limits for y-axis.
-#' @param pch
-#' marker number or symbol for the plot points (if 'b' type is selected).
 #' @param show.plot
 #' logical, if FALSE returns only values and does not show the plot.
 #' @param ...
@@ -539,7 +537,7 @@ plotSensitivity.ddsimcares <- function(obj, show.ci = FALSE, ci.col = "#a0a0a0",
 #'
 #' @export
 plotFoM.ddsimcares <- function(obj, fom = "sens", limType = "classic", type = "b",
-   ylim = c(0, 1.1), pch = 1, show.plot = TRUE, ...) {
+   ylim = c(0, 1.1), show.plot = TRUE, ...) {
 
    labels <- c(
       "sens" = "Sensitivity",
@@ -550,12 +548,13 @@ plotFoM.ddsimcares <- function(obj, fom = "sens", limType = "classic", type = "b
    )
 
    stat <- as.matrix.ddsimcares(obj, limType = limType)
+   colnames(stat) <- tolower(colnames(stat))
 
-   if (!(fom %in% names(labels)) ||  !(labels[fom] %in% colnames(stat))) {
+   if (!(fom %in% names(labels)) ||  !(fom %in% colnames(stat))) {
       stop("Wrong value for 'fom' argument.")
    }
 
-   pd <- matrix(stat[, labels[fom]], nrow = 1)
+   pd <- matrix(stat[, fom], nrow = 1)
    attr(pd, "xaxis.values") <- seq_len(obj$ncomp)
    attr(pd, "xaxis.name") <- "Number of components, A"
    attr(pd, "name") <- labels[fom]
@@ -565,7 +564,7 @@ plotFoM.ddsimcares <- function(obj, fom = "sens", limType = "classic", type = "b
       return(pd)
    }
 
-   return(invisible(mdaplot(pd, type = type, ylim = ylim, pch = pch, ...)))
+   return(invisible(mdaplot(pd, type = type, ylim = ylim, ...)))
 }
 
 
@@ -579,10 +578,10 @@ plotFoM.ddsimcares <- function(obj, fom = "sens", limType = "classic", type = "b
 #' limit type to show the plot for ('classic' or 'robust').
 #' @param type
 #' type of plot (can be 'b', 'l', or 'h').
-#' @param pch
-#' marker number or symbol for the plot points (if 'b' type is selected), can be single or individual for each FoM.
 #' @param ylim
 #' limits for y-axis.
+#' @param col
+#' vector with color values (should contain one value for each fom), if not provided will use default colors.
 #' @param legend.position
 #' position of legend on the plot.
 #' @param main
@@ -594,8 +593,8 @@ plotFoM.ddsimcares <- function(obj, fom = "sens", limType = "classic", type = "b
 #' details in \code{\link{mdaplotg}} method desciption.
 #'
 #' @export
-plotFoMs.ddsimcares <- function(obj, foms = NULL, limType = "classic", type = "b", pch = 1,
-   ylim = c(0, 1.1), legend.position = "top", main = "Figures of merit", ...) {
+plotFoMs.ddsimcares <- function(obj, foms = NULL, limType = "classic", type = "b",
+   ylim = c(0, 1.1), col = NULL, legend.position = "bottom", main = "Figures of merit", ...) {
 
    nm <- obj$simca$numbers$members
    ns <- obj$simca$numbers$strangers
@@ -618,23 +617,25 @@ plotFoMs.ddsimcares <- function(obj, foms = NULL, limType = "classic", type = "b
       "acc" = "Accuracy"
    )
 
+   if (is.null(col)) {
+      colors <- c("sens" = "#1f77b4", "spec" = "#2ca02c", "eff" = "#9467bd", sel = "#17becf", "acc" = "#7f7f7f")
+      col <- colors[foms]
+   }
    stat <- as.matrix.ddsimcares(obj, limType = limType)
-
-
+   colnames(stat) <- tolower(colnames(stat))
    pds <- list()
    for (fom in foms) {
-      if (!(fom %in% names(labels)) ||  !(labels[fom] %in% colnames(stat))) {
+      if (!(fom %in% names(labels)) ||  !(fom %in% colnames(stat))) {
          stop("Wrong value for 'fom' argument.")
       }
-      pd <- matrix(stat[, labels[fom]], nrow = 1)
+      pd <- matrix(stat[, fom], nrow = 1)
       attr(pd, "xaxis.values") <- seq_len(obj$ncomp)
       attr(pd, "xaxis.name") <- "Number of components, A"
       attr(pd, "name") <- labels[fom]
       pds[[fom]] <- pd
    }
 
-   return(invisible(mdaplotg(pds, type = type, ylim = ylim, pch = pch,
-      legend.position = legend.position, main = main, ...)))
+   return(invisible(mdaplotg(pds, type = type, ylim = ylim, col = col, legend.position = legend.position, main = main, ...)))
 }
 
 #' Extremes plot (shortcut to \code{\link{plotExtremes.ddsimcares}}).
@@ -663,8 +664,6 @@ plotExtreme.ddsimcares <- function(obj, ...) {
 #' label for x-axis.
 #' @param ylab
 #' label for y-axis.
-#' @param pch
-#' marker number or symbol for the plot points.
 #' @param col
 #' color of the plot points.
 #' @param ellipse.col
@@ -686,7 +685,7 @@ plotExtremes.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "
    main = sprintf("Extremes (A = %d)", ncomp),
    xlab = "Number of extremes (expected)",
    ylab = "Number of extremes (observed)",
-   pch = 1, col = "#2679b2",
+   col = "#2679b2",
    ellipse.col = "#eeeeee",
    show.plot = TRUE, ...) {
 
@@ -723,7 +722,7 @@ plotExtremes.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "
    }
 
    # show axes, grid and diagonal
-   plot(0, type = "n", xlim = c(0, nobj), ylim = c(0, nobj), main = main, xlab = xlab, ylab = ylab)
+   p <- plot(0, type = "n", xlim = c(0, nobj), ylim = c(0, nobj), main = main, xlab = xlab, ylab = ylab)
    grid()
    lines(c(0, expected), c(0, expected), type = "l", col = ellipse.col)
 
@@ -735,7 +734,9 @@ plotExtremes.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "
    lines(c(0, expected), c(0, Np), col = ellipse.col)
 
    # show the points
-   points(expected, observed, pch = pch, col = col, ...)
+   points(expected, observed, col = col, ...)
+
+   return(invisible(p))
 }
 
 
@@ -754,8 +755,6 @@ plotExtremes.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "
 #' label for x-axis.
 #' @param ylab
 #' label for y-axis.
-#' @param pch
-#' marker number or symbol for the plot points.
 #' @param col
 #' color of the plot points.
 #' @param ellipse.col
@@ -770,7 +769,7 @@ plotAliens.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "cl
    main = sprintf("Aliens (A = %d)", ncomp),
    xlab = "Number of aliens (expected)",
    ylab = "Number of aliens (observed)",
-   pch = 1, col = "#2679b2",
+   col = "#2679b2",
    ellipse.col = "#eeeeee",
    show.plot = TRUE, ...) {
 
@@ -808,7 +807,7 @@ plotAliens.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "cl
    }
 
    # show axes, grid and diagonal
-   plot(0, type = "n", xlim = c(0, nobj), ylim = c(0, nobj), main = main, xlab = xlab, ylab = ylab)
+   p <- plot(0, type = "n", xlim = c(0, nobj), ylim = c(0, nobj), main = main, xlab = xlab, ylab = ylab)
    grid()
    lines(c(0, expected), c(0, expected), type = "l", col = ellipse.col)
 
@@ -820,7 +819,9 @@ plotAliens.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "cl
    lines(c(0, expected), c(0, Np), col = ellipse.col)
 
    # show the points
-   points(expected, observed, pch = pch, col = col, ...)
+   points(expected, observed, col = col, ...)
+
+   return(invisible(p))
 }
 
 
@@ -842,8 +843,6 @@ plotAliens.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "cl
 #' logical, apply log transformation or not.
 #' @param show.legend
 #' logica, show or not colorbar legend on the plot.
-#' @param pch
-#' marker type
 #' @param colors
 #' named vector with colors for every role
 #' @param lim.lty
@@ -872,7 +871,6 @@ plotAcceptance.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType =
       show = "auto",
       log = FALSE,
       show.legend = TRUE,
-      pch = 1,
       colors = c("regular" = "#2679B2", "extreme" = "#F2B825", "outlier" = "#D22C2F", "alien" = "#2679B2", "external" = "#D22C2F", "unknown" = "#3c6784", "excluded" = "#00ff00"),
       lim.lty = c(2, 3),
       lim.col = c("darkgray", "darkgray"),
@@ -992,13 +990,13 @@ plotAcceptance.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType =
    }
 
    # amend the limits
-   if (is.null(xlim)) xlim <- c(0, max(c(pd[, 1], xlo)))
+   if (is.null(xlim)) xlim <- c(0, max(c(pd[, 1], xlo)) * 1.1)
    if (is.null(ylim)) ylim <- c(0, max(c(pd[, 2], ylo)) * 1.2)
 
    if (length(colmap) == 1) {
-      p <- mdaplot(pd, ylim = ylim, xlim = xlim, pch = pch, ...)
+      p <- mdaplot(pd, ylim = ylim, xlim = xlim, ...)
    } else {
-      p <- mdaplot(pd, ylim = ylim, xlim = xlim, colmap = colmap, pch = pch, cgroup = cgroup, lab.cex = lab.cex, lab.col = lab.col, ...)
+      p <- mdaplot(pd, ylim = ylim, xlim = xlim, colmap = colmap, cgroup = cgroup, lab.cex = lab.cex, lab.col = lab.col, ...)
    }
 
    # show the critical limits
@@ -1006,11 +1004,11 @@ plotAcceptance.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType =
       lines(xle, yle, col = lim.col[1], lty = lim.lty[1], lwd = lim.lwd[1])
    }
 
-   if (!is.null(lim.lty) && !is.na(lim.lty[2])) {
+   if (show == "members" && !is.null(lim.lty) && !is.na(lim.lty[2])) {
       lines(xlo, ylo, col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
    }
 
-   return(p)
+   return(invisible(p))
 }
 
 
@@ -1028,8 +1026,6 @@ plotAcceptance.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType =
 #' logical, apply log transformation or not.
 #' @param show.legend
 #' logica, show or not colorbar legend on the plot.
-#' @param pch
-#' marker type
 #' @param lim.lty
 #' vector with two values - types of the lines showing critical limits (extreme, outlier).
 #' @param lim.col
@@ -1052,7 +1048,6 @@ plotDistances.ddsimcares <- function(obj, ncomp = obj$ncomp.selected,
       limType = "classic", distance = "h",
       log = FALSE,
       show.legend = TRUE,
-      pch = 1,
       lim.lty = c(2, 3),
       lim.col = c("darkgray", "darkgray"),
       lim.lwd = c(1, 1),
@@ -1146,8 +1141,7 @@ plotDistances.ddsimcares <- function(obj, ncomp = obj$ncomp.selected,
       return(pd)
    }
 
-   mdaplot(pd, ylim = ylim, xlim = xlim, colmap = colmap, pch = pch,
-      cgroup = cgroup, show.excluded = show.excluded, ...)
+   p <- mdaplot(pd, ylim = ylim, xlim = xlim, colmap = colmap, cgroup = cgroup, show.excluded = show.excluded, ...)
 
 
    if (yle > 0 && !is.null(lim.lty) && !is.na(lim.lty[1])) {
@@ -1157,6 +1151,8 @@ plotDistances.ddsimcares <- function(obj, ncomp = obj$ncomp.selected,
    if (ylo > 0 && !is.null(lim.lty) && !is.na(lim.lty[2])) {
       abline(h = ylo, col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
    }
+
+   return(invisible(p))
 }
 
 
@@ -1199,7 +1195,7 @@ summary.ddsimcares <- function(object, ncomp = object$ncomp.selected, limType = 
    cat("\n")
 
    stat <- as.matrix.ddsimcares(object, limType = limType)
-   rownames(stat)[ncomp] <- paste0(rownames(stat)[ncomp], " (s)")
+   rownames(stat)[ncomp] <- paste0(rownames(stat)[ncomp], "*")
    print(stat, 4)
    cat("\n")
 

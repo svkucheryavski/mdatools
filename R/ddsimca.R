@@ -361,7 +361,7 @@ plot.ddsimca <- function(x, comp = c(1, 2), ncomp = x$ncomp.selected, ...) {
 #' @export
 summary.ddsimca <- function(object, ncomp = object$ncomp.selected, res = object$res, ...) {
 
-   fprintf("\nSIMCA model for class '%s'\n\n", object$classname)
+   fprintf("\nDD-SIMCA model for class '%s'\n\n", object$classname)
 
    if (!is.null(object$info) && nchar(object$info)) {
       fprintf("Info: %s\n", object$info)
@@ -382,7 +382,7 @@ summary.ddsimca <- function(object, ncomp = object$ncomp.selected, res = object$
 
    fprintf("Number of components: %d\n", object$ncomp)
    fprintf("Number of selected components: %d\n", ncomp)
-   fprintf("Type of limits: %s\n", if (object$limType == "moments") "classic" else "robust")
+   fprintf("Type of limits: %s\n", if (object$limType == "robust" || object$limType == "ddrobust") "robust" else "classic")
    fprintf("Alpha: %s\n", object$alpha)
    fprintf("Gamma: %s\n", object$gamma)
 
@@ -392,6 +392,12 @@ summary.ddsimca <- function(object, ncomp = object$ncomp.selected, res = object$
    }
 
    cat("\n")
+
+   if (is.null(object[["res"]]) || is.null(object$res[["cal"]])) {
+      message("Calibration results not found (most probably this model is loaded from web-application).")
+      return(invisible(object))
+   }
+
 
    sum_data <- do.call(rbind, lapply(res, function(x) as.matrix(x)[ncomp, , drop = FALSE]))
    rownames(sum_data) <- capitalize(names(res))
@@ -730,6 +736,7 @@ ddsimca.fromjson <- function(str) {
    m$alpha <- extractValue(str, "alpha") / 100
    m$gamma <- extractValue(str, "gamma") / 100
    m$ncomp.selected <- extractValue(simca.str, "ncomp")
+   m$limType <- extractValue(simca.str, "limType")
    class(m) <- c("ddsimca", "pca")
    return(m)
 }
@@ -827,12 +834,32 @@ writeJSON.ddsimca <- function(obj, fileName, ...) {
 #  Plotting methods            #
 ################################
 
+#' Sensitivity plot.
+#'
+#' @param obj
+#' DD-SIMCA model (object of class \code{ddsimca}).
+#' @param limType
+#' limit type to show the plot for ('classic' or 'robust').
+#' @param col
+#' vector with two colors (for calibration and PV-set sensitivity).
+#' @param type
+#' type of the plot ("b", "l", or "h").
+#' @param pch
+#' vector with two markers (for calibration and PV-set sensitivity).
+#' @param legend.position
+#' position of legend on the plot.
+#' @param ...
+#' any parameters suitable for the \code{\link{plotSensitivity.ddsimcares}} method.
+#'
+#' @details
+#' The method shows sensitivity vs. number of components for calibration and PV-set results.
+#'
 #' @export
 plotSensitivity.ddsimca <- function(obj,
    limType = "classic",
    col = mdaplot.getColors(2),
-   pch = c(1, 1),
    type = "b",
+   pch = c(16, 16),
    legend.position = "bottomright",
    ...) {
 
@@ -841,32 +868,56 @@ plotSensitivity.ddsimca <- function(obj,
       return(invisible(NULL))
    }
 
-   p <- plotSensitivity.ddsimcares(obj$res[["cal"]], col = col[1], pch = pch[1], limType = limType, ...)
-
+   p <- plotSensitivity.ddsimcares(obj$res[["cal"]], pch = pch[1], col = col[1], limType = limType, ...)
    if (!is.null(obj$res[["pv"]])) {
       stopifnot("Number of values for 'col' parameter should be 2." = length(col) == 2)
       stopifnot("Number of values for 'pch' parameter should be 2." = length(pch) == 2)
 
       pd <- plotSensitivity.ddsimcares(obj$res[["pv"]], limType = limType, show.plot = FALSE, ...)
-      mdaplot(pd, show.axes = FALSE, type = type, col = col[2], pch = pch[2], ...)
-      mdaplotg.showLegend(c("cal", "pv"), col = col, pch = pch, lty = NA, position = legend.position)
+      mdaplot(pd, show.axes = FALSE, type = type, pch = pch[2], col = col[2], ...)
+      mdaplotg.showLegend(c("cal", "pv"), pch = pch, col = col, lty = NA, position = legend.position)
    } else {
-      mdaplotg.showLegend("cal", col = col[1], pch = pch[1], lty = NA, position = legend.position)
+      mdaplotg.showLegend("cal", pch = pch[1], col = col[1], lty = NA, position = legend.position)
    }
 }
 
 
+#' A shortcut to \code{\link{plotExtremes.ddsimca}}.
+#'
+#' @param obj
+#' DD-SIMCA model (object of class \code{ddsimca}).
+#' @param ...
+#' any parameters suitable for \code{\link{plotExtremes.ddsimca}}.
+#'
 #' @export
 plotExtreme.ddsimca <- function(obj, ...) {
    return(plotExtremes.ddsimca(obj, ...))
 }
 
+#' Extreme plot
+#'
+#' @description
+#' Shows a plot with number of expected vs. number of observed extreme objects for different
+#' significance levels (alpha values) for calibration and PV-set results.
+#'
+#' @param obj
+#' a DD-SIMCA model (object of class \code{ddsimca})
+#' @param ncomp
+#' number of components to show the plot for
+#' @param limType
+#' limit type to show the plot for ('classic' or 'robust').
+#' @param col
+#' vector with two colors (for calibration and PV-set sensitivity).
+#' @param legend.position
+#' position of the legend
+#' @param ...
+#' other arguments, suitable for \code{\link{plotExtremes.ddsimcares}}
+#'
 #' @export
 plotExtremes.ddsimca <- function(obj,
    ncomp = obj$ncomp.selected,
    limType = "classic",
    col = mdaplot.getColors(2),
-   pch = c(1, 1),
    legend.position = "topleft",
    ...) {
 
@@ -875,17 +926,16 @@ plotExtremes.ddsimca <- function(obj,
       return(invisible(NULL))
    }
 
-   p <- plotExtremes(obj$res[["cal"]], col = col[1], pch = pch[1], ncomp = ncomp, limType = limType, ...)
+   p <- plotExtremes(obj$res[["cal"]], col = col[1], ncomp = ncomp, limType = limType, ...)
 
    if (!is.null(obj$res[["pv"]])) {
       stopifnot("Number of values for 'col' parameter should be 2." = length(col) == 2)
-      stopifnot("Number of values for 'pch' parameter should be 2." = length(pch) == 2)
 
       pd <- plotExtremes(obj$res[["pv"]], limType = limType, ncomp = ncomp, show.plot = FALSE, ...)
-      mdaplot(pd, show.axes = FALSE, col = col[2], pch = pch[2], ...)
-      mdaplotg.showLegend(c("cal", "pv"), col = col, pch = pch, lty = NA, position = legend.position)
+      mdaplot(pd, show.axes = FALSE, col = col[2], ...)
+      mdaplotg.showLegend(c("cal", "pv"), col = col, lty = NA, position = legend.position)
    } else {
-      mdaplotg.showLegend("cal", col = col[1], pch = pch[1], lty = NA, position = legend.position)
+      mdaplotg.showLegend("cal", col = col[1], lty = NA, position = legend.position)
    }
 }
 
@@ -920,12 +970,41 @@ plotAcceptance.ddsimca <- function(obj, res = "cal", ...) {
 }
 
 
+#' Show with distance values (score, orthogonal or full) vs object indices for calibration
+#' and PV-set results.
+#'
+#' @param obj
+#' DD-SIMCA model (object of class \code{ddsimca})
+#'
+#' @param ncomp
+#' number of components to show the plot for.
+#' @param res
+#' name of the results (can be 'cal', 'pv', 'both', or 'diff', in the latter case shows difference
+#' of the distance values between the training and the PV-set).
+#' @param limType
+#' limit type to show the plot for ('classic' or 'robust')
+#' @param distance
+#' which distance to show (\code{"h"} for score, \code{"q"} for orthogonal or \code{"f"} for full distance).
+#' @param log
+#' logical, apply log transformation or not.
+#' @param lim.lty
+#' vector with two values - types of the lines showing critical limits (extreme, outlier).
+#' @param lim.col
+#' vector with two values - colors of the lines showing critical limits (extreme, outlier).
+#' @param lim.lwd
+#' vector with two values - thickness of the lines showing critical limits (extreme, outlier).
+#' @param ylim
+#' limits for y-axis, if NULL will be estimated automatically.
+#' @param xlim
+#' limits for x-axis, if NULL will be estimated automatically.
+#' @param ...
+#' other parameters compatible with \code{\link{plotDistances.ddsimcares}} method.
+#'
 #' @export
 plotDistances.ddsimca <- function(obj, res = "both",
    ncomp = obj$ncomp.selected,
    limType = "classic",
    distance = "h",
-   pch = 1,
    log = FALSE,
    lim.lty = c(2, 3),
    lim.col = c("darkgray", "darkgray"),
@@ -949,7 +1028,7 @@ plotDistances.ddsimca <- function(obj, res = "both",
    }
 
    if (distance != "f") {
-      return(invisible(mdaplotg(plot_data, type = "p", pch = pch, ylim = ylim, ...)))
+      return(invisible(mdaplotg(plot_data, type = "p", ylim = ylim, ...)))
    }
 
    if (res == "diff") {
@@ -981,7 +1060,7 @@ plotDistances.ddsimca <- function(obj, res = "both",
       ylim <- c(0, ymax * 1.2)
    }
 
-   mdaplotg(plot_data, type = "p", pch = pch, ylim = ylim, ...)
+   p <- mdaplotg(plot_data, type = "p", ylim = ylim, ...)
 
    if (yle > 0 && !is.null(lim.lty) && !is.na(lim.lty[1])) {
       abline(h = yle, col = lim.col[1], lty = lim.lty[1], lwd = lim.lwd[1])
@@ -991,5 +1070,6 @@ plotDistances.ddsimca <- function(obj, res = "both",
       abline(h = ylo, col = lim.col[2], lty = lim.lty[2], lwd = lim.lwd[2])
    }
 
+   return(invisible(p))
 }
 
