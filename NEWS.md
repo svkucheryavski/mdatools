@@ -1,7 +1,7 @@
 v. 0.15.0
 =========
 
-This release contains numerous improvements, bug fixes, and new methods. The main highlights are a standalone DD-SIMCA implementation, overhauled preprocessing pipelines (with some breaking changes), and JSON/CSV interoperability with the [mda.tools](https://mda.tools) web-applications.
+This release contains numerous improvements, bug fixes, and new methods. The main highlights are a standalone DD-SIMCA implementation, overhauled preprocessing pipelines (with some breaking changes), and JSON/CSV interoperability with the [mda.tools](https://mda.tools) web-applications.The [tutorial](https://mda.tools/docs) has been updated and improved accordingly.
 
 ### New dedicated methods for DD-SIMCA
 
