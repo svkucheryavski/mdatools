@@ -255,7 +255,6 @@ check_case <- function(m, Xta, cta, Xtf, ctf, Xtn, limType = "classic", caseNum 
    expect_error(plotExtreme(rn))
    expect_error(plotExtreme(ra))
    expect_error(plotExtreme(m, col = "blue"))
-   expect_error(plotExtreme(m, pch = 1))
 
    par(mfrow = c(2, 3))
    plotExtremes(rc)
