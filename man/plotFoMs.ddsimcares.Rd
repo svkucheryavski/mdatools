@@ -9,9 +9,9 @@
   foms = NULL,
   limType = "classic",
   type = "b",
-  pch = 1,
   ylim = c(0, 1.1),
-  legend.position = "top",
+  col = NULL,
+  legend.position = "bottom",
   main = "Figures of merit",
   ...
 )
@@ -25,9 +25,9 @@
 
 \item{type}{type of plot (can be 'b', 'l', or 'h').}
 
-\item{pch}{marker number or symbol for the plot points (if 'b' type is selected), can be single or individual for each FoM.}
-
 \item{ylim}{limits for y-axis.}
+
+\item{col}{vector with color values (should contain one value for each fom), if not provided will use default colors.}
 
 \item{legend.position}{position of legend on the plot.}
 

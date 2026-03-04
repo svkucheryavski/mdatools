@@ -11,7 +11,6 @@
   show = "auto",
   log = FALSE,
   show.legend = TRUE,
-  pch = 1,
   colors = c(regular = "#2679B2", extreme = "#F2B825", outlier = "#D22C2F", alien =
     "#2679B2", external = "#D22C2F", unknown = "#3c6784", excluded = "#00ff00"),
   lim.lty = c(2, 3),
@@ -38,8 +37,6 @@
 \item{log}{logical, apply log transformation or not.}
 
 \item{show.legend}{logica, show or not colorbar legend on the plot.}
-
-\item{pch}{marker type}
 
 \item{colors}{named vector with colors for every role}
 

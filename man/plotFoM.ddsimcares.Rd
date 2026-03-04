@@ -10,7 +10,6 @@
   limType = "classic",
   type = "b",
   ylim = c(0, 1.1),
-  pch = 1,
   show.plot = TRUE,
   ...
 )
@@ -25,8 +24,6 @@
 \item{type}{type of plot (can be 'b', 'l', or 'h').}
 
 \item{ylim}{limits for y-axis.}
-
-\item{pch}{marker number or symbol for the plot points (if 'b' type is selected).}
 
 \item{show.plot}{logical, if FALSE returns only values and does not show the plot.}
 

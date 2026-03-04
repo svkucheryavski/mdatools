@@ -11,7 +11,6 @@
   main = sprintf("Aliens (A = \%d)", ncomp),
   xlab = "Number of aliens (expected)",
   ylab = "Number of aliens (observed)",
-  pch = 1,
   col = "#2679b2",
   ellipse.col = "#eeeeee",
   show.plot = TRUE,
@@ -30,8 +29,6 @@
 \item{xlab}{label for x-axis.}
 
 \item{ylab}{label for y-axis.}
-
-\item{pch}{marker number or symbol for the plot points.}
 
 \item{col}{color of the plot points.}
 
