@@ -218,7 +218,7 @@ regres.err <- function(y.pred, y.ref) {
    err <- array(repmat(y.ref, ncomp, 1), dim = dim(y.pred)) - y.pred
 
    attr(err, "name") <- "Error of prediction"
-   attr(err, "xaxis.name") <- "Components"
+   attr(err, "xaxis.name") <- "Number of components, A"
    attr(err, "yaxis.name") <- "Predictors"
 
    return(err)

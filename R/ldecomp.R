@@ -408,7 +408,7 @@ ldecomp.getVariances <- function(scores, loadings, residuals, Q) {
    names(cumexpvar) <- names(expvar) <- colnames(Q)
    attr(expvar, "name") <- "Variance"
    attr(cumexpvar, "name") <- "Cumulative variance"
-   attr(expvar, "xaxis.name") <- attr(cumexpvar, "xaxis.name") <- "Components"
+   attr(expvar, "xaxis.name") <- attr(cumexpvar, "xaxis.name") <- "Number of components, A"
 
    return(list(expvar = expvar, cumexpvar = cumexpvar))
 }
@@ -496,7 +496,7 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
    # set attributes for Q
    Q <- mda.setattr(Q, mda.getattr(scores), type = "row")
    attr(Q, "name") <- "Squared residual distance (q)"
-   attr(Q, "xaxis.name") <- "Components"
+   attr(Q, "xaxis.name") <- "Number of components, A"
 
    # set attributes for T2
    H <- mda.setattr(H, mda.getattr(Q))
