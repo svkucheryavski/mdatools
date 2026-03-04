@@ -1106,3 +1106,16 @@ readJSON <- function(fileName) {
 }
 
 
+#' Clean text labels from extra elements so they are compatible with JSON
+#'
+#' @param str
+#' label string (for example produced by \code{expression}).
+#'
+#' @export
+cleanLabels <- function(str) {
+   str <- gsub(pattern = '"', replacement = "", x = str)
+   str <- gsub(pattern = '[{}]', replacement = "", x = str)
+   str <- gsub(pattern = '\\s+', replacement = " ", x = str)
+   str <- gsub(pattern = '\\s*\\^\\s*', replacement = "^", x = str)  # tighten around ^
+   return(trimws(str))
+}

@@ -1434,6 +1434,7 @@ asjson.pca <- function(obj, ...) {
    varvalues <- paste0(varvalues, collapse = ",")
    varindices <- paste0(varindices, collapse = ",")
    varvaluesName <- if(!is.null(attr(obj$loadings, "yaxis.name"))) attr(obj$loadings, "yaxis.name") else "''"
+   varvaluesName <- cleanLabels(varvaluesName)
 
    prep <- if (is.null(obj$prep)) "{}" else prep.asjson(obj$prep)
    hash <- paste0("'", genhash(), "'")
@@ -1588,7 +1589,7 @@ plotEigenvalues.pca <- function(obj, type = "b", labels = "values", transform = 
    }
 
    attr(ev, "name") <- ylab
-   attr(ev, "xaxis.name") <- "Components"
+   attr(ev, "xaxis.name") <- "Number of components, A"
    names(ev) <- names(obj$eigenvals)
 
    mdaplot(ev, xticks = xticks, labels = labels, type = type, ylab = ylab, ...)
@@ -1975,12 +1976,17 @@ plotDistDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj
    mdaplotyy(plot_data, type = type, labels = labels, xticks = xticks, ...)
 }
 
-
+#' A shortcut to `\code{\link{plotExtremes.pca}}.
+#'
+#' @param obj
+#' PCA model (object of class \code{pca}).
+#' @param ...
+#' any parameters suitable for `\code{\link{plotExtremes.pca}}.
+#'
 #' @export
 plotExtreme.pca <- function(obj, ...) {
    return(plotExtremes.pca(obj, ...))
 }
-
 
 #' Extreme plot
 #'
