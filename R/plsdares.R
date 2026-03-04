@@ -228,6 +228,8 @@ summary.plsdares <- function(object, nc = seq_len(object$nclasses), ...) {
       print(out)
       cat("\n")
    }
+
+   invisible(object)
 }
 
 #' Print method for PLS-DA results object
@@ -263,4 +265,6 @@ print.plsdares <- function(x, ...) {
    }
 
    cat("$xdecomp - decomposition of x values (ldecomp object)\n")
+
+   invisible(x)
 }

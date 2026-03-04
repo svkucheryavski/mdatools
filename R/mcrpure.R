@@ -275,6 +275,8 @@ print.mcrpure <- function(x, ...) {
    cat(" $cumexpvar - vector with cumulative explained variance\n")
    cat(" $offset - offset value used to compute the purity\n")
    cat(" $info - case info provided by user\n")
+
+   invisible(x)
 }
 
 #' Summary method for mcrpure object
@@ -312,6 +314,8 @@ summary.mcrpure <- function(object, ...) {
    colnames(data) <- c("Expvar", "Cumexpvar", "Varindex", "Purity")
    rownames(data) <- colnames(object$purityspec)
    show(data)
+
+   invisible(object)
 }
 
 

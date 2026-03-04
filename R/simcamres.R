@@ -115,6 +115,8 @@ summary.simcamres <- function(object, nc = seq_len(object$nclasses), ...) {
    fprintf("\nNumber of classes: %d\n", length(nc))
    print(as.matrix.simcamres(object))
    cat("\n")
+
+   invisible(object)
 }
 
 #' Print method for SIMCAM results object
@@ -132,6 +134,8 @@ print.simcamres <- function(x, ...) {
    cat("\nResult for SIMCA multiple classes classification (class simcamres)\n\n")
    print.classres(x, "")
    cat("\n")
+
+   invisible(x)
 }
 
 

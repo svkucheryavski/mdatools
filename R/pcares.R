@@ -233,7 +233,7 @@ writeCSV.pcares <- function(res, fileName, name, sep = ",", dataFile = "", class
          }
       }
 
-      return (out)
+      return(out)
    }
 
    # general information

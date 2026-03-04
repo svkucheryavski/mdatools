@@ -1022,7 +1022,7 @@ pls.fromjson <- function(str) {
 
    m$call <- match.call()
    class(m) <- c("pls", "regmodel")
-   return (m)
+   return(m)
 }
 
 
@@ -1038,7 +1038,7 @@ pls.readJSON <- function(fileName) {
    fileConn <- file(fileName)
    str <- readLines(fileConn, warn = FALSE)
    close(fileConn)
-   return (pls.fromjson(str))
+   return(pls.fromjson(str))
 }
 
 
@@ -1125,7 +1125,7 @@ asvector.pls <- function(obj) {
 
    )
    names(mv) <- NULL
-   return(mv);
+   return(mv)
 }
 
 

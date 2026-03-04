@@ -210,6 +210,8 @@ summary.simcam <- function(object, nc = seq_len(object$nclasses), ...) {
    cat("\nSummary for calibration results\n")
    print(as.matrix.simcamres(object$res[["cal"]], nc = nc))
    cat("\n")
+
+   invisible(object)
 }
 
 #' Print method for SIMCAM model object
@@ -236,6 +238,8 @@ print.simcam <- function(x, ...) {
    cat(" $dispower - matrix with discrimination power values\n")
    cat(" $info - information about the object\n")
    cat(" $res - list with calibration results\n")
+
+   invisible(x)
 }
 
 

@@ -440,6 +440,8 @@ summary.simca <- function(object, ncomp = object$ncomp.selected, res = object$re
    rownames(sum_data) <- capitalize(names(res))
    print(sum_data)
    cat("\n")
+
+   invisible(object)
 }
 
 #' Print method for SIMCA model object
@@ -474,4 +476,6 @@ print.simca <- function(x, ...) {
    cat(" $T2lim - critical values and parameters for score distances\n")
    cat(" $cv - cross-validation parameters\n")
    cat(" $res - list with result objects ('cal', 'cv', 'test')\n")
+
+   invisible(x)
 }

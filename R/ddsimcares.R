@@ -39,13 +39,13 @@
 #' \tabular{ll}{
 #'  \code{print.ddsimcares} \tab shows information about the object.\cr
 #'  \code{summary.ddsimcares} \tab shows statistics for results of classification.\cr
-#'  \code{as.data.frame.ddsimcares} \tab shows converts DD-SIMCA results into data frame.\cr
-#'  \code{as.matrix.ddsimcares} \tab shows converts summary of DD-SIMCA results into matrix.\cr
+#'  \code{as.data.frame.ddsimcares} \tab converts DD-SIMCA results into data frame.\cr
+#'  \code{as.matrix.ddsimcares} \tab converts summary of DD-SIMCA results into matrix.\cr
 #'  \code{writeCSV.ddsimcares} \tab saves DD-SIMCA results into a CSV file.\cr
 #'  \code{plotAcceptance.ddsimcares} \tab shows acceptance plot (q/q0 vs h/h0) with decision and outlier boundaries.\cr
 #'  \code{plotExtremes.ddsimcares} \tab shows extremes plot.\cr
 #'  \code{plotAliens.ddsimcares} \tab shows aliens plot.\cr
-#'  \code{plotDistance.ddsimcares} \tab shows plot with individual distances (q, h or f).\cr
+#'  \code{plotDistances.ddsimcares} \tab shows plot with individual distances (q, h or f).\cr
 #' }
 #'
 #' Methods, inherited from \code{\link{ldecomp}} class:
@@ -695,7 +695,7 @@ plotExtremes.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "
       stop("No information about target class objects is found.")
    }
 
-   ind <- if (!is.null(res$excluded)) res$indices$members && (!res$excluded) else res$indices$members
+   ind <- if (any(res$indices$excluded)) res$indices$members & (!res$indices$excluded) else res$indices$members
    if (sum(ind) < 3) {
       stop("Not enough target class members to make the plot (at least 3 is required).")
    }
@@ -779,7 +779,7 @@ plotAliens.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "cl
       stop("No information about non-target class objects is found.")
    }
 
-   ind <- if (!is.null(res$excluded)) res$indices$strangers && (!res$excluded) else res$indices$strangers
+   ind <- if (any(res$indices$excluded)) res$indices$strangers & (!res$indices$excluded) else res$indices$strangers
    if (sum(ind) < 3) {
       stop("Not enough non-target class members to make the plot (at least 3 is required).")
    }

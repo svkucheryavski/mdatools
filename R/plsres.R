@@ -232,6 +232,8 @@ summary.plsres <- function(object, ny = seq_len(object$nresp), ncomp = NULL, ...
       out[, 9] <- round(out[, 9], 2)
       print(out)
    }
+
+   invisible(object)
 }
 
 #' print method for PLS results object
@@ -264,6 +266,8 @@ print.plsres <- function(x, ...) {
    }
 
    cat(" $xdecomp - decomposition of x values (ldecomp object)\n")
+
+   invisible(x)
 }
 
 
@@ -332,7 +336,7 @@ writeCSV.plsres <- function(res, fileName, name, sep = ",", dataFile = "", ...) 
          }
       }
 
-      return (out)
+      return(out)
    }
 
    # general information

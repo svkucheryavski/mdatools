@@ -293,6 +293,8 @@ summary.randtest <- function(object, ...) {
    cat("\nStatistics and alpha values:\n")
    show(data)
    cat("\n")
+
+   invisible(object)
 }
 
 #' Print method for randtest object
@@ -318,4 +320,6 @@ print.randtest <- function(x, ...) {
    cat("$statperm - matrix with statistic values for each permutation.\n")
    cat("$corrperm - correlations between predicted and reference y-values for permutations.\n")
    cat("\nTry summary(obj) and plot(obj) to see the test results.\n")
+
+   invisible(x)
 }

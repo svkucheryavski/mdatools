@@ -62,7 +62,7 @@ prep.spikes <- function(data, width = 5, threshold = 6) {
          }
       }
 
-      return (data)
+      return(data)
    }
 
    return(prep.generic(data, f, width = width, threshold = threshold))
@@ -250,7 +250,7 @@ prep.ref2km <- function(data) {
    stopifnot("Can't use Kubelka-Munk transformation as some of the values are zeros or negative." = all(data > 0))
    f <- function(x) (1 - x)^2 / (2 * x)
 
-   return (prep.generic(data, f))
+   return(prep.generic(data, f))
 }
 
 
@@ -581,13 +581,13 @@ prep.center.params <- function(data, type = "mean", center = NULL) {
 
    type <- match.arg(type, c("mean", "median"))
    if (!is.null(center)) {
-      return (list(center = center))
+      return(list(center = center))
    }
 
    data <- mda.purgeRows(data)
    f <- c("mean" = mean, "median" = median)
    center <- if (type == "mean") colMeans(data) else apply(data, 2, f[[type]])
-   return (list(type = type, center = center))
+   return(list(type = type, center = center))
 }
 
 
@@ -609,7 +609,7 @@ prep.scale.params <- function(data, type = "sd", max.cov = 0, scale = NULL) {
 
    type <- match.arg(type, c("sd", "iqr", "range", "pareto"))
    if (!is.null(scale)) {
-      return (list(scale = scale))
+      return(list(scale = scale))
    }
 
    data <- mda.purgeRows(data)
@@ -621,7 +621,7 @@ prep.scale.params <- function(data, type = "sd", max.cov = 0, scale = NULL) {
       cv <- scale / abs(m) * 100
       scale[is.nan(cv) | cv <= max.cov] <- 1
    }
-   return (list(type = type, scale = scale))
+   return(list(type = type, scale = scale))
 }
 
 
@@ -659,7 +659,7 @@ prep.emsc.params <- function(data, degree = 0, mspectrum = NULL) {
       }
    }
 
-   return (list(
+   return(list(
       mspectrum = mspectrum,
       lnorm = lnorm,
       A = A
@@ -717,7 +717,7 @@ prep.savgol.params <- function(data, width = 3, porder = 1, dorder = 0) {
    m <- round((width - 1) / 2)
    w <- outer(-m:m, -m:m, function(x, y) weight(x, y, m, porder, dorder))
 
-   return (list(width = width, porder = porder, dorder = dorder, w = w))
+   return(list(width = width, porder = porder, dorder = dorder, w = w))
 }
 
 
@@ -757,7 +757,7 @@ prep.varsel.asjson <- function(params, npred, left = NULL, right = NULL) {
 
    left.local <- if (is.null(left)) min(ind) else min(ind) + left
    right.local <- if (is.null(left)) max(ind) else max(ind) + left
-   return (list(
+   return(list(
       ml = 4,
       mpl = 2,
       mp = c(left.local - 1, right.local),
@@ -787,7 +787,7 @@ prep.varsel.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) 
    right.local <- mp[2] - left.tot
    left.local  <- mp[1] - left.tot + 1
    p <- prep("varsel", var.ind = left.local:right.local)
-   return (p)
+   return(p)
 }
 
 
@@ -810,7 +810,7 @@ prep.spikes.asjson <- function(params, npred, left = NULL, right = NULL) {
    width <- params$width
    threshold <- params$threshold
 
-   return (list(
+   return(list(
       ml = 5,
       mpl = 2,
       mp = c(width, threshold),
@@ -841,7 +841,7 @@ prep.spikes.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) 
    threshold <- mp[2]
 
    p <- prep("spikes", width = width, threshold = threshold)
-   return (p)
+   return(p)
 }
 
 
@@ -869,7 +869,7 @@ prep.norm.asjson <- function(params, npred, left = 0, right = 1) {
    }
    col.ind <- if (!is.null(params$col.ind)) params$col.ind  else 0
 
-   return (list(
+   return(list(
       ml = 0,
       mpl = 2,
       mp = c(type, left + col.ind - 1),
@@ -930,7 +930,7 @@ prep.savgol.asjson <- function(params, npred, left = 0, right = 1) {
    porder <- params$porder
    dorder <- params$dorder
 
-   return (list(
+   return(list(
       ml = 1,
       mpl = 3,
       mp = c(params$width, params$porder, params$dorder), # esmc, degree, NA
@@ -965,7 +965,7 @@ prep.savgol.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) 
    p <- prep("savgol", width = width, porder = porder, dorder = dorder)
    p$params <- list(width = width, porder = porder, dorder = dorder, w = w)
 
-   return (p)
+   return(p)
 }
 
 
@@ -992,7 +992,7 @@ prep.emsc.asjson <- function(params, npred, left = 0, right = 1) {
    vardiff <- npred - nvar
    pad <- rep(0, vardiff * (nterms + 2))
 
-   return (list(
+   return(list(
       ml = 3,
       mpl = 3,
       mp = c(0, degree, 0), # esmc, degree, NA
@@ -1042,7 +1042,7 @@ prep.emsc.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) {
    p <- prep("emsc", degree = degree)
    p$params <- list(mspectrum = mspectrum, lnorm = lnorm, A = A)
 
-   return (p)
+   return(p)
 }
 
 
@@ -1071,7 +1071,7 @@ prep.center.asjson <- function(params, npred, left = 0, right = 1) {
    vardiff <- npred - nvar
    pad <- rep(0, vardiff * 2)
 
-   return (list(
+   return(list(
       ml = 2,
       mpl = 2,
       mp = c(type.num, 0),
@@ -1109,7 +1109,7 @@ prep.center.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) 
    p <- prep("center", type = type)
    p$params <- list(type = type, center = center)
 
-   return (p)
+   return(p)
 }
 
 
@@ -1138,7 +1138,7 @@ prep.scale.asjson <- function(params, npred, left = 0, right = 1) {
    vardiff <- npred - nvar
    pad <- rep(0, vardiff * 2)
 
-   return (list(
+   return(list(
       ml = 2,
       mpl = 2,
       mp = c(0, type.num), #
@@ -1176,7 +1176,7 @@ prep.scale.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) {
    p <- prep("scale", type = type)
    p$params <- list(type = type, scale = scale)
 
-   return (p)
+   return(p)
 }
 
 
@@ -1195,7 +1195,7 @@ prep.scale.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) {
 #' compatible with preprocessing web-application (ml, mpl, mp, mpl_new, mp_new, info)
 #'
 prep.alsbasecorr.asjson <- function(params, npred, left = 0, right = 1) {
-   return (list(
+   return(list(
       ml = 3,
       mpl = 3,
       mp = c(1, params$plambda, params$p), # alsbasecorr, lambda, p
@@ -1223,7 +1223,7 @@ prep.alsbasecorr.asjson <- function(params, npred, left = 0, right = 1) {
 #'
 prep.alsbasecorr.fromjson <- function(mp, mp_new, left = 0, right = 1, left.tot = 0) {
    p <- prep("alsbasecorr", plambda = mp[2], p = mp[3])
-   return (p)
+   return(p)
 }
 
 
@@ -1491,7 +1491,7 @@ prep.fit <- function(obj, x) {
    }
    out[["_npred"]] <- npred
    class(out) <- c("prepmodel")
-   return (out)
+   return(out)
 }
 
 
@@ -1623,7 +1623,7 @@ prep.asjson <- function(obj) {
    )
 
    m <- gsub("\'", "\"", m)
-   return (m)
+   return(m)
 }
 
 
@@ -1727,7 +1727,7 @@ prep.fromjson <- function(str) {
 
    m[["_npred"]] <- npred
    class(m) <- c("prepmodel")
-   return (m)
+   return(m)
 }
 
 
@@ -1965,7 +1965,7 @@ prep.snv <- function(data) {
 #' @export
 prep.msc <- function(data, mspectrum = NULL, ...) {
    # .Deprecated("prep.emsc")
-   return (prep.emsc(data, degree = 0, mspectrum = mspectrum, ...))
+   return(prep.emsc(data, degree = 0, mspectrum = mspectrum, ...))
 }
 
 

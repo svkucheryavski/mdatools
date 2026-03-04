@@ -539,7 +539,7 @@ ldecomp.getDistances <- function(scores, loadings, residuals, eigenvals) {
 #' @export
 jm.crit <- function(residuals, eigenvals, alpha = 0.05, gamma = 0.01) {
 
-   # if not all eigenvalues available - ise residuals to compute the rest
+   # if not all eigenvalues available - use residuals to compute the rest
    ncomp <- length(eigenvals)
    nobj <- nrow(residuals)
    max_ncomp <- min(nrow(residuals) - 1, ncol(residuals))

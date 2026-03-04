@@ -748,6 +748,8 @@ print.ipls <- function(x, ...) {
    cat(" $int.stat - table with statistics for the interval selection results\n")
    cat(" $glob.stat - table with statistics for the first iteration of the algorithm\n")
    cat("\nTry summary(obj) and plot(obj) to see details.\n")
+
+   invisible(x)
 }
 
 #' Summary for iPLS results
@@ -793,4 +795,6 @@ summary.ipls <- function(object, glob.ncomp = object$gm$ncomp.selected, ...) {
    cat("\nSummary for selection procedure:\n")
    show(object$int.stat)
    cat("\n")
+
+   invisible(object)
 }

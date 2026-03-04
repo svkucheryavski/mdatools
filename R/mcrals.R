@@ -305,6 +305,8 @@ print.mcrals <- function(x, ...) {
    cat(" $expvar - vector with explained variance\n")
    cat(" $cumexpvar - vector with cumulative explained variance\n")
    cat(" $info - case info provided by user\n")
+
+   invisible(x)
 }
 
 #' Summary method for mcrals object
@@ -355,6 +357,8 @@ summary.mcrals <- function(object, ...) {
    rownames(out) <- colnames(object$variance)
    colnames(out) <- c("Expvar", "Cumexpvar")
    show(out)
+
+   invisible(object)
 }
 
 

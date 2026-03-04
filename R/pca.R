@@ -102,7 +102,6 @@
 #' however, the model object will not contain calibration/training results, so some of
 #' the plots and statistics will not be available.
 #'
-#' web-applications
 #' @return
 #' Returns an object of \code{pca} class with following fields:
 #' \item{ncomp }{number of components included to the model.}
@@ -632,6 +631,8 @@ print.pca <- function(x, ...) {
       cat(" $res - list with model results (calibration, test)\n")
    if (!is.null(x$prep))
       cat(" $prep - preprocessing model\n")
+
+   invisible(x)
 }
 
 #' Summary method for PCA model object
@@ -693,6 +694,8 @@ summary.pca <- function(object, ...) {
    colnames(data) <- c("Eigenvals", "Expvar", "Cumexpvar", "Nq", "Nh")
    rownames(data) <- colnames(object$loadings)
    show(data)
+
+   invisible(object)
 }
 
 
@@ -1292,7 +1295,7 @@ pca.fromjson <- function(str) {
 
    m$call <- match.call()
    class(m) <- "pca"
-   return (m)
+   return(m)
 }
 
 
@@ -1308,7 +1311,7 @@ pca.readJSON <- function(fileName) {
    fileConn <- file(fileName)
    str <- readLines(fileConn, warn = FALSE)
    close(fileConn)
-   return (pca.fromjson(str))
+   return(pca.fromjson(str))
 }
 
 
@@ -1393,7 +1396,7 @@ asvector.pca <- function(obj) {
       pmax(as.vector(round(gpr$Nu)), 1)      # Ngr
    )
    names(mv) <- NULL
-   return(mv);
+   return(mv)
 }
 
 
@@ -1730,7 +1733,7 @@ plotDistances.pca <- function(obj, ncomp = obj$ncomp.selected, log = FALSE,
 
    ldecomp.plotDistances(res, obj$Qlim, obj$T2lim, ncomp = ncomp, log = log, norm = norm,
       cgroup = cgroup, xlim = xlim, ylim = ylim, show.limits = show.limits, lim.col = lim.col,
-      lim.lwd = lim.lwd, show.legend = show.legend, ...)
+      lim.lwd = lim.lwd, lim.lty = lim.lty, show.legend = show.legend, ...)
 }
 
 

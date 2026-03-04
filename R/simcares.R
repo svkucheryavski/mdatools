@@ -143,6 +143,8 @@ summary.simcares <- function(object, ...) {
 
    print(as.matrix.simcares(object, ...))
    cat("\n")
+
+   invisible(object)
 }
 
 #' Print method for SIMCA results object
@@ -163,4 +165,6 @@ print.simcares <- function(x, ...) {
    print.ldecomp(x, "")
    print.classres(x, "")
    cat("\n")
+
+   invisible(x)
 }

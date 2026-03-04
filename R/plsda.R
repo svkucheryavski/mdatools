@@ -381,6 +381,8 @@ summary.plsda <- function(object, ncomp = object$ncomp.selected,
       print(out[, -c(1, 3), drop = FALSE])
       cat("\n")
    }
+
+   invisible(object)
 }
 
 #' Print method for PLS-DA model object
@@ -409,4 +411,6 @@ print.plsda <- function(x, ...) {
    cat(" $calres - results for calibration set\n")
 
    cat("\nTry summary(model) and plot(model) to see the model performance.\n")
+
+   invisible(x)
 }

@@ -241,6 +241,8 @@ print.classres <- function(x, str = "Classification results (class classres)\nMa
       cat(" $sensitivity - sensitivity of predictions\n")
       cat(" $misclassified - misclassification ratio for predictions\n")
    }
+
+   invisible(x)
 }
 
 #' Summary statistics about classification result object
@@ -278,6 +280,7 @@ summary.classres <- function(object, ncomp = object$ncomp.selected,
       print(as.matrix.classres(object, nc = i, ncomp = ncomp))
    }
 
+   invisible(object)
 }
 
 ################################
