@@ -80,13 +80,13 @@ Methods specific for \code{ddsimcares} objects:
 \tabular{ll}{
  \code{print.ddsimcares} \tab shows information about the object.\cr
  \code{summary.ddsimcares} \tab shows statistics for results of classification.\cr
- \code{as.data.frame.ddsimcares} \tab shows converts DD-SIMCA results into data frame.\cr
- \code{as.matrix.ddsimcares} \tab shows converts summary of DD-SIMCA results into matrix.\cr
+ \code{as.data.frame.ddsimcares} \tab converts DD-SIMCA results into data frame.\cr
+ \code{as.matrix.ddsimcares} \tab converts summary of DD-SIMCA results into matrix.\cr
  \code{writeCSV.ddsimcares} \tab saves DD-SIMCA results into a CSV file.\cr
  \code{plotAcceptance.ddsimcares} \tab shows acceptance plot (q/q0 vs h/h0) with decision and outlier boundaries.\cr
  \code{plotExtremes.ddsimcares} \tab shows extremes plot.\cr
  \code{plotAliens.ddsimcares} \tab shows aliens plot.\cr
- \code{plotDistance.ddsimcares} \tab shows plot with individual distances (q, h or f).\cr
+ \code{plotDistances.ddsimcares} \tab shows plot with individual distances (q, h or f).\cr
 }
 
 Methods, inherited from \code{\link{ldecomp}} class:

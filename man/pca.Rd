@@ -140,8 +140,6 @@ PCA available at https://mda.tools/pca. Likewise one can develop a model in the 
 JSON file and then load it to R by using method \code{\link{readJSON}}. In this case,
 however, the model object will not contain calibration/training results, so some of
 the plots and statistics will not be available.
-
-web-applications
 }
 \examples{
 library(mdatools)
