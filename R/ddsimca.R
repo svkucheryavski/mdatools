@@ -908,6 +908,8 @@ plotExtreme.ddsimca <- function(obj, ...) {
 #' limit type to show the plot for ('classic' or 'robust').
 #' @param col
 #' vector with two colors (for calibration and PV-set sensitivity).
+#' @param pch
+#' vector with two markers (for calibration and PV-set sensitivity).
 #' @param legend.position
 #' position of the legend
 #' @param ...
@@ -918,6 +920,7 @@ plotExtremes.ddsimca <- function(obj,
    ncomp = obj$ncomp.selected,
    limType = "classic",
    col = mdaplot.getColors(2),
+   pch = c(16, 16),
    legend.position = "topleft",
    ...) {
 
@@ -926,16 +929,17 @@ plotExtremes.ddsimca <- function(obj,
       return(invisible(NULL))
    }
 
-   p <- plotExtremes(obj$res[["cal"]], col = col[1], ncomp = ncomp, limType = limType, ...)
+   p <- plotExtremes(obj$res[["cal"]], pch = pch[1], col = col[1], ncomp = ncomp, limType = limType, ...)
 
    if (!is.null(obj$res[["pv"]])) {
       stopifnot("Number of values for 'col' parameter should be 2." = length(col) == 2)
+      stopifnot("Number of values for 'pch' parameter should be 2." = length(pch) == 2)
 
       pd <- plotExtremes(obj$res[["pv"]], limType = limType, ncomp = ncomp, show.plot = FALSE, ...)
-      mdaplot(pd, show.axes = FALSE, col = col[2], ...)
-      mdaplotg.showLegend(c("cal", "pv"), col = col, lty = NA, position = legend.position)
+      mdaplot(pd, show.axes = FALSE, pch = pch[2], col = col[2], ...)
+      mdaplotg.showLegend(c("cal", "pv"), pch = pch, col = col, lty = NA, position = legend.position)
    } else {
-      mdaplotg.showLegend("cal", col = col[1], lty = NA, position = legend.position)
+      mdaplotg.showLegend("cal", pch = pch[1], col = col[1], lty = NA, position = legend.position)
    }
 }
 

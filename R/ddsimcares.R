@@ -666,6 +666,8 @@ plotExtreme.ddsimcares <- function(obj, ...) {
 #' label for y-axis.
 #' @param col
 #' color of the plot points.
+#' @param pch
+#' color of the plot points.
 #' @param ellipse.col
 #' color of the confidence ellipse elements.
 #' @param show.plot
@@ -681,11 +683,12 @@ plotExtreme.ddsimcares <- function(obj, ...) {
 #' The plot also shows a confidence ellipse for the expected values.
 #'
 #' @export
-plotExtremes.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "classic",
+plotExtremes.ddsimcares <- function(obj,
+   ncomp = obj$ncomp.selected, limType = "classic",
    main = sprintf("Extremes (A = %d)", ncomp),
    xlab = "Number of extremes (expected)",
    ylab = "Number of extremes (observed)",
-   col = "#2679b2",
+   col = "#2679b2", pch = 16,
    ellipse.col = "#eeeeee",
    show.plot = TRUE, ...) {
 
@@ -734,7 +737,7 @@ plotExtremes.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType = "
    lines(c(0, expected), c(0, Np), col = ellipse.col)
 
    # show the points
-   points(expected, observed, col = col, ...)
+   points(expected, observed, col = col, pch = pch, ...)
 
    return(invisible(p))
 }

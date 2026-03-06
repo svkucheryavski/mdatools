@@ -9,6 +9,7 @@
   ncomp = obj$ncomp.selected,
   limType = "classic",
   col = mdaplot.getColors(2),
+  pch = c(16, 16),
   legend.position = "topleft",
   ...
 )
@@ -21,6 +22,8 @@
 \item{limType}{limit type to show the plot for ('classic' or 'robust').}
 
 \item{col}{vector with two colors (for calibration and PV-set sensitivity).}
+
+\item{pch}{vector with two markers (for calibration and PV-set sensitivity).}
 
 \item{legend.position}{position of the legend}
 

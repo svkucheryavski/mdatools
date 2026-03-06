@@ -12,6 +12,7 @@
   xlab = "Number of extremes (expected)",
   ylab = "Number of extremes (observed)",
   col = "#2679b2",
+  pch = 16,
   ellipse.col = "#eeeeee",
   show.plot = TRUE,
   ...
@@ -31,6 +32,8 @@
 \item{ylab}{label for y-axis.}
 
 \item{col}{color of the plot points.}
+
+\item{pch}{color of the plot points.}
 
 \item{ellipse.col}{color of the confidence ellipse elements.}
 
