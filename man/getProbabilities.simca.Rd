@@ -21,6 +21,6 @@
 Probabilities of class belonging for PCA/SIMCA results
 }
 \details{
-Computes p-value for every object being from the same populaion as calibration set
+Computes p-value for every object being from the same population as calibration set
 based on its orthogonal and score distances.
 }

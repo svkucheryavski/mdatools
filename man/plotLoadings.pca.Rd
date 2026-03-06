@@ -7,7 +7,7 @@
 \method{plotLoadings}{pca}(
   obj,
   comp = if (obj$ncomp > 1) c(1, 2) else 1,
-  type = (if (length(comp == 2)) "p" else "l"),
+  type = (if (length(comp) == 2) "p" else "l"),
   show.legend = TRUE,
   show.axes = TRUE,
   ...
@@ -22,7 +22,7 @@
 
 \item{show.legend}{logical, show or not a legend on the plot}
 
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+\item{show.axes}{logical, show or not axes lines crossing origin (0,0)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

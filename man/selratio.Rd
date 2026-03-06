@@ -9,14 +9,14 @@ selratio(obj, ncomp = obj$ncomp.selected)
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{number of components to count}
+\item{ncomp}{number of components to use in the model for calculation.}
 }
 \value{
-array \code{nvar x ncomp x ny} with selectivity ratio values
+array \code{nvar x ny} with selectivity ratio values
 }
 \description{
-Calculates selectivity ratio for each component and response variable in
-the PLS model
+Calculates selectivity ratio for all response variables in
+the PLS model with given number of components.
 }
 \references{
 [1] Tarja Rajalahti et al. Chemometrics and Laboratory Systems, 95 (2009), pp. 35-48.

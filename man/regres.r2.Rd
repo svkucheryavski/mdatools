@@ -12,5 +12,5 @@ regres.r2(err, ytot)
 \item{ytot}{total variance for y-values}
 }
 \description{
-Calculates matrix with coeffient of determination for every response and components
+Calculates matrix with coefficient of determination for every response and components
 }

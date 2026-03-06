@@ -19,13 +19,12 @@ plus extra fields, inherited from \code{\link{classres}}:
 
 The following fields are available only if reference values were provided.
 \item{tp}{number of true positives.}
-\item{fp}{nmber of false positives.}
+\item{fp}{number of false positives.}
 \item{fn}{number of false negatives.}
 \item{specificity}{specificity of predictions.}
 \item{sensitivity}{sensitivity of predictions.}
 }
 \description{
-@description
 \code{simcares} is used to store results for SIMCA one-class classification.
 }
 \details{
@@ -51,7 +50,7 @@ se = data[1:30, ]
 model = simca(se, 'Se')
 model = selectCompNum(model, 1)
 
-# show infromation and summary
+# show information and summary
 print(model$calres)
 summary(model$calres)
 

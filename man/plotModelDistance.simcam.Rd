@@ -36,7 +36,7 @@
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
-Shows a plot with distance between one SIMCA model to others.
+Shows a plot with distance between one SIMCA model and others.
 }
 \details{
 The plot shows similarity between a selected model and the others as a ratio of residual
@@ -70,7 +70,7 @@ data(iris)
 x1 <- iris[1:25, 1:4]
 x2 <- iris[51:75, 1:4]
 
-# create to SIMCA models with A = 2
+# create two SIMCA models with A = 2
 m1 <- simca(x1, 'setosa', ncomp = 2)
 m2 <- simca(x2, 'versicolor', ncomp = 2)
 

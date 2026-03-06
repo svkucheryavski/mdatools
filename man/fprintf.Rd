@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{fprintf}
 \alias{fprintf}
-\title{Imitation of fprinf() function}
+\title{Imitation of fprintf() function}
 \usage{
 fprintf(...)
 }
@@ -10,5 +10,5 @@ fprintf(...)
 \item{...}{arguments for sprintf function}
 }
 \description{
-Imitation of fprinf() function
+Imitation of fprintf() function
 }

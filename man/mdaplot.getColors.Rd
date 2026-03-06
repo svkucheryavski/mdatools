@@ -21,7 +21,7 @@ mdaplot.getColors(
 
 \item{opacity}{opacity for colors (between 0 and 1)}
 
-\item{maxsplits}{if contenuous values are used for color gruping - how many groups to create?}
+\item{maxsplits}{if continuous values are used for color grouping - how many groups to create?}
 }
 \value{
 Returns vector with generated color values

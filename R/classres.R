@@ -1,7 +1,7 @@
 #' Results of classification
 #'
 #' @description
-#' \code{classres} is used to store results classification for one or multiple classes.
+#' \code{classres} is used to store results of classification for one or multiple classes.
 #'
 #' @param c.pred
 #' matrix with predicted values (+1 or -1) for each class.
@@ -14,7 +14,7 @@
 #'
 #' @details
 #' There is no need to create a \code{classres} object manually, it is created automatically when
-#' build a classification model (e.g. using \code{\link{simca}} or \code{\link{plsda}}) or apply
+#' building a classification model (e.g. using \code{\link{simca}} or \code{\link{plsda}}) or apply
 #' the model to new data. For any classification method from \code{mdatools}, a class using to
 #' represent results of classification (e.g. \code{\link{simcares}}) inherits fields and methods of
 #' \code{classres}.
@@ -27,18 +27,18 @@
 #' The following fields are available only if reference values were provided.
 #' \item{tp}{number of true positives.}
 #' \item{tn}{number of true negatives.}
-#' \item{fp}{nmber of false positives.}
+#' \item{fp}{number of false positives.}
 #' \item{fn}{number of false negatives.}
 #' \item{specificity}{specificity of predictions.}
 #' \item{sensitivity}{sensitivity of predictions.}
 #' \item{misclassified}{ratio of misclassified objects.}
 #'
 #' @seealso
-#' Methods \code{classres} class:
+#' Methods for \code{classres} class:
 #' \tabular{ll}{
 #'  \code{\link{showPredictions.classres}} \tab shows table with predicted values.\cr
 #'  \code{\link{plotPredictions.classres}} \tab makes plot with predicted values.\cr
-#'  \code{\link{plotSensitivity.classres}} \tab makes sn plot.\cr
+#'  \code{\link{plotSensitivity.classres}} \tab makes sensitivity plot.\cr
 #'  \code{\link{plotSpecificity.classres}} \tab makes specificity plot.\cr
 #'  \code{\link{plotMisclassified.classres}} \tab makes ms ratio plot.\cr
 #'  \code{\link{plotPerformance.classres}} \tab makes plot with misclassified ratio, specificity
@@ -49,7 +49,7 @@
 classres <- function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = 1) {
 
    if (length(dim(c.pred)) != 3) {
-      stop("Wrong number of dimensions for 'c.pred' array (should be 3-way array).")
+      stop("Wrong number of dimensions for 'c.pred' array (should be 3-way array).", call. = FALSE)
    }
 
    obj <- list()
@@ -63,7 +63,7 @@ classres <- function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = 1) {
    # check that ncomp.selected is correct
    if (is.null(ncomp.selected)) ncomp.selected <- obj$ncomp
    if (ncomp.selected < 1 || ncomp.selected > obj$ncomp) {
-      stop("Wrong value for 'ncomp.selected' parameer.")
+      stop("Wrong value for 'ncomp.selected' parameter.", call. = FALSE)
    }
 
    obj$ncomp.selected <- ncomp.selected
@@ -95,13 +95,13 @@ classres <- function(c.pred, c.ref = NULL, p.pred = NULL, ncomp.selected = 1) {
 #' The columns of the matrix correspond to classification results, rows - to the real classes. In
 #' case of soft classification with multiple classes (e.g. SIMCAM) sum of values for every row
 #' will not correspond to the total number of class members as the same object can be classified
-#' as a member of several classes or non of them.
+#' as a member of several classes or none of them.
 #'
 #' @export
 getConfusionMatrix.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 
    if (is.null(obj$c.ref)) {
-      stop("Reference classes are not available!")
+      stop("Reference classes are not available!", call. = FALSE)
    }
 
    attrs <- mda.getattr(obj$c.pred)
@@ -160,7 +160,7 @@ getConfusionMatrix.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 #' @export
 showPredictions.classres <- function(obj, ncomp = obj$ncomp.selected, ...) {
 
-   pred <- obj$c.pred[, ncomp, ]
+   pred <- obj$c.pred[, ncomp, , drop = FALSE]
    dim(pred) <- dim(obj$c.pred)[c(1, 3)]
    dimnames(pred) <- dimnames(obj$c.pred)[c(1, 3)]
 
@@ -189,7 +189,7 @@ as.matrix.classres <- function(x, ncomp = NULL, nc = 1, ...) {
    if (is.null(x$c.ref)) return()
 
    if (length(nc) != 1) {
-      stop("Wrong value for 'nc' parameter.")
+      stop("Wrong value for 'nc' parameter.", call. = FALSE)
    }
 
    specificity <- if (is.null(x$specificity)) matrix(NA, x$nclasses, x$ncomp) else x$specificity
@@ -227,20 +227,22 @@ as.matrix.classres <- function(x, ncomp = NULL, nc = 1, ...) {
 #' @export
 print.classres <- function(x, str = "Classification results (class classres)\nMajor fields:", ...) {
 
-   if (nchar(str) > 0) fprintf("\n%s\n", str)
+   if (nzchar(str)) fprintf("\n%s\n", str)
 
    cat("$c.pred - predicted class values\n")
 
    if (!is.null(x$c.ref)) {
-      cat("$c.ref - reference (true) class values\n")
-      cat("$tp - number of true positives\n")
-      cat("$tn - number of true negatives\n")
-      cat("$fp - number of false positives\n")
-      cat("$fn - number of false negatives\n")
-      cat("$specificity - specificity of predictions\n")
-      cat("$sensitivity - sn of predictions\n")
-      cat("$misclassified - misclassification ratio for predictions\n")
+      cat(" $c.ref - reference (true) class values\n")
+      cat(" $tp - number of true positives\n")
+      cat(" $tn - number of true negatives\n")
+      cat(" $fp - number of false positives\n")
+      cat(" $fn - number of false negatives\n")
+      cat(" $specificity - specificity of predictions\n")
+      cat(" $sensitivity - sensitivity of predictions\n")
+      cat(" $misclassified - misclassification ratio for predictions\n")
    }
+
+   invisible(x)
 }
 
 #' Summary statistics about classification result object
@@ -278,13 +280,14 @@ summary.classres <- function(object, ncomp = object$ncomp.selected,
       print(as.matrix.classres(object, nc = i, ncomp = ncomp))
    }
 
+   invisible(object)
 }
 
 ################################
 #  Static methods              #
 ################################
 
-#' Calculation of  classification performance parameters
+#' Calculation of classification performance parameters
 #'
 #' @description
 #' Calculates and returns performance parameters for classification result (e.g. number of false
@@ -301,9 +304,9 @@ summary.classres <- function(object, ncomp = object$ncomp.selected,
 #'    \code{$fn} \tab number of false negatives (nclasses x ncomponents) \cr
 #'    \code{$fp} \tab number of false positives (nclasses x ncomponents) \cr
 #'    \code{$tp} \tab number of true positives (nclasses x ncomponents) \cr
-#'    \code{$sensitivity} \tab sn values (nclasses x ncomponents) \cr
+#'    \code{$sensitivity} \tab sensitivity values (nclasses x ncomponents) \cr
 #'    \code{$specificity} \tab specificity values (nclasses x ncomponents) \cr
-#'    \code{$specificity} \tab ms ratio values (nclasses x ncomponents) \cr
+#'    \code{$misclassified} \tab misclassification ratio values (nclasses x ncomponents) \cr
 #' }
 #'
 #' @details
@@ -313,11 +316,11 @@ summary.classres <- function(object, ncomp = object$ncomp.selected,
 classres.getPerformance <- function(c.ref, c.pred) {
 
    if (is.null(c.ref) || is.null(c.pred)) {
-      stop("Both reference and predicted class values are required.")
+      stop("Both reference and predicted class values are required.", call. = FALSE)
    }
 
    if (length(c.ref) != dim(c.pred)[1]) {
-      stop("Number of objects in reference and predicted results should be the same.")
+      stop("Number of objects in reference and predicted results should be the same.", call. = FALSE)
    }
 
    # remove excluded rows for correct calculation of performance
@@ -359,7 +362,7 @@ classres.getPerformance <- function(c.ref, c.pred) {
    row_names <- dimnames(c.pred)[[3]]
    col_names <- dimnames(c.pred)[[2]]
    rownames(fn) <- rownames(fp) <- rownames(tp) <- rownames(tn) <- row_names
-   colnames(fn) <- colnames(fp) <- colnames(tp) <- colnames(sn) <- colnames(sp) <- col_names
+   colnames(fn) <- colnames(fp) <- colnames(tp) <- colnames(tn) <- colnames(sn) <- colnames(sp) <- colnames(ms) <- col_names
    rownames(sn) <- rownames(sp) <- rownames(ms) <- c(row_names, "Total")
 
    # in case of one class classifier set sensitivity NULL
@@ -409,11 +412,11 @@ plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, 
    ylim = c(0, 1.1), show.lines = c(NA, 0.5), ...) {
 
    if (is.null(obj$p.pred)) {
-      stop("No probability values are available.")
+      stop("No probability values are available.", call. = FALSE)
    }
 
    if (nc > obj$nclasses || nc < 1) {
-      stop("Wrong value for argument 'nc'.")
+      stop("Wrong value for argument 'nc'.", call. = FALSE)
    }
 
    plot_data <- obj$p.pred[, ncomp, nc]
@@ -428,7 +431,7 @@ plotProbabilities.classres <- function(obj, ncomp = obj$ncomp.selected, nc = 1, 
 #' Sensitivity plot for classification results
 #'
 #' @description
-#' Makes a plot with sn values vs. model complexity (e.g. number of components) for
+#' Makes a plot with sensitivity values vs. model complexity (e.g. number of components) for
 #' classification results.
 #'
 #' @param obj
@@ -522,13 +525,13 @@ plotPerformance.classres <- function(obj, nc = 1, type = "b",
    ylab = "", ylim = c(0, 1.1), xticks = seq_len(obj$ncomp), show.plot = TRUE, ...) {
 
    if (is.null(obj$c.ref)) {
-      stop("No reference data available")
+      stop("No reference data available", call. = FALSE)
    }
 
    # check if parameters requested are not NULL
-   param <- param[param %in% sapply(names(obj), function(x) if (!is.null(obj[[x]])) x)]
+   param <- param[param %in% names(Filter(Negate(is.null), obj))]
    if (length(param) == 0) {
-      stop("Performance parameteres you requested are not available in this result object.")
+      stop("Performance parameters you requested are not available in this result object.", call. = FALSE)
    }
 
    # prepare plot data

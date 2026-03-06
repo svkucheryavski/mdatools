@@ -32,7 +32,7 @@ pls.getydecomp(
 
 \item{y.attrs}{list with response attributes (e.g. from reference values if any)}
 
-\item{x.attrs}{list with preditors attributes}
+\item{x.attrs}{list with predictors attributes}
 
 \item{objnames}{vector with names of objects (rows of x)}
 

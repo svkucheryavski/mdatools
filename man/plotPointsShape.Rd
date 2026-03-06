@@ -13,7 +13,7 @@ plotPointsShape(p, lwd, lty, opacity, shape_function, ...)
 
 \item{lty}{type of line used to show the hull}
 
-\item{opacity}{of opacity is larger than 0 a semi-transparent polygon is shown over points}
+\item{opacity}{if opacity is larger than 0 a semi-transparent polygon is shown over points}
 
 \item{shape_function}{function which calculates and return coordinates of the shape}
 

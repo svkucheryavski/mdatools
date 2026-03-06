@@ -4,15 +4,17 @@
 \alias{prep.msc}
 \title{Multiplicative Scatter Correction transformation}
 \usage{
-prep.msc(data, mspectrum = NULL)
+prep.msc(data, mspectrum = NULL, ...)
 }
 \arguments{
 \item{data}{a matrix with data values (spectra)}
 
 \item{mspectrum}{mean spectrum (if NULL will be calculated from \code{spectra})}
+
+\item{...}{other optional components}
 }
 \value{
-preprocessed spectra (calculated mean spectrum is assigned as attribut 'mspectrum')
+preprocessed spectra (calculated mean spectrum is assigned as attribute 'mspectrum')
 }
 \description{
 Applies Multiplicative Scatter Correction (MSC) transformation to data matrix (spectra)
@@ -20,8 +22,8 @@ Applies Multiplicative Scatter Correction (MSC) transformation to data matrix (s
 \details{
 MSC is used to remove scatter effects (baseline offset and slope) from
 spectral data, e.g. NIR spectra.
-
- @examples
+}
+\examples{
 
  ### Apply MSC to spectra from simdata
 
@@ -34,4 +36,5 @@ spectral data, e.g. NIR spectra.
  par(mfrow = c(2, 1))
  mdaplot(spectra, type = "l", main = "Before MSC")
  mdaplot(cspectra, type = "l", main = "After MSC")
+
 }

@@ -1,4 +1,15 @@
-# new tests on top
+######################################
+# Tests for prep  methods            #
+######################################
+
+setup({
+   sink("dump/mdatools-test-prep.txt", append = FALSE, split = FALSE)
+})
+
+teardown({
+   sink()
+})
+
 
 context("prep: checks")
 
@@ -10,11 +21,8 @@ xe <- 1:10
 
 test_that("Preprocessing methods raise error if data is not a matrix", {
 
-   expect_error(prep.snv((Xe)))
-   expect_error(prep.snv((xe)))
-
-   expect_error(prep.msc((Xe)))
-   expect_error(prep.msc((xe)))
+   expect_error(prep.emsc((Xe)))
+   expect_error(prep.emsc((xe)))
 
    expect_error(prep.norm((Xe)))
    expect_error(prep.norm((xe)))
@@ -91,7 +99,7 @@ context("prep: snv, msc, norm, km")
 
 test_that("SNV works correctly", {
    spectra <- simdata$spectra.c
-   expect_silent(pspectra <- prep.snv(spectra))
+   pspectra <- prep.snv(spectra)
    expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
    expect_equivalent(apply(pspectra, 1, mean), rep(0, nrow(spectra)))
    expect_equivalent(apply(pspectra, 1, sd), rep(1, nrow(spectra)))
@@ -110,10 +118,10 @@ test_that("MSC works correctly", {
    md <- apply(spectra, 2, median)
 
    spectra <- simdata$spectra.c
-   expect_silent(pspectra1 <- prep.msc(spectra))
-   expect_silent(pspectra2 <- prep.msc(spectra, mspectrum = mn))
-   expect_silent(pspectra3 <- prep.msc(spectra, mspectrum = md))
-   expect_silent(pspectra4 <- prep.msc(spectra, mspectrum = matrix(md)))
+   expect_silent(pspectra1 <- prep.emsc(spectra))
+   expect_silent(pspectra2 <- prep.emsc(spectra, mspectrum = mn))
+   expect_silent(pspectra3 <- prep.emsc(spectra, mspectrum = md))
+   expect_silent(pspectra4 <- prep.emsc(spectra, mspectrum = matrix(md)))
 
    expect_equivalent(attr(pspectra1, "mspectrum"), mn)
    expect_equivalent(attr(pspectra2, "mspectrum"), mn)
@@ -129,8 +137,8 @@ test_that("MSC works correctly", {
    expect_equal(mda.getattr(spectra), mda.getattr(pspectra4))
 
    # wrong scenario
-   expect_error(prep.msc(spectra, mspectrum = c(1, 2, 3)))
-   expect_error(prep.msc(spectra, mspectrum = matrix(1:10, ncol = 5)))
+   expect_error(prep.emsc(spectra, mspectrum = c(1, 2, 3)))
+   expect_error(prep.emsc(spectra, mspectrum = matrix(1:10, ncol = 5)))
 })
 
 test_that("Normalization to unit area works correctly", {
@@ -213,6 +221,22 @@ test_that("PQN normalization works correctly", {
    expect_equivalent(prep.norm(spectra, type = "pqn", ref.spectrum = ref.spectrum1), pspectra1)
    expect_equivalent(prep.norm(spectra, type = "pqn", ref.spectrum = ref.spectrum2), pspectra2)
    expect_equivalent(prep.norm(spectra, type = "pqn"), pspectra2)
+})
+
+test_that("PQN normalization works correctly in pipeline", {
+   spectra <- simdata$spectra.c
+   train <- spectra[1:50, ]
+   test  <- spectra[51:100, ]
+   ref <- colMeans(train)
+
+   p <- list(prep("norm", type = "pqn"))
+   pm <- prep.fit(p, train)
+   result_train <- prep.apply(pm, train)
+   result_test  <- prep.apply(pm, test)
+
+   # test data should be normalized against training mean, not its own
+   expected_test <- prep.norm(test, type = "pqn", ref.spectrum = ref)
+   expect_equal(result_test, expected_test)
 })
 
 test_that("Kubelka-Munk works correctly", {
@@ -429,7 +453,6 @@ test_that("List of available methods is shown corectly", {
 })
 
 test_that("Errors are raised when necessary", {
-   expect_error(prep("varsel", var.ind = 50:150))
    expect_error(prep("snv120"))
 })
 
@@ -443,10 +466,10 @@ test_that("Method works with one preprocessing method in the list", {
    x <- mda.exclrows(x, c(1, 20, 30, 70))
 
    p <- list(
-      prep("savgol", list(width = 11, porder = 2, dorder = 1))
+      prep("savgol", width = 11, porder = 2, dorder = 1)
    )
 
-   px1 <- employ.prep(p, x)
+   px1 <- prep.apply(p, x)
    px2 <- prep.savgol(x, width = 11, porder = 2, dorder = 1)
 
    expect_equal(px1, px2)
@@ -464,16 +487,21 @@ test_that("Method works with several preprocessing methods in the list", {
    x <- mda.exclrows(x, c(1, 20, 30, 70))
 
    p <- list(
-      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
-      prep("snv"),
-      prep("autoscale", list(center = TRUE, scale = TRUE))
+      prep("savgol", width = 11, porder = 2, dorder = 1),
+      prep("norm", type="snv"),
+      prep("center", type = "median"),
+      prep("scale", type = "iqr")
    )
 
-   px1 <- employ.prep(p, x)
+   p <- prep.fit(p, x)
+
+   px1 <- prep.apply(p, x)
+
    px2 <- x
    px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
-   px2 <- prep.snv(px2)
-   px2 <- prep.autoscale(px2, center = TRUE, scale = TRUE)
+   px2 <- prep.norm(px2, type = "snv")
+   px2 <- prep.center(px2, type="median")
+   px2 <- prep.scale(px2, type="iqr")
 
    expect_equal(px1, px2)
    expect_equal(mda.getattr(px1), mda.getattr(x))
@@ -490,17 +518,21 @@ test_that("Method works with preprocessing methods and varable selection", {
    x <- mda.exclrows(x, c(1, 20, 30, 70))
 
    p <- list(
-      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
-      prep("snv"),
-      prep("autoscale", list(center = TRUE, scale = TRUE)),
-      prep("varsel", list(var.ind = 50:130))
+      prep("savgol", width = 11, porder = 2, dorder = 1),
+      prep("norm", type = "snv"),
+      prep("center"),
+      prep("scale"),
+      prep("varsel", var.ind = 50:130)
    )
 
-   px1 <- employ.prep(p, x)
+   p <- prep.fit(p, x)
+
+   px1 <- prep.apply(p, x)
    px2 <- x
    px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
-   px2 <- prep.snv(px2)
-   px2 <- prep.autoscale(px2, center = TRUE, scale = TRUE)
+   px2 <- prep.norm(px2, type = "snv")
+   px2 <- prep.center(px2)
+   px2 <- prep.scale(px2)
    px2 <- mda.subset(px2, select = 50:130)
 
    expect_equal(px1, px2)
@@ -518,16 +550,378 @@ test_that("Method works with user defined preprocessing method", {
    x <- mda.exclrows(x, c(1, 20, 30, 70))
 
    p <- list(
-      prep("r2a", method = function(data) log(1/abs(data))),
-      prep("savgol", list(width = 11, porder = 2, dorder = 1)),
-      prep("snv")
+      prep("savgol", width = 11, porder = 2, dorder = 1),
+      prep("norm", type = "snv")
    )
 
-   px1 <- employ.prep(p, x)
-   px2 <- log(1/abs(x))
+   px1 <- prep.apply(p, x)
+   px2 <- x
    px2 <- prep.savgol(px2, width = 11, porder = 2, dorder = 1)
-   px2 <- prep.snv(px2)
+   px2 <- prep.norm(px2, "snv")
 
    expect_equal(px1, px2)
    expect_equal(mda.getattr(px1), mda.getattr(px2))
 })
+
+
+context("prep: spikes")
+
+test_that("Removing spikes works correctly", {
+   data(carbs)
+   spectra <- carbs$D
+   sspectra <- spectra
+   sspectra[1,  110] <- sspectra[1,  110] * 10
+   sspectra[10, 220] <- sspectra[10, 220] * 10
+   sspectra[15, 330] <- sspectra[15, 330] * 10
+   sspectra[20, 450] <- sspectra[20, 450] * 10
+
+   expect_silent(pspectra <- prep.spikes(sspectra, width = 5, threshold = 6))
+   ind2 <- which(abs(spectra - pspectra) / abs(spectra) > 0.5)
+   ind1 <- which(abs(spectra - sspectra) / abs(spectra) > 0.5)
+
+   expect_equal(mda.getattr(spectra), mda.getattr(pspectra))
+   expect_equal(length(ind2), 0)
+   expect_equal(length(ind1), 4)
+
+})
+
+context("prep: center")
+
+do_test_center <- function(type, f) {
+   data(people)
+
+   # full scale
+   xp <- prep.center(people, type = type)
+   v <- apply(people, 2, f)
+   expect_equal(attr(xp, "prep:center"), v)
+   expect_equivalent(xp, scale(people, center = v, scale = FALSE))
+
+   # parameters only
+   p <- prep.center.params(people, type = type)
+   expect_true(is.list(p))
+   expect_equal(length(p), 2)
+   expect_equal(names(p), c("type", "center"))
+   expect_equal(p[[1]], type)
+   expect_equal(p[[2]], v)
+
+   # with outliers
+   o <- c(5, 20)
+   v <- apply(people[-o, ], 2, f)
+   people <- mda.exclrows(people, o)
+   xp <- prep.center(people, type = type)
+   expect_equal(attr(xp, "prep:center"), v)
+   expect_equivalent(xp, scale(people, center = v, scale = FALSE))
+
+   p <- prep.center.params(people, type = type)
+   expect_equal(p[[2]], v)
+}
+
+test_that("Centering works correctly", {
+   do_test_center("mean", mean)
+   do_test_center("median", median)
+})
+
+test_that("Manual centering works correctly", {
+   data(people)
+   center <- rep(10, ncol(people))
+   xp <- prep.center(people, center = center)
+   expect_equal(attr(xp, "prep:center"), center)
+   expect_equivalent(xp, scale(people, center = center, scale = FALSE))
+})
+
+
+
+context("prep: scale")
+
+do_test_scale <- function(type, f) {
+   data(people)
+
+   # full scale
+   xp <- prep.scale(people, type = type)
+   v <- apply(people, 2, f)
+   expect_equal(attr(xp, "prep:scale"), v)
+   expect_equivalent(xp, scale(people, center = FALSE, scale = v))
+
+   # parameters only
+   p <- prep.scale.params(people, type = type)
+   expect_true(is.list(p))
+   expect_equal(length(p), 2)
+   expect_equal(names(p), c("type", "scale"))
+   expect_equal(p[[1]], type)
+   expect_equal(p[[2]], v)
+
+   # with outliers
+   o <- c(5, 20)
+   v <- apply(people[-o, ], 2, f)
+   people <- mda.exclrows(people, o)
+   xp <- prep.scale(people, type = type)
+   expect_equal(attr(xp, "prep:scale"), v)
+   expect_equivalent(xp, scale(people, center = FALSE, scale = v))
+
+   p <- prep.scale.params(people, type = type)
+   expect_equal(p[[2]], v)
+}
+
+test_that("scaling works correctly", {
+   pareto <- function(x) sqrt(sd(x))
+   rng <- function(x) max(x)- min(x)
+
+   do_test_scale("sd", sd)
+   do_test_scale("iqr", IQR)
+   do_test_scale("range", rng)
+   do_test_scale("pareto", pareto)
+})
+
+
+context("prep: emsc")
+
+test_that("emsc works correctly (p = 0)", {
+   x <- c(-3, -2, -1, 0, 2, 3, 4)^2
+   data <- rbind(x, x + 10, x - 10, x + 5, x - 5, x * 2 - 3, x * (-2) - 3)
+   mspectrum <- apply(data, 2, mean)
+
+   pdata1 <- prep.emsc(data)
+   pdata2 <- prep.emsc(data, mspectrum = mspectrum)
+   pdata3 <- prep.emsc(data, degree = 0)
+   pdata4 <- prep.emsc(data, degree = 0, mspectrum = mspectrum)
+
+   # conventional MSC
+   pdata5 <- matrix(0, nrow(data), ncol(data))
+   for (i in seq_len(nrow(data))) {
+      coef <- coef(lm(data[i, ] ~ mspectrum))
+      pdata5[i, ] <- (data[i, ] - coef[1]) / coef[2]
+   }
+
+   expect_equivalent(pdata1, pdata5)
+   expect_equivalent(pdata2, pdata5)
+   expect_equivalent(pdata3, pdata5)
+   expect_equivalent(pdata4, pdata5)
+
+})
+
+test_that("emsc works correctly (p > 0)", {
+   x <- c(-3, -2, -1, 0, 2, 3, 4)^2
+   data <- rbind(x^1.1 + 5, x^1.4 - 5, 2*x^1.1 + 5, 2*x^1.4 - 5,x ^ 1.2 - 3, x^1.3 + 3, x ^ 1.5 - 13, x^1.23 + 13)
+   mspectrum <- apply(data, 2, mean)
+
+   pdata1a <- prep.emsc(data, 1)
+   pdata1b <- prep.emsc(data, 4)
+
+   pdata2a <- prep.emsc(data, 1, mspectrum = x)
+   pdata2b <- prep.emsc(data, 4, mspectrum = x)
+
+   ref1 <- matrix(mspectrum, nrow = nrow(data), ncol = ncol(data), byrow = TRUE)
+   ref2 <- matrix(x, nrow = nrow(data), ncol = ncol(data), byrow = TRUE)
+
+   err1a <- sum((pdata1a - ref1)^2) / sum(ref1^2)
+   err1b <- sum((pdata1b - ref1)^2) / sum(ref1^2)
+   err2a <- sum((pdata2a - ref2)^2) / sum(ref2^2)
+   err2b <- sum((pdata2b - ref2)^2) / sum(ref2^2)
+
+   expect_true(err1a < 0.01)
+   expect_true(err1b < 0.001)
+   expect_true(err2a < 0.01)
+   expect_true(err2b < 0.001)
+
+})
+
+
+
+context("prep: prep.fit and writeJSON")
+
+test_that("fitting prep model works correctly (case Tecator)", {
+
+   dc <- read.csv2('./datasets/tecator_train.csv', row.names = 1, check.names = FALSE)
+   Xc <- as.matrix(dc[, -1])
+
+   dt <- read.csv2('./datasets/tecator_test.csv', row.names = 1, check.names = FALSE)
+   Xt <- as.matrix(dt[, -1])
+
+   dcp.ref <- read.csv2('./datasets/tecator_train-preprocessed.csv', row.names = 1, check.names = FALSE)
+   Xcp.ref <- as.matrix(dcp.ref[, -1])
+
+   dtp.ref <- read.csv2('./datasets/tecator_test-preprocessed.csv', row.names = 1, check.names = FALSE)
+   Xtp.ref <- as.matrix(dtp.ref[, -1])
+
+   p <- list(
+      prep("spikes", width = 5, threshold = 5),
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("varsel", var.ind = 11:90),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2),
+      prep("center", type = "mean"),
+      prep("scale", type = "pareto")
+   )
+
+
+   pm  <- prep.fit(p, Xc)
+   Xcp <- prep.apply(pm, Xc)
+   Xtp <- prep.apply(pm, Xt)
+
+   expect_equivalent(Xcp, Xcp.ref)
+   expect_equivalent(Xtp, Xtp.ref)
+})
+
+test_that("fitting prep model works correctly (case HS-)", {
+
+   dc <- read.csv('./datasets/hs_train.csv', row.names = 1, check.names = FALSE)
+   Xc <- as.matrix(dc[, -1])
+
+   dcp.ref <- read.csv('./datasets/hs_train-preprocessed.csv', row.names = 1, check.names = FALSE)
+   Xcp.ref <- as.matrix(dcp.ref[, -1])
+
+   p <- list(
+      prep("varsel", var.ind = 121:1755),
+      prep("spikes", width = 5, threshold = 10),
+      prep("savgol", width = 5, porder = 1, dorder = 0),
+      prep("alsbasecorr", plambda = 2.5, p = 0.008),
+      prep("varsel", var.ind = 81:1580),
+      prep("norm", type = "is", col.ind = 976),
+      prep("center", type = "mean")
+   )
+
+   pm  <- prep.fit(p, Xc)
+   Xcp <- prep.apply(pm, Xc)
+   expect_equivalent(Xcp, Xcp.ref)
+})
+
+
+
+testCase <- function(p, Xc, jsonFilename) {
+
+
+   # fit pm model
+   pm  <- prep.fit(p, Xc)
+   #print(pm)
+   # test JSON strings
+   json1 <- prep.asjson(pm)
+   fileConn <- file(jsonFilename)
+   json2 <- readLines(fileConn, warn = FALSE)
+   close(fileConn)
+
+   expect_equal(extractStringArray(json1, "info"), extractStringArray(json2, "info"))
+   expect_equal(extractValue(json1, "npred"), extractValue(json2, "npred"))
+
+
+   # save it to JSON file and then load it back
+   writeJSON(pm, './jsonfiles/preprocessing-tmp.json')
+   pm1 <- readJSON('./jsonfiles/preprocessing-tmp.json')
+
+   # load model developed in web-app
+   pm2 <- readJSON(jsonFilename)
+
+   # all models should be the same
+   for (n in seq_along(pm)) {
+      if (!is.list(pm[[n]])) next
+      testList(pm[[n]]$params, pm1[[n]]$params)
+      testList(pm[[n]]$params, pm2[[n]]$params)
+   }
+}
+
+test_that("JSON() and readJSON() methods work correctly.", {
+
+   dc <- read.csv2('./datasets/tecator_train.csv', row.names = 1, check.names = FALSE)
+   Xc <- as.matrix(dc[, -1])
+
+   # one method
+   p <- list(
+      prep("emsc", degree = 2)
+   )
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-1.json")
+
+   # two methods
+   p <- list(
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2)
+   )
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-2.json")
+
+   # three methods
+   p <- list(
+      prep("spikes", width = 5, threshold = 5),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2)
+   )
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-3.json")
+
+   # four methods
+   p <- list(
+      prep("spikes", width = 5, threshold = 5),
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2)
+   )
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-4.json")
+
+   # five methods
+   p <- list(
+      prep("spikes", width = 5, threshold = 5),
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("varsel", var.ind = 11:90),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2),
+      prep("center", type = "mean"),
+      prep("scale", type = "pareto")
+   )
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-full-tecator.json")
+
+
+   # five methods only scale
+   p <- list(
+      prep("spikes", width = 5, threshold = 5),
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("varsel", var.ind = 11:90),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2),
+      prep("scale", type = "range")
+   )
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-full-tecator-scale.json")
+
+   # five methods only center
+   p <- list(
+      prep("spikes", width = 5, threshold = 5),
+      prep("savgol", width = 7, porder = 2, dorder = 2),
+      prep("varsel", var.ind = 11:90),
+      prep("norm", type = "snv"),
+      prep("emsc", degree = 2),
+      prep("center", type = "median")
+   )
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-full-tecator-center.json")
+
+   # full hs- case
+
+   dc <- read.csv('./datasets/hs_train.csv', row.names = 1, check.names = FALSE)
+   Xc <- as.matrix(dc[, -1])
+
+   p <- list(
+      prep("varsel", var.ind = 121:1755),
+      prep("spikes", width = 5, threshold = 10),
+      prep("savgol", width = 5, porder = 1, dorder = 0),
+      prep("alsbasecorr", plambda = 2.5, p = 0.008),
+      prep("varsel", var.ind = 81:1580),
+      prep("norm", type = "is", col.ind = 976),
+      prep("center", type = "mean")
+   )
+   testCase(p, Xc, "./jsonfiles/preprocessing-model-full-hs.json")
+   pm <- prep.fit(p, Xc)
+   summary(pm)
+
+   # error cases
+   p <- list(
+      prep("varsel"),
+      prep("center", type = "mean")
+   )
+   pm  <- prep.fit(p, Xc)
+   expect_error(json <- prep.asjson(pm))
+
+
+   p <- list(
+      prep("varsel", var.ind = c(10:20, 30:40)),
+      prep("center", type = "mean")
+   )
+   pm  <- prep.fit(p, Xc)
+   expect_error(json <- prep.asjson(pm))
+
+})
+
+

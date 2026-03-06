@@ -17,7 +17,7 @@
 }
 \description{
 Makes a histogram for statistic values distribution for particular component, also
-show critical value as a vertical line.
+shows critical value as a vertical line.
 }
 \details{
 See examples in help for \code{\link{randtest}} function.

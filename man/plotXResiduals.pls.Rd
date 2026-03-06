@@ -30,7 +30,7 @@
 
 \item{norm}{logical, normalize distance values or not (see details)}
 
-\item{log}{logical, apply log tranformation to the distances or not (see details)}
+\item{log}{logical, apply log transformation to the distances or not (see details)}
 
 \item{main}{title for the plot}
 
@@ -52,7 +52,7 @@
 
 \item{legend.position}{position of legend (if shown)}
 
-\item{res}{list with result objects to show the plot for (by defaul, model results are used)}
+\item{res}{list with result objects to show the plot for (by default, model results are used)}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }

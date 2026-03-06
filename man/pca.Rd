@@ -17,7 +17,9 @@ pca(
   lim.type = "ddmoments",
   alpha = 0.05,
   gamma = 0.01,
-  info = ""
+  info = "",
+  prep = NULL,
+  do.round = FALSE
 )
 }
 \arguments{
@@ -41,11 +43,15 @@ pca(
 
 \item{lim.type}{which method to use for calculation of critical limits for residual distances (see details)}
 
-\item{alpha}{significance level for extreme limits for T2 and Q disances.}
+\item{alpha}{significance level for extreme limits for T2 and Q distances.}
 
 \item{gamma}{significance level for outlier limits for T2 and Q distances.}
 
 \item{info}{a short text with model description.}
+
+\item{prep}{optional list with preprocessing methods created using `\code{\link{prep}}` function.}
+
+\item{do.round}{logical, round or not DoF for distances.}
 }
 \value{
 Returns an object of \code{pca} class with following fields:
@@ -57,7 +63,8 @@ Returns an object of \code{pca} class with following fields:
 \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
 \item{T2lim }{statistical limit for T2 distance.}
 \item{Qlim }{statistical limit for Q residuals.}
-\item{info }{information about the model, provided by user when build the model.}
+\item{info }{information about the model, provided by user when building the model.}
+\item{prep }{trained preprocessing model (if specified)}
 \item{calres }{an object of class \code{\link{pcares}} with PCA results for a calibration data.}
 \item{testres }{an object of class \code{\link{pcares}} with PCA results for a test data, if it
 was provided.}
@@ -68,33 +75,31 @@ More details and examples can be found in the Bookdown tutorial.
 \code{pca} is used to build and explore a principal component analysis (PCA) model.
 }
 \details{
-Note, that from v. 0.10.0 cross-validation is no more supported in PCA.
-
 If number of components is not specified, a minimum of number of objects - 1 and number of
-variables in calibration set is used. One can also specified an optimal number of component,
+variables in calibration set is used. One can also specify an optimal number of components,
 once model is calibrated (\code{ncomp.selected}). The optimal number of components is used to
-build a residuals distance plot, as well as for SIMCA classification.
+build a residual distance plot, as well as for SIMCA classification.
 
 If some of rows of calibration set should be excluded from calculations (e.g. because they are
 outliers) you can provide row numbers, names, or logical values as parameter \code{exclrows}. In
-this case they will be completely ignored we model is calibrated. However, score and residuls
+this case they will be completely ignored when the model is calibrated. However, score and residual
 distances will be computed for these rows as well and then hidden. You can show them
 on corresponding plots by using parameter \code{show.excluded = TRUE}.
 
-It is also possible to exclude selected columns from calculations by provideing parameter
+It is also possible to exclude selected columns from calculations by providing parameter
 \code{exclcols} in form of column numbers, names or logical values. In this case loading matrix
-will have zeros for these columns. This allows to compute PCA models for selected variables
+will have zeros for these columns. This allows computing PCA models for selected variables
 without removing them physically from a dataset.
 
-Take into account that if you see other packages to make plots (e.g. ggplot2) you will
+Take into account that if you use other packages to make plots (e.g. ggplot2) you will
 not be able to distinguish between hidden and normal objects.
 
 By default loadings are computed for the original dataset using either SVD or NIPALS algorithm.
 However, for datasets with large number of rows (e.g. hyperspectral images), there is a
 possibility to run algorithms based on random permutations [1, 2]. In this case you have
 to define parameter \code{rand} as a vector with two values: \code{p} - oversampling parameter
-and \code{k} - number of iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)}
-are good options, which give quite almost precise solution but much faster.
+and \code{q} - number of power iterations. Usually \code{rand = c(15, 0)} or  \code{rand = c(5, 1)}
+are good options, which give quite precise solutions but much faster.
 
 There are several ways to calculate critical limits for orthogonal (Q, q) and score (T2, h)
 distances. In \code{mdatools} you can specify one of the following methods via parameter
@@ -102,12 +107,12 @@ distances. In \code{mdatools} you can specify one of the following methods via p
 chi-square distribution [4], \code{"ddmoments"} and \code{"ddrobust"} - related to data
 driven method proposed in [5]. The \code{"ddmoments"} is based on method of moments for
 estimation of distribution parameters (also known as "classical" approach) while
-\code{"ddrobust"} is based in robust estimation.
+\code{"ddrobust"} is based on robust estimation.
 
 If \code{lim.type="chisq"} or \code{lim.type="jm"} is used, only limits for Q-distances are
 computed based on corresponding approach, limits for T2-distances are computed using
 Hotelling's T-squared distribution. The methods utilizing the data driven approach calculate
-limits for combination of the distances bases on chi-square distribution and parameters
+limits for combination of the distances based on chi-square distribution and parameters
 estimated from the calibration data.
 
 The critical limits are calculated for a significance level defined by parameter \code{'alpha'}.
@@ -115,14 +120,26 @@ You can also specify another parameter, \code{'gamma'}, which is used to calcula
 limit for outliers (shown as dashed line on residual distance plot).
 
 You can also recalculate the limits for existent model by using different values for alpha and
-gamme, without recomputing the model itself. In this case use the following code (it is assumed
+gamma, without recomputing the model itself. In this case use the following code (it is assumed
 that you current PCA/SIMCA model is stored in variable \code{m}):
 \code{m = setDistanceLimits(m, lim.type, alpha, gamma)}.
 
 In case of PCA the critical limits are just shown on residual plot as lines and can be used for
 detection of extreme objects (solid line) and outliers (dashed line). When PCA model is used for
-classification in SIMCA (see \code{\link{simca}}) the limits are also employed for
-classification of objects.
+classification in SIMCA (see \code{\link{simca}}) or DD-SIMCA (\code{\link{ddsimca}})
+the limits are also employed for classification of objects.
+
+If you provide a list with preprocessing methods, PCA will apply them to the training set
+before excluding the columns and rows (if specified). The list will be used to train a preprocessing
+model which becomes a part of the PCA model object. So when you use method `predict()` the provided
+dataset will be automatically preprocessed by the preprocessing model.
+
+Any PCA model (with or without preprocessing) developed in this package can be saved as JSON file
+using method \code{\link{writeJSON}} and then be loaded to interactive web-application for
+PCA available at https://mda.tools/pca. Likewise one can develop a model in the app, save it to
+JSON file and then load it to R by using method \code{\link{readJSON}}. In this case,
+however, the model object will not contain calibration/training results, so some of
+the plots and statistics will not be available.
 }
 \examples{
 library(mdatools)
@@ -153,6 +170,32 @@ plotResiduals(model, show.labels = TRUE)
 plotResiduals(model, ncomp = 2, show.labels = TRUE)
 par(mfrow = c(1, 1))
 
+## 4. Use list with preprocessing methods
+
+# get the data (calibration and test set)
+data(simdata)
+Xc <- simdata$spectra.c
+Xt <- simdata$spectra.t
+
+# create a list with two preprocessing methods
+p <- list(
+   prep("savgol", width = 7, porder = 2, dorder = 2),
+   prep("norm", type = "snv")
+)
+
+# build a PCA model with and without preprocessing
+m1 <- pca(Xc, 5, prep = p)
+m2 <- pca(Xc, 5)
+
+# apply the models to test set
+r1 <- predict(m1, Xt)
+r2 <- predict(m2, Xt)
+
+# check scores
+par(mfrow = c(1, 2))
+plotScores(m1, c(1, 2), res = list(cal = m1$calres, test = r1), main = "With preprocessing")
+plotScores(m2, c(1, 2), res = list(cal = m2$calres, test = r2), main = "Without preprocessing")
+
 }
 \references{
 1. N. Halko, P.G. Martinsson, J.A. Tropp. Finding structure with randomness: probabilistic
@@ -179,6 +222,8 @@ Methods for \code{pca} objects:
    \code{\link{selectCompNum.pca}} \tab set number of optimal components in the model\cr
    \code{\link{setDistanceLimits.pca}} \tab set critical limits for residuals\cr
    \code{\link{predict.pca}} \tab applies PCA model to a new data.\cr
+   \code{\link{writeJSON.pca}} \tab saves PCA model to a JSON file so it can be used in web-applications.\cr
+   \code{\link{pca.readJSON}} \tab loads PCA model from a JSON file to \code{pca} object.\cr
 }
 
 Plotting methods for \code{pca} objects:
@@ -187,9 +232,10 @@ Plotting methods for \code{pca} objects:
    \code{\link{plotLoadings.pca}} \tab shows loadings plot.\cr
    \code{\link{plotVariance.pca}} \tab shows explained variance plot.\cr
    \code{\link{plotCumVariance.pca}} \tab shows cumulative explained variance plot.\cr
-   \code{\link{plotResiduals.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
+   \code{\link{plotEigenvalues.pca}} \tab shows eigenvalues plot.\cr
+   \code{\link{plotDistances.pca}} \tab shows plot for residual distances (Q vs. T2).\cr
    \code{\link{plotBiplot.pca}} \tab shows bi-plot.\cr
-   \code{\link{plotExtreme.pca}} \tab shows extreme plot.\cr
+   \code{\link{plotExtremes.pca}} \tab shows extreme plot.\cr
    \code{\link{plotT2DoF}} \tab plot with degrees of freedom for score distance.\cr
    \code{\link{plotQDoF}} \tab plot with degrees of freedom for orthogonal distance.\cr
    \code{\link{plotDistDoF}} \tab plot with degrees of freedom for both distances.\cr

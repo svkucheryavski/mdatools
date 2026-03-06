@@ -1,3 +1,151 @@
+#' Show plot with several figures of merit vs. number of components (generic function).
+#'
+#' @param obj
+#' result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the method
+#'
+#' @export
+plotFoMs <- function(obj, ...) {
+   UseMethod("plotFoMs")
+}
+
+
+#' Show plot with figure of merit vs. number of components (generic function).
+#'
+#' @param obj
+#' result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the method
+#'
+#' @export
+plotFoM <- function(obj, ...) {
+   UseMethod("plotFoM")
+}
+
+
+#' Set model parameters other than number of components (generic function)
+#'
+#' @param obj
+#' model object, e.g. \code{ddsimca}
+#' @param ...
+#' other parameters relevant for the method
+#'
+#' @export
+setParams <- function(obj, ...) {
+   UseMethod("setParams")
+}
+
+
+#' Selectivity vs sensitivity plot for DD-SIMCA results (generic function)
+#'
+#' @param obj
+#' result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the plot
+#'
+#' @export
+plotSelectivityArea <- function(obj, ...) {
+   UseMethod("plotSelectivityArea")
+}
+
+#' Aliens plot for DD-SIMCA results (generic function)
+#'
+#' @param obj
+#' result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the plot
+#'
+#' @export
+plotAliens <- function(obj, ...) {
+   UseMethod("plotAliens")
+}
+
+
+#' Distance plot for model and results (generic function)
+#'
+#' @param obj
+#' model or result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the plot
+#'
+#' @export
+plotDistances <- function(obj, ...) {
+   UseMethod("plotDistances")
+}
+
+
+#' Acceptance plot for DDSIMCA model and results (generic function)
+#'
+#' @param obj
+#' model or result object, e.g. \code{ddsimcares}
+#' @param ...
+#' other parameters relevant for the plot
+#'
+#' @export
+plotAcceptance <- function(obj, ...) {
+   UseMethod("plotAcceptance")
+}
+
+
+#' S3 implementation of asjson() method
+#'
+#' @param obj
+#' object of any class, e.g. \code{pca}
+#' @param ...
+#' other parameters relevant for the method
+#'
+#' @export
+asjson <- function(obj, ...) {
+   UseMethod("asjson")
+}
+
+
+#' S3 implementation of as.vector() method
+#'
+#' @param obj
+#' object of any class, e.g. \code{pca}
+#'
+#' @export
+asvector <- function(obj) {
+   UseMethod("asvector")
+}
+
+
+#' Save model as JSON file
+#'
+#' @param obj
+#' model object, e.g. \code{pca}
+#' @param fileName
+#' name (or full path) to JSON file to be created.
+#'
+#' @export
+writeJSON <- function(obj, fileName) {
+   UseMethod("writeJSON")
+}
+
+
+#' Method to write outcomes of any result object to CSV file
+#'
+#' @param res
+#' result object (\code{plsres}, \code{pcares}, etc.).
+#' @param fileName
+#' name (or full path) to CSV file to be created.
+#' @param name
+#' short name of the result object (e.g. \code{"cal"}, \code{"test"}. etc.).
+#' @param sep
+#' values separator (either \code{","} or \code{";"}).
+#' @param dataFile
+#' optional, name of the data file used to create the results.
+#' @param ...
+#' other optional parameters
+#'
+#' @export
+writeCSV <- function(res, fileName, name, sep = ",", dataFile = "", ...) {
+   UseMethod("writeCSV")
+}
+
+
 
 #' Plot for ratio RMSEC/RMSECV vs RMSECV
 #' @param obj
@@ -114,7 +262,7 @@ getProbabilities <- function(obj, ...) {
 #' Set residual distance limits
 #'
 #' @description
-#' Calculates and set critical limits for residuals of PCA model
+#' Calculates and sets critical limits for residuals of PCA model
 #'
 #' @param obj
 #' a model object
@@ -129,7 +277,7 @@ setDistanceLimits <- function(obj, ...) {
 #' Show residual distance limits
 #'
 #' @description
-#' Calculates and set critical limits for residuals of PCA model
+#' Shows critical limits for residuals of PCA model
 #'
 #' @param obj
 #' a model object
@@ -141,19 +289,34 @@ showDistanceLimits <- function(obj, ...) {
    UseMethod("showDistanceLimits")
 }
 
-#' Shows extreme plot for SIMCA model
+#' Shows extreme plot for PCA and DD-SIMCA models
 #'
 #' @description
-#' Generic function for creating extreme plot for SIMCA model
+#' Generic function for creating extreme plot for PCA and DD-SIMCA models
 #'
 #' @param obj
-#' a SIMCA model
+#' a PCA or DD-SIMCA model
 #' @param ...
 #' other parameters
 #'
 #' @export
 plotExtreme <- function(obj, ...) {
    UseMethod("plotExtreme")
+}
+
+#' Shows extreme plot for PCA and DD-SIMCA models
+#'
+#' @description
+#' Generic function for creating extreme plot for PCA and DD-SIMCA models
+#'
+#' @param obj
+#' a PCA or DD-SIMCA model
+#' @param ...
+#' other parameters
+#'
+#' @export
+plotExtremes <- function(obj, ...) {
+   UseMethod("plotExtremes")
 }
 
 #' Get regression coefficients
@@ -324,7 +487,7 @@ plotModellingPower <- function(obj, ...) {
 #' Misclassification ratio plot
 #'
 #' @details
-#' Generic function for plotting missclassification values for classification model or results
+#' Generic function for plotting misclassification values for classification model or results
 #'
 #' @param obj
 #' a model or a result object
@@ -666,6 +829,21 @@ plotVariance <- function(obj, ...) {
    UseMethod("plotVariance")
 }
 
+#' Eigenvalues plot
+#'
+#' @details
+#' Generic function for plotting eigenvalues vs. number of components
+#'
+#' @param obj
+#' a model object
+#' @param ...
+#' other arguments
+#'
+#' @export
+plotEigenvalues <- function(obj, ...) {
+   UseMethod("plotEigenvalues")
+}
+
 #' X loadings plot
 #'
 #' @details
@@ -681,7 +859,7 @@ plotXLoadings <- function(obj, ...) {
    UseMethod("plotXLoadings")
 }
 
-#' X loadings plot
+#' XY loadings plot
 #'
 #' @details
 #' Generic function for plotting loadings values for decomposition of x and y data

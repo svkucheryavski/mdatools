@@ -2,7 +2,7 @@
 % Please edit documentation in R/defaults.R
 \name{plotXYLoadings}
 \alias{plotXYLoadings}
-\title{X loadings plot}
+\title{XY loadings plot}
 \usage{
 plotXYLoadings(obj, ...)
 }
@@ -12,7 +12,7 @@ plotXYLoadings(obj, ...)
 \item{...}{other arguments}
 }
 \description{
-X loadings plot
+XY loadings plot
 }
 \details{
 Generic function for plotting loadings values for decomposition of x and y data

@@ -16,13 +16,13 @@
 )
 }
 \arguments{
-\item{obj}{object of \code{ldecomp} class.}
+\item{obj}{object of \code{plsres} class.}
 
 \item{ncomp}{number of components to show the plot for (if NULL, selected by model value will be used).}
 
 \item{norm}{logical, normalize distance values or not (see details)}
 
-\item{log}{logical, apply log tranformation to the distances or not (see details)}
+\item{log}{logical, apply log transformation to the distances or not (see details)}
 
 \item{show.labels}{logical, show or not labels for the plot objects}
 

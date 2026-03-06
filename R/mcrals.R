@@ -1,7 +1,7 @@
 #' Multivariate curve resolution using Alternating Least Squares
 #'
 #' @description
-#' \code{mcralls} allows to resolve spectroscopic data to linear combination of individual spectra
+#' \code{mcrals} allows resolving spectroscopic data to linear combination of individual spectra
 #' and contributions using the alternating least squares (ALS) algorithm with constraints.
 #'
 #' @param x
@@ -9,19 +9,19 @@
 #' @param ncomp
 #' number of components to calculate.
 #' @param cont.constraints
-#' a list with constraints to be applied to contributions  (see details).
+#' a list with constraints to be applied to contributions (see details).
 #' @param spec.constraints
-#' a list with constraints to be applied to spectra  (see details).
+#' a list with constraints to be applied to spectra (see details).
 #' @param spec.ini
 #' a matrix with initial estimation of the pure components spectra.
 #' @param cont.forced
-#' a matrix which allows to force some of the concentration values (see details).
+#' a matrix that allows forcing some of the concentration values (see details).
 #' @param spec.forced
-#' a matrix which allows to force some of the spectra values (see details).
+#' a matrix that allows forcing some of the spectra values (see details).
 #' @param cont.solver
-#' which function to use as a solver for resolving of pure components contributions (see detials).
+#' which function to use as a solver for resolving of pure components contributions (see details).
 #' @param spec.solver
-#' which function to use as a solver for resolving of pure components spectra (see detials).
+#' which function to use as a solver for resolving of pure components spectra (see details).
 #' @param exclrows
 #' rows to be excluded from calculations (numbers, names or vector with logical values).
 #' @param exclcols
@@ -40,7 +40,7 @@
 #' contributions of each chemical component are estimated and then a set of constraints is
 #' applied to each. The method is well described in [1, 2].
 #'
-#' The method assumes that the spectra (D) is a linear combination of pure components spectra (S)
+#' The method assumes that the spectral data (D) is a linear combination of pure components spectra (S)
 #' and pure component concentrations (C):
 #'
 #' D = CS' + E
@@ -66,17 +66,17 @@
 #' either when number exceeds value in \code{max.niter} or when improvements (difference between
 #' explained variance on current and previous steps) is smaller than \code{tol} value.
 #'
-#' Parameters \code{cont.force} and \code{spec.force} allows you to force some parts of the
+#' Parameters \code{cont.forced} and \code{spec.forced} allow you to force some parts of the
 #' contributions or the spectra to be equal to particular pre-defined values. In this case you need
-#' to provide the parameters (or just one of them) in form of a matrix. For example \code{cont.force}
-#' should have as many rows as many you have in the original spectral data \code{x} and as many
-#' columns as many pure components you want to resolve. Feel all values of this matrix with
+#' to provide the parameters (or just one of them) in form of a matrix. For example \code{cont.forced}
+#' should have as many rows as you have in the original spectral data \code{x} and as many
+#' columns as many pure components you want to resolve. Fill all values of this matrix with
 #' \code{NA} and the values you want to force with real numbers. For example if you know that in
 #' the first measurement concentration of 2 and 3 components was zero, set the corresponding
 #' values of \code{cont.force} to zero. See also the last case in the examples section.
 #'
 #' @return
-#' Returns an object of \code{\link{mcrpure}} class with the following fields:
+#' Returns an object of \code{\link{mcrals}} class with the following fields:
 #' \item{resspec}{matrix with resolved spectra.}
 #' \item{rescont}{matrix with resolved contributions.}
 #' \item{cont.constraints}{list with contribution constraints provided by user.}
@@ -85,7 +85,7 @@
 #' \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
 #' \item{ncomp}{number of resolved components}
 #' \item{max.niter}{maximum number of iterations}
-#' \item{info }{information about the model, provided by user when build the model.}
+#' \item{info }{information about the model, provided by user when building the model.}
 #'
 #'
 #' More details and examples can be found in the Bookdown tutorial.
@@ -119,7 +119,7 @@
 #'
 #' library(mdatools)
 #'
-#' # resolve mixture of carbonhydrates Raman spectra
+#' # resolve mixture of carbohydrates Raman spectra
 #'
 #' data(carbs)
 #'
@@ -135,7 +135,7 @@
 #' )
 #'
 #' # because by default initial approximation is made by using random numbers
-#' # we need to seed the generator in order to get reproducable results
+#' # we need to seed the generator in order to get reproducible results
 #' set.seed(6)
 #'
 #' # run ALS
@@ -225,7 +225,7 @@ mcrals <- function(x, ncomp,
    stopifnot("Number of rows in 'cont.forced' should be the same as number of rows in 'x'." = nrow(cont.forced) == nrow(x))
    stopifnot("Number of columns in 'cont.forced' should be the same as 'ncomp'." = ncol(cont.forced) == ncomp)
    stopifnot("Number of rows in 'spec.forced' should be the same as number of columns in 'x'." = nrow(spec.forced) == ncol(x))
-   stopifnot("Number of columns in 'spec.forced' should be the same as 'ncomp'." = ncol(cont.forced) == ncomp)
+   stopifnot("Number of columns in 'spec.forced' should be the same as 'ncomp'." = ncol(spec.forced) == ncomp)
 
    model <- mcrals.cal(
       x, ncomp,
@@ -245,7 +245,7 @@ mcrals <- function(x, ncomp,
    model$variance <- getVariance.mcr(model, x)
 
    # add class name, call and info and return
-   class(model) <- c("mcr", "mcrals")
+   class(model) <- c("mcrals", "mcr")
    model$call <- match.call()
    model$info <- info
 
@@ -276,13 +276,13 @@ predict.mcrals <- function(object, x, ...) {
 }
 
 
-#' Print method for mcrpure object
+#' Print method for mcrals object
 #'
 #' @description
 #' Prints information about the object structure
 #'
 #' @param x
-#' \code{mcrpure} object
+#' \code{mcrals} object
 #' @param ...
 #' other arguments
 #'
@@ -290,7 +290,7 @@ predict.mcrals <- function(object, x, ...) {
 print.mcrals <- function(x, ...) {
    cat("\nMCRALS unmixing case (class mcrals)\n")
 
-   if (length(x$info) > 1) {
+   if (nzchar(x$info)) {
       cat("\nInfo:\n")
       cat(x$info)
    }
@@ -299,12 +299,14 @@ print.mcrals <- function(x, ...) {
    print(x$call)
 
    cat("\nMajor model fields:\n")
-   cat("$ncomp - number of calculated components\n")
-   cat("$resspec - matrix with resolved spectra\n")
-   cat("$rescons - matrix with resolved concentrations\n")
-   cat("$expvar - vector with explained variance\n")
-   cat("$cumexpvar - vector with cumulative explained variance\n")
-   cat("$info - case info provided by user\n")
+   cat(" $ncomp - number of calculated components\n")
+   cat(" $resspec - matrix with resolved spectra\n")
+   cat(" $rescont - matrix with resolved contributions\n")
+   cat(" $expvar - vector with explained variance\n")
+   cat(" $cumexpvar - vector with cumulative explained variance\n")
+   cat(" $info - case info provided by user\n")
+
+   invisible(x)
 }
 
 #' Summary method for mcrals object
@@ -322,7 +324,7 @@ summary.mcrals <- function(object, ...) {
 
    cat("\nSummary for MCR ALS case (class mcrals)\n")
 
-   if (length(object$info) > 1) {
+   if (nzchar(object$info)) {
       fprintf("\nInfo:\n%s\n", object$info)
    }
 
@@ -331,12 +333,12 @@ summary.mcrals <- function(object, ...) {
    }
 
    if (length(object$exclcols) > 0) {
-      fprintf("Excluded coumns: %d\n", length(object$exclcols))
+      fprintf("Excluded columns: %d\n", length(object$exclcols))
    }
 
    cat("\nConstraints for spectra:\n")
    if (length(object$spec.constraints) > 0) {
-      cat(paste(" - ", sapply(object$spec.constraints, function(x) x$name), collapse = "\n"))
+      cat(paste(" - ", vapply(object$spec.constraints, function(x) x$name, character(1)), collapse = "\n"))
       cat("\n")
    } else {
       cat(" - none\n\n")
@@ -344,17 +346,19 @@ summary.mcrals <- function(object, ...) {
 
    cat("\nConstraints for contributions:\n")
    if (length(object$cont.constraints) > 0) {
-      cat(paste(" - ", sapply(object$cont.constraints, function(x) x$name), collapse = "\n"))
+      cat(paste(" - ", vapply(object$cont.constraints, function(x) x$name, character(1)), collapse = "\n"))
       cat("\n")
    } else {
       cat(" - none\n\n")
    }
 
    cat("\n")
-   out <- round(t(object$variance[1:2, ]), 2)
+   out <- round(t(object$variance[1:2, , drop = FALSE]), 2)
    rownames(out) <- colnames(object$variance)
    colnames(out) <- c("Expvar", "Cumexpvar")
    show(out)
+
+   invisible(object)
 }
 
 
@@ -363,30 +367,30 @@ summary.mcrals <- function(object, ...) {
 ################################
 
 
-#' Identifies pure variables
+#' MCR-ALS calibration
 #'
 #' @description
-#' The method identifies indices of pure variables using the SIMPLISMA
-#' algorithm.
+#' The method resolves spectral data into pure component spectra and contributions
+#' using the Alternating Least Squares algorithm with constraints.
 #'
 #' @param D
 #' matrix with the spectra
 #' @param ncomp
 #' number of pure components
 #' @param cont.constraints
-#' a list with constraints to be applied to contributions  (see details).
+#' a list with constraints to be applied to contributions (see details).
 #' @param spec.constraints
-#' a list with constraints to be applied to spectra  (see details).
+#' a list with constraints to be applied to spectra (see details).
 #' @param spec.ini
 #' a matrix with initial estimation of the pure components spectra.
 #' @param cont.forced
-#' a matrix which allows to force some of the concentration values (see details).
+#' a matrix that allows forcing some of the concentration values (see details).
 #' @param spec.forced
-#' a matrix which allows to force some of the spectra values (see details).
+#' a matrix that allows forcing some of the spectra values (see details).
 #' @param cont.solver
-#' which function to use as a solver for resolving of pure components contributions (see detials).
+#' which function to use as a solver for resolving of pure components contributions (see details).
 #' @param spec.solver
-#' which function to use as a solver for resolving of pure components spectra (see detials).
+#' which function to use as a solver for resolving of pure components spectra (see details).
 #' @param max.niter
 #' maximum number of iterations.
 #' @param tol
@@ -395,7 +399,7 @@ summary.mcrals <- function(object, ...) {
 #' logical, if TRUE information about every iteration will be shown.
 #'
 #' @return
-#' The function returns a list with with following fields:
+#' The function returns a list with the following fields:
 #' \item{ncomp }{number of pure components.}
 #' \item{resspec}{matrix with resolved spectra.}
 #' \item{rescont}{matrix with resolved contributions.}
@@ -437,7 +441,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini,
    var <- 0
 
    if (verbose) {
-      cat(sprintf("\nStarting iterations (max.niter = %d):\n", max.niter))
+      message(sprintf("Starting iterations (max.niter = %d):", max.niter))
    }
 
    cont.forced.ind <- !is.na(cont.forced)
@@ -485,21 +489,19 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini,
       }
 
       if (verbose) {
-         cat(sprintf("Iteration %4d, R2 = %.6f\n", i, var))
+         message(sprintf("Iteration %4d, R2 = %.6f", i, var))
       }
 
       var_old <- var
       var <- tryCatch(
          1 - sum((D - tcrossprod(cont.solver(D, St), St))^2) / totvar,
          error = function(e) {
-            print(e)
-            stop("Unable to resolve the components, perhaps 'ncomp' is too large.\n
-               or initial estimates for spectra are not good enough.", call. = FALSE)
+            stop("Unable to resolve the components, perhaps 'ncomp' is too large or initial estimates for spectra are not good enough.", call. = FALSE)
          }
       )
 
       if ( (var - var_old) < tol) {
-         if (verbose) cat("No more improvements.\n")
+         if (verbose) message("No more improvements.")
          break
       }
 
@@ -509,9 +511,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini,
    Ct <- tryCatch(
       cont.solver(D, St),
       error = function(e) {
-         print(e)
-         stop("Unable to resolve the components, perhaps 'ncomp' is too large.\n
-            or initial estimates for spectra are not good enough.", call. = FALSE)
+         stop("Unable to resolve the components, perhaps 'ncomp' is too large or initial estimates for spectra are not good enough.", call. = FALSE)
       }
    )
 
@@ -542,7 +542,7 @@ mcrals.cal <- function(D, ncomp, cont.constraints, spec.constraints, spec.ini,
          cont.constraints = cont.constraints,
          spec.constraints = spec.constraints,
          cont.solver = cont.solver,
-         spec.colver = spec.solver,
+         spec.solver = spec.solver,
          max.niter = max.niter
       )
    )
@@ -611,7 +611,7 @@ mcrals.nnls <- function(D, A,
 
       # compute initial residuals and values for Lagrange multipliers
       E <- d - A %*% b
-      w <- t(A) %*% E
+      w <- crossprod(A, E)
 
       iter <- 0
 
@@ -640,8 +640,9 @@ mcrals.nnls <- function(D, A,
             iter <- iter + 1
 
             if (iter > itmax) {
-               # too many iterations, exitint with current solution
-               return(b.hat)
+               B[v, ] <- b.hat
+               warning("NNLS did not converge within maximum number of iterations.")
+               return(B)
             }
 
             # find which values in current solution are negative but they are in positive lest

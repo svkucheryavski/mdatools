@@ -1,6 +1,6 @@
 #' PLS-DA results
 #' @description
-#' \code{plsdares} is used to store and visualize results of applying a PLS-DA model to a new data.
+#' \code{plsdares} is used to store and visualize results of applying a PLS-DA model to new data.
 #'
 #' @param plsres
 #' PLS results for the data.
@@ -14,7 +14,7 @@
 #' function \code{\link{predict.plsda}}.
 #'
 #' The object gives access to all PLS-DA results as well as to the plotting methods for
-#' visualisation of the results. The \code{plsidares} class also inherits all properties and methods
+#' visualisation of the results. The \code{plsdares} class also inherits all properties and methods
 #' of \code{classres} and \code{plsres} classes.
 #'
 #' If no reference values provided, classification statistics will not be calculated and
@@ -25,11 +25,11 @@
 #' and \code{\link{plsres}}.
 #'
 #' @seealso
-#' Methods for \code{plsda} objects:
+#' Methods for \code{plsdares} objects:
 #' \tabular{ll}{
-#'  \code{print.plsda} \tab shows information about the object.\cr
-#'  \code{summary.plsda} \tab shows statistics for results of classification.\cr
-#'  \code{plot.plsda} \tab shows plots for overview of the results.\cr
+#'  \code{print.plsdares} \tab shows information about the object.\cr
+#'  \code{summary.plsdares} \tab shows statistics for results of classification.\cr
+#'  \code{plot.plsdares} \tab shows plots for overview of the results.\cr
 #' }
 #'
 #' Methods, inherited from \code{\link{classres}} class:
@@ -53,7 +53,7 @@
 #'    \code{\link{plotXYScores.plsres}} \tab shows scores plot for x and y decomposition.\cr
 #'    \code{\link{plotXVariance.plsres}} \tab shows explained variance plot for x decomposition.\cr
 #'    \code{\link{plotYVariance.plsres}} \tab shows explained variance plot for y decomposition.\cr
-#'    \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for y
+#'    \code{\link{plotXCumVariance.plsres}} \tab shows cumulative explained variance plot for x
 #'    decomposition.\cr
 #'    \code{\link{plotYCumVariance.plsres}} \tab shows cumulative explained variance plot for y
 #'    decomposition.\cr
@@ -159,20 +159,20 @@ plsdares <- function(plsres, cres) {
 plot.plsdares <- function(x, nc = 1, ncomp = x$ncomp.selected, show.labels = FALSE, ...) {
 
    if (is.null(x$c.ref)) {
-      par(mfrow = c(2, 2))
-      plotXResiduals.plsres(x, ncomp = ncomp, show.labels = show.labels)
-      plotYVariance.plsres(x, ncomp = ncomp, show.labels = show.labels)
-      plotPredictions.classres(x, ncomp = ncomp, show.labels = show.labels)
-      par(mfrow = c(1, 1))
+      op <- par(mfrow = c(2, 2))
+      on.exit(par(op))
+      plotXResiduals.plsres(x, ncomp = ncomp, show.labels = show.labels, ...)
+      plotYVariance.plsres(x, ncomp = ncomp, show.labels = show.labels, ...)
+      plotPredictions.classres(x, ncomp = ncomp, show.labels = show.labels, ...)
       return()
    }
 
-   par(mfrow = c(2, 2))
-   plotXResiduals.plsres(x, ncomp = ncomp, show.labels = show.labels)
-   plotYVariance.plsres(x, ncomp = ncomp, show.labels = show.labels)
-   plotPerformance.classres(x, nc = nc, show.labels = show.labels)
-   plotPredictions.classres(x, ncomp = ncomp, show.labels = show.labels)
-   par(mfrow = c(1, 1))
+   op <- par(mfrow = c(2, 2))
+   on.exit(par(op))
+   plotXResiduals.plsres(x, ncomp = ncomp, show.labels = show.labels, ...)
+   plotYVariance.plsres(x, ncomp = ncomp, show.labels = show.labels, ...)
+   plotPerformance.classres(x, nc = nc, show.labels = show.labels, ...)
+   plotPredictions.classres(x, ncomp = ncomp, show.labels = show.labels, ...)
 }
 
 #' as.matrix method for PLS-DA results
@@ -214,7 +214,7 @@ as.matrix.plsdares <- function(x, ncomp = NULL, nc = 1, ...) {
 #' @export
 summary.plsdares <- function(object, nc = seq_len(object$nclasses), ...) {
    cat("\nPLS-DA results (class plsdares) summary:\n")
-   fprintf("Number of selected components: %.0f\n", object$ncomp.selected)
+   fprintf("Number of selected components: %d\n", object$ncomp.selected)
 
    if (is.null(object$c.ref)) {
       cat("No reference data available.\n")
@@ -222,12 +222,14 @@ summary.plsdares <- function(object, nc = seq_len(object$nclasses), ...) {
    }
 
    for (n in nc) {
-      fprintf("\nClass #%.0f (%s):\n", n, object$classnames[n])
+      fprintf("\nClass #%d (%s):\n", n, object$classnames[n])
       out <- as.matrix(object, nc = n)
       if (!any(is.na(out[, 1:4]))) out[, 1:4] <- round(out[, 1:4], 3)
       print(out)
       cat("\n")
    }
+
+   invisible(object)
 }
 
 #' Print method for PLS-DA results object
@@ -252,15 +254,17 @@ print.plsdares <- function(x, ...) {
    cat("$c.pred - array with predicted class values\n")
 
    if (!is.null(x$c.ref)) {
-      cat("$c.ref - vector with reference class values\n")
-      cat("$tp - number of true positives\n")
-      cat("$fp - number of false positives\n")
-      cat("$fn - number of false negatives\n")
-      cat("$specificity - specificity of predictions\n")
-      cat("$sensitivity - sensitivity of predictions\n")
-      cat("$misclassified - misclassification ratio for predictions\n")
-      cat("$ydecomp - decomposition of y values (ldecomp object)\n")
+      cat(" $c.ref - vector with reference class values\n")
+      cat(" $tp - number of true positives\n")
+      cat(" $fp - number of false positives\n")
+      cat(" $fn - number of false negatives\n")
+      cat(" $specificity - specificity of predictions\n")
+      cat(" $sensitivity - sensitivity of predictions\n")
+      cat(" $misclassified - misclassification ratio for predictions\n")
+      cat(" $ydecomp - decomposition of y values (ldecomp object)\n")
    }
 
    cat("$xdecomp - decomposition of x values (ldecomp object)\n")
+
+   invisible(x)
 }

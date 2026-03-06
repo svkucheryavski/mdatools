@@ -40,7 +40,7 @@ data, if it was provided.}
 cross-validation, if this option was chosen.}
 
 Fields, inherited from \code{\link{pca}} class:
-\item{ncomp }{number of components included to the model.}
+\item{ncomp }{number of components included in the model.}
 \item{ncomp.selected }{selected (optimal) number of components.}
 \item{loadings }{matrix with loading values (nvar x ncomp).}
 \item{eigenvals }{vector with eigenvalues for all existent components.}
@@ -48,7 +48,7 @@ Fields, inherited from \code{\link{pca}} class:
 \item{cumexpvar }{vector with cumulative explained variance for each component (in percent).}
 \item{T2lim }{statistical limit for T2 distance.}
 \item{Qlim }{statistical limit for Q residuals.}
-\item{info }{information about the model, provided by user when build the model.}
+\item{info }{information about the model, provided by user when building the model.}
 }
 \description{
 \code{simca} is used to make SIMCA (Soft Independent Modelling of Class Analogies) model for
@@ -57,11 +57,11 @@ one-class classification.
 \details{
 SIMCA is in fact PCA model with additional functionality, so \code{simca} class inherits most
 of the functionality of \code{\link{pca}} class. It uses critical limits calculated for Q and T2
-residuals calculated for PCA model for making classification decistion.
+residuals calculated for PCA model for making classification decision.
 
 Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
 will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
-cross-validation will be preformed). If it is a list, the following syntax can be used:
+cross-validation will be performed). If it is a list, the following syntax can be used:
 \code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg}
 segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits
 to \code{nseg} segments ('venetian blinds').
@@ -80,7 +80,7 @@ se = data[1:20, ]
 model = simca(se, "setosa", cv = 1)
 model = selectCompNum(model, 1)
 
-# show infromation, summary and plot overview
+# show information, summary and plot overview
 print(model)
 summary(model)
 plot(model)
@@ -111,7 +111,7 @@ Methods for \code{simca} objects:
  \code{print.simca} \tab shows information about the object.\cr
  \code{summary.simca} \tab shows summary statistics for the model.\cr
  \code{plot.simca} \tab makes an overview of SIMCA model with four plots.\cr
- \code{\link{predict.simca}} \tab applies SIMCA model to a new data.\cr
+ \code{\link{predict.simca}} \tab applies SIMCA model to new data.\cr
 }
 
 Methods, inherited from \code{classmodel} class:

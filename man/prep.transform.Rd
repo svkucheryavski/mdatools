@@ -17,7 +17,7 @@ prep.transform(data, fun, ...)
 data matrix with transformed values
 }
 \description{
-Transforms values from using any mathematical function (e.g. log).
+Transforms values using any mathematical function (e.g. log).
 }
 \examples{
 # generate a matrix with two columns

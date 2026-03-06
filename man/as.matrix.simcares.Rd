@@ -7,7 +7,7 @@
 \method{as.matrix}{simcares}(x, ncomp = NULL, ...)
 }
 \arguments{
-\item{x}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
+\item{x}{classification results (object of class \code{simcares}).}
 
 \item{ncomp}{model complexity (number of components) to show the parameters for.}
 

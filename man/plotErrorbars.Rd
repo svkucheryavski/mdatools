@@ -21,6 +21,6 @@ plotErrorbars(ps, col = ps$col, pch = 16, lwd = 1, cex = 1, ...)
 }
 \description{
 It is assumed that first row of dataset contains the y-coordinates of points,
-second rows contains size of lower error bar and third - size for upper error bar. If
+second row contains size of lower error bar and third - size for upper error bar. If
 only two rows are provided it is assumed that error bars are symmetric.
 }

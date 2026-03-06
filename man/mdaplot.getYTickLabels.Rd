@@ -4,14 +4,12 @@
 \alias{mdaplot.getYTickLabels}
 \title{Prepare yticklabels for plot}
 \usage{
-mdaplot.getYTickLabels(yticklabels, yticks, excluded_rows)
+mdaplot.getYTickLabels(yticklabels, yticks)
 }
 \arguments{
-\item{yticklabels}{yticklables provided by user (if any)}
+\item{yticklabels}{yticklabels provided by user (if any)}
 
 \item{yticks}{yticks (provided or computed)}
-
-\item{excluded_rows}{rows excluded from plot data (if any)}
 }
 \description{
 Prepare yticklabels for plot

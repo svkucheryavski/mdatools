@@ -2,15 +2,15 @@
 % Please edit documentation in R/defaults.R
 \name{plotExtreme}
 \alias{plotExtreme}
-\title{Shows extreme plot for SIMCA model}
+\title{Shows extreme plot for PCA and DD-SIMCA models}
 \usage{
 plotExtreme(obj, ...)
 }
 \arguments{
-\item{obj}{a SIMCA model}
+\item{obj}{a PCA or DD-SIMCA model}
 
 \item{...}{other parameters}
 }
 \description{
-Generic function for creating extreme plot for SIMCA model
+Generic function for creating extreme plot for PCA and DD-SIMCA models
 }

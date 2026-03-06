@@ -7,7 +7,7 @@
 \method{plotPredictions}{simcamres}(obj, nc = seq_len(obj$nclasses), main = "Predictions", ...)
 }
 \arguments{
-\item{obj}{classification results (object of class \code{plsdares}, \code{simcamres}, etc.).}
+\item{obj}{classification results (object of class \code{simcamres}).}
 
 \item{nc}{vector with classes to show predictions for.}
 

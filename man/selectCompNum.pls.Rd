@@ -23,7 +23,7 @@ the same model with selected number of components
 Allows user to select optimal number of components for PLS model
 }
 \details{
-The method sets \code{ncomp.selected} parameter for the model and return it back. The parameter
+The method sets \code{ncomp.selected} parameter for the model and returns it back. The parameter
 points out to the optimal number of components in the model. You can either specify it manually,
 as argument \code{ncomp}, or use one of the algorithms for automatic selection.
 
@@ -32,12 +32,12 @@ results are found in the model, the method will use test set validation results.
 not available as well, the model will use calibration results and give a warning as in this case
 the selected number of components will lead to overfitted model.
 
-There are two algorithms for automatic selection you can chose between: either first local
+There are two algorithms for automatic selection you can choose between: either first local
 minimum of RMSE (`selcrit="min"`) or Wold's rule (`selcrit="wold"`).
 
 The first local minimum criterion finds at which component, A, error of prediction starts
-raising and selects (A - 1) as the optimal number. The Wold's criterion finds which component A
-does not make error smaller at least by 5% comparing to the previous value and selects (A - 1)
+rising and selects (A - 1) as the optimal number. The Wold's criterion finds which component A
+does not make error smaller at least by 5% compared to the previous value and selects (A - 1)
 as the optimal number.
 
 If model is PLS2 model (has several response variables) the method computes optimal number of

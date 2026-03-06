@@ -20,7 +20,7 @@
 
 \item{norm}{logical, normalize distance values or not (see details)}
 
-\item{log}{logical, apply log tranformation to the distances or not (see details)}
+\item{log}{logical, apply log transformation to the distances or not (see details)}
 
 \item{main}{main title for the plot}
 

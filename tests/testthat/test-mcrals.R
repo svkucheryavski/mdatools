@@ -217,7 +217,7 @@ for (s in solvers) {
       text(0.25, 0.5,
          paste0(capture.output(str(p, max.level = 1, give.attr = FALSE)), collapse="\n"), pos = 4)
 
-      expect_output(m <- do.call(mcrals, c(list(x = D, verbose = TRUE), p)))
+      expect_message(m <- do.call(mcrals, c(list(x = D, verbose = TRUE), p)))
 
       set.seed(6)
       expect_silent(m <- do.call(mcrals, c(list(x = D), p)))

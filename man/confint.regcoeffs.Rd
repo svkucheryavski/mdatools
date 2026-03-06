@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{regression coefficients object (class \code{regcoeffs})}
 
-\item{parm}{not used, needed for compatiility with general method}
+\item{parm}{not used, needed for compatibility with general method}
 
 \item{level}{confidence level}
 
@@ -20,6 +20,6 @@
 \item{...}{other arguments}
 }
 \description{
-returns matrix with confidence intervals for regression coeffocoents
+returns matrix with confidence intervals for regression coefficients
 for given response number and number of components.
 }

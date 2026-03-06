@@ -12,10 +12,6 @@ teardown({
    sink()
 })
 
-#################################################
-# Block 1. Tests the old algorithm              #
-#################################################
-
 context("simpls: PLS2 example from the paper")
 
 # convert results produced by SIMPLS algorithm to form
@@ -65,21 +61,10 @@ test_that("new algorithm works correctly", {
    expect_equivalent(res$Yexp, expected$Yexp, tolerance = 10^-4)
 })
 
-test_that("old algorithm works correctly", {
-   res <- simpls2res(pls.simplsold(X, Y, A), X, Y, A)
-
-   expect_equivalent(abs(res$R), abs(expected$R), tolerance = 10^-4)
-   expect_equivalent(abs(res$T), abs(expected$T), tolerance = 10^-4)
-   expect_equivalent(res$Xexp, expected$Xexp, tolerance = 10^-4)
-   expect_equivalent(res$Yexp, expected$Yexp, tolerance = 10^-4)
-})
-
-
-test_that("new algorithm is more numerically stable", {
+test_that("new algorithm is numerically stable", {
    Xr <- matrix(rnorm(30000 * 1000), 30000, 1000)
    Yr <- matrix(rnorm(30000 * 2), 30000, 2)
 
-   expect_warning(pls.simplsold(Xr, Yr / 100000000, 50))
    expect_silent(pls.simpls(Xr, Yr / 100000000, 50))
 })
 
@@ -87,10 +72,10 @@ test_that("new algorithm is more numerically stable", {
 test_that("new algorithm gives results comparable to other software", {
 
    # read model parameters made in PLS_Toolbox
-   weights <- as.matrix(read.delim("plstlbx-people-weights.csv", sep = " ", header = FALSE))
-   xloadings <- as.matrix(read.delim("plstlbx-people-xloadings.csv", sep = " ", header = FALSE))
-   xscores <- as.matrix(read.delim("plstlbx-people-xscores.csv", sep = " ", header = FALSE))
-   yscores <- as.matrix(read.delim("plstlbx-people-yscores.csv", sep = " ", header = FALSE))
+   weights <- as.matrix(read.delim("auxfiles/plstlbx-people-weights.csv", sep = " ", header = FALSE))
+   xloadings <- as.matrix(read.delim("auxfiles/plstlbx-people-xloadings.csv", sep = " ", header = FALSE))
+   xscores <- as.matrix(read.delim("auxfiles/plstlbx-people-xscores.csv", sep = " ", header = FALSE))
+   yscores <- as.matrix(read.delim("auxfiles/plstlbx-people-yscores.csv", sep = " ", header = FALSE))
    yloadings <- c(5.3643, 1.0338, 0.4675, 0.3567)
    coeffs <- c(0.2078, 0.2647, 0.0073, 0.0722, -0.0016, 0.1829, 0.1420, -0.1984, 0.2153, 0.0151, -0.0405)
 

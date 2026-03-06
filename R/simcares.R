@@ -1,6 +1,6 @@
 #' Results of SIMCA one-class classification
 #'
-#'  @description
+#' @description
 #' \code{simcares} is used to store results for SIMCA one-class classification.
 #' @param class.res
 #' results of classification (class \code{classres}).
@@ -24,7 +24,7 @@
 #'
 #' The following fields are available only if reference values were provided.
 #' \item{tp}{number of true positives.}
-#' \item{fp}{nmber of false positives.}
+#' \item{fp}{number of false positives.}
 #' \item{fn}{number of false negatives.}
 #' \item{specificity}{specificity of predictions.}
 #' \item{sensitivity}{sensitivity of predictions.}
@@ -68,7 +68,7 @@
 #' model = simca(se, 'Se')
 #' model = selectCompNum(model, 1)
 #'
-#' # show infromation and summary
+#' # show information and summary
 #' print(model$calres)
 #' summary(model$calres)
 #'
@@ -96,7 +96,7 @@ simcares <- function(class.res, pca.res = NULL) {
 #' values for specific class.
 #'
 #' @param x
-#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' classification results (object of class \code{simcares}).
 #' @param ncomp
 #' model complexity (number of components) to show the parameters for.
 #' @param ...
@@ -143,6 +143,8 @@ summary.simcares <- function(object, ...) {
 
    print(as.matrix.simcares(object, ...))
    cat("\n")
+
+   invisible(object)
 }
 
 #' Print method for SIMCA results object
@@ -163,4 +165,6 @@ print.simcares <- function(x, ...) {
    print.ldecomp(x, "")
    print.classres(x, "")
    cat("\n")
+
+   invisible(x)
 }

@@ -19,7 +19,7 @@ mcr(x, ncomp, method, exclrows = NULL, exclcols = NULL, info = "", ...)
 
 \item{info}{text with information about the MCR model}
 
-\item{...}{other parameters realted to specific method}
+\item{...}{other parameters related to specific method}
 }
 \description{
 \code{mcr} is used to store and visualise general MCR data and results.

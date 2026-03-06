@@ -7,7 +7,7 @@
 \method{summary}{ipls}(object, glob.ncomp = object$gm$ncomp.selected, ...)
 }
 \arguments{
-\item{object}{a iPLS (object of class \code{ipls}).}
+\item{object}{an iPLS (object of class \code{ipls}).}
 
 \item{glob.ncomp}{number of components for global PLS model with all intervals.}
 

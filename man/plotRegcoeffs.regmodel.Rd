@@ -11,8 +11,8 @@
 
 \item{ncomp}{number of components to show the plot for}
 
-\item{...}{other plot parameters (see \code{link{plot.regcoeffs}} for details)}
+\item{...}{other plot parameters (see \code{\link{plot.regcoeffs}} for details)}
 }
 \description{
-Shows plot with regression coefficient values. Is a proxy for \code{link{plot.regcoeffs}} method.
+Shows plot with regression coefficient values. Is a proxy for \code{\link{plot.regcoeffs}} method.
 }

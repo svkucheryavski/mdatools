@@ -25,8 +25,8 @@ regmodel <- function(...) {
 #' @return
 #' object of class \code{plsres} with results of cross-validation
 #'
-#' Function `pred.fun` must take four agruments: autoscaled x-values, array with regression
-#' coefficients, vectors for centring and scaling of y-values (if used). The function must
+#' Function `pred.fun` must take four arguments: autoscaled x-values, array with regression
+#' coefficients, vectors for centering and scaling of y-values (if used). The function must
 #' return predicted y-values in original units (unscaled and uncentered).
 #'
 #' @export
@@ -85,8 +85,8 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun, pred.fun, cv.scope = 'loca
 
    # loop over segments and repetitions
    for (ir in seq_len(nrep)) {
-      for (is in seq_len(nseg)) {
-         ind <- which(cv_ind[, ir] == is)
+      for (iseg in seq_len(nseg)) {
+         ind <- which(cv_ind[, ir] == iseg)
          if (length(ind) == 0) next
 
          xc <- x[-ind, , drop = FALSE]
@@ -95,8 +95,8 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun, pred.fun, cv.scope = 'loca
 
          # redefine values for local scaling if selected
          if (cv.scope != 'global') {
-            xcenter <- if (obj$center) apply(xc, 2, mean) else rep(0, ncol(xc))
-            ycenter <- if (obj$center) apply(yc, 2, mean) else rep(0, ncol(yc))
+            xcenter <- if (obj$center) colMeans(xc) else rep(0, ncol(xc))
+            ycenter <- if (obj$center) colMeans(yc) else rep(0, ncol(yc))
             xscale <- if (obj$scale)  apply(xc, 2, sd) else rep(1, ncol(xc))
             yscale <- if (obj$scale)  apply(yc, 2, sd) else rep(1, ncol(yc))
 
@@ -122,12 +122,12 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun, pred.fun, cv.scope = 'loca
 
          # if any have NA values quit
          if (any(is.na(yp))) {
-            stop("NA results produced during cross-validation.")
+            stop("NA results produced during cross-validation.", call. = FALSE)
          }
 
          # save results
          yp.cv[ind, , ] <- yp.cv[ind, , , drop = FALSE] + yp
-         jk.coeffs[, , , is] <- jk.coeffs[, , , is, drop = FALSE] +
+         jk.coeffs[, , , iseg] <- jk.coeffs[, , , iseg, drop = FALSE] +
             array(m.loc$coeffs$values, dim = c(dim(m.loc$coeffs$values), 1))
       }
    }
@@ -154,7 +154,7 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun, pred.fun, cv.scope = 'loca
    return(list(y.pred = yp.cv, y.ref = y.ref, jk.coeffs = jk.coeffs))
 }
 
-#' Regression coefficients for PLS model'
+#' Regression coefficients for PLS model
 #'
 #' @description
 #' Returns a matrix with regression coefficients for
@@ -188,14 +188,14 @@ crossval.regmodel <- function(obj, x, y, cv, cal.fun, pred.fun, cv.scope = 'loca
 #' the coefficients for. The confidence interval is computed for unstandardized coefficients.
 #'
 #' @return
-#' A matrix  with regression coefficients and (optinally) statistics.
+#' A matrix with regression coefficients and (optionally) statistics.
 #'
 #' @export
 getRegcoeffs.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, full = FALSE,
    alpha = 0.05, ...) {
 
    if (length(ncomp) != 1 || ncomp <= 0 || ncomp > obj$ncomp) {
-      stop("Wrong value for number of components.")
+      stop("Wrong value for number of components.", call. = FALSE)
    }
 
    attrs <- mda.getattr(obj$coeffs$values)
@@ -255,7 +255,7 @@ summary.regmodel <- function(object, ncomp = object$ncomp.selected,
    ny = seq_len(object$res$cal$nresp), res = object$res, ...) {
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > dim(object$res[["cal"]]$y.pred)[2]) {
-      stop("Wrong value for 'ncomp' parameter.")
+      stop("Wrong value for 'ncomp' parameter.", call. = FALSE)
    }
 
    cat("\nRegression model (class regmodel) summary\n")
@@ -276,9 +276,10 @@ summary.regmodel <- function(object, ncomp = object$ncomp.selected,
       mda.show(sum_data)
    }
    cat("\n")
+   invisible(object)
 }
 
-#' Print method for PLS model object
+#' Print method for regression model object
 #'
 #' @description
 #' Prints information about the object structure
@@ -294,11 +295,12 @@ print.regmodel <- function(x, ...) {
    cat("\nCall:\n")
    print(x$call)
    cat("\nMajor fields:\n")
-   cat("$ncomp - number of calculated components\n")
-   cat("$ncomp.selected - number of selected components\n")
-   cat("$coeffs - object (regcoeffs) with regression coefficients\n")
-   cat("$res - list with result objects\n")
+   cat(" $ncomp - number of calculated components\n")
+   cat(" $ncomp.selected - number of selected components\n")
+   cat(" $coeffs - object (regcoeffs) with regression coefficients\n")
+   cat(" $res - list with result objects\n")
    cat("\nTry summary(model) and plot(model) to see the model performance.\n")
+   invisible(x)
 }
 
 
@@ -405,7 +407,7 @@ plotPredictions.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1,
    legend.position = "topleft", show.line = TRUE, res = obj$res, ...) {
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > dim(obj$res[["cal"]]$y.pred)[2]) {
-      stop("Wrong value for 'ncomp' parameter.")
+      stop("Wrong value for 'ncomp' parameter.", call. = FALSE)
    }
 
    plot_data <- lapply(res, plotPredictions.regres, ny = ny, ncomp = ncomp, show.plot = FALSE)
@@ -431,7 +433,7 @@ plotPredictions.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1,
 #' @param ny
 #' number of response variable to make the plot for (if y is multivariate)
 #' @param show.lines
-#' allows to show the horizonta line at 0 level
+#' allows to show the horizontal line at 0 level
 #' @param res
 #' list with result objects
 #' @param ...
@@ -442,7 +444,7 @@ plotYResiduals.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, sho
    res = obj$res, ...) {
 
    if (length(ncomp) != 1 || ncomp < 1 || ncomp > dim(obj$res[["cal"]]$y.pred)[2]) {
-      stop("Wrong value for 'ncomp' parameter.")
+      stop("Wrong value for 'ncomp' parameter.", call. = FALSE)
    }
 
    plot_data <- lapply(res, plotResiduals, ny = ny, ncomp = ncomp, show.plot = FALSE)
@@ -453,14 +455,14 @@ plotYResiduals.regmodel <- function(obj, ncomp = obj$ncomp.selected, ny = 1, sho
 #' Regression coefficient plot for regression model
 #'
 #' @description
-#' Shows plot with regression coefficient values. Is a proxy for \code{link{plot.regcoeffs}} method.
+#' Shows plot with regression coefficient values. Is a proxy for \code{\link{plot.regcoeffs}} method.
 #'
 #' @param obj
 #' a regression model (object of class \code{regmodel})
 #' @param ncomp
 #' number of components to show the plot for
 #' @param ...
-#' other plot parameters (see \code{link{plot.regcoeffs}} for details)
+#' other plot parameters (see \code{\link{plot.regcoeffs}} for details)
 #'
 #' @export
 plotRegcoeffs.regmodel <- function(obj, ncomp = obj$ncomp.selected, ...) {

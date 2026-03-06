@@ -10,13 +10,13 @@
 #'
 #' @details
 #' Class \code{simcamres} inherits all properties and methods of class \code{\link{classres}}, plus
-#' store values necessary to visualise prediction decisions (e.g. Cooman's plot or Residuals plot).
+#' stores values necessary to visualise prediction decisions (e.g. Cooman's plot or Residuals plot).
 #'
-#' In cotrast to \code{simcares} here only values for optimal (selected) number of components in
+#' In contrast to \code{simcares} here only values for optimal (selected) number of components in
 #' each individual SIMCA models are presented.
 #'
 #' There is no need to create a \code{simcamres} object manually, it is created automatically when
-#' make a SIMCAM model (see \code{\link{simcam}}) or apply the model to a new data (see
+#' you make a SIMCAM model (see \code{\link{simcam}}) or apply the model to a new data (see
 #' \code{\link{predict.simcam}}). The object can be used to show summary and plots for the results.
 #'
 #' @return
@@ -32,7 +32,7 @@
 #'
 #' The following fields are available only if reference values were provided.
 #' \item{tp}{number of true positives.}
-#' \item{fp}{nmber of false positives.}
+#' \item{fp}{number of false positives.}
 #' \item{fn}{number of false negatives.}
 #' \item{specificity}{specificity of predictions.}
 #' \item{sensitivity}{sensitivity of predictions.}
@@ -73,7 +73,7 @@ simcamres <- function(cres, pred.res) {
 #' values for specific class.
 #'
 #' @param x
-#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' classification results (object of class \code{simcamres}).
 #' @param nc
 #' vector with classes to use.
 #' @param ...
@@ -81,7 +81,7 @@ simcamres <- function(cres, pred.res) {
 #'
 #' @export
 as.matrix.simcamres <- function(x, nc = seq_len(x$nclasses), ...) {
-   comp <- sapply(x$pred.res, function(r) r$ncomp.selected)
+   comp <- vapply(x$pred.res, function(r) r$ncomp.selected, numeric(1))
 
    out <- do.call(rbind, lapply(nc, function(n) as.matrix.classres(x, nc = n)))
    out <- cbind(comp, out)
@@ -115,6 +115,8 @@ summary.simcamres <- function(object, nc = seq_len(object$nclasses), ...) {
    fprintf("\nNumber of classes: %d\n", length(nc))
    print(as.matrix.simcamres(object))
    cat("\n")
+
+   invisible(object)
 }
 
 #' Print method for SIMCAM results object
@@ -132,6 +134,8 @@ print.simcamres <- function(x, ...) {
    cat("\nResult for SIMCA multiple classes classification (class simcamres)\n\n")
    print.classres(x, "")
    cat("\n")
+
+   invisible(x)
 }
 
 
@@ -196,7 +200,7 @@ plotCooman.simcamres <- function(obj, nc = c(1, 2), main = "Cooman's plot",
 #' Makes a plot with predicted class values for classification results.
 #'
 #' @param obj
-#' classification results (object of class \code{plsdares}, \code{simcamres}, etc.).
+#' classification results (object of class \code{simcamres}).
 #' @param nc
 #' vector with classes to show predictions for.
 #' @param main
@@ -228,5 +232,5 @@ plotPredictions.simcamres <- function(obj, nc = seq_len(obj$nclasses), main = "P
 #'
 #' @export
 plot.simcamres <- function(x, ...) {
-   plotPredictions(x)
+   plotPredictions(x, ...)
 }

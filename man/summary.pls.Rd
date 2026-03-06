@@ -14,7 +14,7 @@
 \arguments{
 \item{object}{a PLS model (object of class \code{pls})}
 
-\item{ncomp}{how many components to count.}
+\item{ncomp}{how many components to show.}
 
 \item{ny}{which y variables to show the summary for (can be a vector)}
 

@@ -20,5 +20,5 @@ matrix with formatted values
 Format vector with values, so only significant decimal numbers are left.
 }
 \details{
-Function takes into accound difference between values and the values themselves.
+Function takes into account difference between values and the values themselves.
 }

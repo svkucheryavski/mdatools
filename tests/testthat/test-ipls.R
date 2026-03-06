@@ -63,14 +63,14 @@ for (i in seq_along(datasets)) {
    expect_silent(m1 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp, center = d$center,
       scale = d$scale, int.num = 4, silent = TRUE))
 
-   expect_output(m1 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp, center = d$center,
+   expect_message(m1 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp, center = d$center,
       scale = d$scale, int.num = 10))
 
    if (ncol(d$xc) < 20) {
-      expect_output(m2 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp,
+      expect_message(m2 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp,
          center = d$center, scale = d$scale, int.width = 1))
    } else {
-      expect_output(m2 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp,
+      expect_message(m2 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp,
          center = d$center, scale = d$scale, int.width = 20))
    }
    #expect_output(m3 <- ipls(d$xc, d$yc, glob.ncomp = d$ncomp, center = d$center,
@@ -116,14 +116,14 @@ for (i in seq_along(datasets)) {
    expect_silent(m1 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp, center = d$center,
       scale = d$scale, int.num = 4, silent = TRUE))
 
-   expect_output(m1 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
+   expect_message(m1 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
       center = d$center, scale = d$scale, int.num = 10))
 
    if (ncol(d$xc) < 20) {
-      expect_output(m2 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
+      expect_message(m2 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
          center = d$center, scale = d$scale, int.width = 1))
    } else {
-      expect_output(m2 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
+      expect_message(m2 <- ipls(d$xc, d$yc, method = "backward", glob.ncomp = d$ncomp,
          center = d$center, scale = d$scale, int.width = 20))
    }
 
@@ -257,7 +257,7 @@ expect_equal(length(m5$int.selected), 13) # 50 in total minus 37 excluded
 ###############################
 
 # load data used in the paper: Anderson, Bro, JChem, 2010
-d <- read.csv2("Beer.csv")
+d <- read.csv2("datasets/Beer.csv")
 # d <- read.csv2("tests/testthat/Beer.csv")
 y <- d[1:40, 1, drop = FALSE]
 X <- d[1:40, 2:ncol(d)]

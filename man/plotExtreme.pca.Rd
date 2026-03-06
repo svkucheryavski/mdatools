@@ -2,55 +2,15 @@
 % Please edit documentation in R/pca.R
 \name{plotExtreme.pca}
 \alias{plotExtreme.pca}
-\title{Extreme plot}
+\title{A shortcut to `\code{\link{plotExtremes.pca}}.}
 \usage{
-\method{plotExtreme}{pca}(
-  obj,
-  res = obj$res[["cal"]],
-  comp = obj$ncomp.selected,
-  main = "Extreme plot",
-  xlab = "Expected",
-  ylab = "Observed",
-  pch = rep(21, length(comp)),
-  bg = mdaplot.getColors(length(comp)),
-  col = rep("white", length(comp)),
-  lwd = ifelse(pch \%in\% 21:25, 0.25, 1),
-  cex = rep(1.2, length(comp)),
-  ellipse.col = "#cceeff",
-  legend.position = "bottomright",
-  ...
-)
+\method{plotExtreme}{pca}(obj, ...)
 }
 \arguments{
-\item{obj}{a PCA model (object of class \code{pca})}
+\item{obj}{PCA model (object of class \code{pca}).}
 
-\item{res}{object with PCA results to show the plot for (e.g. calibration, test, etc)}
-
-\item{comp}{vector, number of components to show the plot for}
-
-\item{main}{plot title}
-
-\item{xlab}{label for x-axis}
-
-\item{ylab}{label for y-axis}
-
-\item{pch}{vector with values for \code{pch} parameter for each number of components}
-
-\item{bg}{vector with background color values for series of points (if pch=21:25)}
-
-\item{col}{vector with color values for series of points}
-
-\item{lwd}{line width for point symbols}
-
-\item{cex}{scale factor for data points}
-
-\item{ellipse.col}{color for tolerance ellipse}
-
-\item{legend.position}{position of the legend}
-
-\item{...}{other arguments}
+\item{...}{any parameters suitable for `\code{\link{plotExtremes.pca}}.}
 }
 \description{
-Shows a plot with number of expected vs. number of observed extreme objects for different
-significance levels (alpha values)
+A shortcut to `\code{\link{plotExtremes.pca}}.
 }

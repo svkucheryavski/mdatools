@@ -13,7 +13,7 @@
 )
 }
 \arguments{
-\item{obj}{object of clacc \code{mcr}}
+\item{obj}{object of class \code{mcr}}
 
 \item{comp}{vector with number of components to make the plot for}
 

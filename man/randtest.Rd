@@ -44,7 +44,7 @@ Returns an object of \code{randtest} class with following fields:
 \item{stat }{statistic values calculated for each component.}
 \item{alpha }{alpha values calculated for each component.}
 \item{statperm }{matrix with statistic values for each permutation.}
-\item{corrperm }{matrix with correlation between predicted and reference y-vales for each
+\item{corrperm }{matrix with correlation between predicted and reference y-values for each
 permutation.}
 \item{ncomp.selected }{suggested number of components.}
 }
@@ -61,12 +61,12 @@ show how often the statistic T, calculated for permuted Y-values, is the same or
 the same statistic, calculated for original data without permutations.
 
 If a component is important, then the covariance for unpermuted data should be larger than the
-covariance for permuted data and therefore the value for \code{alpha} will be quie small (there
+covariance for permuted data and therefore the value for \code{alpha} will be quite small (there
 is still a small chance to get similar covariance). This makes \code{alpha} very similar to
 p-value in a statistical test.
 
 The \code{randtest} procedure calculates alpha for each component, the values can be observed
-using \code{summary} or \code{plot} functions. There are also several function, allowing e.g.
+using \code{summary} or \code{plot} functions. There are also several functions, allowing e.g.
 to show distribution of statistics and the critical value for each component.
 }
 \examples{

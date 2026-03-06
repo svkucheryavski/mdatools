@@ -20,7 +20,7 @@
 
 \item{type}{type of the plot}
 
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+\item{show.axes}{logical, show or not axes lines crossing origin (0,0)}
 
 \item{show.plot}{logical, shall plot be created or just plot series object is needed}
 

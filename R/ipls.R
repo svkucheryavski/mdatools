@@ -43,7 +43,7 @@
 #' @param silent
 #' logical, show or not information about selection process.
 #' @param full
-#' logical, if TRUE the procedure will continue even if no improvements is observed.
+#' logical, if TRUE the procedure will continue even if no improvement is observed.
 #' @param cv.scope
 #' scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
 #' or 'local' — recompute new for each local calibration set.
@@ -67,7 +67,7 @@
 #' are successively excluded from a model. On the first step the algorithm finds the best
 #' (forward) or the worst (backward) individual interval. Then it tests the others to find the
 #' one which gives the best model in a combination with the already selected/excluded one. The
-#' procedure continues until no improvements is observed or the maximum number of iteration
+#' procedure continues until no improvement is observed or the maximum number of iteration
 #' is reached.
 #'
 #' There are several ways to specify the intervals. First of all either number of intervals
@@ -77,13 +77,13 @@
 #'
 #' Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
 #' will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
-#' cross-validation will be preformed). If it is a list, the following syntax can be used:
+#' cross-validation will be performed). If it is a list, the following syntax can be used:
 #' \code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg}
 #' segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits
 #' to \code{nseg} segments ('venetian blinds').
 #'
 #' @references
-#' [1] Lars Noergaard at al.  Interval partial least-squares regression (iPLS): a
+#' [1] Lars Noergaard et al.  Interval partial least-squares regression (iPLS): a
 #' comparative chemometric study with an example from near-infrared spectroscopy.
 #' Appl.Spec. 2000; 54: 413-419
 #'
@@ -121,6 +121,8 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
    int.limits = NULL, int.niter = NULL, ncomp.selcrit = "min", method = "forward",
    x.test = NULL, y.test = NULL, silent = FALSE, full = FALSE, cv.scope = "local") {
 
+   method <- match.arg(method, c("forward", "backward"))
+
    # process names and values for xaxis
    x <- mda.df2mat(x)
    xaxis.name <- attr(x, "xaxis.name")
@@ -133,9 +135,9 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
    # if test set is provided check it and set cv to NULL
    if (!is.null(x.test) && !is.null(y.test)) {
       if (is.null(dim(y.test))) dim(y.test) <- c(length(y.test), 1)
-      if (nrow(x.test) != nrow(y.test)) stop("Number of rows in 'x.test' and 'y.test' should be the same")
-      if (ncol(x.test) != ncol(x)) stop("Number of columns in 'x.test' and 'x' should be the same")
-      if (ncol(y.test) != ncol(y)) stop("Number of columns in 'y.test' and 'y' should be the same")
+      if (nrow(x.test) != nrow(y.test)) stop("Number of rows in 'x.test' and 'y.test' should be the same", call. = FALSE)
+      if (ncol(x.test) != ncol(x)) stop("Number of columns in 'x.test' and 'x' should be the same", call. = FALSE)
+      if (ncol(y.test) != ncol(y)) stop("Number of columns in 'y.test' and 'y' should be the same", call. = FALSE)
       cv <- NULL
    }
 
@@ -166,7 +168,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
    attr(x, "xaxis.name") <- xaxis.name
 
    if (length(dim(y)) != 2) {
-      stop("Response variable (y) should be a matrix or a sequence.")
+      stop("Response variable (y) should be a matrix or a sequence.", call. = FALSE)
    }
 
    if (ncol(y) > 1) {
@@ -185,7 +187,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
 
    # check limits
    if (ncol(int.limits) != 2 || nrow(int.limits) < 2) {
-      stop("Interval limits shall be provided as a matrix with two columns.")
+      stop("Interval limits shall be provided as a matrix with two columns.", call. = FALSE)
    }
 
    # get difference (size of intervals)
@@ -193,7 +195,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
 
    # check that difference and interval values are also fine
    if (min(int.limits) < 1 || max(int.limits) > npred || any(df < 0)) {
-      stop("Wrong values for interval limits.")
+      stop("Wrong values for interval limits.", call. = FALSE)
    }
 
    # recompute interval numbers and width (average)
@@ -218,7 +220,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
       cv = cv,
       glob.ncomp = glob.ncomp,
       int.ncomp = int.ncomp,
-      xmean = apply(x, 2, "mean"),
+      xmean = colMeans(x),
       int.width = int.width,
       int.num = int.num,
       int.niter = int.niter,
@@ -266,7 +268,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
    obj <- switch(method,
       "forward" = ipls.forward(x, y, obj, int.stat, glob.stat, full, cv.scope),
       "backward" = ipls.backward(x, y, obj, int.stat, glob.stat, full, cv.scope),
-      stop("Wrong value for parameter 'method'.")
+      stop("Wrong value for parameter 'method'.", call. = FALSE)
    )
 
    # correct columns of int.stat
@@ -296,7 +298,7 @@ ipls <- function(x, y, glob.ncomp = 10, center = TRUE, scale = FALSE, cv = list(
 ipls.getintlimits <- function(int.limits, int.width, int.num, npred) {
 
    if (is.null(c(int.limits, int.width, int.num))) {
-      stop("Specify either interval width or number of intervals.")
+      stop("Specify either interval width or number of intervals.", call. = FALSE)
    }
 
    if (!is.null(int.limits)) {
@@ -338,7 +340,7 @@ ipls.getintlimits <- function(int.limits, int.width, int.num, npred) {
 #' @param glob.stat
 #' data frame with initial global statistics.
 #' @param full
-#' logical, if TRUE the procedure will continue even if no improvements is observed.
+#' logical, if TRUE the procedure will continue even if no improvement is observed.
 #' @param cv.scope
 #' scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
 #' or 'local' — recompute new for each local calibration set.
@@ -351,15 +353,15 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
 
 
    if (!obj$silent) {
-      fprintf("\nModel with all intervals: RMSE = %f, nLV = %d\n",
-         int.stat$RMSE[1], int.stat$nComp[1])
+      message(sprintf("Model with all intervals: RMSE = %f, nLV = %d",
+         int.stat$RMSE[1], int.stat$nComp[1]))
    }
 
    # do loop for max number of intervals
    selind <- NULL
    rmse <- Inf
    for (i in seq_len(obj$int.niter)) {
-      if (!obj$silent) fprintf("Iteration %3d/%3d... ", i, obj$int.niter)
+      if (!obj$silent) message(sprintf("Iteration %3d/%3d... ", i, obj$int.niter), appendLF = FALSE)
 
       sel <- NULL
       rmse_loc <- Inf
@@ -398,7 +400,7 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
 
       # if no global improvements and parameter "full" is FALSE - stop
       if (rmse_loc > rmse && !full) {
-         if (!obj$silent) cat("no improvements, stop.\n\n")
+         if (!obj$silent) message("no improvements, stop.\n")
          break
       }
 
@@ -419,7 +421,7 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
       ))
 
       if (!obj$silent) {
-         fprintf("selected interval %3d (RMSE = %f, nLV = %d)\n", sel, rmse, ncomp)
+         message(sprintf("selected interval %3d (RMSE = %f, nLV = %d)", sel, rmse, ncomp))
       }
 
    }
@@ -448,7 +450,7 @@ ipls.forward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
 #' @param glob.stat
 #' data frame with initial global statistics.
 #' @param full
-#' logical, if TRUE the procedure will continue even if no improvements is observed.
+#' logical, if TRUE the procedure will continue even if no improvement is observed.
 #' @param cv.scope
 #' scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
 #' or 'local' — recompute new for each local calibration set.
@@ -460,8 +462,8 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
    int.nonselected <- NULL
 
    if (!obj$silent) {
-      fprintf("\nModel with all intervals: RMSE = %f, nLV = %d\n",
-         int.stat$RMSE[1], int.stat$nComp[1])
+      message(sprintf("Model with all intervals: RMSE = %f, nLV = %d",
+         int.stat$RMSE[1], int.stat$nComp[1]))
    }
 
    # do loop for max number of intervals
@@ -473,7 +475,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
       if (length(int.selected) == 1) break
 
       if (!obj$silent) {
-         fprintf("Iteration %3d/%3d... ", i, obj$int.niter)
+         message(sprintf("Iteration %3d/%3d... ", i, obj$int.niter), appendLF = FALSE)
       }
 
       # do loop to select an interval
@@ -515,7 +517,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
 
       # if no global improvements and parameter "full" is FALSE - stop
       if (rmse_loc > rmse && !full) {
-         if (!obj$silent) cat("no improvements, stop.\n\n")
+         if (!obj$silent) message("no improvements, stop.\n")
          break
       }
 
@@ -540,7 +542,7 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
       ))
 
       if (!obj$silent) {
-         fprintf("excluded interval %3d (RMSE = %f, nLV = %d)\n", unsel, rmse, m$ncomp.selected)
+         message(sprintf("excluded interval %3d (RMSE = %f, nLV = %d)", unsel, rmse, ncomp))
       }
    }
 
@@ -586,25 +588,25 @@ ipls.backward <- function(x, y, obj, int.stat, glob.stat, full, cv.scope) {
 #'
 #' See examples in help for \code{\link{ipls}} function.
 #'
-#'  @seealso
-#'  \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
+#' @seealso
+#' \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
 #'
 #' @export
 plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "iPLS results",
    xlab = obj$xaxis.name, ylab = if (is.null(obj$cv)) "RMSEP" else "RMSECV", xlim = NULL, ylim = NULL, ...) {
 
    if (glob.ncomp < 1 || glob.ncomp > obj$gm$ncomp) {
-      stop("Wrong value for number of components.")
+      stop("Wrong value for number of components.", call. = FALSE)
    }
 
    int <- obj$int.limits
    xlabels <- if (is.null(obj$xaxis.values)) seq_len(max(int)) else obj$xaxis.values
    if (!is.numeric(xlabels)) {
-      stop("Parameter 'xlabels' should be a vector with numbers.")
+      stop("Parameter 'xlabels' should be a vector with numbers.", call. = FALSE)
    }
 
    if (length(xlabels) != (max(int) - min(int) + 1)) {
-      stop("Wrong values for 'xlabels' parameter.")
+      stop("Wrong values for 'xlabels' parameter.", call. = FALSE)
    }
 
    # redefine intervals using xlabels
@@ -612,7 +614,7 @@ plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "
    int[, 2] <- xlabels[int[, 2]]
 
    # compute values for barplot
-   mids <- apply(int, 1, mean)
+   mids <- rowMeans(int)
    rmse <- obj$glob.stat$RMSE[2:nrow(obj$glob.stat)]
    ncomp <- obj$glob.stat$nComp[2:nrow(obj$glob.stat)]
 
@@ -645,8 +647,9 @@ plotSelection.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "
       col = rgb(0.4, 0.4, 0.4), cex = 0.85)
 
    dx <- diff(xlim) / 50
-   abline(h = obj$gm$cvres$rmse[1, glob.ncomp], lty = 2, col = rgb(0.5, 0.5, 0.5))
-   text(xlim[2] + dx, obj$gm$cvres$rmse[1, glob.ncomp], glob.ncomp, cex = 0.85,
+   gmres <- if (is.null(obj$cv)) obj$gm$res$test else obj$gm$res$cv
+   abline(h = gmres$rmse[1, glob.ncomp], lty = 2, col = rgb(0.5, 0.5, 0.5))
+   text(xlim[2] + dx, gmres$rmse[1, glob.ncomp], glob.ncomp, cex = 0.85,
         col = rgb(0.3, 0.3, 0.3), font = 2, pos = 3)
 }
 
@@ -687,7 +690,7 @@ plotRMSE.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "RMSE 
    xlab = "Iterations", ylab = if (is.null(obj$cv)) "RMSEP" else "RMSECV", xlim = NULL, ylim = NULL, ...) {
 
    if (glob.ncomp < 1 || glob.ncomp > obj$gm$ncomp) {
-      stop("Wrong value for number of components.")
+      stop("Wrong value for number of components.", call. = FALSE)
    }
 
    rmse <- obj$int.stat$RMSE
@@ -709,7 +712,7 @@ plotRMSE.ipls <- function(obj, glob.ncomp = obj$gm$ncomp.selected, main = "RMSE 
 #' Shows a plot for iPLS results.
 #'
 #' @param x
-#' a  (object of class \code{pca}).
+#' an iPLS object (object of class \code{ipls}).
 #' @param ...
 #' other arguments.
 #'
@@ -727,7 +730,7 @@ plot.ipls <- function(x, ...) {
 #' Prints information about the iPLS object structure
 #'
 #' @param x
-#' a iPLS (object of class \code{ipls})
+#' an iPLS (object of class \code{ipls})
 #' @param ...
 #' other arguments
 #'
@@ -737,14 +740,16 @@ print.ipls <- function(x, ...) {
    cat("\nCall:\n")
    print(x$call)
    cat("\nMajor fields:\n")
-   cat("$var.selected - vector with selected variables\n")
-   cat("$int.selected - vector with selected intervals\n")
-   cat("$int.num - number of intervals\n")
-   cat("$int.width - width of the intervals\n")
-   cat("$int.limits - limits for the intervals\n")
-   cat("$int.stat - table with statistics for the interval selection results\n")
-   cat("$glob.stat - table with statistics for the first iteration of the algorithm\n")
+   cat(" $var.selected - vector with selected variables\n")
+   cat(" $int.selected - vector with selected intervals\n")
+   cat(" $int.num - number of intervals\n")
+   cat(" $int.width - width of the intervals\n")
+   cat(" $int.limits - limits for the intervals\n")
+   cat(" $int.stat - table with statistics for the interval selection results\n")
+   cat(" $glob.stat - table with statistics for the first iteration of the algorithm\n")
    cat("\nTry summary(obj) and plot(obj) to see details.\n")
+
+   invisible(x)
 }
 
 #' Summary for iPLS results
@@ -753,7 +758,7 @@ print.ipls <- function(x, ...) {
 #' Shows statistics and algorithm parameters for iPLS results.
 #'
 #' @param object
-#' a iPLS (object of class \code{ipls}).
+#' an iPLS (object of class \code{ipls}).
 #' @param glob.ncomp
 #' number of components for global PLS model with all intervals.
 #' @param ...
@@ -770,12 +775,14 @@ print.ipls <- function(x, ...) {
 summary.ipls <- function(object, glob.ncomp = object$gm$ncomp.selected, ...) {
 
    if (glob.ncomp < 1 || glob.ncomp > object$gm$ncomp) {
-      stop("Wrong value for number of components.")
+      stop("Wrong value for number of components.", call. = FALSE)
    }
 
-   glob.rmse <- object$gm$cvres$rmse[1, glob.ncomp]
+   gm.res <- if (is.null(object$cv)) object$gm$res$test else object$gm$res$cv
+   glob.rmse <- gm.res$rmse[1, glob.ncomp]
    opt.ncomp <- object$om$ncomp.selected
-   opt.rmse <- object$om$cvres$rmse[1, opt.ncomp]
+   om.res <- if (is.null(object$cv)) object$om$res$test else object$om$res$cv
+   opt.rmse <- om.res$rmse[1, opt.ncomp]
    rmse.suffix <- if (is.null(object$cv)) "P" else "CV"
 
    cat("\niPLS variable selection results\n")
@@ -788,4 +795,6 @@ summary.ipls <- function(object, glob.ncomp = object$gm$ncomp.selected, ...) {
    cat("\nSummary for selection procedure:\n")
    show(object$int.stat)
    cat("\n")
+
+   invisible(object)
 }

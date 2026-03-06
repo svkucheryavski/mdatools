@@ -64,7 +64,7 @@ ipls(
 
 \item{silent}{logical, show or not information about selection process.}
 
-\item{full}{logical, if TRUE the procedure will continue even if no improvements is observed.}
+\item{full}{logical, if TRUE the procedure will continue even if no improvement is observed.}
 
 \item{cv.scope}{scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
 or 'local' — recompute new for each local calibration set.}
@@ -92,7 +92,7 @@ of the intervals, which gives best prediction performance. There are two selecti
 are successively excluded from a model. On the first step the algorithm finds the best
 (forward) or the worst (backward) individual interval. Then it tests the others to find the
 one which gives the best model in a combination with the already selected/excluded one. The
-procedure continues until no improvements is observed or the maximum number of iteration
+procedure continues until no improvement is observed or the maximum number of iteration
 is reached.
 
 There are several ways to specify the intervals. First of all either number of intervals
@@ -102,7 +102,7 @@ with \code{int.limits}.
 
 Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
 will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
-cross-validation will be preformed). If it is a list, the following syntax can be used:
+cross-validation will be performed). If it is a list, the following syntax can be used:
 \code{cv = list('rand', nseg, nrep)} for random repeated cross-validation with \code{nseg}
 segments and \code{nrep} repetitions or \code{cv = list('ven', nseg)} for systematic splits
 to \code{nseg} segments ('venetian blinds').
@@ -137,7 +137,7 @@ points(simdata$wavelength[ind], mspectrum[ind], pch = 16, col = 'blue')
 
 }
 \references{
-[1] Lars Noergaard at al.  Interval partial least-squares regression (iPLS): a
+[1] Lars Noergaard et al.  Interval partial least-squares regression (iPLS): a
 comparative chemometric study with an example from near-infrared spectroscopy.
 Appl.Spec. 2000; 54: 413-419
 }

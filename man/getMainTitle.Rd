@@ -17,5 +17,5 @@ getMainTitle(main, ncomp, default)
 returns main title for a plot depending on a user choice
 }
 \details{
-Depedning on a user choice it returns main title for a plot
+Depending on a user choice it returns main title for a plot
 }

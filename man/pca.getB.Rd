@@ -11,7 +11,7 @@ pca.getB(X, k = NULL, rand = NULL, dist = "unif")
 
 \item{k}{rank of X (number of components)}
 
-\item{rand}{a vector with two values - number of iterations (q) and oversmapling parameter (p)}
+\item{rand}{a vector with two values - oversampling parameter (p) and number of iterations (q)}
 
 \item{dist}{distribution for generating random numbers, 'unif' or 'norm'}
 }

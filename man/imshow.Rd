@@ -21,7 +21,7 @@ imshow(
 
 \item{main}{main title for the image}
 
-\item{colmap}{colormap using to show the intensity levels}
+\item{colmap}{colormap used to show the intensity levels}
 }
 \description{
 show image data as an image

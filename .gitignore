@@ -7,12 +7,24 @@
 .lintr
 .vscode/*
 LICENSE
+CLAUDE.md
+TODO.md
 
-tests/plots/*.pdf
-tests/plots/*.txt
-tests/matlab
-tests/matlab/*
+tests/testthat/dump
+tests/testthat/dump/*.*
 
 linting.R
 mdatools.Rproj
 localtests.R
+
+
+*-r.json
+
+tests/testthat/jsonfiles/pca-model-1-r.json
+tests/testthat/jsonfiles/pca-model-2-r.json
+tests/testthat/jsonfiles/pca-model-3-r.json
+tests/testthat/jsonfiles/pca-model-4-r.json
+tests/testthat/jsonfiles/pls-model-1-r.json
+tests/testthat/jsonfiles/pls-model-2-r.json
+tests/testthat/jsonfiles/pls-model-3-r.json
+tests/testthat/jsonfiles/pls-model-4-r.json

@@ -1,3 +1,86 @@
+v. 0.15.0
+=========
+
+This release contains numerous improvements, bug fixes, and new methods. The main highlights are a standalone DD-SIMCA implementation, overhauled preprocessing pipelines (with some breaking changes), and JSON/CSV interoperability with the [mda.tools](https://mda.tools) web-applications.The [tutorial](https://mda.tools/docs) has been updated and improved accordingly.
+
+### New dedicated methods for DD-SIMCA
+
+In previous version DD-SIMCA was implemented via more versatile method `simca`, which lets also use other SIMCA implementations. While versatility is in general good, it limited the DD-SIMCA possibilities and it was decided to implement it separately.
+
+Method `ddsimca` can now be used for training, testing and applying of [Data Driven SIMCA](https://doi.org/10.1002/cem.3556) models. It matches functionality of the corresponding [web-application](https://mda.tools/ddsimca), including all plots and figures of merits (for example estimation of beta, selectivity, etc.). It also lets you change decision boundary parameters without rebuilding the main model.
+
+See all details in the [tutorial](https://mda.tools/docs).
+
+The original method `simca` is still available (and always will) for compatibility.
+
+
+### Improvements to preprocessing methods
+
+There are several new methods for preprocessing, including:
+
+* `prep.spikes()` for cosmic spikes removal from Raman spectra.
+* `prep.center()` for centering of data columns.
+* `prep.scale()` for scaling of data columns.
+* `prep.emsc()` for extended multiplicative scatter correction.
+
+The following methods are considered as *deprecated*, you can still use them (they will be kept for compatibility), but for new code it is recommended to use the alternatives:
+
+* `prep.autoscale()` — use `prep.center()` and `prep.scale()` instead.
+* `prep.snv()` — use `prep.norm()` with parameter `type = "snv"` as an alternative.
+* `prep.msc()` — use `prep.emsc()` with parameter `degree = 0`.
+* `employ.prep()` — use `prep.apply()` instead.
+
+
+In addition to that, the possibility to combine the preprocessing methods together into preprocessing chain (we will call it *preprocessing model*) has been improved. However, these improvements **cause breaking changes**, so if you used this feature before, check the text below and the updated user guides very carefully.
+
+First of all, the syntax for creating preprocessing items for combining them to the chain has changed — parameters are now passed as named arguments instead of a list:
+
+* Old: `prep("savgol", list(width = 7, porder = 2, dorder = 2))`
+* New: `prep("savgol", width = 7, porder = 2, dorder = 2)`
+
+Also, the option to add user defined preprocessing methods into a preprocessing model has been removed as it caused issues and non-stable behavior in some cases. From this version, only selected methods can be combined together to a preprocessing model. You can see a full list of the currently supported methods by running `prep.list()`. This list will be extended eventually. And you can still use user defined methods and methods which are not in the list separately.
+
+Second, a preprocessing model can now be integrated directly into `pca`, `pls`, `simca`, `ddsimca`, and `plsda` via the `prep` parameter — the model will train the preprocessing pipeline and apply it automatically during calibration and prediction.
+
+Finally, preprocessing methods can also be *trained* independently using `prep.fit()`, which pre-computes parameters that depend on the training set (e.g. values for centering, scaling, or the reference spectrum for EMSC). Applying the trained preprocessing model to new data is done with `prep.apply()`.
+
+Please check the [updated documentation](https://mda.tools/docs/preprocessing.html) for all details and examples.
+
+
+### JSON and CSV interoperability
+
+Models created with `pca`, `pls`, and `ddsimca` can now be exported to JSON using `writeJSON()` and imported from JSON using `readJSON()` method. This enables round-trip interoperability with the corresponding [mda.tools](https://mda.tools) web-applications — you can build a model in R, upload it to a browser for interactive use, or develop a model in a web-app and load it into R for predictions.
+
+When a model includes a preprocessing pipeline (via the `prep` parameter), the pipeline is saved as part of the JSON file and applied automatically on import.
+
+Result objects from `pca`, `pls`, and `ddsimca` now also have a `writeCSV()` method that exports main outcomes in a format identical to the one produced by the web-applications.
+
+### Improvements and changes
+
+* method `prep.alsbasecorr()` is now several times faster, thanks to `spam` package (which replaced the previously used `Matrix`).
+
+* method `plotResiduals()` for all models and results objects where it was available now is named `plotDistances()`. The old name, however, will work as well to ensure compatibility with old code.
+
+* colorbar legend for continuous color grouping now uses pretty breakpoints with consistent decimal formatting; very large or very small values are shown with a compact multiplier (e.g. ×10³).
+
+* new method `plotEigenvalues()` for PCA models shows eigenvalues vs. number of components with optional `transform` parameter (`"none"`, `"log"`, `"sqrt"`).
+
+
+
+### Bug fixes
+
+* fixed issue with y-scores orthogonalization in `pls`, which could give wrong y-scores when data contains outliers.
+* fixed PQN normalization (`prep.norm()` with `type = "pqn"`) not storing reference spectrum when used in a preprocessing pipeline — test data was normalized against its own mean instead of the training mean.
+* fixed JSON export for scaling method with `type = "sd"`.
+* `prep.savgol()` now requires polynomial degree between 1 and 4 (was 0–4).
+* fixed legend symbol for error bar plot type `"e"` in `mdaplotg()`.
+* fixed zero-range axis limits (e.g. when all data values are zero) producing collapsed margins.
+* fixed single-bar width in `plotBars()` being proportional to the x-position instead of constant.
+* fixed `lty` parameter being ignored for plot type `"b"` (scatter-line) in `mdaplot()`.
+* fixed `plotErrorbars()` ignoring the `col` parameter for error bar segments.
+
+
+
 v. 0.14.2
 =========
 * fixed bug [#118](https://github.com/svkucheryavski/mdatools/issues/118) (thanks to @gongyh).

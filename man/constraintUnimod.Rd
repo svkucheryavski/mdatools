@@ -11,7 +11,7 @@ constraintUnimod(x, d, tol = 0)
 
 \item{d}{matrix with the original spectral values}
 
-\item{tol}{tolerance (value between 0 and 1) to take make method stable to small fluctuations}
+\item{tol}{tolerance (value between 0 and 1) to make the method stable to small fluctuations}
 }
 \description{
 forces column of matrix to have one maximum each

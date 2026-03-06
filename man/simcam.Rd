@@ -9,17 +9,17 @@ simcam(models, info = "")
 \arguments{
 \item{models}{list with SIMCA models (\code{simca} objects).}
 
-\item{info}{optional text with information about the the object.}
+\item{info}{optional text with information about the object.}
 }
 \value{
 Returns an object of \code{simcam} class with following fields:
 \item{models }{a list with provided SIMCA models.}
 \item{dispower }{an array with discrimination power of variables for each pair of individual
 models.}
-\item{moddist }{a matrix with distance between each each pair of individual models.}
+\item{moddist }{a matrix with distance between each pair of individual models.}
 \item{classnames }{vector with names of individual classes.}
 \item{nclasses }{number of classes in the object.}
-\item{info }{information provided by user when create the object.}
+\item{info }{information provided by user when creating the object.}
 \item{calres }{an object of class \code{\link{simcamres}} with classification results for a
 calibration data.}
 }
@@ -31,8 +31,8 @@ Besides the possibility for multiclass classification, SIMCAM also provides tool
 investigation of relationship among individual models (classes), such as discrimination power of
 variables, Cooman's plot, model distance, etc.
 
-When create \code{simcam} object, the calibration data from all individual SIMCA models is
-extracted and combined for making predictions and calculate performance of the multi-class model.
+When creating a \code{simcam} object, the calibration data from all individual SIMCA models is
+extracted and combined for making predictions and calculating performance of the multi-class model.
 The results are stored in \code{$calres} field of the model object.
 }
 \examples{
@@ -77,7 +77,7 @@ plotPredictions(res)
 
 }
 \seealso{
-Methods for \code{simca} objects:
+Methods for \code{simcam} objects:
 \tabular{ll}{
  \code{print.simcam} \tab shows information about the object.\cr
  \code{summary.simcam} \tab shows summary statistics for the models.\cr

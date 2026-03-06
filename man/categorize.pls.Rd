@@ -7,9 +7,9 @@
 \method{categorize}{pls}(obj, res = obj$res$cal, ncomp = obj$ncomp.selected, ...)
 }
 \arguments{
-\item{obj}{object with PCA model}
+\item{obj}{object with PLS model}
 
-\item{res}{object with PCA results}
+\item{res}{object with PLS results}
 
 \item{ncomp}{number of components to use for the categorization}
 

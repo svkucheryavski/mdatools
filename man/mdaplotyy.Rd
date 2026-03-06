@@ -69,7 +69,7 @@ mdaplotyy(
 
 \item{show.grid}{logical, show or not a grid for the plot.}
 
-\item{grid.lwd}{line thinckness (width) for the grid.}
+\item{grid.lwd}{line thickness (width) for the grid.}
 
 \item{grid.col}{line color for the grid.}
 
@@ -90,7 +90,7 @@ mdaplotyy(
 \item{...}{other plotting arguments.}
 }
 \description{
-\code{mdaplotyy} create line plot for two plot series and uses separate y-axis for each.
+\code{mdaplotyy} creates line plot for two plot series and uses separate y-axis for each.
 }
 \details{
 This plot has properties both \code{mdaplot} and \code{mdaplotg}, so when you specify color,

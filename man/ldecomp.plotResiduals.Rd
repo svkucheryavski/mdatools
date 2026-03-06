@@ -2,81 +2,16 @@
 % Please edit documentation in R/ldecomp.R
 \name{ldecomp.plotResiduals}
 \alias{ldecomp.plotResiduals}
-\title{Residuals distance plot for a set of ldecomp objects}
+\title{Residuals distance plot for a set of ldecomp objects (legacy, use \code{\link{ldecomp.plotDistances}} instead).}
 \usage{
-ldecomp.plotResiduals(
-  res,
-  Qlim,
-  T2lim,
-  ncomp,
-  log = FALSE,
-  norm = FALSE,
-  cgroup = NULL,
-  xlim = NULL,
-  ylim = NULL,
-  show.limits = c(TRUE, TRUE),
-  lim.col = c("darkgray", "darkgray"),
-  lim.lwd = c(1, 1),
-  lim.lty = c(2, 3),
-  show.legend = TRUE,
-  legend.position = "topright",
-  show.excluded = FALSE,
-  ...
-)
+ldecomp.plotResiduals(res, ...)
 }
 \arguments{
 \item{res}{list with result objects to show the plot for}
 
-\item{Qlim}{matrix with critical limits for orthogonal distance}
-
-\item{T2lim}{matrix with critical limits for score distance}
-
-\item{ncomp}{how many components to use (by default optimal value selected for the model will be used)}
-
-\item{log}{logical, apply log tranformation to the distances or not (see details)}
-
-\item{norm}{logical, normalize distance values or not (see details)}
-
-\item{cgroup}{color grouping of plot points (works only if one result object is available)}
-
-\item{xlim}{limits for x-axis (if NULL will be computed automatically)}
-
-\item{ylim}{limits for y-axis (if NULL will be computed automatically)}
-
-\item{show.limits}{vector with two logical values defining if limits for extreme and/or outliers must be shown}
-
-\item{lim.col}{vector with two values - line color for extreme and outlier limits}
-
-\item{lim.lwd}{vector with two values - line width for extreme and outlier limits}
-
-\item{lim.lty}{vector with two values - line type for extreme and outlier limits}
-
-\item{show.legend}{logical, show or not legend on the plot (if more than one result object)}
-
-\item{legend.position}{if legend must be shown, where it should be}
-
-\item{show.excluded}{logical, show or hide rows marked as excluded (attribute `exclrows`).}
-
-\item{...}{other plot parameters (see \code{mdaplotg} for details)}
+\item{...}{other parameters}
 }
 \description{
 Shows a plot with score (T2, h) vs orthogonal (Q, q) distances and corresponding critical
 limits for given number of components.
-}
-\details{
-The function is a bit more advanced version of \code{\link{plotResiduals.ldecomp}}. It allows to
-show distance values for several result objects (e.g. calibration and test set or calibration
-and new prediction set) as well as display the correspondng critical limits in form of lines
-or curves.
-
-Depending on how many result objects your model has or how many you specified manually,
-using the \code{res} parameter, the plot behaves in a bit different way.
-
-If only one result object is provided, then it allows to colorise the points using \code{cgroup}
-parameter. If two or more result objects are provided, then the function show
-distances in groups, and adds corresponding legend.
-
-The function can show distance values normalised (h/h0 and q/q0) as well as with log
-transformation (log(1 + h/h0), log(1 + q/q0)). The latter is useful if distribution of the
-points is skewed and most of them are densely located around bottom left corner.
 }

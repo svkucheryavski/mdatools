@@ -12,13 +12,13 @@
 #' opacity of the colors (between 0 and 1).
 #' @param colmap
 #' colormap name to generate color/colors if they are not specified by user. See
-#' \code{link{mdaplot.getColors}} for details.
+#' \code{\link{mdaplot.getColors}} for details.
 #' @param labels
 #' either vector with labels for the series instances or string ("names", "values", or "indices")
 #' if labels should be generated automatically.
 #'
 #' @description
-#' The `plotseries` object contains all necessary paremeters to create main plots
+#' The `plotseries` object contains all necessary parameters to create main plots
 #' from data values, including values for x and y, correct handling of excluded rows
 #' and columns, color grouping (if any), limits and labels.
 #'
@@ -26,7 +26,7 @@
 #'
 #' Labels can be either provided by user or generated automatically based on values, names or
 #' indices of data rows and columns. If series is made for scatter plot `type="p"` then labels
-#' are required for each row of the original dataset. Otherwise (for line, bar and errobar plot)
+#' are required for each row of the original dataset. Otherwise (for line, bar and errorbar plot)
 #' labels correspond to data columns (variables).
 #'
 #' The object has the following plotting methods once created:
@@ -41,7 +41,7 @@ plotseries <- function(data, type, cgroup = NULL, col = NULL, opacity = 1,
    colmap = "default", labels = NULL) {
 
    if (length(data) == 0) {
-      stop("Seems you forgot to provide data values (vector, matrix of data frame).")
+      stop("Seems you forgot to provide data values (vector, matrix of data frame).", call. = FALSE)
    }
 
    ps <- list()
@@ -81,16 +81,16 @@ plotseries <- function(data, type, cgroup = NULL, col = NULL, opacity = 1,
 #' dataset (vector, matrix or data frame)
 #'
 #' @description
-#' The function checks that `data` contains correct numeric values, check for
+#' The function checks that `data` contains correct numeric values, checks for
 #' mandatory attributes (row and column names, x- and y-axis values and names, etc.)
-#' and add them if necessary.
+#' and adds them if necessary.
 #'
-#' Another things is to remove hidden columns and split the rest to visible and hidden
+#' Another thing is to remove hidden columns and split the rest to visible and hidden
 #' values (if excluded rows are present).
 #'
 preparePlotData <- function(data) {
 
-   # get data attributes to separate variable for shorten code
+   # get data attributes to separate variable for shorter code
    attrs <- attributes(data)
 
    # if it is vector without dimension - make a matrix
@@ -133,13 +133,13 @@ preparePlotData <- function(data) {
 
    # check if data still has some columns
    if (is.null(ncol(data)) || ncol(data) == 0) {
-      stop("No columns left after excluded hidden values.")
+      stop("No columns left after excluded hidden values.", call. = FALSE)
    }
 
    # handle excluded rows if any
    excluded_data <- NULL
    excluded_rows <- NULL
-   if (length(attrs$exclrows > 0)) {
+   if (length(attrs$exclrows) > 0) {
       excluded_rows <- mda.getexclind(attrs$exclrows, rownames(data), nrow(data))
       excluded_data <- data[excluded_rows, , drop = FALSE]
       excluded_yaxis_values <- attrs$yaxis.values[excluded_rows]
@@ -148,7 +148,7 @@ preparePlotData <- function(data) {
       attrs$yaxis.values <- attrs$yaxis.values[-excluded_rows]
    }
 
-   # reassign some attribues to data
+   # reassign some attributes to data
    attr(data, "xaxis.values") <- attrs$xaxis.values
    attr(data, "yaxis.values") <- attrs$yaxis.values
    attr(data, "xaxis.name") <- attrs$xaxis.name
@@ -181,14 +181,13 @@ splitPlotData <- function(data, type) {
    # shortcuts to some of parameters
    attrs <- attributes(data)
 
-
    if (type == "p" && ncol(data) == 1) {
       # if data has only one column add y values in front
       data <- cbind(attrs$yaxis.values, data)
       colnames(data)[1] <- if (is.null(attrs$yaxis.name)) "Objects" else attrs$yaxis.name
    }
 
-   if (type %in%  c("p", "d")) {
+   if (type %in% c("p", "d")) {
       # scatter or density plot - take first and second columns as x and y
       x_values <- data[, 1]
       names(x_values) <- rownames(data)
@@ -199,14 +198,13 @@ splitPlotData <- function(data, type) {
    }
 
    if (type == "e") {
-      # errorbar plor - make data consist of three rows: (m, m - err, m + err)
+      # errorbar plot - make data consist of three rows: (m, m - err, m + err)
       data <- rbind(
          data[1, ],
          data[1, ] - data[2, ],
          data[1, ] + if (nrow(data) > 2) data[3, ] else data[2, ]
       )
    }
-
 
    # 0.12.0: yaxis.name must not be used as axis label in line and bar plots
    if (type %in% c("b", "l", "e", "h")) {
@@ -236,7 +234,7 @@ splitPlotData <- function(data, type) {
 splitExcludedData <- function(data, type) {
 
    if (type == "e") {
-      stop("Errorbar can not be created for data with excluded rows.")
+      stop("Errorbar can not be created for data with excluded rows.", call. = FALSE)
    }
 
    pd <- splitPlotData(data, type)
@@ -290,7 +288,7 @@ getPlotColors <- function(ps, col, opacity, cgroup, colmap) {
    }
 
    if (length(cgroup) != cgroup_expected_length) {
-      stop("Parameter 'cgroup' does not match size of the dataset.")
+      stop("Parameter 'cgroup' does not match size of the dataset.", call. = FALSE)
    }
 
    return(list(
@@ -303,7 +301,7 @@ getPlotColors <- function(ps, col, opacity, cgroup, colmap) {
 #' Compute confidence ellipse for a set of points
 #'
 #' @param points
-#' matrix of data frame with coordinates of the points
+#' matrix or data frame with coordinates of the points
 #' @param conf.level
 #' confidence level for the ellipse
 #' @param n
@@ -314,7 +312,7 @@ getPlotColors <- function(ps, col, opacity, cgroup, colmap) {
 #'
 getConfidenceEllipse <- function(points, conf.level = 0.95, n = 100) {
 
-   # compute igen vectors and values
+   # compute eigen vectors and values
    e <- eigen(cov(points))
 
    # get angle between the x-axis and the largest eigenvector
@@ -323,7 +321,7 @@ getConfidenceEllipse <- function(points, conf.level = 0.95, n = 100) {
 
    # compute center and radii
    chisq <- qchisq(conf.level, 2)
-   center <- apply(points, 2, mean)
+   center <- colMeans(points)
    radii <- sqrt(chisq * e$values)
 
    # generate vector of angles
@@ -342,7 +340,7 @@ getConfidenceEllipse <- function(points, conf.level = 0.95, n = 100) {
 #' Compute coordinates of a closed convex hull for data points
 #'
 #' @param points
-#' matrix of data frame with coordinates of the points
+#' matrix or data frame with coordinates of the points
 #'
 #' @importFrom grDevices chull
 #'
@@ -388,7 +386,7 @@ getLabelsAsIndices <- function(ps) {
 
    # function which returns indices for columns or rows
    f <- function(nvalues, excluded_values) {
-      indices <- 1:(nvalues + length(excluded_values))
+      indices <- seq_len(nvalues + length(excluded_values))
       if (!is.null(excluded_values)) {
          indices <- indices[-excluded_values]
       }
@@ -434,7 +432,7 @@ getDataLabels <- function(ps, labels = NULL) {
 
       # check that labels were specified for all values
       if (length(labels) != (n_values + length(excluded_values))) {
-         stop("Labels must be provided for all values (also ones which are excluded).")
+         stop("Labels must be provided for all values (also ones which are excluded).", call. = FALSE)
       }
 
       if (is.null(excluded_values)) {
@@ -486,7 +484,7 @@ showLabels <- function(ps, show.excluded = FALSE, pos = 3, cex = 0.65, col = "da
 
    f <- function(x, y, labels, type) {
 
-      if (length(labels) == 0) stop("No labels available.")
+      if (length(labels) == 0) stop("No labels available.", call. = FALSE)
       if (ps$type %in% c("h", "e")) y <- y[1, ]
       if (ps$type %in% c("l", "b")) y <- apply(y, 2, max)
 
@@ -516,7 +514,7 @@ showLabels <- function(ps, show.excluded = FALSE, pos = 3, cex = 0.65, col = "da
 #' @param ps
 #' `plotseries` object
 #' @param pch
-#' size of point markers
+#' marker symbol for the points
 #' @param col
 #' color of the points
 #' @param bg
@@ -606,7 +604,7 @@ plotLines <- function(ps, col = ps$col, lty = 1, lwd = 1, cex = 1,
 #'
 #' @description
 #' It is assumed that first row of dataset contains the y-coordinates of points,
-#' second rows contains size of lower error bar and third - size for upper error bar. If
+#' second row contains size of lower error bar and third - size for upper error bar. If
 #' only two rows are provided it is assumed that error bars are symmetric.
 #'
 #' @export
@@ -617,9 +615,9 @@ plotErrorbars <- function(ps, col = ps$col, pch = 16, lwd = 1, cex = 1, ...) {
 
    dx <- diff(ps$xlim) / max(50, (length(x) * 3))
 
-   segments(x, y[2, ], x, y[3, ], col = ps$col, lwd = lwd)
-   segments(x - dx, y[2, ], x + dx, y[2, ], col = ps$col, lwd = lwd)
-   segments(x - dx, y[3, ], x + dx, y[3, ], col = ps$col, lwd = lwd)
+   segments(x, y[2, ], x, y[3, ], col = col, lwd = lwd)
+   segments(x - dx, y[2, ], x + dx, y[2, ], col = col, lwd = lwd)
+   segments(x - dx, y[3, ], x + dx, y[3, ], col = col, lwd = lwd)
    points(x, y[1, ], col = col, pch = pch, cex = cex, ...)
 }
 
@@ -650,7 +648,7 @@ plotBars <- function(ps, col = ps$col, bwd = 0.8, border = NA, force.x.values = 
       dx <- min(diff(x))
       bwd_right <- bwd_left <- dx * bwd / 2
    } else {
-      bwd_left <- bwd_right <- bwd * x / 2
+      bwd_left <- bwd_right <- bwd / 2
    }
 
    # correct x_values if they were forced by bwd
@@ -725,7 +723,7 @@ plotDensity <- function(ps, nbins = 60, colmap = ps$colmap) {
    yy2 <- getNearest(y, bin_height * sqrt(3), 0)
 
    # find which of the two fits every point best
-   d1 <- (x - xx1)^2 + (y - yy2)^2
+   d1 <- (x - xx1)^2 + (y - yy1)^2
    d2 <- (x - xx2)^2 + (y - yy2)^2
 
    xx <- ifelse(d1 < d2, xx1, xx2)
@@ -737,7 +735,7 @@ plotDensity <- function(ps, nbins = 60, colmap = ps$colmap) {
    density[, 2] <- as.numeric(as.character(density[, 2]))
 
    # remove centers with no points around
-   density <- density[density[, 3] > 0, ]
+   density <- density[density[, 3] > 0, , drop = FALSE]
    lattice_x <- density[, 1]
    lattice_y <- density[, 2]
    density <- density[, 3]
@@ -763,7 +761,7 @@ plotDensity <- function(ps, nbins = 60, colmap = ps$colmap) {
 #' @param conf.level
 #' confidence level to make the ellipse for (between 0 and 1).
 #' @param opacity
-#' of opacity is 0 ellipse is transparent otherwise semi-transparent.
+#' if opacity is 0 ellipse is transparent otherwise semi-transparent.
 #'
 #' @description
 #' The method shows confidence ellipse for groups of points on a scatter plot made using
@@ -802,7 +800,7 @@ plotConfidenceEllipse <- function(p, conf.level = 0.95, lwd = 1, lty = 1, opacit
 #' @param lty
 #' type of line used to show the hull.
 #' @param opacity
-#' of opacity is larger than 0 a semi-transparent polygon is shown over points.
+#' if opacity is larger than 0 a semi-transparent polygon is shown over points.
 #'
 #' @description
 #' The method shows convex hull for groups of points on a scatter plot made using
@@ -841,7 +839,7 @@ plotConvexHull <- function(p, lwd = 1, lty = 1, opacity = 0) {
 #' @param lty
 #' type of line used to show the hull
 #' @param opacity
-#' of opacity is larger than 0 a semi-transparent polygon is shown over points
+#' if opacity is larger than 0 a semi-transparent polygon is shown over points
 #' @param shape_function
 #' function which calculates and return coordinates of the shape
 #' @param ...
@@ -858,15 +856,15 @@ plotPointsShape <- function(p, lwd, lty, opacity, shape_function, ...) {
    type <- p$type
 
    if (type != "p") {
-      stop("Shape can be added only to scatter plots.")
+      stop("Shape can be added only to scatter plots.", call. = FALSE)
    }
 
    if (!is.factor(cgroup)) {
-      stop("Parameter 'cgroup' must be a factor if you want to show points shape.")
+      stop("Parameter 'cgroup' must be a factor if you want to show points shape.", call. = FALSE)
    }
 
    if (length(unique(cgroup)) != length(unique(p$col))) {
-      stop("Number of colors should be the same as number of levels in parameter 'cgroup'.")
+      stop("Number of colors should be the same as number of levels in parameter 'cgroup'.", call. = FALSE)
    }
 
    col <- split(p$col, f = p$cgroup, drop = TRUE)
@@ -884,7 +882,7 @@ plotPointsShape <- function(p, lwd, lty, opacity, shape_function, ...) {
       }
    }
 
-   sapply(seq_len(length(d)), plot_function)
+   lapply(seq_along(d), plot_function)
    invisible(NULL)
 }
 
@@ -959,20 +957,24 @@ plotRegressionLine <- function(p, col = p$col, ...) {
 plotHotellingEllipse <- function(p, conf.lim = 0.95, col = "#a0a0a0", lty = 3, ...) {
 
    if (!inherits(p, "plotseries")) {
-      stop("Argument 'p' does not look like a plot series, try 'p[[1]]' instead.")
+      stop("Argument 'p' does not look like a plot series, try 'p[[1]]' instead.", call. = FALSE)
    }
 
    if (p$type != "p") {
-      stop("Hotelling ellipse can be added to scatter plot only.")
+      stop("Hotelling ellipse can be added to scatter plot only.", call. = FALSE)
    }
 
    t1 <- as.numeric(p$x_values)
    t2 <- as.numeric(p$y_values)
 
+   nobj <- length(t1)
+   if (nobj < 3) {
+      warning("Hotelling ellipse requires at least 3 data points, skipping.", call. = FALSE)
+      return(invisible(NULL))
+   }
+
    s1 <- sd(t1)^2
    s2 <- sd(t2)^2
-
-   nobj <- length(t1)
    T2lim <- (2 * (nobj - 1) / (nobj - 2)) * qf(conf.lim, 2, (nobj - 2))
 
    a <- sqrt(T2lim * s1)

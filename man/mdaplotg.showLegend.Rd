@@ -35,7 +35,7 @@ mdaplotg.showLegend(
 
 \item{bty}{border type for the legend}
 
-\item{position}{legend position ("topright", "topleft', "bottomright", "bottomleft", "top", "bottom")}
+\item{position}{legend position ("topright", "topleft", "bottomright", "bottomleft", "top", "bottom")}
 
 \item{plot}{logical, show legend or just calculate and return its size}
 

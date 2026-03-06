@@ -24,10 +24,10 @@
 \item{...}{other arguments}
 }
 \value{
-Object models with the two fields updated.
+Model object with the two fields updated.
 }
 \description{
-Computes statisticsl limits for orthogonal and score distances (based on calibration set)
+Computes statistical limits for orthogonal and score distances (based on calibration set)
 and assign the calculated values as model properties.
 }
 \details{

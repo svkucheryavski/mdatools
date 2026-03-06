@@ -2,30 +2,15 @@
 % Please edit documentation in R/ldecomp.R
 \name{plotResiduals.ldecomp}
 \alias{plotResiduals.ldecomp}
-\title{Residual distance plot}
+\title{Residuals distance plot for a set of ldecomp objects (legacy, use \code{\link{plotDistances.ldecomp}} instead).}
 \usage{
-\method{plotResiduals}{ldecomp}(
-  obj,
-  ncomp = obj$ncomp.selected,
-  norm = FALSE,
-  log = FALSE,
-  show.plot = TRUE,
-  ...
-)
+\method{plotResiduals}{ldecomp}(obj, ...)
 }
 \arguments{
 \item{obj}{object of \code{ldecomp} class.}
 
-\item{ncomp}{number of components to show the plot for (if NULL, selected by model value will be used).}
-
-\item{norm}{logical, normalize distance values or not (see details)}
-
-\item{log}{logical, apply log tranformation to the distances or not (see details)}
-
-\item{show.plot}{logical, shall plot be created or just plot series object is needed}
-
-\item{...}{most of graphical parameters from \code{\link{mdaplot}} function can be used.}
+\item{...}{other parameters.}
 }
 \description{
-Shows a plot with orthogonal (Q, q) vs. score (T2, h) distances for data objects.
+Residuals distance plot for a set of ldecomp objects (legacy, use \code{\link{plotDistances.ldecomp}} instead).
 }

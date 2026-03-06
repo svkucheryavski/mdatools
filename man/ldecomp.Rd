@@ -37,7 +37,7 @@ loadings and E - matrix with residuals. It is used, for example, for PCA results
 (\code{\link{pcares}}), in PLS and other methods. The class also includes methods for
 calculation of residual distances and explained variance.
 
-There is no need to use the \code{ldecomp} manually. For example, when build PCA model
-with \code{\link{pca}} or apply it to a new data, the results will automatically inherit
+There is no need to use the \code{ldecomp} class manually. For example, when building a PCA model
+with \code{\link{pca}} or apply it to new data, the results will automatically inherit
 all methods of \code{ldecomp}.
 }

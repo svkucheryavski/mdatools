@@ -13,7 +13,7 @@ plotConvexHull(p, lwd = 1, lty = 1, opacity = 0)
 
 \item{lty}{type of line used to show the hull.}
 
-\item{opacity}{of opacity is larger than 0 a semi-transparent polygon is shown over points.}
+\item{opacity}{if opacity is larger than 0 a semi-transparent polygon is shown over points.}
 }
 \description{
 The method shows convex hull for groups of points on a scatter plot made using

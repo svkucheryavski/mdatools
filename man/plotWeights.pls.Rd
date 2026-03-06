@@ -2,7 +2,7 @@
 % Please edit documentation in R/pls.R
 \name{plotWeights.pls}
 \alias{plotWeights.pls}
-\title{X loadings plot for PLS}
+\title{Weights plot for PLS}
 \usage{
 \method{plotWeights}{pls}(
   obj,
@@ -20,14 +20,14 @@
 
 \item{type}{type of the plot}
 
-\item{show.axes}{logical, show or not a axes lines crossing origin (0,0)}
+\item{show.axes}{logical, show or not axes lines crossing origin (0,0)}
 
 \item{show.legend}{logical, show or not a legend}
 
 \item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
-Shows plot with X loading values for selected components.
+Shows plot with weight values for selected components.
 }
 \details{
 See examples in help for \code{\link{pls}} function.

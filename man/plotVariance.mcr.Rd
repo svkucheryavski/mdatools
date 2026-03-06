@@ -14,7 +14,7 @@
 )
 }
 \arguments{
-\item{obj}{object of clacc \code{mcr}}
+\item{obj}{object of class \code{mcr}}
 
 \item{type}{type of the plot}
 

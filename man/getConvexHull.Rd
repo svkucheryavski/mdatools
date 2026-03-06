@@ -7,7 +7,7 @@
 getConvexHull(points)
 }
 \arguments{
-\item{points}{matrix of data frame with coordinates of the points}
+\item{points}{matrix or data frame with coordinates of the points}
 }
 \description{
 Compute coordinates of a closed convex hull for data points

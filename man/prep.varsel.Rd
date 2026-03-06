@@ -9,7 +9,7 @@ prep.varsel(data, var.ind)
 \arguments{
 \item{data}{a matrix with data values}
 
-\item{var.ind}{indices of variables (columns) to select, can bet either numeric or logical}
+\item{var.ind}{indices of variables (columns) to select, can be either numeric or logical}
 }
 \value{
 data matrix with the selected variables (columns)

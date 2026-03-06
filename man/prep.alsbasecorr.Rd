@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep.R
 \name{prep.alsbasecorr}
 \alias{prep.alsbasecorr}
-\title{Baseline correction using asymetric least squares}
+\title{Baseline correction using asymmetric least squares}
 \usage{
 prep.alsbasecorr(data, plambda = 5, p = 0.1, max.niter = 10)
 }
@@ -11,7 +11,7 @@ prep.alsbasecorr(data, plambda = 5, p = 0.1, max.niter = 10)
 
 \item{plambda}{power of the penalty parameter (e.g. if plambda = 5, lambda = 10^5)}
 
-\item{p}{assymetry ratio (should be between 0 and 1)}
+\item{p}{asymmetry ratio (should be between 0 and 1)}
 
 \item{max.niter}{maximum number of iterations}
 }
@@ -19,12 +19,12 @@ prep.alsbasecorr(data, plambda = 5, p = 0.1, max.niter = 10)
 preprocessed spectra.
 }
 \description{
-Baseline correction using asymetric least squares
+Baseline correction using asymmetric least squares
 }
 \details{
 The function implements baseline correction algorithm based on Whittaker smoother. The method
 was first shown in [1]. The function has two main parameters - power of a penalty parameter
-(usually varies betwen 2 and 9) and the ratio of assymetry (usually between 0.1 and 0.001). The
+(usually varies between 2 and 9) and the ratio of asymmetry (usually between 0.1 and 0.001). The
 choice of the parameters depends on how broad the disturbances of the baseline are and how
 narrow the original spectral peaks are.
 }

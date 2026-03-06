@@ -21,7 +21,8 @@ pls(
   lim.type = "ddmoments",
   alpha = 0.05,
   gamma = 0.01,
-  cv.scope = "local"
+  cv.scope = "local",
+  prep = NULL
 )
 }
 \arguments{
@@ -54,16 +55,18 @@ first local minimum of RMSECV and \code{'wold'} for Wold's rule.)}
 
 \item{lim.type}{which method to use for calculation of critical limits for residual distances (see details)}
 
-\item{alpha}{significance level for extreme limits for T2 and Q disances.}
+\item{alpha}{significance level for extreme limits for T2 and Q distances.}
 
 \item{gamma}{significance level for outlier limits for T2 and Q distances.}
 
 \item{cv.scope}{scope for center/scale operations inside CV loop: 'global' — using globally computed mean and std
 or 'local' — recompute new for each local calibration set.}
+
+\item{prep}{optional list with preprocessing methods created using `\code{\link{prep}}` function.}
 }
 \value{
 Returns an object of \code{pls} class with following fields:
-\item{ncomp }{number of components included to the model.}
+\item{ncomp }{number of components included in the model.}
 \item{ncomp.selected }{selected (optimal) number of components.}
 \item{xcenter }{vector with values used to center the predictors (x).}
 \item{ycenter }{vector with values used to center the responses (y).}
@@ -76,12 +79,13 @@ Returns an object of \code{pls} class with following fields:
 \item{weights }{matrix with PLS weights.}
 \item{coeffs }{object of class \code{\link{regcoeffs}} with regression coefficients calculated
 for each component.}
-\item{info }{information about the model, provided by user when build the model.}
-\item{cv }{information cross-validation method used (if any).}
+\item{info }{information about the model, provided by user when building the model.}
+\item{prep }{trained preprocessing model (if specified)}
+\item{cv }{information about cross-validation method used (if any).}
 \item{res }{a list with result objects (e.g. calibration, cv, etc.)}
 }
 \description{
-\code{pls} is used to calibrate, validate and use of partial least squares (PLS)
+\code{pls} is used to calibrate, validate and apply partial least squares (PLS)
 regression model.
 }
 \details{
@@ -92,21 +96,33 @@ Like in \code{\link{pca}}, \code{pls} uses number of components (\code{ncomp}) a
 number of objects - 1, number of x variables and the default or provided value. Regression
 coefficients, predictions and other results are calculated for each set of components from 1
 to \code{ncomp}: 1, 1:2, 1:3, etc. The optimal number of components, (\code{ncomp.selected}),
-is found using first local minumum, but can be also forced to user defined value using function
+is found using first local minimum, but can be also forced to user defined value using function
 (\code{\link{selectCompNum.pls}}). The selected optimal number of components is used for all
 default operations - predictions, plots, etc.
 
 Cross-validation settings, \code{cv}, can be a number or a list. If \code{cv} is a number, it
 will be used as a number of segments for random cross-validation (if \code{cv = 1}, full
-cross-validation will be preformed). If it is a list, the following syntax can be used:
+cross-validation will be performed). If it is a list, the following syntax can be used:
 \code{cv = list("rand", nseg, nrep)} for random repeated cross-validation with \code{nseg}
 segments and \code{nrep} repetitions or \code{cv = list("ven", nseg)} for systematic splits
 to \code{nseg} segments ('venetian blinds').
 
-Calculation of confidence intervals and p-values for regression coefficients can by done
+Calculation of confidence intervals and p-values for regression coefficients can be done
 based on Jack-Knifing resampling. This is done automatically if cross-validation is used.
 However it is recommended to use at least 10 segments for stable JK result. See help for
 \code{\link{regcoeffs}} objects for more details.
+
+If you provide a list with preprocessing methods, PLS will apply them to the training set
+before excluding the columns and rows (if specified). The list will be used to train a preprocessing
+model which becomes a part of the PLS model object. So when you use method `predict()` the provided
+dataset will be automatically preprocessed by the preprocessing model.
+
+Any PLS model (with or without preprocessing) developed in this package can be saved as JSON file
+using method \code{\link{writeJSON}} and then be loaded to interactive web-application for
+PLS available at https://mda.tools/pls. Likewise one can develop a model in the app, save it to
+JSON file and then load it to R by using method \code{\link{readJSON}}. In this case,
+however, the model object will not contain calibration/training results, so some of
+the plots and statistics will not be available.
 }
 \examples{
 ### Examples of using PLS model class
@@ -216,6 +232,34 @@ plotPredictions(modelsel)
 
 par(mfrow = c(1, 1))
 
+## 12. Use list with preprocessing methods
+
+# get the data (calibration and test set)
+data(simdata)
+Xc <- simdata$spectra.c
+Xt <- simdata$spectra.t
+yc <- simdata$conc.c[, 3]
+yt <- simdata$conc.t[, 3]
+
+# create a list with two preprocessing methods
+p <- list(
+   prep("savgol", width = 7, porder = 2, dorder = 2),
+   prep("norm", type = "snv")
+)
+
+# build a PLS model with and without preprocessing
+m1 <- pls(Xc, yc, 5, prep = p)
+m2 <- pls(Xc, yc, 5)
+
+# apply the models to test set
+r1 <- predict(m1, Xt, yt)
+r2 <- predict(m2, Xt, yt)
+
+# check scores
+par(mfrow = c(1, 2))
+plotPredictions(m1, res = list(cal = m1$calres, test = r1), main = "With preprocessing")
+plotPredictions(m2, res = list(cal = m2$calres, test = r2), main = "Without preprocessing")
+
 }
 \references{
 1. S. de Jong, Chemometrics and Intelligent Laboratory Systems 18 (1993) 251-263.
@@ -246,7 +290,7 @@ Plotting methods for \code{pls} objects:
  \code{\link{plotXYLoadings.pls}} \tab shows loadings plot for x and y decomposition.\cr
  \code{\link{plotXVariance.pls}} \tab shows explained variance plot for x decomposition.\cr
  \code{\link{plotYVariance.pls}} \tab shows explained variance plot for y decomposition.\cr
- \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for y
+ \code{\link{plotXCumVariance.pls}} \tab shows cumulative explained variance plot for x
  decomposition.\cr
  \code{\link{plotYCumVariance.pls}} \tab shows cumulative explained variance plot for y
  decomposition.\cr

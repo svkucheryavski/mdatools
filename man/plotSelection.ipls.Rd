@@ -43,7 +43,7 @@ The intervals found optimal after backward/forward iPLS selection are shown with
 while the other intervals are gray.
 
 See examples in help for \code{\link{ipls}} function.
-
- @seealso
- \code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
+}
+\seealso{
+\code{\link{summary.ipls}}, \code{\link{plotRMSE.ipls}}
 }

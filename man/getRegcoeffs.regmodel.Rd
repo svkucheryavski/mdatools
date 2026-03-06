@@ -2,7 +2,7 @@
 % Please edit documentation in R/regmodel.R
 \name{getRegcoeffs.regmodel}
 \alias{getRegcoeffs.regmodel}
-\title{Regression coefficients for PLS model'}
+\title{Regression coefficients for PLS model}
 \usage{
 \method{getRegcoeffs}{regmodel}(
   obj,
@@ -28,7 +28,7 @@ coefficients (if available)}
 \item{...}{other parameters}
 }
 \value{
-A matrix  with regression coefficients and (optinally) statistics.
+A matrix with regression coefficients and (optionally) statistics.
 }
 \description{
 Returns a matrix with regression coefficients for

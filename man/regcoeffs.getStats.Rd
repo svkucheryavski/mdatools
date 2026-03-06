@@ -2,7 +2,7 @@
 % Please edit documentation in R/regcoeffs.R
 \name{regcoeffs.getStats}
 \alias{regcoeffs.getStats}
-\title{Distribution statistics for regression coeffificents}
+\title{Distribution statistics for regression coefficients}
 \usage{
 regcoeffs.getStats(coeffs, ci.coeffs = NULL, use.mean = TRUE)
 }
@@ -17,7 +17,7 @@ mean values for ci.coeffs is computed first. If \code{FALSE}, \code{values} (coe
 computed for global model) are used as mean.}
 }
 \value{
-a list with statistics three arrays: srandard error, t-values and p-values computed for
+a list with statistics three arrays: standard error, t-values and p-values computed for
 each regression coefficient.
 }
 \description{

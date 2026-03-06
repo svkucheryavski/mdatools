@@ -2,12 +2,12 @@
 % Please edit documentation in R/mcrals.R
 \name{print.mcrals}
 \alias{print.mcrals}
-\title{Print method for mcrpure object}
+\title{Print method for mcrals object}
 \usage{
 \method{print}{mcrals}(x, ...)
 }
 \arguments{
-\item{x}{\code{mcrpure} object}
+\item{x}{\code{mcrals} object}
 
 \item{...}{other arguments}
 }

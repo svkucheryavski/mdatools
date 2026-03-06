@@ -26,13 +26,13 @@ plotseries(
 \item{opacity}{opacity of the colors (between 0 and 1).}
 
 \item{colmap}{colormap name to generate color/colors if they are not specified by user. See
-\code{link{mdaplot.getColors}} for details.}
+\code{\link{mdaplot.getColors}} for details.}
 
 \item{labels}{either vector with labels for the series instances or string ("names", "values", or "indices")
 if labels should be generated automatically.}
 }
 \description{
-The `plotseries` object contains all necessary paremeters to create main plots
+The `plotseries` object contains all necessary parameters to create main plots
 from data values, including values for x and y, correct handling of excluded rows
 and columns, color grouping (if any), limits and labels.
 
@@ -40,7 +40,7 @@ If both `col` and `cgroup` are specified, `cgroup` will be ignored.
 
 Labels can be either provided by user or generated automatically based on values, names or
 indices of data rows and columns. If series is made for scatter plot `type="p"` then labels
-are required for each row of the original dataset. Otherwise (for line, bar and errobar plot)
+are required for each row of the original dataset. Otherwise (for line, bar and errorbar plot)
 labels correspond to data columns (variables).
 
 The object has the following plotting methods once created:

@@ -16,7 +16,7 @@
 #' @param info
 #' text with information about the MCR model
 #' @param ...
-#' other parameters realted to specific method
+#' other parameters related to specific method
 #'
 #' @export
 mcr <- function(x, ncomp, method, exclrows = NULL, exclcols = NULL, info = "", ...) {
@@ -77,7 +77,7 @@ getVariance.mcr <- function(obj, x) {
 #' Show plot with resolved spectra
 #'
 #' @param obj
-#' object of clacc \code{mcr}
+#' object of class \code{mcr}
 #' @param comp
 #' vector with number of components to make the plot for
 #' @param type
@@ -98,7 +98,7 @@ plotSpectra.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
 #' Show plot with resolved contributions
 #'
 #' @param obj
-#' object of clacc \code{mcr}
+#' object of class \code{mcr}
 #' @param comp
 #' vector with number of components to make the plot for
 #' @param type
@@ -119,7 +119,7 @@ plotContributions.mcr <- function(obj, comp = seq_len(obj$ncomp), type = "l",
 #' Show plot with explained variance
 #'
 #' @param obj
-#' object of clacc \code{mcr}
+#' object of class \code{mcr}
 #' @param type
 #' type of the plot
 #' @param labels
@@ -142,7 +142,7 @@ plotVariance.mcr <- function(obj, type = "h", labels = "values", main = "Varianc
 #' Show plot with cumulative explained variance
 #'
 #' @param obj
-#' object of clacc \code{mcr}
+#' object of class \code{mcr}
 #' @param type
 #' type of the plot
 #' @param labels
@@ -171,9 +171,10 @@ plotCumVariance.mcr <- function(obj, type = "b", labels = "values", main = "Cumu
 #'
 #' @export
 plot.mcr <- function(x, ...) {
-   par(mfrow = c(2, 2))
-   plotSpectra(x)
-   plotContributions(x)
-   plotVariance(x)
-   plotCumVariance(x)
+   op <- par(mfrow = c(2, 2))
+   on.exit(par(op))
+   plotSpectra(x, ...)
+   plotContributions(x, ...)
+   plotVariance(x, ...)
+   plotCumVariance(x, ...)
 }

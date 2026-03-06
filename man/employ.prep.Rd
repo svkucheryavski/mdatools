@@ -7,7 +7,7 @@
 employ.prep(obj, x, ...)
 }
 \arguments{
-\item{obj}{list with preprocssing methods (created using \code{prep} function).}
+\item{obj}{list with preprocessing methods (created using \code{prep} function).}
 
 \item{x}{matrix with dataset}
 

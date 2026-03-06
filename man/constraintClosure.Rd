@@ -11,7 +11,7 @@ constraintClosure(x, d, sum = 1)
 
 \item{d}{matrix with the original spectral values}
 
-\item{sum}{which value the specra or contributions should sum up to}
+\item{sum}{which value the spectra or contributions should sum up to}
 }
 \description{
 Force rows of data sum up to given value

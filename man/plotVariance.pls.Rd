@@ -26,7 +26,7 @@
 
 \item{labels}{what to show as labels for plot objects.}
 
-\item{res}{list with result objects to show the plot for (by defaul, model results are used)}
+\item{res}{list with result objects to show the plot for (by default, model results are used)}
 
 \item{ylab}{label for y-axis}
 

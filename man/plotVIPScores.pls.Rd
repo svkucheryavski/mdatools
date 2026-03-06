@@ -4,16 +4,26 @@
 \alias{plotVIPScores.pls}
 \title{VIP scores plot for PLS model}
 \usage{
-\method{plotVIPScores}{pls}(obj, ny = 1, ncomp = obj$ncomp.selected, type = "l", ...)
+\method{plotVIPScores}{pls}(
+  obj,
+  ny = 1,
+  ncomp = obj$ncomp.selected,
+  type = "l",
+  vip.type = "individual",
+  ...
+)
 }
 \arguments{
 \item{obj}{a PLS model (object of class \code{pls})}
 
-\item{ny}{which response to plot the values for (if y is multivariate), can be a vector.}
+\item{ny}{which response to plot the values for (if y is multivariate), can be a vector.
+Ignored when \code{vip.type = "combined"}.}
 
-\item{ncomp}{number of components to count}
+\item{ncomp}{number of components to show}
 
 \item{type}{type of the plot}
+
+\item{vip.type}{type of VIP scores: \code{"individual"} or \code{"combined"} (see \code{\link{vipscores}})}
 
 \item{...}{other plot parameters (see \code{mdaplot} for details)}
 }

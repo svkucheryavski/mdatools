@@ -15,7 +15,7 @@ plotConfidenceEllipse(p, conf.level = 0.95, lwd = 1, lty = 1, opacity = 0)
 
 \item{lty}{type of line used to show the hull.}
 
-\item{opacity}{of opacity is 0 ellipse is transparent otherwise semi-transparent.}
+\item{opacity}{if opacity is 0 ellipse is transparent otherwise semi-transparent.}
 }
 \description{
 The method shows confidence ellipse for groups of points on a scatter plot made using

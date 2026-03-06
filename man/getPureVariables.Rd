@@ -11,16 +11,16 @@ getPureVariables(D, ncomp, purevars, offset)
 
 \item{ncomp}{number of pure components}
 
-\item{purevars}{user provided values gor pure variables (no calculation will be run in this case)}
+\item{purevars}{user provided values for pure variables (no calculation will be run in this case)}
 
 \item{offset}{offset (between 0 and 1) for calculation of parameter alpha}
 }
 \value{
-The function returns a list with with following fields:
+The function returns a list with the following fields:
 \item{ncomp }{number of pure components.}
-\item{purvars }{vector with indices for pure variables.}
+\item{purevars }{vector with indices for pure variables.}
 \item{purityspec }{matrix with purity values for each resolved components.}
-\item{purity }{vector with purity values for resolved components.}
+\item{purevals }{vector with purity values for resolved components.}
 }
 \description{
 The method identifies indices of pure variables using the SIMPLISMA

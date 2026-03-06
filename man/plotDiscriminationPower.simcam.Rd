@@ -9,7 +9,7 @@
   nc = c(1, 2),
   type = "h",
   main = paste0("Discrimination power: ", obj$classnames[nc[1]], " vs. ",
-    obj$classname[nc[2]]),
+    obj$classnames[nc[2]]),
   xlab = attr(obj$dispower, "xaxis.name"),
   ylab = "",
   ...
@@ -35,8 +35,8 @@ Shows a plot with discrimination power of predictors for a pair of SIMCA models
 }
 \details{
 Discrimination power shows an ability of variables to separate classes. The power is computed
-similar to model distance, using variance of residuals. However in this case instead of sum the
+similar to model distance, using variance of residuals. However in this case instead of summing the
 variance across all variables, we take the ratio separately for individual variables.
 
-Discrimination power equal or above 3 is considered as high.
+Discrimination power equal to or above 3 is considered as high.
 }

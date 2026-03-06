@@ -11,7 +11,7 @@
 
 \item{ny}{which response to plot the values for (if y is multivariate), can be a vector.}
 
-\item{ncomp}{number of components to count}
+\item{ncomp}{number of components to show}
 
 \item{type}{type of the plot}
 
@@ -22,5 +22,5 @@ Computes and shows a plot for Selectivity ratio values for given number of compo
 and response variable
 }
 \details{
-See \code{\link{vipscores}} for more details.
+See \code{\link{selratio}} for more details.
 }

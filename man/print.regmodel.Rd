@@ -2,7 +2,7 @@
 % Please edit documentation in R/regmodel.R
 \name{print.regmodel}
 \alias{print.regmodel}
-\title{Print method for PLS model object}
+\title{Print method for regression model object}
 \usage{
 \method{print}{regmodel}(x, ...)
 }

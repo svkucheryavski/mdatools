@@ -20,7 +20,7 @@
 
 \item{ncomp}{complexity of model (e.g. number of components) to show the plot for}
 
-\item{show.lines}{allows to show the horisontal line at y = 0}
+\item{show.lines}{allows to show the horizontal line at y = 0}
 
 \item{show.plot}{logical, show plot or just return plot data}
 
