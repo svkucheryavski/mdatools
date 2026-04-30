@@ -296,7 +296,7 @@ prep.ref2km <- function(data) {
 #' @importFrom methods as
 #'
 #' @export
-prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 10) {
+prep.alsbasecorr <- function(data, plambda = 5, p = 0.1, max.niter = 15) {
 
    f <- function(data, plambda, p, max.niter) {
 
@@ -1302,11 +1302,11 @@ getImplementedPrepMethods <- function() {
          info = "Savitzky-Golay filter."
       ),
 
-      # prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 10)
+      # prep.alsbasecorr <- function(spectra, plambda = 5, p = 0.1, max.niter = 15)
       "alsbasecorr" = list(
          name = "alsbasecorr",
          method = prep.alsbasecorr,
-         params = list(plambda = 5, p = 0.1, max.niter = 10),
+         params = list(plambda = 5, p = 0.1, max.niter = 15),
          params.show = c("plambda", "p"),
          jmethod = prep.alsbasecorr.asjson,
          params.info = list(
