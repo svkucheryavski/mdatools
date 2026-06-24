@@ -138,6 +138,8 @@ parafac.als.nn <- function(X3, rank, tol = 1e-10, max.iter = 500) {
       if (abs(err.old - err) < tol) break
       err.old <- err
    }
-   if (it == max.iter) warning("parafac.als.nn did not converge in max.iter iterations.", call. = FALSE)
+   # Multiplicative updates converge slowly and normally run to max.iter (this
+   # matches tensorly, which stops at the iteration cap silently). No warning:
+   # hitting the cap is expected operation for the non-negative variant.
    list(A = A, B = B, C = C)
 }
