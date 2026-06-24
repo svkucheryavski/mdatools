@@ -45,7 +45,6 @@ projectParafac <- function(B, C, x) {
 # Non-negative (Branch B): the sequential closed form from the Python oracle,
 # intentionally NOT equal to Branch A when B/C are non-orthogonal.
 projectTucker <- function(G, B, C, x, non.negative) {
-   R <- dim(G)[1]
    G1 <- unfold1_3w(G)                   # R x (P*Q)
    M <- kronecker(B, C) %*% t(G1)        # (J*K) x R
    if (non.negative) {
