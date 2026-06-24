@@ -1467,9 +1467,11 @@ asjson.pca <- function(obj, ...) {
 #' Object with PCA model (from \code{\link{pca}}).
 #' @param fileName
 #' Name or full path to JSON file to be created.
+#' @param ...
+#' other possible arguments
 #'
 #' @export
-writeJSON.pca <- function(obj, fileName) {
+writeJSON.pca <- function(obj, fileName, ...) {
    m <- asjson(obj)
    fileConn <- file(fileName)
    writeLines(m, fileConn)

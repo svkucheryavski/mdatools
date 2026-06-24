@@ -1,3 +1,10 @@
+v. 0.15.1
+=========
+
+* default number of iterations in `prep.baseline()` method has been increased from 10 to 15 for better numerical stability and to match the code from web-applications.
+
+
+
 v. 0.15.0
 =========
 

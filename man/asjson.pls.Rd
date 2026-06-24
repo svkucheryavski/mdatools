@@ -4,10 +4,12 @@
 \alias{asjson.pls}
 \title{Converts object with PLS model to JSON string compatible with web-application.}
 \usage{
-\method{asjson}{pls}(obj, ...)
+\method{asjson}{pls}(obj, uncertainties = NULL, ...)
 }
 \arguments{
 \item{obj}{Object with PLS model (from \code{\link{pls}}).}
+
+\item{uncertainties}{Vector with uncertainties for the predicted values (e.g. RMSEP for test set).}
 
 \item{...}{other arguments}
 }

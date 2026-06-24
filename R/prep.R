@@ -1737,9 +1737,11 @@ prep.fromjson <- function(str) {
 #' list with preprocessing methods (created using \code{prep.fit} function).
 #' @param fileName
 #' file name (or full path) to JSON file to save the model into.
+#' @param ...
+#' other possible arguments
 #'
 #' @export
-writeJSON.prepmodel <- function(obj, fileName) {
+writeJSON.prepmodel <- function(obj, fileName, ...) {
    m <- prep.asjson(obj)
    fileConn <- file(fileName)
    writeLines(m, fileConn)

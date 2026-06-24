@@ -118,9 +118,11 @@ asvector <- function(obj) {
 #' model object, e.g. \code{pca}
 #' @param fileName
 #' name (or full path) to JSON file to be created.
+#' @param ...
+#' other optional parameters
 #'
 #' @export
-writeJSON <- function(obj, fileName) {
+writeJSON <- function(obj, fileName, ...) {
    UseMethod("writeJSON")
 }
 

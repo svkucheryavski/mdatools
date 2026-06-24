@@ -4,12 +4,14 @@
 \alias{writeJSON.prepmodel}
 \title{Saves preprocessing model to JSON file which can be loaded to web-application (mda.tools/prep).}
 \usage{
-\method{writeJSON}{prepmodel}(obj, fileName)
+\method{writeJSON}{prepmodel}(obj, fileName, ...)
 }
 \arguments{
 \item{obj}{list with preprocessing methods (created using \code{prep.fit} function).}
 
 \item{fileName}{file name (or full path) to JSON file to save the model into.}
+
+\item{...}{other possible arguments}
 }
 \description{
 Saves preprocessing model to JSON file which can be loaded to web-application (mda.tools/prep).
