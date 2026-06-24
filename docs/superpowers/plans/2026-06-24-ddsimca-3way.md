@@ -347,7 +347,9 @@ parafac.als.nn <- function(X3, rank, tol = 1e-10, max.iter = 500) {
       if (abs(err.old - err) < tol) break
       err.old <- err
    }
-   if (it == max.iter) warning("parafac.als.nn did not converge in max.iter iterations.", call. = FALSE)
+   # Multiplicative updates converge slowly and normally run to max.iter (this
+   # matches tensorly, which stops at the iteration cap silently). No warning:
+   # hitting the cap is expected operation for the non-negative variant.
    list(A = A, B = B, C = C)
 }
 ```
@@ -525,8 +527,9 @@ tucker.hooi <- function(X3, ranks, tol = 1e-10, max.iter = 500) {
 }
 
 # Non-negative Tucker via multiplicative updates on all factors and the core.
-# Multiplicative updates converge slowly; max.iter is higher and the stop is
-# the relative-error plateau. Verified: rel < 1e-4 with all factors >= 0.
+# Multiplicative updates converge slowly; max.iter is higher and the loop
+# normally runs to the cap (it stops early only if the error change drops
+# below tol). Verified: rel < 1e-4 with all factors >= 0.
 tucker.nn <- function(X3, ranks, tol = 1e-10, max.iter = 2000) {
    d3 <- attr(X3, "dim3"); J <- d3[1]; K <- d3[2]; n <- nrow(X3)
    rA <- ranks[1]; rB <- ranks[2]; rC <- ranks[3]
@@ -569,7 +572,9 @@ tucker.nn <- function(X3, ranks, tol = 1e-10, max.iter = 2000) {
       if (abs(err.old - err) < tol) break
       err.old <- err
    }
-   if (it == max.iter) warning("tucker.nn did not converge in max.iter iterations.", call. = FALSE)
+   # Multiplicative updates converge slowly and normally run to max.iter (this
+   # matches tensorly, which stops at the iteration cap silently). No warning:
+   # hitting the cap is expected operation for the non-negative variant.
    list(G = G, A = A, B = B, C = C)
 }
 ```
