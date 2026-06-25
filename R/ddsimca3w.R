@@ -384,6 +384,60 @@ ddsimca.parafac <- function(x, classname, dim,
    model
 }
 
+#' DD-SIMCA with Tucker3 decomposition for 3-way data
+#'
+#' @param x numeric matrix (n x (J*K)), unfolded row-major.
+#' @param classname target class name (<= 20 chars).
+#' @param dim integer vector c(J, K), both >= 2.
+#' @param ncomp integer vector c(R_A_max, R_B, R_C): sample-mode max rank and the
+#'   fixed mode-2 / mode-3 ranks. Requires R_B <= J, R_C <= K, R_A_max <= n-1,
+#'   R_A_max <= R_B*R_C.
+#' @param non.negative logical, use non-negative Tucker.
+#' @param nf.as.sum logical, full-distance DoF rule (FALSE = data-driven eq.7).
+#' @param alpha significance level for extremes.
+#' @param gamma significance level for outliers.
+#'
+#' @return model of class \code{c("ddsimca.tucker","ddsimca3w","ddsimca")}.
+#' @export
+ddsimca.tucker <- function(x, classname, dim, ncomp,
+   non.negative = FALSE, nf.as.sum = FALSE, alpha = 0.05, gamma = 0.01) {
+
+   x <- as.matrix(x)
+   J <- dim[1]; K <- dim[2]
+   rA <- ncomp[1]; rB <- ncomp[2]; rC <- ncomp[3]
+   if (J < 2 || K < 2 || ncol(x) != J * K) {
+      stop("Argument 'dim' does not match the number of columns in 'x'.", call. = FALSE)
+   }
+   if (rA > nrow(x) - 1) stop("R_A_max cannot exceed n - 1.", call. = FALSE)
+   if (rB > J) stop("R_B cannot exceed J.", call. = FALSE)
+   if (rC > K) stop("R_C cannot exceed K.", call. = FALSE)
+   if (rA > rB * rC) stop("R_A_max cannot exceed R_B * R_C.", call. = FALSE)
+   if (!is.character(classname) || nchar(classname) > 20) {
+      stop("Argument 'classname' must be text of up to 20 symbols.", call. = FALSE)
+   }
+
+   X3 <- x; attr(X3, "dim3") <- c(J, K)
+   models <- vector("list", rA)
+   for (nc in seq_len(rA)) {
+      fit <- if (non.negative) tucker.nn(X3, c(nc, rB, rC)) else tucker.hooi(X3, c(nc, rB, rC))
+      sf <- signFix3w(fit$A, fit$B, fit$C, fit$G)
+      # buildSubModel3w signature is (A, B, C, G, x, non.negative, type). Pass
+      # sf$A to keep the call uniform with ddsimca.parafac; for Tucker it is
+      # ignored (stats are re-projected via projectTucker inside the helper).
+      models[[nc]] <- buildSubModel3w(sf$A, sf$B, sf$C, sf$G, x, non.negative, "tucker")
+   }
+
+   model <- makeModel3w(x, models, "tucker", classname, c(J, K), rA,
+      non.negative, nf.as.sum, alpha, gamma)
+   model$B.ncomp <- rB
+   model$C.ncomp <- rC
+   model$call <- match.call()
+   class(model) <- c("ddsimca.tucker", "ddsimca3w", "ddsimca")
+   model$res[["cal"]] <- predict(model, x, rep(classname, nrow(x)))
+   model$calres <- model$res[["cal"]]
+   model
+}
+
 # Build one sub-model: derive the H-stats (A_mean, S_pinv) and the SVD basis
 # (A_V, A_sigma, for scores plots) from the training scores.
 #

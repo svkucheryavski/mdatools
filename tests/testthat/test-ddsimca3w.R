@@ -104,3 +104,44 @@ test_that("ddsimca.parafac trains and predicts end-to-end", {
    r <- predict(m, x, rep("T", n))
    expect_s3_class(r, "ddsimcares")
 })
+
+context("ddsimca3w: Tucker golden")
+
+test_that("Tucker project3w + finalize3w match the Python oracle (1e-9) on fixed factors", {
+   skip_if_not(file.exists(gpath("tucker_X_train.csv")))
+   X <- rdcsv("tucker_X_train.csv")
+   ncomp <- 3; J <- 5; K <- 4; rB <- 5; rC <- 4
+   models <- lapply(seq_len(ncomp), function(nc) {
+      B <- rdcsv(sprintf("tucker_B_%d.csv", nc))
+      C <- rdcsv(sprintf("tucker_C_%d.csv", nc))
+      Gflat <- rdcsv(sprintf("tucker_G_%d.csv", nc))   # nc x (rB*rC), row-major
+      G <- fold1_3w(Gflat, nc, rB, rC)
+      # buildSubModel3w signature is (A, B, C, G, x, non.negative, type). For
+      # Tucker the A arg is IGNORED (stats come from a re-projection, matching
+      # the Python oracle's A_for_stats), so pass NULL here.
+      buildSubModel3w(NULL, B, C, G, X, FALSE, "tucker")
+   })
+   model <- list(type = "tucker", models = models, non.negative = FALSE,
+      dim = c(J, K), ncomp = ncomp, ncomp.selected = ncomp)
+   pj <- project3w(model, X)
+   expect_equal(unname(pj$H), unname(rdcsv("tucker_H.csv")), tolerance = 1e-9)
+   expect_equal(unname(pj$Q), unname(rdcsv("tucker_Q.csv")), tolerance = 1e-9)
+
+   lp <- finalize3w(pj$H, pj$Q, nf.as.sum = FALSE)
+   tf_c <- rdcsv("tucker_fParams_classic.csv")
+   expect_equal(unname(lp$F$moments$Nu), unname(tf_c[2, ]), tolerance = 1e-9)
+})
+
+test_that("ddsimca.tucker trains and predicts end-to-end", {
+   set.seed(21)
+   J <- 5; K <- 4; n <- 30; R <- 3
+   A0 <- matrix(rnorm(n * R), n, R)
+   B0 <- matrix(rnorm(J * R), J, R)
+   C0 <- matrix(rnorm(K * R), K, R)
+   x <- A0 %*% t(khatriRao3w(B0, C0)) + 0.01 * matrix(rnorm(n * J * K), n, J * K)
+   m <- ddsimca.tucker(x, "T", dim = c(J, K), ncomp = c(3, 5, 4))
+   expect_s3_class(m, "ddsimca.tucker")
+   expect_s3_class(m$res$cal, "ddsimcares")
+   expect_equal(ncol(m$res$cal$T2), 3L)
+   expect_equal(m$B.ncomp, 5)
+})
