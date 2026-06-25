@@ -164,3 +164,45 @@ test_that("ddsimca.tucker trains and predicts end-to-end", {
    expect_equal(ncol(m$res$cal$T2), 3L)
    expect_equal(m$B.ncomp, 5)
 })
+
+context("ddsimca3w: S3 glue")
+
+make_pf <- function() {
+   set.seed(22)
+   J <- 5; K <- 4; n <- 30; R <- 3
+   A0 <- matrix(rnorm(n * R), n, R); B0 <- matrix(rnorm(J * R), J, R)
+   C0 <- matrix(rnorm(K * R), K, R)
+   x <- A0 %*% t(khatriRao3w(B0, C0)) + 0.01 * matrix(rnorm(n * J * K), n, J * K)
+   ddsimca.parafac(x, "T", dim = c(J, K), ncomp = 3)
+}
+
+test_that("selectCompNum.ddsimca3w updates model and results", {
+   m <- make_pf()
+   m <- selectCompNum(m, 2)
+   expect_equal(m$ncomp.selected, 2)
+   expect_equal(m$res$cal$ncomp.selected, 2)
+})
+
+test_that("summary and print do not error", {
+   m <- make_pf()
+   expect_output(summary(m))
+   expect_output(print(m))
+})
+
+test_that("plotFactors returns factor values for a PARAFAC model", {
+   m <- make_pf()
+   pdf(tempfile()); on.exit(dev.off())
+   expect_error(plotFactors(m, comp = 1, mode = "B"), NA)
+})
+
+test_that("DoF methods read Nh/Nq/Nf from limParams", {
+   m <- make_pf()
+   pdf(tempfile()); on.exit(dev.off())
+   expect_error(plotT2DoF(m), NA)
+   expect_error(plotDistDoF(m), NA)
+})
+
+test_that("a PCA-only method has no applicable method on the 3-way model", {
+   m <- make_pf()
+   expect_error(plotEigenvalues(m), "no applicable method|not.*found")
+})

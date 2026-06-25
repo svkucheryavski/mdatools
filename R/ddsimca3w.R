@@ -555,3 +555,142 @@ buildPcaresShape3w <- function(object, pj) {
    class(res) <- c("pcares", "ldecomp")
    res
 }
+
+#' @export
+selectCompNum.ddsimca3w <- function(obj, ncomp, ...) {
+   if (ncomp < 1 || ncomp > obj$ncomp) stop("Wrong value for 'ncomp'.", call. = FALSE)
+   obj$ncomp.selected <- ncomp
+   # sub-models are not nested, so the selected sub-model's scores must be
+   # re-projected; simplest correct path is to rebuild the cal result. The
+   # training matrix is on the model (obj$Xcal, set by makeModel3w).
+   obj$res$cal <- predict(obj, obj$Xcal, obj$res$cal$simca$c.ref)
+   obj$res$cal$ncomp.selected <- ncomp
+   obj$calres <- obj$res$cal
+   obj
+}
+
+#' Update significance levels for a 3-way DD-SIMCA model
+#'
+#' @param obj a 3-way DD-SIMCA model (class \code{ddsimca3w}).
+#' @param alpha significance level for extremes.
+#' @param gamma significance level for outliers.
+#' @param ... ignored.
+#'
+#' @details Unlike \code{setParams.ddsimca}, this re-runs \code{predict} so the
+#' data-driven full-distance limits (which \code{setParams.ddsimca} does not
+#' know about) are recomputed correctly.
+#' @return the model with updated alpha/gamma and rebuilt calibration result.
+#' @export
+setParams.ddsimca3w <- function(obj, alpha = obj$alpha, gamma = obj$gamma, ...) {
+   obj$alpha <- alpha
+   obj$gamma <- gamma
+   if (!is.null(obj$res) && !is.null(obj$res$cal)) {
+      obj$res$cal <- predict(obj, obj$Xcal, obj$res$cal$simca$c.ref, alpha = alpha, gamma = gamma)
+      obj$calres <- obj$res$cal
+   }
+   obj
+}
+
+#' @export
+summary.ddsimca3w <- function(object, ncomp = object$ncomp.selected, res = object$res, ...) {
+   title <- if (object$type == "parafac") "DD-SIMCA-PARAFAC" else "DD-SIMCA-TUCKER"
+   fprintf("\n%s model for class '%s'%s\n\n", title, object$classname,
+      sprintf(" (%d x %d)", object$dim[1], object$dim[2]))
+   if (object$type == "tucker") {
+      fprintf("Tucker ranks: (%dx%dx%d-%dx%dx%d) total, (%dx%dx%d) optimal\n",
+         1, object$B.ncomp, object$C.ncomp, object$ncomp, object$B.ncomp, object$C.ncomp,
+         object$ncomp.selected, object$B.ncomp, object$C.ncomp)
+   }
+   fprintf("Number of components: %d\n", object$ncomp)
+   fprintf("Number of selected components: %d\n", ncomp)
+   fprintf("Alpha: %s\n", object$alpha)
+   fprintf("Gamma: %s\n\n", object$gamma)
+   if (!is.null(object$res) && !is.null(object$res$cal)) {
+      sum_data <- do.call(rbind, lapply(res, function(z) as.matrix(z)[ncomp, , drop = FALSE]))
+      rownames(sum_data) <- capitalize(names(res))
+      print(sum_data, 4)
+      cat("\n")
+   }
+   return(invisible(object))
+}
+
+#' @export
+print.ddsimca3w <- function(x, ...) {
+   title <- if (x$type == "parafac") "DD-SIMCA-PARAFAC" else "DD-SIMCA-TUCKER"
+   fprintf("\n%s model (class 'ddsimca3w')\n", title)
+   cat("\nCall:\n"); print(x$call)
+   cat("\nMain fields:\n")
+   cat(" $ncomp - number of components\n")
+   cat(" $ncomp.selected - number of selected components\n")
+   cat(" $dim - 3-way dimensions (J x K)\n")
+   cat(" $limParams - distance distribution parameters\n")
+   cat(" $res - list with results (calibration)\n")
+   return(invisible(x))
+}
+
+#' Plot a factor (loading) curve for a 3-way model.
+#'
+#' @param obj a 3-way DD-SIMCA model (class \code{ddsimca3w}).
+#' @param comp 1-indexed component within the chosen sub-model.
+#' @param mode which factor matrix to draw, "B" (mode-2) or "C" (mode-3).
+#' @param ncomp which trained sub-model to read from (default selected).
+#' @param type plot type.
+#' @param ... arguments passed to \code{mdaplot}.
+#' @export
+plotFactors.ddsimca3w <- function(obj, comp = 1, mode = c("B", "C"),
+   ncomp = obj$ncomp.selected, type = "l", ...) {
+   mode <- match.arg(mode)
+   if (ncomp < 1 || ncomp > obj$ncomp) stop("Wrong value for 'ncomp'.", call. = FALSE)
+   M <- obj$models[[ncomp]][[mode]]
+   if (comp < 1 || comp > ncol(M)) stop("Wrong value for 'comp'.", call. = FALSE)
+   y <- M[, comp]
+   pd <- matrix(y, nrow = 1)
+   colnames(pd) <- seq_along(y)
+   rownames(pd) <- sprintf("Comp %d", comp)
+   attr(pd, "name") <- sprintf("%s factors (%s)",
+      if (obj$type == "parafac") "PARAFAC" else "Tucker", mode)
+   attr(pd, "xaxis.name") <- sprintf("Mode-%d index", if (mode == "B") 2 else 3)
+   mdaplot(pd, type = type, ylab = "Factor values", ...)
+}
+
+#' @export
+plotScores.ddsimca3w <- function(obj, comp = if (obj$ncomp.selected > 1) c(1, 2) else 1, ...) {
+   plotScores(obj$res$cal, comp = comp, ...)
+}
+
+#' @export
+plotLoadings.ddsimca3w <- function(obj, ...) {
+   plotFactors(obj, ...)
+}
+
+# DoF methods read Nh/Nq/Nf directly from limParams (no $T2lim/$Qlim machinery).
+#' @export
+plotT2DoF.ddsimca3w <- function(obj, type = "b", labels = "values",
+   xticks = seq_len(obj$ncomp), ylab = "Nh", est = "moments", ...) {
+   y <- obj$limParams$T2[[est]]$Nu
+   pd <- matrix(y, nrow = 1); colnames(pd) <- xticks; rownames(pd) <- "Nh"
+   attr(pd, "name") <- "Degrees of freedom"
+   mdaplot(pd, type = type, labels = labels, xticks = xticks, ylab = ylab, ...)
+}
+
+#' @export
+plotQDoF.ddsimca3w <- function(obj, type = "b", labels = "values",
+   xticks = seq_len(obj$ncomp), ylab = "Nq", est = "moments", ...) {
+   y <- obj$limParams$Q[[est]]$Nu
+   pd <- matrix(y, nrow = 1); colnames(pd) <- xticks; rownames(pd) <- "Nq"
+   attr(pd, "name") <- "Degrees of freedom"
+   mdaplot(pd, type = type, labels = labels, xticks = xticks, ylab = ylab, ...)
+}
+
+#' @export
+plotDistDoF.ddsimca3w <- function(obj, type = "b", labels = "values",
+   xticks = seq_len(obj$ncomp), est = "moments", ...) {
+   pd <- rbind(
+      Nh = obj$limParams$T2[[est]]$Nu,
+      Nq = obj$limParams$Q[[est]]$Nu,
+      Nf = obj$limParams$F[[est]]$Nu
+   )
+   colnames(pd) <- xticks
+   attr(pd, "name") <- "Degrees of freedom"
+   mdaplotg(pd, type = type, labels = labels, xticks = xticks, ...)
+}

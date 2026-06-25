@@ -935,3 +935,13 @@ plotWeights <- function(obj, ...) {
 plotXYResiduals <- function(obj, ...) {
    UseMethod("plotXYResiduals")
 }
+
+#' Plot factors for a 3-way decomposition model
+#'
+#' @param obj a model object.
+#' @param ... arguments passed to methods.
+#'
+#' @export
+plotFactors <- function(obj, ...) {
+   UseMethod("plotFactors")
+}
