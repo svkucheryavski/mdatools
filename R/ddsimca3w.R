@@ -275,3 +275,219 @@ tucker.nn <- function(X3, ranks, tol = 1e-10, max.iter = 2000) {
    # hitting the cap is expected operation for the non-negative variant.
    list(G = G, A = A, B = B, C = C)
 }
+
+# Project x (n x (J*K)) through every stored sub-model. H/Q are n x ncomp
+# (column nc = distances from the rank-nc sub-model; sub-models are NOT nested).
+# T/U are n x ncomp.selected from the selected sub-model only; E is the residual
+# of the final sub-model.
+project3w <- function(model, x) {
+   n <- nrow(x)
+   ncomp <- model$ncomp
+   H <- matrix(0, n, ncomp)
+   Q <- matrix(0, n, ncomp)
+   E <- matrix(0, n, ncol(x))
+   Tsel <- NULL; Usel <- NULL
+
+   for (nc in seq_len(ncomp)) {
+      mdl <- model$models[[nc]]
+      pr <- if (model$type == "parafac") {
+         projectParafac(mdl$B, mdl$C, x)
+      } else {
+         projectTucker(mdl$G, mdl$B, mdl$C, x, model$non.negative)
+      }
+      A <- pr$A
+      A_c <- sweep(A, 2, mdl$A_mean)
+      H[, nc] <- rowSums((A_c %*% mdl$S_pinv) * A_c)
+      Q[, nc] <- rowSums(pr$E^2)
+      if (nc == ncomp) E <- pr$E
+
+      if (nc == model$ncomp.selected) {
+         Tt <- A_c %*% mdl$A_V
+         sigma <- mdl$A_sigma
+         Usel <- sweep(Tt, 2, ifelse(sigma > 1e-12, sigma, 1), "/")
+         Usel[, sigma <= 1e-12] <- 0
+         Tsel <- Tt
+      }
+   }
+   list(H = H, Q = Q, T = Tsel, U = Usel, E = E)
+}
+
+# Build the limParams structure classify() consumes. T2 and Q come from
+# ldecomp.getLimParams (clamps DoF). F is the scaled full distance: sum rule
+# (nf.as.sum = TRUE) or data-driven (paper eq.7) with explicit clamp.dof on Nu.
+finalize3w <- function(H, Q, nf.as.sum) {
+   T2 <- ldecomp.getLimParams(H)
+   Qp <- ldecomp.getLimParams(Q)
+
+   if (nf.as.sum) {
+      F <- list(
+         moments = list(u0 = T2$moments$Nu + Qp$moments$Nu, Nu = T2$moments$Nu + Qp$moments$Nu),
+         robust  = list(u0 = T2$robust$Nu  + Qp$robust$Nu,  Nu = T2$robust$Nu  + Qp$robust$Nu)
+      )
+   } else {
+      Fc <- sweep(H, 2, T2$moments$u0, "/") %*% diag(T2$moments$Nu, ncol(H)) +
+            sweep(Q, 2, Qp$moments$u0, "/") %*% diag(Qp$moments$Nu, ncol(Q))
+      Fr <- sweep(H, 2, T2$robust$u0,  "/") %*% diag(T2$robust$Nu,  ncol(H)) +
+            sweep(Q, 2, Qp$robust$u0,  "/") %*% diag(Qp$robust$Nu,  ncol(Q))
+      mc <- ddmoments.param(Fc); rr <- ddrobust.param(Fr)
+      # ddmoments.param/ddrobust.param do NOT clamp; only ldecomp.getLimParams
+      # does. Clamp F's DoF to the package-wide integer [1,250] range here.
+      mc$Nu <- clamp.dof(mc$Nu); rr$Nu <- clamp.dof(rr$Nu)
+      F <- list(moments = mc, robust = rr)
+   }
+   list(T2 = T2, Q = Qp, F = F)
+}
+
+#' DD-SIMCA with PARAFAC decomposition for 3-way data
+#'
+#' @param x numeric matrix (n x (J*K)), tensor unfolded row-major (column for
+#'   element (j,k) is (j-1)*K + k).
+#' @param classname name of the target class (<= 20 chars).
+#' @param dim integer vector c(J, K), both >= 2.
+#' @param ncomp number of PARAFAC components (<= min(J, K, n-1)).
+#' @param non.negative logical, use non-negative PARAFAC.
+#' @param nf.as.sum logical, full-distance DoF rule (FALSE = data-driven eq.7).
+#' @param alpha significance level for extremes.
+#' @param gamma significance level for outliers.
+#'
+#' @return model of class \code{c("ddsimca.parafac","ddsimca3w","ddsimca")}.
+#' @export
+ddsimca.parafac <- function(x, classname, dim,
+   ncomp = min(dim[1], dim[2], nrow(x) - 1),
+   non.negative = FALSE, nf.as.sum = FALSE, alpha = 0.05, gamma = 0.01) {
+
+   x <- as.matrix(x)
+   J <- dim[1]; K <- dim[2]
+   if (J < 2 || K < 2 || ncol(x) != J * K) {
+      stop("Argument 'dim' does not match the number of columns in 'x'.", call. = FALSE)
+   }
+   if (ncomp < 1 || ncomp > J || ncomp > K || ncomp > nrow(x) - 1) {
+      stop("Wrong value for 'ncomp'.", call. = FALSE)
+   }
+   if (!is.character(classname) || nchar(classname) > 20) {
+      stop("Argument 'classname' must be text of up to 20 symbols.", call. = FALSE)
+   }
+
+   X3 <- x; attr(X3, "dim3") <- c(J, K)
+   models <- vector("list", ncomp)
+   for (nc in seq_len(ncomp)) {
+      fit <- if (non.negative) parafac.als.nn(X3, nc) else parafac.als(X3, nc)
+      models[[nc]] <- buildSubModel3w(fit$B, fit$C, NULL, x, non.negative, "parafac")
+   }
+
+   model <- makeModel3w(x, models, "parafac", classname, c(J, K), ncomp,
+      non.negative, nf.as.sum, alpha, gamma)
+   model$call <- match.call()
+   class(model) <- c("ddsimca.parafac", "ddsimca3w", "ddsimca")
+   model$res[["cal"]] <- predict(model, x, rep(classname, nrow(x)))
+   model$calres <- model$res[["cal"]]
+   model
+}
+
+# Build one sub-model: project training data to get scores, then the H-stats
+# (A_mean, S_pinv) and the SVD basis (A_V, A_sigma) for scores plots.
+buildSubModel3w <- function(B, C, G, x, non.negative, type) {
+   pr <- if (type == "parafac") projectParafac(B, C, x) else projectTucker(G, B, C, x, non.negative)
+   A <- pr$A
+   A_mean <- colMeans(A)
+   A_c <- sweep(A, 2, A_mean)
+   S <- crossprod(A_c) / max(nrow(A_c) - 1, 1)
+   sv <- svd(A_c)
+   list(B = B, C = C, G = G, A_mean = A_mean, S_pinv = pinv3way(S),
+        A_V = sv$v, A_sigma = sv$d)
+}
+
+# Assemble the shared model state (limParams + metadata). Type-agnostic.
+makeModel3w <- function(x, models, type, classname, dim3, ncomp, non.negative,
+   nf.as.sum, alpha, gamma) {
+
+   base <- list(type = type, models = models, non.negative = non.negative,
+      dim = dim3, ncomp = ncomp, ncomp.selected = ncomp)
+   pj <- project3w(base, x)
+   lp <- finalize3w(pj$H, pj$Q, nf.as.sum)
+
+   model <- base
+   model$limParams <- lp
+   model$tssX <- sum(x^2)        # total SS for cumexpvar (buildPcaresShape3w)
+   model$Xcal <- x               # training data, reused by selectCompNum/setParams
+   model$nrows <- nrow(x)
+   model$nclasses <- 1
+   model$classname <- classname
+   model$alpha <- alpha
+   model$gamma <- gamma
+   model$nf.as.sum <- nf.as.sum
+   model$limType <- "moments"
+   model
+}
+
+#' Predictions for a 3-way DD-SIMCA model
+#' @param object a 3-way DD-SIMCA model (class \code{ddsimca3w}).
+#' @param x numeric matrix (n x (J*K)), unfolded row-major.
+#' @param c.ref optional vector of reference class names.
+#' @param alpha significance level for predictions.
+#' @param gamma significance level for outliers.
+#' @param ... ignored.
+#' @return object of class \code{ddsimcares}.
+#' @export
+predict.ddsimca3w <- function(object, x, c.ref = NULL,
+   alpha = object$alpha, gamma = object$gamma, ...) {
+
+   x <- as.matrix(x)
+   pj <- project3w(object, x)
+   n <- nrow(x)
+
+   # build the pcares-shaped object the result methods read
+   res <- buildPcaresShape3w(object, pj)
+
+   # indices/numbers (no excluded rows for 3-way)
+   if (is.null(c.ref)) {
+      indMembers <- NULL; indStrangers <- NULL; indUnknowns <- rep(TRUE, n)
+      nMembers <- 0; nStrangers <- 0; nUnknowns <- n
+   } else {
+      indMembers <- c.ref == object$classname
+      indStrangers <- !indMembers
+      indUnknowns <- NULL
+      nMembers <- sum(indMembers); nStrangers <- sum(indStrangers); nUnknowns <- 0
+   }
+   indices <- list(members = indMembers, strangers = indStrangers,
+      unknown = indUnknowns, excluded = rep(FALSE, n))
+   numbers <- list(members = nMembers, strangers = nStrangers,
+      unknown = nUnknowns, excluded = 0)
+
+   lp <- object$limParams
+   outcomes <- list(
+      moments = classify(res, indices, numbers, lp$Q$moments, lp$T2$moments,
+         object$nrows, alpha, gamma, object$classname, c.ref, fp = lp$F$moments),
+      robust = classify(res, indices, numbers, lp$Q$robust, lp$T2$robust,
+         object$nrows, alpha, gamma, object$classname, c.ref, fp = lp$F$robust)
+   )
+   ddsimcares(res, outcomes, indices, numbers, alpha = alpha,
+      classname = object$classname, c.ref = c.ref)
+}
+
+# Build the pcares-shaped result object (scores/T2/Q/residuals/expvar + dimnames)
+# that classify() and the ddsimcares result methods consume.
+buildPcaresShape3w <- function(object, pj) {
+   ncomp <- object$ncomp
+   compNames <- paste("Comp", seq_len(ncomp))
+   H <- pj$H; Q <- pj$Q
+   colnames(H) <- compNames; colnames(Q) <- compNames
+   sel <- object$ncomp.selected
+   scores <- pj$T
+   if (!is.null(scores)) colnames(scores) <- paste("Comp", seq_len(ncol(scores)))
+
+   # cumulative explained variance from per-sub-model residual SS (object$tssX
+   # = sum(x^2) is stored on the model by makeModel3w). Non-nested sub-models can
+   # make cumexpvar non-monotonic; that only affects the cosmetic Expvar columns.
+   cumexpvar <- 100 * (1 - colSums(Q) / object$tssX)
+   expvar <- c(cumexpvar[1], diff(cumexpvar))
+
+   res <- list(
+      scores = scores, T2 = H, Q = Q, residuals = pj$E,
+      ncomp = ncomp, ncomp.selected = sel,
+      expvar = expvar, cumexpvar = cumexpvar,
+      U = pj$U
+   )
+   class(res) <- c("pcares", "ldecomp")
+   res
+}

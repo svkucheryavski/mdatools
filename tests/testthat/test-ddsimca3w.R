@@ -50,3 +50,58 @@ test_that("DoF plot generics still dispatch for pca/ddsimca objects", {
    expect_error(plotT2DoF(m), NA)
    expect_true(is.function(plotT2DoF))
 })
+
+context("ddsimca3w: PARAFAC golden")
+
+gpath <- function(f) test_path("ddsimca3w", f)
+rdcsv <- function(f) as.matrix(read.csv(gpath(f), header = FALSE))
+
+test_that("PARAFAC project3w + finalize3w match the Python oracle (1e-9) on fixed factors", {
+   skip_if_not(file.exists(gpath("parafac_X_train.csv")))
+   X <- rdcsv("parafac_X_train.csv")
+   ncomp <- 3; J <- 5; K <- 4
+   models <- lapply(seq_len(ncomp), function(nc) {
+      B <- rdcsv(sprintf("parafac_B_%d.csv", nc))
+      C <- rdcsv(sprintf("parafac_C_%d.csv", nc))
+      pr <- projectParafac(B, C, X)
+      A <- pr$A
+      A_mean <- colMeans(A)
+      A_c <- sweep(A, 2, A_mean)
+      S <- crossprod(A_c) / max(nrow(A_c) - 1, 1)
+      list(B = B, C = C, A_mean = A_mean, S_pinv = pinv3way(S),
+           A_V = svd(A_c)$v, A_sigma = svd(A_c)$d)
+   })
+   model <- list(type = "parafac", models = models, non.negative = FALSE,
+      dim = c(J, K), ncomp = ncomp, ncomp.selected = ncomp)
+   pj <- project3w(model, X)
+   expect_equal(unname(pj$H), unname(rdcsv("parafac_H.csv")), tolerance = 1e-9)
+   expect_equal(unname(pj$Q), unname(rdcsv("parafac_Q.csv")), tolerance = 1e-9)
+
+   lp <- finalize3w(pj$H, pj$Q, nf.as.sum = FALSE)
+   pf_c <- rdcsv("parafac_fParams_classic.csv")
+   expect_equal(unname(lp$F$moments$u0), unname(pf_c[1, ]), tolerance = 1e-9)
+   expect_equal(unname(lp$F$moments$Nu), unname(pf_c[2, ]), tolerance = 1e-9)
+   ph_c <- rdcsv("parafac_hParams_classic.csv")
+   expect_equal(unname(lp$T2$moments$u0), unname(ph_c[1, ]), tolerance = 1e-9)
+   expect_equal(unname(lp$T2$moments$Nu), unname(ph_c[2, ]), tolerance = 1e-9)
+})
+
+test_that("ddsimca.parafac trains and predicts end-to-end", {
+   set.seed(20)
+   J <- 5; K <- 4; n <- 30; R <- 3
+   A0 <- matrix(rnorm(n * R), n, R)
+   B0 <- matrix(rnorm(J * R), J, R)
+   C0 <- matrix(rnorm(K * R), K, R)
+   x <- A0 %*% t(khatriRao3w(B0, C0)) + 0.01 * matrix(rnorm(n * J * K), n, J * K)
+   m <- ddsimca.parafac(x, "T", dim = c(J, K), ncomp = 3)
+   expect_s3_class(m, "ddsimca.parafac")
+   expect_s3_class(m, "ddsimca3w")
+   expect_s3_class(m$res$cal, "ddsimcares")
+   expect_equal(ncol(m$res$cal$T2), 3L)
+   # full-distance critical limit uses scaled F (f0.model != Nf in general)
+   v <- m$res$cal$simca$outcomes$moments$values[[3]]
+   expect_true(!is.null(v$f0.model))
+   # predict on new data returns a ddsimcares
+   r <- predict(m, x, rep("T", n))
+   expect_s3_class(r, "ddsimcares")
+})
