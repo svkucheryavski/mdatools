@@ -255,6 +255,12 @@ test_that("parafac.als.nn keeps factors non-negative", {
    fit <- parafac.als.nn(X3, rank = 2)
    expect_true(all(fit$A >= -1e-9) && all(fit$B >= -1e-9) && all(fit$C >= -1e-9))
 })
+
+test_that("parafac.als.nn rejects negative data", {
+   X3 <- matrix(c(1, -2, 3, 4, 5, 6), nrow = 2)   # contains a negative value
+   attr(X3, "dim3") <- c(3, 1)
+   expect_error(parafac.als.nn(X3, rank = 1), "non-negative data")
+})
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -276,7 +282,7 @@ Append to `R/ddsimca3w.R`:
 parafac.als <- function(X3, rank, tol = 1e-10, max.iter = 500) {
    d3 <- attr(X3, "dim3")
    J <- d3[1]; K <- d3[2]; n <- nrow(X3)
-   X <- unclass(X3)
+   X <- X3; attr(X, "dim3") <- NULL
 
    # mode unfoldings of the data tensor (row-major)
    # X1 (n x J*K) is X itself; X2 (J x n*K) and X3m (K x n*J) built once.
@@ -284,7 +290,8 @@ parafac.als <- function(X3, rank, tol = 1e-10, max.iter = 500) {
    X2 <- matrix(aperm(T3, c(1, 3, 2)), nrow = J)   # J x (n*K), col (k-1)*n + i
    X3u <- matrix(aperm(T3, c(2, 3, 1)), nrow = K)  # K x (n*J), col (j-1)*n + i
 
-   set.seed(0)
+   # Random init. Library functions must NOT call set.seed() (CRAN policy);
+   # callers seed the RNG themselves for reproducible models, as mcrals does.
    A <- matrix(rnorm(n * rank), n, rank)
    B <- matrix(rnorm(J * rank), J, rank)
    C <- matrix(rnorm(K * rank), K, rank)
@@ -318,14 +325,14 @@ parafac.als <- function(X3, rank, tol = 1e-10, max.iter = 500) {
 parafac.als.nn <- function(X3, rank, tol = 1e-10, max.iter = 500) {
    d3 <- attr(X3, "dim3")
    J <- d3[1]; K <- d3[2]; n <- nrow(X3)
-   X <- unclass(X3)
+   X <- X3; attr(X, "dim3") <- NULL
    if (any(X < 0)) stop("Non-negative PARAFAC requires non-negative data.", call. = FALSE)
 
    T3 <- array(aperm(array(t(X), dim = c(K, J, n)), c(2, 1, 3)), dim = c(J, K, n))
    X2 <- matrix(aperm(T3, c(1, 3, 2)), nrow = J)
    X3u <- matrix(aperm(T3, c(2, 3, 1)), nrow = K)
 
-   set.seed(0)
+   # Random init; caller seeds the RNG for reproducibility (no set.seed here).
    eps <- 1e-12
    A <- matrix(abs(rnorm(n * rank)), n, rank)
    B <- matrix(abs(rnorm(J * rank)), J, rank)
@@ -501,7 +508,7 @@ signFix3w <- function(A, B, C, G) {
 tucker.hooi <- function(X3, ranks, tol = 1e-10, max.iter = 500) {
    d3 <- attr(X3, "dim3"); J <- d3[1]; K <- d3[2]; n <- nrow(X3)
    rA <- ranks[1]; rB <- ranks[2]; rC <- ranks[3]
-   X <- unclass(X3); T3 <- asTensor3w(X, J, K)
+   X <- X3; attr(X, "dim3") <- NULL; T3 <- asTensor3w(X, J, K)
 
    B <- .leadingSV(.unfoldB(T3), rB)
    C <- .leadingSV(.unfoldC(T3), rC)
@@ -533,9 +540,10 @@ tucker.hooi <- function(X3, ranks, tol = 1e-10, max.iter = 500) {
 tucker.nn <- function(X3, ranks, tol = 1e-10, max.iter = 2000) {
    d3 <- attr(X3, "dim3"); J <- d3[1]; K <- d3[2]; n <- nrow(X3)
    rA <- ranks[1]; rB <- ranks[2]; rC <- ranks[3]
-   X <- unclass(X3)
+   X <- X3; attr(X, "dim3") <- NULL
    if (any(X < 0)) stop("Non-negative Tucker requires non-negative data.", call. = FALSE)
-   eps <- 1e-12; set.seed(0)
+   # Random init; caller seeds the RNG for reproducibility (no set.seed here).
+   eps <- 1e-12
    A <- matrix(abs(rnorm(n * rA)), n, rA)
    B <- matrix(abs(rnorm(J * rB)), J, rB)
    C <- matrix(abs(rnorm(K * rC)), K, rC)
