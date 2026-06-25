@@ -372,7 +372,7 @@ ddsimca.parafac <- function(x, classname, dim,
    models <- vector("list", ncomp)
    for (nc in seq_len(ncomp)) {
       fit <- if (non.negative) parafac.als.nn(X3, nc) else parafac.als(X3, nc)
-      models[[nc]] <- buildSubModel3w(fit$B, fit$C, NULL, x, non.negative, "parafac")
+      models[[nc]] <- buildSubModel3w(fit$A, fit$B, fit$C, NULL, x, non.negative, "parafac")
    }
 
    model <- makeModel3w(x, models, "parafac", classname, c(J, K), ncomp,
@@ -384,11 +384,18 @@ ddsimca.parafac <- function(x, classname, dim,
    model
 }
 
-# Build one sub-model: project training data to get scores, then the H-stats
-# (A_mean, S_pinv) and the SVD basis (A_V, A_sigma) for scores plots.
-buildSubModel3w <- function(B, C, G, x, non.negative, type) {
-   pr <- if (type == "parafac") projectParafac(B, C, x) else projectTucker(G, B, C, x, non.negative)
-   A <- pr$A
+# Build one sub-model: derive the H-stats (A_mean, S_pinv) and the SVD basis
+# (A_V, A_sigma, for scores plots) from the training scores.
+#
+# Which scores define the population differs by method, to match the oracle:
+#   PARAFAC: the ALS-fitted A factor itself (Python uses factors[0], NOT a
+#            re-projection of X onto (B, C); the two differ by an ALS
+#            convergence artifact ~1e-6 -> ~4e-5 in H).
+#   Tucker:  the re-projected training scores (Python derives Tucker stats
+#            from a re-projection, so the train-time population matches the
+#            predict-time projection).
+buildSubModel3w <- function(A, B, C, G, x, non.negative, type) {
+   if (type == "tucker") A <- projectTucker(G, B, C, x, non.negative)$A
    A_mean <- colMeans(A)
    A_c <- sweep(A, 2, A_mean)
    S <- crossprod(A_c) / max(nrow(A_c) - 1, 1)

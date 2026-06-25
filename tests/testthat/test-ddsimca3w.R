@@ -60,16 +60,15 @@ test_that("PARAFAC project3w + finalize3w match the Python oracle (1e-9) on fixe
    skip_if_not(file.exists(gpath("parafac_X_train.csv")))
    X <- rdcsv("parafac_X_train.csv")
    ncomp <- 3; J <- 5; K <- 4
+   # Build sub-models exactly as production does: PARAFAC's H-statistics come
+   # from the ALS A factor (Python's factors[0], dumped as parafac_A_*.csv),
+   # NOT a re-projection of X onto (B, C). Re-projecting here puts H ~4e-5 off
+   # the oracle; feeding A_train reproduces it at machine precision.
    models <- lapply(seq_len(ncomp), function(nc) {
+      A <- rdcsv(sprintf("parafac_A_%d.csv", nc))
       B <- rdcsv(sprintf("parafac_B_%d.csv", nc))
       C <- rdcsv(sprintf("parafac_C_%d.csv", nc))
-      pr <- projectParafac(B, C, X)
-      A <- pr$A
-      A_mean <- colMeans(A)
-      A_c <- sweep(A, 2, A_mean)
-      S <- crossprod(A_c) / max(nrow(A_c) - 1, 1)
-      list(B = B, C = C, A_mean = A_mean, S_pinv = pinv3way(S),
-           A_V = svd(A_c)$v, A_sigma = svd(A_c)$d)
+      buildSubModel3w(A, B, C, NULL, X, FALSE, "parafac")
    })
    model <- list(type = "parafac", models = models, non.negative = FALSE,
       dim = c(J, K), ncomp = ncomp, ncomp.selected = ncomp)
