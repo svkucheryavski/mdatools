@@ -2,9 +2,12 @@
 % Please edit documentation in R/pca.R
 \name{plotQDoF}
 \alias{plotQDoF}
+\alias{plotQDoF.pca}
 \title{Degrees of freedom plot for orthogonal distance (Nq)}
 \usage{
-plotQDoF(
+plotQDoF(obj, ...)
+
+\method{plotQDoF}{pca}(
   obj,
   type = "b",
   labels = "values",
@@ -16,6 +19,8 @@ plotQDoF(
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
 
+\item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
 \item{type}{type of the plot ("b", "l", "h")}
 
 \item{labels}{what to show as data points labels}
@@ -23,8 +28,6 @@ plotQDoF(
 \item{xticks}{vector with tick values for x-axis}
 
 \item{ylab}{label for y-axis}
-
-\item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
 Shows a plot with degrees of freedom computed for orthogonal distances at given number

@@ -40,3 +40,13 @@ test_that("as.matrix.ddsimcares keys component count off T2, not scores", {
    # rows must span all 4 sub-models (ncol of T2), not the 2 score columns
    expect_equal(nrow(mm), 4L)
 })
+
+test_that("DoF plot generics still dispatch for pca/ddsimca objects", {
+   data(people)
+   x <- people[, -4]
+   m <- pca(x, ncomp = 3, center = TRUE, scale = TRUE, lim.type = "ddmoments")
+   pdf(tempfile()); on.exit(dev.off())
+   # plotT2DoF.pca draws (no show.plot arg); assert it dispatches without error
+   expect_error(plotT2DoF(m), NA)
+   expect_true(is.function(plotT2DoF))
+})
