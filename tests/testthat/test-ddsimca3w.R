@@ -28,3 +28,15 @@ test_that("classify with fp scales critical limits by f0.model/Nf", {
    expect_equal(v$f0.model, 20)
    expect_equal(v$fce, 20 / 10 * qchisq(1 - m$alpha, 10))
 })
+
+test_that("as.matrix.ddsimcares keys component count off T2, not scores", {
+   data(people)
+   x <- people[, -4]
+   m <- ddsimca(x, "people", ncomp = 4, center = TRUE, scale = TRUE, pcv = NULL)
+   # simulate the 3-way shape: scores narrower than T2 (selected < total)
+   r <- m$res$cal
+   r$scores <- r$scores[, 1:2, drop = FALSE]   # pretend only 2 selected
+   mm <- as.matrix(r)
+   # rows must span all 4 sub-models (ncol of T2), not the 2 score columns
+   expect_equal(nrow(mm), 4L)
+})

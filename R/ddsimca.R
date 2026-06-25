@@ -1067,8 +1067,9 @@ plotDistances.ddsimca <- function(obj, res = "both",
    res <- obj$res$cal$simca
    v <- res$outcomes[[limType]]$values[[ncomp]]
 
-   yle <- v$fce / v$Nf
-   ylo <- v$fco / v$Nf
+   f0m <- if (is.null(v$f0.model)) v$Nf else v$f0.model
+   yle <- v$fce / f0m
+   ylo <- v$fco / f0m
 
    if (log == TRUE) {
       yle <- log(1 + yle)
