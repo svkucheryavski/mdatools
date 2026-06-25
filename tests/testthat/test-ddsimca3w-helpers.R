@@ -78,3 +78,9 @@ test_that("parafac.als.nn keeps factors non-negative", {
    fit <- parafac.als.nn(X3, rank = 2)
    expect_true(all(fit$A >= -1e-9) && all(fit$B >= -1e-9) && all(fit$C >= -1e-9))
 })
+
+test_that("parafac.als.nn rejects negative data", {
+   X3 <- matrix(c(1, -2, 3, 4, 5, 6), nrow = 2)   # contains a negative value
+   attr(X3, "dim3") <- c(3, 1)
+   expect_error(parafac.als.nn(X3, rank = 1), "non-negative data")
+})
