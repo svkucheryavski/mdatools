@@ -385,7 +385,7 @@ git commit -m "Add PARAFAC decomposition (ALS and non-negative)"
 - Consumes: `unfold1_3w`, `projectTucker`, `khatriRao3w` (Task 1).
 - Produces:
   - `tucker.hooi(X3, ranks, tol = 1e-10, max.iter = 500)` → list(`G` = array `c(rA, rB, rC)`, `A` = `n x rA`, `B` = `J x rB`, `C` = `K x rC`). `ranks = c(rA, rB, rC)`. HOSVD init + HOOI.
-  - `tucker.nn(X3, ranks, tol = 1e-10, max.iter = 500)` → same, non-negative (multiplicative updates).
+  - `tucker.nn(X3, ranks, tol = 1e-10, max.iter = 2000)` → same, non-negative (multiplicative updates; higher cap, runs to it silently).
   - `signFix3w(A, B, C, G)` → list(A, B, C, G) with the canonical max-abs-positive sign convention applied to A/B/C columns and compensating signs absorbed into G (reconstruction-preserving).
 
 - [ ] **Step 1: Write the failing tests**
