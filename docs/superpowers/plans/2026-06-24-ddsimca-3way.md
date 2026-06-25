@@ -693,9 +693,11 @@ Replace the distribution-parameter / critical-limit block (current lines 489-498
       f0.model <- fp$u0
    }
 
-   # compute critical limits (scale collapses to plain qchisq when f0.model == Nf)
-   fCritE <- f0.model / Nf * qchisq(1 - alpha, Nf)
-   fCritO <- f0.model / Nf * qchisq((1 - gamma)^(1 / nobj.cal), Nf)
+   # compute critical limits (scale collapses to plain qchisq when f0.model == Nf).
+   # unname() because f0.model/Nf inherits component names from Nh+Nq; the stored
+   # per-component fce/fco scalars are unnamed (matches qchisq on a positional df).
+   fCritE <- unname(f0.model / Nf * qchisq(1 - alpha, Nf))
+   fCritO <- unname(f0.model / Nf * qchisq((1 - gamma)^(1 / nobj.cal), Nf))
 ```
 
 Inside the per-component loop, add `f0.model` to the local scalars and into the `res` list. After `Nqa <- Nq[a]` (current line 531) add:
