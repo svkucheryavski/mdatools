@@ -525,8 +525,11 @@ predict.ddsimca3w <- function(object, x, c.ref = NULL,
       robust = classify(res, indices, numbers, lp$Q$robust, lp$T2$robust,
          object$nrows, alpha, gamma, object$classname, c.ref, fp = lp$F$robust)
    )
-   ddsimcares(res, outcomes, indices, numbers, alpha = alpha,
-      classname = object$classname, c.ref = c.ref)
+   # All args named: ddsimcares()'s positional order is (pcares, outcomes,
+   # classname, indices, numbers, ...), which does not match the order here,
+   # so naming every argument is required to bind them correctly.
+   ddsimcares(pcares = res, outcomes = outcomes, classname = object$classname,
+      indices = indices, numbers = numbers, alpha = alpha, c.ref = c.ref)
 }
 
 # Build the pcares-shaped result object (scores/T2/Q/residuals/expvar + dimnames)
@@ -618,7 +621,8 @@ summary.ddsimca3w <- function(object, ncomp = object$ncomp.selected, res = objec
 print.ddsimca3w <- function(x, ...) {
    title <- if (x$type == "parafac") "DD-SIMCA-PARAFAC" else "DD-SIMCA-TUCKER"
    fprintf("\n%s model (class 'ddsimca3w')\n", title)
-   cat("\nCall:\n"); print(x$call)
+   cat("\nCall:\n")
+   print(x$call)
    cat("\nMain fields:\n")
    cat(" $ncomp - number of components\n")
    cat(" $ncomp.selected - number of selected components\n")

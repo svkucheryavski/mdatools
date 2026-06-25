@@ -199,6 +199,7 @@ test_that("DoF methods read Nh/Nq/Nf from limParams", {
    m <- make_pf()
    pdf(tempfile()); on.exit(dev.off())
    expect_error(plotT2DoF(m), NA)
+   expect_error(plotQDoF(m), NA)
    expect_error(plotDistDoF(m), NA)
 })
 
