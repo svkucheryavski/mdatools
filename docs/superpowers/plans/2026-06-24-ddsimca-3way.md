@@ -941,8 +941,11 @@ golden tests. Run inside the ddsimca-py venv:
     cd ../../ddsimca-py && .venv/bin/python tests/dump_3way_golden.py <out_dir>
 """
 import sys, os
-# make the sibling golden_parafac_setup.py importable when run from the repo root
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# make the sibling golden_parafac_setup.py AND the `ddsimca` package importable
+# regardless of cwd: add both the tests/ dir and the repo root to sys.path.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _HERE)                       # for golden_parafac_setup
+sys.path.insert(0, os.path.dirname(_HERE))      # repo root, for `import ddsimca`
 import numpy as np
 from golden_parafac_setup import build_train_df, DIM, NCOMP
 from ddsimca.ddsimca_parafac import ddsimca_parafac
