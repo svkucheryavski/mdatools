@@ -14,7 +14,8 @@ classify(
   alpha = 0.05,
   gamma = 0.01,
   classname,
-  c.ref = NULL
+  c.ref = NULL,
+  fp = NULL
 )
 }
 \arguments{
@@ -37,6 +38,9 @@ classify(
 \item{classname}{name of the target class.}
 
 \item{c.ref}{vector with names of the reference classes.}
+
+\item{fp}{optional list with data-driven full-distance parameters (\code{$u0}, \code{$Nu} per
+component); when \code{NULL} the basic sum-rule full distance is used (PCA behavior).}
 }
 \value{
 a list with classification outcomes for each number of components.
