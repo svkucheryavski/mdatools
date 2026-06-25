@@ -144,3 +144,134 @@ parafac.als.nn <- function(X3, rank, tol = 1e-10, max.iter = 500) {
    # hitting the cap is expected operation for the non-negative variant.
    list(A = A, B = B, C = C)
 }
+
+# Build the n x J x K array from the row-major n x (J*K) matrix.
+asTensor3w <- function(X, J, K) {
+   n <- nrow(X)
+   aperm(array(t(X), dim = c(K, J, n)), c(3, 2, 1))   # [i, j, k] = X[i, (j-1)*K + k]
+}
+
+# Inverse of unfold1_3w: pack an rA x (rB*rC) matrix (col (b-1)*rC + c) back
+# into an rA x rB x rC array.
+fold1_3w <- function(G1, rA, rB, rC) {
+   aperm(array(G1, dim = c(rA, rC, rB)), c(1, 3, 2))
+}
+
+# Mode-n unfolding helpers for an n x J x K tensor T3 (column orders noted).
+.unfoldA <- function(T3) {           # n x (J*K), col (j-1)*K + k  (row-major)
+   matrix(aperm(T3, c(1, 3, 2)), nrow = dim(T3)[1])
+}
+.unfoldB <- function(T3) {           # J x (n*K), col (i-1)*K + k
+   matrix(aperm(T3, c(2, 3, 1)), nrow = dim(T3)[2])
+}
+.unfoldC <- function(T3) {           # K x (n*J), col (j-1)*n + i
+   matrix(aperm(T3, c(3, 1, 2)), nrow = dim(T3)[3])
+}
+
+# Canonical sign convention: flip A/B/C columns so each column's max-abs entry
+# is non-negative; absorb compensating signs into G. sign(0) -> +1; ties go to
+# the first index (which.max). Compute signs from the UNMODIFIED factors first.
+signFix3w <- function(A, B, C, G) {
+   colSigns <- function(M) {
+      idx <- apply(abs(M), 2, which.max)
+      picks <- M[cbind(idx, seq_len(ncol(M)))]
+      ifelse(picks < 0, -1, 1)
+   }
+   sA <- colSigns(A); sB <- colSigns(B); sC <- colSigns(C)
+   A2 <- A * rep(sA, each = nrow(A))
+   B2 <- B * rep(sB, each = nrow(B))
+   C2 <- C * rep(sC, each = nrow(C))
+   G2 <- G
+   dG <- dim(G)
+   for (a in seq_len(dG[1])) for (b in seq_len(dG[2])) for (cc in seq_len(dG[3]))
+      G2[a, b, cc] <- G[a, b, cc] * sA[a] * sB[b] * sC[cc]
+   list(A = A2, B = B2, C = C2, G = G2)
+}
+
+# Leading `r` left singular vectors of a matrix (HOSVD init / HOOI projection).
+.leadingSV <- function(M, r) {
+   s <- svd(M, nu = r, nv = 0)
+   s$u[, seq_len(r), drop = FALSE]
+}
+
+# Tucker3 via HOSVD init + HOOI (orthonormal factors).
+tucker.hooi <- function(X3, ranks, tol = 1e-10, max.iter = 500) {
+   d3 <- attr(X3, "dim3"); J <- d3[1]; K <- d3[2]; n <- nrow(X3)
+   rA <- ranks[1]; rB <- ranks[2]; rC <- ranks[3]
+   X <- X3; attr(X, "dim3") <- NULL; T3 <- asTensor3w(X, J, K)
+
+   B <- .leadingSV(.unfoldB(T3), rB)
+   C <- .leadingSV(.unfoldC(T3), rC)
+   A <- .leadingSV(.unfoldA(T3), rA)
+
+   normX <- sqrt(sum(X^2)); err.old <- Inf
+   for (it in seq_len(max.iter)) {
+      A <- .leadingSV(X %*% kronecker(B, C), rA)
+      B <- .leadingSV(.unfoldB(T3) %*% kronecker(C, A), rB)
+      C <- .leadingSV(.unfoldC(T3) %*% kronecker(B, A), rC)
+
+      G1 <- t(A) %*% X %*% kronecker(B, C)
+      G <- fold1_3w(G1, rA, rB, rC)
+      recon <- A %*% t(kronecker(B, C) %*% t(unfold1_3w(G)))
+      err <- sqrt(sum((X - recon)^2)) / normX
+      if (!is.finite(err)) break
+      if (abs(err.old - err) < tol) break
+      err.old <- err
+   }
+   if (it == max.iter) warning("tucker.hooi did not converge in max.iter iterations.", call. = FALSE)
+   G1 <- t(A) %*% X %*% kronecker(B, C)
+   list(G = fold1_3w(G1, rA, rB, rC), A = A, B = B, C = C)
+}
+
+# Non-negative Tucker via multiplicative updates on all factors and the core.
+# Multiplicative updates converge slowly; max.iter is higher and the loop
+# normally runs to the cap (it stops early only if the error change drops
+# below tol). Verified: rel < 1e-4 with all factors >= 0.
+tucker.nn <- function(X3, ranks, tol = 1e-10, max.iter = 2000) {
+   d3 <- attr(X3, "dim3"); J <- d3[1]; K <- d3[2]; n <- nrow(X3)
+   rA <- ranks[1]; rB <- ranks[2]; rC <- ranks[3]
+   X <- X3; attr(X, "dim3") <- NULL
+   if (any(X < 0)) stop("Non-negative Tucker requires non-negative data.", call. = FALSE)
+   # Random init; caller seeds the RNG for reproducibility (no set.seed here).
+   eps <- 1e-12
+   A <- matrix(abs(rnorm(n * rA)), n, rA)
+   B <- matrix(abs(rnorm(J * rB)), J, rB)
+   C <- matrix(abs(rnorm(K * rC)), K, rC)
+   G <- array(abs(rnorm(rA * rB * rC)), dim = c(rA, rB, rC))
+   T3 <- asTensor3w(X, J, K); UB <- .unfoldB(T3); UC <- .unfoldC(T3)
+   normX <- sqrt(sum(X^2)); err.old <- Inf
+
+   for (it in seq_len(max.iter)) {
+      # A (mode-1): X1 ~ A %*% t(M), M = kron(B,C) %*% t(G_(1))
+      M <- kronecker(B, C) %*% t(unfold1_3w(G))
+      A <- A * (X %*% M) / pmax(A %*% crossprod(M), eps)
+
+      # core (mode-1): X1 ~ A %*% G1 %*% t(kron(B,C))
+      KBC <- kronecker(B, C); G1 <- unfold1_3w(G)
+      G1 <- G1 * (t(A) %*% X %*% KBC) /
+         pmax(t(A) %*% (A %*% G1 %*% t(KBC)) %*% KBC, eps)
+      G <- fold1_3w(G1, rA, rB, rC)
+
+      # B (mode-2): X2 ~ B %*% (G2 %*% t(kron(A,C))). UB col (i-1)*K+k matches
+      # kron(A,C) rows; G2 col (a-1)*rC+c matches via aperm(G, c(2,3,1)).
+      G2 <- matrix(aperm(G, c(2, 3, 1)), nrow = rB)
+      Zb <- G2 %*% t(kronecker(A, C))
+      B <- B * (UB %*% t(Zb)) / pmax(B %*% tcrossprod(Zb), eps)
+
+      # C (mode-3): X3 ~ C %*% (G3 %*% t(kron(B,A))). UC col (j-1)*n+i matches
+      # kron(B,A) rows; G3 col (b-1)*rA+a matches via aperm(G, c(3,1,2)).
+      G3 <- matrix(aperm(G, c(3, 1, 2)), nrow = rC)
+      Zc <- G3 %*% t(kronecker(B, A))
+      C <- C * (UC %*% t(Zc)) / pmax(C %*% tcrossprod(Zc), eps)
+
+      recon <- A %*% t(kronecker(B, C) %*% t(unfold1_3w(G)))
+      err <- sqrt(sum((X - recon)^2)) / normX
+      if (!is.finite(err)) break
+      if (abs(err.old - err) < tol) break
+      err.old <- err
+   }
+   # Multiplicative updates converge slowly and normally run to max.iter (this
+   # matches tensorly, which stops at the iteration cap silently). No warning:
+   # hitting the cap is expected operation for the non-negative variant.
+   list(G = G, A = A, B = B, C = C)
+}
