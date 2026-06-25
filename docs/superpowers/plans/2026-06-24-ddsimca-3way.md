@@ -751,9 +751,11 @@ git commit -m "Add fp argument and f0.model to classify for data-driven full dis
 ## Task 5: Thread `f0.model` through result methods + `ncol(T2)` keying
 
 **Files:**
-- Modify: `R/ddsimcares.R` — `plotExtremes.ddsimcares:711-712`, `plotDistances.ddsimcares:1063,1087-1097`, `plotSelectivityArea.ddsimcares:467-468`, `as.matrix.ddsimcares:188,222`, `as.data.frame.ddsimcares:133`
-- Modify: `R/ddsimca.R` — `plotDistances.ddsimca:1054-1055`
+- Modify: `R/ddsimcares.R` — `plotExtremes.ddsimcares:712`, `plotDistances.ddsimcares:1063,1089-1090,1096`, `plotAcceptance.ddsimcares:884`, `as.matrix.ddsimcares:188,222`, `as.data.frame.ddsimcares:133`
+- Modify: `R/ddsimca.R` — `plotDistances.ddsimca:1070-1071`
 - Test: `tests/testthat/test-ddsimca3w.R` (append) + existing `test-ddsimcaplots.R`/`test-ddsimca.R` regression
+
+> **NOTE (verified against current source before execution):** `plotSelectivityArea.ddsimcares` is intentionally NOT edited. Its `fcrit <- qchisq(1 - alpha, v$k)` uses the stranger-class DoF (`v$k <- res$Nf`, set in `processStrangers`), and the f0.model scaling already flows into selectivity via `res$fce` (used at `processStrangers` line 710). `v$k` is `0` for members-only models (no strangers), so swapping it to `v$Nf` would NOT be bit-identical. Leaving it alone is both simpler and correct.
 
 **Interfaces:**
 - Consumes: `f0.model` field on each outcome (Task 4).
@@ -780,7 +782,7 @@ test_that("as.matrix.ddsimcares keys component count off T2, not scores", {
 - [ ] **Step 2: Run to verify it fails**
 
 Run: `Rscript -e 'devtools::test(filter = "ddsimca3w")'`
-Expected: FAIL — `nrow(mm)` is 2 (keyed off `ncol(scores)`).
+Expected: FAIL — before the fix `ncomp` is keyed off `ncol(scores) = 2` while the `as.matrix.ldecomp` part still has 4 rows, so the test fails (either a `cbind` "number of rows must match" error, or `nrow(mm) != 4`). Any failure here is the correct RED; record the actual message.
 
 - [ ] **Step 3: Edit `as.matrix.ddsimcares` (R/ddsimcares.R)**
 
@@ -791,7 +793,9 @@ Line 133 in `as.data.frame.ddsimcares`: `if (ncomp < 1 || ncomp > ncol(x$scores)
 
 Line 1063 in `plotDistances.ddsimcares`: `if (ncomp < 1 || ncomp > ncol(obj$scores)) {` → `if (ncomp < 1 || ncomp > ncol(obj$T2)) {`
 
-In `plotAcceptance.ddsimcares` (R/ddsimcares.R:873) find the analogous `ncol(obj$scores)` bound check and change it to `ncol(obj$T2)` (if present; if the method uses `obj$ncomp.selected` only, no change needed).
+Line 884 in `plotAcceptance.ddsimcares`: `if (ncomp < 1 || ncomp > ncol(obj$scores)) {` → `if (ncomp < 1 || ncomp > ncol(obj$T2)) {`
+
+(These four `ncol(scores)` → `ncol(T2)` edits are bit-identical for PCA, where `ncol(scores) == ncol(T2)`; for 3-way the scores are narrower than T2, so keying off `T2` spans all sub-models / avoids wrongly rejecting a valid `ncomp`.)
 
 - [ ] **Step 4: Edit the `f0.model` scaling in the three plot methods**
 
@@ -814,15 +818,7 @@ and (line ~1096, inside the `else` for `distance == "f"`):
       y <- y / f0m
 ```
 
-In `plotSelectivityArea.ddsimcares` replace lines 467-468:
-
-```r
-   f0m <- if (is.null(v$f0.model)) v$Nf else v$f0.model
-   fcrit <- f0m / v$Nf * qchisq(1 - alpha, v$Nf)
-   z <- fcrit / v$f0
-```
-
-In `plotDistances.ddsimca` (R/ddsimca.R) replace lines 1054-1055:
+In `plotDistances.ddsimca` (R/ddsimca.R) replace lines 1070-1071 (`v` is set just above at line 1068; insert the `f0m` line before the `yle`/`ylo` lines):
 
 ```r
    f0m <- if (is.null(v$f0.model)) v$Nf else v$f0.model
@@ -830,7 +826,7 @@ In `plotDistances.ddsimca` (R/ddsimca.R) replace lines 1054-1055:
    ylo <- v$fco / f0m
 ```
 
-> All five edits reduce to the current code when `f0.model == Nf` (the PCA path), so existing plots are unchanged. The scaling only differs for the 3-way data-driven F where `f0.model != Nf`; these diagnostic curves are not part of the golden set, so the choice to keep them self-consistent with the scaled decision boundary is intentional (it is more correct than the Python oracle, which leaves these particular curves unscaled).
+> All four edits reduce to the current code when `f0.model == Nf` (the PCA path), so existing plots are unchanged. The scaling only differs for the 3-way data-driven F where `f0.model != Nf`; these diagnostic curves are not part of the golden set, so the choice to keep them self-consistent with the scaled decision boundary is intentional (it is more correct than the Python oracle, which leaves these particular curves unscaled).
 
 - [ ] **Step 5: Run the new test + regression suites**
 
