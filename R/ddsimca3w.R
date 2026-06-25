@@ -404,6 +404,9 @@ ddsimca.tucker <- function(x, classname, dim, ncomp,
 
    x <- as.matrix(x)
    J <- dim[1]; K <- dim[2]
+   if (length(ncomp) != 3) {
+      stop("Argument 'ncomp' must be a vector c(R_A, R_B, R_C) of length 3.", call. = FALSE)
+   }
    rA <- ncomp[1]; rB <- ncomp[2]; rC <- ncomp[3]
    if (J < 2 || K < 2 || ncol(x) != J * K) {
       stop("Argument 'dim' does not match the number of columns in 'x'.", call. = FALSE)
