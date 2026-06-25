@@ -710,6 +710,14 @@ In the `res <- list(...)` add the field (next to `Nf = Nfa`):
          f0.model = f0ma,
 ```
 
+`classify` is internal (not exported) but DOES have a generated man page (`man/classify.Rd`), and its roxygen block documents every parameter. Add a `@param fp` entry so the new argument is documented (insert it right after the `@param c.ref` block, before the `@return` line):
+
+```r
+#' @param fp
+#' optional list with data-driven full-distance parameters (\code{$u0}, \code{$Nu} per
+#' component); when \code{NULL} the basic sum-rule full distance is used (PCA behavior).
+```
+
 - [ ] **Step 4: Run the new tests AND the full ddsimca regression suite**
 
 Run: `Rscript -e 'devtools::test(filter = "ddsimca3w")'`
@@ -718,10 +726,21 @@ Expected: PASS (3 tests).
 Run: `Rscript -e 'devtools::test(filter = "ddsimca")'`
 Expected: PASS — `test-ddsimca.R` unchanged (the new `f0.model` field is additive; all existing assertions hold).
 
+- [ ] **Step 4b: Regenerate the man page for the changed signature**
+
+Because `classify`'s signature changed, `man/classify.Rd` must be regenerated or R CMD check raises a codoc/usage-mismatch WARNING.
+
+Run: `Rscript -e 'roxygen2::roxygenize()'`
+
+Then check the scope of regeneration:
+
+Run: `git status --short man/ NAMESPACE`
+Expected: ONLY `man/classify.Rd` modified (its `\usage` and a new `\arguments` entry for `fp`). `NAMESPACE` must be unchanged (classify stays internal — adding a param does not export it). If roxygenize touches OTHER man pages or NAMESPACE, that is pre-existing drift unrelated to this task: restore those files with `git checkout -- <file>` and note the drift as a concern; keep only `man/classify.Rd`.
+
 - [ ] **Step 5: Commit**
 
 ```bash
-git add R/ddsimca.R tests/testthat/test-ddsimca3w.R
+git add R/ddsimca.R tests/testthat/test-ddsimca3w.R man/classify.Rd
 git commit -m "Add fp argument and f0.model to classify for data-driven full distance"
 ```
 
