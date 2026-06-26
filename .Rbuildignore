@@ -12,6 +12,7 @@
 .github
 .gitignore
 .claude
+.superpowers
 LICENSE.md
 CLAUDE.md
 TODO.md
