@@ -207,3 +207,60 @@ test_that("a PCA-only method has no applicable method on the 3-way model", {
    m <- make_pf()
    expect_error(plotEigenvalues(m), "no applicable method|not.*found")
 })
+
+context("ddsimca3w: 3-way array input")
+
+# A 3-way array passed directly must be unfolded row-major internally so the
+# model is identical to the one built from the equivalent row-major-unfolded
+# matrix (col for (j,k) is (j-1)*K + k == numpy reshape(n, -1)). This spares the
+# user R's native dim()<- reshape, which is column-major and silently wrong.
+
+# low-rank tensor (+ tiny noise) so PARAFAC/Tucker converge cleanly; fold the
+# row-major unfolded matrix back to an [n, J, K] array so the two are an exact
+# round-trip of each other.
+make3w <- function(seed, J, K, n, R) {
+   set.seed(seed)
+   A0 <- matrix(rnorm(n * R), n, R)
+   B0 <- matrix(rnorm(J * R), J, R)
+   C0 <- matrix(rnorm(K * R), K, R)
+   xmat <- A0 %*% t(khatriRao3w(B0, C0)) + 0.01 * matrix(rnorm(n * J * K), n, J * K)
+   A3 <- aperm(array(t(xmat), dim = c(K, J, n)), c(3, 2, 1))   # fold to [n, J, K]
+   list(array = A3, mat = matrix(aperm(A3, c(1, 3, 2)), nrow = n))
+}
+
+test_that("ddsimca.parafac accepts a 3-way array identical to the unfolded matrix", {
+   J <- 5; K <- 4; n <- 30
+   d <- make3w(123, J, K, n, 3)
+
+   # PARAFAC has random ALS init; seed identically so both fits are comparable
+   set.seed(3); m_mat <- ddsimca.parafac(d$mat,   "T", dim = c(J, K), ncomp = 3)
+   set.seed(3); m_arr <- ddsimca.parafac(d$array, "T", ncomp = 3)   # dim inferred
+
+   expect_s3_class(m_arr, "ddsimca.parafac")
+   expect_equal(m_arr$dim, c(J, K))
+   expect_equal(m_arr$res$cal$T2, m_mat$res$cal$T2)
+   expect_equal(m_arr$res$cal$Q,  m_mat$res$cal$Q)
+})
+
+test_that("ddsimca.tucker accepts a 3-way array identical to the unfolded matrix", {
+   J <- 5; K <- 4; n <- 30
+   d <- make3w(321, J, K, n, 3)
+
+   m_mat <- ddsimca.tucker(d$mat,   "T", dim = c(J, K), ncomp = c(3, 5, 4))
+   m_arr <- ddsimca.tucker(d$array, "T", ncomp = c(3, 5, 4))   # dim inferred
+
+   expect_s3_class(m_arr, "ddsimca.tucker")
+   expect_equal(m_arr$dim, c(J, K))
+   expect_equal(m_arr$res$cal$T2, m_mat$res$cal$T2)
+   expect_equal(m_arr$res$cal$Q,  m_mat$res$cal$Q)
+})
+
+test_that("ddsimca.parafac errors when a matrix is given without 'dim'", {
+   x <- matrix(rnorm(30 * 20), 30, 20)
+   expect_error(ddsimca.parafac(x, "T", ncomp = 3), "dim")
+})
+
+test_that("ddsimca.parafac errors when 'dim' conflicts with array dimensions", {
+   A3 <- array(rnorm(30 * 5 * 4), dim = c(30, 5, 4))
+   expect_error(ddsimca.parafac(A3, "T", dim = c(4, 5), ncomp = 3), "match")
+})

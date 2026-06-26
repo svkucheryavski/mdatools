@@ -7,7 +7,7 @@
 ddsimca.tucker(
   x,
   classname,
-  dim,
+  dim = NULL,
   ncomp,
   non.negative = FALSE,
   nf.as.sum = FALSE,
@@ -16,11 +16,14 @@ ddsimca.tucker(
 )
 }
 \arguments{
-\item{x}{numeric matrix (n x (J*K)), unfolded row-major.}
+\item{x}{either an n x J x K numeric array, or a numeric matrix (n x (J*K))
+unfolded row-major. When an array is supplied it is unfolded for you and
+\code{dim} is inferred.}
 
 \item{classname}{target class name (<= 20 chars).}
 
-\item{dim}{integer vector c(J, K), both >= 2.}
+\item{dim}{integer vector c(J, K), both >= 2. Optional (inferred) when \code{x}
+is a 3-way array; required when \code{x} is a matrix.}
 
 \item{ncomp}{integer vector c(R_A_max, R_B, R_C): sample-mode max rank and the
 fixed mode-2 / mode-3 ranks. Requires R_B <= J, R_C <= K, R_A_max <= n-1,

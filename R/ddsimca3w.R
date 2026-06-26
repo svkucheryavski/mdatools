@@ -151,6 +151,15 @@ asTensor3w <- function(X, J, K) {
    aperm(array(t(X), dim = c(K, J, n)), c(3, 2, 1))   # [i, j, k] = X[i, (j-1)*K + k]
 }
 
+# Reconcile a user-supplied `dim` with the actual mode-2/3 size of a 3-way array
+# input. Returns the c(J, K) to use; errors if an explicit `dim` disagrees.
+checkDims3w <- function(dims, actual) {
+   if (!is.null(dims) && !identical(as.integer(dims), as.integer(actual))) {
+      stop("Argument 'dim' does not match the array dimensions in 'x'.", call. = FALSE)
+   }
+   actual
+}
+
 # Inverse of unfold1_3w: pack an rA x (rB*rC) matrix (col (b-1)*rC + c) back
 # into an rA x rB x rC array.
 fold1_3w <- function(G1, rA, rB, rC) {
@@ -340,10 +349,13 @@ finalize3w <- function(H, Q, nf.as.sum) {
 
 #' DD-SIMCA with PARAFAC decomposition for 3-way data
 #'
-#' @param x numeric matrix (n x (J*K)), tensor unfolded row-major (column for
-#'   element (j,k) is (j-1)*K + k).
+#' @param x either an n x J x K numeric array, or a numeric matrix (n x (J*K))
+#'   with the tensor unfolded row-major (column for element (j,k) is (j-1)*K + k,
+#'   i.e. matching \code{numpy.reshape(n, -1)}). When an array is supplied it is
+#'   unfolded for you and \code{dim} is inferred.
 #' @param classname name of the target class (<= 20 chars).
-#' @param dim integer vector c(J, K), both >= 2.
+#' @param dim integer vector c(J, K), both >= 2. Optional (inferred) when \code{x}
+#'   is a 3-way array; required when \code{x} is a matrix.
 #' @param ncomp number of PARAFAC components (<= min(J, K, n-1)).
 #' @param non.negative logical, use non-negative PARAFAC.
 #' @param nf.as.sum logical, full-distance DoF rule (FALSE = data-driven eq.7).
@@ -352,9 +364,16 @@ finalize3w <- function(H, Q, nf.as.sum) {
 #'
 #' @return model of class \code{c("ddsimca.parafac","ddsimca3w","ddsimca")}.
 #' @export
-ddsimca.parafac <- function(x, classname, dim,
+ddsimca.parafac <- function(x, classname, dim = NULL,
    ncomp = min(dim[1], dim[2], nrow(x) - 1),
    non.negative = FALSE, nf.as.sum = FALSE, alpha = 0.05, gamma = 0.01) {
+
+   if (length(dim(x)) == 3) {
+      dim <- checkDims3w(dim, dim(x)[2:3])
+      x <- matrix(aperm(x, c(1, 3, 2)), nrow = nrow(x))   # row-major mode-1 unfold
+   } else if (is.null(dim)) {
+      stop("Argument 'dim' is required when 'x' is a matrix.", call. = FALSE)
+   }
 
    x <- as.matrix(x)
    J <- dim[1]; K <- dim[2]
@@ -386,9 +405,12 @@ ddsimca.parafac <- function(x, classname, dim,
 
 #' DD-SIMCA with Tucker3 decomposition for 3-way data
 #'
-#' @param x numeric matrix (n x (J*K)), unfolded row-major.
+#' @param x either an n x J x K numeric array, or a numeric matrix (n x (J*K))
+#'   unfolded row-major. When an array is supplied it is unfolded for you and
+#'   \code{dim} is inferred.
 #' @param classname target class name (<= 20 chars).
-#' @param dim integer vector c(J, K), both >= 2.
+#' @param dim integer vector c(J, K), both >= 2. Optional (inferred) when \code{x}
+#'   is a 3-way array; required when \code{x} is a matrix.
 #' @param ncomp integer vector c(R_A_max, R_B, R_C): sample-mode max rank and the
 #'   fixed mode-2 / mode-3 ranks. Requires R_B <= J, R_C <= K, R_A_max <= n-1,
 #'   R_A_max <= R_B*R_C.
@@ -399,8 +421,15 @@ ddsimca.parafac <- function(x, classname, dim,
 #'
 #' @return model of class \code{c("ddsimca.tucker","ddsimca3w","ddsimca")}.
 #' @export
-ddsimca.tucker <- function(x, classname, dim, ncomp,
+ddsimca.tucker <- function(x, classname, dim = NULL, ncomp,
    non.negative = FALSE, nf.as.sum = FALSE, alpha = 0.05, gamma = 0.01) {
+
+   if (length(dim(x)) == 3) {
+      dim <- checkDims3w(dim, dim(x)[2:3])
+      x <- matrix(aperm(x, c(1, 3, 2)), nrow = nrow(x))   # row-major mode-1 unfold
+   } else if (is.null(dim)) {
+      stop("Argument 'dim' is required when 'x' is a matrix.", call. = FALSE)
+   }
 
    x <- as.matrix(x)
    J <- dim[1]; K <- dim[2]

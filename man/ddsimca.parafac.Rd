@@ -7,7 +7,7 @@
 ddsimca.parafac(
   x,
   classname,
-  dim,
+  dim = NULL,
   ncomp = min(dim[1], dim[2], nrow(x) - 1),
   non.negative = FALSE,
   nf.as.sum = FALSE,
@@ -16,12 +16,15 @@ ddsimca.parafac(
 )
 }
 \arguments{
-\item{x}{numeric matrix (n x (J*K)), tensor unfolded row-major (column for
-element (j,k) is (j-1)*K + k).}
+\item{x}{either an n x J x K numeric array, or a numeric matrix (n x (J*K))
+with the tensor unfolded row-major (column for element (j,k) is (j-1)*K + k,
+i.e. matching \code{numpy.reshape(n, -1)}). When an array is supplied it is
+unfolded for you and \code{dim} is inferred.}
 
 \item{classname}{name of the target class (<= 20 chars).}
 
-\item{dim}{integer vector c(J, K), both >= 2.}
+\item{dim}{integer vector c(J, K), both >= 2. Optional (inferred) when \code{x}
+is a 3-way array; required when \code{x} is a matrix.}
 
 \item{ncomp}{number of PARAFAC components (<= min(J, K, n-1)).}
 
