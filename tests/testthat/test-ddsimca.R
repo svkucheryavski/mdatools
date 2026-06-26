@@ -1,6 +1,7 @@
 ####################################
 # Tests for all bugs found in 2022 #
 ####################################
+context("ddsimca: tests")
 
 setup({
    pdf(file = "dump/mdatools-test-dsimca.pdf")
@@ -137,7 +138,6 @@ compareModels <- function(mr, mjs) {
    }
 }
 
-context("tests for model training:")
 
 dc <- read.csv2("datasets/wines_baro.csv", row.names = 1, check.names = FALSE)
 dta <- read.csv2("datasets/wines_grigno.csv", row.names = 1)
