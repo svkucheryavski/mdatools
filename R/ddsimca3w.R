@@ -64,7 +64,7 @@ projectTucker <- function(G, B, C, x, non.negative) {
 # helpers built from the current factor estimates.
 
 # Standard CP-ALS with random init. X3: n x (J*K), attr "dim3" = c(J, K).
-parafac.als <- function(X3, rank, tol = 1e-10, max.iter = 500) {
+parafac.als <- function(X3, rank, tol = 1e-10, max.iter = 500, verbose = FALSE) {
    d3 <- attr(X3, "dim3")
    J <- d3[1]; K <- d3[2]; n <- nrow(X3)
    X <- X3; attr(X, "dim3") <- NULL
@@ -102,8 +102,16 @@ parafac.als <- function(X3, rank, tol = 1e-10, max.iter = 500) {
       if (abs(err.old - err) < tol) break
       err.old <- err
    }
-   if (it == max.iter) warning("parafac.als did not converge in max.iter iterations.", call. = FALSE)
-   list(A = A, B = B, C = C)
+   # Over-factoring (more components than the data supports) makes CP-ALS swamp:
+   # the error plateaus but the step never drops below tol, so the loop runs to
+   # max.iter. This is expected, not a failure, so it is silent by default;
+   # verbose = TRUE surfaces it as guidance (tensorly stops silently too).
+   if (verbose && it == max.iter) {
+      message(sprintf(paste0("ncomp = %d: parafac.als reached the maximum number of iterations ",
+         "(%d) without meeting the convergence tolerance; the data may support fewer ",
+         "components than requested."), rank, max.iter))
+   }
+   normalizeParafac3w(A, B, C)
 }
 
 # Non-negative CP via multiplicative updates (tensorly's algorithm; no NNLS).
@@ -142,7 +150,7 @@ parafac.als.nn <- function(X3, rank, tol = 1e-10, max.iter = 500) {
    # Multiplicative updates converge slowly and normally run to max.iter (this
    # matches tensorly, which stops at the iteration cap silently). No warning:
    # hitting the cap is expected operation for the non-negative variant.
-   list(A = A, B = B, C = C)
+   normalizeParafac3w(A, B, C)
 }
 
 # Build the n x J x K array from the row-major n x (J*K) matrix.
@@ -158,6 +166,47 @@ checkDims3w <- function(dims, actual) {
       stop("Argument 'dim' does not match the array dimensions in 'x'.", call. = FALSE)
    }
    actual
+}
+
+# Normalize a user input to the internal row-major (n x J*K) matrix plus the
+# resolved c(J, K). `x` may be an n x J x K array, or an already-unfolded matrix
+# which is taken to be COLUMN-MAJOR (R-native, i.e. produced by `dim(x) <- c(n,
+# J*K)`); the matrix is refolded to the array through `dim` before the common
+# row-major unfold the internals expect. Returns list(x, dim).
+prepareInput3w <- function(x, dims) {
+   if (length(dim(x)) == 2L) {
+      if (is.null(dims)) {
+         stop("Argument 'dim' is required when 'x' is a matrix.", call. = FALSE)
+      }
+      if (ncol(x) != dims[1] * dims[2]) {
+         stop("Argument 'dim' does not match the number of columns in 'x'.", call. = FALSE)
+      }
+      dim(x) <- c(nrow(x), dims[1], dims[2])     # column-major refold to an array
+   }
+   d3 <- dim(x)
+   if (length(d3) != 3L) {
+      stop("Argument 'x' must be a 3-way array or an unfolded matrix.", call. = FALSE)
+   }
+   dims <- checkDims3w(dims, d3[2:3])
+   list(x = matrix(aperm(x, c(1, 3, 2)), nrow = d3[1]), dim = dims)
+}
+
+# Canonicalize PARAFAC factors to tensorly's convention (cp_normalize +
+# cp_flip_sign(mode=0, func=mean)): scale each B/C column to unit L2 norm with a
+# positive column mean, folding the magnitude and the compensating sign into the
+# score factor A. A %o% B %o% C is unchanged, so reconstruction, H (Mahalanobis
+# on A) and Q are invariant — this only fixes the arbitrary sign/scale of the raw
+# ALS factors so loadings are interpretable and comparable to tensorly's.
+normalizeParafac3w <- function(A, B, C) {
+   colnorm <- function(M) { s <- sqrt(colSums(M^2)); s[s == 0] <- 1; s }
+   nA <- colnorm(A); nB <- colnorm(B); nC <- colnorm(C)
+   A <- sweep(A, 2, nA, "/"); B <- sweep(B, 2, nB, "/"); C <- sweep(C, 2, nC, "/")
+   w <- nA * nB * nC
+   sB <- sign(colMeans(B)); sB[sB == 0] <- 1
+   sC <- sign(colMeans(C)); sC[sC == 0] <- 1
+   B <- sweep(B, 2, sB, "*"); C <- sweep(C, 2, sC, "*")
+   A <- sweep(A, 2, sB * sC * w, "*")      # absorb sign + magnitude into the scores
+   list(A = A, B = B, C = C)
 }
 
 # Inverse of unfold1_3w: pack an rA x (rB*rC) matrix (col (b-1)*rC + c) back
@@ -204,7 +253,7 @@ signFix3w <- function(A, B, C, G) {
 }
 
 # Tucker3 via HOSVD init + HOOI (orthonormal factors).
-tucker.hooi <- function(X3, ranks, tol = 1e-10, max.iter = 500) {
+tucker.hooi <- function(X3, ranks, tol = 1e-10, max.iter = 500, verbose = FALSE) {
    d3 <- attr(X3, "dim3"); J <- d3[1]; K <- d3[2]; n <- nrow(X3)
    rA <- ranks[1]; rB <- ranks[2]; rC <- ranks[3]
    X <- X3; attr(X, "dim3") <- NULL; T3 <- asTensor3w(X, J, K)
@@ -227,7 +276,12 @@ tucker.hooi <- function(X3, ranks, tol = 1e-10, max.iter = 500) {
       if (abs(err.old - err) < tol) break
       err.old <- err
    }
-   if (it == max.iter) warning("tucker.hooi did not converge in max.iter iterations.", call. = FALSE)
+   # Silent by default (see parafac.als); verbose = TRUE surfaces it as guidance.
+   if (verbose && it == max.iter) {
+      message(sprintf(paste0("ncomp = %d: tucker.hooi reached the maximum number of iterations ",
+         "(%d) without meeting the convergence tolerance; the data may support fewer ",
+         "components than requested."), rA, max.iter))
+   }
    G1 <- t(A) %*% X %*% kronecker(B, C)
    list(G = fold1_3w(G1, rA, rB, rC), A = A, B = B, C = C)
 }
@@ -349,10 +403,10 @@ finalize3w <- function(H, Q, nf.as.sum) {
 
 #' DD-SIMCA with PARAFAC decomposition for 3-way data
 #'
-#' @param x either an n x J x K numeric array, or a numeric matrix (n x (J*K))
-#'   with the tensor unfolded row-major (column for element (j,k) is (j-1)*K + k,
-#'   i.e. matching \code{numpy.reshape(n, -1)}). When an array is supplied it is
-#'   unfolded for you and \code{dim} is inferred.
+#' @param x either an n x J x K numeric array, or an already-unfolded numeric
+#'   matrix (n x (J*K)). A matrix is interpreted column-major (R's native order,
+#'   as produced by \code{dim(x) <- c(n, J*K)}) and refolded through \code{dim}.
+#'   When an array is supplied \code{dim} is inferred.
 #' @param classname name of the target class (<= 20 chars).
 #' @param dim integer vector c(J, K), both >= 2. Optional (inferred) when \code{x}
 #'   is a 3-way array; required when \code{x} is a matrix.
@@ -361,24 +415,22 @@ finalize3w <- function(H, Q, nf.as.sum) {
 #' @param nf.as.sum logical, full-distance DoF rule (FALSE = data-driven eq.7).
 #' @param alpha significance level for extremes.
 #' @param gamma significance level for outliers.
+#' @param verbose logical, if \code{TRUE} report sub-models whose CP-ALS reached
+#'   the iteration limit without converging (usually a sign of more components
+#'   than the data supports). Silent by default.
 #'
 #' @return model of class \code{c("ddsimca.parafac","ddsimca3w","ddsimca")}.
 #' @export
 ddsimca.parafac <- function(x, classname, dim = NULL,
    ncomp = min(dim[1], dim[2], nrow(x) - 1),
-   non.negative = FALSE, nf.as.sum = FALSE, alpha = 0.05, gamma = 0.01) {
+   non.negative = FALSE, nf.as.sum = FALSE, alpha = 0.05, gamma = 0.01,
+   verbose = FALSE) {
 
-   if (length(dim(x)) == 3) {
-      dim <- checkDims3w(dim, dim(x)[2:3])
-      x <- matrix(aperm(x, c(1, 3, 2)), nrow = nrow(x))   # row-major mode-1 unfold
-   } else if (is.null(dim)) {
-      stop("Argument 'dim' is required when 'x' is a matrix.", call. = FALSE)
-   }
-
-   x <- as.matrix(x)
+   prep <- prepareInput3w(x, dim)
+   x <- prep$x; dim <- prep$dim
    J <- dim[1]; K <- dim[2]
-   if (J < 2 || K < 2 || ncol(x) != J * K) {
-      stop("Argument 'dim' does not match the number of columns in 'x'.", call. = FALSE)
+   if (J < 2 || K < 2) {
+      stop("Both dimensions in 'dim' must be >= 2.", call. = FALSE)
    }
    if (ncomp < 1 || ncomp > J || ncomp > K || ncomp > nrow(x) - 1) {
       stop("Wrong value for 'ncomp'.", call. = FALSE)
@@ -390,7 +442,7 @@ ddsimca.parafac <- function(x, classname, dim = NULL,
    X3 <- x; attr(X3, "dim3") <- c(J, K)
    models <- vector("list", ncomp)
    for (nc in seq_len(ncomp)) {
-      fit <- if (non.negative) parafac.als.nn(X3, nc) else parafac.als(X3, nc)
+      fit <- if (non.negative) parafac.als.nn(X3, nc) else parafac.als(X3, nc, verbose = verbose)
       models[[nc]] <- buildSubModel3w(fit$A, fit$B, fit$C, NULL, x, non.negative, "parafac")
    }
 
@@ -398,16 +450,16 @@ ddsimca.parafac <- function(x, classname, dim = NULL,
       non.negative, nf.as.sum, alpha, gamma)
    model$call <- match.call()
    class(model) <- c("ddsimca.parafac", "ddsimca3w", "ddsimca")
-   model$res[["cal"]] <- predict(model, x, rep(classname, nrow(x)))
+   model$res[["cal"]] <- predictInternal3w(model, x, rep(classname, nrow(x)))
    model$calres <- model$res[["cal"]]
    model
 }
 
 #' DD-SIMCA with Tucker3 decomposition for 3-way data
 #'
-#' @param x either an n x J x K numeric array, or a numeric matrix (n x (J*K))
-#'   unfolded row-major. When an array is supplied it is unfolded for you and
-#'   \code{dim} is inferred.
+#' @param x either an n x J x K numeric array, or an already-unfolded numeric
+#'   matrix (n x (J*K)) interpreted column-major (R's native \code{dim(x) <- c(n,
+#'   J*K)} order). When an array is supplied \code{dim} is inferred.
 #' @param classname target class name (<= 20 chars).
 #' @param dim integer vector c(J, K), both >= 2. Optional (inferred) when \code{x}
 #'   is a 3-way array; required when \code{x} is a matrix.
@@ -418,27 +470,25 @@ ddsimca.parafac <- function(x, classname, dim = NULL,
 #' @param nf.as.sum logical, full-distance DoF rule (FALSE = data-driven eq.7).
 #' @param alpha significance level for extremes.
 #' @param gamma significance level for outliers.
+#' @param verbose logical, if \code{TRUE} report sub-models whose HOOI reached the
+#'   iteration limit without converging (usually a sign of more components than
+#'   the data supports). Silent by default.
 #'
 #' @return model of class \code{c("ddsimca.tucker","ddsimca3w","ddsimca")}.
 #' @export
 ddsimca.tucker <- function(x, classname, dim = NULL, ncomp,
-   non.negative = FALSE, nf.as.sum = FALSE, alpha = 0.05, gamma = 0.01) {
+   non.negative = FALSE, nf.as.sum = FALSE, alpha = 0.05, gamma = 0.01,
+   verbose = FALSE) {
 
-   if (length(dim(x)) == 3) {
-      dim <- checkDims3w(dim, dim(x)[2:3])
-      x <- matrix(aperm(x, c(1, 3, 2)), nrow = nrow(x))   # row-major mode-1 unfold
-   } else if (is.null(dim)) {
-      stop("Argument 'dim' is required when 'x' is a matrix.", call. = FALSE)
-   }
-
-   x <- as.matrix(x)
-   J <- dim[1]; K <- dim[2]
    if (length(ncomp) != 3) {
       stop("Argument 'ncomp' must be a vector c(R_A, R_B, R_C) of length 3.", call. = FALSE)
    }
+   prep <- prepareInput3w(x, dim)
+   x <- prep$x; dim <- prep$dim
+   J <- dim[1]; K <- dim[2]
    rA <- ncomp[1]; rB <- ncomp[2]; rC <- ncomp[3]
-   if (J < 2 || K < 2 || ncol(x) != J * K) {
-      stop("Argument 'dim' does not match the number of columns in 'x'.", call. = FALSE)
+   if (J < 2 || K < 2) {
+      stop("Both dimensions in 'dim' must be >= 2.", call. = FALSE)
    }
    if (rA > nrow(x) - 1) stop("R_A_max cannot exceed n - 1.", call. = FALSE)
    if (rB > J) stop("R_B cannot exceed J.", call. = FALSE)
@@ -451,7 +501,7 @@ ddsimca.tucker <- function(x, classname, dim = NULL, ncomp,
    X3 <- x; attr(X3, "dim3") <- c(J, K)
    models <- vector("list", rA)
    for (nc in seq_len(rA)) {
-      fit <- if (non.negative) tucker.nn(X3, c(nc, rB, rC)) else tucker.hooi(X3, c(nc, rB, rC))
+      fit <- if (non.negative) tucker.nn(X3, c(nc, rB, rC)) else tucker.hooi(X3, c(nc, rB, rC), verbose = verbose)
       sf <- signFix3w(fit$A, fit$B, fit$C, fit$G)
       # buildSubModel3w signature is (A, B, C, G, x, non.negative, type). Pass
       # sf$A to keep the call uniform with ddsimca.parafac; for Tucker it is
@@ -465,7 +515,7 @@ ddsimca.tucker <- function(x, classname, dim = NULL, ncomp,
    model$C.ncomp <- rC
    model$call <- match.call()
    class(model) <- c("ddsimca.tucker", "ddsimca3w", "ddsimca")
-   model$res[["cal"]] <- predict(model, x, rep(classname, nrow(x)))
+   model$res[["cal"]] <- predictInternal3w(model, x, rep(classname, nrow(x)))
    model$calres <- model$res[["cal"]]
    model
 }
@@ -515,7 +565,9 @@ makeModel3w <- function(x, models, type, classname, dim3, ncomp, non.negative,
 
 #' Predictions for a 3-way DD-SIMCA model
 #' @param object a 3-way DD-SIMCA model (class \code{ddsimca3w}).
-#' @param x numeric matrix (n x (J*K)), unfolded row-major.
+#' @param x either an n x J x K numeric array, or an already-unfolded numeric
+#'   matrix (n x (J*K)) interpreted column-major (R's native \code{dim(x) <- c(n,
+#'   J*K)} order), refolded using the model's \code{dim}.
 #' @param c.ref optional vector of reference class names.
 #' @param alpha significance level for predictions.
 #' @param gamma significance level for outliers.
@@ -525,7 +577,19 @@ makeModel3w <- function(x, models, type, classname, dim3, ncomp, non.negative,
 predict.ddsimca3w <- function(object, x, c.ref = NULL,
    alpha = object$alpha, gamma = object$gamma, ...) {
 
-   x <- as.matrix(x)
+   x <- prepareInput3w(x, object$dim)$x
+   predictInternal3w(object, x, c.ref, alpha, gamma)
+}
+
+# Prediction worker shared by predict.ddsimca3w() and the constructors /
+# selectCompNum / setParams. It assumes 'x' is ALREADY the internal unfolded
+# matrix (n x (J*K), mode-1 row-major layout). Callers holding raw user input
+# (a 3-way array or a column-major matrix) must go through predict.ddsimca3w,
+# which runs prepareInput3w() once; calling prepareInput3w() again on an
+# already-unfolded matrix would refold it column-major and scramble the tensor.
+predictInternal3w <- function(object, x, c.ref = NULL,
+   alpha = object$alpha, gamma = object$gamma) {
+
    pj <- project3w(object, x)
    n <- nrow(x)
 
@@ -594,8 +658,9 @@ selectCompNum.ddsimca3w <- function(obj, ncomp, ...) {
    obj$ncomp.selected <- ncomp
    # sub-models are not nested, so the selected sub-model's scores must be
    # re-projected; simplest correct path is to rebuild the cal result. The
-   # training matrix is on the model (obj$Xcal, set by makeModel3w).
-   obj$res$cal <- predict(obj, obj$Xcal, obj$res$cal$simca$c.ref)
+   # training matrix is on the model (obj$Xcal, set by makeModel3w). It is
+   # already unfolded, so use the internal worker (predict() would refold it).
+   obj$res$cal <- predictInternal3w(obj, obj$Xcal, obj$res$cal$simca$c.ref)
    obj$res$cal$ncomp.selected <- ncomp
    obj$calres <- obj$res$cal
    obj
@@ -617,7 +682,8 @@ setParams.ddsimca3w <- function(obj, alpha = obj$alpha, gamma = obj$gamma, ...) 
    obj$alpha <- alpha
    obj$gamma <- gamma
    if (!is.null(obj$res) && !is.null(obj$res$cal)) {
-      obj$res$cal <- predict(obj, obj$Xcal, obj$res$cal$simca$c.ref, alpha = alpha, gamma = gamma)
+      obj$res$cal <- predictInternal3w(obj, obj$Xcal, obj$res$cal$simca$c.ref,
+         alpha = alpha, gamma = gamma)
       obj$calres <- obj$res$cal
    }
    obj

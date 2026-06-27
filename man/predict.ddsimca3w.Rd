@@ -16,7 +16,9 @@
 \arguments{
 \item{object}{a 3-way DD-SIMCA model (class \code{ddsimca3w}).}
 
-\item{x}{numeric matrix (n x (J*K)), unfolded row-major.}
+\item{x}{either an n x J x K numeric array, or an already-unfolded numeric
+matrix (n x (J*K)) interpreted column-major (R's native \code{dim(x) <- c(n,
+J*K)} order), refolded using the model's \code{dim}.}
 
 \item{c.ref}{optional vector of reference class names.}
 

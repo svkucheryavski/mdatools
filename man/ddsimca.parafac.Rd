@@ -12,14 +12,15 @@ ddsimca.parafac(
   non.negative = FALSE,
   nf.as.sum = FALSE,
   alpha = 0.05,
-  gamma = 0.01
+  gamma = 0.01,
+  verbose = FALSE
 )
 }
 \arguments{
-\item{x}{either an n x J x K numeric array, or a numeric matrix (n x (J*K))
-with the tensor unfolded row-major (column for element (j,k) is (j-1)*K + k,
-i.e. matching \code{numpy.reshape(n, -1)}). When an array is supplied it is
-unfolded for you and \code{dim} is inferred.}
+\item{x}{either an n x J x K numeric array, or an already-unfolded numeric
+matrix (n x (J*K)). A matrix is interpreted column-major (R's native order,
+as produced by \code{dim(x) <- c(n, J*K)}) and refolded through \code{dim}.
+When an array is supplied \code{dim} is inferred.}
 
 \item{classname}{name of the target class (<= 20 chars).}
 
@@ -35,6 +36,10 @@ is a 3-way array; required when \code{x} is a matrix.}
 \item{alpha}{significance level for extremes.}
 
 \item{gamma}{significance level for outliers.}
+
+\item{verbose}{logical, if \code{TRUE} report sub-models whose CP-ALS reached
+the iteration limit without converging (usually a sign of more components
+than the data supports). Silent by default.}
 }
 \value{
 model of class \code{c("ddsimca.parafac","ddsimca3w","ddsimca")}.

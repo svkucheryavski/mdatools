@@ -12,13 +12,14 @@ ddsimca.tucker(
   non.negative = FALSE,
   nf.as.sum = FALSE,
   alpha = 0.05,
-  gamma = 0.01
+  gamma = 0.01,
+  verbose = FALSE
 )
 }
 \arguments{
-\item{x}{either an n x J x K numeric array, or a numeric matrix (n x (J*K))
-unfolded row-major. When an array is supplied it is unfolded for you and
-\code{dim} is inferred.}
+\item{x}{either an n x J x K numeric array, or an already-unfolded numeric
+matrix (n x (J*K)) interpreted column-major (R's native \code{dim(x) <- c(n,
+J*K)} order). When an array is supplied \code{dim} is inferred.}
 
 \item{classname}{target class name (<= 20 chars).}
 
@@ -36,6 +37,10 @@ R_A_max <= R_B*R_C.}
 \item{alpha}{significance level for extremes.}
 
 \item{gamma}{significance level for outliers.}
+
+\item{verbose}{logical, if \code{TRUE} report sub-models whose HOOI reached the
+iteration limit without converging (usually a sign of more components than
+the data supports). Silent by default.}
 }
 \value{
 model of class \code{c("ddsimca.tucker","ddsimca3w","ddsimca")}.

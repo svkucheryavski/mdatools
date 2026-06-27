@@ -210,14 +210,14 @@ test_that("a PCA-only method has no applicable method on the 3-way model", {
 
 context("ddsimca3w: 3-way array input")
 
-# A 3-way array passed directly must be unfolded row-major internally so the
-# model is identical to the one built from the equivalent row-major-unfolded
-# matrix (col for (j,k) is (j-1)*K + k == numpy reshape(n, -1)). This spares the
-# user R's native dim()<- reshape, which is column-major and silently wrong.
+# A 3-way array and the equivalent COLUMN-MAJOR (R-native dim()<-) unfolded matrix
+# must give identical models: an array is unfolded for the user, and matrix input
+# is interpreted column-major and refolded through `dim`. So `dim(X) <- c(n, J*K)`
+# (the natural R idiom) is correct.
 
-# low-rank tensor (+ tiny noise) so PARAFAC/Tucker converge cleanly; fold the
-# row-major unfolded matrix back to an [n, J, K] array so the two are an exact
-# round-trip of each other.
+# low-rank tensor (+ tiny noise) so PARAFAC/Tucker converge cleanly. `mat` is the
+# column-major (R-native dim()<-) unfold of the array, the layout the matrix API
+# now expects, so `array` and `mat` are equivalent inputs.
 make3w <- function(seed, J, K, n, R) {
    set.seed(seed)
    A0 <- matrix(rnorm(n * R), n, R)
@@ -225,7 +225,7 @@ make3w <- function(seed, J, K, n, R) {
    C0 <- matrix(rnorm(K * R), K, R)
    xmat <- A0 %*% t(khatriRao3w(B0, C0)) + 0.01 * matrix(rnorm(n * J * K), n, J * K)
    A3 <- aperm(array(t(xmat), dim = c(K, J, n)), c(3, 2, 1))   # fold to [n, J, K]
-   list(array = A3, mat = matrix(aperm(A3, c(1, 3, 2)), nrow = n))
+   list(array = A3, mat = matrix(A3, nrow = n))                # column-major unfold
 }
 
 test_that("ddsimca.parafac accepts a 3-way array identical to the unfolded matrix", {
@@ -255,6 +255,32 @@ test_that("ddsimca.tucker accepts a 3-way array identical to the unfolded matrix
    expect_equal(m_arr$res$cal$Q,  m_mat$res$cal$Q)
 })
 
+test_that("predict.ddsimca3w accepts a 3-way array identical to the unfolded matrix", {
+   J <- 5; K <- 4
+   tr <- make3w(123, J, K, 30, 3)
+   set.seed(3); m <- ddsimca.parafac(tr$array, "T", ncomp = 3)
+
+   nw <- make3w(55, J, K, 12, 3)   # new data, array + its row-major unfold
+   r_arr <- predict(m, nw$array, rep("T", 12))
+   r_mat <- predict(m, nw$mat,   rep("T", 12))
+
+   expect_s3_class(r_arr, "ddsimcares")
+   expect_equal(r_arr$T2, r_mat$T2)
+   expect_equal(r_arr$Q,  r_mat$Q)
+})
+
+test_that("matrix input is interpreted column-major (R-native dim()<- idiom)", {
+   J <- 5; K <- 4; n <- 30
+   set.seed(8)
+   A3 <- array(rnorm(n * J * K), dim = c(n, J, K))
+   Mcol <- A3; dim(Mcol) <- c(n, J * K)            # the exact dim()<- idiom users reach for
+
+   set.seed(4); m_arr <- ddsimca.parafac(A3,   "T", ncomp = 3)
+   set.seed(4); m_mat <- ddsimca.parafac(Mcol, "T", dim = c(J, K), ncomp = 3)
+   expect_equal(m_mat$res$cal$T2, m_arr$res$cal$T2)
+   expect_equal(m_mat$res$cal$Q,  m_arr$res$cal$Q)
+})
+
 test_that("ddsimca.parafac errors when a matrix is given without 'dim'", {
    x <- matrix(rnorm(30 * 20), 30, 20)
    expect_error(ddsimca.parafac(x, "T", ncomp = 3), "dim")
@@ -263,4 +289,82 @@ test_that("ddsimca.parafac errors when a matrix is given without 'dim'", {
 test_that("ddsimca.parafac errors when 'dim' conflicts with array dimensions", {
    A3 <- array(rnorm(30 * 5 * 4), dim = c(30, 5, 4))
    expect_error(ddsimca.parafac(A3, "T", dim = c(4, 5), ncomp = 3), "match")
+})
+
+context("ddsimca3w: factor normalization")
+
+# Build a positive low-rank tensor (returned as a 3-way array, so it is
+# convention-independent) — true B/C loadings are positive bumps.
+posTensor <- function(seed, J, K, n, R) {
+   set.seed(seed)
+   A0 <- matrix(abs(rnorm(n * R)) + 0.5, n, R)
+   B0 <- matrix(abs(rnorm(J * R)) + 0.5, J, R)
+   C0 <- matrix(abs(rnorm(K * R)) + 0.5, K, R)
+   xmat <- A0 %*% t(khatriRao3w(B0, C0)) + 0.01 * matrix(rnorm(n * J * K), n, J * K)
+   aperm(array(t(xmat), dim = c(K, J, n)), c(3, 2, 1))   # [n, J, K] array
+}
+
+test_that("ddsimca.parafac factors follow tensorly convention: unit-norm columns, positive mean", {
+   J <- 5; K <- 4
+   x <- posTensor(11, J, K, 30, 2)
+   set.seed(1)
+   m <- suppressWarnings(ddsimca.parafac(x, "T", ncomp = 2))
+   B <- m$models[[2]]$B; C <- m$models[[2]]$C
+   expect_equal(sqrt(colSums(B^2)), rep(1, 2), tolerance = 1e-8)   # unit-norm
+   expect_equal(sqrt(colSums(C^2)), rep(1, 2), tolerance = 1e-8)
+   expect_true(all(colMeans(B) >= 0))                             # positive-mean sign convention
+   expect_true(all(colMeans(C) >= 0))
+})
+
+test_that("ddsimca.parafac calibration Q is consistent with the stored factors", {
+   # Guards against the cal pipeline transforming the input twice: the
+   # constructor unfolds the array, then the (former) predict() refolded the
+   # already-unfolded matrix column-major and scrambled it. The rank-nc
+   # sub-model's reported Q must equal the residual of re-projecting its own
+   # stored B/C onto the same internal unfold used to fit them.
+   J <- 5; K <- 4; n <- 30
+   x <- posTensor(12, J, K, n, 2)
+   set.seed(2)
+   m <- suppressWarnings(ddsimca.parafac(x, "T", ncomp = 2))
+   xi <- matrix(aperm(x, c(1, 3, 2)), nrow = n)   # internal row-major unfold
+   for (nc in seq_len(m$ncomp)) {
+      pj <- mdatools:::projectParafac(m$models[[nc]]$B, m$models[[nc]]$C, xi)
+      expect_equal(unname(rowSums(pj$E^2)), unname(m$res$cal$Q[, nc]), tolerance = 1e-8)
+   }
+})
+
+context("ddsimca3w: convergence reporting")
+
+test_that("ddsimca.parafac is silent by default even when a sub-model hits max.iter", {
+   # posTensor is ~rank-2; ncomp=3 over-factors so the rank-3 CP-ALS sub-model
+   # swamps and runs to max.iter. The constructor must stay silent by default.
+   x <- posTensor(12, 5, 4, 30, 2)
+   set.seed(2)
+   expect_silent(m <- ddsimca.parafac(x, "T", ncomp = 3))
+})
+
+# capture every message emitted while evaluating expr
+captureMessages3w <- function(expr) {
+   msgs <- character(0)
+   withCallingHandlers(force(expr),
+      message = function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") })
+   msgs
+}
+
+test_that("ddsimca.parafac verbose = TRUE names the over-factored sub-model by ncomp", {
+   x <- posTensor(12, 5, 4, 30, 2)   # ~rank-2; the rank-3 sub-model over-factors
+   set.seed(2)
+   msgs <- captureMessages3w(ddsimca.parafac(x, "T", ncomp = 3, verbose = TRUE))
+   expect_true(any(grepl("ncomp = 3", msgs, fixed = TRUE)))
+   expect_true(any(grepl("maximum number of iterations", msgs, fixed = TRUE)))
+})
+
+test_that("ddsimca.tucker is silent by default and names the sub-model by ncomp when verbose", {
+   x <- posTensor(7, 6, 5, 40, 2)
+   set.seed(3)
+   expect_silent(m <- ddsimca.tucker(x, "T", ncomp = c(2, 3, 3)))
+   set.seed(3)
+   msgs <- captureMessages3w(ddsimca.tucker(x, "T", ncomp = c(2, 3, 3), verbose = TRUE))
+   expect_true(any(grepl("ncomp = 2", msgs, fixed = TRUE)))
+   expect_true(any(grepl("maximum number of iterations", msgs, fixed = TRUE)))
 })
