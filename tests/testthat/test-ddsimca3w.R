@@ -356,7 +356,8 @@ test_that("ddsimca.parafac verbose = TRUE names the over-factored sub-model by n
    set.seed(2)
    msgs <- captureMessages3w(ddsimca.parafac(x, "T", ncomp = 3, verbose = TRUE))
    expect_true(any(grepl("ncomp = 3", msgs, fixed = TRUE)))
-   expect_true(any(grepl("maximum number of iterations", msgs, fixed = TRUE)))
+   expect_true(any(grepl("reached max iterations", msgs, fixed = TRUE)))
+   expect_true(all(nchar(trimws(msgs)) <= 70))   # message must fit 70-column width
 })
 
 test_that("ddsimca.tucker is silent by default and names the sub-model by ncomp when verbose", {
@@ -366,5 +367,6 @@ test_that("ddsimca.tucker is silent by default and names the sub-model by ncomp 
    set.seed(3)
    msgs <- captureMessages3w(ddsimca.tucker(x, "T", ncomp = c(2, 3, 3), verbose = TRUE))
    expect_true(any(grepl("ncomp = 2", msgs, fixed = TRUE)))
-   expect_true(any(grepl("maximum number of iterations", msgs, fixed = TRUE)))
+   expect_true(any(grepl("reached max iterations", msgs, fixed = TRUE)))
+   expect_true(all(nchar(trimws(msgs)) <= 70))   # message must fit 70-column width
 })

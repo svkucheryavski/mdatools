@@ -107,9 +107,8 @@ parafac.als <- function(X3, rank, tol = 1e-10, max.iter = 500, verbose = FALSE) 
    # max.iter. This is expected, not a failure, so it is silent by default;
    # verbose = TRUE surfaces it as guidance (tensorly stops silently too).
    if (verbose && it == max.iter) {
-      message(sprintf(paste0("ncomp = %d: parafac.als reached the maximum number of iterations ",
-         "(%d) without meeting the convergence tolerance; the data may support fewer ",
-         "components than requested."), rank, max.iter))
+      message(sprintf("ncomp = %d: parafac.als reached max iterations (%d) before converging",
+         rank, max.iter))
    }
    normalizeParafac3w(A, B, C)
 }
@@ -278,9 +277,8 @@ tucker.hooi <- function(X3, ranks, tol = 1e-10, max.iter = 500, verbose = FALSE)
    }
    # Silent by default (see parafac.als); verbose = TRUE surfaces it as guidance.
    if (verbose && it == max.iter) {
-      message(sprintf(paste0("ncomp = %d: tucker.hooi reached the maximum number of iterations ",
-         "(%d) without meeting the convergence tolerance; the data may support fewer ",
-         "components than requested."), rA, max.iter))
+      message(sprintf("ncomp = %d: tucker.hooi reached max iterations (%d) before converging",
+         rA, max.iter))
    }
    G1 <- t(A) %*% X %*% kronecker(B, C)
    list(G = fold1_3w(G1, rA, rB, rC), A = A, B = B, C = C)
