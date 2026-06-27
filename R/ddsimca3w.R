@@ -725,29 +725,41 @@ print.ddsimca3w <- function(x, ...) {
    return(invisible(x))
 }
 
-#' Plot a factor (loading) curve for a 3-way model.
+#' Plot factor (loading) curves for a 3-way model.
+#'
+#' @description
+#' Draws the mode-2 (\code{"B"}) or mode-3 (\code{"C"}) factor curves of the
+#' currently selected optimal sub-model. Several factors can be shown on the
+#' same line plot; each is drawn in its own colour taken from
+#' \code{\link{mdaplot.getColors}}, with a legend.
 #'
 #' @param obj a 3-way DD-SIMCA model (class \code{ddsimca3w}).
-#' @param comp 1-indexed component within the chosen sub-model.
+#' @param comp factor number or vector of factor numbers to show. By default all
+#'   factors of the selected sub-model are shown.
 #' @param mode which factor matrix to draw, "B" (mode-2) or "C" (mode-3).
-#' @param ncomp which trained sub-model to read from (default selected).
-#' @param type plot type.
-#' @param ... arguments passed to \code{mdaplot}.
+#' @param ncomp which trained sub-model to read factors from. Defaults to the
+#'   currently selected optimal model (\code{obj$ncomp.selected}).
+#' @param type plot type (line plots only).
+#' @param show.legend logical, show a legend with the factor numbers.
+#' @param ... arguments passed to \code{\link{mdaplotg}}.
 #' @export
-plotFactors.ddsimca3w <- function(obj, comp = 1, mode = c("B", "C"),
-   ncomp = obj$ncomp.selected, type = "l", ...) {
+plotFactors.ddsimca3w <- function(obj, comp = NULL, mode = c("B", "C"),
+   ncomp = obj$ncomp.selected, type = "l", show.legend = TRUE, ...) {
    mode <- match.arg(mode)
    if (ncomp < 1 || ncomp > obj$ncomp) stop("Wrong value for 'ncomp'.", call. = FALSE)
    M <- obj$models[[ncomp]][[mode]]
-   if (comp < 1 || comp > ncol(M)) stop("Wrong value for 'comp'.", call. = FALSE)
-   y <- M[, comp]
-   pd <- matrix(y, nrow = 1)
-   colnames(pd) <- seq_along(y)
-   rownames(pd) <- sprintf("Comp %d", comp)
+   if (is.null(comp)) comp <- seq_len(ncol(M))
+   if (min(comp) < 1 || max(comp) > ncol(M)) stop("Wrong value for 'comp'.", call. = FALSE)
+
+   # one row per factor so mdaplotg draws each as its own coloured series
+   pd <- t(M[, comp, drop = FALSE])
+   colnames(pd) <- seq_len(ncol(pd))                # x-axis = mode index
+   rownames(pd) <- sprintf("Comp %d", comp)         # legend / group names
    attr(pd, "name") <- sprintf("%s factors (%s)",
       if (obj$type == "parafac") "PARAFAC" else "Tucker", mode)
    attr(pd, "xaxis.name") <- sprintf("Mode-%d index", if (mode == "B") 2 else 3)
-   mdaplot(pd, type = type, ylab = "Factor values", ...)
+   attr(pd, "yaxis.name") <- "Factor values"
+   mdaplotg(pd, type = type, show.legend = show.legend, ...)
 }
 
 #' @export

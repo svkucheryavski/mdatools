@@ -195,6 +195,35 @@ test_that("plotFactors returns factor values for a PARAFAC model", {
    expect_error(plotFactors(m, comp = 1, mode = "B"), NA)
 })
 
+test_that("plotFactors draws one line per requested component for a vector comp", {
+   m <- make_pf()                                   # 3-component PARAFAC
+   pdf(tempfile()); on.exit(dev.off())
+   ps <- plotFactors(m, comp = c(1, 3), mode = "B")
+   expect_equal(length(ps), 2)                      # two factor curves, one per comp
+})
+
+test_that("plotFactors defaults to all factors of the currently selected optimal model", {
+   m <- make_pf()                                   # ncomp.selected == 3
+   pdf(tempfile()); on.exit(dev.off())
+   expect_equal(length(plotFactors(m, mode = "B")), 3)
+   m2 <- selectCompNum(m, 2)                        # optimal model now has 2 components
+   expect_equal(length(plotFactors(m2, mode = "B")), 2)
+})
+
+test_that("plotFactors errors when comp exceeds the selected model's components", {
+   m <- make_pf()
+   pdf(tempfile()); on.exit(dev.off())
+   expect_error(plotFactors(m, comp = c(1, 99), mode = "B"), "Wrong value for 'comp'")
+})
+
+test_that("plotFactors colours the factor curves using mdaplot.getColors", {
+   m <- make_pf()
+   pdf(tempfile()); on.exit(dev.off())
+   ps <- plotFactors(m, comp = c(1, 3), mode = "B")
+   cols <- substr(vapply(ps, function(s) s$col, character(1)), 1, 7)   # strip alpha
+   expect_equal(unname(cols), mdaplot.getColors(2))
+})
+
 test_that("DoF methods read Nh/Nq/Nf from limParams", {
    m <- make_pf()
    pdf(tempfile()); on.exit(dev.off())
