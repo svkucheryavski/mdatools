@@ -1,9 +1,10 @@
-v. 0.15.1
+v. 0.16.0
 =========
 
+* added new method `ddsimca.parafac()` for DD-SIMCA classification of 3-way data based on PARAFAC decompositizon.
+* added new method `ddsimca.tucker()` for DD-SIMCA classification of 3-way data based on Tucker decomposition.
 * default number of iterations in `prep.baseline()` method has been increased from 10 to 15 for better numerical stability and to match the code from web-applications.
-
-
+* small improvements and bug fixes.
 
 v. 0.15.0
 =========
