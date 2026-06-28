@@ -477,9 +477,13 @@ print.ddsimca <- function(x, ...) {
 #' name of the target class.
 #' @param c.ref
 #' vector with names of the reference classes.
+#' @param fp
+#' optional list with data-driven full-distance parameters (\code{$u0}, \code{$Nu} per
+#' component); when \code{NULL} the basic sum-rule full distance is used (PCA behavior).
 #'
 #' @return a list with classification outcomes for each number of components.
-classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, gamma = 0.01, classname, c.ref = NULL) {
+classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, gamma = 0.01,
+   classname, c.ref = NULL, fp = NULL) {
 
    # get distances and compute matrix with full distance
    H <- pcares$T2
@@ -491,11 +495,21 @@ classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, g
    Nq <- qp$Nu
    h0 <- hp$u0
    Nh <- hp$Nu
-   Nf <- Nh + Nq
 
-   # compute critical limits
-   fCritE <- qchisq(1 - alpha, Nf)
-   fCritO <- qchisq((1 - gamma)^(1/nobj.cal), Nf)
+   # full-distance DoF and scale. fp = NULL keeps the basic DD-SIMCA sum rule
+   # (Nf = Nh + Nq, scale f0.model = Nf) so PCA / scalar ddsimca is unchanged.
+   # fp supplied (3-way data-driven F) uses the fitted (f0, Nf) directly.
+   if (is.null(fp)) {
+      Nf <- Nh + Nq
+      f0.model <- Nf
+   } else {
+      Nf <- fp$Nu
+      f0.model <- fp$u0
+   }
+
+   # compute critical limits (scale collapses to plain qchisq when f0.model == Nf)
+   fCritE <- unname(f0.model / Nf * qchisq(1 - alpha, Nf))
+   fCritO <- unname(f0.model / Nf * qchisq((1 - gamma)^(1 / nobj.cal), Nf))
 
    ncomp <- ncol(H)
    nobj <- nrow(H)
@@ -529,6 +543,7 @@ classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, g
       Nfa <- Nf[a]
       Nha <- Nh[a]
       Nqa <- Nq[a]
+      f0ma <- f0.model[a]
 
       fcea <- fCritE[a]
       fcoa <- fCritO[a]
@@ -541,6 +556,7 @@ classify <- function(pcares, indices, numbers, qp, hp, nobj.cal, alpha = 0.05, g
          Nh = Nha,
          Nq = Nqa,
          Nf = Nfa,
+         f0.model = f0ma,
          fce = fcea,
          fco = fcoa,
          roles = rep("", nobj),
@@ -1051,8 +1067,9 @@ plotDistances.ddsimca <- function(obj, res = "both",
    res <- obj$res$cal$simca
    v <- res$outcomes[[limType]]$values[[ncomp]]
 
-   yle <- v$fce / v$Nf
-   ylo <- v$fco / v$Nf
+   f0m <- if (is.null(v$f0.model)) v$Nf else v$f0.model
+   yle <- v$fce / f0m
+   ylo <- v$fco / f0m
 
    if (log == TRUE) {
       yle <- log(1 + yle)

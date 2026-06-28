@@ -4,12 +4,16 @@
 \alias{writeJSON.pls}
 \title{Saves PLS model as JSON file compatible with web-application (https://mda.tools/pls).}
 \usage{
-\method{writeJSON}{pls}(obj, fileName)
+\method{writeJSON}{pls}(obj, fileName, uncertainties = NULL, ...)
 }
 \arguments{
 \item{obj}{Object with PLS model (from \code{\link{pca}}).}
 
 \item{fileName}{Name or full path to JSON file to be created.}
+
+\item{uncertainties}{Optional vector with uncertainties for the predicted values (e.g. RMSEP for test set).}
+
+\item{...}{other possible arguments}
 }
 \description{
 You can load created JSON file to web-app and use it for prediction.

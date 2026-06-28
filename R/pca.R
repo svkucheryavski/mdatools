@@ -1467,9 +1467,11 @@ asjson.pca <- function(obj, ...) {
 #' Object with PCA model (from \code{\link{pca}}).
 #' @param fileName
 #' Name or full path to JSON file to be created.
+#' @param ...
+#' other possible arguments
 #'
 #' @export
-writeJSON.pca <- function(obj, fileName) {
+writeJSON.pca <- function(obj, fileName, ...) {
    m <- asjson(obj)
    fileConn <- file(fileName)
    writeLines(m, fileConn)
@@ -1892,7 +1894,13 @@ plotBiplot.pca <- function(obj, comp = c(1, 2), pch = c(16, NA), col = mdaplot.g
 #' Works only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
-plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ylab = "Nh", ...) {
+plotT2DoF <- function(obj, ...) {
+   UseMethod("plotT2DoF")
+}
+
+#' @export
+#' @rdname plotT2DoF
+plotT2DoF.pca <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ylab = "Nh", ...) {
 
    if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
       stop("This plot can not be made for selected 'lim.type' method.", call. = FALSE)
@@ -1928,7 +1936,13 @@ plotT2DoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$n
 #' Works only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
-plotQDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ylab = "Nq", ...) {
+plotQDoF <- function(obj, ...) {
+   UseMethod("plotQDoF")
+}
+
+#' @export
+#' @rdname plotQDoF
+plotQDoF.pca <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ylab = "Nq", ...) {
 
    if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
       stop("This plot can not be made for selected 'lim.type' method.", call. = FALSE)
@@ -1962,7 +1976,13 @@ plotQDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$nc
 #' Works only if parameter \code{lim.type} equal to "ddmoments" or "ddrobust".
 #'
 #' @export
-plotDistDoF <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...) {
+plotDistDoF <- function(obj, ...) {
+   UseMethod("plotDistDoF")
+}
+
+#' @export
+#' @rdname plotDistDoF
+plotDistDoF.pca <- function(obj, type = "b", labels = "values", xticks = seq_len(obj$ncomp), ...) {
 
    if (!(obj$lim.type %in% c("ddrobust", "ddmoments", "chisq"))) {
       stop("This plot can not be made for selected 'lim.type' method.", call. = FALSE)

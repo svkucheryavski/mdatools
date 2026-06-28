@@ -4,7 +4,7 @@
 \alias{prep.alsbasecorr}
 \title{Baseline correction using asymmetric least squares}
 \usage{
-prep.alsbasecorr(data, plambda = 5, p = 0.1, max.niter = 10)
+prep.alsbasecorr(data, plambda = 5, p = 0.1, max.niter = 15)
 }
 \arguments{
 \item{data}{matrix with spectra (rows correspond to individual spectra)}

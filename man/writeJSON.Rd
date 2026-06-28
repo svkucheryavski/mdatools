@@ -4,12 +4,14 @@
 \alias{writeJSON}
 \title{Save model as JSON file}
 \usage{
-writeJSON(obj, fileName)
+writeJSON(obj, fileName, ...)
 }
 \arguments{
 \item{obj}{model object, e.g. \code{pca}}
 
 \item{fileName}{name (or full path) to JSON file to be created.}
+
+\item{...}{other optional parameters}
 }
 \description{
 Save model as JSON file

@@ -130,7 +130,7 @@ ddsimcares <- function(pcares, outcomes, classname, indices, numbers, alpha, c.r
 #' @export
 as.data.frame.ddsimcares <- function(x, row.names = NULL, optional = FALSE, ..., ncomp = x$ncomp.selected, limType = "classic") {
 
-  if (ncomp < 1 || ncomp > ncol(x$scores)) {
+  if (ncomp < 1 || ncomp > ncol(x$T2)) {
       stop("Wrong value for 'ncomp' parameter.")
    }
 
@@ -185,7 +185,7 @@ as.matrix.ddsimcares <- function(x, limType = "classic", ...) {
 
    limType <- processLimType(limType)
    res <- x$simca$outcomes[[limType]]
-   ncomp <- ncol(x$scores)
+   ncomp <- ncol(x$T2)
 
    labels <- c(
       "nin" = "In",
@@ -219,7 +219,7 @@ as.matrix.ddsimcares <- function(x, limType = "classic", ...) {
 
    out <- do.call(cbind, res[names])
    colnames(out) <- labels[colnames(out)]
-   rownames(out) <- colnames(x$scores)
+   rownames(out) <- colnames(x$T2)
    return(cbind(as.matrix.ldecomp(x), out))
 }
 
@@ -709,7 +709,8 @@ plotExtremes.ddsimcares <- function(obj,
 
    # get the DD-SIMCA outcomes for particular limit type and number of components
    f <- v$f[ind]
-   p <- 1 - pchisq(f, v$Nf)
+   f0m <- if (is.null(v$f0.model)) v$Nf else v$f0.model
+   p <- 1 - pchisq(f * v$Nf / f0m, v$Nf)
 
    nobj <- length(f)
    expected <- seq_len(nobj)
@@ -881,7 +882,7 @@ plotAcceptance.ddsimcares <- function(obj, ncomp = obj$ncomp.selected, limType =
       ylim = NULL, xlim = NULL, res.name = NULL,
       show.excluded = FALSE, ...) {
 
-   if (ncomp < 1 || ncomp > ncol(obj$scores)) {
+   if (ncomp < 1 || ncomp > ncol(obj$T2)) {
       stop("Wrong value for 'ncomp' parameter.")
    }
 
@@ -1060,7 +1061,7 @@ plotDistances.ddsimcares <- function(obj, ncomp = obj$ncomp.selected,
       ...)
    {
 
-   if (ncomp < 1 || ncomp > ncol(obj$scores)) {
+   if (ncomp < 1 || ncomp > ncol(obj$T2)) {
       stop("Wrong value for 'ncomp' parameter.")
    }
 
@@ -1086,14 +1087,15 @@ plotDistances.ddsimcares <- function(obj, ncomp = obj$ncomp.selected,
 
    y <- v[[distance]]
    x <- attr(obj$scores, "yaxis.values")
-   yle <- v$fce / v$Nf
-   ylo <- v$fco / v$Nf
+   f0m <- if (is.null(v$f0.model)) v$Nf else v$f0.model
+   yle <- v$fce / f0m
+   ylo <- v$fco / f0m
 
    if (distance != "f") {
       yle <- 0
       ylo <- 0
    } else {
-      y <- y / v$Nf
+      y <- y / f0m
    }
 
    if (log == TRUE) {

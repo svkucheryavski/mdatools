@@ -1133,13 +1133,15 @@ asvector.pls <- function(obj) {
 #'
 #' @param obj
 #' Object with PLS model (from \code{\link{pls}}).
+#' @param uncertainties
+#' Vector with uncertainties for the predicted values (e.g. RMSEP for test set).
 #' @param ...
 #' other arguments
 #'
 #' @return stringified JSON
 #'
 #' @export
-asjson.pls <- function(obj, ...) {
+asjson.pls <- function(obj, uncertainties = NULL, ...) {
 
    v <- asvector(obj)
 
@@ -1210,6 +1212,15 @@ asjson.pls <- function(obj, ...) {
       ",'yexpvar': [", paste0(as.numeric(obj$res$cal$ydecomp$expvar/100), collapse = ","),"]",
    "}")
 
+
+   if (is.null(uncertainties)) {
+      uncertainties_str <- ""
+   } else if (!is.numeric(uncertainties) || length(uncertainties) != nresp) {
+      stop("The number of values in vector with uncertainties should match the number of responses.")
+   } else {
+      uncertainties_str <- paste0(uncertainties, collapse = ",")
+   }
+
    m <- paste0(
       "{'",
          "class':['plsmodel', 'pcamodel']",
@@ -1238,6 +1249,7 @@ asjson.pls <- function(obj, ...) {
          ",'varvaluesUnits':'', 'varrev':", varrev,
          ",'ncomp_selected':", obj$ncomp.selected,
          ",'stat':", stat,
+         ",'uncertainties':[", uncertainties_str, "]",
       "}"
    )
    m <- gsub("\'", "\"", m)
@@ -1253,10 +1265,14 @@ asjson.pls <- function(obj, ...) {
 #' Object with PLS model (from \code{\link{pca}}).
 #' @param fileName
 #' Name or full path to JSON file to be created.
+#' @param uncertainties
+#' Optional vector with uncertainties for the predicted values (e.g. RMSEP for test set).
+#' @param ...
+#' other possible arguments
 #'
 #' @export
-writeJSON.pls <- function(obj, fileName) {
-   m <- asjson(obj)
+writeJSON.pls <- function(obj, fileName, uncertainties = NULL, ...) {
+   m <- asjson(obj, uncertainties)
    fileConn <- file(fileName)
    writeLines(m, fileConn)
    close(fileConn)

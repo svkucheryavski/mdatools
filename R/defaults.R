@@ -118,9 +118,11 @@ asvector <- function(obj) {
 #' model object, e.g. \code{pca}
 #' @param fileName
 #' name (or full path) to JSON file to be created.
+#' @param ...
+#' other optional parameters
 #'
 #' @export
-writeJSON <- function(obj, fileName) {
+writeJSON <- function(obj, fileName, ...) {
    UseMethod("writeJSON")
 }
 
@@ -932,4 +934,14 @@ plotWeights <- function(obj, ...) {
 #' @export
 plotXYResiduals <- function(obj, ...) {
    UseMethod("plotXYResiduals")
+}
+
+#' Plot factors for a 3-way decomposition model
+#'
+#' @param obj a model object.
+#' @param ... arguments passed to methods.
+#'
+#' @export
+plotFactors <- function(obj, ...) {
+   UseMethod("plotFactors")
 }

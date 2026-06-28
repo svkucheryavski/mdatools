@@ -2,9 +2,12 @@
 % Please edit documentation in R/pca.R
 \name{plotT2DoF}
 \alias{plotT2DoF}
+\alias{plotT2DoF.pca}
 \title{Degrees of freedom plot for score distance (Nh)}
 \usage{
-plotT2DoF(
+plotT2DoF(obj, ...)
+
+\method{plotT2DoF}{pca}(
   obj,
   type = "b",
   labels = "values",
@@ -16,6 +19,8 @@ plotT2DoF(
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
 
+\item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
 \item{type}{type of the plot ("b", "l", "h")}
 
 \item{labels}{what to show as data points labels}
@@ -23,8 +28,6 @@ plotT2DoF(
 \item{xticks}{vector with tick values for x-axis}
 
 \item{ylab}{label for y-axis}
-
-\item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
 Shows a plot with degrees of freedom computed for score distances at given number

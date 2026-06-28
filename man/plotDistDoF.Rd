@@ -2,9 +2,12 @@
 % Please edit documentation in R/pca.R
 \name{plotDistDoF}
 \alias{plotDistDoF}
+\alias{plotDistDoF.pca}
 \title{Degrees of freedom plot for both distances}
 \usage{
-plotDistDoF(
+plotDistDoF(obj, ...)
+
+\method{plotDistDoF}{pca}(
   obj,
   type = "b",
   labels = "values",
@@ -15,13 +18,13 @@ plotDistDoF(
 \arguments{
 \item{obj}{a PCA model (object of class \code{pca})}
 
+\item{...}{other plot parameters (see \code{mdaplotg} for details)}
+
 \item{type}{type of the plot ("b", "l", "h")}
 
 \item{labels}{what to show as data points labels}
 
 \item{xticks}{vector with tick values for x-axis}
-
-\item{...}{other plot parameters (see \code{mdaplotg} for details)}
 }
 \description{
 Shows a plot with degrees of freedom computed for score and orthogonal distances at given number
